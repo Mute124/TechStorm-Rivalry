@@ -1,0 +1,326 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<section xmlns="http://docbook.org/ns/docbook" version="5.0" xmlns:xlink="http://www.w3.org/1999/xlink" xml:id="__old_2_classes_2lib_2include_2c_09_09_2ext_2pb__ds_2detail_2thin__heap___2thin__heap___8hpp_source" xml:lang="en-US">
+<title>thin_heap_.hpp</title>
+<indexterm><primary>C:/Users/HP/Documents/GitHub/Minero-Game/Old/Classes/lib/include/c++/ext/pb_ds/detail/thin_heap_/thin_heap_.hpp</primary></indexterm>
+Go to the documentation of this file.<programlisting linenumbering="unnumbered">1 <emphasis role="comment">//&#32;-*-&#32;C++&#32;-*-</emphasis>
+2 
+3 <emphasis role="comment">//&#32;Copyright&#32;(C)&#32;2005-2022&#32;Free&#32;Software&#32;Foundation,&#32;Inc.</emphasis>
+4 <emphasis role="comment">//</emphasis>
+5 <emphasis role="comment">//&#32;This&#32;file&#32;is&#32;part&#32;of&#32;the&#32;GNU&#32;ISO&#32;C++&#32;Library.&#32;&#32;This&#32;library&#32;is&#32;free</emphasis>
+6 <emphasis role="comment">//&#32;software;&#32;you&#32;can&#32;redistribute&#32;it&#32;and/or&#32;modify&#32;it&#32;under&#32;the&#32;terms</emphasis>
+7 <emphasis role="comment">//&#32;of&#32;the&#32;GNU&#32;General&#32;Public&#32;License&#32;as&#32;published&#32;by&#32;the&#32;Free&#32;Software</emphasis>
+8 <emphasis role="comment">//&#32;Foundation;&#32;either&#32;version&#32;3,&#32;or&#32;(at&#32;your&#32;option)&#32;any&#32;later</emphasis>
+9 <emphasis role="comment">//&#32;version.</emphasis>
+10 
+11 <emphasis role="comment">//&#32;This&#32;library&#32;is&#32;distributed&#32;in&#32;the&#32;hope&#32;that&#32;it&#32;will&#32;be&#32;useful,&#32;but</emphasis>
+12 <emphasis role="comment">//&#32;WITHOUT&#32;ANY&#32;WARRANTY;&#32;without&#32;even&#32;the&#32;implied&#32;warranty&#32;of</emphasis>
+13 <emphasis role="comment">//&#32;MERCHANTABILITY&#32;or&#32;FITNESS&#32;FOR&#32;A&#32;PARTICULAR&#32;PURPOSE.&#32;&#32;See&#32;the&#32;GNU</emphasis>
+14 <emphasis role="comment">//&#32;General&#32;Public&#32;License&#32;for&#32;more&#32;details.</emphasis>
+15 
+16 <emphasis role="comment">//&#32;Under&#32;Section&#32;7&#32;of&#32;GPL&#32;version&#32;3,&#32;you&#32;are&#32;granted&#32;additional</emphasis>
+17 <emphasis role="comment">//&#32;permissions&#32;described&#32;in&#32;the&#32;GCC&#32;Runtime&#32;Library&#32;Exception,&#32;version</emphasis>
+18 <emphasis role="comment">//&#32;3.1,&#32;as&#32;published&#32;by&#32;the&#32;Free&#32;Software&#32;Foundation.</emphasis>
+19 
+20 <emphasis role="comment">//&#32;You&#32;should&#32;have&#32;received&#32;a&#32;copy&#32;of&#32;the&#32;GNU&#32;General&#32;Public&#32;License&#32;and</emphasis>
+21 <emphasis role="comment">//&#32;a&#32;copy&#32;of&#32;the&#32;GCC&#32;Runtime&#32;Library&#32;Exception&#32;along&#32;with&#32;this&#32;program;</emphasis>
+22 <emphasis role="comment">//&#32;see&#32;the&#32;files&#32;COPYING3&#32;and&#32;COPYING.RUNTIME&#32;respectively.&#32;&#32;If&#32;not,&#32;see</emphasis>
+23 <emphasis role="comment">//&#32;&lt;http://www.gnu.org/licenses/&gt;.</emphasis>
+24 
+25 <emphasis role="comment">//&#32;Copyright&#32;(C)&#32;2004&#32;Ami&#32;Tavory&#32;and&#32;Vladimir&#32;Dreizin,&#32;IBM-HRL.</emphasis>
+26 
+27 <emphasis role="comment">//&#32;Permission&#32;to&#32;use,&#32;copy,&#32;modify,&#32;sell,&#32;and&#32;distribute&#32;this&#32;software</emphasis>
+28 <emphasis role="comment">//&#32;is&#32;hereby&#32;granted&#32;without&#32;fee,&#32;provided&#32;that&#32;the&#32;above&#32;copyright</emphasis>
+29 <emphasis role="comment">//&#32;notice&#32;appears&#32;in&#32;all&#32;copies,&#32;and&#32;that&#32;both&#32;that&#32;copyright&#32;notice</emphasis>
+30 <emphasis role="comment">//&#32;and&#32;this&#32;permission&#32;notice&#32;appear&#32;in&#32;supporting&#32;documentation.&#32;None</emphasis>
+31 <emphasis role="comment">//&#32;of&#32;the&#32;above&#32;authors,&#32;nor&#32;IBM&#32;Haifa&#32;Research&#32;Laboratories,&#32;make&#32;any</emphasis>
+32 <emphasis role="comment">//&#32;representation&#32;about&#32;the&#32;suitability&#32;of&#32;this&#32;software&#32;for&#32;any</emphasis>
+33 <emphasis role="comment">//&#32;purpose.&#32;It&#32;is&#32;provided&#32;&quot;as&#32;is&quot;&#32;without&#32;express&#32;or&#32;implied</emphasis>
+34 <emphasis role="comment">//&#32;warranty.</emphasis>
+35 
+41 <emphasis role="preprocessor">#ifndef&#32;PB_DS_THIN_HEAP_HPP</emphasis>
+42 <emphasis role="preprocessor">#define&#32;PB_DS_THIN_HEAP_HPP</emphasis>
+43 
+44 <emphasis role="preprocessor">#include&#32;&lt;algorithm&gt;</emphasis>
+45 <emphasis role="preprocessor">#include&#32;&lt;ext/pb_ds/detail/cond_dealtor.hpp&gt;</emphasis>
+46 <emphasis role="preprocessor">#include&#32;&lt;ext/pb_ds/detail/type_utils.hpp&gt;</emphasis>
+47 <emphasis role="preprocessor">#include&#32;&lt;ext/pb_ds/detail/left_child_next_sibling_heap_/left_child_next_sibling_heap_.hpp&gt;</emphasis>
+48 <emphasis role="preprocessor">#include&#32;&lt;debug/debug.h&gt;</emphasis>
+49 
+50 <emphasis role="keyword">namespace&#32;</emphasis><link linkend="_namespace____gnu__pbds">__gnu_pbds</link>
+51 {
+52 &#32;&#32;<emphasis role="keyword">namespace&#32;</emphasis>detail
+53 &#32;&#32;{
+54 <emphasis role="preprocessor">#define&#32;PB_DS_CLASS_T_DEC&#32;\</emphasis>
+55 <emphasis role="preprocessor">&#32;&#32;&#32;&#32;template&lt;typename&#32;Value_Type,&#32;typename&#32;Cmp_Fn,&#32;typename&#32;_Alloc&gt;</emphasis>
+56 
+57 <emphasis role="preprocessor">#define&#32;PB_DS_CLASS_C_DEC&#32;\</emphasis>
+58 <emphasis role="preprocessor">&#32;&#32;&#32;&#32;thin_heap&lt;Value_Type,&#32;Cmp_Fn,&#32;_Alloc&gt;</emphasis>
+59 
+60 <emphasis role="preprocessor">#ifdef&#32;_GLIBCXX_DEBUG</emphasis>
+61 <emphasis role="preprocessor">#define&#32;PB_DS_BASE_T_P&#32;\</emphasis>
+62 <emphasis role="preprocessor">&#32;&#32;&#32;&#32;&lt;Value_Type,&#32;Cmp_Fn,&#32;typename&#32;_Alloc::size_type,&#32;_Alloc,&#32;true&gt;</emphasis>
+63 <emphasis role="preprocessor">#else</emphasis>
+64 <emphasis role="preprocessor">#define&#32;PB_DS_BASE_T_P&#32;\</emphasis>
+65 <emphasis role="preprocessor">&#32;&#32;&#32;&#32;&lt;Value_Type,&#32;Cmp_Fn,&#32;typename&#32;_Alloc::size_type,&#32;_Alloc&gt;</emphasis>
+66 <emphasis role="preprocessor">#endif</emphasis>
+67 
+68 
+76 &#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;Value_Type,&#32;<emphasis role="keyword">typename</emphasis>&#32;Cmp_Fn,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Alloc&gt;
+77 &#32;&#32;&#32;&#32;<emphasis role="keyword">class&#32;</emphasis>thin_heap
+78 &#32;&#32;&#32;&#32;:&#32;<emphasis role="keyword">public</emphasis>&#32;left_child_next_sibling_heap&#32;<link linkend="__classes_2lib_2include_2c_09_09_2ext_2pb__ds_2detail_2thin__heap___2thin__heap___8hpp_1aa8617f1a3aa5dcfba0f785845dd46be7">PB_DS_BASE_T_P</link>
+79 &#32;&#32;&#32;&#32;{
+80 &#32;&#32;&#32;&#32;<emphasis role="keyword">private</emphasis>:
+81 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;rebind_traits&lt;_Alloc,&#32;Value_Type&gt;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__rebind_a;
+82 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;left_child_next_sibling_heap&#32;<link linkend="__classes_2lib_2include_2c_09_09_2ext_2pb__ds_2detail_2thin__heap___2thin__heap___8hpp_1aa8617f1a3aa5dcfba0f785845dd46be7">PB_DS_BASE_T_P</link>&#32;base_type;
+83 
+84 &#32;&#32;&#32;&#32;<emphasis role="keyword">protected</emphasis>:
+85 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">typename</emphasis>&#32;base_type::node&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1detail_1_1thin__heap_1a3e996f7a3a41313e6bd08a8b7757448f">node</link>;
+86 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">typename</emphasis>&#32;base_type::node_pointer&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1detail_1_1thin__heap_1ae975f70083e84e1dd132a6e2e59f3b95">node_pointer</link>;
+87 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">typename</emphasis>&#32;base_type::node_const_pointer&#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1detail_1_1thin__heap_1a7fe80c9cdd7bc84f4038c98407d3bff0">node_const_pointer</link>;
+88 
+89 &#32;&#32;&#32;&#32;<emphasis role="keyword">public</emphasis>:
+90 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;Value_Type&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1detail_1_1thin__heap_1a2e918c6d009e1010843a42a85586fbd6">value_type</link>;
+91 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;Cmp_Fn&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1detail_1_1thin__heap_1a41d6146905b2cdfa2b33e38d27b7a07a">cmp_fn</link>;
+92 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;_Alloc&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1detail_1_1thin__heap_1adb3758fa10cfc04b866b4394b7e9a001">allocator_type</link>;
+93 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">typename</emphasis>&#32;_Alloc::size_type&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1detail_1_1thin__heap_1ab7c7e032ea7ba046e035cd6341c0bae9">size_type</link>;
+94 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">typename</emphasis>&#32;_Alloc::difference_type&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1detail_1_1thin__heap_1a7c1a6691ab10f51ac5cefc7e0bea3edb">difference_type</link>;
+95 
+96 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">typename</emphasis>&#32;__rebind_a::pointer&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1detail_1_1thin__heap_1ad8876f1190b918597adb90799ba3b0bd">pointer</link>;
+97 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">typename</emphasis>&#32;__rebind_a::const_pointer&#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1detail_1_1thin__heap_1a911f7888367bb80dee04c49ccd1c1669">const_pointer</link>;
+98 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">typename</emphasis>&#32;__rebind_a::reference&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1detail_1_1thin__heap_1a88200fdce48eb600e5ac729ca86ed9af">reference</link>;
+99 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">typename</emphasis>&#32;__rebind_a::const_reference&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1detail_1_1thin__heap_1adefa682549377e2ed0d4b1d7596a5777">const_reference</link>;
+100 
+101 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">typename</emphasis>&#32;base_type::point_iterator&#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1detail_1_1thin__heap_1a138085c2c62f353fd7ff32785a64ae69">point_iterator</link>;
+102 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">typename</emphasis>&#32;base_type::point_const_iterator&#32;&#32;<link linkend="_class____gnu__pbds_1_1detail_1_1thin__heap_1a3d6ef68589e1e1e4761622cc5a30868c">point_const_iterator</link>;
+103 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">typename</emphasis>&#32;base_type::iterator&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1detail_1_1thin__heap_1a07230a5637877d32621b5647ce43771f">iterator</link>;
+104 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">typename</emphasis>&#32;base_type::const_iterator&#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1detail_1_1thin__heap_1a03e9eb9e80d203cfc4d9a199bb03be63">const_iterator</link>;
+105 
+106 
+107 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<link linkend="_class____gnu__pbds_1_1detail_1_1thin__heap_1a138085c2c62f353fd7ff32785a64ae69">point_iterator</link>
+108 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1detail_1_1thin__heap_1a35b3f99fdbcef049dc063a5292ea3f66">push</link>(<link linkend="_class____gnu__pbds_1_1detail_1_1thin__heap_1adefa682549377e2ed0d4b1d7596a5777">const_reference</link>);
+109 
+110 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+111 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1detail_1_1thin__heap_1acd1cc451b846ead43bb1c82d8265e71d">modify</link>(<link linkend="_class____gnu__pbds_1_1detail_1_1thin__heap_1a138085c2c62f353fd7ff32785a64ae69">point_iterator</link>,&#32;<link linkend="_class____gnu__pbds_1_1detail_1_1thin__heap_1adefa682549377e2ed0d4b1d7596a5777">const_reference</link>);
+112 
+113 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<link linkend="_class____gnu__pbds_1_1detail_1_1thin__heap_1adefa682549377e2ed0d4b1d7596a5777">const_reference</link>
+114 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1detail_1_1thin__heap_1a6bab6151465acc4480bcb3cb12117b50">top</link>()&#32;<emphasis role="keyword">const</emphasis>;
+115 
+116 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+117 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1detail_1_1thin__heap_1a1ec619ebab10b54c844ed2b8d701afbb">pop</link>();
+118 
+119 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+120 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1detail_1_1thin__heap_1a2e81e90d6cf1af25ffe2602c97802cdd">erase</link>(<link linkend="_class____gnu__pbds_1_1detail_1_1thin__heap_1a138085c2c62f353fd7ff32785a64ae69">point_iterator</link>);
+121 
+122 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>
+123 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1detail_1_1thin__heap_1a36b64e0912329d70c784d801b27fe8d4">clear</link>();
+124 
+125 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;Pred&gt;
+126 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1detail_1_1thin__heap_1ab7c7e032ea7ba046e035cd6341c0bae9">size_type</link>
+127 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1detail_1_1thin__heap_1a345afe3795c92c730f0098591a2ba6f4">erase_if</link>(Pred);
+128 
+129 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;Pred&gt;
+130 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+131 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1detail_1_1thin__heap_1a02f3cd3e5642fc7b83e328537ee0938c">split</link>(Pred,&#32;<link linkend="__classes_2lib_2include_2c_09_09_2ext_2pb__ds_2detail_2bin__search__tree___2bin__search__tree___8hpp_1a304b8b73a11afe64bfca54576b91263b">PB_DS_CLASS_C_DEC</link>&amp;);
+132 
+133 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+134 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1detail_1_1thin__heap_1a895466149bfefe96c33ba7ef05d32c47">join</link>(<link linkend="__classes_2lib_2include_2c_09_09_2ext_2pb__ds_2detail_2bin__search__tree___2bin__search__tree___8hpp_1a304b8b73a11afe64bfca54576b91263b">PB_DS_CLASS_C_DEC</link>&amp;);
+135 
+136 &#32;&#32;&#32;&#32;<emphasis role="keyword">protected</emphasis>:
+137 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1detail_1_1thin__heap_1a8037bdbb52eea7d198d238241a3b2dd3">thin_heap</link>();
+138 
+139 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1detail_1_1thin__heap_1af7a0f130af528ab8954bb59f0cd4f3a5">thin_heap</link>(<emphasis role="keyword">const</emphasis>&#32;Cmp_Fn&amp;);
+140 
+141 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1detail_1_1thin__heap_1a0b551135072e71e0b5b6018251c29d69">thin_heap</link>(<emphasis role="keyword">const</emphasis>&#32;<link linkend="__classes_2lib_2include_2c_09_09_2ext_2pb__ds_2detail_2bin__search__tree___2bin__search__tree___8hpp_1a304b8b73a11afe64bfca54576b91263b">PB_DS_CLASS_C_DEC</link>&amp;);
+142 
+143 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+144 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1detail_1_1thin__heap_1a8e799d6e0b385d1148f2561fb77faecd">swap</link>(<link linkend="__classes_2lib_2include_2c_09_09_2ext_2pb__ds_2detail_2bin__search__tree___2bin__search__tree___8hpp_1a304b8b73a11afe64bfca54576b91263b">PB_DS_CLASS_C_DEC</link>&amp;);
+145 
+146 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1detail_1_1thin__heap_1a9424edc2fa0cffaa8a8a0dcfa779f42e">~thin_heap</link>();
+147 
+148 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;It&gt;
+149 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+150 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1detail_1_1thin__heap_1aeba8cb7f8805e87f39266fa7eeba6977">copy_from_range</link>(It,&#32;It);
+151 
+152 <emphasis role="preprocessor">#ifdef&#32;_GLIBCXX_DEBUG</emphasis>
+153 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+154 &#32;&#32;&#32;&#32;&#32;&#32;assert_valid(<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>*,&#32;<emphasis role="keywordtype">int</emphasis>)&#32;<emphasis role="keyword">const</emphasis>;
+155 
+156 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+157 &#32;&#32;&#32;&#32;&#32;&#32;assert_max(<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>*,&#32;<emphasis role="keywordtype">int</emphasis>)&#32;<emphasis role="keyword">const</emphasis>;
+158 <emphasis role="preprocessor">#endif</emphasis>
+159 
+160 <emphasis role="preprocessor">#ifdef&#32;PB_DS_THIN_HEAP_TRACE_</emphasis>
+161 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+162 &#32;&#32;&#32;&#32;&#32;&#32;trace()&#32;<emphasis role="keyword">const</emphasis>;
+163 <emphasis role="preprocessor">#endif</emphasis>
+164 
+165 &#32;&#32;&#32;&#32;<emphasis role="keyword">private</emphasis>:
+166 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">enum</emphasis>
+167 &#32;&#32;&#32;&#32;{
+168 &#32;&#32;&#32;&#32;&#32;&#32;max_rank&#32;=&#32;(<emphasis role="keyword">sizeof</emphasis>(<link linkend="_class____gnu__pbds_1_1detail_1_1thin__heap_1ab7c7e032ea7ba046e035cd6341c0bae9">size_type</link>)&#32;&lt;&lt;&#32;4)&#32;+&#32;2
+169 &#32;&#32;&#32;&#32;};
+170 
+171 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+172 &#32;&#32;&#32;&#32;&#32;&#32;initialize();
+173 
+174 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>
+175 &#32;&#32;&#32;&#32;&#32;&#32;update_max(<link linkend="_class____gnu__pbds_1_1detail_1_1thin__heap_1ae975f70083e84e1dd132a6e2e59f3b95">node_pointer</link>);
+176 
+177 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>
+178 &#32;&#32;&#32;&#32;&#32;&#32;fix(<link linkend="_class____gnu__pbds_1_1detail_1_1thin__heap_1ae975f70083e84e1dd132a6e2e59f3b95">node_pointer</link>);
+179 
+180 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>
+181 &#32;&#32;&#32;&#32;&#32;&#32;fix_root(<link linkend="_class____gnu__pbds_1_1detail_1_1thin__heap_1ae975f70083e84e1dd132a6e2e59f3b95">node_pointer</link>);
+182 
+183 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>
+184 &#32;&#32;&#32;&#32;&#32;&#32;fix_sibling_rank_1_unmarked(<link linkend="_class____gnu__pbds_1_1detail_1_1thin__heap_1ae975f70083e84e1dd132a6e2e59f3b95">node_pointer</link>);
+185 
+186 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>
+187 &#32;&#32;&#32;&#32;&#32;&#32;fix_sibling_rank_1_marked(<link linkend="_class____gnu__pbds_1_1detail_1_1thin__heap_1ae975f70083e84e1dd132a6e2e59f3b95">node_pointer</link>);
+188 
+189 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>
+190 &#32;&#32;&#32;&#32;&#32;&#32;fix_sibling_general_unmarked(<link linkend="_class____gnu__pbds_1_1detail_1_1thin__heap_1ae975f70083e84e1dd132a6e2e59f3b95">node_pointer</link>);
+191 
+192 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>
+193 &#32;&#32;&#32;&#32;&#32;&#32;fix_sibling_general_marked(<link linkend="_class____gnu__pbds_1_1detail_1_1thin__heap_1ae975f70083e84e1dd132a6e2e59f3b95">node_pointer</link>);
+194 
+195 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>
+196 &#32;&#32;&#32;&#32;&#32;&#32;fix_child(<link linkend="_class____gnu__pbds_1_1detail_1_1thin__heap_1ae975f70083e84e1dd132a6e2e59f3b95">node_pointer</link>);
+197 
+198 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>
+199 &#32;&#32;&#32;&#32;&#32;&#32;make_root(<link linkend="_class____gnu__pbds_1_1detail_1_1thin__heap_1ae975f70083e84e1dd132a6e2e59f3b95">node_pointer</link>);
+200 
+201 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>
+202 &#32;&#32;&#32;&#32;&#32;&#32;make_root_and_link(<link linkend="_class____gnu__pbds_1_1detail_1_1thin__heap_1ae975f70083e84e1dd132a6e2e59f3b95">node_pointer</link>);
+203 
+204 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>
+205 &#32;&#32;&#32;&#32;&#32;&#32;remove_max_node();
+206 
+207 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+208 &#32;&#32;&#32;&#32;&#32;&#32;to_aux_except_max();
+209 
+210 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>
+211 &#32;&#32;&#32;&#32;&#32;&#32;add_to_aux(<link linkend="_class____gnu__pbds_1_1detail_1_1thin__heap_1ae975f70083e84e1dd132a6e2e59f3b95">node_pointer</link>);
+212 
+213 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>
+214 &#32;&#32;&#32;&#32;&#32;&#32;make_from_aux();
+215 
+216 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<link linkend="_class____gnu__pbds_1_1detail_1_1thin__heap_1ab7c7e032ea7ba046e035cd6341c0bae9">size_type</link>
+217 &#32;&#32;&#32;&#32;&#32;&#32;rank_bound();
+218 
+219 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>
+220 &#32;&#32;&#32;&#32;&#32;&#32;make_child_of(<link linkend="_class____gnu__pbds_1_1detail_1_1thin__heap_1ae975f70083e84e1dd132a6e2e59f3b95">node_pointer</link>,&#32;<link linkend="_class____gnu__pbds_1_1detail_1_1thin__heap_1ae975f70083e84e1dd132a6e2e59f3b95">node_pointer</link>);
+221 
+222 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>
+223 &#32;&#32;&#32;&#32;&#32;&#32;remove_node(<link linkend="_class____gnu__pbds_1_1detail_1_1thin__heap_1ae975f70083e84e1dd132a6e2e59f3b95">node_pointer</link>);
+224 
+225 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<link linkend="_class____gnu__pbds_1_1detail_1_1thin__heap_1ae975f70083e84e1dd132a6e2e59f3b95">node_pointer</link>
+226 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1detail_1_1thin__heap_1a895466149bfefe96c33ba7ef05d32c47">join</link>(<link linkend="_class____gnu__pbds_1_1detail_1_1thin__heap_1ae975f70083e84e1dd132a6e2e59f3b95">node_pointer</link>,&#32;<link linkend="_class____gnu__pbds_1_1detail_1_1thin__heap_1ae975f70083e84e1dd132a6e2e59f3b95">node_pointer</link>)&#32;<emphasis role="keyword">const</emphasis>;
+227 
+228 <emphasis role="preprocessor">#ifdef&#32;_GLIBCXX_DEBUG</emphasis>
+229 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+230 &#32;&#32;&#32;&#32;&#32;&#32;assert_node_consistent(<link linkend="_class____gnu__pbds_1_1detail_1_1thin__heap_1a7fe80c9cdd7bc84f4038c98407d3bff0">node_const_pointer</link>,&#32;<emphasis role="keywordtype">bool</emphasis>,&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>*,&#32;<emphasis role="keywordtype">int</emphasis>)&#32;<emphasis role="keyword">const</emphasis>;
+231 
+232 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+233 &#32;&#32;&#32;&#32;&#32;&#32;assert_aux_null(<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>*,&#32;<emphasis role="keywordtype">int</emphasis>)&#32;<emphasis role="keyword">const</emphasis>;
+234 <emphasis role="preprocessor">#endif</emphasis>
+235 
+236 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1detail_1_1thin__heap_1ae975f70083e84e1dd132a6e2e59f3b95">node_pointer</link>&#32;&#32;m_p_max;
+237 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1detail_1_1thin__heap_1ae975f70083e84e1dd132a6e2e59f3b95">node_pointer</link>&#32;&#32;m_a_aux[max_rank];
+238 &#32;&#32;&#32;&#32;};
+239 
+240 &#32;&#32;&#32;&#32;<emphasis role="keyword">enum</emphasis>
+241 &#32;&#32;&#32;&#32;&#32;&#32;{
+242 &#32;&#32;&#32;&#32;<link linkend="_namespace____gnu__pbds_1_1detail_1a75fb9f6cb19d78aef283f055a8230d36a3e332c792291a8b732dbc4f861f12630">num_distinct_rank_bounds</link>&#32;=&#32;48
+243 &#32;&#32;&#32;&#32;&#32;&#32;};
+244 
+245 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Taken&#32;from&#32;the&#32;SGI&#32;implementation;&#32;acknowledged&#32;in&#32;the&#32;docs.</emphasis>
+246 &#32;&#32;&#32;&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keyword">const</emphasis>&#32;std::size_t&#32;g_a_rank_bounds[<link linkend="_namespace____gnu__pbds_1_1detail_1a75fb9f6cb19d78aef283f055a8230d36a3e332c792291a8b732dbc4f861f12630">num_distinct_rank_bounds</link>]&#32;=
+247 &#32;&#32;&#32;&#32;&#32;&#32;{
+248 &#32;&#32;&#32;&#32;<emphasis role="comment">/*&#32;Dealing&#32;cards...&#32;*/</emphasis>
+249 &#32;&#32;&#32;&#32;<emphasis role="comment">/*&#32;0&#32;&#32;&#32;&#32;&#32;*/</emphasis>&#32;0ul,
+250 &#32;&#32;&#32;&#32;<emphasis role="comment">/*&#32;1&#32;&#32;&#32;&#32;&#32;*/</emphasis>&#32;1ul,
+251 &#32;&#32;&#32;&#32;<emphasis role="comment">/*&#32;2&#32;&#32;&#32;&#32;&#32;*/</emphasis>&#32;1ul,
+252 &#32;&#32;&#32;&#32;<emphasis role="comment">/*&#32;3&#32;&#32;&#32;&#32;&#32;*/</emphasis>&#32;2ul,
+253 &#32;&#32;&#32;&#32;<emphasis role="comment">/*&#32;4&#32;&#32;&#32;&#32;&#32;*/</emphasis>&#32;4ul,
+254 &#32;&#32;&#32;&#32;<emphasis role="comment">/*&#32;5&#32;&#32;&#32;&#32;&#32;*/</emphasis>&#32;6ul,
+255 &#32;&#32;&#32;&#32;<emphasis role="comment">/*&#32;6&#32;&#32;&#32;&#32;&#32;*/</emphasis>&#32;11ul,
+256 &#32;&#32;&#32;&#32;<emphasis role="comment">/*&#32;7&#32;&#32;&#32;&#32;&#32;*/</emphasis>&#32;17ul,
+257 &#32;&#32;&#32;&#32;<emphasis role="comment">/*&#32;8&#32;&#32;&#32;&#32;&#32;*/</emphasis>&#32;29ul,
+258 &#32;&#32;&#32;&#32;<emphasis role="comment">/*&#32;9&#32;&#32;&#32;&#32;&#32;*/</emphasis>&#32;46ul,
+259 &#32;&#32;&#32;&#32;<emphasis role="comment">/*&#32;10&#32;&#32;&#32;&#32;*/</emphasis>&#32;76ul,
+260 &#32;&#32;&#32;&#32;<emphasis role="comment">/*&#32;11&#32;&#32;&#32;&#32;*/</emphasis>&#32;122ul,
+261 &#32;&#32;&#32;&#32;<emphasis role="comment">/*&#32;12&#32;&#32;&#32;&#32;*/</emphasis>&#32;199ul,
+262 &#32;&#32;&#32;&#32;<emphasis role="comment">/*&#32;13&#32;&#32;&#32;&#32;*/</emphasis>&#32;321ul,
+263 &#32;&#32;&#32;&#32;<emphasis role="comment">/*&#32;14&#32;&#32;&#32;&#32;*/</emphasis>&#32;521ul,
+264 &#32;&#32;&#32;&#32;<emphasis role="comment">/*&#32;15&#32;&#32;&#32;&#32;*/</emphasis>&#32;842ul,
+265 &#32;&#32;&#32;&#32;<emphasis role="comment">/*&#32;16&#32;&#32;&#32;&#32;*/</emphasis>&#32;1364ul,
+266 &#32;&#32;&#32;&#32;<emphasis role="comment">/*&#32;17&#32;&#32;&#32;&#32;*/</emphasis>&#32;2206ul,
+267 &#32;&#32;&#32;&#32;<emphasis role="comment">/*&#32;18&#32;&#32;&#32;&#32;*/</emphasis>&#32;3571ul,
+268 &#32;&#32;&#32;&#32;<emphasis role="comment">/*&#32;19&#32;&#32;&#32;&#32;*/</emphasis>&#32;5777ul,
+269 &#32;&#32;&#32;&#32;<emphasis role="comment">/*&#32;20&#32;&#32;&#32;&#32;*/</emphasis>&#32;9349ul,
+270 &#32;&#32;&#32;&#32;<emphasis role="comment">/*&#32;21&#32;&#32;&#32;&#32;*/</emphasis>&#32;15126ul,
+271 &#32;&#32;&#32;&#32;<emphasis role="comment">/*&#32;22&#32;&#32;&#32;&#32;*/</emphasis>&#32;24476ul,
+272 &#32;&#32;&#32;&#32;<emphasis role="comment">/*&#32;23&#32;&#32;&#32;&#32;*/</emphasis>&#32;39602ul,
+273 &#32;&#32;&#32;&#32;<emphasis role="comment">/*&#32;24&#32;&#32;&#32;&#32;*/</emphasis>&#32;64079ul
+274 <emphasis role="preprocessor">#if&#32;__SIZE_MAX__&#32;&gt;&#32;0xfffful</emphasis>
+275 &#32;&#32;&#32;&#32;,
+276 &#32;&#32;&#32;&#32;<emphasis role="comment">/*&#32;25&#32;&#32;&#32;&#32;*/</emphasis>&#32;103681ul,
+277 &#32;&#32;&#32;&#32;<emphasis role="comment">/*&#32;26&#32;&#32;&#32;&#32;*/</emphasis>&#32;167761ul,
+278 &#32;&#32;&#32;&#32;<emphasis role="comment">/*&#32;27&#32;&#32;&#32;&#32;*/</emphasis>&#32;271442ul,
+279 &#32;&#32;&#32;&#32;<emphasis role="comment">/*&#32;28&#32;&#32;&#32;&#32;*/</emphasis>&#32;439204ul,
+280 &#32;&#32;&#32;&#32;<emphasis role="comment">/*&#32;29&#32;&#32;&#32;&#32;*/</emphasis>&#32;710646ul
+281 <emphasis role="preprocessor">#if&#32;__SIZE_MAX__&#32;&gt;&#32;0xffffful</emphasis>
+282 &#32;&#32;&#32;&#32;,
+283 &#32;&#32;&#32;&#32;<emphasis role="comment">/*&#32;30&#32;&#32;&#32;&#32;*/</emphasis>&#32;1149851ul,
+284 &#32;&#32;&#32;&#32;<emphasis role="comment">/*&#32;31&#32;&#32;&#32;&#32;*/</emphasis>&#32;1860497ul,
+285 &#32;&#32;&#32;&#32;<emphasis role="comment">/*&#32;32&#32;&#32;&#32;&#32;*/</emphasis>&#32;3010349ul,
+286 &#32;&#32;&#32;&#32;<emphasis role="comment">/*&#32;33&#32;&#32;&#32;&#32;*/</emphasis>&#32;4870846ul,
+287 &#32;&#32;&#32;&#32;<emphasis role="comment">/*&#32;34&#32;&#32;&#32;&#32;*/</emphasis>&#32;7881196ul,
+288 &#32;&#32;&#32;&#32;<emphasis role="comment">/*&#32;35&#32;&#32;&#32;&#32;*/</emphasis>&#32;12752042ul
+289 <emphasis role="preprocessor">#if&#32;__SIZE_MAX__&#32;&gt;&#32;0xfffffful</emphasis>
+290 &#32;&#32;&#32;&#32;,
+291 &#32;&#32;&#32;&#32;<emphasis role="comment">/*&#32;36&#32;&#32;&#32;&#32;*/</emphasis>&#32;20633239ul,
+292 &#32;&#32;&#32;&#32;<emphasis role="comment">/*&#32;37&#32;&#32;&#32;&#32;*/</emphasis>&#32;33385282ul,
+293 &#32;&#32;&#32;&#32;<emphasis role="comment">/*&#32;38&#32;&#32;&#32;&#32;*/</emphasis>&#32;54018521ul,
+294 &#32;&#32;&#32;&#32;<emphasis role="comment">/*&#32;39&#32;&#32;&#32;&#32;*/</emphasis>&#32;87403803ul,
+295 &#32;&#32;&#32;&#32;<emphasis role="comment">/*&#32;40&#32;&#32;&#32;&#32;*/</emphasis>&#32;141422324ul,
+296 &#32;&#32;&#32;&#32;<emphasis role="comment">/*&#32;41&#32;&#32;&#32;&#32;*/</emphasis>&#32;228826127ul,
+297 &#32;&#32;&#32;&#32;<emphasis role="comment">/*&#32;42&#32;&#32;&#32;&#32;*/</emphasis>&#32;370248451ul,
+298 &#32;&#32;&#32;&#32;<emphasis role="comment">/*&#32;43&#32;&#32;&#32;&#32;*/</emphasis>&#32;599074578ul,
+299 &#32;&#32;&#32;&#32;<emphasis role="comment">/*&#32;44&#32;&#32;&#32;&#32;*/</emphasis>&#32;969323029ul,
+300 &#32;&#32;&#32;&#32;<emphasis role="comment">/*&#32;45&#32;&#32;&#32;&#32;*/</emphasis>&#32;1568397607ul,
+301 &#32;&#32;&#32;&#32;<emphasis role="comment">/*&#32;46&#32;&#32;&#32;&#32;*/</emphasis>&#32;2537720636ul,
+302 &#32;&#32;&#32;&#32;<emphasis role="comment">/*&#32;47&#32;&#32;&#32;&#32;*/</emphasis>&#32;4106118243ul
+303 <emphasis role="preprocessor">#endif</emphasis>
+304 <emphasis role="preprocessor">#endif</emphasis>
+305 <emphasis role="preprocessor">#endif</emphasis>
+306 &#32;&#32;&#32;&#32;<emphasis role="comment">/*&#32;Pot&apos;s&#32;good,&#32;let&apos;s&#32;play&#32;*/</emphasis>
+307 &#32;&#32;&#32;&#32;&#32;&#32;};
+308 
+309 <emphasis role="preprocessor">#define&#32;PB_DS_ASSERT_NODE_CONSISTENT(_Node,&#32;_Bool)&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;\</emphasis>
+310 <emphasis role="preprocessor">&#32;&#32;_GLIBCXX_DEBUG_ONLY(assert_node_consistent(_Node,&#32;_Bool,&#32;&#32;&#32;&#32;&#32;&#32;\</emphasis>
+311 <emphasis role="preprocessor">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__FILE__,&#32;__LINE__);)</emphasis>
+312 
+313 <emphasis role="preprocessor">#define&#32;PB_DS_ASSERT_AUX_NULL(X)&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;\</emphasis>
+314 <emphasis role="preprocessor">&#32;&#32;_GLIBCXX_DEBUG_ONLY(X.assert_aux_null(__FILE__,&#32;__LINE__);)</emphasis>
+315 
+316 <emphasis role="preprocessor">#include&#32;&lt;ext/pb_ds/detail/thin_heap_/constructors_destructor_fn_imps.hpp&gt;</emphasis>
+317 <emphasis role="preprocessor">#include&#32;&lt;ext/pb_ds/detail/thin_heap_/debug_fn_imps.hpp&gt;</emphasis>
+318 <emphasis role="preprocessor">#include&#32;&lt;ext/pb_ds/detail/thin_heap_/trace_fn_imps.hpp&gt;</emphasis>
+319 <emphasis role="preprocessor">#include&#32;&lt;ext/pb_ds/detail/thin_heap_/find_fn_imps.hpp&gt;</emphasis>
+320 <emphasis role="preprocessor">#include&#32;&lt;ext/pb_ds/detail/thin_heap_/insert_fn_imps.hpp&gt;</emphasis>
+321 <emphasis role="preprocessor">#include&#32;&lt;ext/pb_ds/detail/thin_heap_/erase_fn_imps.hpp&gt;</emphasis>
+322 <emphasis role="preprocessor">#include&#32;&lt;ext/pb_ds/detail/thin_heap_/split_join_fn_imps.hpp&gt;</emphasis>
+323 
+324 <emphasis role="preprocessor">#undef&#32;PB_DS_ASSERT_AUX_NULL</emphasis>
+325 <emphasis role="preprocessor">#undef&#32;PB_DS_ASSERT_NODE_CONSISTENT</emphasis>
+326 <emphasis role="preprocessor">#undef&#32;PB_DS_CLASS_C_DEC</emphasis>
+327 <emphasis role="preprocessor">#undef&#32;PB_DS_CLASS_T_DEC</emphasis>
+328 <emphasis role="preprocessor">#undef&#32;PB_DS_BASE_T_P</emphasis>
+329 
+330 &#32;&#32;}&#32;<emphasis role="comment">//&#32;namespace&#32;detail</emphasis>
+331 }&#32;<emphasis role="comment">//&#32;namespace&#32;__gnu_pbds</emphasis>
+332 
+333 <emphasis role="preprocessor">#endif</emphasis>
+</programlisting></section>

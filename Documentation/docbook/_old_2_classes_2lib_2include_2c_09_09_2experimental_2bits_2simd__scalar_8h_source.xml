@@ -1,0 +1,806 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<section xmlns="http://docbook.org/ns/docbook" version="5.0" xmlns:xlink="http://www.w3.org/1999/xlink" xml:id="__old_2_classes_2lib_2include_2c_09_09_2experimental_2bits_2simd__scalar_8h_source" xml:lang="en-US">
+<title>simd_scalar.h</title>
+<indexterm><primary>C:/Users/HP/Documents/GitHub/Minero-Game/Old/Classes/lib/include/c++/experimental/bits/simd_scalar.h</primary></indexterm>
+Go to the documentation of this file.<programlisting linenumbering="unnumbered">1 <emphasis role="comment">//&#32;Simd&#32;scalar&#32;ABI&#32;specific&#32;implementations&#32;-*-&#32;C++&#32;-*-</emphasis>
+2 
+3 <emphasis role="comment">//&#32;Copyright&#32;(C)&#32;2020-2022&#32;Free&#32;Software&#32;Foundation,&#32;Inc.</emphasis>
+4 <emphasis role="comment">//</emphasis>
+5 <emphasis role="comment">//&#32;This&#32;file&#32;is&#32;part&#32;of&#32;the&#32;GNU&#32;ISO&#32;C++&#32;Library.&#32;&#32;This&#32;library&#32;is&#32;free</emphasis>
+6 <emphasis role="comment">//&#32;software;&#32;you&#32;can&#32;redistribute&#32;it&#32;and/or&#32;modify&#32;it&#32;under&#32;the</emphasis>
+7 <emphasis role="comment">//&#32;terms&#32;of&#32;the&#32;GNU&#32;General&#32;Public&#32;License&#32;as&#32;published&#32;by&#32;the</emphasis>
+8 <emphasis role="comment">//&#32;Free&#32;Software&#32;Foundation;&#32;either&#32;version&#32;3,&#32;or&#32;(at&#32;your&#32;option)</emphasis>
+9 <emphasis role="comment">//&#32;any&#32;later&#32;version.</emphasis>
+10 
+11 <emphasis role="comment">//&#32;This&#32;library&#32;is&#32;distributed&#32;in&#32;the&#32;hope&#32;that&#32;it&#32;will&#32;be&#32;useful,</emphasis>
+12 <emphasis role="comment">//&#32;but&#32;WITHOUT&#32;ANY&#32;WARRANTY;&#32;without&#32;even&#32;the&#32;implied&#32;warranty&#32;of</emphasis>
+13 <emphasis role="comment">//&#32;MERCHANTABILITY&#32;or&#32;FITNESS&#32;FOR&#32;A&#32;PARTICULAR&#32;PURPOSE.&#32;&#32;See&#32;the</emphasis>
+14 <emphasis role="comment">//&#32;GNU&#32;General&#32;Public&#32;License&#32;for&#32;more&#32;details.</emphasis>
+15 
+16 <emphasis role="comment">//&#32;Under&#32;Section&#32;7&#32;of&#32;GPL&#32;version&#32;3,&#32;you&#32;are&#32;granted&#32;additional</emphasis>
+17 <emphasis role="comment">//&#32;permissions&#32;described&#32;in&#32;the&#32;GCC&#32;Runtime&#32;Library&#32;Exception,&#32;version</emphasis>
+18 <emphasis role="comment">//&#32;3.1,&#32;as&#32;published&#32;by&#32;the&#32;Free&#32;Software&#32;Foundation.</emphasis>
+19 
+20 <emphasis role="comment">//&#32;You&#32;should&#32;have&#32;received&#32;a&#32;copy&#32;of&#32;the&#32;GNU&#32;General&#32;Public&#32;License&#32;and</emphasis>
+21 <emphasis role="comment">//&#32;a&#32;copy&#32;of&#32;the&#32;GCC&#32;Runtime&#32;Library&#32;Exception&#32;along&#32;with&#32;this&#32;program;</emphasis>
+22 <emphasis role="comment">//&#32;see&#32;the&#32;files&#32;COPYING3&#32;and&#32;COPYING.RUNTIME&#32;respectively.&#32;&#32;If&#32;not,&#32;see</emphasis>
+23 <emphasis role="comment">//&#32;&lt;http://www.gnu.org/licenses/&gt;.</emphasis>
+24 
+25 <emphasis role="preprocessor">#ifndef&#32;_GLIBCXX_EXPERIMENTAL_SIMD_SCALAR_H_</emphasis>
+26 <emphasis role="preprocessor">#define&#32;_GLIBCXX_EXPERIMENTAL_SIMD_SCALAR_H_</emphasis>
+27 <emphasis role="preprocessor">#if&#32;__cplusplus&#32;&gt;=&#32;201703L</emphasis>
+28 
+29 <emphasis role="preprocessor">#include&#32;&lt;cmath&gt;</emphasis>
+30 
+31 _GLIBCXX_SIMD_BEGIN_NAMESPACE
+32 
+33 <emphasis role="comment">//&#32;__promote_preserving_unsigned{{{</emphasis>
+34 <emphasis role="comment">//&#32;work&#32;around&#32;crazy&#32;semantics&#32;of&#32;unsigned&#32;integers&#32;of&#32;lower&#32;rank&#32;than&#32;int:</emphasis>
+35 <emphasis role="comment">//&#32;Before&#32;applying&#32;an&#32;operator&#32;the&#32;operands&#32;are&#32;promoted&#32;to&#32;int.&#32;In&#32;which&#32;case</emphasis>
+36 <emphasis role="comment">//&#32;over-&#32;or&#32;underflow&#32;is&#32;UB,&#32;even&#32;though&#32;the&#32;operand&#32;types&#32;were&#32;unsigned.</emphasis>
+37 <emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+38 &#32;&#32;_GLIBCXX_SIMD_INTRINSIC&#32;<emphasis role="keyword">constexpr</emphasis>&#32;<emphasis role="keyword">decltype</emphasis>(<emphasis role="keyword">auto</emphasis>)
+39 &#32;&#32;__promote_preserving_unsigned(<emphasis role="keyword">const</emphasis>&#32;_Tp&amp;&#32;__x)
+40 &#32;&#32;{
+41 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;<emphasis role="keyword">constexpr</emphasis>&#32;(is_signed_v&lt;<emphasis role="keyword">decltype</emphasis>(+__x)&gt;&#32;&amp;&amp;&#32;is_unsigned_v&lt;_Tp&gt;)
+42 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<emphasis role="keyword">static_cast&lt;</emphasis><emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis><emphasis role="keyword">&gt;</emphasis>(__x);
+43 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>
+44 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__x;
+45 &#32;&#32;}
+46 
+47 <emphasis role="comment">//&#32;}}}</emphasis>
+48 
+49 <emphasis role="keyword">struct&#32;</emphasis>_CommonImplScalar;
+50 <emphasis role="keyword">struct&#32;</emphasis>_CommonImplBuiltin;
+51 <emphasis role="keyword">struct&#32;</emphasis>_SimdImplScalar;
+52 <emphasis role="keyword">struct&#32;</emphasis>_MaskImplScalar;
+53 
+54 <emphasis role="comment">//&#32;simd_abi::_Scalar&#32;{{{</emphasis>
+55 <emphasis role="keyword">struct&#32;</emphasis>simd_abi::_Scalar
+56 {
+57 &#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+58 &#32;&#32;&#32;&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keyword">constexpr</emphasis>&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;_S_size&#32;=&#32;1;
+59 
+60 &#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+61 &#32;&#32;&#32;&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keyword">constexpr</emphasis>&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;_S_full_size&#32;=&#32;1;
+62 
+63 &#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+64 &#32;&#32;&#32;&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keyword">constexpr</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>&#32;_S_is_partial&#32;=&#32;<emphasis role="keyword">false</emphasis>;
+65 
+66 &#32;&#32;<emphasis role="keyword">struct&#32;</emphasis>_IsValidAbiTag&#32;:&#32;<link linkend="_namespace____gnu__pbds_1_1detail_1a6bd7131856cf31c3caa443a674400ab1">true_type</link>&#32;{};
+67 
+68 &#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+69 &#32;&#32;&#32;&#32;<emphasis role="keyword">struct&#32;</emphasis>_IsValidSizeFor&#32;:&#32;<link linkend="_namespace____gnu__pbds_1_1detail_1a6bd7131856cf31c3caa443a674400ab1">true_type</link>&#32;{};
+70 
+71 &#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+72 &#32;&#32;&#32;&#32;<emphasis role="keyword">struct&#32;</emphasis>_IsValid&#32;:&#32;__is_vectorizable&lt;_Tp&gt;&#32;{};
+73 
+74 &#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+75 &#32;&#32;&#32;&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keyword">constexpr</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>&#32;_S_is_valid_v&#32;=&#32;_IsValid&lt;_Tp&gt;::value;
+76 
+77 &#32;&#32;_GLIBCXX_SIMD_INTRINSIC&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keyword">constexpr</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>&#32;_S_masked(<emphasis role="keywordtype">bool</emphasis>&#32;__x)
+78 &#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;__x;&#32;}
+79 
+80 &#32;&#32;<emphasis role="keyword">using&#32;</emphasis>_CommonImpl&#32;=&#32;_CommonImplScalar;
+81 &#32;&#32;<emphasis role="keyword">using&#32;</emphasis>_SimdImpl&#32;=&#32;_SimdImplScalar;
+82 &#32;&#32;<emphasis role="keyword">using&#32;</emphasis>_MaskImpl&#32;=&#32;_MaskImplScalar;
+83 
+84 &#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp,&#32;<emphasis role="keywordtype">bool</emphasis>&#32;=&#32;_S_is_val<emphasis role="keywordtype">id</emphasis>_v&lt;_Tp&gt;&gt;
+85 &#32;&#32;&#32;&#32;<emphasis role="keyword">struct&#32;</emphasis>__traits&#32;:&#32;_InvalidTraits&#32;{};
+86 
+87 &#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+88 &#32;&#32;&#32;&#32;<emphasis role="keyword">struct&#32;</emphasis>__traits&lt;_Tp,&#32;<link linkend="__classes_2lib_2include_2stdbool_8h_1a41f9c5fb8b08eb5dc3edce4dcb37fee7">true</link>&gt;
+89 &#32;&#32;&#32;&#32;{
+90 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">using&#32;</emphasis>_IsValid&#32;=&#32;<link linkend="_namespace____gnu__pbds_1_1detail_1a6bd7131856cf31c3caa443a674400ab1">true_type</link>;
+91 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">using&#32;</emphasis>_SimdImpl&#32;=&#32;_SimdImplScalar;
+92 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">using&#32;</emphasis>_MaskImpl&#32;=&#32;_MaskImplScalar;
+93 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">using&#32;</emphasis>_SimdMember&#32;=&#32;_Tp;
+94 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">using&#32;</emphasis>_MaskMember&#32;=&#32;<link linkend="__classes_2lib_2include_2stdbool_8h_1abb452686968e48b67397da5f97445f5b">bool</link>;
+95 
+96 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keyword">constexpr</emphasis>&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;_S_simd_align&#32;=&#32;<emphasis role="keyword">alignof</emphasis>(_SimdMember);
+97 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keyword">constexpr</emphasis>&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;_S_mask_align&#32;=&#32;<emphasis role="keyword">alignof</emphasis>(_MaskMember);
+98 
+99 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;nothing&#32;the&#32;user&#32;can&#32;spell&#32;converts&#32;to/from&#32;simd/simd_mask</emphasis>
+100 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">struct&#32;</emphasis>_SimdCastType&#32;{&#32;_SimdCastType()&#32;=&#32;<emphasis role="keyword">delete</emphasis>;&#32;};
+101 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">struct&#32;</emphasis>_MaskCastType&#32;{&#32;_MaskCastType()&#32;=&#32;<emphasis role="keyword">delete</emphasis>;&#32;};
+102 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">struct&#32;</emphasis>_SimdBase&#32;{};
+103 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">struct&#32;</emphasis>_MaskBase&#32;{};
+104 &#32;&#32;&#32;&#32;};
+105 };
+106 
+107 <emphasis role="comment">//&#32;}}}</emphasis>
+108 <emphasis role="comment">//&#32;_CommonImplScalar&#32;{{{</emphasis>
+109 <emphasis role="keyword">struct&#32;</emphasis>_CommonImplScalar
+110 {
+111 &#32;&#32;<emphasis role="comment">//&#32;_S_store&#32;{{{</emphasis>
+112 &#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+113 &#32;&#32;&#32;&#32;_GLIBCXX_SIMD_INTRINSIC&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>&#32;_S_store(_Tp&#32;__x,&#32;<emphasis role="keywordtype">void</emphasis>*&#32;__addr)
+114 &#32;&#32;&#32;&#32;{&#32;__builtin_memcpy(__addr,&#32;&amp;__x,&#32;<emphasis role="keyword">sizeof</emphasis>(_Tp));&#32;}
+115 
+116 &#32;&#32;<emphasis role="comment">//&#32;}}}</emphasis>
+117 &#32;&#32;<emphasis role="comment">//&#32;_S_store_bool_array(_BitMask)&#32;{{{</emphasis>
+118 &#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keywordtype">size_t</emphasis>&#32;_Np,&#32;<emphasis role="keywordtype">bool</emphasis>&#32;_Sanitized&gt;
+119 &#32;&#32;&#32;&#32;_GLIBCXX_SIMD_INTRINSIC&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keyword">constexpr</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>
+120 &#32;&#32;&#32;&#32;_S_store_bool_array(_BitMask&lt;_Np,&#32;_Sanitized&gt;&#32;__x,&#32;<emphasis role="keywordtype">bool</emphasis>*&#32;__mem)
+121 &#32;&#32;&#32;&#32;{
+122 &#32;&#32;&#32;&#32;&#32;&#32;__make_dependent_t&lt;<emphasis role="keyword">decltype</emphasis>(__x),&#32;_CommonImplBuiltin&gt;::_S_store_bool_array(
+123 &#32;&#32;&#32;&#32;__x,&#32;__mem);
+124 &#32;&#32;&#32;&#32;}
+125 
+126 &#32;&#32;<emphasis role="comment">//&#32;}}}</emphasis>
+127 };
+128 
+129 <emphasis role="comment">//&#32;}}}</emphasis>
+130 <emphasis role="comment">//&#32;_SimdImplScalar&#32;{{{</emphasis>
+131 <emphasis role="keyword">struct&#32;</emphasis>_SimdImplScalar
+132 {
+133 &#32;&#32;<emphasis role="comment">//&#32;member&#32;types&#32;{{{2</emphasis>
+134 &#32;&#32;<emphasis role="keyword">using&#32;</emphasis>abi_type&#32;=&#32;simd_abi::scalar;
+135 
+136 &#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+137 &#32;&#32;&#32;&#32;<emphasis role="keyword">using&#32;</emphasis>_TypeTag&#32;=&#32;_Tp*;
+138 
+139 &#32;&#32;<emphasis role="comment">//&#32;_S_broadcast&#32;{{{2</emphasis>
+140 &#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+141 &#32;&#32;&#32;&#32;_GLIBCXX_SIMD_INTRINSIC&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keyword">constexpr</emphasis>&#32;_Tp&#32;_S_broadcast(_Tp&#32;__x)&#32;<emphasis role="keyword">noexcept</emphasis>
+142 &#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;__x;&#32;}
+143 
+144 &#32;&#32;<emphasis role="comment">//&#32;_S_generator&#32;{{{2</emphasis>
+145 &#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">typename</emphasis>&#32;_Fp,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+146 &#32;&#32;&#32;&#32;_GLIBCXX_SIMD_INTRINSIC&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keyword">constexpr</emphasis>&#32;_Tp&#32;_S_generator(_Fp&amp;&amp;&#32;__gen,
+147 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_TypeTag&lt;_Tp&gt;)
+148 &#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;__gen(_SizeConstant&lt;0&gt;());&#32;}
+149 
+150 &#32;&#32;<emphasis role="comment">//&#32;_S_load&#32;{{{2</emphasis>
+151 &#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Up&gt;
+152 &#32;&#32;&#32;&#32;_GLIBCXX_SIMD_INTRINSIC&#32;<emphasis role="keyword">static</emphasis>&#32;_Tp&#32;_S_load(<emphasis role="keyword">const</emphasis>&#32;_Up*&#32;__mem,
+153 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_TypeTag&lt;_Tp&gt;)&#32;<emphasis role="keyword">noexcept</emphasis>
+154 &#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;<emphasis role="keyword">static_cast&lt;</emphasis>_Tp<emphasis role="keyword">&gt;</emphasis>(__mem[0]);&#32;}
+155 
+156 &#32;&#32;<emphasis role="comment">//&#32;_S_masked_load&#32;{{{2</emphasis>
+157 &#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Up&gt;
+158 &#32;&#32;&#32;&#32;_GLIBCXX_SIMD_INTRINSIC
+159 &#32;&#32;&#32;&#32;<emphasis role="keyword">static</emphasis>&#32;_Tp&#32;_S_masked_load(_Tp&#32;__merge,&#32;<emphasis role="keywordtype">bool</emphasis>&#32;__k,
+160 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;_Up*&#32;__mem)&#32;<emphasis role="keyword">noexcept</emphasis>
+161 &#32;&#32;&#32;&#32;{
+162 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__k)
+163 &#32;&#32;&#32;&#32;__merge&#32;=&#32;<emphasis role="keyword">static_cast&lt;</emphasis>_Tp<emphasis role="keyword">&gt;</emphasis>(__mem[0]);
+164 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__merge;
+165 &#32;&#32;&#32;&#32;}
+166 
+167 &#32;&#32;<emphasis role="comment">//&#32;_S_store&#32;{{{2</emphasis>
+168 &#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Up&gt;
+169 &#32;&#32;&#32;&#32;_GLIBCXX_SIMD_INTRINSIC
+170 &#32;&#32;&#32;&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>&#32;_S_store(_Tp&#32;__v,&#32;_Up*&#32;__mem,&#32;_TypeTag&lt;_Tp&gt;)&#32;<emphasis role="keyword">noexcept</emphasis>
+171 &#32;&#32;&#32;&#32;{&#32;__mem[0]&#32;=&#32;<emphasis role="keyword">static_cast&lt;</emphasis>_Up<emphasis role="keyword">&gt;</emphasis>(__v);&#32;}
+172 
+173 &#32;&#32;<emphasis role="comment">//&#32;_S_masked_store&#32;{{{2</emphasis>
+174 &#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Up&gt;
+175 &#32;&#32;&#32;&#32;_GLIBCXX_SIMD_INTRINSIC
+176 &#32;&#32;&#32;&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>&#32;_S_masked_store(<emphasis role="keyword">const</emphasis>&#32;_Tp&#32;__v,&#32;_Up*&#32;__mem,
+177 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>&#32;__k)&#32;<emphasis role="keyword">noexcept</emphasis>
+178 &#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__k)&#32;__mem[0]&#32;=&#32;__v;&#32;}
+179 
+180 &#32;&#32;<emphasis role="comment">//&#32;_S_negate&#32;{{{2</emphasis>
+181 &#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+182 &#32;&#32;&#32;&#32;_GLIBCXX_SIMD_INTRINSIC
+183 &#32;&#32;&#32;&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keyword">constexpr</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>&#32;_S_negate(_Tp&#32;__x)&#32;<emphasis role="keyword">noexcept</emphasis>
+184 &#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;!__x;&#32;}
+185 
+186 &#32;&#32;<emphasis role="comment">//&#32;_S_reduce&#32;{{{2</emphasis>
+187 &#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp,&#32;<emphasis role="keyword">typename</emphasis>&#32;_BinaryOperation&gt;
+188 &#32;&#32;&#32;&#32;_GLIBCXX_SIMD_INTRINSIC
+189 &#32;&#32;&#32;&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keyword">constexpr</emphasis>&#32;_Tp
+190 &#32;&#32;&#32;&#32;_S_reduce(<emphasis role="keyword">const</emphasis>&#32;simd&lt;_Tp,&#32;simd_abi::scalar&gt;&amp;&#32;__x,&#32;<emphasis role="keyword">const</emphasis>&#32;_BinaryOperation&amp;)
+191 &#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;__x._M_data;&#32;}
+192 
+193 &#32;&#32;<emphasis role="comment">//&#32;_S_min,&#32;_S_max&#32;{{{2</emphasis>
+194 &#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+195 &#32;&#32;&#32;&#32;_GLIBCXX_SIMD_INTRINSIC
+196 &#32;&#32;&#32;&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keyword">constexpr</emphasis>&#32;_Tp&#32;_S_min(<emphasis role="keyword">const</emphasis>&#32;_Tp&#32;__a,&#32;<emphasis role="keyword">const</emphasis>&#32;_Tp&#32;__b)
+197 &#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;std::min(__a,&#32;__b);&#32;}
+198 
+199 &#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+200 &#32;&#32;&#32;&#32;_GLIBCXX_SIMD_INTRINSIC
+201 &#32;&#32;&#32;&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keyword">constexpr</emphasis>&#32;_Tp&#32;_S_max(<emphasis role="keyword">const</emphasis>&#32;_Tp&#32;__a,&#32;<emphasis role="keyword">const</emphasis>&#32;_Tp&#32;__b)
+202 &#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;std::max(__a,&#32;__b);&#32;}
+203 
+204 &#32;&#32;<emphasis role="comment">//&#32;_S_complement&#32;{{{2</emphasis>
+205 &#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+206 &#32;&#32;&#32;&#32;_GLIBCXX_SIMD_INTRINSIC
+207 &#32;&#32;&#32;&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keyword">constexpr</emphasis>&#32;_Tp&#32;_S_complement(_Tp&#32;__x)&#32;<emphasis role="keyword">noexcept</emphasis>
+208 &#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;<emphasis role="keyword">static_cast&lt;</emphasis>_Tp<emphasis role="keyword">&gt;</emphasis>(~__x);&#32;}
+209 
+210 &#32;&#32;<emphasis role="comment">//&#32;_S_unary_minus&#32;{{{2</emphasis>
+211 &#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+212 &#32;&#32;&#32;&#32;_GLIBCXX_SIMD_INTRINSIC
+213 &#32;&#32;&#32;&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keyword">constexpr</emphasis>&#32;_Tp&#32;_S_unary_minus(_Tp&#32;__x)&#32;<emphasis role="keyword">noexcept</emphasis>
+214 &#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;<emphasis role="keyword">static_cast&lt;</emphasis>_Tp<emphasis role="keyword">&gt;</emphasis>(-__x);&#32;}
+215 
+216 &#32;&#32;<emphasis role="comment">//&#32;arithmetic&#32;operators&#32;{{{2</emphasis>
+217 &#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+218 &#32;&#32;&#32;&#32;_GLIBCXX_SIMD_INTRINSIC
+219 &#32;&#32;&#32;&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keyword">constexpr</emphasis>&#32;_Tp&#32;_S_plus(_Tp&#32;__x,&#32;_Tp&#32;__y)
+220 &#32;&#32;&#32;&#32;{
+221 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<emphasis role="keyword">static_cast&lt;</emphasis>_Tp<emphasis role="keyword">&gt;</emphasis>(__promote_preserving_unsigned(__x)
+222 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;+&#32;__promote_preserving_unsigned(__y));
+223 &#32;&#32;&#32;&#32;}
+224 
+225 &#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+226 &#32;&#32;&#32;&#32;_GLIBCXX_SIMD_INTRINSIC
+227 &#32;&#32;&#32;&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keyword">constexpr</emphasis>&#32;_Tp&#32;_S_minus(_Tp&#32;__x,&#32;_Tp&#32;__y)
+228 &#32;&#32;&#32;&#32;{
+229 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<emphasis role="keyword">static_cast&lt;</emphasis>_Tp<emphasis role="keyword">&gt;</emphasis>(__promote_preserving_unsigned(__x)
+230 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;-&#32;__promote_preserving_unsigned(__y));
+231 &#32;&#32;&#32;&#32;}
+232 
+233 &#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+234 &#32;&#32;&#32;&#32;_GLIBCXX_SIMD_INTRINSIC
+235 &#32;&#32;&#32;&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keyword">constexpr</emphasis>&#32;_Tp&#32;_S_multiplies(_Tp&#32;__x,&#32;_Tp&#32;__y)
+236 &#32;&#32;&#32;&#32;{
+237 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<emphasis role="keyword">static_cast&lt;</emphasis>_Tp<emphasis role="keyword">&gt;</emphasis>(__promote_preserving_unsigned(__x)
+238 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;*&#32;__promote_preserving_unsigned(__y));
+239 &#32;&#32;&#32;&#32;}
+240 
+241 &#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+242 &#32;&#32;&#32;&#32;_GLIBCXX_SIMD_INTRINSIC
+243 &#32;&#32;&#32;&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keyword">constexpr</emphasis>&#32;_Tp&#32;_S_divides(_Tp&#32;__x,&#32;_Tp&#32;__y)
+244 &#32;&#32;&#32;&#32;{
+245 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<emphasis role="keyword">static_cast&lt;</emphasis>_Tp<emphasis role="keyword">&gt;</emphasis>(__promote_preserving_unsigned(__x)
+246 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;/&#32;__promote_preserving_unsigned(__y));
+247 &#32;&#32;&#32;&#32;}
+248 
+249 &#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+250 &#32;&#32;&#32;&#32;_GLIBCXX_SIMD_INTRINSIC
+251 &#32;&#32;&#32;&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keyword">constexpr</emphasis>&#32;_Tp&#32;_S_modulus(_Tp&#32;__x,&#32;_Tp&#32;__y)
+252 &#32;&#32;&#32;&#32;{
+253 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<emphasis role="keyword">static_cast&lt;</emphasis>_Tp<emphasis role="keyword">&gt;</emphasis>(__promote_preserving_unsigned(__x)
+254 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;%&#32;__promote_preserving_unsigned(__y));
+255 &#32;&#32;&#32;&#32;}
+256 
+257 &#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+258 &#32;&#32;&#32;&#32;_GLIBCXX_SIMD_INTRINSIC
+259 &#32;&#32;&#32;&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keyword">constexpr</emphasis>&#32;_Tp&#32;_S_bit_and(_Tp&#32;__x,&#32;_Tp&#32;__y)
+260 &#32;&#32;&#32;&#32;{
+261 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;<emphasis role="keyword">constexpr</emphasis>&#32;(is_floating_point_v&lt;_Tp&gt;)
+262 &#32;&#32;&#32;&#32;{
+263 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">using&#32;</emphasis>_Ip&#32;=&#32;__int_for_sizeof_t&lt;_Tp&gt;;
+264 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__bit_cast&lt;_Tp&gt;(__bit_cast&lt;_Ip&gt;(__x)&#32;&amp;&#32;__bit_cast&lt;_Ip&gt;(__y));
+265 &#32;&#32;&#32;&#32;}
+266 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>
+267 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<emphasis role="keyword">static_cast&lt;</emphasis>_Tp<emphasis role="keyword">&gt;</emphasis>(__promote_preserving_unsigned(__x)
+268 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&amp;&#32;__promote_preserving_unsigned(__y));
+269 &#32;&#32;&#32;&#32;}
+270 
+271 &#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+272 &#32;&#32;&#32;&#32;_GLIBCXX_SIMD_INTRINSIC
+273 &#32;&#32;&#32;&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keyword">constexpr</emphasis>&#32;_Tp&#32;_S_bit_or(_Tp&#32;__x,&#32;_Tp&#32;__y)
+274 &#32;&#32;&#32;&#32;{
+275 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;<emphasis role="keyword">constexpr</emphasis>&#32;(is_floating_point_v&lt;_Tp&gt;)
+276 &#32;&#32;&#32;&#32;{
+277 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">using&#32;</emphasis>_Ip&#32;=&#32;__int_for_sizeof_t&lt;_Tp&gt;;
+278 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__bit_cast&lt;_Tp&gt;(__bit_cast&lt;_Ip&gt;(__x)&#32;|&#32;__bit_cast&lt;_Ip&gt;(__y));
+279 &#32;&#32;&#32;&#32;}
+280 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>
+281 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<emphasis role="keyword">static_cast&lt;</emphasis>_Tp<emphasis role="keyword">&gt;</emphasis>(__promote_preserving_unsigned(__x)
+282 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;|&#32;__promote_preserving_unsigned(__y));
+283 &#32;&#32;&#32;&#32;}
+284 
+285 &#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+286 &#32;&#32;&#32;&#32;_GLIBCXX_SIMD_INTRINSIC
+287 &#32;&#32;&#32;&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keyword">constexpr</emphasis>&#32;_Tp&#32;_S_bit_xor(_Tp&#32;__x,&#32;_Tp&#32;__y)
+288 &#32;&#32;&#32;&#32;{
+289 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;<emphasis role="keyword">constexpr</emphasis>&#32;(is_floating_point_v&lt;_Tp&gt;)
+290 &#32;&#32;&#32;&#32;{
+291 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">using&#32;</emphasis>_Ip&#32;=&#32;__int_for_sizeof_t&lt;_Tp&gt;;
+292 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__bit_cast&lt;_Tp&gt;(__bit_cast&lt;_Ip&gt;(__x)&#32;^&#32;__bit_cast&lt;_Ip&gt;(__y));
+293 &#32;&#32;&#32;&#32;}
+294 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>
+295 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<emphasis role="keyword">static_cast&lt;</emphasis>_Tp<emphasis role="keyword">&gt;</emphasis>(__promote_preserving_unsigned(__x)
+296 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;^&#32;__promote_preserving_unsigned(__y));
+297 &#32;&#32;&#32;&#32;}
+298 
+299 &#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+300 &#32;&#32;&#32;&#32;_GLIBCXX_SIMD_INTRINSIC
+301 &#32;&#32;&#32;&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keyword">constexpr</emphasis>&#32;_Tp&#32;_S_bit_shift_left(_Tp&#32;__x,&#32;<emphasis role="keywordtype">int</emphasis>&#32;__y)
+302 &#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;<emphasis role="keyword">static_cast&lt;</emphasis>_Tp<emphasis role="keyword">&gt;</emphasis>(__promote_preserving_unsigned(__x)&#32;&lt;&lt;&#32;__y);&#32;}
+303 
+304 &#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+305 &#32;&#32;&#32;&#32;_GLIBCXX_SIMD_INTRINSIC
+306 &#32;&#32;&#32;&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keyword">constexpr</emphasis>&#32;_Tp&#32;_S_bit_shift_right(_Tp&#32;__x,&#32;<emphasis role="keywordtype">int</emphasis>&#32;__y)
+307 &#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;<emphasis role="keyword">static_cast&lt;</emphasis>_Tp<emphasis role="keyword">&gt;</emphasis>(__promote_preserving_unsigned(__x)&#32;&gt;&gt;&#32;__y);&#32;}
+308 
+309 &#32;&#32;<emphasis role="comment">//&#32;math&#32;{{{2</emphasis>
+310 &#32;&#32;<emphasis role="comment">//&#32;frexp,&#32;modf&#32;and&#32;copysign&#32;implemented&#32;in&#32;simd_math.h</emphasis>
+311 &#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+312 &#32;&#32;&#32;&#32;<emphasis role="keyword">using&#32;</emphasis>_ST&#32;=&#32;_SimdTuple&lt;_Tp,&#32;simd_abi::scalar&gt;;
+313 
+314 &#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+315 &#32;&#32;&#32;&#32;_GLIBCXX_SIMD_INTRINSIC&#32;<emphasis role="keyword">static</emphasis>&#32;_Tp&#32;_S_acos(_Tp&#32;__x)
+316 &#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;std::acos(__x);&#32;}
+317 
+318 &#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+319 &#32;&#32;&#32;&#32;_GLIBCXX_SIMD_INTRINSIC&#32;<emphasis role="keyword">static</emphasis>&#32;_Tp&#32;_S_asin(_Tp&#32;__x)
+320 &#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;std::asin(__x);&#32;}
+321 
+322 &#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+323 &#32;&#32;&#32;&#32;_GLIBCXX_SIMD_INTRINSIC&#32;<emphasis role="keyword">static</emphasis>&#32;_Tp&#32;_S_atan(_Tp&#32;__x)
+324 &#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;std::atan(__x);&#32;}
+325 
+326 &#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+327 &#32;&#32;&#32;&#32;_GLIBCXX_SIMD_INTRINSIC&#32;<emphasis role="keyword">static</emphasis>&#32;_Tp&#32;_S_cos(_Tp&#32;__x)
+328 &#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;std::cos(__x);&#32;}
+329 
+330 &#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+331 &#32;&#32;&#32;&#32;_GLIBCXX_SIMD_INTRINSIC&#32;<emphasis role="keyword">static</emphasis>&#32;_Tp&#32;_S_sin(_Tp&#32;__x)
+332 &#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;std::sin(__x);&#32;}
+333 
+334 &#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+335 &#32;&#32;&#32;&#32;_GLIBCXX_SIMD_INTRINSIC&#32;<emphasis role="keyword">static</emphasis>&#32;_Tp&#32;_S_tan(_Tp&#32;__x)
+336 &#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;std::tan(__x);&#32;}
+337 
+338 &#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+339 &#32;&#32;&#32;&#32;_GLIBCXX_SIMD_INTRINSIC&#32;<emphasis role="keyword">static</emphasis>&#32;_Tp&#32;_S_acosh(_Tp&#32;__x)
+340 &#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;std::acosh(__x);&#32;}
+341 
+342 &#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+343 &#32;&#32;&#32;&#32;_GLIBCXX_SIMD_INTRINSIC&#32;<emphasis role="keyword">static</emphasis>&#32;_Tp&#32;_S_asinh(_Tp&#32;__x)
+344 &#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;std::asinh(__x);&#32;}
+345 
+346 &#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+347 &#32;&#32;&#32;&#32;_GLIBCXX_SIMD_INTRINSIC&#32;<emphasis role="keyword">static</emphasis>&#32;_Tp&#32;_S_atanh(_Tp&#32;__x)
+348 &#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;std::atanh(__x);&#32;}
+349 
+350 &#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+351 &#32;&#32;&#32;&#32;_GLIBCXX_SIMD_INTRINSIC&#32;<emphasis role="keyword">static</emphasis>&#32;_Tp&#32;_S_cosh(_Tp&#32;__x)
+352 &#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;std::cosh(__x);&#32;}
+353 
+354 &#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+355 &#32;&#32;&#32;&#32;_GLIBCXX_SIMD_INTRINSIC&#32;<emphasis role="keyword">static</emphasis>&#32;_Tp&#32;_S_sinh(_Tp&#32;__x)
+356 &#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;std::sinh(__x);&#32;}
+357 
+358 &#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+359 &#32;&#32;&#32;&#32;_GLIBCXX_SIMD_INTRINSIC&#32;<emphasis role="keyword">static</emphasis>&#32;_Tp&#32;_S_tanh(_Tp&#32;__x)
+360 &#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;std::tanh(__x);&#32;}
+361 
+362 &#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+363 &#32;&#32;&#32;&#32;_GLIBCXX_SIMD_INTRINSIC&#32;<emphasis role="keyword">static</emphasis>&#32;_Tp&#32;_S_atan2(_Tp&#32;__x,&#32;_Tp&#32;__y)
+364 &#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;std::atan2(__x,&#32;__y);&#32;}
+365 
+366 &#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+367 &#32;&#32;&#32;&#32;_GLIBCXX_SIMD_INTRINSIC&#32;<emphasis role="keyword">static</emphasis>&#32;_Tp&#32;_S_exp(_Tp&#32;__x)
+368 &#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;std::exp(__x);&#32;}
+369 
+370 &#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+371 &#32;&#32;&#32;&#32;_GLIBCXX_SIMD_INTRINSIC&#32;<emphasis role="keyword">static</emphasis>&#32;_Tp&#32;_S_exp2(_Tp&#32;__x)
+372 &#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;std::exp2(__x);&#32;}
+373 
+374 &#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+375 &#32;&#32;&#32;&#32;_GLIBCXX_SIMD_INTRINSIC&#32;<emphasis role="keyword">static</emphasis>&#32;_Tp&#32;_S_expm1(_Tp&#32;__x)
+376 &#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;std::expm1(__x);&#32;}
+377 
+378 &#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+379 &#32;&#32;&#32;&#32;_GLIBCXX_SIMD_INTRINSIC&#32;<emphasis role="keyword">static</emphasis>&#32;_Tp&#32;_S_log(_Tp&#32;__x)
+380 &#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;std::log(__x);&#32;}
+381 
+382 &#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+383 &#32;&#32;&#32;&#32;_GLIBCXX_SIMD_INTRINSIC&#32;<emphasis role="keyword">static</emphasis>&#32;_Tp&#32;_S_log10(_Tp&#32;__x)
+384 &#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;std::log10(__x);&#32;}
+385 
+386 &#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+387 &#32;&#32;&#32;&#32;_GLIBCXX_SIMD_INTRINSIC&#32;<emphasis role="keyword">static</emphasis>&#32;_Tp&#32;_S_log1p(_Tp&#32;__x)
+388 &#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;std::log1p(__x);&#32;}
+389 
+390 &#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+391 &#32;&#32;&#32;&#32;_GLIBCXX_SIMD_INTRINSIC&#32;<emphasis role="keyword">static</emphasis>&#32;_Tp&#32;_S_log2(_Tp&#32;__x)
+392 &#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;std::log2(__x);&#32;}
+393 
+394 &#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+395 &#32;&#32;&#32;&#32;_GLIBCXX_SIMD_INTRINSIC&#32;<emphasis role="keyword">static</emphasis>&#32;_Tp&#32;_S_logb(_Tp&#32;__x)
+396 &#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;std::logb(__x);&#32;}
+397 
+398 &#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+399 &#32;&#32;&#32;&#32;_GLIBCXX_SIMD_INTRINSIC&#32;<emphasis role="keyword">static</emphasis>&#32;_ST&lt;int&gt;&#32;_S_ilogb(_Tp&#32;__x)
+400 &#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;{std::ilogb(__x)};&#32;}
+401 
+402 &#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+403 &#32;&#32;&#32;&#32;_GLIBCXX_SIMD_INTRINSIC&#32;<emphasis role="keyword">static</emphasis>&#32;_Tp&#32;_S_pow(_Tp&#32;__x,&#32;_Tp&#32;__y)
+404 &#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;std::pow(__x,&#32;__y);&#32;}
+405 
+406 &#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+407 &#32;&#32;&#32;&#32;_GLIBCXX_SIMD_INTRINSIC&#32;<emphasis role="keyword">static</emphasis>&#32;_Tp&#32;_S_abs(_Tp&#32;__x)
+408 &#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;std::abs(__x);&#32;}
+409 
+410 &#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+411 &#32;&#32;&#32;&#32;_GLIBCXX_SIMD_INTRINSIC&#32;<emphasis role="keyword">static</emphasis>&#32;_Tp&#32;_S_fabs(_Tp&#32;__x)
+412 &#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;std::fabs(__x);&#32;}
+413 
+414 &#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+415 &#32;&#32;&#32;&#32;_GLIBCXX_SIMD_INTRINSIC&#32;<emphasis role="keyword">static</emphasis>&#32;_Tp&#32;_S_sqrt(_Tp&#32;__x)
+416 &#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;std::sqrt(__x);&#32;}
+417 
+418 &#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+419 &#32;&#32;&#32;&#32;_GLIBCXX_SIMD_INTRINSIC&#32;<emphasis role="keyword">static</emphasis>&#32;_Tp&#32;_S_cbrt(_Tp&#32;__x)
+420 &#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;std::cbrt(__x);&#32;}
+421 
+422 &#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+423 &#32;&#32;&#32;&#32;_GLIBCXX_SIMD_INTRINSIC&#32;<emphasis role="keyword">static</emphasis>&#32;_Tp&#32;_S_erf(_Tp&#32;__x)
+424 &#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;std::erf(__x);&#32;}
+425 
+426 &#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+427 &#32;&#32;&#32;&#32;_GLIBCXX_SIMD_INTRINSIC&#32;<emphasis role="keyword">static</emphasis>&#32;_Tp&#32;_S_erfc(_Tp&#32;__x)
+428 &#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;std::erfc(__x);&#32;}
+429 
+430 &#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+431 &#32;&#32;&#32;&#32;_GLIBCXX_SIMD_INTRINSIC&#32;<emphasis role="keyword">static</emphasis>&#32;_Tp&#32;_S_lgamma(_Tp&#32;__x)
+432 &#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;std::lgamma(__x);&#32;}
+433 
+434 &#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+435 &#32;&#32;&#32;&#32;_GLIBCXX_SIMD_INTRINSIC&#32;<emphasis role="keyword">static</emphasis>&#32;_Tp&#32;_S_tgamma(_Tp&#32;__x)
+436 &#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;std::tgamma(__x);&#32;}
+437 
+438 &#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+439 &#32;&#32;&#32;&#32;_GLIBCXX_SIMD_INTRINSIC&#32;<emphasis role="keyword">static</emphasis>&#32;_Tp&#32;_S_trunc(_Tp&#32;__x)
+440 &#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;std::trunc(__x);&#32;}
+441 
+442 &#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+443 &#32;&#32;&#32;&#32;_GLIBCXX_SIMD_INTRINSIC&#32;<emphasis role="keyword">static</emphasis>&#32;_Tp&#32;_S_floor(_Tp&#32;__x)
+444 &#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;std::floor(__x);&#32;}
+445 
+446 &#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+447 &#32;&#32;&#32;&#32;_GLIBCXX_SIMD_INTRINSIC&#32;<emphasis role="keyword">static</emphasis>&#32;_Tp&#32;_S_ceil(_Tp&#32;__x)
+448 &#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;std::ceil(__x);&#32;}
+449 
+450 &#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+451 &#32;&#32;&#32;&#32;_GLIBCXX_SIMD_INTRINSIC&#32;<emphasis role="keyword">static</emphasis>&#32;_Tp&#32;_S_nearbyint(_Tp&#32;__x)
+452 &#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;std::nearbyint(__x);&#32;}
+453 
+454 &#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+455 &#32;&#32;&#32;&#32;_GLIBCXX_SIMD_INTRINSIC&#32;<emphasis role="keyword">static</emphasis>&#32;_Tp&#32;_S_rint(_Tp&#32;__x)
+456 &#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;std::rint(__x);&#32;}
+457 
+458 &#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+459 &#32;&#32;&#32;&#32;_GLIBCXX_SIMD_INTRINSIC&#32;<emphasis role="keyword">static</emphasis>&#32;_ST&lt;long&gt;&#32;_S_lrint(_Tp&#32;__x)
+460 &#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;{std::lrint(__x)};&#32;}
+461 
+462 &#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+463 &#32;&#32;&#32;&#32;_GLIBCXX_SIMD_INTRINSIC&#32;<emphasis role="keyword">static</emphasis>&#32;_ST&lt;long&#32;long&gt;&#32;_S_llrint(_Tp&#32;__x)
+464 &#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;{std::llrint(__x)};&#32;}
+465 
+466 &#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+467 &#32;&#32;&#32;&#32;_GLIBCXX_SIMD_INTRINSIC&#32;<emphasis role="keyword">static</emphasis>&#32;_Tp&#32;_S_round(_Tp&#32;__x)
+468 &#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;std::round(__x);&#32;}
+469 
+470 &#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+471 &#32;&#32;&#32;&#32;_GLIBCXX_SIMD_INTRINSIC&#32;<emphasis role="keyword">static</emphasis>&#32;_ST&lt;long&gt;&#32;_S_lround(_Tp&#32;__x)
+472 &#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;{std::lround(__x)};&#32;}
+473 
+474 &#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+475 &#32;&#32;&#32;&#32;_GLIBCXX_SIMD_INTRINSIC&#32;<emphasis role="keyword">static</emphasis>&#32;_ST&lt;long&#32;long&gt;&#32;_S_llround(_Tp&#32;__x)
+476 &#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;{std::llround(__x)};&#32;}
+477 
+478 &#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+479 &#32;&#32;&#32;&#32;_GLIBCXX_SIMD_INTRINSIC&#32;<emphasis role="keyword">static</emphasis>&#32;_Tp&#32;_S_ldexp(_Tp&#32;__x,&#32;_ST&lt;int&gt;&#32;__y)
+480 &#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;std::ldexp(__x,&#32;__y.first);&#32;}
+481 
+482 &#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+483 &#32;&#32;&#32;&#32;_GLIBCXX_SIMD_INTRINSIC&#32;<emphasis role="keyword">static</emphasis>&#32;_Tp&#32;_S_scalbn(_Tp&#32;__x,&#32;_ST&lt;int&gt;&#32;__y)
+484 &#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;std::scalbn(__x,&#32;__y.first);&#32;}
+485 
+486 &#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+487 &#32;&#32;&#32;&#32;_GLIBCXX_SIMD_INTRINSIC&#32;<emphasis role="keyword">static</emphasis>&#32;_Tp&#32;_S_scalbln(_Tp&#32;__x,&#32;_ST&lt;long&gt;&#32;__y)
+488 &#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;std::scalbln(__x,&#32;__y.first);&#32;}
+489 
+490 &#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+491 &#32;&#32;&#32;&#32;_GLIBCXX_SIMD_INTRINSIC&#32;<emphasis role="keyword">static</emphasis>&#32;_Tp&#32;_S_fmod(_Tp&#32;__x,&#32;_Tp&#32;__y)
+492 &#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;std::fmod(__x,&#32;__y);&#32;}
+493 
+494 &#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+495 &#32;&#32;&#32;&#32;_GLIBCXX_SIMD_INTRINSIC&#32;<emphasis role="keyword">static</emphasis>&#32;_Tp&#32;_S_remainder(_Tp&#32;__x,&#32;_Tp&#32;__y)
+496 &#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;std::remainder(__x,&#32;__y);&#32;}
+497 
+498 &#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+499 &#32;&#32;&#32;&#32;_GLIBCXX_SIMD_INTRINSIC&#32;<emphasis role="keyword">static</emphasis>&#32;_Tp&#32;_S_nextafter(_Tp&#32;__x,&#32;_Tp&#32;__y)
+500 &#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;std::nextafter(__x,&#32;__y);&#32;}
+501 
+502 &#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+503 &#32;&#32;&#32;&#32;_GLIBCXX_SIMD_INTRINSIC&#32;<emphasis role="keyword">static</emphasis>&#32;_Tp&#32;_S_fdim(_Tp&#32;__x,&#32;_Tp&#32;__y)
+504 &#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;std::fdim(__x,&#32;__y);&#32;}
+505 
+506 &#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+507 &#32;&#32;&#32;&#32;_GLIBCXX_SIMD_INTRINSIC&#32;<emphasis role="keyword">static</emphasis>&#32;_Tp&#32;_S_fmax(_Tp&#32;__x,&#32;_Tp&#32;__y)
+508 &#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;std::fmax(__x,&#32;__y);&#32;}
+509 
+510 &#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+511 &#32;&#32;&#32;&#32;_GLIBCXX_SIMD_INTRINSIC&#32;<emphasis role="keyword">static</emphasis>&#32;_Tp&#32;_S_fmin(_Tp&#32;__x,&#32;_Tp&#32;__y)
+512 &#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;std::fmin(__x,&#32;__y);&#32;}
+513 
+514 &#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+515 &#32;&#32;&#32;&#32;_GLIBCXX_SIMD_INTRINSIC&#32;<emphasis role="keyword">static</emphasis>&#32;_Tp&#32;_S_fma(_Tp&#32;__x,&#32;_Tp&#32;__y,&#32;_Tp&#32;__z)
+516 &#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;std::fma(__x,&#32;__y,&#32;__z);&#32;}
+517 
+518 &#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+519 &#32;&#32;&#32;&#32;_GLIBCXX_SIMD_INTRINSIC&#32;<emphasis role="keyword">static</emphasis>&#32;_Tp&#32;_S_remquo(_Tp&#32;__x,&#32;_Tp&#32;__y,&#32;_ST&lt;int&gt;*&#32;__z)
+520 &#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;std::remquo(__x,&#32;__y,&#32;&amp;__z-&gt;first);&#32;}
+521 
+522 &#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+523 &#32;&#32;&#32;&#32;_GLIBCXX_SIMD_INTRINSIC&#32;<emphasis role="keyword">constexpr</emphasis>&#32;<emphasis role="keyword">static</emphasis>&#32;_ST&lt;int&gt;&#32;_S_fpclassify(_Tp&#32;__x)
+524 &#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;{std::fpclassify(__x)};&#32;}
+525 
+526 &#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+527 &#32;&#32;&#32;&#32;_GLIBCXX_SIMD_INTRINSIC&#32;<emphasis role="keyword">constexpr</emphasis>&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>&#32;_S_isfinite(_Tp&#32;__x)
+528 &#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;std::isfinite(__x);&#32;}
+529 
+530 &#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+531 &#32;&#32;&#32;&#32;_GLIBCXX_SIMD_INTRINSIC&#32;<emphasis role="keyword">constexpr</emphasis>&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>&#32;_S_isinf(_Tp&#32;__x)
+532 &#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;std::isinf(__x);&#32;}
+533 
+534 &#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+535 &#32;&#32;&#32;&#32;_GLIBCXX_SIMD_INTRINSIC&#32;<emphasis role="keyword">constexpr</emphasis>&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>&#32;_S_isnan(_Tp&#32;__x)
+536 &#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;std::isnan(__x);&#32;}
+537 
+538 &#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+539 &#32;&#32;&#32;&#32;_GLIBCXX_SIMD_INTRINSIC&#32;<emphasis role="keyword">constexpr</emphasis>&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>&#32;_S_isnormal(_Tp&#32;__x)
+540 &#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;std::isnormal(__x);&#32;}
+541 
+542 &#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+543 &#32;&#32;&#32;&#32;_GLIBCXX_SIMD_INTRINSIC&#32;<emphasis role="keyword">constexpr</emphasis>&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>&#32;_S_signbit(_Tp&#32;__x)
+544 &#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;std::signbit(__x);&#32;}
+545 
+546 &#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+547 &#32;&#32;&#32;&#32;_GLIBCXX_SIMD_INTRINSIC&#32;<emphasis role="keyword">constexpr</emphasis>&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>&#32;_S_isgreater(_Tp&#32;__x,&#32;_Tp&#32;__y)
+548 &#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;std::isgreater(__x,&#32;__y);&#32;}
+549 
+550 &#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+551 &#32;&#32;&#32;&#32;_GLIBCXX_SIMD_INTRINSIC&#32;<emphasis role="keyword">constexpr</emphasis>&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>&#32;_S_isgreaterequal(_Tp&#32;__x,
+552 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_Tp&#32;__y)
+553 &#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;std::isgreaterequal(__x,&#32;__y);&#32;}
+554 
+555 &#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+556 &#32;&#32;&#32;&#32;_GLIBCXX_SIMD_INTRINSIC&#32;<emphasis role="keyword">constexpr</emphasis>&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>&#32;_S_isless(_Tp&#32;__x,&#32;_Tp&#32;__y)
+557 &#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;std::isless(__x,&#32;__y);&#32;}
+558 
+559 &#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+560 &#32;&#32;&#32;&#32;_GLIBCXX_SIMD_INTRINSIC&#32;<emphasis role="keyword">constexpr</emphasis>&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>&#32;_S_islessequal(_Tp&#32;__x,&#32;_Tp&#32;__y)
+561 &#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;std::islessequal(__x,&#32;__y);&#32;}
+562 
+563 &#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+564 &#32;&#32;&#32;&#32;_GLIBCXX_SIMD_INTRINSIC&#32;<emphasis role="keyword">constexpr</emphasis>&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>&#32;_S_islessgreater(_Tp&#32;__x,
+565 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_Tp&#32;__y)
+566 &#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;std::islessgreater(__x,&#32;__y);&#32;}
+567 
+568 &#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+569 &#32;&#32;&#32;&#32;_GLIBCXX_SIMD_INTRINSIC&#32;<emphasis role="keyword">constexpr</emphasis>&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>&#32;_S_isunordered(_Tp&#32;__x,
+570 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_Tp&#32;__y)
+571 &#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;std::isunordered(__x,&#32;__y);&#32;}
+572 
+573 &#32;&#32;<emphasis role="comment">//&#32;_S_increment&#32;&amp;&#32;_S_decrement{{{2</emphasis>
+574 &#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+575 &#32;&#32;&#32;&#32;_GLIBCXX_SIMD_INTRINSIC
+576 &#32;&#32;&#32;&#32;<emphasis role="keyword">constexpr</emphasis>&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>&#32;_S_increment(_Tp&amp;&#32;__x)
+577 &#32;&#32;&#32;&#32;{&#32;++__x;&#32;}
+578 
+579 &#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+580 &#32;&#32;&#32;&#32;_GLIBCXX_SIMD_INTRINSIC
+581 &#32;&#32;&#32;&#32;<emphasis role="keyword">constexpr</emphasis>&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>&#32;_S_decrement(_Tp&amp;&#32;__x)
+582 &#32;&#32;&#32;&#32;{&#32;--__x;&#32;}
+583 
+584 
+585 &#32;&#32;<emphasis role="comment">//&#32;compares&#32;{{{2</emphasis>
+586 &#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+587 &#32;&#32;&#32;&#32;_GLIBCXX_SIMD_INTRINSIC&#32;<emphasis role="keyword">constexpr</emphasis>&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>&#32;_S_equal_to(_Tp&#32;__x,&#32;_Tp&#32;__y)
+588 &#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;__x&#32;==&#32;__y;&#32;}
+589 
+590 &#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+591 &#32;&#32;&#32;&#32;_GLIBCXX_SIMD_INTRINSIC&#32;<emphasis role="keyword">constexpr</emphasis>&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>&#32;_S_not_equal_to(_Tp&#32;__x,
+592 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_Tp&#32;__y)
+593 &#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;__x&#32;!=&#32;__y;&#32;}
+594 
+595 &#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+596 &#32;&#32;&#32;&#32;_GLIBCXX_SIMD_INTRINSIC&#32;<emphasis role="keyword">constexpr</emphasis>&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>&#32;_S_less(_Tp&#32;__x,&#32;_Tp&#32;__y)
+597 &#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;__x&#32;&lt;&#32;__y;&#32;}
+598 
+599 &#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+600 &#32;&#32;&#32;&#32;_GLIBCXX_SIMD_INTRINSIC&#32;<emphasis role="keyword">constexpr</emphasis>&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>&#32;_S_less_equal(_Tp&#32;__x,
+601 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_Tp&#32;__y)
+602 &#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;__x&#32;&lt;=&#32;__y;&#32;}
+603 
+604 &#32;&#32;<emphasis role="comment">//&#32;smart_reference&#32;access&#32;{{{2</emphasis>
+605 &#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Up&gt;
+606 &#32;&#32;&#32;&#32;_GLIBCXX_SIMD_INTRINSIC
+607 &#32;&#32;&#32;&#32;<emphasis role="keyword">constexpr</emphasis>&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>&#32;_S_set(_Tp&amp;&#32;__v,&#32;[[maybe_unused]]&#32;<emphasis role="keywordtype">int</emphasis>&#32;__i,
+608 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_Up&amp;&amp;&#32;__x)&#32;<emphasis role="keyword">noexcept</emphasis>
+609 &#32;&#32;&#32;&#32;{
+610 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_lib_2include_2c_09_09_2debug_2assertions_8h_1aa2bfb4e74c7be93673913edf15f85504">_GLIBCXX_DEBUG_ASSERT</link>(__i&#32;==&#32;0);
+611 &#32;&#32;&#32;&#32;&#32;&#32;__v&#32;=&#32;<emphasis role="keyword">static_cast&lt;</emphasis>_Up&amp;&amp;<emphasis role="keyword">&gt;</emphasis>(__x);
+612 &#32;&#32;&#32;&#32;}
+613 
+614 &#32;&#32;<emphasis role="comment">//&#32;_S_masked_assign&#32;{{{2</emphasis>
+615 &#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+616 &#32;&#32;&#32;&#32;_GLIBCXX_SIMD_INTRINSIC&#32;<emphasis role="keyword">constexpr</emphasis>&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>
+617 &#32;&#32;&#32;&#32;_S_masked_assign(<emphasis role="keywordtype">bool</emphasis>&#32;__k,&#32;_Tp&amp;&#32;__lhs,&#32;_Tp&#32;__rhs)
+618 &#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__k)&#32;__lhs&#32;=&#32;__rhs;&#32;}
+619 
+620 &#32;&#32;<emphasis role="comment">//&#32;_S_masked_cassign&#32;{{{2</emphasis>
+621 &#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">typename</emphasis>&#32;_Op,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+622 &#32;&#32;&#32;&#32;_GLIBCXX_SIMD_INTRINSIC&#32;<emphasis role="keyword">constexpr</emphasis>&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>
+623 &#32;&#32;&#32;&#32;_S_masked_cassign(<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>&#32;__k,&#32;_Tp&amp;&#32;__lhs,&#32;<emphasis role="keyword">const</emphasis>&#32;_Tp&#32;__rhs,&#32;_Op&#32;__op)
+624 &#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__k)&#32;__lhs&#32;=&#32;__op(_SimdImplScalar{},&#32;__lhs,&#32;__rhs);&#32;}
+625 
+626 &#32;&#32;<emphasis role="comment">//&#32;_S_masked_unary&#32;{{{2</emphasis>
+627 &#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">typename</emphasis>&gt;&#32;<emphasis role="keyword">class&#32;</emphasis>_Op,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+628 &#32;&#32;&#32;&#32;_GLIBCXX_SIMD_INTRINSIC&#32;<emphasis role="keyword">constexpr</emphasis>&#32;<emphasis role="keyword">static</emphasis>&#32;_Tp&#32;_S_masked_unary(<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>&#32;__k,
+629 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;_Tp&#32;__v)
+630 &#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;<emphasis role="keyword">static_cast&lt;</emphasis>_Tp<emphasis role="keyword">&gt;</emphasis>(__k&#32;?&#32;_Op&lt;_Tp&gt;{}(__v)&#32;:&#32;__v);&#32;}
+631 
+632 &#32;&#32;<emphasis role="comment">//&#32;}}}2</emphasis>
+633 };
+634 
+635 <emphasis role="comment">//&#32;}}}</emphasis>
+636 <emphasis role="comment">//&#32;_MaskImplScalar&#32;{{{</emphasis>
+637 <emphasis role="keyword">struct&#32;</emphasis>_MaskImplScalar
+638 {
+639 &#32;&#32;<emphasis role="comment">//&#32;member&#32;types&#32;{{{</emphasis>
+640 &#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+641 &#32;&#32;&#32;&#32;<emphasis role="keyword">using&#32;</emphasis>_TypeTag&#32;=&#32;_Tp*;
+642 
+643 &#32;&#32;<emphasis role="comment">//&#32;}}}</emphasis>
+644 &#32;&#32;<emphasis role="comment">//&#32;_S_broadcast&#32;{{{</emphasis>
+645 &#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">typename</emphasis>&gt;
+646 &#32;&#32;&#32;&#32;_GLIBCXX_SIMD_INTRINSIC&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keyword">constexpr</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>&#32;_S_broadcast(<emphasis role="keywordtype">bool</emphasis>&#32;__x)
+647 &#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;__x;&#32;}
+648 
+649 &#32;&#32;<emphasis role="comment">//&#32;}}}</emphasis>
+650 &#32;&#32;<emphasis role="comment">//&#32;_S_load&#32;{{{</emphasis>
+651 &#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">typename</emphasis>&gt;
+652 &#32;&#32;&#32;&#32;_GLIBCXX_SIMD_INTRINSIC&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keyword">constexpr</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>&#32;_S_load(<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>*&#32;__mem)
+653 &#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;__mem[0];&#32;}
+654 
+655 &#32;&#32;<emphasis role="comment">//&#32;}}}</emphasis>
+656 &#32;&#32;<emphasis role="comment">//&#32;_S_to_bits&#32;{{{</emphasis>
+657 &#32;&#32;_GLIBCXX_SIMD_INTRINSIC&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keyword">constexpr</emphasis>&#32;_SanitizedBitMask&lt;1&gt;
+658 &#32;&#32;_S_to_bits(<emphasis role="keywordtype">bool</emphasis>&#32;__x)
+659 &#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;__x;&#32;}
+660 
+661 &#32;&#32;<emphasis role="comment">//&#32;}}}</emphasis>
+662 &#32;&#32;<emphasis role="comment">//&#32;_S_convert&#32;{{{</emphasis>
+663 &#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">typename</emphasis>,&#32;<emphasis role="keywordtype">bool</emphasis>&#32;_Sanitized&gt;
+664 &#32;&#32;&#32;&#32;_GLIBCXX_SIMD_INTRINSIC&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keyword">constexpr</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>
+665 &#32;&#32;&#32;&#32;_S_convert(_BitMask&lt;1,&#32;_Sanitized&gt;&#32;__x)
+666 &#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;__x[0];&#32;}
+667 
+668 &#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">typename</emphasis>,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Up,&#32;<emphasis role="keyword">typename</emphasis>&#32;_UAbi&gt;
+669 &#32;&#32;&#32;&#32;_GLIBCXX_SIMD_INTRINSIC&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keyword">constexpr</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>
+670 &#32;&#32;&#32;&#32;_S_convert(simd_mask&lt;_Up,&#32;_UAbi&gt;&#32;__x)
+671 &#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;__x[0];&#32;}
+672 
+673 &#32;&#32;<emphasis role="comment">//&#32;}}}</emphasis>
+674 &#32;&#32;<emphasis role="comment">//&#32;_S_from_bitmask&#32;{{{2</emphasis>
+675 &#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+676 &#32;&#32;&#32;&#32;_GLIBCXX_SIMD_INTRINSIC&#32;<emphasis role="keyword">constexpr</emphasis>&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>
+677 &#32;&#32;&#32;&#32;_S_from_bitmask(_SanitizedBitMask&lt;1&gt;&#32;__bits,&#32;_TypeTag&lt;_Tp&gt;)&#32;<emphasis role="keyword">noexcept</emphasis>
+678 &#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;__bits[0];&#32;}
+679 
+680 &#32;&#32;<emphasis role="comment">//&#32;_S_masked_load&#32;{{{2</emphasis>
+681 &#32;&#32;_GLIBCXX_SIMD_INTRINSIC&#32;<emphasis role="keyword">constexpr</emphasis>&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>
+682 &#32;&#32;_S_masked_load(<emphasis role="keywordtype">bool</emphasis>&#32;__merge,&#32;<emphasis role="keywordtype">bool</emphasis>&#32;__mask,&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>*&#32;__mem)&#32;<emphasis role="keyword">noexcept</emphasis>
+683 &#32;&#32;{
+684 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__mask)
+685 &#32;&#32;&#32;&#32;&#32;&#32;__merge&#32;=&#32;__mem[0];
+686 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__merge;
+687 &#32;&#32;}
+688 
+689 &#32;&#32;<emphasis role="comment">//&#32;_S_store&#32;{{{2</emphasis>
+690 &#32;&#32;_GLIBCXX_SIMD_INTRINSIC&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>&#32;_S_store(<emphasis role="keywordtype">bool</emphasis>&#32;__v,&#32;<emphasis role="keywordtype">bool</emphasis>*&#32;__mem)&#32;<emphasis role="keyword">noexcept</emphasis>
+691 &#32;&#32;{&#32;__mem[0]&#32;=&#32;__v;&#32;}
+692 
+693 &#32;&#32;<emphasis role="comment">//&#32;_S_masked_store&#32;{{{2</emphasis>
+694 &#32;&#32;_GLIBCXX_SIMD_INTRINSIC&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>
+695 &#32;&#32;_S_masked_store(<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>&#32;__v,&#32;<emphasis role="keywordtype">bool</emphasis>*&#32;__mem,&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>&#32;__k)&#32;<emphasis role="keyword">noexcept</emphasis>
+696 &#32;&#32;{
+697 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__k)
+698 &#32;&#32;&#32;&#32;&#32;&#32;__mem[0]&#32;=&#32;__v;
+699 &#32;&#32;}
+700 
+701 &#32;&#32;<emphasis role="comment">//&#32;logical&#32;and&#32;bitwise&#32;operators&#32;{{{2</emphasis>
+702 &#32;&#32;_GLIBCXX_SIMD_INTRINSIC
+703 &#32;&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keyword">constexpr</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>&#32;_S_logical_and(<emphasis role="keywordtype">bool</emphasis>&#32;__x,&#32;<emphasis role="keywordtype">bool</emphasis>&#32;__y)
+704 &#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;__x&#32;&amp;&amp;&#32;__y;&#32;}
+705 
+706 &#32;&#32;_GLIBCXX_SIMD_INTRINSIC
+707 &#32;&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keyword">constexpr</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>&#32;_S_logical_or(<emphasis role="keywordtype">bool</emphasis>&#32;__x,&#32;<emphasis role="keywordtype">bool</emphasis>&#32;__y)
+708 &#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;__x&#32;||&#32;__y;&#32;}
+709 
+710 &#32;&#32;_GLIBCXX_SIMD_INTRINSIC
+711 &#32;&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keyword">constexpr</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>&#32;_S_bit_not(<emphasis role="keywordtype">bool</emphasis>&#32;__x)
+712 &#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;!__x;&#32;}
+713 
+714 &#32;&#32;_GLIBCXX_SIMD_INTRINSIC
+715 &#32;&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keyword">constexpr</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>&#32;_S_bit_and(<emphasis role="keywordtype">bool</emphasis>&#32;__x,&#32;<emphasis role="keywordtype">bool</emphasis>&#32;__y)
+716 &#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;__x&#32;&amp;&amp;&#32;__y;&#32;}
+717 
+718 &#32;&#32;_GLIBCXX_SIMD_INTRINSIC
+719 &#32;&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keyword">constexpr</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>&#32;_S_bit_or(<emphasis role="keywordtype">bool</emphasis>&#32;__x,&#32;<emphasis role="keywordtype">bool</emphasis>&#32;__y)
+720 &#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;__x&#32;||&#32;__y;&#32;}
+721 
+722 &#32;&#32;_GLIBCXX_SIMD_INTRINSIC
+723 &#32;&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keyword">constexpr</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>&#32;_S_bit_xor(<emphasis role="keywordtype">bool</emphasis>&#32;__x,&#32;<emphasis role="keywordtype">bool</emphasis>&#32;__y)
+724 &#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;__x&#32;!=&#32;__y;&#32;}
+725 
+726 &#32;&#32;<emphasis role="comment">//&#32;smart_reference&#32;access&#32;{{{2</emphasis>
+727 &#32;&#32;_GLIBCXX_SIMD_INTRINSIC
+728 &#32;&#32;<emphasis role="keyword">constexpr</emphasis>&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>&#32;_S_set(<emphasis role="keywordtype">bool</emphasis>&amp;&#32;__k,&#32;[[maybe_unused]]&#32;<emphasis role="keywordtype">int</emphasis>&#32;__i,
+729 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">bool</emphasis>&#32;__x)&#32;<emphasis role="keyword">noexcept</emphasis>
+730 &#32;&#32;{
+731 &#32;&#32;&#32;&#32;<link linkend="_lib_2include_2c_09_09_2debug_2assertions_8h_1aa2bfb4e74c7be93673913edf15f85504">_GLIBCXX_DEBUG_ASSERT</link>(__i&#32;==&#32;0);
+732 &#32;&#32;&#32;&#32;__k&#32;=&#32;__x;
+733 &#32;&#32;}
+734 
+735 &#32;&#32;<emphasis role="comment">//&#32;_S_masked_assign&#32;{{{2</emphasis>
+736 &#32;&#32;_GLIBCXX_SIMD_INTRINSIC&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>&#32;_S_masked_assign(<emphasis role="keywordtype">bool</emphasis>&#32;__k,&#32;<emphasis role="keywordtype">bool</emphasis>&amp;&#32;__lhs,
+737 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">bool</emphasis>&#32;__rhs)
+738 &#32;&#32;{
+739 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__k)
+740 &#32;&#32;&#32;&#32;&#32;&#32;__lhs&#32;=&#32;__rhs;
+741 &#32;&#32;}
+742 
+743 &#32;&#32;<emphasis role="comment">//&#32;}}}2</emphasis>
+744 &#32;&#32;<emphasis role="comment">//&#32;_S_all_of&#32;{{{</emphasis>
+745 &#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Abi&gt;
+746 &#32;&#32;&#32;&#32;_GLIBCXX_SIMD_INTRINSIC&#32;<emphasis role="keyword">constexpr</emphasis>&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>
+747 &#32;&#32;&#32;&#32;_S_all_of(simd_mask&lt;_Tp,&#32;_Abi&gt;&#32;__k)
+748 &#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;__k._M_data;&#32;}
+749 
+750 &#32;&#32;<emphasis role="comment">//&#32;}}}</emphasis>
+751 &#32;&#32;<emphasis role="comment">//&#32;_S_any_of&#32;{{{</emphasis>
+752 &#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Abi&gt;
+753 &#32;&#32;&#32;&#32;_GLIBCXX_SIMD_INTRINSIC&#32;<emphasis role="keyword">constexpr</emphasis>&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>
+754 &#32;&#32;&#32;&#32;_S_any_of(simd_mask&lt;_Tp,&#32;_Abi&gt;&#32;__k)
+755 &#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;__k._M_data;&#32;}
+756 
+757 &#32;&#32;<emphasis role="comment">//&#32;}}}</emphasis>
+758 &#32;&#32;<emphasis role="comment">//&#32;_S_none_of&#32;{{{</emphasis>
+759 &#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Abi&gt;
+760 &#32;&#32;&#32;&#32;_GLIBCXX_SIMD_INTRINSIC&#32;<emphasis role="keyword">constexpr</emphasis>&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>
+761 &#32;&#32;&#32;&#32;_S_none_of(simd_mask&lt;_Tp,&#32;_Abi&gt;&#32;__k)
+762 &#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;!__k._M_data;&#32;}
+763 
+764 &#32;&#32;<emphasis role="comment">//&#32;}}}</emphasis>
+765 &#32;&#32;<emphasis role="comment">//&#32;_S_some_of&#32;{{{</emphasis>
+766 &#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Abi&gt;
+767 &#32;&#32;&#32;&#32;_GLIBCXX_SIMD_INTRINSIC&#32;<emphasis role="keyword">constexpr</emphasis>&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>
+768 &#32;&#32;&#32;&#32;_S_some_of(simd_mask&lt;_Tp,&#32;_Abi&gt;)
+769 &#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;<emphasis role="keyword">false</emphasis>;&#32;}
+770 
+771 &#32;&#32;<emphasis role="comment">//&#32;}}}</emphasis>
+772 &#32;&#32;<emphasis role="comment">//&#32;_S_popcount&#32;{{{</emphasis>
+773 &#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Abi&gt;
+774 &#32;&#32;&#32;&#32;_GLIBCXX_SIMD_INTRINSIC&#32;<emphasis role="keyword">constexpr</emphasis>&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>
+775 &#32;&#32;&#32;&#32;_S_popcount(simd_mask&lt;_Tp,&#32;_Abi&gt;&#32;__k)
+776 &#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;__k._M_data;&#32;}
+777 
+778 &#32;&#32;<emphasis role="comment">//&#32;}}}</emphasis>
+779 &#32;&#32;<emphasis role="comment">//&#32;_S_find_first_set&#32;{{{</emphasis>
+780 &#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Abi&gt;
+781 &#32;&#32;&#32;&#32;_GLIBCXX_SIMD_INTRINSIC&#32;<emphasis role="keyword">constexpr</emphasis>&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>
+782 &#32;&#32;&#32;&#32;_S_find_first_set(simd_mask&lt;_Tp,&#32;_Abi&gt;)
+783 &#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;0;&#32;}
+784 
+785 &#32;&#32;<emphasis role="comment">//&#32;}}}</emphasis>
+786 &#32;&#32;<emphasis role="comment">//&#32;_S_find_last_set&#32;{{{</emphasis>
+787 &#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Abi&gt;
+788 &#32;&#32;&#32;&#32;_GLIBCXX_SIMD_INTRINSIC&#32;<emphasis role="keyword">constexpr</emphasis>&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>
+789 &#32;&#32;&#32;&#32;_S_find_last_set(simd_mask&lt;_Tp,&#32;_Abi&gt;)
+790 &#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;0;&#32;}
+791 
+792 &#32;&#32;<emphasis role="comment">//&#32;}}}</emphasis>
+793 };
+794 
+795 <emphasis role="comment">//&#32;}}}</emphasis>
+796 
+797 _GLIBCXX_SIMD_END_NAMESPACE
+798 <emphasis role="preprocessor">#endif&#32;</emphasis><emphasis role="comment">//&#32;__cplusplus&#32;&gt;=&#32;201703L</emphasis>
+799 <emphasis role="preprocessor">#endif&#32;</emphasis><emphasis role="comment">//&#32;_GLIBCXX_EXPERIMENTAL_SIMD_SCALAR_H_</emphasis>
+800 
+801 <emphasis role="comment">//&#32;vim:&#32;foldmethod=marker&#32;sw=2&#32;noet&#32;ts=8&#32;sts=2&#32;tw=80</emphasis>
+</programlisting></section>

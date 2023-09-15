@@ -1,0 +1,410 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<section xmlns="http://docbook.org/ns/docbook" version="5.0" xmlns:xlink="http://www.w3.org/1999/xlink" xml:id="_toml__formatter_8inl_source" xml:lang="en-US">
+<title>toml_formatter.inl</title>
+<indexterm><primary>C:/Users/HP/Documents/GitHub/Minero-Game/Classes/ConfigMan/lib/tomlplusplus-3.3.0/tomlplusplus-3.3.0/include/toml++/impl/toml_formatter.inl</primary></indexterm>
+Go to the documentation of this file.<programlisting linenumbering="unnumbered">1 <emphasis role="comment">//#&#32;This&#32;file&#32;is&#32;a&#32;part&#32;of&#32;toml++&#32;and&#32;is&#32;subject&#32;to&#32;the&#32;the&#32;terms&#32;of&#32;the&#32;MIT&#32;license.</emphasis>
+2 <emphasis role="comment">//#&#32;Copyright&#32;(c)&#32;Mark&#32;Gillard&#32;&lt;mark.gillard@outlook.com.au&gt;</emphasis>
+3 <emphasis role="comment">//#&#32;See&#32;https://github.com/marzer/tomlplusplus/blob/master/LICENSE&#32;for&#32;the&#32;full&#32;license&#32;text.</emphasis>
+4 <emphasis role="comment">//&#32;SPDX-License-Identifier:&#32;MIT</emphasis>
+5 <emphasis role="preprocessor">#pragma&#32;once</emphasis>
+6 
+7 <emphasis role="preprocessor">#include&#32;&quot;<link linkend="_preprocessor_8h">preprocessor.h</link>&quot;</emphasis>
+8 <emphasis role="comment">//#&#32;{{</emphasis>
+9 <emphasis role="preprocessor">#if&#32;!TOML_IMPLEMENTATION</emphasis>
+10 <emphasis role="preprocessor">#error&#32;This&#32;is&#32;an&#32;implementation-only&#32;header.</emphasis>
+11 <emphasis role="preprocessor">#endif</emphasis>
+12 <emphasis role="comment">//#&#32;}}</emphasis>
+13 <emphasis role="preprocessor">#if&#32;TOML_ENABLE_FORMATTERS</emphasis>
+14 
+15 <emphasis role="preprocessor">#include&#32;&quot;<link linkend="_toml__formatter_8h">toml_formatter.h</link>&quot;</emphasis>
+16 <emphasis role="preprocessor">#include&#32;&quot;<link linkend="_print__to__stream_8h">print_to_stream.h</link>&quot;</emphasis>
+17 <emphasis role="preprocessor">#include&#32;&quot;<link linkend="_value_8h">value.h</link>&quot;</emphasis>
+18 <emphasis role="preprocessor">#include&#32;&quot;<link linkend="_table_8h">table.h</link>&quot;</emphasis>
+19 <emphasis role="preprocessor">#include&#32;&quot;<link linkend="_array_8h">array.h</link>&quot;</emphasis>
+20 <emphasis role="preprocessor">#include&#32;&quot;<link linkend="_unicode_8h">unicode.h</link>&quot;</emphasis>
+21 <emphasis role="preprocessor">#include&#32;&quot;<link linkend="_header__start_8h">header_start.h</link>&quot;</emphasis>
+22 <link linkend="_toml__formatter_8inl_1a56df52d1a29373a87698fdc09a1c1c7a">TOML_DISABLE_ARITHMETIC_WARNINGS</link>;
+23 
+24 <link linkend="_toml__formatter_8inl_1a3e6bf84af897e30e783c8365170eb278">TOML_ANON_NAMESPACE_START</link>
+25 {
+26 &#32;&#32;&#32;&#32;<link linkend="_preprocessor_8h_1a31ffc2d7129c04c13914b97c0a6e8417">TOML_INTERNAL_LINKAGE</link>
+27 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;toml_formatter_count_inline_columns(<emphasis role="keyword">const</emphasis>&#32;node&amp;&#32;node,&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;line_wrap_cols)&#32;<emphasis role="keyword">noexcept</emphasis>
+28 &#32;&#32;&#32;&#32;{
+29 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">switch</emphasis>&#32;(node.type())
+30 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+31 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">case</emphasis>&#32;node_type::table:
+32 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+33 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">auto</emphasis>&amp;&#32;tbl&#32;=&#32;*<emphasis role="keyword">reinterpret_cast&lt;</emphasis><emphasis role="keyword">const&#32;</emphasis><link linkend="_classtable">table</link>*<emphasis role="keyword">&gt;</emphasis>(&amp;node);
+34 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(tbl.empty())
+35 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;2u;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;&quot;{}&quot;</emphasis>
+36 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;weight&#32;=&#32;3u;&#32;<emphasis role="comment">//&#32;&quot;{&#32;}&quot;</emphasis>
+37 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(<emphasis role="keyword">auto</emphasis>&amp;&amp;&#32;[k,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a14cfbe2fc2234f5504618905b69d1e06">v</link>]&#32;:&#32;tbl)
+38 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+39 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;weight&#32;+=&#32;k.length()&#32;+&#32;toml_formatter_count_inline_columns(<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a14cfbe2fc2234f5504618905b69d1e06">v</link>,&#32;line_wrap_cols)&#32;+&#32;2u;&#32;<emphasis role="comment">//&#32;+&#32;&#32;&quot;,&#32;&quot;</emphasis>
+40 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(weight&#32;&gt;=&#32;line_wrap_cols)
+41 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">break</emphasis>;
+42 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+43 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;weight;
+44 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+45 
+46 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">case</emphasis>&#32;node_type::array:
+47 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+48 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">auto</emphasis>&amp;&#32;arr&#32;=&#32;*<emphasis role="keyword">reinterpret_cast&lt;</emphasis><emphasis role="keyword">const&#32;</emphasis><link linkend="_classarray">array</link>*<emphasis role="keyword">&gt;</emphasis>(&amp;node);
+49 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(arr.empty())
+50 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;2u;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;&quot;[]&quot;</emphasis>
+51 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;weight&#32;=&#32;3u;&#32;<emphasis role="comment">//&#32;&quot;[&#32;]&quot;</emphasis>
+52 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(<emphasis role="keyword">auto</emphasis>&amp;&#32;elem&#32;:&#32;arr)
+53 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+54 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;weight&#32;+=&#32;toml_formatter_count_inline_columns(elem,&#32;line_wrap_cols)&#32;+&#32;2u;&#32;<emphasis role="comment">//&#32;+&#32;&#32;&quot;,&#32;&quot;</emphasis>
+55 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(weight&#32;&gt;=&#32;line_wrap_cols)
+56 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">break</emphasis>;
+57 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+58 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;weight;
+59 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+60 
+61 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">case</emphasis>&#32;node_type::string:
+62 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+63 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;todo:&#32;proper&#32;utf8&#32;decoding?</emphasis>
+64 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;todo:&#32;tab&#32;awareness?</emphasis>
+65 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">auto</emphasis>&amp;&#32;str&#32;=&#32;(*<emphasis role="keyword">reinterpret_cast&lt;</emphasis><emphasis role="keyword">const&#32;</emphasis><link linkend="_classvalue">value&lt;std::string&gt;</link>*<emphasis role="keyword">&gt;</emphasis>(&amp;node)).<link linkend="_classarray_1a0b94266548e749456885847091128b5d">get</link>();
+66 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;str.length()&#32;+&#32;2u;&#32;<emphasis role="comment">//&#32;+&#32;&quot;&quot;</emphasis>
+67 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+68 
+69 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">case</emphasis>&#32;node_type::integer:
+70 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+71 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">auto</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1aa857b95cc76669c2a9109239ef40a47c">val</link>&#32;=&#32;(*<emphasis role="keyword">reinterpret_cast&lt;</emphasis><emphasis role="keyword">const&#32;</emphasis><link linkend="_classvalue">value&lt;int64_t&gt;</link>*<emphasis role="keyword">&gt;</emphasis>(&amp;node)).get();
+72 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(!<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1aa857b95cc76669c2a9109239ef40a47c">val</link>)
+73 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;1u;
+74 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;weight&#32;=&#32;{};
+75 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1aa857b95cc76669c2a9109239ef40a47c">val</link>&#32;&lt;&#32;0)
+76 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+77 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;weight&#32;+=&#32;1u;
+78 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1aa857b95cc76669c2a9109239ef40a47c">val</link>&#32;*=&#32;-1;
+79 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+80 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;weight&#32;+&#32;<emphasis role="keyword">static_cast&lt;</emphasis><emphasis role="keywordtype">size_t</emphasis><emphasis role="keyword">&gt;</emphasis>(<link linkend="__classes_2lib_2include_2tgmath_8h_1af26c25cec2b892904654e4068b199882">log10</link>(<emphasis role="keyword">static_cast&lt;</emphasis><emphasis role="keywordtype">double</emphasis><emphasis role="keyword">&gt;</emphasis>(<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1aa857b95cc76669c2a9109239ef40a47c">val</link>)))&#32;+&#32;1u;
+81 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+82 
+83 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">case</emphasis>&#32;node_type::floating_point:
+84 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+85 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">auto</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1aa857b95cc76669c2a9109239ef40a47c">val</link>&#32;=&#32;(*<emphasis role="keyword">reinterpret_cast&lt;</emphasis><emphasis role="keyword">const&#32;</emphasis><link linkend="_classvalue">value&lt;double&gt;</link>*<emphasis role="keyword">&gt;</emphasis>(&amp;node)).get();
+86 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1aa857b95cc76669c2a9109239ef40a47c">val</link>&#32;==&#32;0.0)
+87 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;3u;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;&quot;0.0&quot;</emphasis>
+88 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;weight&#32;=&#32;2u;&#32;<emphasis role="comment">//&#32;&quot;.0&quot;</emphasis>
+89 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1aa857b95cc76669c2a9109239ef40a47c">val</link>&#32;&lt;&#32;0.0)
+90 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+91 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;weight&#32;+=&#32;1u;
+92 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1aa857b95cc76669c2a9109239ef40a47c">val</link>&#32;*=&#32;-1.0;
+93 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+94 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;weight&#32;+&#32;<emphasis role="keyword">static_cast&lt;</emphasis><emphasis role="keywordtype">size_t</emphasis><emphasis role="keyword">&gt;</emphasis>(<link linkend="__classes_2lib_2include_2tgmath_8h_1af26c25cec2b892904654e4068b199882">log10</link>(<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1aa857b95cc76669c2a9109239ef40a47c">val</link>))&#32;+&#32;1u;
+95 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">break</emphasis>;
+96 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+97 
+98 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">case</emphasis>&#32;node_type::boolean:&#32;<emphasis role="keywordflow">return</emphasis>&#32;5u;
+99 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">case</emphasis>&#32;node_type::date:&#32;[[fallthrough]];
+100 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">case</emphasis>&#32;node_type::time:&#32;<emphasis role="keywordflow">return</emphasis>&#32;10u;
+101 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">case</emphasis>&#32;node_type::date_time:&#32;<emphasis role="keywordflow">return</emphasis>&#32;30u;
+102 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">case</emphasis>&#32;node_type::none:&#32;<link linkend="_preprocessor_8h_1a43a3ff9d3097bf4e929c9a73bd17b793">TOML_UNREACHABLE</link>;
+103 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">default</emphasis>:&#32;<link linkend="_preprocessor_8h_1a43a3ff9d3097bf4e929c9a73bd17b793">TOML_UNREACHABLE</link>;
+104 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+105 
+106 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_preprocessor_8h_1a43a3ff9d3097bf4e929c9a73bd17b793">TOML_UNREACHABLE</link>;
+107 &#32;&#32;&#32;&#32;}
+108 
+109 &#32;&#32;&#32;&#32;<link linkend="_preprocessor_8h_1a31ffc2d7129c04c13914b97c0a6e8417">TOML_INTERNAL_LINKAGE</link>
+110 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">bool</emphasis>&#32;toml_formatter_forces_multiline(<emphasis role="keyword">const</emphasis>&#32;node&amp;&#32;node,&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;line_wrap_cols,&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;starting_column_bias)&#32;<emphasis role="keyword">noexcept</emphasis>
+111 &#32;&#32;&#32;&#32;{
+112 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;(toml_formatter_count_inline_columns(node,&#32;line_wrap_cols)&#32;+&#32;starting_column_bias)&#32;&gt;=&#32;line_wrap_cols;
+113 &#32;&#32;&#32;&#32;}
+114 }
+115 <link linkend="_preprocessor_8h_1a0385295454ae473a68d194eaffaf597c">TOML_ANON_NAMESPACE_END</link>;
+116 
+117 <link linkend="_toml__formatter_8inl_1a24e5c42f7e94b0b0f3212744874731e6">TOML_NAMESPACE_START</link>
+118 {
+119 &#32;&#32;&#32;&#32;<link linkend="_preprocessor_8h_1a4256b41e25e4aa04b70cf55fd56ce202">TOML_EXTERNAL_LINKAGE</link>
+120 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>&#32;toml_formatter::print_pending_table_separator()
+121 &#32;&#32;&#32;&#32;{
+122 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(pending_table_separator_)
+123 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+124 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;print_newline(<emphasis role="keyword">true</emphasis>);
+125 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;print_newline(<emphasis role="keyword">true</emphasis>);
+126 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;pending_table_separator_&#32;=&#32;<emphasis role="keyword">false</emphasis>;
+127 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+128 &#32;&#32;&#32;&#32;}
+129 
+130 &#32;&#32;&#32;&#32;<link linkend="_preprocessor_8h_1a4256b41e25e4aa04b70cf55fd56ce202">TOML_EXTERNAL_LINKAGE</link>
+131 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>&#32;toml_formatter::print(<emphasis role="keyword">const</emphasis>&#32;key&amp;&#32;k)
+132 &#32;&#32;&#32;&#32;{
+133 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;print_string(k.str(),&#32;<emphasis role="keyword">false</emphasis>,&#32;<emphasis role="keyword">true</emphasis>);
+134 &#32;&#32;&#32;&#32;}
+135 
+136 &#32;&#32;&#32;&#32;<link linkend="_preprocessor_8h_1a4256b41e25e4aa04b70cf55fd56ce202">TOML_EXTERNAL_LINKAGE</link>
+137 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>&#32;toml_formatter::print_inline(<emphasis role="keyword">const</emphasis>&#32;<link linkend="_classtable">table</link>&amp;&#32;tbl)
+138 &#32;&#32;&#32;&#32;{
+139 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(tbl.<link linkend="_classtable_1a406c059cce67faebb6aa0815624b6231">empty</link>())
+140 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+141 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;print_unformatted(<emphasis role="stringliteral">&quot;{}&quot;</emphasis><link linkend="_conformance__burntsushi__valid_8cpp_1a3a352c2235a269bac37d1a34a19cde48">sv</link>);
+142 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>;
+143 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+144 
+145 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;print_unformatted(<emphasis role="stringliteral">&quot;{&#32;&quot;</emphasis><link linkend="_conformance__burntsushi__valid_8cpp_1a3a352c2235a269bac37d1a34a19cde48">sv</link>);
+146 
+147 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">bool</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1ada771a798be00a696d20928c9a3371e7">first</link>&#32;=&#32;<emphasis role="keyword">false</emphasis>;
+148 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(<emphasis role="keyword">auto</emphasis>&amp;&amp;&#32;[k,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a14cfbe2fc2234f5504618905b69d1e06">v</link>]&#32;:&#32;tbl)
+149 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+150 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1ada771a798be00a696d20928c9a3371e7">first</link>)
+151 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;print_unformatted(<emphasis role="stringliteral">&quot;,&#32;&quot;</emphasis><link linkend="_conformance__burntsushi__valid_8cpp_1a3a352c2235a269bac37d1a34a19cde48">sv</link>);
+152 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1ada771a798be00a696d20928c9a3371e7">first</link>&#32;=&#32;<emphasis role="keyword">true</emphasis>;
+153 
+154 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2glm_2test_2gtx_2gtx__type__aligned_8cpp_1a5df63d15d7c51355174224d9d0c6518a">print</link>(k);
+155 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(terse_kvps())
+156 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;print_unformatted(<emphasis role="stringliteral">&quot;=&quot;</emphasis><link linkend="_conformance__burntsushi__valid_8cpp_1a3a352c2235a269bac37d1a34a19cde48">sv</link>);
+157 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>
+158 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;print_unformatted(<emphasis role="stringliteral">&quot;&#32;=&#32;&quot;</emphasis><link linkend="_conformance__burntsushi__valid_8cpp_1a3a352c2235a269bac37d1a34a19cde48">sv</link>);
+159 
+160 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keyword">auto</emphasis>&#32;<link linkend="__classes_2_gameobj_8h_1a890efa53b3d7deeeced6f3a0d6653ed3">type</link>&#32;=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a14cfbe2fc2234f5504618905b69d1e06">v</link>.type();
+161 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_preprocessor_8h_1a87bd3a07eee4ded6e9f8a97ac8fba3e8">TOML_ASSUME</link>(<link linkend="__classes_2_gameobj_8h_1a890efa53b3d7deeeced6f3a0d6653ed3">type</link>&#32;!=&#32;node_type::none);
+162 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">switch</emphasis>&#32;(<link linkend="__classes_2_gameobj_8h_1a890efa53b3d7deeeced6f3a0d6653ed3">type</link>)
+163 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+164 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">case</emphasis>&#32;node_type::table:&#32;print_inline(*<emphasis role="keyword">reinterpret_cast&lt;</emphasis><emphasis role="keyword">const&#32;</emphasis><link linkend="_classtable">table</link>*<emphasis role="keyword">&gt;</emphasis>(&amp;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a14cfbe2fc2234f5504618905b69d1e06">v</link>));&#32;<emphasis role="keywordflow">break</emphasis>;
+165 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">case</emphasis>&#32;node_type::array:&#32;<link linkend="__classes_2lib_2glm_2test_2gtx_2gtx__type__aligned_8cpp_1a5df63d15d7c51355174224d9d0c6518a">print</link>(*<emphasis role="keyword">reinterpret_cast&lt;</emphasis><emphasis role="keyword">const&#32;</emphasis><link linkend="_classarray">array</link>*<emphasis role="keyword">&gt;</emphasis>(&amp;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a14cfbe2fc2234f5504618905b69d1e06">v</link>));&#32;<emphasis role="keywordflow">break</emphasis>;
+166 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">default</emphasis>:&#32;<link linkend="__classes_2lib_2glm_2test_2gtc_2gtc__packing_8cpp_1a57a79a4ef71048df91475bed8ba43e2b">print_value</link>(<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a14cfbe2fc2234f5504618905b69d1e06">v</link>,&#32;<link linkend="__classes_2_gameobj_8h_1a890efa53b3d7deeeced6f3a0d6653ed3">type</link>);
+167 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+168 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+169 
+170 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;print_unformatted(<emphasis role="stringliteral">&quot;&#32;}&quot;</emphasis><link linkend="_conformance__burntsushi__valid_8cpp_1a3a352c2235a269bac37d1a34a19cde48">sv</link>);
+171 &#32;&#32;&#32;&#32;}
+172 
+173 &#32;&#32;&#32;&#32;<link linkend="_preprocessor_8h_1a4256b41e25e4aa04b70cf55fd56ce202">TOML_EXTERNAL_LINKAGE</link>
+174 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>&#32;toml_formatter::print(<emphasis role="keyword">const</emphasis>&#32;<link linkend="_classarray">array</link>&amp;&#32;arr)
+175 &#32;&#32;&#32;&#32;{
+176 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(arr.<link linkend="_classarray_1aaea8c1a0137a49b14637584bb2aa5d94">empty</link>())
+177 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+178 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;print_unformatted(<emphasis role="stringliteral">&quot;[]&quot;</emphasis><link linkend="_conformance__burntsushi__valid_8cpp_1a3a352c2235a269bac37d1a34a19cde48">sv</link>);
+179 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>;
+180 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+181 
+182 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keyword">auto</emphasis>&#32;original_indent&#32;=&#32;indent();
+183 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keyword">auto</emphasis>&#32;multiline&#32;&#32;&#32;&#32;&#32;&#32;&#32;=&#32;TOML_ANON_NAMESPACE::toml_formatter_forces_multiline(
+184 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;arr,
+185 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;120u,
+186 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;indent_columns()&#32;*&#32;<emphasis role="keyword">static_cast&lt;</emphasis><emphasis role="keywordtype">size_t</emphasis><emphasis role="keyword">&gt;</emphasis>(original_indent&#32;&lt;&#32;0&#32;?&#32;0&#32;:&#32;original_indent));
+187 
+188 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;print_unformatted(<emphasis role="stringliteral">&quot;[&quot;</emphasis><link linkend="_conformance__burntsushi__valid_8cpp_1a3a352c2235a269bac37d1a34a19cde48">sv</link>);
+189 
+190 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(multiline)
+191 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+192 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(original_indent&#32;&lt;&#32;0)
+193 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;indent(0);
+194 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(<link linkend="_forward__declarations_8h_1af3a33663e90d253686912eba69982c35">indent_array_elements</link>())
+195 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;increase_indent();
+196 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+197 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>
+198 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;print_unformatted(<emphasis role="charliteral">&apos;&#32;&apos;</emphasis>);
+199 
+200 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(<emphasis role="keywordtype">size_t</emphasis>&#32;i&#32;=&#32;0;&#32;i&#32;&lt;&#32;arr.<link linkend="_classarray_1aeb9d2f12b9199641b8b340365a59174b">size</link>();&#32;i++)
+201 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+202 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(i&#32;&gt;&#32;0<link linkend="__classes_2lib_2glm_2test_2core_2core__func__integer__find__lsb_8cpp_1a1f9aca42e2010bb82488684dee1a66ea">u</link>)
+203 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+204 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;print_unformatted(<emphasis role="charliteral">&apos;,&apos;</emphasis>);
+205 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(!multiline)
+206 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;print_unformatted(<emphasis role="charliteral">&apos;&#32;&apos;</emphasis>);
+207 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+208 
+209 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(multiline)
+210 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+211 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;print_newline(<emphasis role="keyword">true</emphasis>);
+212 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;print_indent();
+213 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+214 
+215 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">auto</emphasis>&amp;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a14cfbe2fc2234f5504618905b69d1e06">v</link>&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;=&#32;arr[i];
+216 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keyword">auto</emphasis>&#32;<link linkend="__classes_2_gameobj_8h_1a890efa53b3d7deeeced6f3a0d6653ed3">type</link>&#32;=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a14cfbe2fc2234f5504618905b69d1e06">v</link>.<link linkend="_classarray_1a9ccff2347a4e44e86ec966c0aba8aec3">type</link>();
+217 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_preprocessor_8h_1a87bd3a07eee4ded6e9f8a97ac8fba3e8">TOML_ASSUME</link>(<link linkend="__classes_2_gameobj_8h_1a890efa53b3d7deeeced6f3a0d6653ed3">type</link>&#32;!=&#32;node_type::none);
+218 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">switch</emphasis>&#32;(<link linkend="__classes_2_gameobj_8h_1a890efa53b3d7deeeced6f3a0d6653ed3">type</link>)
+219 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+220 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">case</emphasis>&#32;node_type::table:&#32;print_inline(*<emphasis role="keyword">reinterpret_cast&lt;</emphasis><emphasis role="keyword">const&#32;</emphasis><link linkend="_classtable">table</link>*<emphasis role="keyword">&gt;</emphasis>(&amp;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a14cfbe2fc2234f5504618905b69d1e06">v</link>));&#32;<emphasis role="keywordflow">break</emphasis>;
+221 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">case</emphasis>&#32;node_type::array:&#32;<link linkend="__classes_2lib_2glm_2test_2gtx_2gtx__type__aligned_8cpp_1a5df63d15d7c51355174224d9d0c6518a">print</link>(*<emphasis role="keyword">reinterpret_cast&lt;</emphasis><emphasis role="keyword">const&#32;</emphasis><link linkend="_classarray">array</link>*<emphasis role="keyword">&gt;</emphasis>(&amp;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a14cfbe2fc2234f5504618905b69d1e06">v</link>));&#32;<emphasis role="keywordflow">break</emphasis>;
+222 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">default</emphasis>:&#32;<link linkend="__classes_2lib_2glm_2test_2gtc_2gtc__packing_8cpp_1a57a79a4ef71048df91475bed8ba43e2b">print_value</link>(<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a14cfbe2fc2234f5504618905b69d1e06">v</link>,&#32;<link linkend="__classes_2_gameobj_8h_1a890efa53b3d7deeeced6f3a0d6653ed3">type</link>);
+223 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+224 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+225 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(multiline)
+226 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+227 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;indent(original_indent);
+228 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;print_newline(<emphasis role="keyword">true</emphasis>);
+229 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;print_indent();
+230 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+231 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>
+232 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;print_unformatted(<emphasis role="charliteral">&apos;&#32;&apos;</emphasis>);
+233 
+234 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;print_unformatted(<emphasis role="stringliteral">&quot;]&quot;</emphasis><link linkend="_conformance__burntsushi__valid_8cpp_1a3a352c2235a269bac37d1a34a19cde48">sv</link>);
+235 &#32;&#32;&#32;&#32;}
+236 
+237 &#32;&#32;&#32;&#32;<link linkend="_preprocessor_8h_1a4256b41e25e4aa04b70cf55fd56ce202">TOML_EXTERNAL_LINKAGE</link>
+238 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>&#32;toml_formatter::print(<emphasis role="keyword">const</emphasis>&#32;<link linkend="_classtable">table</link>&amp;&#32;tbl)
+239 &#32;&#32;&#32;&#32;{
+240 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keyword">constexpr</emphasis>&#32;<emphasis role="keyword">auto</emphasis>&#32;is_non_inline_array_of_tables&#32;=&#32;[](<emphasis role="keyword">const</emphasis>&#32;node&amp;&#32;n)&#32;<emphasis role="keyword">noexcept</emphasis>
+241 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+242 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keyword">auto</emphasis>&#32;arr&#32;=&#32;n.<link linkend="_classarray_1ae1acd61c688b255230a78ca6ec23fe90">as_array</link>();
+243 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(!arr&#32;||&#32;!arr-&gt;<link linkend="_classarray_1a6efebd20b162d0297dc45cdcb312f885">is_array_of_tables</link>())
+244 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<emphasis role="keyword">false</emphasis>;
+245 
+246 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;!<emphasis role="keyword">reinterpret_cast&lt;</emphasis><emphasis role="keyword">const&#32;</emphasis><link linkend="_classtable">table</link>*<emphasis role="keyword">&gt;</emphasis>(&amp;(*arr)[0])-&gt;is_inline();
+247 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;};
+248 
+249 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;values,&#32;arrays,&#32;and&#32;inline&#32;tables/table&#32;arrays</emphasis>
+250 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(<emphasis role="keyword">auto</emphasis>&amp;&amp;&#32;[k,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a14cfbe2fc2234f5504618905b69d1e06">v</link>]&#32;:&#32;tbl)
+251 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+252 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keyword">auto</emphasis>&#32;<link linkend="__classes_2_gameobj_8h_1a890efa53b3d7deeeced6f3a0d6653ed3">type</link>&#32;=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a14cfbe2fc2234f5504618905b69d1e06">v</link>.<link linkend="_classtable_1a54c936c3aac096be1dcad45036ee6a9f">type</link>();
+253 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;((<link linkend="__classes_2_gameobj_8h_1a890efa53b3d7deeeced6f3a0d6653ed3">type</link>&#32;==&#32;node_type::table&#32;&amp;&amp;&#32;!<emphasis role="keyword">reinterpret_cast&lt;</emphasis><emphasis role="keyword">const&#32;</emphasis><link linkend="_classtable">table</link>*<emphasis role="keyword">&gt;</emphasis>(&amp;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a14cfbe2fc2234f5504618905b69d1e06">v</link>)-&gt;is_inline())
+254 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;||&#32;(<link linkend="__classes_2_gameobj_8h_1a890efa53b3d7deeeced6f3a0d6653ed3">type</link>&#32;==&#32;node_type::array&#32;&amp;&amp;&#32;is_non_inline_array_of_tables(<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a14cfbe2fc2234f5504618905b69d1e06">v</link>)))
+255 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">continue</emphasis>;
+256 
+257 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;pending_table_separator_&#32;=&#32;<emphasis role="keyword">true</emphasis>;
+258 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;print_newline();
+259 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;print_indent();
+260 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2glm_2test_2gtx_2gtx__type__aligned_8cpp_1a5df63d15d7c51355174224d9d0c6518a">print</link>(k);
+261 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(terse_kvps())
+262 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;print_unformatted(<emphasis role="stringliteral">&quot;=&quot;</emphasis><link linkend="_conformance__burntsushi__valid_8cpp_1a3a352c2235a269bac37d1a34a19cde48">sv</link>);
+263 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>
+264 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;print_unformatted(<emphasis role="stringliteral">&quot;&#32;=&#32;&quot;</emphasis><link linkend="_conformance__burntsushi__valid_8cpp_1a3a352c2235a269bac37d1a34a19cde48">sv</link>);
+265 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_preprocessor_8h_1a87bd3a07eee4ded6e9f8a97ac8fba3e8">TOML_ASSUME</link>(<link linkend="__classes_2_gameobj_8h_1a890efa53b3d7deeeced6f3a0d6653ed3">type</link>&#32;!=&#32;node_type::none);
+266 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">switch</emphasis>&#32;(<link linkend="__classes_2_gameobj_8h_1a890efa53b3d7deeeced6f3a0d6653ed3">type</link>)
+267 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+268 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">case</emphasis>&#32;node_type::table:&#32;print_inline(*<emphasis role="keyword">reinterpret_cast&lt;</emphasis><emphasis role="keyword">const&#32;</emphasis><link linkend="_classtable">table</link>*<emphasis role="keyword">&gt;</emphasis>(&amp;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a14cfbe2fc2234f5504618905b69d1e06">v</link>));&#32;<emphasis role="keywordflow">break</emphasis>;
+269 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">case</emphasis>&#32;node_type::array:&#32;<link linkend="__classes_2lib_2glm_2test_2gtx_2gtx__type__aligned_8cpp_1a5df63d15d7c51355174224d9d0c6518a">print</link>(*<emphasis role="keyword">reinterpret_cast&lt;</emphasis><emphasis role="keyword">const&#32;</emphasis><link linkend="_classarray">array</link>*<emphasis role="keyword">&gt;</emphasis>(&amp;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a14cfbe2fc2234f5504618905b69d1e06">v</link>));&#32;<emphasis role="keywordflow">break</emphasis>;
+270 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">default</emphasis>:&#32;<link linkend="__classes_2lib_2glm_2test_2gtc_2gtc__packing_8cpp_1a57a79a4ef71048df91475bed8ba43e2b">print_value</link>(<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a14cfbe2fc2234f5504618905b69d1e06">v</link>,&#32;<link linkend="__classes_2_gameobj_8h_1a890efa53b3d7deeeced6f3a0d6653ed3">type</link>);
+271 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+272 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+273 
+274 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keyword">auto</emphasis>&#32;print_key_path&#32;=&#32;[&amp;]()
+275 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+276 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;i{};
+277 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keyword">auto</emphasis>&#32;k&#32;:&#32;key_path_)
+278 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+279 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(i++)
+280 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;print_unformatted(<emphasis role="charliteral">&apos;.&apos;</emphasis>);
+281 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2glm_2test_2gtx_2gtx__type__aligned_8cpp_1a5df63d15d7c51355174224d9d0c6518a">print</link>(*k);
+282 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+283 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;};
+284 
+285 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;non-inline&#32;tables</emphasis>
+286 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(<emphasis role="keyword">auto</emphasis>&amp;&amp;&#32;[k,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a14cfbe2fc2234f5504618905b69d1e06">v</link>]&#32;:&#32;tbl)
+287 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+288 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keyword">auto</emphasis>&#32;<link linkend="__classes_2_gameobj_8h_1a890efa53b3d7deeeced6f3a0d6653ed3">type</link>&#32;=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a14cfbe2fc2234f5504618905b69d1e06">v</link>.type();
+289 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(<link linkend="__classes_2_gameobj_8h_1a890efa53b3d7deeeced6f3a0d6653ed3">type</link>&#32;!=&#32;node_type::table&#32;||&#32;<emphasis role="keyword">reinterpret_cast&lt;</emphasis><emphasis role="keyword">const&#32;</emphasis><link linkend="_classtable">table</link>*<emphasis role="keyword">&gt;</emphasis>(&amp;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a14cfbe2fc2234f5504618905b69d1e06">v</link>)-&gt;<link linkend="_classtable_1aaaf20b46eede72428dea24b4f4ac85c8">is_inline</link>())
+290 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">continue</emphasis>;
+291 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">auto</emphasis>&amp;&#32;child_tbl&#32;=&#32;*<emphasis role="keyword">reinterpret_cast&lt;</emphasis><emphasis role="keyword">const&#32;</emphasis><link linkend="_classtable">table</link>*<emphasis role="keyword">&gt;</emphasis>(&amp;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a14cfbe2fc2234f5504618905b69d1e06">v</link>);
+292 
+293 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;we&#32;can&#32;skip&#32;indenting&#32;and&#32;emitting&#32;the&#32;headers&#32;for&#32;tables&#32;that&#32;only&#32;contain&#32;other&#32;tables</emphasis>
+294 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;(so&#32;we&#32;don&apos;t&#32;over-nest)</emphasis>
+295 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;child_value_count{};&#32;<emphasis role="comment">//&#32;includes&#32;inline&#32;tables&#32;and&#32;non-table&#32;arrays</emphasis>
+296 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;child_table_count{};
+297 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;child_table_array_count{};
+298 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(<emphasis role="keyword">auto</emphasis>&amp;&amp;&#32;[child_k,&#32;child_v]&#32;:&#32;child_tbl)
+299 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+300 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_preprocessor_8h_1a05802eb834f167bd8a151e82492b8866">TOML_UNUSED</link>(child_k);
+301 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keyword">auto</emphasis>&#32;child_type&#32;=&#32;child_v.type();
+302 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_preprocessor_8h_1a87bd3a07eee4ded6e9f8a97ac8fba3e8">TOML_ASSUME</link>(child_type&#32;!=&#32;node_type::none);
+303 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">switch</emphasis>&#32;(child_type)
+304 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+305 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">case</emphasis>&#32;node_type::table:
+306 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(<emphasis role="keyword">reinterpret_cast&lt;</emphasis><emphasis role="keyword">const&#32;</emphasis><link linkend="_classtable">table</link>*<emphasis role="keyword">&gt;</emphasis>(&amp;child_v)-&gt;is_inline())
+307 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;child_value_count++;
+308 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>
+309 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;child_table_count++;
+310 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">break</emphasis>;
+311 
+312 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">case</emphasis>&#32;node_type::array:
+313 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(is_non_inline_array_of_tables(child_v))
+314 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;child_table_array_count++;
+315 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>
+316 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;child_value_count++;
+317 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">break</emphasis>;
+318 
+319 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">default</emphasis>:&#32;child_value_count++;
+320 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+321 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+322 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">bool</emphasis>&#32;skip_self&#32;=&#32;<emphasis role="keyword">false</emphasis>;
+323 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(child_value_count&#32;==&#32;0<link linkend="__classes_2lib_2glm_2test_2core_2core__func__integer__find__lsb_8cpp_1a1f9aca42e2010bb82488684dee1a66ea">u</link>&#32;&amp;&amp;&#32;(child_table_count&#32;&gt;&#32;0<link linkend="__classes_2lib_2glm_2test_2core_2core__func__integer__find__lsb_8cpp_1a1f9aca42e2010bb82488684dee1a66ea">u</link>&#32;||&#32;child_table_array_count&#32;&gt;&#32;0<link linkend="__classes_2lib_2glm_2test_2core_2core__func__integer__find__lsb_8cpp_1a1f9aca42e2010bb82488684dee1a66ea">u</link>))
+324 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;skip_self&#32;=&#32;<emphasis role="keyword">true</emphasis>;
+325 
+326 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;key_path_.push_back(&amp;k);
+327 
+328 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(!skip_self)
+329 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+330 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;print_pending_table_separator();
+331 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(<link linkend="_forward__declarations_8h_1ae225507e97029b1deaa6b3c2fb8634ea">indent_sub_tables</link>())
+332 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;increase_indent();
+333 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;print_indent();
+334 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;print_unformatted(<emphasis role="stringliteral">&quot;[&quot;</emphasis><link linkend="_conformance__burntsushi__valid_8cpp_1a3a352c2235a269bac37d1a34a19cde48">sv</link>);
+335 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;print_key_path();
+336 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;print_unformatted(<emphasis role="stringliteral">&quot;]&quot;</emphasis><link linkend="_conformance__burntsushi__valid_8cpp_1a3a352c2235a269bac37d1a34a19cde48">sv</link>);
+337 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;pending_table_separator_&#32;=&#32;<emphasis role="keyword">true</emphasis>;
+338 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+339 
+340 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2glm_2test_2gtx_2gtx__type__aligned_8cpp_1a5df63d15d7c51355174224d9d0c6518a">print</link>(child_tbl);
+341 
+342 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;key_path_.pop_back();
+343 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(!skip_self&#32;&amp;&amp;&#32;<link linkend="_forward__declarations_8h_1ae225507e97029b1deaa6b3c2fb8634ea">indent_sub_tables</link>())
+344 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;decrease_indent();
+345 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+346 
+347 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;table&#32;arrays</emphasis>
+348 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(<emphasis role="keyword">auto</emphasis>&amp;&amp;&#32;[k,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a14cfbe2fc2234f5504618905b69d1e06">v</link>]&#32;:&#32;tbl)
+349 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+350 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(!is_non_inline_array_of_tables(<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a14cfbe2fc2234f5504618905b69d1e06">v</link>))
+351 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">continue</emphasis>;
+352 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">auto</emphasis>&amp;&#32;arr&#32;=&#32;*<emphasis role="keyword">reinterpret_cast&lt;</emphasis><emphasis role="keyword">const&#32;</emphasis><link linkend="_classarray">array</link>*<emphasis role="keyword">&gt;</emphasis>(&amp;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a14cfbe2fc2234f5504618905b69d1e06">v</link>);
+353 
+354 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(<link linkend="_forward__declarations_8h_1ae225507e97029b1deaa6b3c2fb8634ea">indent_sub_tables</link>())
+355 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;increase_indent();
+356 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;key_path_.<link linkend="_classarray_1afa5750f44dfcc2e9c7097a3efb02019c">push_back</link>(&amp;k);
+357 
+358 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(<emphasis role="keywordtype">size_t</emphasis>&#32;i&#32;=&#32;0;&#32;i&#32;&lt;&#32;arr.<link linkend="_classarray_1aeb9d2f12b9199641b8b340365a59174b">size</link>();&#32;i++)
+359 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+360 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;print_pending_table_separator();
+361 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;print_indent();
+362 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;print_unformatted(<emphasis role="stringliteral">&quot;[[&quot;</emphasis><link linkend="_conformance__burntsushi__valid_8cpp_1a3a352c2235a269bac37d1a34a19cde48">sv</link>);
+363 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;print_key_path();
+364 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;print_unformatted(<emphasis role="stringliteral">&quot;]]&quot;</emphasis><link linkend="_conformance__burntsushi__valid_8cpp_1a3a352c2235a269bac37d1a34a19cde48">sv</link>);
+365 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;pending_table_separator_&#32;=&#32;<emphasis role="keyword">true</emphasis>;
+366 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2glm_2test_2gtx_2gtx__type__aligned_8cpp_1a5df63d15d7c51355174224d9d0c6518a">print</link>(*<emphasis role="keyword">reinterpret_cast&lt;</emphasis><emphasis role="keyword">const&#32;</emphasis><link linkend="_classtable">table</link>*<emphasis role="keyword">&gt;</emphasis>(&amp;arr[i]));
+367 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+368 
+369 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;key_path_.pop_back();
+370 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(<link linkend="_forward__declarations_8h_1ae225507e97029b1deaa6b3c2fb8634ea">indent_sub_tables</link>())
+371 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;decrease_indent();
+372 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+373 &#32;&#32;&#32;&#32;}
+374 
+375 &#32;&#32;&#32;&#32;<link linkend="_preprocessor_8h_1a4256b41e25e4aa04b70cf55fd56ce202">TOML_EXTERNAL_LINKAGE</link>
+376 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>&#32;toml_formatter::print()
+377 &#32;&#32;&#32;&#32;{
+378 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(dump_failed_parse_result())
+379 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>;
+380 
+381 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">switch</emphasis>&#32;(<emphasis role="keyword">auto</emphasis>&#32;source_type&#32;=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a633906574fe6e39b7f2840bed0e49832">source</link>().<link linkend="__classes_2_gameobj_8h_1a890efa53b3d7deeeced6f3a0d6653ed3">type</link>())
+382 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+383 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">case</emphasis>&#32;node_type::table:
+384 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+385 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">auto</emphasis>&amp;&#32;tbl&#32;=&#32;*<emphasis role="keyword">reinterpret_cast&lt;</emphasis><emphasis role="keyword">const&#32;</emphasis><link linkend="_classtable">table</link>*<emphasis role="keyword">&gt;</emphasis>(&amp;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a633906574fe6e39b7f2840bed0e49832">source</link>());
+386 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(tbl.<link linkend="_classtable_1aaaf20b46eede72428dea24b4f4ac85c8">is_inline</link>())
+387 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;print_inline(tbl);
+388 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>
+389 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+390 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;decrease_indent();&#32;<emphasis role="comment">//&#32;so&#32;root&#32;kvps&#32;and&#32;tables&#32;have&#32;the&#32;same&#32;indent</emphasis>
+391 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2glm_2test_2gtx_2gtx__type__aligned_8cpp_1a5df63d15d7c51355174224d9d0c6518a">print</link>(tbl);
+392 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+393 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">break</emphasis>;
+394 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+395 
+396 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">case</emphasis>&#32;node_type::array:&#32;<link linkend="__classes_2lib_2glm_2test_2gtx_2gtx__type__aligned_8cpp_1a5df63d15d7c51355174224d9d0c6518a">print</link>(*<emphasis role="keyword">reinterpret_cast&lt;</emphasis><emphasis role="keyword">const&#32;</emphasis><link linkend="_classarray">array</link>*<emphasis role="keyword">&gt;</emphasis>(&amp;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a633906574fe6e39b7f2840bed0e49832">source</link>()));&#32;<emphasis role="keywordflow">break</emphasis>;
+397 
+398 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">default</emphasis>:&#32;<link linkend="__classes_2lib_2glm_2test_2gtc_2gtc__packing_8cpp_1a57a79a4ef71048df91475bed8ba43e2b">print_value</link>(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a633906574fe6e39b7f2840bed0e49832">source</link>(),&#32;source_type);
+399 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+400 &#32;&#32;&#32;&#32;}
+401 }
+402 <link linkend="_preprocessor_8h_1aab40a6832fe11707ab2cc1b83d8a1270">TOML_NAMESPACE_END</link>;
+403 
+404 <emphasis role="preprocessor">#include&#32;&quot;<link linkend="_header__end_8h">header_end.h</link>&quot;</emphasis>
+405 <emphasis role="preprocessor">#endif&#32;</emphasis><emphasis role="comment">//&#32;TOML_ENABLE_FORMATTERS</emphasis>
+</programlisting></section>

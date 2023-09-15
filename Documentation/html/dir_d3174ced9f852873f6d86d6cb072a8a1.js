@@ -1,0 +1,5 @@
+var dir_d3174ced9f852873f6d86d6cb072a8a1 =
+[
+    [ "android_native_app_glue.c", "lib_2_raylib_erosion_standalone-main_2raylib_2src_2external_2android_2native__app__glue_2android__native__app__glue_8c.html", "lib_2_raylib_erosion_standalone-main_2raylib_2src_2external_2android_2native__app__glue_2android__native__app__glue_8c" ],
+    [ "android_native_app_glue.h", "lib_2_raylib_erosion_standalone-main_2raylib_2src_2external_2android_2native__app__glue_2android__native__app__glue_8h.html", "lib_2_raylib_erosion_standalone-main_2raylib_2src_2external_2android_2native__app__glue_2android__native__app__glue_8h" ]
+];

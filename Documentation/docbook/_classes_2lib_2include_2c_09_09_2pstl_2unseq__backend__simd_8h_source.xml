@@ -1,0 +1,861 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<section xmlns="http://docbook.org/ns/docbook" version="5.0" xmlns:xlink="http://www.w3.org/1999/xlink" xml:id="__classes_2lib_2include_2c_09_09_2pstl_2unseq__backend__simd_8h_source" xml:lang="en-US">
+<title>unseq_backend_simd.h</title>
+<indexterm><primary>C:/Users/HP/Documents/GitHub/Minero-Game/Classes/lib/include/c++/pstl/unseq_backend_simd.h</primary></indexterm>
+Go to the documentation of this file.<programlisting linenumbering="unnumbered">1 <emphasis role="comment">//&#32;-*-&#32;C++&#32;-*-</emphasis>
+2 <emphasis role="comment">//===--&#32;unseq_backend_simd.h&#32;----------------------------------------------===//</emphasis>
+3 <emphasis role="comment">//</emphasis>
+4 <emphasis role="comment">//&#32;Part&#32;of&#32;the&#32;LLVM&#32;Project,&#32;under&#32;the&#32;Apache&#32;License&#32;v2.0&#32;with&#32;LLVM&#32;Exceptions.</emphasis>
+5 <emphasis role="comment">//&#32;See&#32;https://llvm.org/LICENSE.txt&#32;for&#32;license&#32;information.</emphasis>
+6 <emphasis role="comment">//&#32;SPDX-License-Identifier:&#32;Apache-2.0&#32;WITH&#32;LLVM-exception</emphasis>
+7 <emphasis role="comment">//</emphasis>
+8 <emphasis role="comment">//===----------------------------------------------------------------------===//</emphasis>
+9 
+10 <emphasis role="preprocessor">#ifndef&#32;_PSTL_UNSEQ_BACKEND_SIMD_H</emphasis>
+11 <emphasis role="preprocessor">#define&#32;_PSTL_UNSEQ_BACKEND_SIMD_H</emphasis>
+12 
+13 <emphasis role="preprocessor">#include&#32;&lt;type_traits&gt;</emphasis>
+14 
+15 <emphasis role="preprocessor">#include&#32;&quot;<link linkend="__old_2_classes_2lib_2utils_8h">utils.h</link>&quot;</emphasis>
+16 
+17 <emphasis role="comment">//&#32;This&#32;header&#32;defines&#32;the&#32;minimum&#32;set&#32;of&#32;vector&#32;routines&#32;required</emphasis>
+18 <emphasis role="comment">//&#32;to&#32;support&#32;parallel&#32;STL.</emphasis>
+19 <emphasis role="keyword">namespace&#32;</emphasis><link linkend="_namespace____pstl">__pstl</link>
+20 {
+21 <emphasis role="keyword">namespace&#32;</emphasis>__unseq_backend
+22 {
+23 
+24 <emphasis role="comment">//&#32;Expect&#32;vector&#32;width&#32;up&#32;to&#32;64&#32;(or&#32;512&#32;bit)</emphasis>
+25 <emphasis role="keyword">const</emphasis>&#32;std::size_t&#32;<link linkend="_namespace____pstl_1_1____unseq__backend_1a27c10308d5fbdecc0b2c2155df84772b">__lane_size</link>&#32;=&#32;64;
+26 
+27 <emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">class</emphasis>&#32;_Iterator,&#32;<emphasis role="keyword">class</emphasis>&#32;_DifferenceType,&#32;<emphasis role="keyword">class</emphasis>&#32;_Function&gt;
+28 _Iterator
+29 <link linkend="_namespace____pstl_1_1____unseq__backend_1a2196b03264f94d6785c560717628cfd2">__simd_walk_1</link>(_Iterator&#32;__first,&#32;_DifferenceType&#32;__n,&#32;_Function&#32;__f)&#32;<emphasis role="keyword">noexcept</emphasis>
+30 {
+31 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2pstl_2pstl__config_8h_1ab3b8f78050438083ac8c8c8f45c37776">_PSTL_PRAGMA_SIMD</link>
+32 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(_DifferenceType&#32;__i&#32;=&#32;0;&#32;__i&#32;&lt;&#32;__n;&#32;++__i)
+33 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__f(__first[__i]);
+34 
+35 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__first&#32;+&#32;__n;
+36 }
+37 
+38 <emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">class</emphasis>&#32;_Iterator1,&#32;<emphasis role="keyword">class</emphasis>&#32;_DifferenceType,&#32;<emphasis role="keyword">class</emphasis>&#32;_Iterator2,&#32;<emphasis role="keyword">class</emphasis>&#32;_Function&gt;
+39 _Iterator2
+40 <link linkend="_namespace____pstl_1_1____unseq__backend_1af633b9e9ab66296f5dd7efba7c834932">__simd_walk_2</link>(_Iterator1&#32;__first1,&#32;_DifferenceType&#32;__n,&#32;_Iterator2&#32;__first2,&#32;_Function&#32;__f)&#32;<emphasis role="keyword">noexcept</emphasis>
+41 {
+42 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2pstl_2pstl__config_8h_1ab3b8f78050438083ac8c8c8f45c37776">_PSTL_PRAGMA_SIMD</link>
+43 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(_DifferenceType&#32;__i&#32;=&#32;0;&#32;__i&#32;&lt;&#32;__n;&#32;++__i)
+44 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__f(__first1[__i],&#32;__first2[__i]);
+45 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__first2&#32;+&#32;__n;
+46 }
+47 
+48 <emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">class</emphasis>&#32;_Iterator1,&#32;<emphasis role="keyword">class</emphasis>&#32;_DifferenceType,&#32;<emphasis role="keyword">class</emphasis>&#32;_Iterator2,&#32;<emphasis role="keyword">class</emphasis>&#32;_Iterator3,&#32;<emphasis role="keyword">class</emphasis>&#32;_Function&gt;
+49 _Iterator3
+50 <link linkend="_namespace____pstl_1_1____unseq__backend_1a08f3845eaf1306879cde3522c5e2d542">__simd_walk_3</link>(_Iterator1&#32;__first1,&#32;_DifferenceType&#32;__n,&#32;_Iterator2&#32;__first2,&#32;_Iterator3&#32;__first3,
+51 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_Function&#32;__f)&#32;<emphasis role="keyword">noexcept</emphasis>
+52 {
+53 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2pstl_2pstl__config_8h_1ab3b8f78050438083ac8c8c8f45c37776">_PSTL_PRAGMA_SIMD</link>
+54 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(_DifferenceType&#32;__i&#32;=&#32;0;&#32;__i&#32;&lt;&#32;__n;&#32;++__i)
+55 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__f(__first1[__i],&#32;__first2[__i],&#32;__first3[__i]);
+56 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__first3&#32;+&#32;__n;
+57 }
+58 
+59 <emphasis role="comment">//&#32;TODO:&#32;check&#32;whether&#32;__simd_first()&#32;can&#32;be&#32;used&#32;here</emphasis>
+60 <emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">class</emphasis>&#32;_Index,&#32;<emphasis role="keyword">class</emphasis>&#32;_DifferenceType,&#32;<emphasis role="keyword">class</emphasis>&#32;_Pred&gt;
+61 <emphasis role="keywordtype">bool</emphasis>
+62 <link linkend="_namespace____pstl_1_1____unseq__backend_1a84dca71a2f0e2711f0e53a5894296ca7">__simd_or</link>(_Index&#32;__first,&#32;_DifferenceType&#32;__n,&#32;_Pred&#32;__pred)&#32;<emphasis role="keyword">noexcept</emphasis>
+63 {
+64 <emphasis role="preprocessor">#if&#32;_PSTL_EARLYEXIT_PRESENT</emphasis>
+65 &#32;&#32;&#32;&#32;_DifferenceType&#32;__i;
+66 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2pstl_2pstl__config_8h_1a9462800627b6012423c08174792d90b3">_PSTL_PRAGMA_VECTOR_UNALIGNED</link>
+67 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2pstl_2pstl__config_8h_1a16cf82b19f295311a3fc539ea4d34cc3">_PSTL_PRAGMA_SIMD_EARLYEXIT</link>
+68 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(__i&#32;=&#32;0;&#32;__i&#32;&lt;&#32;__n;&#32;++__i)
+69 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__pred(__first[__i]))
+70 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">break</emphasis>;
+71 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__i&#32;&lt;&#32;__n;
+72 <emphasis role="preprocessor">#else</emphasis>
+73 &#32;&#32;&#32;&#32;_DifferenceType&#32;__block_size&#32;=&#32;4&#32;&lt;&#32;__n&#32;?&#32;4&#32;:&#32;__n;
+74 &#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;_Index&#32;__last&#32;=&#32;__first&#32;+&#32;__n;
+75 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">while</emphasis>&#32;(__last&#32;!=&#32;__first)
+76 &#32;&#32;&#32;&#32;{
+77 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2external_2glfw_2deps_2vs2008_2stdint_8h_1ab1967d8591af1a4e48c37fd2b0f184d0">int32_t</link>&#32;__flag&#32;=&#32;1;
+78 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2pstl_2pstl__config_8h_1ac51a0fce61e93aced768603992a95eb7">_PSTL_PRAGMA_SIMD_REDUCTION</link>(&amp;&#32;:&#32;__flag)
+79 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(_DifferenceType&#32;__i&#32;=&#32;0;&#32;__i&#32;&lt;&#32;__block_size;&#32;++__i)
+80 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__pred(*(__first&#32;+&#32;__i)))
+81 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__flag&#32;=&#32;0;
+82 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(!__flag)
+83 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<emphasis role="keyword">true</emphasis>;
+84 
+85 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__first&#32;+=&#32;__block_size;
+86 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__last&#32;-&#32;__first&#32;&gt;=&#32;__block_size&#32;&lt;&lt;&#32;1)
+87 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+88 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Double&#32;the&#32;block&#32;_Size.&#32;&#32;Any&#32;unnecessary&#32;iterations&#32;can&#32;be&#32;amortized&#32;against&#32;work&#32;done&#32;so&#32;far.</emphasis>
+89 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__block_size&#32;&lt;&lt;=&#32;1;
+90 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+91 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>
+92 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+93 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__block_size&#32;=&#32;__last&#32;-&#32;__first;
+94 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+95 &#32;&#32;&#32;&#32;}
+96 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<emphasis role="keyword">false</emphasis>;
+97 <emphasis role="preprocessor">#endif</emphasis>
+98 }
+99 
+100 <emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">class</emphasis>&#32;_Index,&#32;<emphasis role="keyword">class</emphasis>&#32;_DifferenceType,&#32;<emphasis role="keyword">class</emphasis>&#32;_Compare&gt;
+101 _Index
+102 <link linkend="_namespace____pstl_1_1____unseq__backend_1a023c091ae2ba21d6c93ac71573523349">__simd_first</link>(_Index&#32;__first,&#32;_DifferenceType&#32;__begin,&#32;_DifferenceType&#32;__end,&#32;_Compare&#32;__comp)&#32;<emphasis role="keyword">noexcept</emphasis>
+103 {
+104 <emphasis role="preprocessor">#if&#32;_PSTL_EARLYEXIT_PRESENT</emphasis>
+105 &#32;&#32;&#32;&#32;_DifferenceType&#32;__i&#32;=&#32;__begin;
+106 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2pstl_2pstl__config_8h_1a9462800627b6012423c08174792d90b3">_PSTL_PRAGMA_VECTOR_UNALIGNED</link>&#32;<emphasis role="comment">//&#32;Do&#32;not&#32;generate&#32;peel&#32;loop&#32;part</emphasis>
+107 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2pstl_2pstl__config_8h_1a16cf82b19f295311a3fc539ea4d34cc3">_PSTL_PRAGMA_SIMD_EARLYEXIT</link>&#32;<emphasis role="keywordflow">for</emphasis>&#32;(;&#32;__i&#32;&lt;&#32;__end;&#32;++__i)
+108 &#32;&#32;&#32;&#32;{
+109 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__comp(__first,&#32;__i))
+110 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+111 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">break</emphasis>;
+112 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+113 &#32;&#32;&#32;&#32;}
+114 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__first&#32;+&#32;__i;
+115 <emphasis role="preprocessor">#else</emphasis>
+116 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Experiments&#32;show&#32;good&#32;block&#32;sizes&#32;like&#32;this</emphasis>
+117 &#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;_DifferenceType&#32;__block_size&#32;=&#32;8;
+118 &#32;&#32;&#32;&#32;<emphasis role="keyword">alignas</emphasis>(<link linkend="_namespace____pstl_1_1____unseq__backend_1a27c10308d5fbdecc0b2c2155df84772b">__lane_size</link>)&#32;_DifferenceType&#32;__lane[__block_size]&#32;=&#32;{0};
+119 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">while</emphasis>&#32;(__end&#32;-&#32;__begin&#32;&gt;=&#32;__block_size)
+120 &#32;&#32;&#32;&#32;{
+121 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_DifferenceType&#32;__found&#32;=&#32;0;
+122 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2pstl_2pstl__config_8h_1a9462800627b6012423c08174792d90b3">_PSTL_PRAGMA_VECTOR_UNALIGNED</link>&#32;<emphasis role="comment">//&#32;Do&#32;not&#32;generate&#32;peel&#32;loop&#32;part</emphasis>
+123 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2pstl_2pstl__config_8h_1ac51a0fce61e93aced768603992a95eb7">_PSTL_PRAGMA_SIMD_REDUCTION</link>(|
+124 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;:&#32;__found)&#32;<emphasis role="keywordflow">for</emphasis>&#32;(_DifferenceType&#32;__i&#32;=&#32;__begin;&#32;__i&#32;&lt;&#32;__begin&#32;+&#32;__block_size;
+125 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;++__i)
+126 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+127 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;_DifferenceType&#32;__t&#32;=&#32;__comp(__first,&#32;__i);
+128 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__lane[__i&#32;-&#32;__begin]&#32;=&#32;__t;
+129 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__found&#32;|=&#32;__t;
+130 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+131 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__found)
+132 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+133 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_DifferenceType&#32;__i;
+134 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;This&#32;will&#32;vectorize</emphasis>
+135 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(__i&#32;=&#32;0;&#32;__i&#32;&lt;&#32;__block_size;&#32;++__i)
+136 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+137 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__lane[__i])
+138 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+139 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">break</emphasis>;
+140 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+141 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+142 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__first&#32;+&#32;__begin&#32;+&#32;__i;
+143 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+144 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__begin&#32;+=&#32;__block_size;
+145 &#32;&#32;&#32;&#32;}
+146 
+147 &#32;&#32;&#32;&#32;<emphasis role="comment">//Keep&#32;remainder&#32;scalar</emphasis>
+148 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">while</emphasis>&#32;(__begin&#32;!=&#32;__end)
+149 &#32;&#32;&#32;&#32;{
+150 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__comp(__first,&#32;__begin))
+151 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+152 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__first&#32;+&#32;__begin;
+153 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+154 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;++__begin;
+155 &#32;&#32;&#32;&#32;}
+156 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__first&#32;+&#32;__end;
+157 <emphasis role="preprocessor">#endif&#32;</emphasis><emphasis role="comment">//_PSTL_EARLYEXIT_PRESENT</emphasis>
+158 }
+159 
+160 <emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">class</emphasis>&#32;_Index1,&#32;<emphasis role="keyword">class</emphasis>&#32;_DifferenceType,&#32;<emphasis role="keyword">class</emphasis>&#32;_Index2,&#32;<emphasis role="keyword">class</emphasis>&#32;_Pred&gt;
+161 std::pair&lt;_Index1,&#32;_Index2&gt;
+162 <link linkend="_namespace____pstl_1_1____unseq__backend_1a023c091ae2ba21d6c93ac71573523349">__simd_first</link>(_Index1&#32;__first1,&#32;_DifferenceType&#32;__n,&#32;_Index2&#32;__first2,&#32;_Pred&#32;__pred)&#32;<emphasis role="keyword">noexcept</emphasis>
+163 {
+164 <emphasis role="preprocessor">#if&#32;_PSTL_EARLYEXIT_PRESENT</emphasis>
+165 &#32;&#32;&#32;&#32;_DifferenceType&#32;__i&#32;=&#32;0;
+166 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2pstl_2pstl__config_8h_1a9462800627b6012423c08174792d90b3">_PSTL_PRAGMA_VECTOR_UNALIGNED</link>
+167 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2pstl_2pstl__config_8h_1a16cf82b19f295311a3fc539ea4d34cc3">_PSTL_PRAGMA_SIMD_EARLYEXIT</link>
+168 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(;&#32;__i&#32;&lt;&#32;__n;&#32;++__i)
+169 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__pred(__first1[__i],&#32;__first2[__i]))
+170 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">break</emphasis>;
+171 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;std::make_pair(__first1&#32;+&#32;__i,&#32;__first2&#32;+&#32;__i);
+172 <emphasis role="preprocessor">#else</emphasis>
+173 &#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;_Index1&#32;__last1&#32;=&#32;__first1&#32;+&#32;__n;
+174 &#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;_Index2&#32;__last2&#32;=&#32;__first2&#32;+&#32;__n;
+175 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Experiments&#32;show&#32;good&#32;block&#32;sizes&#32;like&#32;this</emphasis>
+176 &#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;_DifferenceType&#32;__block_size&#32;=&#32;8;
+177 &#32;&#32;&#32;&#32;<emphasis role="keyword">alignas</emphasis>(<link linkend="_namespace____pstl_1_1____unseq__backend_1a27c10308d5fbdecc0b2c2155df84772b">__lane_size</link>)&#32;_DifferenceType&#32;__lane[__block_size]&#32;=&#32;{0};
+178 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">while</emphasis>&#32;(__last1&#32;-&#32;__first1&#32;&gt;=&#32;__block_size)
+179 &#32;&#32;&#32;&#32;{
+180 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_DifferenceType&#32;__found&#32;=&#32;0;
+181 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_DifferenceType&#32;__i;
+182 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2pstl_2pstl__config_8h_1a9462800627b6012423c08174792d90b3">_PSTL_PRAGMA_VECTOR_UNALIGNED</link>&#32;<emphasis role="comment">//&#32;Do&#32;not&#32;generate&#32;peel&#32;loop&#32;part</emphasis>
+183 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2pstl_2pstl__config_8h_1ac51a0fce61e93aced768603992a95eb7">_PSTL_PRAGMA_SIMD_REDUCTION</link>(|
+184 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;:&#32;__found)&#32;<emphasis role="keywordflow">for</emphasis>&#32;(__i&#32;=&#32;0;&#32;__i&#32;&lt;&#32;__block_size;&#32;++__i)
+185 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+186 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;_DifferenceType&#32;__t&#32;=&#32;__pred(__first1[__i],&#32;__first2[__i]);
+187 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__lane[__i]&#32;=&#32;__t;
+188 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__found&#32;|=&#32;__t;
+189 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+190 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__found)
+191 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+192 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_DifferenceType&#32;__i2;
+193 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;This&#32;will&#32;vectorize</emphasis>
+194 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(__i2&#32;=&#32;0;&#32;__i2&#32;&lt;&#32;__block_size;&#32;++__i2)
+195 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+196 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__lane[__i2])
+197 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">break</emphasis>;
+198 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+199 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;std::make_pair(__first1&#32;+&#32;__i2,&#32;__first2&#32;+&#32;__i2);
+200 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+201 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__first1&#32;+=&#32;__block_size;
+202 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__first2&#32;+=&#32;__block_size;
+203 &#32;&#32;&#32;&#32;}
+204 
+205 &#32;&#32;&#32;&#32;<emphasis role="comment">//Keep&#32;remainder&#32;scalar</emphasis>
+206 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(;&#32;__last1&#32;!=&#32;__first1;&#32;++__first1,&#32;++__first2)
+207 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__pred(*(__first1),&#32;*(__first2)))
+208 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;std::make_pair(__first1,&#32;__first2);
+209 
+210 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;std::make_pair(__last1,&#32;__last2);
+211 <emphasis role="preprocessor">#endif&#32;</emphasis><emphasis role="comment">//_PSTL_EARLYEXIT_PRESENT</emphasis>
+212 }
+213 
+214 <emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">class</emphasis>&#32;_Index,&#32;<emphasis role="keyword">class</emphasis>&#32;_DifferenceType,&#32;<emphasis role="keyword">class</emphasis>&#32;_Pred&gt;
+215 _DifferenceType
+216 <link linkend="_namespace____pstl_1_1____unseq__backend_1aa5db97c5dd4abf4d3f9e36bb4b87246d">__simd_count</link>(_Index&#32;__index,&#32;_DifferenceType&#32;__n,&#32;_Pred&#32;__pred)&#32;<emphasis role="keyword">noexcept</emphasis>
+217 {
+218 &#32;&#32;&#32;&#32;_DifferenceType&#32;<link linkend="__classes_2lib_2include_2mmintrin_8h_1a7cee916b88079d74fdaf7856046abea3">__count</link>&#32;=&#32;0;
+219 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2pstl_2pstl__config_8h_1ac51a0fce61e93aced768603992a95eb7">_PSTL_PRAGMA_SIMD_REDUCTION</link>(+&#32;:&#32;<link linkend="__classes_2lib_2include_2mmintrin_8h_1a7cee916b88079d74fdaf7856046abea3">__count</link>)
+220 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(_DifferenceType&#32;__i&#32;=&#32;0;&#32;__i&#32;&lt;&#32;__n;&#32;++__i)
+221 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__pred(*(__index&#32;+&#32;__i)))
+222 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;++<link linkend="__classes_2lib_2include_2mmintrin_8h_1a7cee916b88079d74fdaf7856046abea3">__count</link>;
+223 
+224 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="__classes_2lib_2include_2mmintrin_8h_1a7cee916b88079d74fdaf7856046abea3">__count</link>;
+225 }
+226 
+227 <emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">class</emphasis>&#32;_InputIterator,&#32;<emphasis role="keyword">class</emphasis>&#32;_DifferenceType,&#32;<emphasis role="keyword">class</emphasis>&#32;_OutputIterator,&#32;<emphasis role="keyword">class</emphasis>&#32;_BinaryPredicate&gt;
+228 _OutputIterator
+229 <link linkend="_namespace____pstl_1_1____unseq__backend_1a8f4a13b8b7a0ae886233c0f39105d74b">__simd_unique_copy</link>(_InputIterator&#32;__first,&#32;_DifferenceType&#32;__n,&#32;_OutputIterator&#32;__result,
+230 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_BinaryPredicate&#32;__pred)&#32;<emphasis role="keyword">noexcept</emphasis>
+231 {
+232 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__n&#32;==&#32;0)
+233 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__result;
+234 
+235 &#32;&#32;&#32;&#32;_DifferenceType&#32;__cnt&#32;=&#32;1;
+236 &#32;&#32;&#32;&#32;__result[0]&#32;=&#32;__first[0];
+237 
+238 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2pstl_2pstl__config_8h_1ab3b8f78050438083ac8c8c8f45c37776">_PSTL_PRAGMA_SIMD</link>
+239 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(_DifferenceType&#32;__i&#32;=&#32;1;&#32;__i&#32;&lt;&#32;__n;&#32;++__i)
+240 &#32;&#32;&#32;&#32;{
+241 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2pstl_2pstl__config_8h_1a81e49948de40ec764395a50a414810c8">_PSTL_PRAGMA_SIMD_ORDERED_MONOTONIC</link>(__cnt&#32;:&#32;1)
+242 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(!__pred(__first[__i],&#32;__first[__i&#32;-&#32;1]))
+243 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+244 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__result[__cnt]&#32;=&#32;__first[__i];
+245 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;++__cnt;
+246 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+247 &#32;&#32;&#32;&#32;}
+248 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__result&#32;+&#32;__cnt;
+249 }
+250 
+251 <emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">class</emphasis>&#32;_InputIterator,&#32;<emphasis role="keyword">class</emphasis>&#32;_DifferenceType,&#32;<emphasis role="keyword">class</emphasis>&#32;_OutputIterator,&#32;<emphasis role="keyword">class</emphasis>&#32;_Assigner&gt;
+252 _OutputIterator
+253 <link linkend="_namespace____pstl_1_1____unseq__backend_1abf6b81f4b7a63941917bba09bed75ba7">__simd_assign</link>(_InputIterator&#32;__first,&#32;_DifferenceType&#32;__n,&#32;_OutputIterator&#32;__result,&#32;_Assigner&#32;__assigner)&#32;<emphasis role="keyword">noexcept</emphasis>
+254 {
+255 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2pstl_2pstl__config_8h_1abb1ea8e89d13c5abaa97f65868db5dcc">_PSTL_USE_NONTEMPORAL_STORES_IF_ALLOWED</link>
+256 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2pstl_2pstl__config_8h_1ab3b8f78050438083ac8c8c8f45c37776">_PSTL_PRAGMA_SIMD</link>
+257 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(_DifferenceType&#32;__i&#32;=&#32;0;&#32;__i&#32;&lt;&#32;__n;&#32;++__i)
+258 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__assigner(__first&#32;+&#32;__i,&#32;__result&#32;+&#32;__i);
+259 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__result&#32;+&#32;__n;
+260 }
+261 
+262 <emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">class</emphasis>&#32;_InputIterator,&#32;<emphasis role="keyword">class</emphasis>&#32;_DifferenceType,&#32;<emphasis role="keyword">class</emphasis>&#32;_OutputIterator,&#32;<emphasis role="keyword">class</emphasis>&#32;_UnaryPredicate&gt;
+263 _OutputIterator
+264 <link linkend="_namespace____pstl_1_1____unseq__backend_1aed82f294600d447d733a67b243739a33">__simd_copy_if</link>(_InputIterator&#32;__first,&#32;_DifferenceType&#32;__n,&#32;_OutputIterator&#32;__result,&#32;_UnaryPredicate&#32;__pred)&#32;<emphasis role="keyword">noexcept</emphasis>
+265 {
+266 &#32;&#32;&#32;&#32;_DifferenceType&#32;__cnt&#32;=&#32;0;
+267 
+268 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2pstl_2pstl__config_8h_1ab3b8f78050438083ac8c8c8f45c37776">_PSTL_PRAGMA_SIMD</link>
+269 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(_DifferenceType&#32;__i&#32;=&#32;0;&#32;__i&#32;&lt;&#32;__n;&#32;++__i)
+270 &#32;&#32;&#32;&#32;{
+271 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2pstl_2pstl__config_8h_1a81e49948de40ec764395a50a414810c8">_PSTL_PRAGMA_SIMD_ORDERED_MONOTONIC</link>(__cnt&#32;:&#32;1)
+272 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__pred(__first[__i]))
+273 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+274 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__result[__cnt]&#32;=&#32;__first[__i];
+275 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;++__cnt;
+276 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+277 &#32;&#32;&#32;&#32;}
+278 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__result&#32;+&#32;__cnt;
+279 }
+280 
+281 <emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">class</emphasis>&#32;_InputIterator,&#32;<emphasis role="keyword">class</emphasis>&#32;_DifferenceType,&#32;<emphasis role="keyword">class</emphasis>&#32;_BinaryPredicate&gt;
+282 _DifferenceType
+283 <link linkend="_namespace____pstl_1_1____unseq__backend_1a2a17cb1cac91c919487a9a14776a4b29">__simd_calc_mask_2</link>(_InputIterator&#32;__first,&#32;_DifferenceType&#32;__n,&#32;<emphasis role="keywordtype">bool</emphasis>*&#32;__mask,&#32;_BinaryPredicate&#32;__pred)&#32;<emphasis role="keyword">noexcept</emphasis>
+284 {
+285 &#32;&#32;&#32;&#32;_DifferenceType&#32;<link linkend="__classes_2lib_2include_2mmintrin_8h_1a7cee916b88079d74fdaf7856046abea3">__count</link>&#32;=&#32;0;
+286 
+287 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2pstl_2pstl__config_8h_1ac51a0fce61e93aced768603992a95eb7">_PSTL_PRAGMA_SIMD_REDUCTION</link>(+&#32;:&#32;<link linkend="__classes_2lib_2include_2mmintrin_8h_1a7cee916b88079d74fdaf7856046abea3">__count</link>)
+288 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(_DifferenceType&#32;__i&#32;=&#32;0;&#32;__i&#32;&lt;&#32;__n;&#32;++__i)
+289 &#32;&#32;&#32;&#32;{
+290 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__mask[__i]&#32;=&#32;!__pred(__first[__i],&#32;__first[__i&#32;-&#32;1]);
+291 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2mmintrin_8h_1a7cee916b88079d74fdaf7856046abea3">__count</link>&#32;+=&#32;__mask[__i];
+292 &#32;&#32;&#32;&#32;}
+293 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="__classes_2lib_2include_2mmintrin_8h_1a7cee916b88079d74fdaf7856046abea3">__count</link>;
+294 }
+295 
+296 <emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">class</emphasis>&#32;_InputIterator,&#32;<emphasis role="keyword">class</emphasis>&#32;_DifferenceType,&#32;<emphasis role="keyword">class</emphasis>&#32;_UnaryPredicate&gt;
+297 _DifferenceType
+298 <link linkend="_namespace____pstl_1_1____unseq__backend_1ac0071b0b112cd9a2338904f168f77e46">__simd_calc_mask_1</link>(_InputIterator&#32;__first,&#32;_DifferenceType&#32;__n,&#32;<emphasis role="keywordtype">bool</emphasis>*&#32;__mask,&#32;_UnaryPredicate&#32;__pred)&#32;<emphasis role="keyword">noexcept</emphasis>
+299 {
+300 &#32;&#32;&#32;&#32;_DifferenceType&#32;<link linkend="__classes_2lib_2include_2mmintrin_8h_1a7cee916b88079d74fdaf7856046abea3">__count</link>&#32;=&#32;0;
+301 
+302 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2pstl_2pstl__config_8h_1ac51a0fce61e93aced768603992a95eb7">_PSTL_PRAGMA_SIMD_REDUCTION</link>(+&#32;:&#32;<link linkend="__classes_2lib_2include_2mmintrin_8h_1a7cee916b88079d74fdaf7856046abea3">__count</link>)
+303 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(_DifferenceType&#32;__i&#32;=&#32;0;&#32;__i&#32;&lt;&#32;__n;&#32;++__i)
+304 &#32;&#32;&#32;&#32;{
+305 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__mask[__i]&#32;=&#32;__pred(__first[__i]);
+306 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2mmintrin_8h_1a7cee916b88079d74fdaf7856046abea3">__count</link>&#32;+=&#32;__mask[__i];
+307 &#32;&#32;&#32;&#32;}
+308 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="__classes_2lib_2include_2mmintrin_8h_1a7cee916b88079d74fdaf7856046abea3">__count</link>;
+309 }
+310 
+311 <emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">class</emphasis>&#32;_InputIterator,&#32;<emphasis role="keyword">class</emphasis>&#32;_DifferenceType,&#32;<emphasis role="keyword">class</emphasis>&#32;_OutputIterator,&#32;<emphasis role="keyword">class</emphasis>&#32;_Assigner&gt;
+312 <emphasis role="keywordtype">void</emphasis>
+313 <link linkend="_namespace____pstl_1_1____unseq__backend_1ab878b934153baa9dd2feb302c14a6300">__simd_copy_by_mask</link>(_InputIterator&#32;__first,&#32;_DifferenceType&#32;__n,&#32;_OutputIterator&#32;__result,&#32;<emphasis role="keywordtype">bool</emphasis>*&#32;__mask,
+314 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_Assigner&#32;__assigner)&#32;<emphasis role="keyword">noexcept</emphasis>
+315 {
+316 &#32;&#32;&#32;&#32;_DifferenceType&#32;__cnt&#32;=&#32;0;
+317 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2pstl_2pstl__config_8h_1ab3b8f78050438083ac8c8c8f45c37776">_PSTL_PRAGMA_SIMD</link>
+318 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(_DifferenceType&#32;__i&#32;=&#32;0;&#32;__i&#32;&lt;&#32;__n;&#32;++__i)
+319 &#32;&#32;&#32;&#32;{
+320 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__mask[__i])
+321 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+322 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2pstl_2pstl__config_8h_1a81e49948de40ec764395a50a414810c8">_PSTL_PRAGMA_SIMD_ORDERED_MONOTONIC</link>(__cnt&#32;:&#32;1)
+323 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+324 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__assigner(__first&#32;+&#32;__i,&#32;__result&#32;+&#32;__cnt);
+325 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;++__cnt;
+326 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+327 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+328 &#32;&#32;&#32;&#32;}
+329 }
+330 
+331 <emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">class</emphasis>&#32;_InputIterator,&#32;<emphasis role="keyword">class</emphasis>&#32;_DifferenceType,&#32;<emphasis role="keyword">class</emphasis>&#32;_OutputIterator1,&#32;<emphasis role="keyword">class</emphasis>&#32;_OutputIterator2&gt;
+332 <emphasis role="keywordtype">void</emphasis>
+333 <link linkend="_namespace____pstl_1_1____unseq__backend_1a496b19bf0c9d0074ec201b5925959300">__simd_partition_by_mask</link>(_InputIterator&#32;__first,&#32;_DifferenceType&#32;__n,&#32;_OutputIterator1&#32;__out_true,
+334 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_OutputIterator2&#32;__out_false,&#32;<emphasis role="keywordtype">bool</emphasis>*&#32;__mask)&#32;<emphasis role="keyword">noexcept</emphasis>
+335 {
+336 &#32;&#32;&#32;&#32;_DifferenceType&#32;__cnt_true&#32;=&#32;0,&#32;__cnt_false&#32;=&#32;0;
+337 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2pstl_2pstl__config_8h_1ab3b8f78050438083ac8c8c8f45c37776">_PSTL_PRAGMA_SIMD</link>
+338 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(_DifferenceType&#32;__i&#32;=&#32;0;&#32;__i&#32;&lt;&#32;__n;&#32;++__i)
+339 &#32;&#32;&#32;&#32;{
+340 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2pstl_2pstl__config_8h_1aff659a8a7303fb2c174c6e4103102021">_PSTL_PRAGMA_SIMD_ORDERED_MONOTONIC_2ARGS</link>(__cnt_true&#32;:&#32;1,&#32;__cnt_false&#32;:&#32;1)
+341 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__mask[__i])
+342 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+343 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__out_true[__cnt_true]&#32;=&#32;__first[__i];
+344 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;++__cnt_true;
+345 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+346 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>
+347 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+348 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__out_false[__cnt_false]&#32;=&#32;__first[__i];
+349 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;++__cnt_false;
+350 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+351 &#32;&#32;&#32;&#32;}
+352 }
+353 
+354 <emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">class</emphasis>&#32;_Index,&#32;<emphasis role="keyword">class</emphasis>&#32;_DifferenceType,&#32;<emphasis role="keyword">class</emphasis>&#32;_Tp&gt;
+355 _Index
+356 <link linkend="_namespace____pstl_1_1____unseq__backend_1a983f96df75978314ca65ca251d12dcca">__simd_fill_n</link>(_Index&#32;__first,&#32;_DifferenceType&#32;__n,&#32;<emphasis role="keyword">const</emphasis>&#32;_Tp&amp;&#32;__value)&#32;<emphasis role="keyword">noexcept</emphasis>
+357 {
+358 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2pstl_2pstl__config_8h_1abb1ea8e89d13c5abaa97f65868db5dcc">_PSTL_USE_NONTEMPORAL_STORES_IF_ALLOWED</link>
+359 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2pstl_2pstl__config_8h_1ab3b8f78050438083ac8c8c8f45c37776">_PSTL_PRAGMA_SIMD</link>
+360 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(_DifferenceType&#32;__i&#32;=&#32;0;&#32;__i&#32;&lt;&#32;__n;&#32;++__i)
+361 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__first[__i]&#32;=&#32;__value;
+362 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__first&#32;+&#32;__n;
+363 }
+364 
+365 <emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">class</emphasis>&#32;_Index,&#32;<emphasis role="keyword">class</emphasis>&#32;_DifferenceType,&#32;<emphasis role="keyword">class</emphasis>&#32;_Generator&gt;
+366 _Index
+367 <link linkend="_namespace____pstl_1_1____unseq__backend_1a688fc4a4ac7c94084efa0a2ba118fbbd">__simd_generate_n</link>(_Index&#32;__first,&#32;_DifferenceType&#32;__size,&#32;_Generator&#32;__g)&#32;<emphasis role="keyword">noexcept</emphasis>
+368 {
+369 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2pstl_2pstl__config_8h_1abb1ea8e89d13c5abaa97f65868db5dcc">_PSTL_USE_NONTEMPORAL_STORES_IF_ALLOWED</link>
+370 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2pstl_2pstl__config_8h_1ab3b8f78050438083ac8c8c8f45c37776">_PSTL_PRAGMA_SIMD</link>
+371 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(_DifferenceType&#32;__i&#32;=&#32;0;&#32;__i&#32;&lt;&#32;__size;&#32;++__i)
+372 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__first[__i]&#32;=&#32;__g();
+373 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__first&#32;+&#32;__size;
+374 }
+375 
+376 <emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">class</emphasis>&#32;_Index,&#32;<emphasis role="keyword">class</emphasis>&#32;_BinaryPredicate&gt;
+377 _Index
+378 <link linkend="_namespace____pstl_1_1____unseq__backend_1adc51efbb93e46158542f104631cfa2e3">__simd_adjacent_find</link>(_Index&#32;__first,&#32;_Index&#32;__last,&#32;_BinaryPredicate&#32;__pred,&#32;<emphasis role="keywordtype">bool</emphasis>&#32;__or_semantic)&#32;<emphasis role="keyword">noexcept</emphasis>
+379 {
+380 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__last&#32;-&#32;__first&#32;&lt;&#32;2)
+381 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__last;
+382 
+383 &#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">typename</emphasis>&#32;std::iterator_traits&lt;_Index&gt;::difference_type&#32;_DifferenceType;
+384 &#32;&#32;&#32;&#32;_DifferenceType&#32;__i&#32;=&#32;0;
+385 
+386 <emphasis role="preprocessor">#if&#32;_PSTL_EARLYEXIT_PRESENT</emphasis>
+387 &#32;&#32;&#32;&#32;<emphasis role="comment">//Some&#32;compiler&#32;versions&#32;fail&#32;to&#32;compile&#32;the&#32;following&#32;loop&#32;when&#32;iterators&#32;are&#32;used.&#32;Indices&#32;are&#32;used&#32;instead</emphasis>
+388 &#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;_DifferenceType&#32;__n&#32;=&#32;__last&#32;-&#32;__first&#32;-&#32;1;
+389 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2pstl_2pstl__config_8h_1a9462800627b6012423c08174792d90b3">_PSTL_PRAGMA_VECTOR_UNALIGNED</link>
+390 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2pstl_2pstl__config_8h_1a16cf82b19f295311a3fc539ea4d34cc3">_PSTL_PRAGMA_SIMD_EARLYEXIT</link>
+391 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(;&#32;__i&#32;&lt;&#32;__n;&#32;++__i)
+392 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__pred(__first[__i],&#32;__first[__i&#32;+&#32;1]))
+393 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">break</emphasis>;
+394 
+395 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__i&#32;&lt;&#32;__n&#32;?&#32;__first&#32;+&#32;__i&#32;:&#32;__last;
+396 <emphasis role="preprocessor">#else</emphasis>
+397 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Experiments&#32;show&#32;good&#32;block&#32;sizes&#32;like&#32;this</emphasis>
+398 &#32;&#32;&#32;&#32;<emphasis role="comment">//TODO:&#32;to&#32;consider&#32;tuning&#32;block_size&#32;for&#32;various&#32;data&#32;types</emphasis>
+399 &#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;_DifferenceType&#32;__block_size&#32;=&#32;8;
+400 &#32;&#32;&#32;&#32;<emphasis role="keyword">alignas</emphasis>(<link linkend="_namespace____pstl_1_1____unseq__backend_1a27c10308d5fbdecc0b2c2155df84772b">__lane_size</link>)&#32;_DifferenceType&#32;__lane[__block_size]&#32;=&#32;{0};
+401 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">while</emphasis>&#32;(__last&#32;-&#32;__first&#32;&gt;=&#32;__block_size)
+402 &#32;&#32;&#32;&#32;{
+403 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_DifferenceType&#32;__found&#32;=&#32;0;
+404 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2pstl_2pstl__config_8h_1a9462800627b6012423c08174792d90b3">_PSTL_PRAGMA_VECTOR_UNALIGNED</link>&#32;<emphasis role="comment">//&#32;Do&#32;not&#32;generate&#32;peel&#32;loop&#32;part</emphasis>
+405 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2pstl_2pstl__config_8h_1ac51a0fce61e93aced768603992a95eb7">_PSTL_PRAGMA_SIMD_REDUCTION</link>(|
+406 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;:&#32;__found)&#32;<emphasis role="keywordflow">for</emphasis>&#32;(__i&#32;=&#32;0;&#32;__i&#32;&lt;&#32;__block_size&#32;-&#32;1;&#32;++__i)
+407 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+408 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//TODO:&#32;to&#32;improve&#32;SIMD&#32;vectorization</emphasis>
+409 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;_DifferenceType&#32;__t&#32;=&#32;__pred(*(__first&#32;+&#32;__i),&#32;*(__first&#32;+&#32;__i&#32;+&#32;1));
+410 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__lane[__i]&#32;=&#32;__t;
+411 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__found&#32;|=&#32;__t;
+412 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+413 
+414 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//Process&#32;a&#32;pair&#32;of&#32;elements&#32;on&#32;a&#32;boundary&#32;of&#32;a&#32;data&#32;block</emphasis>
+415 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__first&#32;+&#32;__block_size&#32;&lt;&#32;__last&#32;&amp;&amp;&#32;__pred(*(__first&#32;+&#32;__i),&#32;*(__first&#32;+&#32;__i&#32;+&#32;1)))
+416 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__lane[__i]&#32;=&#32;__found&#32;=&#32;1;
+417 
+418 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__found)
+419 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+420 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__or_semantic)
+421 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__first;
+422 
+423 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;This&#32;will&#32;vectorize</emphasis>
+424 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(__i&#32;=&#32;0;&#32;__i&#32;&lt;&#32;__block_size;&#32;++__i)
+425 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__lane[__i])
+426 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">break</emphasis>;
+427 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__first&#32;+&#32;__i;&#32;<emphasis role="comment">//As&#32;far&#32;as&#32;found&#32;is&#32;true&#32;a&#32;__result&#32;(__lane[__i]&#32;is&#32;true)&#32;is&#32;guaranteed</emphasis>
+428 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+429 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__first&#32;+=&#32;__block_size;
+430 &#32;&#32;&#32;&#32;}
+431 &#32;&#32;&#32;&#32;<emphasis role="comment">//Process&#32;the&#32;rest&#32;elements</emphasis>
+432 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(;&#32;__last&#32;-&#32;__first&#32;&gt;&#32;1;&#32;++__first)
+433 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__pred(*__first,&#32;*(__first&#32;+&#32;1)))
+434 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__first;
+435 
+436 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__last;
+437 <emphasis role="preprocessor">#endif</emphasis>
+438 }
+439 
+440 <emphasis role="comment">//&#32;It&#32;was&#32;created&#32;to&#32;reduce&#32;the&#32;code&#32;inside&#32;std::enable_if</emphasis>
+441 <emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp,&#32;<emphasis role="keyword">typename</emphasis>&#32;_BinaryOperation&gt;
+442 <emphasis role="keyword">using&#32;</emphasis><link linkend="_namespace____pstl_1_1____unseq__backend_1a13c5fe9fe0a5bf280299db1159ff6858">is_arithmetic_plus</link>&#32;=&#32;std::integral_constant&lt;bool,&#32;std::is_arithmetic&lt;_Tp&gt;::value&#32;&amp;&amp;
+443 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;std::is_same&lt;_BinaryOperation,&#32;std::plus&lt;_Tp&gt;&gt;<link linkend="_classvalue">::value</link>&gt;;
+444 
+445 <emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">typename</emphasis>&#32;_DifferenceType,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Tp,&#32;<emphasis role="keyword">typename</emphasis>&#32;_BinaryOperation,&#32;<emphasis role="keyword">typename</emphasis>&#32;_UnaryOperation&gt;
+446 <emphasis role="keyword">typename</emphasis>&#32;std::enable_if&lt;is_arithmetic_plus&lt;_Tp,&#32;_BinaryOperation&gt;::value,&#32;_Tp&gt;<link linkend="__classes_2_gameobj_8h_1a890efa53b3d7deeeced6f3a0d6653ed3">::type</link>
+447 <link linkend="_namespace____pstl_1_1____unseq__backend_1afc12596caaca4854e89120ed63e7261e">__simd_transform_reduce</link>(_DifferenceType&#32;__n,&#32;_Tp&#32;__init,&#32;_BinaryOperation,&#32;_UnaryOperation&#32;__f)&#32;<emphasis role="keyword">noexcept</emphasis>
+448 {
+449 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2pstl_2pstl__config_8h_1ac51a0fce61e93aced768603992a95eb7">_PSTL_PRAGMA_SIMD_REDUCTION</link>(+&#32;:&#32;__init)
+450 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(_DifferenceType&#32;__i&#32;=&#32;0;&#32;__i&#32;&lt;&#32;__n;&#32;++__i)
+451 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__init&#32;+=&#32;__f(__i);
+452 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__init;
+453 }
+454 
+455 <emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">typename</emphasis>&#32;_Size,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Tp,&#32;<emphasis role="keyword">typename</emphasis>&#32;_BinaryOperation,&#32;<emphasis role="keyword">typename</emphasis>&#32;_UnaryOperation&gt;
+456 <emphasis role="keyword">typename</emphasis>&#32;std::enable_if&lt;!is_arithmetic_plus&lt;_Tp,&#32;_BinaryOperation&gt;::value,&#32;_Tp&gt;<link linkend="__classes_2_gameobj_8h_1a890efa53b3d7deeeced6f3a0d6653ed3">::type</link>
+457 <link linkend="_namespace____pstl_1_1____unseq__backend_1afc12596caaca4854e89120ed63e7261e">__simd_transform_reduce</link>(_Size&#32;__n,&#32;_Tp&#32;__init,&#32;_BinaryOperation&#32;__binary_op,&#32;_UnaryOperation&#32;__f)&#32;<emphasis role="keyword">noexcept</emphasis>
+458 {
+459 &#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;_Size&#32;__block_size&#32;=&#32;<link linkend="_namespace____pstl_1_1____unseq__backend_1a27c10308d5fbdecc0b2c2155df84772b">__lane_size</link>&#32;/&#32;<emphasis role="keyword">sizeof</emphasis>(_Tp);
+460 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__n&#32;&gt;&#32;2&#32;*&#32;__block_size&#32;&amp;&amp;&#32;__block_size&#32;&gt;&#32;1)
+461 &#32;&#32;&#32;&#32;{
+462 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">alignas</emphasis>(<link linkend="_namespace____pstl_1_1____unseq__backend_1a27c10308d5fbdecc0b2c2155df84772b">__lane_size</link>)&#32;<emphasis role="keywordtype">char</emphasis>&#32;__lane_[<link linkend="_namespace____pstl_1_1____unseq__backend_1a27c10308d5fbdecc0b2c2155df84772b">__lane_size</link>];
+463 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_Tp*&#32;__lane&#32;=&#32;<emphasis role="keyword">reinterpret_cast&lt;</emphasis>_Tp*<emphasis role="keyword">&gt;</emphasis>(__lane_);
+464 
+465 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;initializer</emphasis>
+466 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2pstl_2pstl__config_8h_1ab3b8f78050438083ac8c8c8f45c37776">_PSTL_PRAGMA_SIMD</link>
+467 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(_Size&#32;__i&#32;=&#32;0;&#32;__i&#32;&lt;&#32;__block_size;&#32;++__i)
+468 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+469 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;::new&#32;(__lane&#32;+&#32;__i)&#32;_Tp(__binary_op(__f(__i),&#32;__f(__block_size&#32;+&#32;__i)));
+470 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+471 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;main&#32;loop</emphasis>
+472 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_Size&#32;__i&#32;=&#32;2&#32;*&#32;__block_size;
+473 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;_Size&#32;last_iteration&#32;=&#32;__block_size&#32;*&#32;(__n&#32;/&#32;__block_size);
+474 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(;&#32;__i&#32;&lt;&#32;last_iteration;&#32;__i&#32;+=&#32;__block_size)
+475 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+476 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2pstl_2pstl__config_8h_1ab3b8f78050438083ac8c8c8f45c37776">_PSTL_PRAGMA_SIMD</link>
+477 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(_Size&#32;__j&#32;=&#32;0;&#32;__j&#32;&lt;&#32;__block_size;&#32;++__j)
+478 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+479 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__lane[__j]&#32;=&#32;__binary_op(__lane[__j],&#32;__f(__i&#32;+&#32;__j));
+480 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+481 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+482 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;remainder</emphasis>
+483 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2pstl_2pstl__config_8h_1ab3b8f78050438083ac8c8c8f45c37776">_PSTL_PRAGMA_SIMD</link>
+484 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(_Size&#32;__j&#32;=&#32;0;&#32;__j&#32;&lt;&#32;__n&#32;-&#32;last_iteration;&#32;++__j)
+485 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+486 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__lane[__j]&#32;=&#32;__binary_op(__lane[__j],&#32;__f(last_iteration&#32;+&#32;__j));
+487 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+488 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;combiner</emphasis>
+489 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(_Size&#32;__j&#32;=&#32;0;&#32;__j&#32;&lt;&#32;__block_size;&#32;++__j)
+490 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+491 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__init&#32;=&#32;__binary_op(__init,&#32;__lane[__j]);
+492 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+493 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;destroyer</emphasis>
+494 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2pstl_2pstl__config_8h_1ab3b8f78050438083ac8c8c8f45c37776">_PSTL_PRAGMA_SIMD</link>
+495 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(_Size&#32;__j&#32;=&#32;0;&#32;__j&#32;&lt;&#32;__block_size;&#32;++__j)
+496 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+497 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__lane[__j].~_Tp();
+498 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+499 &#32;&#32;&#32;&#32;}
+500 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>
+501 &#32;&#32;&#32;&#32;{
+502 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(_Size&#32;__i&#32;=&#32;0;&#32;__i&#32;&lt;&#32;__n;&#32;++__i)
+503 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+504 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__init&#32;=&#32;__binary_op(__init,&#32;__f(__i));
+505 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+506 &#32;&#32;&#32;&#32;}
+507 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__init;
+508 }
+509 
+510 <emphasis role="comment">//&#32;Exclusive&#32;scan&#32;for&#32;&quot;+&quot;&#32;and&#32;arithmetic&#32;types</emphasis>
+511 <emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">class&#32;</emphasis>_InputIterator,&#32;<emphasis role="keyword">class&#32;</emphasis>_Size,&#32;<emphasis role="keyword">class&#32;</emphasis>_OutputIterator,&#32;<emphasis role="keyword">class&#32;</emphasis>_UnaryOperation,&#32;<emphasis role="keyword">class&#32;</emphasis>_Tp,
+512 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">class&#32;</emphasis>_BinaryOperation&gt;
+513 <emphasis role="keyword">typename</emphasis>&#32;std::enable_if&lt;is_arithmetic_plus&lt;_Tp,&#32;_BinaryOperation&gt;::value,&#32;std::pair&lt;_OutputIterator,&#32;_Tp&gt;&gt;<link linkend="__classes_2_gameobj_8h_1a890efa53b3d7deeeced6f3a0d6653ed3">::type</link>
+514 <link linkend="_namespace____pstl_1_1____unseq__backend_1ab2bb4d082cad248f414d6cd55326980c">__simd_scan</link>(_InputIterator&#32;__first,&#32;_Size&#32;__n,&#32;_OutputIterator&#32;__result,&#32;_UnaryOperation&#32;__unary_op,&#32;_Tp&#32;__init,
+515 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_BinaryOperation,&#32;<emphasis role="comment">/*Inclusive*/</emphasis>&#32;std::false_type)
+516 {
+517 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2pstl_2pstl__config_8h_1a0b3d5b5fb721ca6eaa9134cb63477edc">_PSTL_PRAGMA_SIMD_SCAN</link>(+&#32;:&#32;__init)
+518 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(_Size&#32;__i&#32;=&#32;0;&#32;__i&#32;&lt;&#32;__n;&#32;++__i)
+519 &#32;&#32;&#32;&#32;{
+520 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__result[__i]&#32;=&#32;__init;
+521 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2pstl_2pstl__config_8h_1a42ed9ed1fa6d58d78b66bd73c39e25e3">_PSTL_PRAGMA_SIMD_EXCLUSIVE_SCAN</link>(__init)
+522 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__init&#32;+=&#32;__unary_op(__first[__i]);
+523 &#32;&#32;&#32;&#32;}
+524 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;std::make_pair(__result&#32;+&#32;__n,&#32;__init);
+525 }
+526 
+527 <emphasis role="comment">//&#32;As&#32;soon&#32;as&#32;we&#32;cannot&#32;call&#32;__binary_op&#32;in&#32;&quot;combiner&quot;&#32;we&#32;create&#32;a&#32;wrapper&#32;over&#32;_Tp&#32;to&#32;encapsulate&#32;__binary_op</emphasis>
+528 <emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp,&#32;<emphasis role="keyword">typename</emphasis>&#32;_BinaryOp&gt;
+529 <emphasis role="keyword">struct&#32;</emphasis><link linkend="_struct____pstl_1_1____unseq__backend_1_1___combiner">_Combiner</link>
+530 {
+531 &#32;&#32;&#32;&#32;_Tp&#32;<link linkend="_struct____pstl_1_1____unseq__backend_1_1___combiner_1ae3f12809088966acebee2627d5df0542">__value</link>;
+532 &#32;&#32;&#32;&#32;_BinaryOp*&#32;<link linkend="_struct____pstl_1_1____unseq__backend_1_1___combiner_1a8049f95d9f64f9662699f902e8c6384f">__bin_op</link>;&#32;<emphasis role="comment">//&#32;Here&#32;is&#32;a&#32;pointer&#32;to&#32;function&#32;because&#32;of&#32;default&#32;ctor</emphasis>
+533 
+534 &#32;&#32;&#32;&#32;<link linkend="_struct____pstl_1_1____unseq__backend_1_1___combiner_1a7e8bcc3679f3b7d77efdb871fa8ad0eb">_Combiner</link>()&#32;:&#32;<link linkend="_struct____pstl_1_1____unseq__backend_1_1___combiner_1ae3f12809088966acebee2627d5df0542">__value</link>{},&#32;<link linkend="_struct____pstl_1_1____unseq__backend_1_1___combiner_1a8049f95d9f64f9662699f902e8c6384f">__bin_op</link>(nullptr)&#32;{}
+535 &#32;&#32;&#32;&#32;<link linkend="_struct____pstl_1_1____unseq__backend_1_1___combiner_1af531fb64193b931a4fba10d45293115e">_Combiner</link>(<emphasis role="keyword">const</emphasis>&#32;_Tp&amp;&#32;<link linkend="_classvalue">value</link>,&#32;<emphasis role="keyword">const</emphasis>&#32;_BinaryOp*&#32;bin_op)&#32;:&#32;<link linkend="_struct____pstl_1_1____unseq__backend_1_1___combiner_1ae3f12809088966acebee2627d5df0542">__value</link>(<link linkend="_classvalue">value</link>),&#32;<link linkend="_struct____pstl_1_1____unseq__backend_1_1___combiner_1a8049f95d9f64f9662699f902e8c6384f">__bin_op</link>(const_cast&lt;_BinaryOp*&gt;(bin_op))&#32;{}
+536 &#32;&#32;&#32;&#32;<link linkend="_struct____pstl_1_1____unseq__backend_1_1___combiner_1a02bd96ecf308ee199321c8c1d1cf8be3">_Combiner</link>(<emphasis role="keyword">const</emphasis>&#32;<link linkend="_struct____pstl_1_1____unseq__backend_1_1___combiner">_Combiner</link>&amp;&#32;__obj)&#32;:&#32;<link linkend="_struct____pstl_1_1____unseq__backend_1_1___combiner_1ae3f12809088966acebee2627d5df0542">__value</link>{},&#32;<link linkend="_struct____pstl_1_1____unseq__backend_1_1___combiner_1a8049f95d9f64f9662699f902e8c6384f">__bin_op</link>(__obj.<link linkend="_struct____pstl_1_1____unseq__backend_1_1___combiner_1a8049f95d9f64f9662699f902e8c6384f">__bin_op</link>)&#32;{}
+537 
+538 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+539 &#32;&#32;&#32;&#32;<link linkend="_struct____pstl_1_1____unseq__backend_1_1___combiner_1a14e3f7a2c7c1cf6c59776f60642482b4">operator()</link>(<emphasis role="keyword">const</emphasis>&#32;<link linkend="_struct____pstl_1_1____unseq__backend_1_1___combiner">_Combiner</link>&amp;&#32;__obj)
+540 &#32;&#32;&#32;&#32;{
+541 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_struct____pstl_1_1____unseq__backend_1_1___combiner_1ae3f12809088966acebee2627d5df0542">__value</link>&#32;=&#32;(*__bin_op)(<link linkend="_struct____pstl_1_1____unseq__backend_1_1___combiner_1ae3f12809088966acebee2627d5df0542">__value</link>,&#32;__obj.<link linkend="_struct____pstl_1_1____unseq__backend_1_1___combiner_1ae3f12809088966acebee2627d5df0542">__value</link>);
+542 &#32;&#32;&#32;&#32;}
+543 };
+544 
+545 <emphasis role="comment">//&#32;Exclusive&#32;scan&#32;for&#32;other&#32;binary&#32;operations&#32;and&#32;types</emphasis>
+546 <emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">class&#32;</emphasis>_InputIterator,&#32;<emphasis role="keyword">class&#32;</emphasis>_Size,&#32;<emphasis role="keyword">class&#32;</emphasis>_OutputIterator,&#32;<emphasis role="keyword">class&#32;</emphasis>_UnaryOperation,&#32;<emphasis role="keyword">class&#32;</emphasis>_Tp,
+547 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">class&#32;</emphasis>_BinaryOperation&gt;
+548 <emphasis role="keyword">typename</emphasis>&#32;std::enable_if&lt;!is_arithmetic_plus&lt;_Tp,&#32;_BinaryOperation&gt;::value,&#32;std::pair&lt;_OutputIterator,&#32;_Tp&gt;&gt;<link linkend="__classes_2_gameobj_8h_1a890efa53b3d7deeeced6f3a0d6653ed3">::type</link>
+549 <link linkend="_namespace____pstl_1_1____unseq__backend_1ab2bb4d082cad248f414d6cd55326980c">__simd_scan</link>(_InputIterator&#32;__first,&#32;_Size&#32;__n,&#32;_OutputIterator&#32;__result,&#32;_UnaryOperation&#32;__unary_op,&#32;_Tp&#32;__init,
+550 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_BinaryOperation&#32;__binary_op,&#32;<emphasis role="comment">/*Inclusive*/</emphasis>&#32;std::false_type)
+551 {
+552 &#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<link linkend="_struct____pstl_1_1____unseq__backend_1_1___combiner">_Combiner&lt;_Tp, _BinaryOperation&gt;</link>&#32;_CombinerType;
+553 &#32;&#32;&#32;&#32;_CombinerType&#32;__init_{__init,&#32;&amp;__binary_op};
+554 
+555 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2pstl_2pstl__config_8h_1a8a9e21bb812ab9788e727ad3fda8c2f8">_PSTL_PRAGMA_DECLARE_REDUCTION</link>(__bin_op,&#32;_CombinerType)
+556 
+557 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2pstl_2pstl__config_8h_1a0b3d5b5fb721ca6eaa9134cb63477edc">_PSTL_PRAGMA_SIMD_SCAN</link>(__bin_op&#32;:&#32;__init_)
+558 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(_Size&#32;__i&#32;=&#32;0;&#32;__i&#32;&lt;&#32;__n;&#32;++__i)
+559 &#32;&#32;&#32;&#32;{
+560 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__result[__i]&#32;=&#32;__init_.<link linkend="_struct____pstl_1_1____unseq__backend_1_1___combiner_1ae3f12809088966acebee2627d5df0542">__value</link>;
+561 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2pstl_2pstl__config_8h_1a42ed9ed1fa6d58d78b66bd73c39e25e3">_PSTL_PRAGMA_SIMD_EXCLUSIVE_SCAN</link>(__init_)
+562 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2pstl_2pstl__config_8h_1ac4da865ecd911c850842ba22933784aa">_PSTL_PRAGMA_FORCEINLINE</link>
+563 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__init_.__value&#32;=&#32;__binary_op(__init_.__value,&#32;__unary_op(__first[__i]));
+564 &#32;&#32;&#32;&#32;}
+565 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;std::make_pair(__result&#32;+&#32;__n,&#32;__init_.__value);
+566 }
+567 
+568 <emphasis role="comment">//&#32;Inclusive&#32;scan&#32;for&#32;&quot;+&quot;&#32;and&#32;arithmetic&#32;types</emphasis>
+569 <emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">class&#32;</emphasis>_InputIterator,&#32;<emphasis role="keyword">class&#32;</emphasis>_Size,&#32;<emphasis role="keyword">class&#32;</emphasis>_OutputIterator,&#32;<emphasis role="keyword">class&#32;</emphasis>_UnaryOperation,&#32;<emphasis role="keyword">class&#32;</emphasis>_Tp,
+570 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">class&#32;</emphasis>_BinaryOperation&gt;
+571 <emphasis role="keyword">typename</emphasis>&#32;std::enable_if&lt;is_arithmetic_plus&lt;_Tp,&#32;_BinaryOperation&gt;::value,&#32;std::pair&lt;_OutputIterator,&#32;_Tp&gt;&gt;<link linkend="__classes_2_gameobj_8h_1a890efa53b3d7deeeced6f3a0d6653ed3">::type</link>
+572 <link linkend="_namespace____pstl_1_1____unseq__backend_1ab2bb4d082cad248f414d6cd55326980c">__simd_scan</link>(_InputIterator&#32;__first,&#32;_Size&#32;__n,&#32;_OutputIterator&#32;__result,&#32;_UnaryOperation&#32;__unary_op,&#32;_Tp&#32;__init,
+573 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_BinaryOperation,&#32;<emphasis role="comment">/*Inclusive*/</emphasis>&#32;std::true_type)
+574 {
+575 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2pstl_2pstl__config_8h_1a0b3d5b5fb721ca6eaa9134cb63477edc">_PSTL_PRAGMA_SIMD_SCAN</link>(+&#32;:&#32;__init)
+576 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(_Size&#32;__i&#32;=&#32;0;&#32;__i&#32;&lt;&#32;__n;&#32;++__i)
+577 &#32;&#32;&#32;&#32;{
+578 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__init&#32;+=&#32;__unary_op(__first[__i]);
+579 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2pstl_2pstl__config_8h_1aebac0a32c4fb5ea6bd5846d62170cab9">_PSTL_PRAGMA_SIMD_INCLUSIVE_SCAN</link>(__init)
+580 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__result[__i]&#32;=&#32;__init;
+581 &#32;&#32;&#32;&#32;}
+582 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;std::make_pair(__result&#32;+&#32;__n,&#32;__init);
+583 }
+584 
+585 <emphasis role="comment">//&#32;Inclusive&#32;scan&#32;for&#32;other&#32;binary&#32;operations&#32;and&#32;types</emphasis>
+586 <emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">class&#32;</emphasis>_InputIterator,&#32;<emphasis role="keyword">class&#32;</emphasis>_Size,&#32;<emphasis role="keyword">class&#32;</emphasis>_OutputIterator,&#32;<emphasis role="keyword">class&#32;</emphasis>_UnaryOperation,&#32;<emphasis role="keyword">class&#32;</emphasis>_Tp,
+587 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">class&#32;</emphasis>_BinaryOperation&gt;
+588 <emphasis role="keyword">typename</emphasis>&#32;std::enable_if&lt;!is_arithmetic_plus&lt;_Tp,&#32;_BinaryOperation&gt;::value,&#32;std::pair&lt;_OutputIterator,&#32;_Tp&gt;&gt;<link linkend="__classes_2_gameobj_8h_1a890efa53b3d7deeeced6f3a0d6653ed3">::type</link>
+589 <link linkend="_namespace____pstl_1_1____unseq__backend_1ab2bb4d082cad248f414d6cd55326980c">__simd_scan</link>(_InputIterator&#32;__first,&#32;_Size&#32;__n,&#32;_OutputIterator&#32;__result,&#32;_UnaryOperation&#32;__unary_op,&#32;_Tp&#32;__init,
+590 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_BinaryOperation&#32;__binary_op,&#32;std::true_type)
+591 {
+592 &#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<link linkend="_struct____pstl_1_1____unseq__backend_1_1___combiner">_Combiner&lt;_Tp, _BinaryOperation&gt;</link>&#32;_CombinerType;
+593 &#32;&#32;&#32;&#32;_CombinerType&#32;__init_{__init,&#32;&amp;__binary_op};
+594 
+595 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2pstl_2pstl__config_8h_1a8a9e21bb812ab9788e727ad3fda8c2f8">_PSTL_PRAGMA_DECLARE_REDUCTION</link>(__bin_op,&#32;_CombinerType)
+596 
+597 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2pstl_2pstl__config_8h_1a0b3d5b5fb721ca6eaa9134cb63477edc">_PSTL_PRAGMA_SIMD_SCAN</link>(__bin_op&#32;:&#32;__init_)
+598 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(_Size&#32;__i&#32;=&#32;0;&#32;__i&#32;&lt;&#32;__n;&#32;++__i)
+599 &#32;&#32;&#32;&#32;{
+600 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2pstl_2pstl__config_8h_1ac4da865ecd911c850842ba22933784aa">_PSTL_PRAGMA_FORCEINLINE</link>
+601 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__init_.<link linkend="_struct____pstl_1_1____unseq__backend_1_1___combiner_1ae3f12809088966acebee2627d5df0542">__value</link>&#32;=&#32;__binary_op(__init_.__value,&#32;__unary_op(__first[__i]));
+602 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2pstl_2pstl__config_8h_1aebac0a32c4fb5ea6bd5846d62170cab9">_PSTL_PRAGMA_SIMD_INCLUSIVE_SCAN</link>(__init_)
+603 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__result[__i]&#32;=&#32;__init_.__value;
+604 &#32;&#32;&#32;&#32;}
+605 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;std::make_pair(__result&#32;+&#32;__n,&#32;__init_.__value);
+606 }
+607 
+608 <emphasis role="comment">//&#32;[restriction]&#32;-&#32;std::iterator_traits&lt;_ForwardIterator&gt;::value_type&#32;should&#32;be&#32;DefaultConstructible.</emphasis>
+609 <emphasis role="comment">//&#32;complexity&#32;[violation]&#32;-&#32;We&#32;will&#32;have&#32;at&#32;most&#32;(__n-1&#32;+&#32;number_of_lanes)&#32;comparisons&#32;instead&#32;of&#32;at&#32;most&#32;__n-1.</emphasis>
+610 <emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">typename</emphasis>&#32;_ForwardIterator,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Size,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Compare&gt;
+611 _ForwardIterator
+612 <link linkend="_namespace____pstl_1_1____unseq__backend_1abef9031d6d8ae9b085d54cbfc8fd0b7e">__simd_min_element</link>(_ForwardIterator&#32;__first,&#32;_Size&#32;__n,&#32;_Compare&#32;__comp)&#32;<emphasis role="keyword">noexcept</emphasis>
+613 {
+614 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__n&#32;==&#32;0)
+615 &#32;&#32;&#32;&#32;{
+616 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__first;
+617 &#32;&#32;&#32;&#32;}
+618 
+619 &#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">typename</emphasis>&#32;std::iterator_traits&lt;_ForwardIterator&gt;::value_type&#32;_ValueType;
+620 &#32;&#32;&#32;&#32;<emphasis role="keyword">struct&#32;</emphasis>_ComplexType
+621 &#32;&#32;&#32;&#32;{
+622 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_ValueType&#32;__min_val;
+623 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_Size&#32;__min_ind;
+624 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_Compare*&#32;__min_comp;
+625 
+626 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_ComplexType()&#32;:&#32;__min_val{},&#32;__min_ind{},&#32;__min_comp(<emphasis role="keyword">nullptr</emphasis>)&#32;{}
+627 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_ComplexType(<emphasis role="keyword">const</emphasis>&#32;_ValueType&amp;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1aa857b95cc76669c2a9109239ef40a47c">val</link>,&#32;<emphasis role="keyword">const</emphasis>&#32;_Compare*&#32;<link linkend="__classes_2lib_2glm_2test_2core_2core__type__vec4_8cpp_1a50b69e8e55167990c85f65e0a656e294">comp</link>)
+628 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;:&#32;__min_val(<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1aa857b95cc76669c2a9109239ef40a47c">val</link>),&#32;__min_ind(0),&#32;__min_comp(<emphasis role="keyword">const_cast&lt;</emphasis>_Compare*<emphasis role="keyword">&gt;</emphasis>(<link linkend="__classes_2lib_2glm_2test_2core_2core__type__vec4_8cpp_1a50b69e8e55167990c85f65e0a656e294">comp</link>))
+629 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+630 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+631 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_ComplexType(<emphasis role="keyword">const</emphasis>&#32;_ComplexType&amp;&#32;__obj)
+632 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;:&#32;__min_val(__obj.__min_val),&#32;__min_ind(__obj.__min_ind),&#32;__min_comp(__obj.__min_comp)
+633 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+634 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+635 
+636 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2pstl_2pstl__config_8h_1a74932447cb17c0b3fd6d033a724e616f">_PSTL_PRAGMA_DECLARE_SIMD</link>
+637 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+638 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;operator()(<emphasis role="keyword">const</emphasis>&#32;_ComplexType&amp;&#32;__obj)
+639 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+640 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(!(*__min_comp)(__min_val,&#32;__obj.__min_val)&#32;&amp;&amp;
+641 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;((*__min_comp)(__obj.__min_val,&#32;__min_val)&#32;||&#32;__obj.__min_ind&#32;-&#32;__min_ind&#32;&lt;&#32;0))
+642 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+643 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__min_val&#32;=&#32;__obj.__min_val;
+644 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__min_ind&#32;=&#32;__obj.__min_ind;
+645 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+646 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+647 &#32;&#32;&#32;&#32;};
+648 
+649 &#32;&#32;&#32;&#32;_ComplexType&#32;__init{*__first,&#32;&amp;__comp};
+650 
+651 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2pstl_2pstl__config_8h_1a8a9e21bb812ab9788e727ad3fda8c2f8">_PSTL_PRAGMA_DECLARE_REDUCTION</link>(__min_func,&#32;_ComplexType)
+652 
+653 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2pstl_2pstl__config_8h_1ac51a0fce61e93aced768603992a95eb7">_PSTL_PRAGMA_SIMD_REDUCTION</link>(__min_func&#32;:&#32;__init)
+654 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(_Size&#32;__i&#32;=&#32;1;&#32;__i&#32;&lt;&#32;__n;&#32;++__i)
+655 &#32;&#32;&#32;&#32;{
+656 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;_ValueType&#32;__min_val&#32;=&#32;__init.__min_val;
+657 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;_ValueType&#32;__current&#32;=&#32;__first[__i];
+658 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__comp(__current,&#32;__min_val))
+659 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+660 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__init.__min_val&#32;=&#32;__current;
+661 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__init.__min_ind&#32;=&#32;__i;
+662 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+663 &#32;&#32;&#32;&#32;}
+664 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__first&#32;+&#32;__init.__min_ind;
+665 }
+666 
+667 <emphasis role="comment">//&#32;[restriction]&#32;-&#32;std::iterator_traits&lt;_ForwardIterator&gt;::value_type&#32;should&#32;be&#32;DefaultConstructible.</emphasis>
+668 <emphasis role="comment">//&#32;complexity&#32;[violation]&#32;-&#32;We&#32;will&#32;have&#32;at&#32;most&#32;(2*(__n-1)&#32;+&#32;4*number_of_lanes)&#32;comparisons&#32;instead&#32;of&#32;at&#32;most&#32;[1.5*(__n-1)].</emphasis>
+669 <emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">typename</emphasis>&#32;_ForwardIterator,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Size,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Compare&gt;
+670 std::pair&lt;_ForwardIterator,&#32;_ForwardIterator&gt;
+671 <link linkend="_namespace____pstl_1_1____unseq__backend_1a2ed9a294e155700282c9599e705b4f90">__simd_minmax_element</link>(_ForwardIterator&#32;__first,&#32;_Size&#32;__n,&#32;_Compare&#32;__comp)&#32;<emphasis role="keyword">noexcept</emphasis>
+672 {
+673 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__n&#32;==&#32;0)
+674 &#32;&#32;&#32;&#32;{
+675 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;std::make_pair(__first,&#32;__first);
+676 &#32;&#32;&#32;&#32;}
+677 &#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">typename</emphasis>&#32;std::iterator_traits&lt;_ForwardIterator&gt;::value_type&#32;_ValueType;
+678 
+679 &#32;&#32;&#32;&#32;<emphasis role="keyword">struct&#32;</emphasis>_ComplexType
+680 &#32;&#32;&#32;&#32;{
+681 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_ValueType&#32;__min_val;
+682 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_ValueType&#32;__max_val;
+683 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_Size&#32;__min_ind;
+684 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_Size&#32;__max_ind;
+685 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_Compare*&#32;__minmax_comp;
+686 
+687 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_ComplexType()&#32;:&#32;__min_val{},&#32;__max_val{},&#32;__min_ind{},&#32;__max_ind{},&#32;__minmax_comp(<emphasis role="keyword">nullptr</emphasis>)&#32;{}
+688 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_ComplexType(<emphasis role="keyword">const</emphasis>&#32;_ValueType&amp;&#32;min_val,&#32;<emphasis role="keyword">const</emphasis>&#32;_ValueType&amp;&#32;max_val,&#32;<emphasis role="keyword">const</emphasis>&#32;_Compare*&#32;<link linkend="__classes_2lib_2glm_2test_2core_2core__type__vec4_8cpp_1a50b69e8e55167990c85f65e0a656e294">comp</link>)
+689 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;:&#32;__min_val(min_val),&#32;__max_val(max_val),&#32;__min_ind(0),&#32;__max_ind(0),
+690 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__minmax_comp(<emphasis role="keyword">const_cast&lt;</emphasis>_Compare*<emphasis role="keyword">&gt;</emphasis>(<link linkend="__classes_2lib_2glm_2test_2core_2core__type__vec4_8cpp_1a50b69e8e55167990c85f65e0a656e294">comp</link>))
+691 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+692 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+693 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_ComplexType(<emphasis role="keyword">const</emphasis>&#32;_ComplexType&amp;&#32;__obj)
+694 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;:&#32;__min_val(__obj.__min_val),&#32;__max_val(__obj.__max_val),&#32;__min_ind(__obj.__min_ind),
+695 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__max_ind(__obj.__max_ind),&#32;__minmax_comp(__obj.__minmax_comp)
+696 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+697 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+698 
+699 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+700 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;operator()(<emphasis role="keyword">const</emphasis>&#32;_ComplexType&amp;&#32;__obj)
+701 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+702 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;min</emphasis>
+703 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;((*__minmax_comp)(__obj.__min_val,&#32;__min_val))
+704 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+705 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__min_val&#32;=&#32;__obj.__min_val;
+706 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__min_ind&#32;=&#32;__obj.__min_ind;
+707 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+708 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>&#32;<emphasis role="keywordflow">if</emphasis>&#32;(!(*__minmax_comp)(__min_val,&#32;__obj.__min_val))
+709 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+710 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__min_val&#32;=&#32;__obj.__min_val;
+711 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__min_ind&#32;=&#32;(__min_ind&#32;-&#32;__obj.__min_ind&#32;&lt;&#32;0)&#32;?&#32;__min_ind&#32;:&#32;__obj.__min_ind;
+712 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+713 
+714 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;max</emphasis>
+715 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;((*__minmax_comp)(__max_val,&#32;__obj.__max_val))
+716 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+717 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__max_val&#32;=&#32;__obj.__max_val;
+718 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__max_ind&#32;=&#32;__obj.__max_ind;
+719 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+720 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>&#32;<emphasis role="keywordflow">if</emphasis>&#32;(!(*__minmax_comp)(__obj.__max_val,&#32;__max_val))
+721 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+722 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__max_val&#32;=&#32;__obj.__max_val;
+723 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__max_ind&#32;=&#32;(__max_ind&#32;-&#32;__obj.__max_ind&#32;&lt;&#32;0)&#32;?&#32;__obj.__max_ind&#32;:&#32;__max_ind;
+724 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+725 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+726 &#32;&#32;&#32;&#32;};
+727 
+728 &#32;&#32;&#32;&#32;_ComplexType&#32;__init{*__first,&#32;*__first,&#32;&amp;__comp};
+729 
+730 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2pstl_2pstl__config_8h_1a8a9e21bb812ab9788e727ad3fda8c2f8">_PSTL_PRAGMA_DECLARE_REDUCTION</link>(__min_func,&#32;_ComplexType);
+731 
+732 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2pstl_2pstl__config_8h_1ac51a0fce61e93aced768603992a95eb7">_PSTL_PRAGMA_SIMD_REDUCTION</link>(__min_func&#32;:&#32;__init)
+733 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(_Size&#32;__i&#32;=&#32;1;&#32;__i&#32;&lt;&#32;__n;&#32;++__i)
+734 &#32;&#32;&#32;&#32;{
+735 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">auto</emphasis>&#32;__min_val&#32;=&#32;__init.__min_val;
+736 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">auto</emphasis>&#32;__max_val&#32;=&#32;__init.__max_val;
+737 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">auto</emphasis>&#32;__current&#32;=&#32;__first&#32;+&#32;__i;
+738 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__comp(*__current,&#32;__min_val))
+739 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+740 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__init.__min_val&#32;=&#32;*__current;
+741 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__init.__min_ind&#32;=&#32;__i;
+742 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+743 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>&#32;<emphasis role="keywordflow">if</emphasis>&#32;(!__comp(*__current,&#32;__max_val))
+744 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+745 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__init.__max_val&#32;=&#32;*__current;
+746 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__init.__max_ind&#32;=&#32;__i;
+747 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+748 &#32;&#32;&#32;&#32;}
+749 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;std::make_pair(__first&#32;+&#32;__init.__min_ind,&#32;__first&#32;+&#32;__init.__max_ind);
+750 }
+751 
+752 <emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">class&#32;</emphasis>_InputIterator,&#32;<emphasis role="keyword">class&#32;</emphasis>_DifferenceType,&#32;<emphasis role="keyword">class&#32;</emphasis>_OutputIterator1,&#32;<emphasis role="keyword">class&#32;</emphasis>_OutputIterator2,
+753 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">class&#32;</emphasis>_UnaryPredicate&gt;
+754 std::pair&lt;_OutputIterator1,&#32;_OutputIterator2&gt;
+755 <link linkend="_namespace____pstl_1_1____unseq__backend_1ac6ab4cceb121c8d40ff90ab47badf64c">__simd_partition_copy</link>(_InputIterator&#32;__first,&#32;_DifferenceType&#32;__n,&#32;_OutputIterator1&#32;__out_true,
+756 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_OutputIterator2&#32;__out_false,&#32;_UnaryPredicate&#32;__pred)&#32;<emphasis role="keyword">noexcept</emphasis>
+757 {
+758 &#32;&#32;&#32;&#32;_DifferenceType&#32;__cnt_true&#32;=&#32;0,&#32;__cnt_false&#32;=&#32;0;
+759 
+760 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2pstl_2pstl__config_8h_1ab3b8f78050438083ac8c8c8f45c37776">_PSTL_PRAGMA_SIMD</link>
+761 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(_DifferenceType&#32;__i&#32;=&#32;0;&#32;__i&#32;&lt;&#32;__n;&#32;++__i)
+762 &#32;&#32;&#32;&#32;{
+763 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2pstl_2pstl__config_8h_1aff659a8a7303fb2c174c6e4103102021">_PSTL_PRAGMA_SIMD_ORDERED_MONOTONIC_2ARGS</link>(__cnt_true&#32;:&#32;1,&#32;__cnt_false&#32;:&#32;1)
+764 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__pred(__first[__i]))
+765 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+766 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__out_true[__cnt_true]&#32;=&#32;__first[__i];
+767 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;++__cnt_true;
+768 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+769 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>
+770 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+771 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__out_false[__cnt_false]&#32;=&#32;__first[__i];
+772 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;++__cnt_false;
+773 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+774 &#32;&#32;&#32;&#32;}
+775 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;std::make_pair(__out_true&#32;+&#32;__cnt_true,&#32;__out_false&#32;+&#32;__cnt_false);
+776 }
+777 
+778 <emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">class</emphasis>&#32;_ForwardIterator1,&#32;<emphasis role="keyword">class</emphasis>&#32;_ForwardIterator2,&#32;<emphasis role="keyword">class</emphasis>&#32;_BinaryPredicate&gt;
+779 _ForwardIterator1
+780 <link linkend="_namespace____pstl_1_1____unseq__backend_1a34b5595f5511ca6085e97c33055d6b8f">__simd_find_first_of</link>(_ForwardIterator1&#32;__first,&#32;_ForwardIterator1&#32;__last,&#32;_ForwardIterator2&#32;__s_first,
+781 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_ForwardIterator2&#32;__s_last,&#32;_BinaryPredicate&#32;__pred)&#32;<emphasis role="keyword">noexcept</emphasis>
+782 {
+783 &#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">typename</emphasis>&#32;std::iterator_traits&lt;_ForwardIterator1&gt;::difference_type&#32;_DifferencType;
+784 
+785 &#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;_DifferencType&#32;__n1&#32;=&#32;__last&#32;-&#32;__first;
+786 &#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;_DifferencType&#32;__n2&#32;=&#32;__s_last&#32;-&#32;__s_first;
+787 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__n1&#32;==&#32;0&#32;||&#32;__n2&#32;==&#32;0)
+788 &#32;&#32;&#32;&#32;{
+789 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__last;&#32;<emphasis role="comment">//&#32;according&#32;to&#32;the&#32;standard</emphasis>
+790 &#32;&#32;&#32;&#32;}
+791 
+792 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Common&#32;case</emphasis>
+793 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;If&#32;first&#32;sequence&#32;larger&#32;than&#32;second&#32;then&#32;we&apos;ll&#32;run&#32;simd_first&#32;with&#32;parameters&#32;of&#32;first&#32;sequence.</emphasis>
+794 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Otherwise,&#32;vice&#32;versa.</emphasis>
+795 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__n1&#32;&lt;&#32;__n2)
+796 &#32;&#32;&#32;&#32;{
+797 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(;&#32;__first&#32;!=&#32;__last;&#32;++__first)
+798 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+799 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(<link linkend="_namespace____pstl_1_1____unseq__backend_1a84dca71a2f0e2711f0e53a5894296ca7">__unseq_backend::__simd_or</link>(
+800 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__s_first,&#32;__n2,
+801 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____pstl_1_1____internal_1_1____equal__value__by__pred">__internal::__equal_value_by_pred</link>&lt;<emphasis role="keyword">decltype</emphasis>(*__first),&#32;_BinaryPredicate&gt;(*__first,&#32;__pred)))
+802 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+803 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__first;
+804 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+805 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+806 &#32;&#32;&#32;&#32;}
+807 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>
+808 &#32;&#32;&#32;&#32;{
+809 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(;&#32;__s_first&#32;!=&#32;__s_last;&#32;++__s_first)
+810 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+811 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keyword">auto</emphasis>&#32;__result&#32;=&#32;<link linkend="_namespace____pstl_1_1____unseq__backend_1a023c091ae2ba21d6c93ac71573523349">__unseq_backend::__simd_first</link>(
+812 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__first,&#32;_DifferencType(0),&#32;__n1,&#32;[__s_first,&#32;&amp;__pred](_ForwardIterator1&#32;__it,&#32;_DifferencType&#32;__i)&#32;{
+813 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__pred(__it[__i],&#32;*__s_first);
+814 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;});
+815 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__result&#32;!=&#32;__last)
+816 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+817 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__result;
+818 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+819 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+820 &#32;&#32;&#32;&#32;}
+821 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__last;
+822 }
+823 
+824 <emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">class</emphasis>&#32;_RandomAccessIterator,&#32;<emphasis role="keyword">class</emphasis>&#32;_DifferenceType,&#32;<emphasis role="keyword">class</emphasis>&#32;_UnaryPredicate&gt;
+825 _RandomAccessIterator
+826 <link linkend="_namespace____pstl_1_1____unseq__backend_1af3e3465f13790c9379d715942bfd8234">__simd_remove_if</link>(_RandomAccessIterator&#32;__first,&#32;_DifferenceType&#32;__n,&#32;_UnaryPredicate&#32;__pred)&#32;<emphasis role="keyword">noexcept</emphasis>
+827 {
+828 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;find&#32;first&#32;element&#32;we&#32;need&#32;to&#32;remove</emphasis>
+829 &#32;&#32;&#32;&#32;<emphasis role="keyword">auto</emphasis>&#32;__current&#32;=&#32;<link linkend="_namespace____pstl_1_1____unseq__backend_1a023c091ae2ba21d6c93ac71573523349">__unseq_backend::__simd_first</link>(
+830 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__first,&#32;_DifferenceType(0),&#32;__n,
+831 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;[&amp;__pred](_RandomAccessIterator&#32;__it,&#32;_DifferenceType&#32;__i)&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;__pred(__it[__i]);&#32;});
+832 &#32;&#32;&#32;&#32;__n&#32;-=&#32;__current&#32;-&#32;__first;
+833 
+834 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;if&#32;we&#32;have&#32;in&#32;sequence&#32;only&#32;one&#32;element&#32;that&#32;pred(__current[1])&#32;!=&#32;false&#32;we&#32;can&#32;exit&#32;the&#32;function</emphasis>
+835 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__n&#32;&lt;&#32;2)
+836 &#32;&#32;&#32;&#32;{
+837 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__current;
+838 &#32;&#32;&#32;&#32;}
+839 
+840 &#32;&#32;&#32;&#32;_DifferenceType&#32;__cnt&#32;=&#32;0;
+841 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2pstl_2pstl__config_8h_1ab3b8f78050438083ac8c8c8f45c37776">_PSTL_PRAGMA_SIMD</link>
+842 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(_DifferenceType&#32;__i&#32;=&#32;1;&#32;__i&#32;&lt;&#32;__n;&#32;++__i)
+843 &#32;&#32;&#32;&#32;{
+844 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2pstl_2pstl__config_8h_1a81e49948de40ec764395a50a414810c8">_PSTL_PRAGMA_SIMD_ORDERED_MONOTONIC</link>(__cnt&#32;:&#32;1)
+845 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(!__pred(__current[__i]))
+846 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+847 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__current[__cnt]&#32;=&#32;<link linkend="_namespacestd_1ac7095819f6a8da64d69b1ee3029c52be">std::move</link>(__current[__i]);
+848 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;++__cnt;
+849 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+850 &#32;&#32;&#32;&#32;}
+851 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__current&#32;+&#32;__cnt;
+852 }
+853 }&#32;<emphasis role="comment">//&#32;namespace&#32;__unseq_backend</emphasis>
+854 }&#32;<emphasis role="comment">//&#32;namespace&#32;__pstl</emphasis>
+855 
+856 <emphasis role="preprocessor">#endif&#32;</emphasis><emphasis role="comment">/*&#32;_PSTL_UNSEQ_BACKEND_SIMD_H&#32;*/</emphasis><emphasis role="preprocessor"></emphasis>
+</programlisting></section>

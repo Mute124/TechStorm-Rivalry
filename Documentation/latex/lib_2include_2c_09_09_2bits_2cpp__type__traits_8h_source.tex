@@ -1,0 +1,570 @@
+\doxysection{cpp\+\_\+type\+\_\+traits.\+h}
+\hypertarget{lib_2include_2c_09_09_2bits_2cpp__type__traits_8h_source}{}\label{lib_2include_2c_09_09_2bits_2cpp__type__traits_8h_source}\index{C:/Users/HP/Documents/GitHub/Minero-\/Game/lib/include/c++/bits/cpp\_type\_traits.h@{C:/Users/HP/Documents/GitHub/Minero-\/Game/lib/include/c++/bits/cpp\_type\_traits.h}}
+\mbox{\hyperlink{lib_2include_2c_09_09_2bits_2cpp__type__traits_8h}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{comment}{//\ The\ \ -\/*-\/\ C++\ -\/*-\/\ type\ traits\ classes\ for\ internal\ use\ in\ libstdc++}}
+\DoxyCodeLine{00002\ }
+\DoxyCodeLine{00003\ \textcolor{comment}{//\ Copyright\ (C)\ 2000-\/2022\ Free\ Software\ Foundation,\ Inc.}}
+\DoxyCodeLine{00004\ \textcolor{comment}{//}}
+\DoxyCodeLine{00005\ \textcolor{comment}{//\ This\ file\ is\ part\ of\ the\ GNU\ ISO\ C++\ Library.\ \ This\ library\ is\ free}}
+\DoxyCodeLine{00006\ \textcolor{comment}{//\ software;\ you\ can\ redistribute\ it\ and/or\ modify\ it\ under\ the}}
+\DoxyCodeLine{00007\ \textcolor{comment}{//\ terms\ of\ the\ GNU\ General\ Public\ License\ as\ published\ by\ the}}
+\DoxyCodeLine{00008\ \textcolor{comment}{//\ Free\ Software\ Foundation;\ either\ version\ 3,\ or\ (at\ your\ option)}}
+\DoxyCodeLine{00009\ \textcolor{comment}{//\ any\ later\ version.}}
+\DoxyCodeLine{00010\ }
+\DoxyCodeLine{00011\ \textcolor{comment}{//\ This\ library\ is\ distributed\ in\ the\ hope\ that\ it\ will\ be\ useful,}}
+\DoxyCodeLine{00012\ \textcolor{comment}{//\ but\ WITHOUT\ ANY\ WARRANTY;\ without\ even\ the\ implied\ warranty\ of}}
+\DoxyCodeLine{00013\ \textcolor{comment}{//\ MERCHANTABILITY\ or\ FITNESS\ FOR\ A\ PARTICULAR\ PURPOSE.\ \ See\ the}}
+\DoxyCodeLine{00014\ \textcolor{comment}{//\ GNU\ General\ Public\ License\ for\ more\ details.}}
+\DoxyCodeLine{00015\ }
+\DoxyCodeLine{00016\ \textcolor{comment}{//\ Under\ Section\ 7\ of\ GPL\ version\ 3,\ you\ are\ granted\ additional}}
+\DoxyCodeLine{00017\ \textcolor{comment}{//\ permissions\ described\ in\ the\ GCC\ Runtime\ Library\ Exception,\ version}}
+\DoxyCodeLine{00018\ \textcolor{comment}{//\ 3.1,\ as\ published\ by\ the\ Free\ Software\ Foundation.}}
+\DoxyCodeLine{00019\ }
+\DoxyCodeLine{00020\ \textcolor{comment}{//\ You\ should\ have\ received\ a\ copy\ of\ the\ GNU\ General\ Public\ License\ and}}
+\DoxyCodeLine{00021\ \textcolor{comment}{//\ a\ copy\ of\ the\ GCC\ Runtime\ Library\ Exception\ along\ with\ this\ program;}}
+\DoxyCodeLine{00022\ \textcolor{comment}{//\ see\ the\ files\ COPYING3\ and\ COPYING.RUNTIME\ respectively.\ \ If\ not,\ see}}
+\DoxyCodeLine{00023\ \textcolor{comment}{//\ <http://www.gnu.org/licenses/>.}}
+\DoxyCodeLine{00024\ }
+\DoxyCodeLine{00030\ \textcolor{comment}{//\ Written\ by\ Gabriel\ Dos\ Reis\ <dosreis@cmla.ens-\/cachan.fr>}}
+\DoxyCodeLine{00031\ }
+\DoxyCodeLine{00032\ \textcolor{preprocessor}{\#ifndef\ \_CPP\_TYPE\_TRAITS\_H}}
+\DoxyCodeLine{00033\ \textcolor{preprocessor}{\#define\ \_CPP\_TYPE\_TRAITS\_H\ 1}}
+\DoxyCodeLine{00034\ }
+\DoxyCodeLine{00035\ \textcolor{preprocessor}{\#pragma\ GCC\ system\_header}}
+\DoxyCodeLine{00036\ }
+\DoxyCodeLine{00037\ \textcolor{preprocessor}{\#include\ <bits/c++config.h>}}
+\DoxyCodeLine{00038\ }
+\DoxyCodeLine{00039\ \textcolor{comment}{//}}
+\DoxyCodeLine{00040\ \textcolor{comment}{//\ This\ file\ provides\ some\ compile-\/time\ information\ about\ various\ types.}}
+\DoxyCodeLine{00041\ \textcolor{comment}{//\ These\ representations\ were\ designed,\ on\ purpose,\ to\ be\ constant-\/expressions}}
+\DoxyCodeLine{00042\ \textcolor{comment}{//\ and\ not\ types\ as\ found\ in\ <bits/type\_traits.h>.\ \ In\ particular,\ they}}
+\DoxyCodeLine{00043\ \textcolor{comment}{//\ can\ be\ used\ in\ control\ structures\ and\ the\ optimizer\ hopefully\ will\ do}}
+\DoxyCodeLine{00044\ \textcolor{comment}{//\ the\ obvious\ thing.}}
+\DoxyCodeLine{00045\ \textcolor{comment}{//}}
+\DoxyCodeLine{00046\ \textcolor{comment}{//\ Why\ integral\ expressions,\ and\ not\ functions\ nor\ types?}}
+\DoxyCodeLine{00047\ \textcolor{comment}{//\ Firstly,\ these\ compile-\/time\ entities\ are\ used\ as\ template-\/arguments}}
+\DoxyCodeLine{00048\ \textcolor{comment}{//\ so\ function\ return\ values\ won't\ work:\ \ We\ need\ compile-\/time\ entities.}}
+\DoxyCodeLine{00049\ \textcolor{comment}{//\ We're\ left\ with\ types\ and\ constant\ \ integral\ expressions.}}
+\DoxyCodeLine{00050\ \textcolor{comment}{//\ Secondly,\ from\ the\ point\ of\ view\ of\ ease\ of\ use,\ type-\/based\ compile-\/time}}
+\DoxyCodeLine{00051\ \textcolor{comment}{//\ information\ is\ -\/not-\/\ *that*\ convenient.\ \ One\ has\ to\ write\ lots\ of}}
+\DoxyCodeLine{00052\ \textcolor{comment}{//\ overloaded\ functions\ and\ to\ hope\ that\ the\ compiler\ will\ select\ the\ right}}
+\DoxyCodeLine{00053\ \textcolor{comment}{//\ one.\ As\ a\ net\ effect,\ the\ overall\ structure\ isn't\ very\ clear\ at\ first}}
+\DoxyCodeLine{00054\ \textcolor{comment}{//\ glance.}}
+\DoxyCodeLine{00055\ \textcolor{comment}{//\ Thirdly,\ partial\ ordering\ and\ overload\ resolution\ (of\ function\ templates)}}
+\DoxyCodeLine{00056\ \textcolor{comment}{//\ is\ highly\ costly\ in\ terms\ of\ compiler-\/resource.\ \ It\ is\ a\ Good\ Thing\ to}}
+\DoxyCodeLine{00057\ \textcolor{comment}{//\ keep\ these\ resource\ consumption\ as\ least\ as\ possible.}}
+\DoxyCodeLine{00058\ \textcolor{comment}{//}}
+\DoxyCodeLine{00059\ \textcolor{comment}{//\ See\ valarray\_array.h\ for\ a\ case\ use.}}
+\DoxyCodeLine{00060\ \textcolor{comment}{//}}
+\DoxyCodeLine{00061\ \textcolor{comment}{//\ -\/-\/\ Gaby\ (dosreis@cmla.ens-\/cachan.fr)\ 2000-\/03-\/06.}}
+\DoxyCodeLine{00062\ \textcolor{comment}{//}}
+\DoxyCodeLine{00063\ \textcolor{comment}{//\ Update\ 2005:\ types\ are\ also\ provided\ and\ <bits/type\_traits.h>\ has\ been}}
+\DoxyCodeLine{00064\ \textcolor{comment}{//\ removed.}}
+\DoxyCodeLine{00065\ \textcolor{comment}{//}}
+\DoxyCodeLine{00066\ }
+\DoxyCodeLine{00067\ \textcolor{keyword}{extern}\ \textcolor{stringliteral}{"{}C++"{}}\ \{}
+\DoxyCodeLine{00068\ }
+\DoxyCodeLine{00069\ \textcolor{keyword}{namespace\ }\mbox{\hyperlink{namespacestd}{std}}\ \mbox{\hyperlink{_classes_2lib_2include_2c_09_09_2x86__64-w64-mingw32_2bits_2c_09_09config_8h_a44377df0d3503f0b3d9ab316dd8ddf8b}{\_GLIBCXX\_VISIBILITY}}(default)}
+\DoxyCodeLine{00070\ \{}
+\DoxyCodeLine{00071\ \_GLIBCXX\_BEGIN\_NAMESPACE\_VERSION}
+\DoxyCodeLine{00072\ }
+\DoxyCodeLine{00073\ \ \ \textcolor{keyword}{struct\ }\_\_true\_type\ \{\ \};}
+\DoxyCodeLine{00074\ \ \ \textcolor{keyword}{struct\ }\_\_false\_type\ \{\ \};}
+\DoxyCodeLine{00075\ }
+\DoxyCodeLine{00076\ \ \ \textcolor{keyword}{template}<\textcolor{keywordtype}{bool}>}
+\DoxyCodeLine{00077\ \ \ \ \ \textcolor{keyword}{struct\ }\_\_truth\_type}
+\DoxyCodeLine{00078\ \ \ \ \ \{\ \textcolor{keyword}{typedef}\ \_\_false\_type\ \_\_type;\ \};}
+\DoxyCodeLine{00079\ }
+\DoxyCodeLine{00080\ \ \ \textcolor{keyword}{template}<>}
+\DoxyCodeLine{00081\ \ \ \ \ \textcolor{keyword}{struct\ }\_\_truth\_type<\mbox{\hyperlink{_classes_2lib_2include_2stdbool_8h_a41f9c5fb8b08eb5dc3edce4dcb37fee7}{true}}>}
+\DoxyCodeLine{00082\ \ \ \ \ \{\ \textcolor{keyword}{typedef}\ \_\_true\_type\ \_\_type;\ \};}
+\DoxyCodeLine{00083\ }
+\DoxyCodeLine{00084\ \ \ \textcolor{comment}{//\ N.B.\ The\ conversions\ to\ bool\ are\ needed\ due\ to\ the\ issue}}
+\DoxyCodeLine{00085\ \ \ \textcolor{comment}{//\ explained\ in\ c++/19404.}}
+\DoxyCodeLine{00086\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{class}\ \_Sp,\ \textcolor{keyword}{class}\ \_Tp>}
+\DoxyCodeLine{00087\ \ \ \ \ \textcolor{keyword}{struct\ }\_\_traitor}
+\DoxyCodeLine{00088\ \ \ \ \ \{}
+\DoxyCodeLine{00089\ \ \ \ \ \ \ \textcolor{keyword}{enum}\ \{\ \_\_value\ =\ \mbox{\hyperlink{_classes_2lib_2include_2stdbool_8h_abb452686968e48b67397da5f97445f5b}{bool}}(\_Sp::\_\_value)\ ||\ \mbox{\hyperlink{_classes_2lib_2include_2stdbool_8h_abb452686968e48b67397da5f97445f5b}{bool}}(\_Tp::\_\_value)\ \};}
+\DoxyCodeLine{00090\ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ \textcolor{keyword}{typename}\ \_\_truth\_type<\_\_value>::\_\_type\ \_\_type;}
+\DoxyCodeLine{00091\ \ \ \ \ \};}
+\DoxyCodeLine{00092\ }
+\DoxyCodeLine{00093\ \ \ \textcolor{comment}{//\ Compare\ for\ equality\ of\ types.}}
+\DoxyCodeLine{00094\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename},\ \textcolor{keyword}{typename}>}
+\DoxyCodeLine{00095\ \ \ \ \ \textcolor{keyword}{struct\ }\_\_are\_same}
+\DoxyCodeLine{00096\ \ \ \ \ \{}
+\DoxyCodeLine{00097\ \ \ \ \ \ \ \textcolor{keyword}{enum}\ \{\ \_\_value\ =\ 0\ \};}
+\DoxyCodeLine{00098\ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ \_\_false\_type\ \_\_type;}
+\DoxyCodeLine{00099\ \ \ \ \ \};}
+\DoxyCodeLine{00100\ }
+\DoxyCodeLine{00101\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Tp>}
+\DoxyCodeLine{00102\ \ \ \ \ \textcolor{keyword}{struct\ }\_\_are\_same<\_Tp,\ \_Tp>}
+\DoxyCodeLine{00103\ \ \ \ \ \{}
+\DoxyCodeLine{00104\ \ \ \ \ \ \ \textcolor{keyword}{enum}\ \{\ \_\_value\ =\ 1\ \};}
+\DoxyCodeLine{00105\ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ \_\_true\_type\ \_\_type;}
+\DoxyCodeLine{00106\ \ \ \ \ \};}
+\DoxyCodeLine{00107\ }
+\DoxyCodeLine{00108\ \ \ \textcolor{comment}{//\ Holds\ if\ the\ template-\/argument\ is\ a\ void\ type.}}
+\DoxyCodeLine{00109\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Tp>}
+\DoxyCodeLine{00110\ \ \ \ \ \textcolor{keyword}{struct\ }\_\_is\_void}
+\DoxyCodeLine{00111\ \ \ \ \ \{}
+\DoxyCodeLine{00112\ \ \ \ \ \ \ \textcolor{keyword}{enum}\ \{\ \_\_value\ =\ 0\ \};}
+\DoxyCodeLine{00113\ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ \_\_false\_type\ \_\_type;}
+\DoxyCodeLine{00114\ \ \ \ \ \};}
+\DoxyCodeLine{00115\ }
+\DoxyCodeLine{00116\ \ \ \textcolor{keyword}{template}<>}
+\DoxyCodeLine{00117\ \ \ \ \ \textcolor{keyword}{struct\ }\_\_is\_void<\mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_a0f7193911e632cd84da4082d5c628fe3}{void}}>}
+\DoxyCodeLine{00118\ \ \ \ \ \{}
+\DoxyCodeLine{00119\ \ \ \ \ \ \ \textcolor{keyword}{enum}\ \{\ \_\_value\ =\ 1\ \};}
+\DoxyCodeLine{00120\ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ \_\_true\_type\ \_\_type;}
+\DoxyCodeLine{00121\ \ \ \ \ \};}
+\DoxyCodeLine{00122\ }
+\DoxyCodeLine{00123\ \ \ \textcolor{comment}{//}}
+\DoxyCodeLine{00124\ \ \ \textcolor{comment}{//\ Integer\ types}}
+\DoxyCodeLine{00125\ \ \ \textcolor{comment}{//}}
+\DoxyCodeLine{00126\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Tp>}
+\DoxyCodeLine{00127\ \ \ \ \ \textcolor{keyword}{struct\ }\_\_is\_integer}
+\DoxyCodeLine{00128\ \ \ \ \ \{}
+\DoxyCodeLine{00129\ \ \ \ \ \ \ \textcolor{keyword}{enum}\ \{\ \_\_value\ =\ 0\ \};}
+\DoxyCodeLine{00130\ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ \_\_false\_type\ \_\_type;}
+\DoxyCodeLine{00131\ \ \ \ \ \};}
+\DoxyCodeLine{00132\ }
+\DoxyCodeLine{00133\ \ \ \textcolor{comment}{//\ Thirteen\ specializations\ (yes\ there\ are\ eleven\ standard\ integer}}
+\DoxyCodeLine{00134\ \ \ \textcolor{comment}{//\ types;\ <em>long\ long</em>\ and\ <em>unsigned\ long\ long</em>\ are}}
+\DoxyCodeLine{00135\ \ \ \textcolor{comment}{//\ supported\ as\ extensions).\ \ Up\ to\ four\ target-\/specific\ \_\_int<N>}}
+\DoxyCodeLine{00136\ \ \ \textcolor{comment}{//\ types\ are\ supported\ as\ well.}}
+\DoxyCodeLine{00137\ \ \ \textcolor{keyword}{template}<>}
+\DoxyCodeLine{00138\ \ \ \ \ \textcolor{keyword}{struct\ }\_\_is\_integer<\mbox{\hyperlink{_classes_2lib_2raylib_8h_af6a258d8f3ee5206d682d799316314b1}{bool}}>}
+\DoxyCodeLine{00139\ \ \ \ \ \{}
+\DoxyCodeLine{00140\ \ \ \ \ \ \ \textcolor{keyword}{enum}\ \{\ \_\_value\ =\ 1\ \};}
+\DoxyCodeLine{00141\ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ \_\_true\_type\ \_\_type;}
+\DoxyCodeLine{00142\ \ \ \ \ \};}
+\DoxyCodeLine{00143\ }
+\DoxyCodeLine{00144\ \ \ \textcolor{keyword}{template}<>}
+\DoxyCodeLine{00145\ \ \ \ \ \textcolor{keyword}{struct\ }\_\_is\_integer<char>}
+\DoxyCodeLine{00146\ \ \ \ \ \{}
+\DoxyCodeLine{00147\ \ \ \ \ \ \ \textcolor{keyword}{enum}\ \{\ \_\_value\ =\ 1\ \};}
+\DoxyCodeLine{00148\ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ \_\_true\_type\ \_\_type;}
+\DoxyCodeLine{00149\ \ \ \ \ \};}
+\DoxyCodeLine{00150\ }
+\DoxyCodeLine{00151\ \ \ \textcolor{keyword}{template}<>}
+\DoxyCodeLine{00152\ \ \ \ \ \textcolor{keyword}{struct\ }\_\_is\_integer<signed\ char>}
+\DoxyCodeLine{00153\ \ \ \ \ \{}
+\DoxyCodeLine{00154\ \ \ \ \ \ \ \textcolor{keyword}{enum}\ \{\ \_\_value\ =\ 1\ \};}
+\DoxyCodeLine{00155\ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ \_\_true\_type\ \_\_type;}
+\DoxyCodeLine{00156\ \ \ \ \ \};}
+\DoxyCodeLine{00157\ }
+\DoxyCodeLine{00158\ \ \ \textcolor{keyword}{template}<>}
+\DoxyCodeLine{00159\ \ \ \ \ \textcolor{keyword}{struct\ }\_\_is\_integer<unsigned\ char>}
+\DoxyCodeLine{00160\ \ \ \ \ \{}
+\DoxyCodeLine{00161\ \ \ \ \ \ \ \textcolor{keyword}{enum}\ \{\ \_\_value\ =\ 1\ \};}
+\DoxyCodeLine{00162\ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ \_\_true\_type\ \_\_type;}
+\DoxyCodeLine{00163\ \ \ \ \ \};}
+\DoxyCodeLine{00164\ }
+\DoxyCodeLine{00165\ \textcolor{preprocessor}{\#\ ifdef\ \_\_WCHAR\_TYPE\_\_}}
+\DoxyCodeLine{00166\ \ \ \textcolor{keyword}{template}<>}
+\DoxyCodeLine{00167\ \ \ \ \ \textcolor{keyword}{struct\ }\_\_is\_integer<\mbox{\hyperlink{_classes_2lib_2include_2stddef_8h_a5f245e933e58ed4d268146a5b1f116ca}{wchar\_t}}>}
+\DoxyCodeLine{00168\ \ \ \ \ \{}
+\DoxyCodeLine{00169\ \ \ \ \ \ \ \textcolor{keyword}{enum}\ \{\ \_\_value\ =\ 1\ \};}
+\DoxyCodeLine{00170\ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ \_\_true\_type\ \_\_type;}
+\DoxyCodeLine{00171\ \ \ \ \ \};}
+\DoxyCodeLine{00172\ \textcolor{preprocessor}{\#\ endif}}
+\DoxyCodeLine{00173\ }
+\DoxyCodeLine{00174\ \textcolor{preprocessor}{\#ifdef\ \_GLIBCXX\_USE\_CHAR8\_T}}
+\DoxyCodeLine{00175\ \ \ \textcolor{keyword}{template}<>}
+\DoxyCodeLine{00176\ \ \ \ \ \textcolor{keyword}{struct\ }\_\_is\_integer<char8\_t>}
+\DoxyCodeLine{00177\ \ \ \ \ \{}
+\DoxyCodeLine{00178\ \ \ \ \ \ \ \textcolor{keyword}{enum}\ \{\ \_\_value\ =\ 1\ \};}
+\DoxyCodeLine{00179\ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ \_\_true\_type\ \_\_type;}
+\DoxyCodeLine{00180\ \ \ \ \ \};}
+\DoxyCodeLine{00181\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00182\ }
+\DoxyCodeLine{00183\ \textcolor{preprocessor}{\#if\ \_\_cplusplus\ >=\ 201103L}}
+\DoxyCodeLine{00184\ \ \ \textcolor{keyword}{template}<>}
+\DoxyCodeLine{00185\ \ \ \ \ \textcolor{keyword}{struct\ }\_\_is\_integer<char16\_t>}
+\DoxyCodeLine{00186\ \ \ \ \ \{}
+\DoxyCodeLine{00187\ \ \ \ \ \ \ \textcolor{keyword}{enum}\ \{\ \_\_value\ =\ 1\ \};}
+\DoxyCodeLine{00188\ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ \_\_true\_type\ \_\_type;}
+\DoxyCodeLine{00189\ \ \ \ \ \};}
+\DoxyCodeLine{00190\ }
+\DoxyCodeLine{00191\ \ \ \textcolor{keyword}{template}<>}
+\DoxyCodeLine{00192\ \ \ \ \ \textcolor{keyword}{struct\ }\_\_is\_integer<char32\_t>}
+\DoxyCodeLine{00193\ \ \ \ \ \{}
+\DoxyCodeLine{00194\ \ \ \ \ \ \ \textcolor{keyword}{enum}\ \{\ \_\_value\ =\ 1\ \};}
+\DoxyCodeLine{00195\ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ \_\_true\_type\ \_\_type;}
+\DoxyCodeLine{00196\ \ \ \ \ \};}
+\DoxyCodeLine{00197\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00198\ }
+\DoxyCodeLine{00199\ \ \ \textcolor{keyword}{template}<>}
+\DoxyCodeLine{00200\ \ \ \ \ \textcolor{keyword}{struct\ }\_\_is\_integer<short>}
+\DoxyCodeLine{00201\ \ \ \ \ \{}
+\DoxyCodeLine{00202\ \ \ \ \ \ \ \textcolor{keyword}{enum}\ \{\ \_\_value\ =\ 1\ \};}
+\DoxyCodeLine{00203\ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ \_\_true\_type\ \_\_type;}
+\DoxyCodeLine{00204\ \ \ \ \ \};}
+\DoxyCodeLine{00205\ }
+\DoxyCodeLine{00206\ \ \ \textcolor{keyword}{template}<>}
+\DoxyCodeLine{00207\ \ \ \ \ \textcolor{keyword}{struct\ }\_\_is\_integer<unsigned\ short>}
+\DoxyCodeLine{00208\ \ \ \ \ \{}
+\DoxyCodeLine{00209\ \ \ \ \ \ \ \textcolor{keyword}{enum}\ \{\ \_\_value\ =\ 1\ \};}
+\DoxyCodeLine{00210\ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ \_\_true\_type\ \_\_type;}
+\DoxyCodeLine{00211\ \ \ \ \ \};}
+\DoxyCodeLine{00212\ }
+\DoxyCodeLine{00213\ \ \ \textcolor{keyword}{template}<>}
+\DoxyCodeLine{00214\ \ \ \ \ \textcolor{keyword}{struct\ }\_\_is\_integer<int>}
+\DoxyCodeLine{00215\ \ \ \ \ \{}
+\DoxyCodeLine{00216\ \ \ \ \ \ \ \textcolor{keyword}{enum}\ \{\ \_\_value\ =\ 1\ \};}
+\DoxyCodeLine{00217\ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ \_\_true\_type\ \_\_type;}
+\DoxyCodeLine{00218\ \ \ \ \ \};}
+\DoxyCodeLine{00219\ }
+\DoxyCodeLine{00220\ \ \ \textcolor{keyword}{template}<>}
+\DoxyCodeLine{00221\ \ \ \ \ \textcolor{keyword}{struct\ }\_\_is\_integer<unsigned\ int>}
+\DoxyCodeLine{00222\ \ \ \ \ \{}
+\DoxyCodeLine{00223\ \ \ \ \ \ \ \textcolor{keyword}{enum}\ \{\ \_\_value\ =\ 1\ \};}
+\DoxyCodeLine{00224\ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ \_\_true\_type\ \_\_type;}
+\DoxyCodeLine{00225\ \ \ \ \ \};}
+\DoxyCodeLine{00226\ }
+\DoxyCodeLine{00227\ \ \ \textcolor{keyword}{template}<>}
+\DoxyCodeLine{00228\ \ \ \ \ \textcolor{keyword}{struct\ }\_\_is\_integer<long>}
+\DoxyCodeLine{00229\ \ \ \ \ \{}
+\DoxyCodeLine{00230\ \ \ \ \ \ \ \textcolor{keyword}{enum}\ \{\ \_\_value\ =\ 1\ \};}
+\DoxyCodeLine{00231\ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ \_\_true\_type\ \_\_type;}
+\DoxyCodeLine{00232\ \ \ \ \ \};}
+\DoxyCodeLine{00233\ }
+\DoxyCodeLine{00234\ \ \ \textcolor{keyword}{template}<>}
+\DoxyCodeLine{00235\ \ \ \ \ \textcolor{keyword}{struct\ }\_\_is\_integer<unsigned\ long>}
+\DoxyCodeLine{00236\ \ \ \ \ \{}
+\DoxyCodeLine{00237\ \ \ \ \ \ \ \textcolor{keyword}{enum}\ \{\ \_\_value\ =\ 1\ \};}
+\DoxyCodeLine{00238\ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ \_\_true\_type\ \_\_type;}
+\DoxyCodeLine{00239\ \ \ \ \ \};}
+\DoxyCodeLine{00240\ }
+\DoxyCodeLine{00241\ \ \ \textcolor{keyword}{template}<>}
+\DoxyCodeLine{00242\ \ \ \ \ \textcolor{keyword}{struct\ }\_\_is\_integer<long\ long>}
+\DoxyCodeLine{00243\ \ \ \ \ \{}
+\DoxyCodeLine{00244\ \ \ \ \ \ \ \textcolor{keyword}{enum}\ \{\ \_\_value\ =\ 1\ \};}
+\DoxyCodeLine{00245\ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ \_\_true\_type\ \_\_type;}
+\DoxyCodeLine{00246\ \ \ \ \ \};}
+\DoxyCodeLine{00247\ }
+\DoxyCodeLine{00248\ \ \ \textcolor{keyword}{template}<>}
+\DoxyCodeLine{00249\ \ \ \ \ \textcolor{keyword}{struct\ }\_\_is\_integer<unsigned\ long\ long>}
+\DoxyCodeLine{00250\ \ \ \ \ \{}
+\DoxyCodeLine{00251\ \ \ \ \ \ \ \textcolor{keyword}{enum}\ \{\ \_\_value\ =\ 1\ \};}
+\DoxyCodeLine{00252\ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ \_\_true\_type\ \_\_type;}
+\DoxyCodeLine{00253\ \ \ \ \ \};}
+\DoxyCodeLine{00254\ }
+\DoxyCodeLine{00255\ \textcolor{preprocessor}{\#define\ \_\_INT\_N(TYPE)\ \ \ \ \ \ \ \ \ \ \ \(\backslash\)}}
+\DoxyCodeLine{00256\ \textcolor{preprocessor}{\ \ \_\_extension\_\_\ \ \ \ \ \ \ \ \ \ \ \ \ \(\backslash\)}}
+\DoxyCodeLine{00257\ \textcolor{preprocessor}{\ \ template<>\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \(\backslash\)}}
+\DoxyCodeLine{00258\ \textcolor{preprocessor}{\ \ \ \ struct\ \_\_is\_integer<TYPE>\ \ \ \ \ \ \ \(\backslash\)}}
+\DoxyCodeLine{00259\ \textcolor{preprocessor}{\ \ \ \ \{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \(\backslash\)}}
+\DoxyCodeLine{00260\ \textcolor{preprocessor}{\ \ \ \ \ \ enum\ \{\ \_\_value\ =\ 1\ \};\ \ \ \ \ \(\backslash\)}}
+\DoxyCodeLine{00261\ \textcolor{preprocessor}{\ \ \ \ \ \ typedef\ \_\_true\_type\ \_\_type;\ \ \ \(\backslash\)}}
+\DoxyCodeLine{00262\ \textcolor{preprocessor}{\ \ \ \ \};\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \(\backslash\)}}
+\DoxyCodeLine{00263\ \textcolor{preprocessor}{\ \ \_\_extension\_\_\ \ \ \ \ \ \ \ \ \ \ \ \ \(\backslash\)}}
+\DoxyCodeLine{00264\ \textcolor{preprocessor}{\ \ template<>\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \(\backslash\)}}
+\DoxyCodeLine{00265\ \textcolor{preprocessor}{\ \ \ \ struct\ \_\_is\_integer<unsigned\ TYPE>\ \ \(\backslash\)}}
+\DoxyCodeLine{00266\ \textcolor{preprocessor}{\ \ \ \ \{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \(\backslash\)}}
+\DoxyCodeLine{00267\ \textcolor{preprocessor}{\ \ \ \ \ \ enum\ \{\ \_\_value\ =\ 1\ \};\ \ \ \ \ \(\backslash\)}}
+\DoxyCodeLine{00268\ \textcolor{preprocessor}{\ \ \ \ \ \ typedef\ \_\_true\_type\ \_\_type;\ \ \ \(\backslash\)}}
+\DoxyCodeLine{00269\ \textcolor{preprocessor}{\ \ \ \ \};}}
+\DoxyCodeLine{00270\ }
+\DoxyCodeLine{00271\ \textcolor{preprocessor}{\#ifdef\ \_\_GLIBCXX\_TYPE\_INT\_N\_0}}
+\DoxyCodeLine{00272\ \mbox{\hyperlink{_classes_2lib_2include_2c_09_09_2bits_2cpp__type__traits_8h_a336bf4e61fee5f317313d01106fde707}{\_\_INT\_N}}(\_\_GLIBCXX\_TYPE\_INT\_N\_0)}
+\DoxyCodeLine{00273\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00274\ \textcolor{preprocessor}{\#ifdef\ \_\_GLIBCXX\_TYPE\_INT\_N\_1}}
+\DoxyCodeLine{00275\ \mbox{\hyperlink{_classes_2lib_2include_2c_09_09_2bits_2cpp__type__traits_8h_a336bf4e61fee5f317313d01106fde707}{\_\_INT\_N}}(\_\_GLIBCXX\_TYPE\_INT\_N\_1)}
+\DoxyCodeLine{00276\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00277\ \textcolor{preprocessor}{\#ifdef\ \_\_GLIBCXX\_TYPE\_INT\_N\_2}}
+\DoxyCodeLine{00278\ \mbox{\hyperlink{_classes_2lib_2include_2c_09_09_2bits_2cpp__type__traits_8h_a336bf4e61fee5f317313d01106fde707}{\_\_INT\_N}}(\_\_GLIBCXX\_TYPE\_INT\_N\_2)}
+\DoxyCodeLine{00279\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00280\ \textcolor{preprocessor}{\#ifdef\ \_\_GLIBCXX\_TYPE\_INT\_N\_3}}
+\DoxyCodeLine{00281\ \mbox{\hyperlink{_classes_2lib_2include_2c_09_09_2bits_2cpp__type__traits_8h_a336bf4e61fee5f317313d01106fde707}{\_\_INT\_N}}(\_\_GLIBCXX\_TYPE\_INT\_N\_3)}
+\DoxyCodeLine{00282\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00283\ }
+\DoxyCodeLine{00284\ \textcolor{preprocessor}{\#undef\ \_\_INT\_N}}
+\DoxyCodeLine{00285\ }
+\DoxyCodeLine{00286\ \ \ \textcolor{comment}{//}}
+\DoxyCodeLine{00287\ \ \ \textcolor{comment}{//\ Floating\ point\ types}}
+\DoxyCodeLine{00288\ \ \ \textcolor{comment}{//}}
+\DoxyCodeLine{00289\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Tp>}
+\DoxyCodeLine{00290\ \ \ \ \ \textcolor{keyword}{struct\ }\_\_is\_floating}
+\DoxyCodeLine{00291\ \ \ \ \ \{}
+\DoxyCodeLine{00292\ \ \ \ \ \ \ \textcolor{keyword}{enum}\ \{\ \_\_value\ =\ 0\ \};}
+\DoxyCodeLine{00293\ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ \_\_false\_type\ \_\_type;}
+\DoxyCodeLine{00294\ \ \ \ \ \};}
+\DoxyCodeLine{00295\ }
+\DoxyCodeLine{00296\ \ \ \textcolor{comment}{//\ three\ specializations\ (float,\ double\ and\ 'long\ double')}}
+\DoxyCodeLine{00297\ \ \ \textcolor{keyword}{template}<>}
+\DoxyCodeLine{00298\ \ \ \ \ \textcolor{keyword}{struct\ }\_\_is\_floating<float>}
+\DoxyCodeLine{00299\ \ \ \ \ \{}
+\DoxyCodeLine{00300\ \ \ \ \ \ \ \textcolor{keyword}{enum}\ \{\ \_\_value\ =\ 1\ \};}
+\DoxyCodeLine{00301\ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ \_\_true\_type\ \_\_type;}
+\DoxyCodeLine{00302\ \ \ \ \ \};}
+\DoxyCodeLine{00303\ }
+\DoxyCodeLine{00304\ \ \ \textcolor{keyword}{template}<>}
+\DoxyCodeLine{00305\ \ \ \ \ \textcolor{keyword}{struct\ }\_\_is\_floating<double>}
+\DoxyCodeLine{00306\ \ \ \ \ \{}
+\DoxyCodeLine{00307\ \ \ \ \ \ \ \textcolor{keyword}{enum}\ \{\ \_\_value\ =\ 1\ \};}
+\DoxyCodeLine{00308\ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ \_\_true\_type\ \_\_type;}
+\DoxyCodeLine{00309\ \ \ \ \ \};}
+\DoxyCodeLine{00310\ }
+\DoxyCodeLine{00311\ \ \ \textcolor{keyword}{template}<>}
+\DoxyCodeLine{00312\ \ \ \ \ \textcolor{keyword}{struct\ }\_\_is\_floating<long\ double>}
+\DoxyCodeLine{00313\ \ \ \ \ \{}
+\DoxyCodeLine{00314\ \ \ \ \ \ \ \textcolor{keyword}{enum}\ \{\ \_\_value\ =\ 1\ \};}
+\DoxyCodeLine{00315\ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ \_\_true\_type\ \_\_type;}
+\DoxyCodeLine{00316\ \ \ \ \ \};}
+\DoxyCodeLine{00317\ }
+\DoxyCodeLine{00318\ \ \ \textcolor{comment}{//}}
+\DoxyCodeLine{00319\ \ \ \textcolor{comment}{//\ Pointer\ types}}
+\DoxyCodeLine{00320\ \ \ \textcolor{comment}{//}}
+\DoxyCodeLine{00321\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Tp>}
+\DoxyCodeLine{00322\ \ \ \ \ \textcolor{keyword}{struct\ }\_\_is\_pointer}
+\DoxyCodeLine{00323\ \ \ \ \ \{}
+\DoxyCodeLine{00324\ \ \ \ \ \ \ \textcolor{keyword}{enum}\ \{\ \_\_value\ =\ 0\ \};}
+\DoxyCodeLine{00325\ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ \_\_false\_type\ \_\_type;}
+\DoxyCodeLine{00326\ \ \ \ \ \};}
+\DoxyCodeLine{00327\ }
+\DoxyCodeLine{00328\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Tp>}
+\DoxyCodeLine{00329\ \ \ \ \ \textcolor{keyword}{struct\ }\_\_is\_pointer<\_Tp*>}
+\DoxyCodeLine{00330\ \ \ \ \ \{}
+\DoxyCodeLine{00331\ \ \ \ \ \ \ \textcolor{keyword}{enum}\ \{\ \_\_value\ =\ 1\ \};}
+\DoxyCodeLine{00332\ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ \_\_true\_type\ \_\_type;}
+\DoxyCodeLine{00333\ \ \ \ \ \};}
+\DoxyCodeLine{00334\ }
+\DoxyCodeLine{00335\ \ \ \textcolor{comment}{//}}
+\DoxyCodeLine{00336\ \ \ \textcolor{comment}{//\ An\ arithmetic\ type\ is\ an\ integer\ type\ or\ a\ floating\ point\ type}}
+\DoxyCodeLine{00337\ \ \ \textcolor{comment}{//}}
+\DoxyCodeLine{00338\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Tp>}
+\DoxyCodeLine{00339\ \ \ \ \ \textcolor{keyword}{struct\ }\_\_is\_arithmetic}
+\DoxyCodeLine{00340\ \ \ \ \ :\ \textcolor{keyword}{public}\ \_\_traitor<\_\_is\_integer<\_Tp>,\ \_\_is\_floating<\_Tp>\ >}
+\DoxyCodeLine{00341\ \ \ \ \ \{\ \};}
+\DoxyCodeLine{00342\ }
+\DoxyCodeLine{00343\ \ \ \textcolor{comment}{//}}
+\DoxyCodeLine{00344\ \ \ \textcolor{comment}{//\ A\ scalar\ type\ is\ an\ arithmetic\ type\ or\ a\ pointer\ type}}
+\DoxyCodeLine{00345\ \ \ \textcolor{comment}{//\ }}
+\DoxyCodeLine{00346\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Tp>}
+\DoxyCodeLine{00347\ \ \ \ \ \textcolor{keyword}{struct\ }\_\_is\_scalar}
+\DoxyCodeLine{00348\ \ \ \ \ :\ \textcolor{keyword}{public}\ \_\_traitor<\_\_is\_arithmetic<\_Tp>,\ \_\_is\_pointer<\_Tp>\ >}
+\DoxyCodeLine{00349\ \ \ \ \ \{\ \};}
+\DoxyCodeLine{00350\ }
+\DoxyCodeLine{00351\ \ \ \textcolor{comment}{//}}
+\DoxyCodeLine{00352\ \ \ \textcolor{comment}{//\ For\ use\ in\ std::copy\ and\ std::find\ overloads\ for\ streambuf\ iterators.}}
+\DoxyCodeLine{00353\ \ \ \textcolor{comment}{//}}
+\DoxyCodeLine{00354\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Tp>}
+\DoxyCodeLine{00355\ \ \ \ \ \textcolor{keyword}{struct\ }\_\_is\_char}
+\DoxyCodeLine{00356\ \ \ \ \ \{}
+\DoxyCodeLine{00357\ \ \ \ \ \ \ \textcolor{keyword}{enum}\ \{\ \_\_value\ =\ 0\ \};}
+\DoxyCodeLine{00358\ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ \_\_false\_type\ \_\_type;}
+\DoxyCodeLine{00359\ \ \ \ \ \};}
+\DoxyCodeLine{00360\ }
+\DoxyCodeLine{00361\ \ \ \textcolor{keyword}{template}<>}
+\DoxyCodeLine{00362\ \ \ \ \ \textcolor{keyword}{struct\ }\_\_is\_char<char>}
+\DoxyCodeLine{00363\ \ \ \ \ \{}
+\DoxyCodeLine{00364\ \ \ \ \ \ \ \textcolor{keyword}{enum}\ \{\ \_\_value\ =\ 1\ \};}
+\DoxyCodeLine{00365\ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ \_\_true\_type\ \_\_type;}
+\DoxyCodeLine{00366\ \ \ \ \ \};}
+\DoxyCodeLine{00367\ }
+\DoxyCodeLine{00368\ \textcolor{preprocessor}{\#ifdef\ \_\_WCHAR\_TYPE\_\_}}
+\DoxyCodeLine{00369\ \ \ \textcolor{keyword}{template}<>}
+\DoxyCodeLine{00370\ \ \ \ \ \textcolor{keyword}{struct\ }\_\_is\_char<\mbox{\hyperlink{_classes_2lib_2include_2stddef_8h_a5f245e933e58ed4d268146a5b1f116ca}{wchar\_t}}>}
+\DoxyCodeLine{00371\ \ \ \ \ \{}
+\DoxyCodeLine{00372\ \ \ \ \ \ \ \textcolor{keyword}{enum}\ \{\ \_\_value\ =\ 1\ \};}
+\DoxyCodeLine{00373\ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ \_\_true\_type\ \_\_type;}
+\DoxyCodeLine{00374\ \ \ \ \ \};}
+\DoxyCodeLine{00375\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00376\ }
+\DoxyCodeLine{00377\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Tp>}
+\DoxyCodeLine{00378\ \ \ \ \ \textcolor{keyword}{struct\ }\_\_is\_byte}
+\DoxyCodeLine{00379\ \ \ \ \ \{}
+\DoxyCodeLine{00380\ \ \ \ \ \ \ \textcolor{keyword}{enum}\ \{\ \_\_value\ =\ 0\ \};}
+\DoxyCodeLine{00381\ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ \_\_false\_type\ \_\_type;}
+\DoxyCodeLine{00382\ \ \ \ \ \};}
+\DoxyCodeLine{00383\ }
+\DoxyCodeLine{00384\ \ \ \textcolor{keyword}{template}<>}
+\DoxyCodeLine{00385\ \ \ \ \ \textcolor{keyword}{struct\ }\_\_is\_byte<char>}
+\DoxyCodeLine{00386\ \ \ \ \ \{}
+\DoxyCodeLine{00387\ \ \ \ \ \ \ \textcolor{keyword}{enum}\ \{\ \_\_value\ =\ 1\ \};}
+\DoxyCodeLine{00388\ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ \_\_true\_type\ \_\_type;}
+\DoxyCodeLine{00389\ \ \ \ \ \};}
+\DoxyCodeLine{00390\ }
+\DoxyCodeLine{00391\ \ \ \textcolor{keyword}{template}<>}
+\DoxyCodeLine{00392\ \ \ \ \ \textcolor{keyword}{struct\ }\_\_is\_byte<signed\ char>}
+\DoxyCodeLine{00393\ \ \ \ \ \{}
+\DoxyCodeLine{00394\ \ \ \ \ \ \ \textcolor{keyword}{enum}\ \{\ \_\_value\ =\ 1\ \};}
+\DoxyCodeLine{00395\ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ \_\_true\_type\ \_\_type;}
+\DoxyCodeLine{00396\ \ \ \ \ \};}
+\DoxyCodeLine{00397\ }
+\DoxyCodeLine{00398\ \ \ \textcolor{keyword}{template}<>}
+\DoxyCodeLine{00399\ \ \ \ \ \textcolor{keyword}{struct\ }\_\_is\_byte<unsigned\ char>}
+\DoxyCodeLine{00400\ \ \ \ \ \{}
+\DoxyCodeLine{00401\ \ \ \ \ \ \ \textcolor{keyword}{enum}\ \{\ \_\_value\ =\ 1\ \};}
+\DoxyCodeLine{00402\ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ \_\_true\_type\ \_\_type;}
+\DoxyCodeLine{00403\ \ \ \ \ \};}
+\DoxyCodeLine{00404\ }
+\DoxyCodeLine{00405\ \textcolor{preprocessor}{\#if\ \_\_cplusplus\ >=\ 201703L}}
+\DoxyCodeLine{00406\ \ \ \textcolor{keyword}{enum\ class}\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2rlgl_8h_a0c8186d9b9b7880309c27230bbb5e69d}{byte}}\ :\ \textcolor{keywordtype}{unsigned}\ char;}
+\DoxyCodeLine{00407\ }
+\DoxyCodeLine{00408\ \ \ \textcolor{keyword}{template}<>}
+\DoxyCodeLine{00409\ \ \ \ \ \textcolor{keyword}{struct\ }\_\_is\_byte<\mbox{\hyperlink{_classes_2lib_2raylib_2src_2rlgl_8h_a0c8186d9b9b7880309c27230bbb5e69d}{byte}}>}
+\DoxyCodeLine{00410\ \ \ \ \ \{}
+\DoxyCodeLine{00411\ \ \ \ \ \ \ \textcolor{keyword}{enum}\ \{\ \_\_value\ =\ 1\ \};}
+\DoxyCodeLine{00412\ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ \_\_true\_type\ \_\_type;}
+\DoxyCodeLine{00413\ \ \ \ \ \};}
+\DoxyCodeLine{00414\ \textcolor{preprocessor}{\#endif\ }\textcolor{comment}{//\ C++17}}
+\DoxyCodeLine{00415\ }
+\DoxyCodeLine{00416\ \textcolor{preprocessor}{\#ifdef\ \_GLIBCXX\_USE\_CHAR8\_T}}
+\DoxyCodeLine{00417\ \ \ \textcolor{keyword}{template}<>}
+\DoxyCodeLine{00418\ \ \ \ \ \textcolor{keyword}{struct\ }\_\_is\_byte<char8\_t>}
+\DoxyCodeLine{00419\ \ \ \ \ \{}
+\DoxyCodeLine{00420\ \ \ \ \ \ \ \textcolor{keyword}{enum}\ \{\ \_\_value\ =\ 1\ \};}
+\DoxyCodeLine{00421\ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ \_\_true\_type\ \_\_type;}
+\DoxyCodeLine{00422\ \ \ \ \ \};}
+\DoxyCodeLine{00423\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00424\ }
+\DoxyCodeLine{00425\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}>\ \textcolor{keyword}{struct\ }iterator\_traits;}
+\DoxyCodeLine{00426\ }
+\DoxyCodeLine{00427\ \ \ \textcolor{comment}{//\ A\ type\ that\ is\ safe\ for\ use\ with\ memcpy,\ memmove,\ memcmp\ etc.}}
+\DoxyCodeLine{00428\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Tp>}
+\DoxyCodeLine{00429\ \ \ \ \ \textcolor{keyword}{struct\ }\_\_is\_nonvolatile\_trivially\_copyable}
+\DoxyCodeLine{00430\ \ \ \ \ \{}
+\DoxyCodeLine{00431\ \ \ \ \ \ \ \textcolor{keyword}{enum}\ \{\ \_\_value\ =\ \_\_is\_trivially\_copyable(\_Tp)\ \};}
+\DoxyCodeLine{00432\ \ \ \ \ \};}
+\DoxyCodeLine{00433\ }
+\DoxyCodeLine{00434\ \ \ \textcolor{comment}{//\ Cannot\ use\ memcpy/memmove/memcmp\ on\ volatile\ types\ even\ if\ they\ are}}
+\DoxyCodeLine{00435\ \ \ \textcolor{comment}{//\ trivially\ copyable,\ so\ ensure\ \_\_memcpyable<volatile\ int*,\ volatile\ int*>}}
+\DoxyCodeLine{00436\ \ \ \textcolor{comment}{//\ and\ similar\ will\ be\ false.}}
+\DoxyCodeLine{00437\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Tp>}
+\DoxyCodeLine{00438\ \ \ \ \ \textcolor{keyword}{struct\ }\_\_is\_nonvolatile\_trivially\_copyable<volatile\ \_Tp>}
+\DoxyCodeLine{00439\ \ \ \ \ \{}
+\DoxyCodeLine{00440\ \ \ \ \ \ \ \textcolor{keyword}{enum}\ \{\ \_\_value\ =\ 0\ \};}
+\DoxyCodeLine{00441\ \ \ \ \ \};}
+\DoxyCodeLine{00442\ }
+\DoxyCodeLine{00443\ \ \ \textcolor{comment}{//\ Whether\ two\ iterator\ types\ can\ be\ used\ with\ memcpy/memmove.}}
+\DoxyCodeLine{00444\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_OutputIter,\ \textcolor{keyword}{typename}\ \_InputIter>}
+\DoxyCodeLine{00445\ \ \ \ \ \textcolor{keyword}{struct\ }\_\_memcpyable}
+\DoxyCodeLine{00446\ \ \ \ \ \{}
+\DoxyCodeLine{00447\ \ \ \ \ \ \ \textcolor{keyword}{enum}\ \{\ \_\_value\ =\ 0\ \};}
+\DoxyCodeLine{00448\ \ \ \ \ \};}
+\DoxyCodeLine{00449\ }
+\DoxyCodeLine{00450\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Tp>}
+\DoxyCodeLine{00451\ \ \ \ \ \textcolor{keyword}{struct\ }\_\_memcpyable<\_Tp*,\ \_Tp*>}
+\DoxyCodeLine{00452\ \ \ \ \ :\ \_\_is\_nonvolatile\_trivially\_copyable<\_Tp>}
+\DoxyCodeLine{00453\ \ \ \ \ \{\ \};}
+\DoxyCodeLine{00454\ }
+\DoxyCodeLine{00455\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Tp>}
+\DoxyCodeLine{00456\ \ \ \ \ \textcolor{keyword}{struct\ }\_\_memcpyable<\_Tp*,\ \textcolor{keyword}{const}\ \_Tp*>}
+\DoxyCodeLine{00457\ \ \ \ \ :\ \_\_is\_nonvolatile\_trivially\_copyable<\_Tp>}
+\DoxyCodeLine{00458\ \ \ \ \ \{\ \};}
+\DoxyCodeLine{00459\ }
+\DoxyCodeLine{00460\ \ \ \textcolor{comment}{//\ Whether\ two\ iterator\ types\ can\ be\ used\ with\ memcmp.}}
+\DoxyCodeLine{00461\ \ \ \textcolor{comment}{//\ This\ trait\ only\ says\ it's\ well-\/formed\ to\ use\ memcmp,\ not\ that\ it}}
+\DoxyCodeLine{00462\ \ \ \textcolor{comment}{//\ gives\ the\ right\ answer\ for\ a\ given\ algorithm.\ So\ for\ example,\ std::equal}}
+\DoxyCodeLine{00463\ \ \ \textcolor{comment}{//\ needs\ to\ add\ additional\ checks\ that\ the\ types\ are\ integers\ or\ pointers,}}
+\DoxyCodeLine{00464\ \ \ \textcolor{comment}{//\ because\ other\ trivially\ copyable\ types\ can\ overload\ operator==.}}
+\DoxyCodeLine{00465\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Iter1,\ \textcolor{keyword}{typename}\ \_Iter2>}
+\DoxyCodeLine{00466\ \ \ \ \ \textcolor{keyword}{struct\ }\_\_memcmpable}
+\DoxyCodeLine{00467\ \ \ \ \ \{}
+\DoxyCodeLine{00468\ \ \ \ \ \ \ \textcolor{keyword}{enum}\ \{\ \_\_value\ =\ 0\ \};}
+\DoxyCodeLine{00469\ \ \ \ \ \};}
+\DoxyCodeLine{00470\ }
+\DoxyCodeLine{00471\ \ \ \textcolor{comment}{//\ OK\ to\ use\ memcmp\ with\ pointers\ to\ trivially\ copyable\ types.}}
+\DoxyCodeLine{00472\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Tp>}
+\DoxyCodeLine{00473\ \ \ \ \ \textcolor{keyword}{struct\ }\_\_memcmpable<\_Tp*,\ \_Tp*>}
+\DoxyCodeLine{00474\ \ \ \ \ :\ \_\_is\_nonvolatile\_trivially\_copyable<\_Tp>}
+\DoxyCodeLine{00475\ \ \ \ \ \{\ \};}
+\DoxyCodeLine{00476\ }
+\DoxyCodeLine{00477\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Tp>}
+\DoxyCodeLine{00478\ \ \ \ \ \textcolor{keyword}{struct\ }\_\_memcmpable<const\ \_Tp*,\ \_Tp*>}
+\DoxyCodeLine{00479\ \ \ \ \ :\ \_\_is\_nonvolatile\_trivially\_copyable<\_Tp>}
+\DoxyCodeLine{00480\ \ \ \ \ \{\ \};}
+\DoxyCodeLine{00481\ }
+\DoxyCodeLine{00482\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Tp>}
+\DoxyCodeLine{00483\ \ \ \ \ \textcolor{keyword}{struct\ }\_\_memcmpable<\_Tp*,\ \textcolor{keyword}{const}\ \_Tp*>}
+\DoxyCodeLine{00484\ \ \ \ \ :\ \_\_is\_nonvolatile\_trivially\_copyable<\_Tp>}
+\DoxyCodeLine{00485\ \ \ \ \ \{\ \};}
+\DoxyCodeLine{00486\ }
+\DoxyCodeLine{00487\ \ \ \textcolor{comment}{//\ Whether\ memcmp\ can\ be\ used\ to\ determine\ ordering\ for\ a\ type}}
+\DoxyCodeLine{00488\ \ \ \textcolor{comment}{//\ e.g.\ in\ std::lexicographical\_compare\ or\ three-\/way\ comparisons.}}
+\DoxyCodeLine{00489\ \ \ \textcolor{comment}{//\ True\ for\ unsigned\ integer-\/like\ types\ where\ comparing\ each\ byte\ in\ turn}}
+\DoxyCodeLine{00490\ \ \ \textcolor{comment}{//\ as\ an\ unsigned\ char\ yields\ the\ right\ result.\ This\ is\ true\ for\ all}}
+\DoxyCodeLine{00491\ \ \ \textcolor{comment}{//\ unsigned\ integers\ on\ big\ endian\ targets,\ but\ only\ unsigned\ narrow}}
+\DoxyCodeLine{00492\ \ \ \textcolor{comment}{//\ character\ types\ (and\ std::byte)\ on\ little\ endian\ targets.}}
+\DoxyCodeLine{00493\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Tp,\ \textcolor{keywordtype}{bool}\ \_TreatAsBytes\ =}
+\DoxyCodeLine{00494\ \textcolor{preprocessor}{\#if\ \_\_BYTE\_ORDER\_\_\ ==\ \_\_ORDER\_BIG\_ENDIAN\_\_}}
+\DoxyCodeLine{00495\ \ \ \ \ \_\_is\_integer<\_Tp>::\_\_value}
+\DoxyCodeLine{00496\ \textcolor{preprocessor}{\#else}}
+\DoxyCodeLine{00497\ \ \ \ \ \_\_is\_byte<\_Tp>::\_\_value}
+\DoxyCodeLine{00498\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00499\ \ \ \ \ >}
+\DoxyCodeLine{00500\ \ \ \ \ \textcolor{keyword}{struct\ }\_\_is\_memcmp\_ordered}
+\DoxyCodeLine{00501\ \ \ \ \ \{}
+\DoxyCodeLine{00502\ \ \ \ \ \ \ \textcolor{keyword}{static}\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{bool}\ \_\_value\ =\ \_Tp(-\/1)\ >\ \_Tp(1);\ \textcolor{comment}{//\ is\ unsigned}}
+\DoxyCodeLine{00503\ \ \ \ \ \};}
+\DoxyCodeLine{00504\ }
+\DoxyCodeLine{00505\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Tp>}
+\DoxyCodeLine{00506\ \ \ \ \ \textcolor{keyword}{struct\ }\_\_is\_memcmp\_ordered<\_Tp,\ \mbox{\hyperlink{_classes_2lib_2include_2stdbool_8h_a65e9886d74aaee76545e83dd09011727}{false}}>}
+\DoxyCodeLine{00507\ \ \ \ \ \{}
+\DoxyCodeLine{00508\ \ \ \ \ \ \ \textcolor{keyword}{static}\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{bool}\ \_\_value\ =\ \textcolor{keyword}{false};}
+\DoxyCodeLine{00509\ \ \ \ \ \};}
+\DoxyCodeLine{00510\ }
+\DoxyCodeLine{00511\ \ \ \textcolor{comment}{//\ Whether\ two\ types\ can\ be\ compared\ using\ memcmp.}}
+\DoxyCodeLine{00512\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Tp,\ \textcolor{keyword}{typename}\ \_Up,\ \textcolor{keywordtype}{bool}\ =\ sizeof(\_Tp)\ ==\ sizeof(\_Up)>}
+\DoxyCodeLine{00513\ \ \ \ \ \textcolor{keyword}{struct\ }\_\_is\_memcmp\_ordered\_with}
+\DoxyCodeLine{00514\ \ \ \ \ \{}
+\DoxyCodeLine{00515\ \ \ \ \ \ \ \textcolor{keyword}{static}\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{bool}\ \_\_value\ =\ \_\_is\_memcmp\_ordered<\_Tp>::\_\_value}
+\DoxyCodeLine{00516\ \ \ \ \ \&\&\ \_\_is\_memcmp\_ordered<\_Up>::\_\_value;}
+\DoxyCodeLine{00517\ \ \ \ \ \};}
+\DoxyCodeLine{00518\ }
+\DoxyCodeLine{00519\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Tp,\ \textcolor{keyword}{typename}\ \_Up>}
+\DoxyCodeLine{00520\ \ \ \ \ \textcolor{keyword}{struct\ }\_\_is\_memcmp\_ordered\_with<\_Tp,\ \_Up,\ \mbox{\hyperlink{_classes_2lib_2include_2stdbool_8h_a65e9886d74aaee76545e83dd09011727}{false}}>}
+\DoxyCodeLine{00521\ \ \ \ \ \{}
+\DoxyCodeLine{00522\ \ \ \ \ \ \ \textcolor{keyword}{static}\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{bool}\ \_\_value\ =\ \textcolor{keyword}{false};}
+\DoxyCodeLine{00523\ \ \ \ \ \};}
+\DoxyCodeLine{00524\ }
+\DoxyCodeLine{00525\ \textcolor{preprocessor}{\#if\ \_\_cplusplus\ >=\ 201703L}}
+\DoxyCodeLine{00526\ \textcolor{preprocessor}{\#if\ \_\_BYTE\_ORDER\_\_\ ==\ \_\_ORDER\_BIG\_ENDIAN\_\_}}
+\DoxyCodeLine{00527\ \ \ \textcolor{comment}{//\ std::byte\ is\ not\ an\ integer,\ but\ it\ can\ be\ compared\ using\ memcmp.}}
+\DoxyCodeLine{00528\ \ \ \textcolor{keyword}{template}<>}
+\DoxyCodeLine{00529\ \ \ \ \ \textcolor{keyword}{struct\ }\_\_is\_memcmp\_ordered<\mbox{\hyperlink{namespacestd}{std}}::\mbox{\hyperlink{_classes_2lib_2raylib_2src_2rlgl_8h_a0c8186d9b9b7880309c27230bbb5e69d}{byte}},\ \mbox{\hyperlink{_classes_2lib_2include_2stdbool_8h_a65e9886d74aaee76545e83dd09011727}{false}}>}
+\DoxyCodeLine{00530\ \ \ \ \ \{\ \textcolor{keyword}{static}\ \textcolor{keyword}{constexpr}\ \textcolor{keywordtype}{bool}\ \_\_value\ =\ \textcolor{keyword}{true};\ \};}
+\DoxyCodeLine{00531\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00532\ }
+\DoxyCodeLine{00533\ \ \ \textcolor{comment}{//\ std::byte\ can\ only\ be\ compared\ to\ itself,\ not\ to\ other\ types.}}
+\DoxyCodeLine{00534\ \ \ \textcolor{keyword}{template}<>}
+\DoxyCodeLine{00535\ \ \ \ \ \textcolor{keyword}{struct\ }\_\_is\_memcmp\_ordered\_with<\mbox{\hyperlink{namespacestd}{std}}::\mbox{\hyperlink{_classes_2lib_2raylib_2src_2rlgl_8h_a0c8186d9b9b7880309c27230bbb5e69d}{byte}},\ std::byte,\ \mbox{\hyperlink{_classes_2lib_2include_2stdbool_8h_a41f9c5fb8b08eb5dc3edce4dcb37fee7}{true}}>}
+\DoxyCodeLine{00536\ \ \ \ \ \{\ \textcolor{keyword}{static}\ \textcolor{keyword}{constexpr}\ \textcolor{keywordtype}{bool}\ \_\_value\ =\ \textcolor{keyword}{true};\ \};}
+\DoxyCodeLine{00537\ }
+\DoxyCodeLine{00538\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Tp,\ \textcolor{keywordtype}{bool}\ \_SameSize>}
+\DoxyCodeLine{00539\ \ \ \ \ \textcolor{keyword}{struct\ }\_\_is\_memcmp\_ordered\_with<\_Tp,\ \mbox{\hyperlink{namespacestd}{std}}::\mbox{\hyperlink{_classes_2lib_2raylib_2src_2rlgl_8h_a0c8186d9b9b7880309c27230bbb5e69d}{byte}},\ \_SameSize>}
+\DoxyCodeLine{00540\ \ \ \ \ \{\ \textcolor{keyword}{static}\ \textcolor{keyword}{constexpr}\ \textcolor{keywordtype}{bool}\ \_\_value\ =\ \textcolor{keyword}{false};\ \};}
+\DoxyCodeLine{00541\ }
+\DoxyCodeLine{00542\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Up,\ \textcolor{keywordtype}{bool}\ \_SameSize>}
+\DoxyCodeLine{00543\ \ \ \ \ \textcolor{keyword}{struct\ }\_\_is\_memcmp\_ordered\_with<\mbox{\hyperlink{namespacestd}{std}}::\mbox{\hyperlink{_classes_2lib_2raylib_2src_2rlgl_8h_a0c8186d9b9b7880309c27230bbb5e69d}{byte}},\ \_Up,\ \_SameSize>}
+\DoxyCodeLine{00544\ \ \ \ \ \{\ \textcolor{keyword}{static}\ \textcolor{keyword}{constexpr}\ \textcolor{keywordtype}{bool}\ \_\_value\ =\ \textcolor{keyword}{false};\ \};}
+\DoxyCodeLine{00545\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00546\ }
+\DoxyCodeLine{00547\ \ \ \textcolor{comment}{//}}
+\DoxyCodeLine{00548\ \ \ \textcolor{comment}{//\ Move\ iterator\ type}}
+\DoxyCodeLine{00549\ \ \ \textcolor{comment}{//}}
+\DoxyCodeLine{00550\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Tp>}
+\DoxyCodeLine{00551\ \ \ \ \ \textcolor{keyword}{struct\ }\_\_is\_move\_iterator}
+\DoxyCodeLine{00552\ \ \ \ \ \{}
+\DoxyCodeLine{00553\ \ \ \ \ \ \ \textcolor{keyword}{enum}\ \{\ \_\_value\ =\ 0\ \};}
+\DoxyCodeLine{00554\ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ \_\_false\_type\ \_\_type;}
+\DoxyCodeLine{00555\ \ \ \ \ \};}
+\DoxyCodeLine{00556\ }
+\DoxyCodeLine{00557\ \ \ \textcolor{comment}{//\ Fallback\ implementation\ of\ the\ function\ in\ bits/stl\_iterator.h\ used\ to}}
+\DoxyCodeLine{00558\ \ \ \textcolor{comment}{//\ remove\ the\ move\_iterator\ wrapper.}}
+\DoxyCodeLine{00559\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Iterator>}
+\DoxyCodeLine{00560\ \ \ \ \ \_GLIBCXX20\_CONSTEXPR}
+\DoxyCodeLine{00561\ \ \ \ \ \textcolor{keyword}{inline}\ \_Iterator}
+\DoxyCodeLine{00562\ \ \ \ \ \_\_miter\_base(\_Iterator\ \_\_it)}
+\DoxyCodeLine{00563\ \ \ \ \ \{\ \textcolor{keywordflow}{return}\ \_\_it;\ \}}
+\DoxyCodeLine{00564\ }
+\DoxyCodeLine{00565\ \_GLIBCXX\_END\_NAMESPACE\_VERSION}
+\DoxyCodeLine{00566\ \}\ \textcolor{comment}{//\ namespace}}
+\DoxyCodeLine{00567\ \}\ \textcolor{comment}{//\ extern\ "{}C++"{}}}
+\DoxyCodeLine{00568\ }
+\DoxyCodeLine{00569\ \textcolor{preprocessor}{\#endif\ }\textcolor{comment}{//\_CPP\_TYPE\_TRAITS\_H}}
+
+\end{DoxyCode}

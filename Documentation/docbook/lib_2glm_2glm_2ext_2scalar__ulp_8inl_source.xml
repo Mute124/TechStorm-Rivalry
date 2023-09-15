@@ -1,0 +1,284 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<section xmlns="http://docbook.org/ns/docbook" version="5.0" xmlns:xlink="http://www.w3.org/1999/xlink" xml:id="_lib_2glm_2glm_2ext_2scalar__ulp_8inl_source" xml:lang="en-US">
+<title>scalar_ulp.inl</title>
+<indexterm><primary>C:/Users/HP/Documents/GitHub/Minero-Game/lib/glm/glm/ext/scalar_ulp.inl</primary></indexterm>
+Go to the documentation of this file.<programlisting linenumbering="unnumbered">1 
+7 
+8 <emphasis role="preprocessor">#include&#32;&quot;../detail/type_float.hpp&quot;</emphasis>
+9 <emphasis role="preprocessor">#include&#32;&quot;../ext/scalar_constants.hpp&quot;</emphasis>
+10 <emphasis role="preprocessor">#include&#32;&lt;cmath&gt;</emphasis>
+11 <emphasis role="preprocessor">#include&#32;&lt;cfloat&gt;</emphasis>
+12 
+13 <emphasis role="preprocessor">#if(GLM_COMPILER&#32;&amp;&#32;GLM_COMPILER_VC)</emphasis>
+14 <emphasis role="preprocessor">#&#32;&#32;&#32;pragma&#32;warning(push)</emphasis>
+15 <emphasis role="preprocessor">#&#32;&#32;&#32;pragma&#32;warning(disable&#32;:&#32;4127)</emphasis>
+16 <emphasis role="preprocessor">#endif</emphasis>
+17 
+18 <emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">union</emphasis>
+19 {
+20 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">float</emphasis>&#32;<link linkend="_classvalue">value</link>;
+21 &#32;&#32;&#32;&#32;<emphasis role="comment">/*&#32;FIXME:&#32;Assumes&#32;32&#32;bit&#32;int.&#32;&#32;*/</emphasis>
+22 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="_group__gtx__raw__data_1ga5617a479d471021b5c773c5e969ba46d">word</link>;
+23 }&#32;<link linkend="_unionieee__float__shape__type">ieee_float_shape_type</link>;
+24 
+25 <emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">union</emphasis>
+26 {
+27 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">double</emphasis>&#32;<link linkend="_classvalue">value</link>;
+28 &#32;&#32;&#32;&#32;<emphasis role="keyword">struct</emphasis>
+29 &#32;&#32;&#32;&#32;{
+30 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;lsw;
+31 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;msw;
+32 &#32;&#32;&#32;&#32;}&#32;parts;
+33 }&#32;<link linkend="_unionieee__double__shape__type">ieee_double_shape_type</link>;
+34 
+35 <emphasis role="preprocessor">#define&#32;GLM_EXTRACT_WORDS(ix0,ix1,d)&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;\</emphasis>
+36 <emphasis role="preprocessor">&#32;&#32;&#32;&#32;do&#32;{&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;\</emphasis>
+37 <emphasis role="preprocessor">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;ieee_double_shape_type&#32;ew_u;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;\</emphasis>
+38 <emphasis role="preprocessor">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;ew_u.value&#32;=&#32;(d);&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;\</emphasis>
+39 <emphasis role="preprocessor">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;(ix0)&#32;=&#32;ew_u.parts.msw;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;\</emphasis>
+40 <emphasis role="preprocessor">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;(ix1)&#32;=&#32;ew_u.parts.lsw;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;\</emphasis>
+41 <emphasis role="preprocessor">&#32;&#32;&#32;&#32;}&#32;while&#32;(0)</emphasis>
+42 
+43 <emphasis role="preprocessor">#define&#32;GLM_GET_FLOAT_WORD(i,d)&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;\</emphasis>
+44 <emphasis role="preprocessor">&#32;&#32;&#32;&#32;do&#32;{&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;\</emphasis>
+45 <emphasis role="preprocessor">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;ieee_float_shape_type&#32;gf_u;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;\</emphasis>
+46 <emphasis role="preprocessor">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;gf_u.value&#32;=&#32;(d);&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;\</emphasis>
+47 <emphasis role="preprocessor">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;(i)&#32;=&#32;gf_u.word;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;\</emphasis>
+48 <emphasis role="preprocessor">&#32;&#32;&#32;&#32;}&#32;while&#32;(0)</emphasis>
+49 
+50 <emphasis role="preprocessor">#define&#32;GLM_SET_FLOAT_WORD(d,i)&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;\</emphasis>
+51 <emphasis role="preprocessor">&#32;&#32;&#32;&#32;do&#32;{&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;\</emphasis>
+52 <emphasis role="preprocessor">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;ieee_float_shape_type&#32;sf_u;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;\</emphasis>
+53 <emphasis role="preprocessor">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;sf_u.word&#32;=&#32;(i);&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;\</emphasis>
+54 <emphasis role="preprocessor">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;(d)&#32;=&#32;sf_u.value;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;\</emphasis>
+55 <emphasis role="preprocessor">&#32;&#32;&#32;&#32;}&#32;while&#32;(0)</emphasis>
+56 
+57 <emphasis role="preprocessor">#define&#32;GLM_INSERT_WORDS(d,ix0,ix1)&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;\</emphasis>
+58 <emphasis role="preprocessor">&#32;&#32;&#32;&#32;do&#32;{&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;\</emphasis>
+59 <emphasis role="preprocessor">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;ieee_double_shape_type&#32;iw_u;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;\</emphasis>
+60 <emphasis role="preprocessor">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;iw_u.parts.msw&#32;=&#32;(ix0);&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;\</emphasis>
+61 <emphasis role="preprocessor">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;iw_u.parts.lsw&#32;=&#32;(ix1);&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;\</emphasis>
+62 <emphasis role="preprocessor">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;(d)&#32;=&#32;iw_u.value;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;\</emphasis>
+63 <emphasis role="preprocessor">&#32;&#32;&#32;&#32;}&#32;while&#32;(0)</emphasis>
+64 
+65 <emphasis role="keyword">namespace&#32;</emphasis><link linkend="_namespaceglm">glm</link>{
+66 <emphasis role="keyword">namespace&#32;</emphasis>detail
+67 {
+68 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2glm_2glm_2detail_2setup_8hpp_1a33fdea6f91c5f834105f7415e2a64407">GLM_FUNC_QUALIFIER</link>&#32;<emphasis role="keywordtype">float</emphasis>&#32;<link linkend="_namespaceglm_1_1detail_1ab0eb795c482130b1d6c83470bdb031e6">nextafterf</link>(<emphasis role="keywordtype">float</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1ac916c0825494ac3acd4457effd2823d2">x</link>,&#32;<emphasis role="keywordtype">float</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a4f27f1eebce8c31db01bb39fab9ef561">y</link>)
+69 &#32;&#32;&#32;&#32;{
+70 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">volatile</emphasis>&#32;<emphasis role="keywordtype">float</emphasis>&#32;t;
+71 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;hx,&#32;hy,&#32;ix,&#32;iy;
+72 
+73 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2glm_2glm_2ext_2scalar__ulp_8inl_1a28d9056369280955e923f99180ccb23c">GLM_GET_FLOAT_WORD</link>(hx,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1ac916c0825494ac3acd4457effd2823d2">x</link>);
+74 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2glm_2glm_2ext_2scalar__ulp_8inl_1a28d9056369280955e923f99180ccb23c">GLM_GET_FLOAT_WORD</link>(hy,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a4f27f1eebce8c31db01bb39fab9ef561">y</link>);
+75 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;ix&#32;=&#32;hx&#32;&amp;&#32;0x7fffffff;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;|x|</emphasis>
+76 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;iy&#32;=&#32;hy&#32;&amp;&#32;0x7fffffff;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;|y|</emphasis>
+77 
+78 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>((ix&#32;&gt;&#32;0x7f800000)&#32;||&#32;<emphasis role="comment">//&#32;x&#32;is&#32;nan</emphasis>
+79 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;(iy&#32;&gt;&#32;0x7f800000))&#32;&#32;<emphasis role="comment">//&#32;y&#32;is&#32;nan</emphasis>
+80 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1ac916c0825494ac3acd4457effd2823d2">x</link>&#32;+&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a4f27f1eebce8c31db01bb39fab9ef561">y</link>;
+81 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>(<link linkend="_group__core__func__common_1ga439e60a72eadecfeda2df5449c613a64">abs</link>(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a4f27f1eebce8c31db01bb39fab9ef561">y</link>&#32;-&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1ac916c0825494ac3acd4457effd2823d2">x</link>)&#32;&lt;=&#32;epsilon&lt;float&gt;())
+82 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a4f27f1eebce8c31db01bb39fab9ef561">y</link>;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;x=y,&#32;return&#32;y</emphasis>
+83 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>(ix&#32;==&#32;0)
+84 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;x&#32;==&#32;0</emphasis>
+85 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2glm_2glm_2ext_2scalar__ulp_8inl_1ab01ab8df0632f4a5f05e00f570e6b873">GLM_SET_FLOAT_WORD</link>(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1ac916c0825494ac3acd4457effd2823d2">x</link>,&#32;(hy&#32;&amp;&#32;0x80000000)&#32;|&#32;1);<emphasis role="comment">//&#32;return&#32;+-minsubnormal</emphasis>
+86 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;t&#32;=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1ac916c0825494ac3acd4457effd2823d2">x</link>&#32;*&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1ac916c0825494ac3acd4457effd2823d2">x</link>;
+87 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>(<link linkend="_group__core__func__common_1ga439e60a72eadecfeda2df5449c613a64">abs</link>(t&#32;-&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1ac916c0825494ac3acd4457effd2823d2">x</link>)&#32;&lt;=&#32;epsilon&lt;float&gt;())
+88 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;t;
+89 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>
+90 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1ac916c0825494ac3acd4457effd2823d2">x</link>;&#32;&#32;&#32;<emphasis role="comment">//&#32;raise&#32;underflow&#32;flag</emphasis>
+91 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+92 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>(hx&#32;&gt;=&#32;0)
+93 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;x&#32;&gt;&#32;0</emphasis>
+94 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>(hx&#32;&gt;&#32;hy)&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;x&#32;&gt;&#32;y,&#32;x&#32;-=&#32;ulp</emphasis>
+95 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;hx&#32;-=&#32;1;
+96 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;x&#32;&lt;&#32;y,&#32;x&#32;+=&#32;ulp</emphasis>
+97 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;hx&#32;+=&#32;1;
+98 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+99 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>
+100 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;x&#32;&lt;&#32;0</emphasis>
+101 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>(hy&#32;&gt;=&#32;0&#32;||&#32;hx&#32;&gt;&#32;hy)&#32;&#32;<emphasis role="comment">//&#32;x&#32;&lt;&#32;y,&#32;x&#32;-=&#32;ulp</emphasis>
+102 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;hx&#32;-=&#32;1;
+103 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;x&#32;&gt;&#32;y,&#32;x&#32;+=&#32;ulp</emphasis>
+104 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;hx&#32;+=&#32;1;
+105 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+106 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;hy&#32;=&#32;hx&#32;&amp;&#32;0x7f800000;
+107 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>(hy&#32;&gt;=&#32;0x7f800000)
+108 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1ac916c0825494ac3acd4457effd2823d2">x</link>&#32;+&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1ac916c0825494ac3acd4457effd2823d2">x</link>;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;overflow</emphasis>
+109 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>(hy&#32;&lt;&#32;0x00800000)&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;underflow</emphasis>
+110 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+111 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;t&#32;=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1ac916c0825494ac3acd4457effd2823d2">x</link>&#32;*&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1ac916c0825494ac3acd4457effd2823d2">x</link>;
+112 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>(<link linkend="_group__core__func__common_1ga439e60a72eadecfeda2df5449c613a64">abs</link>(t&#32;-&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1ac916c0825494ac3acd4457effd2823d2">x</link>)&#32;&gt;&#32;epsilon&lt;float&gt;())
+113 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;raise&#32;underflow&#32;flag</emphasis>
+114 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2glm_2glm_2ext_2scalar__ulp_8inl_1ab01ab8df0632f4a5f05e00f570e6b873">GLM_SET_FLOAT_WORD</link>(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a4f27f1eebce8c31db01bb39fab9ef561">y</link>,&#32;hx);
+115 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a4f27f1eebce8c31db01bb39fab9ef561">y</link>;
+116 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+117 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+118 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2glm_2glm_2ext_2scalar__ulp_8inl_1ab01ab8df0632f4a5f05e00f570e6b873">GLM_SET_FLOAT_WORD</link>(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1ac916c0825494ac3acd4457effd2823d2">x</link>,&#32;hx);
+119 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1ac916c0825494ac3acd4457effd2823d2">x</link>;
+120 &#32;&#32;&#32;&#32;}
+121 
+122 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2glm_2glm_2detail_2setup_8hpp_1a33fdea6f91c5f834105f7415e2a64407">GLM_FUNC_QUALIFIER</link>&#32;<emphasis role="keywordtype">double</emphasis>&#32;<link linkend="__classes_2lib_2include_2tgmath_8h_1a1b027edfeb81f764c9e07df1452652a8">nextafter</link>(<emphasis role="keywordtype">double</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1ac916c0825494ac3acd4457effd2823d2">x</link>,&#32;<emphasis role="keywordtype">double</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a4f27f1eebce8c31db01bb39fab9ef561">y</link>)
+123 &#32;&#32;&#32;&#32;{
+124 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">volatile</emphasis>&#32;<emphasis role="keywordtype">double</emphasis>&#32;t;
+125 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;hx,&#32;hy,&#32;ix,&#32;iy;
+126 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;lx,&#32;ly;
+127 
+128 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2glm_2glm_2ext_2scalar__ulp_8inl_1a037d712bb7eec79dcd0073eb07d3f3e8">GLM_EXTRACT_WORDS</link>(hx,&#32;lx,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1ac916c0825494ac3acd4457effd2823d2">x</link>);
+129 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2glm_2glm_2ext_2scalar__ulp_8inl_1a037d712bb7eec79dcd0073eb07d3f3e8">GLM_EXTRACT_WORDS</link>(hy,&#32;ly,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a4f27f1eebce8c31db01bb39fab9ef561">y</link>);
+130 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;ix&#32;=&#32;hx&#32;&amp;&#32;0x7fffffff;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;|x|</emphasis>
+131 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;iy&#32;=&#32;hy&#32;&amp;&#32;0x7fffffff;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;|y|</emphasis>
+132 
+133 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>(((ix&#32;&gt;=&#32;0x7ff00000)&#32;&amp;&amp;&#32;((ix&#32;-&#32;0x7ff00000)&#32;|&#32;lx)&#32;!=&#32;0)&#32;||&#32;<emphasis role="comment">//&#32;x&#32;is&#32;nan</emphasis>
+134 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;((iy&#32;&gt;=&#32;0x7ff00000)&#32;&amp;&amp;&#32;((iy&#32;-&#32;0x7ff00000)&#32;|&#32;ly)&#32;!=&#32;0))&#32;&#32;<emphasis role="comment">//&#32;y&#32;is&#32;nan</emphasis>
+135 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1ac916c0825494ac3acd4457effd2823d2">x</link>&#32;+&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a4f27f1eebce8c31db01bb39fab9ef561">y</link>;
+136 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>(<link linkend="_group__core__func__common_1ga439e60a72eadecfeda2df5449c613a64">abs</link>(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a4f27f1eebce8c31db01bb39fab9ef561">y</link>&#32;-&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1ac916c0825494ac3acd4457effd2823d2">x</link>)&#32;&lt;=&#32;epsilon&lt;double&gt;())
+137 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a4f27f1eebce8c31db01bb39fab9ef561">y</link>;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;x=y,&#32;return&#32;y</emphasis>
+138 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>((ix&#32;|&#32;lx)&#32;==&#32;0)
+139 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;x&#32;==&#32;0</emphasis>
+140 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2glm_2glm_2ext_2scalar__ulp_8inl_1ac4ec14cb5c94f0ca1d594457ee17636f">GLM_INSERT_WORDS</link>(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1ac916c0825494ac3acd4457effd2823d2">x</link>,&#32;hy&#32;&amp;&#32;0x80000000,&#32;1);&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;return&#32;+-minsubnormal</emphasis>
+141 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;t&#32;=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1ac916c0825494ac3acd4457effd2823d2">x</link>&#32;*&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1ac916c0825494ac3acd4457effd2823d2">x</link>;
+142 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>(<link linkend="_group__core__func__common_1ga439e60a72eadecfeda2df5449c613a64">abs</link>(t&#32;-&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1ac916c0825494ac3acd4457effd2823d2">x</link>)&#32;&lt;=&#32;epsilon&lt;double&gt;())
+143 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;t;
+144 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>
+145 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1ac916c0825494ac3acd4457effd2823d2">x</link>;&#32;&#32;&#32;<emphasis role="comment">//&#32;raise&#32;underflow&#32;flag</emphasis>
+146 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+147 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>(hx&#32;&gt;=&#32;0)&#32;{&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;x&#32;&gt;&#32;0</emphasis>
+148 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>(hx&#32;&gt;&#32;hy&#32;||&#32;((hx&#32;==&#32;hy)&#32;&amp;&amp;&#32;(lx&#32;&gt;&#32;ly)))&#32;{&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;x&#32;&gt;&#32;y,&#32;x&#32;-=&#32;ulp</emphasis>
+149 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>(lx&#32;==&#32;0)&#32;hx&#32;-=&#32;1;
+150 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;lx&#32;-=&#32;1;
+151 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+152 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>&#32;{&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;x&#32;&lt;&#32;y,&#32;x&#32;+=&#32;ulp</emphasis>
+153 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;lx&#32;+=&#32;1;
+154 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>(lx&#32;==&#32;0)&#32;hx&#32;+=&#32;1;
+155 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+156 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+157 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>&#32;{&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;x&#32;&lt;&#32;0</emphasis>
+158 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>(hy&#32;&gt;=&#32;0&#32;||&#32;hx&#32;&gt;&#32;hy&#32;||&#32;((hx&#32;==&#32;hy)&#32;&amp;&amp;&#32;(lx&#32;&gt;&#32;ly))){<emphasis role="comment">//&#32;x&#32;&lt;&#32;y,&#32;x&#32;-=&#32;ulp</emphasis>
+159 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>(lx&#32;==&#32;0)&#32;hx&#32;-=&#32;1;
+160 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;lx&#32;-=&#32;1;
+161 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+162 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>&#32;{&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;x&#32;&gt;&#32;y,&#32;x&#32;+=&#32;ulp</emphasis>
+163 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;lx&#32;+=&#32;1;
+164 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>(lx&#32;==&#32;0)&#32;hx&#32;+=&#32;1;
+165 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+166 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+167 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;hy&#32;=&#32;hx&#32;&amp;&#32;0x7ff00000;
+168 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>(hy&#32;&gt;=&#32;0x7ff00000)
+169 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1ac916c0825494ac3acd4457effd2823d2">x</link>&#32;+&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1ac916c0825494ac3acd4457effd2823d2">x</link>;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;overflow</emphasis>
+170 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>(hy&#32;&lt;&#32;0x00100000)
+171 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;underflow</emphasis>
+172 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;t&#32;=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1ac916c0825494ac3acd4457effd2823d2">x</link>&#32;*&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1ac916c0825494ac3acd4457effd2823d2">x</link>;
+173 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>(<link linkend="_group__core__func__common_1ga439e60a72eadecfeda2df5449c613a64">abs</link>(t&#32;-&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1ac916c0825494ac3acd4457effd2823d2">x</link>)&#32;&gt;&#32;epsilon&lt;double&gt;())
+174 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;raise&#32;underflow&#32;flag</emphasis>
+175 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2glm_2glm_2ext_2scalar__ulp_8inl_1ac4ec14cb5c94f0ca1d594457ee17636f">GLM_INSERT_WORDS</link>(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a4f27f1eebce8c31db01bb39fab9ef561">y</link>,&#32;hx,&#32;lx);
+176 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a4f27f1eebce8c31db01bb39fab9ef561">y</link>;
+177 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+178 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+179 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2glm_2glm_2ext_2scalar__ulp_8inl_1ac4ec14cb5c94f0ca1d594457ee17636f">GLM_INSERT_WORDS</link>(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1ac916c0825494ac3acd4457effd2823d2">x</link>,&#32;hx,&#32;lx);
+180 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1ac916c0825494ac3acd4457effd2823d2">x</link>;
+181 &#32;&#32;&#32;&#32;}
+182 }<emphasis role="comment">//namespace&#32;detail</emphasis>
+183 }<emphasis role="comment">//namespace&#32;glm</emphasis>
+184 
+185 <emphasis role="preprocessor">#if(GLM_COMPILER&#32;&amp;&#32;GLM_COMPILER_VC)</emphasis>
+186 <emphasis role="preprocessor">#&#32;&#32;&#32;pragma&#32;warning(pop)</emphasis>
+187 <emphasis role="preprocessor">#endif</emphasis>
+188 
+189 <emphasis role="keyword">namespace&#32;</emphasis><link linkend="_namespaceglm">glm</link>
+190 {
+191 &#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;&gt;
+192 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2glm_2glm_2detail_2setup_8hpp_1a33fdea6f91c5f834105f7415e2a64407">GLM_FUNC_QUALIFIER</link>&#32;<emphasis role="keywordtype">float</emphasis>&#32;<link linkend="_namespaceglm_1a30bc0280e7cefd159867b1aa5050b94a">nextFloat</link>(<emphasis role="keywordtype">float</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1ac916c0825494ac3acd4457effd2823d2">x</link>)
+193 &#32;&#32;&#32;&#32;{
+194 <emphasis role="preprocessor">#&#32;&#32;&#32;&#32;&#32;&#32;&#32;if&#32;GLM_HAS_CXX11_STL</emphasis>
+195 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;std::nextafter(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1ac916c0825494ac3acd4457effd2823d2">x</link>,&#32;std::numeric_limits&lt;float&gt;::max());
+196 <emphasis role="preprocessor">#&#32;&#32;&#32;&#32;&#32;&#32;&#32;elif((GLM_COMPILER&#32;&amp;&#32;GLM_COMPILER_VC)&#32;||&#32;((GLM_COMPILER&#32;&amp;&#32;GLM_COMPILER_INTEL)&#32;&amp;&amp;&#32;(GLM_PLATFORM&#32;&amp;&#32;GLM_PLATFORM_WINDOWS)))</emphasis>
+197 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="_namespaceglm_1_1detail_1ab0eb795c482130b1d6c83470bdb031e6">detail::nextafterf</link>(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1ac916c0825494ac3acd4457effd2823d2">x</link>,&#32;<link linkend="__classes_2lib_2include_2float_8h_1a7fbf1534f9e0f0bfdb86fb928902474c">FLT_MAX</link>);
+198 <emphasis role="preprocessor">#&#32;&#32;&#32;&#32;&#32;&#32;&#32;elif(GLM_PLATFORM&#32;&amp;&#32;GLM_PLATFORM_ANDROID)</emphasis>
+199 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__builtin_nextafterf(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1ac916c0825494ac3acd4457effd2823d2">x</link>,&#32;<link linkend="__classes_2lib_2include_2float_8h_1a7fbf1534f9e0f0bfdb86fb928902474c">FLT_MAX</link>);
+200 <emphasis role="preprocessor">#&#32;&#32;&#32;&#32;&#32;&#32;&#32;else</emphasis>
+201 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;nextafterf(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1ac916c0825494ac3acd4457effd2823d2">x</link>,&#32;<link linkend="__classes_2lib_2include_2float_8h_1a7fbf1534f9e0f0bfdb86fb928902474c">FLT_MAX</link>);
+202 <emphasis role="preprocessor">#&#32;&#32;&#32;&#32;&#32;&#32;&#32;endif</emphasis>
+203 &#32;&#32;&#32;&#32;}
+204 
+205 &#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;&gt;
+206 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2glm_2glm_2detail_2setup_8hpp_1a33fdea6f91c5f834105f7415e2a64407">GLM_FUNC_QUALIFIER</link>&#32;<emphasis role="keywordtype">double</emphasis>&#32;<link linkend="_namespaceglm_1a30bc0280e7cefd159867b1aa5050b94a">nextFloat</link>(<emphasis role="keywordtype">double</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1ac916c0825494ac3acd4457effd2823d2">x</link>)
+207 &#32;&#32;&#32;&#32;{
+208 <emphasis role="preprocessor">#&#32;&#32;&#32;&#32;&#32;&#32;&#32;if&#32;GLM_HAS_CXX11_STL</emphasis>
+209 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;std::nextafter(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1ac916c0825494ac3acd4457effd2823d2">x</link>,&#32;std::numeric_limits&lt;double&gt;::max());
+210 <emphasis role="preprocessor">#&#32;&#32;&#32;&#32;&#32;&#32;&#32;elif((GLM_COMPILER&#32;&amp;&#32;GLM_COMPILER_VC)&#32;||&#32;((GLM_COMPILER&#32;&amp;&#32;GLM_COMPILER_INTEL)&#32;&amp;&amp;&#32;(GLM_PLATFORM&#32;&amp;&#32;GLM_PLATFORM_WINDOWS)))</emphasis>
+211 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="_namespaceglm_1_1detail_1a3c14f8400407e8b4cff5be12ceef2c1e">detail::nextafter</link>(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1ac916c0825494ac3acd4457effd2823d2">x</link>,&#32;std::numeric_limits&lt;double&gt;::max());
+212 <emphasis role="preprocessor">#&#32;&#32;&#32;&#32;&#32;&#32;&#32;elif(GLM_PLATFORM&#32;&amp;&#32;GLM_PLATFORM_ANDROID)</emphasis>
+213 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__builtin_nextafter(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1ac916c0825494ac3acd4457effd2823d2">x</link>,&#32;<link linkend="__classes_2lib_2include_2float_8h_1af78670ee54c1203d613f8fb0e022d214">DBL_MAX</link>);
+214 <emphasis role="preprocessor">#&#32;&#32;&#32;&#32;&#32;&#32;&#32;else</emphasis>
+215 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="__classes_2lib_2include_2tgmath_8h_1a1b027edfeb81f764c9e07df1452652a8">nextafter</link>(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1ac916c0825494ac3acd4457effd2823d2">x</link>,&#32;<link linkend="__classes_2lib_2include_2float_8h_1af78670ee54c1203d613f8fb0e022d214">DBL_MAX</link>);
+216 <emphasis role="preprocessor">#&#32;&#32;&#32;&#32;&#32;&#32;&#32;endif</emphasis>
+217 &#32;&#32;&#32;&#32;}
+218 
+219 &#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;T&gt;
+220 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2glm_2glm_2detail_2setup_8hpp_1a33fdea6f91c5f834105f7415e2a64407">GLM_FUNC_QUALIFIER</link>&#32;T&#32;<link linkend="_namespaceglm_1a30bc0280e7cefd159867b1aa5050b94a">nextFloat</link>(T&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1ac916c0825494ac3acd4457effd2823d2">x</link>,&#32;<emphasis role="keywordtype">int</emphasis>&#32;ULPs)
+221 &#32;&#32;&#32;&#32;{
+222 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2glm_2glm_2detail_2setup_8hpp_1a6893d4a6bf0ecab00f7c73166379245a">GLM_STATIC_ASSERT</link>(std::numeric_limits&lt;T&gt;::is_iec559,&#32;<emphasis role="stringliteral">&quot;&apos;next_float&apos;&#32;only&#32;accept&#32;floating-point&#32;input&quot;</emphasis>);
+223 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;assert(ULPs&#32;&gt;=&#32;0);
+224 
+225 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;T&#32;temp&#32;=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1ac916c0825494ac3acd4457effd2823d2">x</link>;
+226 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>(<emphasis role="keywordtype">int</emphasis>&#32;i&#32;=&#32;0;&#32;i&#32;&lt;&#32;ULPs;&#32;++i)
+227 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;temp&#32;=&#32;<link linkend="_namespaceglm_1a30bc0280e7cefd159867b1aa5050b94a">nextFloat</link>(temp);
+228 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;temp;
+229 &#32;&#32;&#32;&#32;}
+230 
+231 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2glm_2glm_2detail_2setup_8hpp_1a33fdea6f91c5f834105f7415e2a64407">GLM_FUNC_QUALIFIER</link>&#32;<emphasis role="keywordtype">float</emphasis>&#32;<link linkend="_namespaceglm_1a25320ace5b3e239405077912eb4e7bf9">prevFloat</link>(<emphasis role="keywordtype">float</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1ac916c0825494ac3acd4457effd2823d2">x</link>)
+232 &#32;&#32;&#32;&#32;{
+233 <emphasis role="preprocessor">#&#32;&#32;&#32;&#32;&#32;&#32;&#32;if&#32;GLM_HAS_CXX11_STL</emphasis>
+234 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;std::nextafter(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1ac916c0825494ac3acd4457effd2823d2">x</link>,&#32;std::numeric_limits&lt;float&gt;::min());
+235 <emphasis role="preprocessor">#&#32;&#32;&#32;&#32;&#32;&#32;&#32;elif((GLM_COMPILER&#32;&amp;&#32;GLM_COMPILER_VC)&#32;||&#32;((GLM_COMPILER&#32;&amp;&#32;GLM_COMPILER_INTEL)&#32;&amp;&amp;&#32;(GLM_PLATFORM&#32;&amp;&#32;GLM_PLATFORM_WINDOWS)))</emphasis>
+236 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="_namespaceglm_1_1detail_1ab0eb795c482130b1d6c83470bdb031e6">detail::nextafterf</link>(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1ac916c0825494ac3acd4457effd2823d2">x</link>,&#32;<link linkend="__classes_2lib_2include_2float_8h_1a890322b63a2fab56b8ff916c08368df6">FLT_MIN</link>);
+237 <emphasis role="preprocessor">#&#32;&#32;&#32;&#32;&#32;&#32;&#32;elif(GLM_PLATFORM&#32;&amp;&#32;GLM_PLATFORM_ANDROID)</emphasis>
+238 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__builtin_nextafterf(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1ac916c0825494ac3acd4457effd2823d2">x</link>,&#32;<link linkend="__classes_2lib_2include_2float_8h_1a890322b63a2fab56b8ff916c08368df6">FLT_MIN</link>);
+239 <emphasis role="preprocessor">#&#32;&#32;&#32;&#32;&#32;&#32;&#32;else</emphasis>
+240 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="_namespaceglm_1_1detail_1ab0eb795c482130b1d6c83470bdb031e6">nextafterf</link>(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1ac916c0825494ac3acd4457effd2823d2">x</link>,&#32;<link linkend="__classes_2lib_2include_2float_8h_1a890322b63a2fab56b8ff916c08368df6">FLT_MIN</link>);
+241 <emphasis role="preprocessor">#&#32;&#32;&#32;&#32;&#32;&#32;&#32;endif</emphasis>
+242 &#32;&#32;&#32;&#32;}
+243 
+244 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2glm_2glm_2detail_2setup_8hpp_1a33fdea6f91c5f834105f7415e2a64407">GLM_FUNC_QUALIFIER</link>&#32;<emphasis role="keywordtype">double</emphasis>&#32;<link linkend="_namespaceglm_1a25320ace5b3e239405077912eb4e7bf9">prevFloat</link>(<emphasis role="keywordtype">double</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1ac916c0825494ac3acd4457effd2823d2">x</link>)
+245 &#32;&#32;&#32;&#32;{
+246 <emphasis role="preprocessor">#&#32;&#32;&#32;&#32;&#32;&#32;&#32;if&#32;GLM_HAS_CXX11_STL</emphasis>
+247 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;std::nextafter(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1ac916c0825494ac3acd4457effd2823d2">x</link>,&#32;std::numeric_limits&lt;double&gt;::min());
+248 <emphasis role="preprocessor">#&#32;&#32;&#32;&#32;&#32;&#32;&#32;elif((GLM_COMPILER&#32;&amp;&#32;GLM_COMPILER_VC)&#32;||&#32;((GLM_COMPILER&#32;&amp;&#32;GLM_COMPILER_INTEL)&#32;&amp;&amp;&#32;(GLM_PLATFORM&#32;&amp;&#32;GLM_PLATFORM_WINDOWS)))</emphasis>
+249 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;_nextafter(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1ac916c0825494ac3acd4457effd2823d2">x</link>,&#32;<link linkend="__classes_2lib_2include_2float_8h_1ab5f2d2630bc132bca0a4c9733164e91a">DBL_MIN</link>);
+250 <emphasis role="preprocessor">#&#32;&#32;&#32;&#32;&#32;&#32;&#32;elif(GLM_PLATFORM&#32;&amp;&#32;GLM_PLATFORM_ANDROID)</emphasis>
+251 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__builtin_nextafter(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1ac916c0825494ac3acd4457effd2823d2">x</link>,&#32;<link linkend="__classes_2lib_2include_2float_8h_1ab5f2d2630bc132bca0a4c9733164e91a">DBL_MIN</link>);
+252 <emphasis role="preprocessor">#&#32;&#32;&#32;&#32;&#32;&#32;&#32;else</emphasis>
+253 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="__classes_2lib_2include_2tgmath_8h_1a1b027edfeb81f764c9e07df1452652a8">nextafter</link>(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1ac916c0825494ac3acd4457effd2823d2">x</link>,&#32;<link linkend="__classes_2lib_2include_2float_8h_1ab5f2d2630bc132bca0a4c9733164e91a">DBL_MIN</link>);
+254 <emphasis role="preprocessor">#&#32;&#32;&#32;&#32;&#32;&#32;&#32;endif</emphasis>
+255 &#32;&#32;&#32;&#32;}
+256 
+257 &#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;T&gt;
+258 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2glm_2glm_2detail_2setup_8hpp_1a33fdea6f91c5f834105f7415e2a64407">GLM_FUNC_QUALIFIER</link>&#32;T&#32;<link linkend="_namespaceglm_1a25320ace5b3e239405077912eb4e7bf9">prevFloat</link>(T&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1ac916c0825494ac3acd4457effd2823d2">x</link>,&#32;<emphasis role="keywordtype">int</emphasis>&#32;ULPs)
+259 &#32;&#32;&#32;&#32;{
+260 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2glm_2glm_2detail_2setup_8hpp_1a6893d4a6bf0ecab00f7c73166379245a">GLM_STATIC_ASSERT</link>(std::numeric_limits&lt;T&gt;::is_iec559,&#32;<emphasis role="stringliteral">&quot;&apos;prev_float&apos;&#32;only&#32;accept&#32;floating-point&#32;input&quot;</emphasis>);
+261 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;assert(ULPs&#32;&gt;=&#32;0);
+262 
+263 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;T&#32;temp&#32;=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1ac916c0825494ac3acd4457effd2823d2">x</link>;
+264 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>(<emphasis role="keywordtype">int</emphasis>&#32;i&#32;=&#32;0;&#32;i&#32;&lt;&#32;ULPs;&#32;++i)
+265 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;temp&#32;=&#32;<link linkend="_namespaceglm_1a25320ace5b3e239405077912eb4e7bf9">prevFloat</link>(temp);
+266 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;temp;
+267 &#32;&#32;&#32;&#32;}
+268 
+269 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2glm_2glm_2detail_2setup_8hpp_1a33fdea6f91c5f834105f7415e2a64407">GLM_FUNC_QUALIFIER</link>&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="_namespaceglm_1a9f531d81a978cdffac7c8257d513f59b">floatDistance</link>(<emphasis role="keywordtype">float</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1ac916c0825494ac3acd4457effd2823d2">x</link>,&#32;<emphasis role="keywordtype">float</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a4f27f1eebce8c31db01bb39fab9ef561">y</link>)
+270 &#32;&#32;&#32;&#32;{
+271 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;detail::float_t&lt;float&gt;&#32;<emphasis role="keyword">const</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1ac8729153468b5dcf13f971b21d84d4e5">a</link>(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1ac916c0825494ac3acd4457effd2823d2">x</link>);
+272 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;detail::float_t&lt;float&gt;&#32;<emphasis role="keyword">const</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a6eba317e3cf44d6d26c04a5a8f197dcb">b</link>(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a4f27f1eebce8c31db01bb39fab9ef561">y</link>);
+273 
+274 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="_group__core__func__common_1ga439e60a72eadecfeda2df5449c613a64">abs</link>(<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1ac8729153468b5dcf13f971b21d84d4e5">a</link>.i&#32;-&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a6eba317e3cf44d6d26c04a5a8f197dcb">b</link>.i);
+275 &#32;&#32;&#32;&#32;}
+276 
+277 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2glm_2glm_2detail_2setup_8hpp_1a33fdea6f91c5f834105f7415e2a64407">GLM_FUNC_QUALIFIER</link>&#32;<link linkend="_group__ext__scalar__int__sized_1ga435d75819cce297cc5fa21bd84ef89a5">int64</link>&#32;<link linkend="_namespaceglm_1a9f531d81a978cdffac7c8257d513f59b">floatDistance</link>(<emphasis role="keywordtype">double</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1ac916c0825494ac3acd4457effd2823d2">x</link>,&#32;<emphasis role="keywordtype">double</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a4f27f1eebce8c31db01bb39fab9ef561">y</link>)
+278 &#32;&#32;&#32;&#32;{
+279 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;detail::float_t&lt;double&gt;&#32;<emphasis role="keyword">const</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1ac8729153468b5dcf13f971b21d84d4e5">a</link>(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1ac916c0825494ac3acd4457effd2823d2">x</link>);
+280 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;detail::float_t&lt;double&gt;&#32;<emphasis role="keyword">const</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a6eba317e3cf44d6d26c04a5a8f197dcb">b</link>(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a4f27f1eebce8c31db01bb39fab9ef561">y</link>);
+281 
+282 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="_group__core__func__common_1ga439e60a72eadecfeda2df5449c613a64">abs</link>(<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1ac8729153468b5dcf13f971b21d84d4e5">a</link>.i&#32;-&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a6eba317e3cf44d6d26c04a5a8f197dcb">b</link>.i);
+283 &#32;&#32;&#32;&#32;}
+284 }<emphasis role="comment">//namespace&#32;glm</emphasis>
+</programlisting></section>

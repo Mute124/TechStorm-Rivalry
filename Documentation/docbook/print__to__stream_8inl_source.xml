@@ -1,0 +1,495 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<section xmlns="http://docbook.org/ns/docbook" version="5.0" xmlns:xlink="http://www.w3.org/1999/xlink" xml:id="_print__to__stream_8inl_source" xml:lang="en-US">
+<title>print_to_stream.inl</title>
+<indexterm><primary>C:/Users/HP/Documents/GitHub/Minero-Game/Classes/ConfigMan/lib/tomlplusplus-3.3.0/tomlplusplus-3.3.0/include/toml++/impl/print_to_stream.inl</primary></indexterm>
+Go to the documentation of this file.<programlisting linenumbering="unnumbered">1 <emphasis role="comment">//#&#32;This&#32;file&#32;is&#32;a&#32;part&#32;of&#32;toml++&#32;and&#32;is&#32;subject&#32;to&#32;the&#32;the&#32;terms&#32;of&#32;the&#32;MIT&#32;license.</emphasis>
+2 <emphasis role="comment">//#&#32;Copyright&#32;(c)&#32;Mark&#32;Gillard&#32;&lt;mark.gillard@outlook.com.au&gt;</emphasis>
+3 <emphasis role="comment">//#&#32;See&#32;https://github.com/marzer/tomlplusplus/blob/master/LICENSE&#32;for&#32;the&#32;full&#32;license&#32;text.</emphasis>
+4 <emphasis role="comment">//&#32;SPDX-License-Identifier:&#32;MIT</emphasis>
+5 <emphasis role="preprocessor">#pragma&#32;once</emphasis>
+6 
+7 <emphasis role="comment">//#&#32;{{</emphasis>
+8 <emphasis role="preprocessor">#include&#32;&quot;<link linkend="_preprocessor_8h">preprocessor.h</link>&quot;</emphasis>
+9 <emphasis role="preprocessor">#if&#32;!TOML_IMPLEMENTATION</emphasis>
+10 <emphasis role="preprocessor">#error&#32;This&#32;is&#32;an&#32;implementation-only&#32;header.</emphasis>
+11 <emphasis role="preprocessor">#endif</emphasis>
+12 <emphasis role="comment">//#&#32;}}</emphasis>
+13 
+14 <emphasis role="preprocessor">#include&#32;&quot;<link linkend="_print__to__stream_8h">print_to_stream.h</link>&quot;</emphasis>
+15 <emphasis role="preprocessor">#include&#32;&quot;<link linkend="_source__region_8h">source_region.h</link>&quot;</emphasis>
+16 <emphasis role="preprocessor">#include&#32;&quot;<link linkend="_date__time_8h">date_time.h</link>&quot;</emphasis>
+17 <emphasis role="preprocessor">#include&#32;&quot;<link linkend="_toml__formatter_8h">toml_formatter.h</link>&quot;</emphasis>
+18 <emphasis role="preprocessor">#include&#32;&quot;<link linkend="_value_8h">value.h</link>&quot;</emphasis>
+19 <emphasis role="preprocessor">#include&#32;&quot;<link linkend="_array_8h">array.h</link>&quot;</emphasis>
+20 <emphasis role="preprocessor">#include&#32;&quot;<link linkend="_table_8h">table.h</link>&quot;</emphasis>
+21 <link linkend="_print__to__stream_8inl_1a6c2a5b158c0a6d208edd992229d91d78">TOML_DISABLE_WARNINGS</link>;
+22 <emphasis role="preprocessor">#include&#32;&lt;ostream&gt;</emphasis>
+23 <emphasis role="preprocessor">#if&#32;TOML_INT_CHARCONV&#32;||&#32;TOML_FLOAT_CHARCONV</emphasis>
+24 <emphasis role="preprocessor">#include&#32;&lt;charconv&gt;</emphasis>
+25 <emphasis role="preprocessor">#endif</emphasis>
+26 <emphasis role="preprocessor">#if&#32;!TOML_INT_CHARCONV&#32;||&#32;!TOML_FLOAT_CHARCONV</emphasis>
+27 <emphasis role="preprocessor">#include&#32;&lt;sstream&gt;</emphasis>
+28 <emphasis role="preprocessor">#endif</emphasis>
+29 <emphasis role="preprocessor">#if&#32;!TOML_INT_CHARCONV</emphasis>
+30 <emphasis role="preprocessor">#include&#32;&lt;iomanip&gt;</emphasis>
+31 <emphasis role="preprocessor">#endif</emphasis>
+32 <link linkend="_print__to__stream_8inl_1a4e1f9eaceb60becba33cd64d3a85e3ed">TOML_ENABLE_WARNINGS</link>;
+33 <emphasis role="preprocessor">#include&#32;&quot;<link linkend="_header__start_8h">header_start.h</link>&quot;</emphasis>
+34 
+35 <link linkend="_print__to__stream_8inl_1a3e6bf84af897e30e783c8365170eb278">TOML_ANON_NAMESPACE_START</link>
+36 {
+37 &#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">typename</emphasis>&#32;T&gt;
+38 &#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keyword">constexpr</emphasis>&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;charconv_buffer_length&#32;=&#32;0;
+39 
+40 &#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;&gt;
+41 &#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keyword">constexpr</emphasis>&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;<link linkend="_print__to__stream_8inl_1a8189ce073a380bfaedb83b589d944ddf">charconv_buffer_length&lt;int8_t&gt;</link>&#32;=&#32;4;&#32;<emphasis role="comment">//&#32;strlen(&quot;-128&quot;)</emphasis>
+42 
+43 &#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;&gt;
+44 &#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keyword">constexpr</emphasis>&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;<link linkend="_print__to__stream_8inl_1a0d52c8fffb070859c3decf0313a3627b">charconv_buffer_length&lt;int16_t&gt;</link>&#32;=&#32;6;&#32;<emphasis role="comment">//&#32;strlen(&quot;-32768&quot;)</emphasis>
+45 
+46 &#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;&gt;
+47 &#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keyword">constexpr</emphasis>&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;<link linkend="_print__to__stream_8inl_1aa0eeb9b98c1b00814115ccbcc26584ef">charconv_buffer_length&lt;int32_t&gt;</link>&#32;=&#32;11;&#32;<emphasis role="comment">//&#32;strlen(&quot;-2147483648&quot;)</emphasis>
+48 
+49 &#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;&gt;
+50 &#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keyword">constexpr</emphasis>&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;<link linkend="_print__to__stream_8inl_1a3a79e3122b596ad47a25b66aacf181d9">charconv_buffer_length&lt;int64_t&gt;</link>&#32;=&#32;20;&#32;<emphasis role="comment">//&#32;strlen(&quot;-9223372036854775808&quot;)</emphasis>
+51 
+52 &#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;&gt;
+53 &#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keyword">constexpr</emphasis>&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;<link linkend="_print__to__stream_8inl_1a10b1beeb9876d2242010a83848a8d2f8">charconv_buffer_length&lt;uint8_t&gt;</link>&#32;=&#32;3;&#32;<emphasis role="comment">//&#32;strlen(&quot;255&quot;)</emphasis>
+54 
+55 &#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;&gt;
+56 &#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keyword">constexpr</emphasis>&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;<link linkend="_print__to__stream_8inl_1a736cfeba3712a13299acce5d8bbae738">charconv_buffer_length&lt;uint16_t&gt;</link>&#32;=&#32;5;&#32;<emphasis role="comment">//&#32;strlen(&quot;65535&quot;)</emphasis>
+57 
+58 &#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;&gt;
+59 &#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keyword">constexpr</emphasis>&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;<link linkend="_print__to__stream_8inl_1a97a3f7337264b54b891ea302ae08b9e7">charconv_buffer_length&lt;uint32_t&gt;</link>&#32;=&#32;10;&#32;<emphasis role="comment">//&#32;strlen(&quot;4294967295&quot;)</emphasis>
+60 
+61 &#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;&gt;
+62 &#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keyword">constexpr</emphasis>&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;<link linkend="_print__to__stream_8inl_1aa953f8a1b787818620a3a5be31755675">charconv_buffer_length&lt;uint64_t&gt;</link>&#32;=&#32;20;&#32;<emphasis role="comment">//&#32;strlen(&quot;18446744073709551615&quot;)</emphasis>
+63 
+64 &#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;&gt;
+65 &#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keyword">constexpr</emphasis>&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;<link linkend="_print__to__stream_8inl_1addbd7d618800a068ddd7d1e5528ace93">charconv_buffer_length&lt;float&gt;</link>&#32;=&#32;64;
+66 
+67 &#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;&gt;
+68 &#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keyword">constexpr</emphasis>&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;<link linkend="_print__to__stream_8inl_1ad164d15850201081ce9f8d2820252b21">charconv_buffer_length&lt;double&gt;</link>&#32;=&#32;64;
+69 
+70 &#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">typename</emphasis>&#32;T&gt;
+71 &#32;&#32;&#32;&#32;<link linkend="_preprocessor_8h_1a31ffc2d7129c04c13914b97c0a6e8417">TOML_INTERNAL_LINKAGE</link>
+72 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>&#32;<link linkend="_print__to__stream_8inl_1ae0ee9b1728e8a7cddf22095cf20e5090">print_integer_to_stream</link>(std::ostream&#32;&amp;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a020a78e9ab6f08067423e5d76c0277d0">stream</link>,&#32;T&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1aa857b95cc76669c2a9109239ef40a47c">val</link>,&#32;<link linkend="_forward__declarations_8h_1a0c7177c8470bcc9d80d5b97c482f4a86">value_flags</link>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a3f8f226b5004bbc9a172e2bbf28ed102">format</link>&#32;=&#32;{},&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;min_digits&#32;=&#32;0)
+73 &#32;&#32;&#32;&#32;{
+74 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(!<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1aa857b95cc76669c2a9109239ef40a47c">val</link>)
+75 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+76 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(!min_digits)
+77 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;min_digits&#32;=&#32;1;
+78 
+79 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(<emphasis role="keywordtype">size_t</emphasis>&#32;i&#32;=&#32;0;&#32;i&#32;&lt;&#32;min_digits;&#32;i++)
+80 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a020a78e9ab6f08067423e5d76c0277d0">stream</link>.put(<emphasis role="charliteral">&apos;0&apos;</emphasis>);
+81 
+82 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>;
+83 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+84 
+85 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keyword">constexpr</emphasis>&#32;<emphasis role="keyword">auto</emphasis>&#32;value_flags_mask&#32;=
+86 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;value_flags::format_as_binary&#32;|&#32;value_flags::format_as_octal&#32;|&#32;value_flags::format_as_hexadecimal;
+87 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a3f8f226b5004bbc9a172e2bbf28ed102">format</link>&#32;&amp;=&#32;value_flags_mask;
+88 
+89 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;base&#32;=&#32;10;
+90 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a3f8f226b5004bbc9a172e2bbf28ed102">format</link>&#32;!=&#32;value_flags::none&#32;&amp;&amp;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1aa857b95cc76669c2a9109239ef40a47c">val</link>&#32;&gt;&#32;T{})
+91 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+92 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">switch</emphasis>&#32;(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a3f8f226b5004bbc9a172e2bbf28ed102">format</link>)
+93 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+94 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">case</emphasis>&#32;value_flags::format_as_binary:&#32;base&#32;=&#32;2;&#32;<emphasis role="keywordflow">break</emphasis>;
+95 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">case</emphasis>&#32;value_flags::format_as_octal:&#32;base&#32;=&#32;8;&#32;<emphasis role="keywordflow">break</emphasis>;
+96 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">case</emphasis>&#32;value_flags::format_as_hexadecimal:&#32;base&#32;=&#32;16;&#32;<emphasis role="keywordflow">break</emphasis>;
+97 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">default</emphasis>:&#32;<emphasis role="keywordflow">break</emphasis>;
+98 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+99 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+100 
+101 <emphasis role="preprocessor">#if&#32;TOML_INT_CHARCONV</emphasis>
+102 
+103 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">char</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1ad8a8baf08bc0399738960c9259571911">buf</link>[(<emphasis role="keyword">sizeof</emphasis>(T)&#32;*&#32;CHAR_BIT)];
+104 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keyword">auto</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a1dbb21208b9047cc8031ca9c840d3c2f">res</link>&#32;=&#32;std::to_chars(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1ad8a8baf08bc0399738960c9259571911">buf</link>,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1ad8a8baf08bc0399738960c9259571911">buf</link>&#32;+&#32;<emphasis role="keyword">sizeof</emphasis>(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1ad8a8baf08bc0399738960c9259571911">buf</link>),&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1aa857b95cc76669c2a9109239ef40a47c">val</link>,&#32;base);
+105 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keyword">auto</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a30ee67aa502329a88f4a203775adfa1a">len</link>&#32;=&#32;<emphasis role="keyword">static_cast&lt;</emphasis><emphasis role="keywordtype">size_t</emphasis><emphasis role="keyword">&gt;</emphasis>(<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a1dbb21208b9047cc8031ca9c840d3c2f">res</link>.ptr&#32;-&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1ad8a8baf08bc0399738960c9259571911">buf</link>);
+106 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(<emphasis role="keywordtype">size_t</emphasis>&#32;i&#32;=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a30ee67aa502329a88f4a203775adfa1a">len</link>;&#32;i&#32;&lt;&#32;min_digits;&#32;i++)
+107 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a020a78e9ab6f08067423e5d76c0277d0">stream</link>.put(<emphasis role="charliteral">&apos;0&apos;</emphasis>);
+108 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(base&#32;==&#32;16)
+109 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+110 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(<emphasis role="keywordtype">size_t</emphasis>&#32;i&#32;=&#32;0;&#32;i&#32;&lt;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a30ee67aa502329a88f4a203775adfa1a">len</link>;&#32;i++)
+111 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1ad8a8baf08bc0399738960c9259571911">buf</link>[i]&#32;&gt;=&#32;<emphasis role="charliteral">&apos;a&apos;</emphasis>)
+112 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1ad8a8baf08bc0399738960c9259571911">buf</link>[i]&#32;-=&#32;32;
+113 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+114 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;impl::print_to_stream(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a020a78e9ab6f08067423e5d76c0277d0">stream</link>,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1ad8a8baf08bc0399738960c9259571911">buf</link>,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a30ee67aa502329a88f4a203775adfa1a">len</link>);
+115 
+116 <emphasis role="preprocessor">#else</emphasis>
+117 
+118 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">using&#32;</emphasis>unsigned_type&#32;=&#32;std::conditional_t&lt;(<emphasis role="keyword">sizeof</emphasis>(T)&#32;&gt;&#32;<emphasis role="keyword">sizeof</emphasis>(<emphasis role="keywordtype">unsigned</emphasis>)),&#32;std::make_unsigned_t&lt;T&gt;,&#32;<emphasis role="keywordtype">unsigned</emphasis>&gt;;
+119 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">using&#32;</emphasis>cast_type&#32;&#32;&#32;&#32;&#32;=&#32;std::conditional_t&lt;std::is_signed_v&lt;T&gt;,&#32;std::make_signed_t&lt;unsigned_type&gt;,&#32;unsigned_type&gt;;
+120 
+121 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(base&#32;==&#32;2)
+122 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+123 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keyword">auto</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a30ee67aa502329a88f4a203775adfa1a">len</link>&#32;=&#32;<emphasis role="keyword">sizeof</emphasis>(T)&#32;*&#32;CHAR_BIT;
+124 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(<emphasis role="keywordtype">size_t</emphasis>&#32;i&#32;=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a30ee67aa502329a88f4a203775adfa1a">len</link>;&#32;i&#32;&lt;&#32;min_digits;&#32;i++)
+125 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a020a78e9ab6f08067423e5d76c0277d0">stream</link>.put(<emphasis role="charliteral">&apos;0&apos;</emphasis>);
+126 
+127 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">bool</emphasis>&#32;found_one&#32;&#32;&#32;&#32;&#32;=&#32;<emphasis role="keyword">false</emphasis>;
+128 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keyword">auto</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a14cfbe2fc2234f5504618905b69d1e06">v</link>&#32;&#32;&#32;&#32;&#32;&#32;&#32;=&#32;<emphasis role="keyword">static_cast&lt;</emphasis>unsigned_type<emphasis role="keyword">&gt;</emphasis>(<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1aa857b95cc76669c2a9109239ef40a47c">val</link>);
+129 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;unsigned_type&#32;<link linkend="_namespacemask">mask</link>&#32;=&#32;unsigned_type{&#32;1&#32;}&#32;&lt;&lt;&#32;(<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a30ee67aa502329a88f4a203775adfa1a">len</link>&#32;-&#32;1u);
+130 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(<emphasis role="keywordtype">size_t</emphasis>&#32;i&#32;=&#32;0;&#32;i&#32;&lt;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a30ee67aa502329a88f4a203775adfa1a">len</link>;&#32;i++)
+131 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+132 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;((<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a14cfbe2fc2234f5504618905b69d1e06">v</link>&#32;&amp;&#32;<link linkend="_namespacemask">mask</link>))
+133 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+134 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a020a78e9ab6f08067423e5d76c0277d0">stream</link>.put(<emphasis role="charliteral">&apos;1&apos;</emphasis>);
+135 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;found_one&#32;=&#32;<emphasis role="keyword">true</emphasis>;
+136 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+137 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>&#32;<emphasis role="keywordflow">if</emphasis>&#32;(found_one)
+138 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a020a78e9ab6f08067423e5d76c0277d0">stream</link>.put(<emphasis role="charliteral">&apos;0&apos;</emphasis>);
+139 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_namespacemask">mask</link>&#32;&gt;&gt;=&#32;1;
+140 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+141 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+142 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>
+143 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+144 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;std::ostringstream&#32;ss;
+145 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;ss.imbue(std::locale::classic());
+146 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;ss&#32;&lt;&lt;&#32;std::uppercase&#32;&lt;&lt;&#32;std::setbase(base);
+147 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(min_digits)
+148 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;ss&#32;&lt;&lt;&#32;std::setfill(&apos;0&apos;)&#32;&lt;&lt;&#32;std::setw(static_cast&lt;int&gt;(min_digits));
+149 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;ss&#32;&lt;&lt;&#32;static_cast&lt;cast_type&gt;(<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1aa857b95cc76669c2a9109239ef40a47c">val</link>);
+150 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keyword">auto</emphasis>&#32;str&#32;=&#32;<link linkend="_namespacestd_1ac7095819f6a8da64d69b1ee3029c52be">std::move</link>(ss).str();
+151 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;impl::print_to_stream(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a020a78e9ab6f08067423e5d76c0277d0">stream</link>,&#32;str);
+152 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+153 
+154 <emphasis role="preprocessor">#endif</emphasis>
+155 &#32;&#32;&#32;&#32;}
+156 
+157 &#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">typename</emphasis>&#32;T&gt;
+158 &#32;&#32;&#32;&#32;<link linkend="_preprocessor_8h_1a31ffc2d7129c04c13914b97c0a6e8417">TOML_INTERNAL_LINKAGE</link>
+159 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>&#32;<link linkend="_print__to__stream_8inl_1a6ee5428b144b0bd723b9ef03285a17b5">print_floating_point_to_stream</link>(std::ostream&#32;&amp;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a020a78e9ab6f08067423e5d76c0277d0">stream</link>,
+160 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;T&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1aa857b95cc76669c2a9109239ef40a47c">val</link>,
+161 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_forward__declarations_8h_1a0c7177c8470bcc9d80d5b97c482f4a86">value_flags</link>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a3f8f226b5004bbc9a172e2bbf28ed102">format</link>,
+162 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;[[maybe_unused]]&#32;<emphasis role="keywordtype">bool</emphasis>&#32;relaxed_precision)
+163 &#32;&#32;&#32;&#32;{
+164 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">switch</emphasis>&#32;(impl::fpclassify(<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1aa857b95cc76669c2a9109239ef40a47c">val</link>))
+165 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+166 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">case</emphasis>&#32;impl::fp_class::neg_inf:&#32;impl::print_to_stream(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a020a78e9ab6f08067423e5d76c0277d0">stream</link>,&#32;<emphasis role="stringliteral">&quot;-inf&quot;</emphasis><link linkend="_conformance__burntsushi__valid_8cpp_1a3a352c2235a269bac37d1a34a19cde48">sv</link>);&#32;<emphasis role="keywordflow">break</emphasis>;
+167 
+168 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">case</emphasis>&#32;impl::fp_class::pos_inf:&#32;impl::print_to_stream(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a020a78e9ab6f08067423e5d76c0277d0">stream</link>,&#32;<emphasis role="stringliteral">&quot;inf&quot;</emphasis><link linkend="_conformance__burntsushi__valid_8cpp_1a3a352c2235a269bac37d1a34a19cde48">sv</link>);&#32;<emphasis role="keywordflow">break</emphasis>;
+169 
+170 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">case</emphasis>&#32;impl::fp_class::nan:&#32;impl::print_to_stream(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a020a78e9ab6f08067423e5d76c0277d0">stream</link>,&#32;<emphasis role="stringliteral">&quot;nan&quot;</emphasis><link linkend="_conformance__burntsushi__valid_8cpp_1a3a352c2235a269bac37d1a34a19cde48">sv</link>);&#32;<emphasis role="keywordflow">break</emphasis>;
+171 
+172 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">case</emphasis>&#32;impl::fp_class::ok:
+173 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+174 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keyword">constexpr</emphasis>&#32;<emphasis role="keyword">auto</emphasis>&#32;needs_decimal_point&#32;=&#32;[](<emphasis role="keyword">auto</emphasis>&amp;&amp;&#32;s)&#32;<emphasis role="keyword">noexcept</emphasis>
+175 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+176 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(<emphasis role="keyword">auto</emphasis>&#32;c&#32;:&#32;s)
+177 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(c&#32;==&#32;<emphasis role="charliteral">&apos;.&apos;</emphasis>&#32;||&#32;c&#32;==&#32;<emphasis role="charliteral">&apos;E&apos;</emphasis>&#32;||&#32;c&#32;==&#32;<emphasis role="charliteral">&apos;e&apos;</emphasis>)
+178 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<emphasis role="keyword">false</emphasis>;
+179 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<emphasis role="keyword">true</emphasis>;
+180 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;};
+181 
+182 <emphasis role="preprocessor">#if&#32;TOML_FLOAT_CHARCONV</emphasis>
+183 
+184 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keyword">auto</emphasis>&#32;hex&#32;=&#32;!!(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a3f8f226b5004bbc9a172e2bbf28ed102">format</link>&#32;&amp;&#32;value_flags::format_as_hexadecimal);
+185 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">char</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1ad8a8baf08bc0399738960c9259571911">buf</link>[charconv_buffer_length&lt;T&gt;];
+186 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">auto</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a1dbb21208b9047cc8031ca9c840d3c2f">res</link>&#32;=&#32;hex&#32;?&#32;std::to_chars(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1ad8a8baf08bc0399738960c9259571911">buf</link>,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1ad8a8baf08bc0399738960c9259571911">buf</link>&#32;+&#32;<emphasis role="keyword">sizeof</emphasis>(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1ad8a8baf08bc0399738960c9259571911">buf</link>),&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1aa857b95cc76669c2a9109239ef40a47c">val</link>,&#32;std::chars_format::hex)
+187 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;:&#32;std::to_chars(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1ad8a8baf08bc0399738960c9259571911">buf</link>,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1ad8a8baf08bc0399738960c9259571911">buf</link>&#32;+&#32;<emphasis role="keyword">sizeof</emphasis>(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1ad8a8baf08bc0399738960c9259571911">buf</link>),&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1aa857b95cc76669c2a9109239ef40a47c">val</link>);
+188 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">auto</emphasis>&#32;str&#32;=&#32;std::string_view{&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1ad8a8baf08bc0399738960c9259571911">buf</link>,&#32;<emphasis role="keyword">static_cast&lt;</emphasis><emphasis role="keywordtype">size_t</emphasis><emphasis role="keyword">&gt;</emphasis>(<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a1dbb21208b9047cc8031ca9c840d3c2f">res</link>.ptr&#32;-&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1ad8a8baf08bc0399738960c9259571911">buf</link>)&#32;};
+189 
+190 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">char</emphasis>&#32;buf2[charconv_buffer_length&lt;T&gt;];
+191 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(!hex&#32;&amp;&amp;&#32;relaxed_precision)
+192 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+193 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a1dbb21208b9047cc8031ca9c840d3c2f">res</link>&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;=&#32;std::to_chars(buf2,&#32;buf2&#32;+&#32;<emphasis role="keyword">sizeof</emphasis>(buf2),&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1aa857b95cc76669c2a9109239ef40a47c">val</link>,&#32;std::chars_format::general,&#32;6);
+194 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keyword">auto</emphasis>&#32;str2&#32;=&#32;std::string_view{&#32;buf2,&#32;<emphasis role="keyword">static_cast&lt;</emphasis><emphasis role="keywordtype">size_t</emphasis><emphasis role="keyword">&gt;</emphasis>(<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a1dbb21208b9047cc8031ca9c840d3c2f">res</link>.ptr&#32;-&#32;buf2)&#32;};
+195 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(str2.length()&#32;&lt;&#32;str.length())
+196 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;str&#32;=&#32;str2;
+197 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+198 
+199 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;impl::print_to_stream(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a020a78e9ab6f08067423e5d76c0277d0">stream</link>,&#32;str);
+200 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(!hex&#32;&amp;&amp;&#32;needs_decimal_point(str))
+201 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;toml::impl::print_to_stream(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a020a78e9ab6f08067423e5d76c0277d0">stream</link>,&#32;<emphasis role="stringliteral">&quot;.0&quot;</emphasis><link linkend="_conformance__burntsushi__valid_8cpp_1a3a352c2235a269bac37d1a34a19cde48">sv</link>);
+202 
+203 <emphasis role="preprocessor">#else</emphasis>
+204 
+205 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;std::ostringstream&#32;ss;
+206 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;ss.imbue(std::locale::classic());
+207 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(!relaxed_precision)
+208 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;ss.precision(std::numeric_limits&lt;T&gt;::max_digits10);
+209 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(!!(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a3f8f226b5004bbc9a172e2bbf28ed102">format</link>&#32;&amp;&#32;value_flags::format_as_hexadecimal))
+210 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;ss&#32;&lt;&lt;&#32;std::hexfloat;
+211 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;ss&#32;&lt;&lt;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1aa857b95cc76669c2a9109239ef40a47c">val</link>;
+212 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keyword">auto</emphasis>&#32;str&#32;=&#32;<link linkend="_namespacestd_1ac7095819f6a8da64d69b1ee3029c52be">std::move</link>(ss).str();
+213 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;impl::print_to_stream(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a020a78e9ab6f08067423e5d76c0277d0">stream</link>,&#32;str);
+214 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(!(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a3f8f226b5004bbc9a172e2bbf28ed102">format</link>&#32;&amp;&#32;value_flags::format_as_hexadecimal)&#32;&amp;&amp;&#32;needs_decimal_point(str))
+215 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;impl::print_to_stream(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a020a78e9ab6f08067423e5d76c0277d0">stream</link>,&#32;<emphasis role="stringliteral">&quot;.0&quot;</emphasis><link linkend="_conformance__burntsushi__valid_8cpp_1a3a352c2235a269bac37d1a34a19cde48">sv</link>);
+216 
+217 <emphasis role="preprocessor">#endif</emphasis>
+218 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+219 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">break</emphasis>;
+220 
+221 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">default</emphasis>:&#32;<link linkend="_preprocessor_8h_1a43a3ff9d3097bf4e929c9a73bd17b793">TOML_UNREACHABLE</link>;
+222 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+223 &#32;&#32;&#32;&#32;}
+224 }
+225 <link linkend="_print__to__stream_8inl_1add7da6ab746a2f655de5a68f56dc763a">TOML_ANON_NAMESPACE_END</link>;
+226 
+227 <link linkend="_print__to__stream_8inl_1af62a64490c99e43956a0f41548262369">TOML_IMPL_NAMESPACE_START</link>
+228 {
+229 &#32;&#32;&#32;&#32;<link linkend="_preprocessor_8h_1a4256b41e25e4aa04b70cf55fd56ce202">TOML_EXTERNAL_LINKAGE</link>
+230 &#32;&#32;&#32;&#32;<link linkend="_preprocessor_8h_1ab61929848048873f2ffe3be0cfab436f">TOML_ATTR</link>(nonnull)
+231 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>&#32;<link linkend="_group__configuration_1ga2bfc7ae4747f15378d92249aadce019e">TOML_CALLCONV</link>&#32;<link linkend="_print__to__stream_8h_1a3ecc6f4250547523307312cbff28007e">print_to_stream</link>(std::ostream&#32;&amp;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a020a78e9ab6f08067423e5d76c0277d0">stream</link>,&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>*&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1aa857b95cc76669c2a9109239ef40a47c">val</link>,&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a30ee67aa502329a88f4a203775adfa1a">len</link>)
+232 &#32;&#32;&#32;&#32;{
+233 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a020a78e9ab6f08067423e5d76c0277d0">stream</link>.write(<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1aa857b95cc76669c2a9109239ef40a47c">val</link>,&#32;<emphasis role="keyword">static_cast&lt;</emphasis>std::streamsize<emphasis role="keyword">&gt;</emphasis>(<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a30ee67aa502329a88f4a203775adfa1a">len</link>));
+234 &#32;&#32;&#32;&#32;}
+235 
+236 &#32;&#32;&#32;&#32;<link linkend="_preprocessor_8h_1a4256b41e25e4aa04b70cf55fd56ce202">TOML_EXTERNAL_LINKAGE</link>
+237 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>&#32;<link linkend="_group__configuration_1ga2bfc7ae4747f15378d92249aadce019e">TOML_CALLCONV</link>&#32;<link linkend="_print__to__stream_8h_1a3ecc6f4250547523307312cbff28007e">print_to_stream</link>(std::ostream&#32;&amp;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a020a78e9ab6f08067423e5d76c0277d0">stream</link>,&#32;std::string_view&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1aa857b95cc76669c2a9109239ef40a47c">val</link>)
+238 &#32;&#32;&#32;&#32;{
+239 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a020a78e9ab6f08067423e5d76c0277d0">stream</link>.write(<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1aa857b95cc76669c2a9109239ef40a47c">val</link>.data(),&#32;<emphasis role="keyword">static_cast&lt;</emphasis>std::streamsize<emphasis role="keyword">&gt;</emphasis>(<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1aa857b95cc76669c2a9109239ef40a47c">val</link>.length()));
+240 &#32;&#32;&#32;&#32;}
+241 
+242 &#32;&#32;&#32;&#32;<link linkend="_preprocessor_8h_1a4256b41e25e4aa04b70cf55fd56ce202">TOML_EXTERNAL_LINKAGE</link>
+243 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>&#32;<link linkend="_group__configuration_1ga2bfc7ae4747f15378d92249aadce019e">TOML_CALLCONV</link>&#32;<link linkend="_print__to__stream_8h_1a3ecc6f4250547523307312cbff28007e">print_to_stream</link>(std::ostream&#32;&amp;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a020a78e9ab6f08067423e5d76c0277d0">stream</link>,&#32;<emphasis role="keyword">const</emphasis>&#32;std::string&amp;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1aa857b95cc76669c2a9109239ef40a47c">val</link>)
+244 &#32;&#32;&#32;&#32;{
+245 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a020a78e9ab6f08067423e5d76c0277d0">stream</link>.write(<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1aa857b95cc76669c2a9109239ef40a47c">val</link>.data(),&#32;<emphasis role="keyword">static_cast&lt;</emphasis>std::streamsize<emphasis role="keyword">&gt;</emphasis>(<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1aa857b95cc76669c2a9109239ef40a47c">val</link>.length()));
+246 &#32;&#32;&#32;&#32;}
+247 
+248 &#32;&#32;&#32;&#32;<link linkend="_preprocessor_8h_1a4256b41e25e4aa04b70cf55fd56ce202">TOML_EXTERNAL_LINKAGE</link>
+249 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>&#32;<link linkend="_group__configuration_1ga2bfc7ae4747f15378d92249aadce019e">TOML_CALLCONV</link>&#32;<link linkend="_print__to__stream_8h_1a3ecc6f4250547523307312cbff28007e">print_to_stream</link>(std::ostream&#32;&amp;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a020a78e9ab6f08067423e5d76c0277d0">stream</link>,&#32;<emphasis role="keywordtype">char</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1aa857b95cc76669c2a9109239ef40a47c">val</link>)
+250 &#32;&#32;&#32;&#32;{
+251 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a020a78e9ab6f08067423e5d76c0277d0">stream</link>.put(<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1aa857b95cc76669c2a9109239ef40a47c">val</link>);
+252 &#32;&#32;&#32;&#32;}
+253 
+254 &#32;&#32;&#32;&#32;<link linkend="_preprocessor_8h_1a4256b41e25e4aa04b70cf55fd56ce202">TOML_EXTERNAL_LINKAGE</link>
+255 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>&#32;<link linkend="_group__configuration_1ga2bfc7ae4747f15378d92249aadce019e">TOML_CALLCONV</link>&#32;<link linkend="_print__to__stream_8h_1a3ecc6f4250547523307312cbff28007e">print_to_stream</link>(std::ostream&#32;&amp;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a020a78e9ab6f08067423e5d76c0277d0">stream</link>,&#32;<emphasis role="keywordtype">signed</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1aa857b95cc76669c2a9109239ef40a47c">val</link>,&#32;<link linkend="_forward__declarations_8h_1a0c7177c8470bcc9d80d5b97c482f4a86">value_flags</link>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a3f8f226b5004bbc9a172e2bbf28ed102">format</link>,&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;min_digits)
+256 &#32;&#32;&#32;&#32;{
+257 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;TOML_ANON_NAMESPACE::print_integer_to_stream(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a020a78e9ab6f08067423e5d76c0277d0">stream</link>,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1aa857b95cc76669c2a9109239ef40a47c">val</link>,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a3f8f226b5004bbc9a172e2bbf28ed102">format</link>,&#32;min_digits);
+258 &#32;&#32;&#32;&#32;}
+259 
+260 &#32;&#32;&#32;&#32;<link linkend="_preprocessor_8h_1a4256b41e25e4aa04b70cf55fd56ce202">TOML_EXTERNAL_LINKAGE</link>
+261 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>&#32;<link linkend="_group__configuration_1ga2bfc7ae4747f15378d92249aadce019e">TOML_CALLCONV</link>&#32;<link linkend="_print__to__stream_8h_1a3ecc6f4250547523307312cbff28007e">print_to_stream</link>(std::ostream&#32;&amp;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a020a78e9ab6f08067423e5d76c0277d0">stream</link>,&#32;<emphasis role="keywordtype">signed</emphasis>&#32;<emphasis role="keywordtype">short</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1aa857b95cc76669c2a9109239ef40a47c">val</link>,&#32;<link linkend="_forward__declarations_8h_1a0c7177c8470bcc9d80d5b97c482f4a86">value_flags</link>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a3f8f226b5004bbc9a172e2bbf28ed102">format</link>,&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;min_digits)
+262 &#32;&#32;&#32;&#32;{
+263 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;TOML_ANON_NAMESPACE::print_integer_to_stream(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a020a78e9ab6f08067423e5d76c0277d0">stream</link>,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1aa857b95cc76669c2a9109239ef40a47c">val</link>,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a3f8f226b5004bbc9a172e2bbf28ed102">format</link>,&#32;min_digits);
+264 &#32;&#32;&#32;&#32;}
+265 
+266 &#32;&#32;&#32;&#32;<link linkend="_preprocessor_8h_1a4256b41e25e4aa04b70cf55fd56ce202">TOML_EXTERNAL_LINKAGE</link>
+267 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>&#32;<link linkend="_group__configuration_1ga2bfc7ae4747f15378d92249aadce019e">TOML_CALLCONV</link>&#32;<link linkend="_print__to__stream_8h_1a3ecc6f4250547523307312cbff28007e">print_to_stream</link>(std::ostream&#32;&amp;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a020a78e9ab6f08067423e5d76c0277d0">stream</link>,&#32;<emphasis role="keywordtype">signed</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1aa857b95cc76669c2a9109239ef40a47c">val</link>,&#32;<link linkend="_forward__declarations_8h_1a0c7177c8470bcc9d80d5b97c482f4a86">value_flags</link>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a3f8f226b5004bbc9a172e2bbf28ed102">format</link>,&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;min_digits)
+268 &#32;&#32;&#32;&#32;{
+269 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;TOML_ANON_NAMESPACE::print_integer_to_stream(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a020a78e9ab6f08067423e5d76c0277d0">stream</link>,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1aa857b95cc76669c2a9109239ef40a47c">val</link>,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a3f8f226b5004bbc9a172e2bbf28ed102">format</link>,&#32;min_digits);
+270 &#32;&#32;&#32;&#32;}
+271 
+272 &#32;&#32;&#32;&#32;<link linkend="_preprocessor_8h_1a4256b41e25e4aa04b70cf55fd56ce202">TOML_EXTERNAL_LINKAGE</link>
+273 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>&#32;<link linkend="_group__configuration_1ga2bfc7ae4747f15378d92249aadce019e">TOML_CALLCONV</link>&#32;<link linkend="_print__to__stream_8h_1a3ecc6f4250547523307312cbff28007e">print_to_stream</link>(std::ostream&#32;&amp;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a020a78e9ab6f08067423e5d76c0277d0">stream</link>,&#32;<emphasis role="keywordtype">signed</emphasis>&#32;<emphasis role="keywordtype">long</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1aa857b95cc76669c2a9109239ef40a47c">val</link>,&#32;<link linkend="_forward__declarations_8h_1a0c7177c8470bcc9d80d5b97c482f4a86">value_flags</link>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a3f8f226b5004bbc9a172e2bbf28ed102">format</link>,&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;min_digits)
+274 &#32;&#32;&#32;&#32;{
+275 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;TOML_ANON_NAMESPACE::print_integer_to_stream(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a020a78e9ab6f08067423e5d76c0277d0">stream</link>,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1aa857b95cc76669c2a9109239ef40a47c">val</link>,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a3f8f226b5004bbc9a172e2bbf28ed102">format</link>,&#32;min_digits);
+276 &#32;&#32;&#32;&#32;}
+277 
+278 &#32;&#32;&#32;&#32;<link linkend="_preprocessor_8h_1a4256b41e25e4aa04b70cf55fd56ce202">TOML_EXTERNAL_LINKAGE</link>
+279 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>&#32;<link linkend="_group__configuration_1ga2bfc7ae4747f15378d92249aadce019e">TOML_CALLCONV</link>&#32;<link linkend="_print__to__stream_8h_1a3ecc6f4250547523307312cbff28007e">print_to_stream</link>(std::ostream&#32;&amp;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a020a78e9ab6f08067423e5d76c0277d0">stream</link>,
+280 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">signed</emphasis>&#32;<emphasis role="keywordtype">long</emphasis>&#32;<emphasis role="keywordtype">long</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1aa857b95cc76669c2a9109239ef40a47c">val</link>,
+281 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_forward__declarations_8h_1a0c7177c8470bcc9d80d5b97c482f4a86">value_flags</link>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a3f8f226b5004bbc9a172e2bbf28ed102">format</link>,
+282 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;min_digits)
+283 &#32;&#32;&#32;&#32;{
+284 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;TOML_ANON_NAMESPACE::print_integer_to_stream(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a020a78e9ab6f08067423e5d76c0277d0">stream</link>,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1aa857b95cc76669c2a9109239ef40a47c">val</link>,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a3f8f226b5004bbc9a172e2bbf28ed102">format</link>,&#32;min_digits);
+285 &#32;&#32;&#32;&#32;}
+286 
+287 &#32;&#32;&#32;&#32;<link linkend="_preprocessor_8h_1a4256b41e25e4aa04b70cf55fd56ce202">TOML_EXTERNAL_LINKAGE</link>
+288 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>&#32;<link linkend="_group__configuration_1ga2bfc7ae4747f15378d92249aadce019e">TOML_CALLCONV</link>&#32;<link linkend="_print__to__stream_8h_1a3ecc6f4250547523307312cbff28007e">print_to_stream</link>(std::ostream&#32;&amp;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a020a78e9ab6f08067423e5d76c0277d0">stream</link>,&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1aa857b95cc76669c2a9109239ef40a47c">val</link>,&#32;<link linkend="_forward__declarations_8h_1a0c7177c8470bcc9d80d5b97c482f4a86">value_flags</link>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a3f8f226b5004bbc9a172e2bbf28ed102">format</link>,&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;min_digits)
+289 &#32;&#32;&#32;&#32;{
+290 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;TOML_ANON_NAMESPACE::print_integer_to_stream(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a020a78e9ab6f08067423e5d76c0277d0">stream</link>,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1aa857b95cc76669c2a9109239ef40a47c">val</link>,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a3f8f226b5004bbc9a172e2bbf28ed102">format</link>,&#32;min_digits);
+291 &#32;&#32;&#32;&#32;}
+292 
+293 &#32;&#32;&#32;&#32;<link linkend="_preprocessor_8h_1a4256b41e25e4aa04b70cf55fd56ce202">TOML_EXTERNAL_LINKAGE</link>
+294 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>&#32;<link linkend="_group__configuration_1ga2bfc7ae4747f15378d92249aadce019e">TOML_CALLCONV</link>&#32;<link linkend="_print__to__stream_8h_1a3ecc6f4250547523307312cbff28007e">print_to_stream</link>(std::ostream&#32;&amp;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a020a78e9ab6f08067423e5d76c0277d0">stream</link>,&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">short</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1aa857b95cc76669c2a9109239ef40a47c">val</link>,&#32;<link linkend="_forward__declarations_8h_1a0c7177c8470bcc9d80d5b97c482f4a86">value_flags</link>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a3f8f226b5004bbc9a172e2bbf28ed102">format</link>,&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;min_digits)
+295 &#32;&#32;&#32;&#32;{
+296 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;TOML_ANON_NAMESPACE::print_integer_to_stream(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a020a78e9ab6f08067423e5d76c0277d0">stream</link>,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1aa857b95cc76669c2a9109239ef40a47c">val</link>,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a3f8f226b5004bbc9a172e2bbf28ed102">format</link>,&#32;min_digits);
+297 &#32;&#32;&#32;&#32;}
+298 
+299 &#32;&#32;&#32;&#32;<link linkend="_preprocessor_8h_1a4256b41e25e4aa04b70cf55fd56ce202">TOML_EXTERNAL_LINKAGE</link>
+300 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>&#32;<link linkend="_group__configuration_1ga2bfc7ae4747f15378d92249aadce019e">TOML_CALLCONV</link>&#32;<link linkend="_print__to__stream_8h_1a3ecc6f4250547523307312cbff28007e">print_to_stream</link>(std::ostream&#32;&amp;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a020a78e9ab6f08067423e5d76c0277d0">stream</link>,&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1aa857b95cc76669c2a9109239ef40a47c">val</link>,&#32;<link linkend="_forward__declarations_8h_1a0c7177c8470bcc9d80d5b97c482f4a86">value_flags</link>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a3f8f226b5004bbc9a172e2bbf28ed102">format</link>,&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;min_digits)
+301 &#32;&#32;&#32;&#32;{
+302 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;TOML_ANON_NAMESPACE::print_integer_to_stream(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a020a78e9ab6f08067423e5d76c0277d0">stream</link>,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1aa857b95cc76669c2a9109239ef40a47c">val</link>,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a3f8f226b5004bbc9a172e2bbf28ed102">format</link>,&#32;min_digits);
+303 &#32;&#32;&#32;&#32;}
+304 
+305 &#32;&#32;&#32;&#32;<link linkend="_preprocessor_8h_1a4256b41e25e4aa04b70cf55fd56ce202">TOML_EXTERNAL_LINKAGE</link>
+306 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>&#32;<link linkend="_group__configuration_1ga2bfc7ae4747f15378d92249aadce019e">TOML_CALLCONV</link>&#32;<link linkend="_print__to__stream_8h_1a3ecc6f4250547523307312cbff28007e">print_to_stream</link>(std::ostream&#32;&amp;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a020a78e9ab6f08067423e5d76c0277d0">stream</link>,&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">long</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1aa857b95cc76669c2a9109239ef40a47c">val</link>,&#32;<link linkend="_forward__declarations_8h_1a0c7177c8470bcc9d80d5b97c482f4a86">value_flags</link>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a3f8f226b5004bbc9a172e2bbf28ed102">format</link>,&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;min_digits)
+307 &#32;&#32;&#32;&#32;{
+308 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;TOML_ANON_NAMESPACE::print_integer_to_stream(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a020a78e9ab6f08067423e5d76c0277d0">stream</link>,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1aa857b95cc76669c2a9109239ef40a47c">val</link>,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a3f8f226b5004bbc9a172e2bbf28ed102">format</link>,&#32;min_digits);
+309 &#32;&#32;&#32;&#32;}
+310 
+311 &#32;&#32;&#32;&#32;<link linkend="_preprocessor_8h_1a4256b41e25e4aa04b70cf55fd56ce202">TOML_EXTERNAL_LINKAGE</link>
+312 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>&#32;<link linkend="_group__configuration_1ga2bfc7ae4747f15378d92249aadce019e">TOML_CALLCONV</link>&#32;<link linkend="_print__to__stream_8h_1a3ecc6f4250547523307312cbff28007e">print_to_stream</link>(std::ostream&#32;&amp;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a020a78e9ab6f08067423e5d76c0277d0">stream</link>,
+313 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">long</emphasis>&#32;<emphasis role="keywordtype">long</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1aa857b95cc76669c2a9109239ef40a47c">val</link>,
+314 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_forward__declarations_8h_1a0c7177c8470bcc9d80d5b97c482f4a86">value_flags</link>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a3f8f226b5004bbc9a172e2bbf28ed102">format</link>,
+315 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;min_digits)
+316 &#32;&#32;&#32;&#32;{
+317 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;TOML_ANON_NAMESPACE::print_integer_to_stream(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a020a78e9ab6f08067423e5d76c0277d0">stream</link>,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1aa857b95cc76669c2a9109239ef40a47c">val</link>,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a3f8f226b5004bbc9a172e2bbf28ed102">format</link>,&#32;min_digits);
+318 &#32;&#32;&#32;&#32;}
+319 
+320 &#32;&#32;&#32;&#32;<link linkend="_preprocessor_8h_1a4256b41e25e4aa04b70cf55fd56ce202">TOML_EXTERNAL_LINKAGE</link>
+321 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>&#32;<link linkend="_group__configuration_1ga2bfc7ae4747f15378d92249aadce019e">TOML_CALLCONV</link>&#32;<link linkend="_print__to__stream_8h_1a3ecc6f4250547523307312cbff28007e">print_to_stream</link>(std::ostream&#32;&amp;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a020a78e9ab6f08067423e5d76c0277d0">stream</link>,&#32;<emphasis role="keywordtype">float</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1aa857b95cc76669c2a9109239ef40a47c">val</link>,&#32;<link linkend="_forward__declarations_8h_1a0c7177c8470bcc9d80d5b97c482f4a86">value_flags</link>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a3f8f226b5004bbc9a172e2bbf28ed102">format</link>,&#32;<emphasis role="keywordtype">bool</emphasis>&#32;relaxed_precision)
+322 &#32;&#32;&#32;&#32;{
+323 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;TOML_ANON_NAMESPACE::print_floating_point_to_stream(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a020a78e9ab6f08067423e5d76c0277d0">stream</link>,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1aa857b95cc76669c2a9109239ef40a47c">val</link>,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a3f8f226b5004bbc9a172e2bbf28ed102">format</link>,&#32;relaxed_precision);
+324 &#32;&#32;&#32;&#32;}
+325 
+326 &#32;&#32;&#32;&#32;<link linkend="_preprocessor_8h_1a4256b41e25e4aa04b70cf55fd56ce202">TOML_EXTERNAL_LINKAGE</link>
+327 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>&#32;<link linkend="_group__configuration_1ga2bfc7ae4747f15378d92249aadce019e">TOML_CALLCONV</link>&#32;<link linkend="_print__to__stream_8h_1a3ecc6f4250547523307312cbff28007e">print_to_stream</link>(std::ostream&#32;&amp;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a020a78e9ab6f08067423e5d76c0277d0">stream</link>,&#32;<emphasis role="keywordtype">double</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1aa857b95cc76669c2a9109239ef40a47c">val</link>,&#32;<link linkend="_forward__declarations_8h_1a0c7177c8470bcc9d80d5b97c482f4a86">value_flags</link>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a3f8f226b5004bbc9a172e2bbf28ed102">format</link>,&#32;<emphasis role="keywordtype">bool</emphasis>&#32;relaxed_precision)
+328 &#32;&#32;&#32;&#32;{
+329 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;TOML_ANON_NAMESPACE::print_floating_point_to_stream(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a020a78e9ab6f08067423e5d76c0277d0">stream</link>,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1aa857b95cc76669c2a9109239ef40a47c">val</link>,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a3f8f226b5004bbc9a172e2bbf28ed102">format</link>,&#32;relaxed_precision);
+330 &#32;&#32;&#32;&#32;}
+331 
+332 &#32;&#32;&#32;&#32;<link linkend="_preprocessor_8h_1a4256b41e25e4aa04b70cf55fd56ce202">TOML_EXTERNAL_LINKAGE</link>
+333 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>&#32;<link linkend="_group__configuration_1ga2bfc7ae4747f15378d92249aadce019e">TOML_CALLCONV</link>&#32;<link linkend="_print__to__stream_8h_1a3ecc6f4250547523307312cbff28007e">print_to_stream</link>(std::ostream&#32;&amp;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a020a78e9ab6f08067423e5d76c0277d0">stream</link>,&#32;<emphasis role="keywordtype">bool</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1aa857b95cc76669c2a9109239ef40a47c">val</link>)
+334 &#32;&#32;&#32;&#32;{
+335 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_print__to__stream_8h_1a3ecc6f4250547523307312cbff28007e">print_to_stream</link>(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a020a78e9ab6f08067423e5d76c0277d0">stream</link>,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1aa857b95cc76669c2a9109239ef40a47c">val</link>&#32;?&#32;<emphasis role="stringliteral">&quot;true&quot;</emphasis><link linkend="_conformance__burntsushi__valid_8cpp_1a3a352c2235a269bac37d1a34a19cde48">sv</link>&#32;:&#32;<emphasis role="stringliteral">&quot;false&quot;</emphasis><link linkend="_conformance__burntsushi__valid_8cpp_1a3a352c2235a269bac37d1a34a19cde48">sv</link>);
+336 &#32;&#32;&#32;&#32;}
+337 
+338 &#32;&#32;&#32;&#32;<link linkend="_preprocessor_8h_1a4256b41e25e4aa04b70cf55fd56ce202">TOML_EXTERNAL_LINKAGE</link>
+339 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>&#32;<link linkend="_group__configuration_1ga2bfc7ae4747f15378d92249aadce019e">TOML_CALLCONV</link>&#32;<link linkend="_print__to__stream_8h_1a3ecc6f4250547523307312cbff28007e">print_to_stream</link>(std::ostream&#32;&amp;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a020a78e9ab6f08067423e5d76c0277d0">stream</link>,&#32;<emphasis role="keyword">const</emphasis>&#32;toml::date&amp;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1aa857b95cc76669c2a9109239ef40a47c">val</link>)
+340 &#32;&#32;&#32;&#32;{
+341 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_print__to__stream_8h_1a3ecc6f4250547523307312cbff28007e">print_to_stream</link>(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a020a78e9ab6f08067423e5d76c0277d0">stream</link>,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1aa857b95cc76669c2a9109239ef40a47c">val</link>.year,&#32;{},&#32;4);
+342 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a020a78e9ab6f08067423e5d76c0277d0">stream</link>.put(<emphasis role="charliteral">&apos;-&apos;</emphasis>);
+343 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_print__to__stream_8h_1a3ecc6f4250547523307312cbff28007e">print_to_stream</link>(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a020a78e9ab6f08067423e5d76c0277d0">stream</link>,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1aa857b95cc76669c2a9109239ef40a47c">val</link>.month,&#32;{},&#32;2);
+344 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a020a78e9ab6f08067423e5d76c0277d0">stream</link>.put(<emphasis role="charliteral">&apos;-&apos;</emphasis>);
+345 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_print__to__stream_8h_1a3ecc6f4250547523307312cbff28007e">print_to_stream</link>(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a020a78e9ab6f08067423e5d76c0277d0">stream</link>,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1aa857b95cc76669c2a9109239ef40a47c">val</link>.day,&#32;{},&#32;2);
+346 &#32;&#32;&#32;&#32;}
+347 
+348 &#32;&#32;&#32;&#32;<link linkend="_preprocessor_8h_1a4256b41e25e4aa04b70cf55fd56ce202">TOML_EXTERNAL_LINKAGE</link>
+349 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>&#32;<link linkend="_group__configuration_1ga2bfc7ae4747f15378d92249aadce019e">TOML_CALLCONV</link>&#32;<link linkend="_print__to__stream_8h_1a3ecc6f4250547523307312cbff28007e">print_to_stream</link>(std::ostream&#32;&amp;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a020a78e9ab6f08067423e5d76c0277d0">stream</link>,&#32;<emphasis role="keyword">const</emphasis>&#32;toml::time&amp;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1aa857b95cc76669c2a9109239ef40a47c">val</link>)
+350 &#32;&#32;&#32;&#32;{
+351 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_print__to__stream_8h_1a3ecc6f4250547523307312cbff28007e">print_to_stream</link>(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a020a78e9ab6f08067423e5d76c0277d0">stream</link>,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1aa857b95cc76669c2a9109239ef40a47c">val</link>.hour,&#32;{},&#32;2);
+352 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a020a78e9ab6f08067423e5d76c0277d0">stream</link>.put(<emphasis role="charliteral">&apos;:&apos;</emphasis>);
+353 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_print__to__stream_8h_1a3ecc6f4250547523307312cbff28007e">print_to_stream</link>(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a020a78e9ab6f08067423e5d76c0277d0">stream</link>,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1aa857b95cc76669c2a9109239ef40a47c">val</link>.minute,&#32;{},&#32;2);
+354 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a020a78e9ab6f08067423e5d76c0277d0">stream</link>.put(<emphasis role="charliteral">&apos;:&apos;</emphasis>);
+355 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_print__to__stream_8h_1a3ecc6f4250547523307312cbff28007e">print_to_stream</link>(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a020a78e9ab6f08067423e5d76c0277d0">stream</link>,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1aa857b95cc76669c2a9109239ef40a47c">val</link>.second,&#32;{},&#32;2);
+356 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1aa857b95cc76669c2a9109239ef40a47c">val</link>.nanosecond&#32;&amp;&amp;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1aa857b95cc76669c2a9109239ef40a47c">val</link>.nanosecond&#32;&lt;=&#32;999999999u)
+357 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+358 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a020a78e9ab6f08067423e5d76c0277d0">stream</link>.put(<emphasis role="charliteral">&apos;.&apos;</emphasis>);
+359 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">auto</emphasis>&#32;ns&#32;&#32;&#32;&#32;&#32;&#32;&#32;=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1aa857b95cc76669c2a9109239ef40a47c">val</link>.nanosecond;
+360 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;digits&#32;=&#32;9u;
+361 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">while</emphasis>&#32;(ns&#32;%&#32;10u&#32;==&#32;0<link linkend="__classes_2lib_2glm_2test_2core_2core__func__integer__find__lsb_8cpp_1a1f9aca42e2010bb82488684dee1a66ea">u</link>)
+362 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+363 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;ns&#32;/=&#32;10u;
+364 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;digits--;
+365 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+366 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_print__to__stream_8h_1a3ecc6f4250547523307312cbff28007e">print_to_stream</link>(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a020a78e9ab6f08067423e5d76c0277d0">stream</link>,&#32;ns,&#32;{},&#32;digits);
+367 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+368 &#32;&#32;&#32;&#32;}
+369 
+370 &#32;&#32;&#32;&#32;<link linkend="_preprocessor_8h_1a4256b41e25e4aa04b70cf55fd56ce202">TOML_EXTERNAL_LINKAGE</link>
+371 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>&#32;<link linkend="_group__configuration_1ga2bfc7ae4747f15378d92249aadce019e">TOML_CALLCONV</link>&#32;<link linkend="_print__to__stream_8h_1a3ecc6f4250547523307312cbff28007e">print_to_stream</link>(std::ostream&#32;&amp;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a020a78e9ab6f08067423e5d76c0277d0">stream</link>,&#32;<emphasis role="keyword">const</emphasis>&#32;toml::time_offset&amp;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1aa857b95cc76669c2a9109239ef40a47c">val</link>)
+372 &#32;&#32;&#32;&#32;{
+373 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(!<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1aa857b95cc76669c2a9109239ef40a47c">val</link>.minutes)
+374 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+375 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a020a78e9ab6f08067423e5d76c0277d0">stream</link>.put(<emphasis role="charliteral">&apos;Z&apos;</emphasis>);
+376 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>;
+377 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+378 
+379 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">auto</emphasis>&#32;mins&#32;=&#32;<emphasis role="keyword">static_cast&lt;</emphasis><emphasis role="keywordtype">int</emphasis><emphasis role="keyword">&gt;</emphasis>(<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1aa857b95cc76669c2a9109239ef40a47c">val</link>.minutes);
+380 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(mins&#32;&lt;&#32;0)
+381 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+382 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a020a78e9ab6f08067423e5d76c0277d0">stream</link>.put(<emphasis role="charliteral">&apos;-&apos;</emphasis>);
+383 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;mins&#32;=&#32;-mins;
+384 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+385 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>
+386 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a020a78e9ab6f08067423e5d76c0277d0">stream</link>.put(<emphasis role="charliteral">&apos;+&apos;</emphasis>);
+387 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keyword">auto</emphasis>&#32;hours&#32;=&#32;mins&#32;/&#32;60;
+388 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(hours)
+389 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+390 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_print__to__stream_8h_1a3ecc6f4250547523307312cbff28007e">print_to_stream</link>(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a020a78e9ab6f08067423e5d76c0277d0">stream</link>,&#32;<emphasis role="keyword">static_cast&lt;</emphasis><emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis><emphasis role="keyword">&gt;</emphasis>(hours),&#32;{},&#32;2);
+391 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;mins&#32;-=&#32;hours&#32;*&#32;60;
+392 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+393 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>
+394 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_print__to__stream_8h_1a3ecc6f4250547523307312cbff28007e">print_to_stream</link>(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a020a78e9ab6f08067423e5d76c0277d0">stream</link>,&#32;<emphasis role="stringliteral">&quot;00&quot;</emphasis><link linkend="_conformance__burntsushi__valid_8cpp_1a3a352c2235a269bac37d1a34a19cde48">sv</link>);
+395 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a020a78e9ab6f08067423e5d76c0277d0">stream</link>.put(<emphasis role="charliteral">&apos;:&apos;</emphasis>);
+396 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_print__to__stream_8h_1a3ecc6f4250547523307312cbff28007e">print_to_stream</link>(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a020a78e9ab6f08067423e5d76c0277d0">stream</link>,&#32;<emphasis role="keyword">static_cast&lt;</emphasis><emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis><emphasis role="keyword">&gt;</emphasis>(mins),&#32;{},&#32;2);
+397 &#32;&#32;&#32;&#32;}
+398 
+399 &#32;&#32;&#32;&#32;<link linkend="_preprocessor_8h_1a4256b41e25e4aa04b70cf55fd56ce202">TOML_EXTERNAL_LINKAGE</link>
+400 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>&#32;<link linkend="_group__configuration_1ga2bfc7ae4747f15378d92249aadce019e">TOML_CALLCONV</link>&#32;<link linkend="_print__to__stream_8h_1a3ecc6f4250547523307312cbff28007e">print_to_stream</link>(std::ostream&#32;&amp;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a020a78e9ab6f08067423e5d76c0277d0">stream</link>,&#32;<emphasis role="keyword">const</emphasis>&#32;toml::date_time&amp;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1aa857b95cc76669c2a9109239ef40a47c">val</link>)
+401 &#32;&#32;&#32;&#32;{
+402 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_print__to__stream_8h_1a3ecc6f4250547523307312cbff28007e">print_to_stream</link>(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a020a78e9ab6f08067423e5d76c0277d0">stream</link>,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1aa857b95cc76669c2a9109239ef40a47c">val</link>.date);
+403 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a020a78e9ab6f08067423e5d76c0277d0">stream</link>.put(<emphasis role="charliteral">&apos;T&apos;</emphasis>);
+404 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_print__to__stream_8h_1a3ecc6f4250547523307312cbff28007e">print_to_stream</link>(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a020a78e9ab6f08067423e5d76c0277d0">stream</link>,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1aa857b95cc76669c2a9109239ef40a47c">val</link>.time);
+405 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1aa857b95cc76669c2a9109239ef40a47c">val</link>.offset)
+406 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_print__to__stream_8h_1a3ecc6f4250547523307312cbff28007e">print_to_stream</link>(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a020a78e9ab6f08067423e5d76c0277d0">stream</link>,&#32;*<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1aa857b95cc76669c2a9109239ef40a47c">val</link>.offset);
+407 &#32;&#32;&#32;&#32;}
+408 
+409 &#32;&#32;&#32;&#32;<link linkend="_preprocessor_8h_1a4256b41e25e4aa04b70cf55fd56ce202">TOML_EXTERNAL_LINKAGE</link>
+410 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>&#32;<link linkend="_group__configuration_1ga2bfc7ae4747f15378d92249aadce019e">TOML_CALLCONV</link>&#32;<link linkend="_print__to__stream_8h_1a3ecc6f4250547523307312cbff28007e">print_to_stream</link>(std::ostream&#32;&amp;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a020a78e9ab6f08067423e5d76c0277d0">stream</link>,&#32;<emphasis role="keyword">const</emphasis>&#32;<link linkend="_structsource__position">source_position</link>&amp;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1aa857b95cc76669c2a9109239ef40a47c">val</link>)
+411 &#32;&#32;&#32;&#32;{
+412 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_print__to__stream_8h_1a3ecc6f4250547523307312cbff28007e">print_to_stream</link>(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a020a78e9ab6f08067423e5d76c0277d0">stream</link>,&#32;<emphasis role="stringliteral">&quot;line&#32;&quot;</emphasis><link linkend="_conformance__burntsushi__valid_8cpp_1a3a352c2235a269bac37d1a34a19cde48">sv</link>);
+413 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_print__to__stream_8h_1a3ecc6f4250547523307312cbff28007e">print_to_stream</link>(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a020a78e9ab6f08067423e5d76c0277d0">stream</link>,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1aa857b95cc76669c2a9109239ef40a47c">val</link>.line);
+414 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_print__to__stream_8h_1a3ecc6f4250547523307312cbff28007e">print_to_stream</link>(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a020a78e9ab6f08067423e5d76c0277d0">stream</link>,&#32;<emphasis role="stringliteral">&quot;,&#32;column&#32;&quot;</emphasis><link linkend="_conformance__burntsushi__valid_8cpp_1a3a352c2235a269bac37d1a34a19cde48">sv</link>);
+415 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_print__to__stream_8h_1a3ecc6f4250547523307312cbff28007e">print_to_stream</link>(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a020a78e9ab6f08067423e5d76c0277d0">stream</link>,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1aa857b95cc76669c2a9109239ef40a47c">val</link>.column);
+416 &#32;&#32;&#32;&#32;}
+417 
+418 &#32;&#32;&#32;&#32;<link linkend="_preprocessor_8h_1a4256b41e25e4aa04b70cf55fd56ce202">TOML_EXTERNAL_LINKAGE</link>
+419 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>&#32;<link linkend="_group__configuration_1ga2bfc7ae4747f15378d92249aadce019e">TOML_CALLCONV</link>&#32;<link linkend="_print__to__stream_8h_1a3ecc6f4250547523307312cbff28007e">print_to_stream</link>(std::ostream&#32;&amp;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a020a78e9ab6f08067423e5d76c0277d0">stream</link>,&#32;<emphasis role="keyword">const</emphasis>&#32;<link linkend="_structsource__region">source_region</link>&amp;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1aa857b95cc76669c2a9109239ef40a47c">val</link>)
+420 &#32;&#32;&#32;&#32;{
+421 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_print__to__stream_8h_1a3ecc6f4250547523307312cbff28007e">print_to_stream</link>(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a020a78e9ab6f08067423e5d76c0277d0">stream</link>,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1aa857b95cc76669c2a9109239ef40a47c">val</link>.begin);
+422 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1aa857b95cc76669c2a9109239ef40a47c">val</link>.path)
+423 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+424 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_print__to__stream_8h_1a3ecc6f4250547523307312cbff28007e">print_to_stream</link>(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a020a78e9ab6f08067423e5d76c0277d0">stream</link>,&#32;<emphasis role="stringliteral">&quot;&#32;of&#32;&apos;&quot;</emphasis><link linkend="_conformance__burntsushi__valid_8cpp_1a3a352c2235a269bac37d1a34a19cde48">sv</link>);
+425 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_print__to__stream_8h_1a3ecc6f4250547523307312cbff28007e">print_to_stream</link>(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a020a78e9ab6f08067423e5d76c0277d0">stream</link>,&#32;*<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1aa857b95cc76669c2a9109239ef40a47c">val</link>.path);
+426 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a020a78e9ab6f08067423e5d76c0277d0">stream</link>.put(<emphasis role="charliteral">&apos;\&apos;&apos;</emphasis>);
+427 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+428 &#32;&#32;&#32;&#32;}
+429 
+430 <emphasis role="preprocessor">#if&#32;TOML_ENABLE_FORMATTERS</emphasis>
+431 
+432 &#32;&#32;&#32;&#32;<link linkend="_preprocessor_8h_1a4256b41e25e4aa04b70cf55fd56ce202">TOML_EXTERNAL_LINKAGE</link>
+433 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>&#32;<link linkend="_group__configuration_1ga2bfc7ae4747f15378d92249aadce019e">TOML_CALLCONV</link>&#32;<link linkend="_print__to__stream_8h_1a3ecc6f4250547523307312cbff28007e">print_to_stream</link>(std::ostream&#32;&amp;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a020a78e9ab6f08067423e5d76c0277d0">stream</link>,&#32;<emphasis role="keyword">const</emphasis>&#32;<link linkend="_classarray">array</link>&amp;&#32;arr)
+434 &#32;&#32;&#32;&#32;{
+435 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a020a78e9ab6f08067423e5d76c0277d0">stream</link>&#32;&lt;&lt;&#32;toml_formatter{&#32;arr&#32;};
+436 &#32;&#32;&#32;&#32;}
+437 
+438 &#32;&#32;&#32;&#32;<link linkend="_preprocessor_8h_1a4256b41e25e4aa04b70cf55fd56ce202">TOML_EXTERNAL_LINKAGE</link>
+439 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>&#32;<link linkend="_group__configuration_1ga2bfc7ae4747f15378d92249aadce019e">TOML_CALLCONV</link>&#32;<link linkend="_print__to__stream_8h_1a3ecc6f4250547523307312cbff28007e">print_to_stream</link>(std::ostream&#32;&amp;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a020a78e9ab6f08067423e5d76c0277d0">stream</link>,&#32;<emphasis role="keyword">const</emphasis>&#32;<link linkend="_classtable">table</link>&amp;&#32;tbl)
+440 &#32;&#32;&#32;&#32;{
+441 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a020a78e9ab6f08067423e5d76c0277d0">stream</link>&#32;&lt;&lt;&#32;toml_formatter{&#32;tbl&#32;};
+442 &#32;&#32;&#32;&#32;}
+443 
+444 &#32;&#32;&#32;&#32;<link linkend="_preprocessor_8h_1a4256b41e25e4aa04b70cf55fd56ce202">TOML_EXTERNAL_LINKAGE</link>
+445 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>&#32;<link linkend="_group__configuration_1ga2bfc7ae4747f15378d92249aadce019e">TOML_CALLCONV</link>&#32;<link linkend="_print__to__stream_8h_1a3ecc6f4250547523307312cbff28007e">print_to_stream</link>(std::ostream&#32;&amp;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a020a78e9ab6f08067423e5d76c0277d0">stream</link>,&#32;<emphasis role="keyword">const</emphasis>&#32;<link linkend="_classvalue">value&lt;std::string&gt;</link>&amp;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1aa857b95cc76669c2a9109239ef40a47c">val</link>)
+446 &#32;&#32;&#32;&#32;{
+447 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a020a78e9ab6f08067423e5d76c0277d0">stream</link>&#32;&lt;&lt;&#32;toml_formatter{&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1aa857b95cc76669c2a9109239ef40a47c">val</link>&#32;};
+448 &#32;&#32;&#32;&#32;}
+449 
+450 &#32;&#32;&#32;&#32;<link linkend="_preprocessor_8h_1a4256b41e25e4aa04b70cf55fd56ce202">TOML_EXTERNAL_LINKAGE</link>
+451 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>&#32;<link linkend="_group__configuration_1ga2bfc7ae4747f15378d92249aadce019e">TOML_CALLCONV</link>&#32;<link linkend="_print__to__stream_8h_1a3ecc6f4250547523307312cbff28007e">print_to_stream</link>(std::ostream&#32;&amp;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a020a78e9ab6f08067423e5d76c0277d0">stream</link>,&#32;<emphasis role="keyword">const</emphasis>&#32;<link linkend="_classvalue">value&lt;int64_t&gt;</link>&amp;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1aa857b95cc76669c2a9109239ef40a47c">val</link>)
+452 &#32;&#32;&#32;&#32;{
+453 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a020a78e9ab6f08067423e5d76c0277d0">stream</link>&#32;&lt;&lt;&#32;toml_formatter{&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1aa857b95cc76669c2a9109239ef40a47c">val</link>&#32;};
+454 &#32;&#32;&#32;&#32;}
+455 
+456 &#32;&#32;&#32;&#32;<link linkend="_preprocessor_8h_1a4256b41e25e4aa04b70cf55fd56ce202">TOML_EXTERNAL_LINKAGE</link>
+457 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>&#32;<link linkend="_group__configuration_1ga2bfc7ae4747f15378d92249aadce019e">TOML_CALLCONV</link>&#32;<link linkend="_print__to__stream_8h_1a3ecc6f4250547523307312cbff28007e">print_to_stream</link>(std::ostream&#32;&amp;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a020a78e9ab6f08067423e5d76c0277d0">stream</link>,&#32;<emphasis role="keyword">const</emphasis>&#32;<link linkend="_classvalue">value&lt;double&gt;</link>&amp;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1aa857b95cc76669c2a9109239ef40a47c">val</link>)
+458 &#32;&#32;&#32;&#32;{
+459 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a020a78e9ab6f08067423e5d76c0277d0">stream</link>&#32;&lt;&lt;&#32;toml_formatter{&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1aa857b95cc76669c2a9109239ef40a47c">val</link>&#32;};
+460 &#32;&#32;&#32;&#32;}
+461 
+462 &#32;&#32;&#32;&#32;<link linkend="_preprocessor_8h_1a4256b41e25e4aa04b70cf55fd56ce202">TOML_EXTERNAL_LINKAGE</link>
+463 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>&#32;<link linkend="_group__configuration_1ga2bfc7ae4747f15378d92249aadce019e">TOML_CALLCONV</link>&#32;<link linkend="_print__to__stream_8h_1a3ecc6f4250547523307312cbff28007e">print_to_stream</link>(std::ostream&#32;&amp;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a020a78e9ab6f08067423e5d76c0277d0">stream</link>,&#32;<emphasis role="keyword">const</emphasis>&#32;<link linkend="_classvalue">value&lt;bool&gt;</link>&amp;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1aa857b95cc76669c2a9109239ef40a47c">val</link>)
+464 &#32;&#32;&#32;&#32;{
+465 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a020a78e9ab6f08067423e5d76c0277d0">stream</link>&#32;&lt;&lt;&#32;toml_formatter{&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1aa857b95cc76669c2a9109239ef40a47c">val</link>&#32;};
+466 &#32;&#32;&#32;&#32;}
+467 
+468 &#32;&#32;&#32;&#32;<link linkend="_preprocessor_8h_1a4256b41e25e4aa04b70cf55fd56ce202">TOML_EXTERNAL_LINKAGE</link>
+469 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>&#32;<link linkend="_group__configuration_1ga2bfc7ae4747f15378d92249aadce019e">TOML_CALLCONV</link>&#32;<link linkend="_print__to__stream_8h_1a3ecc6f4250547523307312cbff28007e">print_to_stream</link>(std::ostream&#32;&amp;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a020a78e9ab6f08067423e5d76c0277d0">stream</link>,&#32;<emphasis role="keyword">const</emphasis>&#32;<link linkend="_classvalue">value&lt;date&gt;</link>&amp;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1aa857b95cc76669c2a9109239ef40a47c">val</link>)
+470 &#32;&#32;&#32;&#32;{
+471 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a020a78e9ab6f08067423e5d76c0277d0">stream</link>&#32;&lt;&lt;&#32;toml_formatter{&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1aa857b95cc76669c2a9109239ef40a47c">val</link>&#32;};
+472 &#32;&#32;&#32;&#32;}
+473 
+474 &#32;&#32;&#32;&#32;<link linkend="_preprocessor_8h_1a4256b41e25e4aa04b70cf55fd56ce202">TOML_EXTERNAL_LINKAGE</link>
+475 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>&#32;<link linkend="_group__configuration_1ga2bfc7ae4747f15378d92249aadce019e">TOML_CALLCONV</link>&#32;<link linkend="_print__to__stream_8h_1a3ecc6f4250547523307312cbff28007e">print_to_stream</link>(std::ostream&#32;&amp;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a020a78e9ab6f08067423e5d76c0277d0">stream</link>,&#32;<emphasis role="keyword">const</emphasis>&#32;<link linkend="_classvalue">value&lt;time&gt;</link>&amp;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1aa857b95cc76669c2a9109239ef40a47c">val</link>)
+476 &#32;&#32;&#32;&#32;{
+477 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a020a78e9ab6f08067423e5d76c0277d0">stream</link>&#32;&lt;&lt;&#32;toml_formatter{&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1aa857b95cc76669c2a9109239ef40a47c">val</link>&#32;};
+478 &#32;&#32;&#32;&#32;}
+479 
+480 &#32;&#32;&#32;&#32;<link linkend="_preprocessor_8h_1a4256b41e25e4aa04b70cf55fd56ce202">TOML_EXTERNAL_LINKAGE</link>
+481 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>&#32;<link linkend="_group__configuration_1ga2bfc7ae4747f15378d92249aadce019e">TOML_CALLCONV</link>&#32;<link linkend="_print__to__stream_8h_1a3ecc6f4250547523307312cbff28007e">print_to_stream</link>(std::ostream&#32;&amp;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a020a78e9ab6f08067423e5d76c0277d0">stream</link>,&#32;<emphasis role="keyword">const</emphasis>&#32;<link linkend="_classvalue">value&lt;date_time&gt;</link>&amp;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1aa857b95cc76669c2a9109239ef40a47c">val</link>)
+482 &#32;&#32;&#32;&#32;{
+483 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a020a78e9ab6f08067423e5d76c0277d0">stream</link>&#32;&lt;&lt;&#32;toml_formatter{&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1aa857b95cc76669c2a9109239ef40a47c">val</link>&#32;};
+484 &#32;&#32;&#32;&#32;}
+485 
+486 <emphasis role="preprocessor">#endif</emphasis>
+487 }
+488 <link linkend="_preprocessor_8h_1abec69dd25f1e4c1dfbdd288441864939">TOML_IMPL_NAMESPACE_END</link>;
+489 
+490 <emphasis role="preprocessor">#include&#32;&quot;<link linkend="_header__end_8h">header_end.h</link>&quot;</emphasis>
+</programlisting></section>

@@ -1,0 +1,780 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<section xmlns="http://docbook.org/ns/docbook" version="5.0" xmlns:xlink="http://www.w3.org/1999/xlink" xml:id="__classes_2lib_2_raylib_erosion_standalone-main_2raylib_2src_2rmem_8h_source" xml:lang="en-US">
+<title>rmem.h</title>
+<indexterm><primary>C:/Users/HP/Documents/GitHub/Minero-Game/Classes/lib/RaylibErosionStandalone-main/raylib/src/rmem.h</primary></indexterm>
+Go to the documentation of this file.<programlisting linenumbering="unnumbered">1 <emphasis role="comment">/**********************************************************************************************</emphasis>
+2 <emphasis role="comment">*</emphasis>
+3 <emphasis role="comment">*&#32;&#32;&#32;rmem&#32;-&#32;raylib&#32;memory&#32;pool&#32;and&#32;objects&#32;pool</emphasis>
+4 <emphasis role="comment">*</emphasis>
+5 <emphasis role="comment">*&#32;&#32;&#32;A&#32;quick,&#32;efficient,&#32;and&#32;minimal&#32;free&#32;list&#32;and&#32;stack-based&#32;allocator</emphasis>
+6 <emphasis role="comment">*</emphasis>
+7 <emphasis role="comment">*&#32;&#32;&#32;PURPOSE:</emphasis>
+8 <emphasis role="comment">*&#32;&#32;&#32;&#32;&#32;-&#32;A&#32;quicker,&#32;efficient&#32;memory&#32;allocator&#32;alternative&#32;to&#32;&apos;malloc&apos;&#32;and&#32;friends.</emphasis>
+9 <emphasis role="comment">*&#32;&#32;&#32;&#32;&#32;-&#32;Reduce&#32;the&#32;possibilities&#32;of&#32;memory&#32;leaks&#32;for&#32;beginner&#32;developers&#32;using&#32;Raylib.</emphasis>
+10 <emphasis role="comment">*&#32;&#32;&#32;&#32;&#32;-&#32;Being&#32;able&#32;to&#32;flexibly&#32;range&#32;check&#32;memory&#32;if&#32;necessary.</emphasis>
+11 <emphasis role="comment">*</emphasis>
+12 <emphasis role="comment">*&#32;&#32;&#32;CONFIGURATION:</emphasis>
+13 <emphasis role="comment">*</emphasis>
+14 <emphasis role="comment">*&#32;&#32;&#32;#define&#32;RMEM_IMPLEMENTATION</emphasis>
+15 <emphasis role="comment">*&#32;&#32;&#32;&#32;&#32;&#32;&#32;Generates&#32;the&#32;implementation&#32;of&#32;the&#32;library&#32;into&#32;the&#32;included&#32;file.</emphasis>
+16 <emphasis role="comment">*&#32;&#32;&#32;&#32;&#32;&#32;&#32;If&#32;not&#32;defined,&#32;the&#32;library&#32;is&#32;in&#32;header&#32;only&#32;mode&#32;and&#32;can&#32;be&#32;included&#32;in&#32;other&#32;headers</emphasis>
+17 <emphasis role="comment">*&#32;&#32;&#32;&#32;&#32;&#32;&#32;or&#32;source&#32;files&#32;without&#32;problems.&#32;But&#32;only&#32;ONE&#32;file&#32;should&#32;hold&#32;the&#32;implementation.</emphasis>
+18 <emphasis role="comment">*</emphasis>
+19 <emphasis role="comment">*</emphasis>
+20 <emphasis role="comment">*&#32;&#32;&#32;LICENSE:&#32;zlib/libpng</emphasis>
+21 <emphasis role="comment">*</emphasis>
+22 <emphasis role="comment">*&#32;&#32;&#32;Copyright&#32;(c)&#32;2019&#32;Kevin&#32;&apos;Assyrianic&apos;&#32;Yonan&#32;(@assyrianic)&#32;and&#32;reviewed&#32;by&#32;Ramon&#32;Santamaria&#32;(@raysan5)</emphasis>
+23 <emphasis role="comment">*</emphasis>
+24 <emphasis role="comment">*&#32;&#32;&#32;This&#32;software&#32;is&#32;provided&#32;&quot;as-is&quot;,&#32;without&#32;any&#32;express&#32;or&#32;implied&#32;warranty.&#32;In&#32;no&#32;event</emphasis>
+25 <emphasis role="comment">*&#32;&#32;&#32;will&#32;the&#32;authors&#32;be&#32;held&#32;liable&#32;for&#32;any&#32;damages&#32;arising&#32;from&#32;the&#32;use&#32;of&#32;this&#32;software.</emphasis>
+26 <emphasis role="comment">*</emphasis>
+27 <emphasis role="comment">*&#32;&#32;&#32;Permission&#32;is&#32;granted&#32;to&#32;anyone&#32;to&#32;use&#32;this&#32;software&#32;for&#32;any&#32;purpose,&#32;including&#32;commercial</emphasis>
+28 <emphasis role="comment">*&#32;&#32;&#32;applications,&#32;and&#32;to&#32;alter&#32;it&#32;and&#32;redistribute&#32;it&#32;freely,&#32;subject&#32;to&#32;the&#32;following&#32;restrictions:</emphasis>
+29 <emphasis role="comment">*</emphasis>
+30 <emphasis role="comment">*&#32;&#32;&#32;&#32;&#32;1.&#32;The&#32;origin&#32;of&#32;this&#32;software&#32;must&#32;not&#32;be&#32;misrepresented;&#32;you&#32;must&#32;not&#32;claim&#32;that&#32;you</emphasis>
+31 <emphasis role="comment">*&#32;&#32;&#32;&#32;&#32;wrote&#32;the&#32;original&#32;software.&#32;If&#32;you&#32;use&#32;this&#32;software&#32;in&#32;a&#32;product,&#32;an&#32;acknowledgment</emphasis>
+32 <emphasis role="comment">*&#32;&#32;&#32;&#32;&#32;in&#32;the&#32;product&#32;documentation&#32;would&#32;be&#32;appreciated&#32;but&#32;is&#32;not&#32;required.</emphasis>
+33 <emphasis role="comment">*</emphasis>
+34 <emphasis role="comment">*&#32;&#32;&#32;&#32;&#32;2.&#32;Altered&#32;source&#32;versions&#32;must&#32;be&#32;plainly&#32;marked&#32;as&#32;such,&#32;and&#32;must&#32;not&#32;be&#32;misrepresented</emphasis>
+35 <emphasis role="comment">*&#32;&#32;&#32;&#32;&#32;as&#32;being&#32;the&#32;original&#32;software.</emphasis>
+36 <emphasis role="comment">*</emphasis>
+37 <emphasis role="comment">*&#32;&#32;&#32;&#32;&#32;3.&#32;This&#32;notice&#32;may&#32;not&#32;be&#32;removed&#32;or&#32;altered&#32;from&#32;any&#32;source&#32;distribution.</emphasis>
+38 <emphasis role="comment">*</emphasis>
+39 <emphasis role="comment">**********************************************************************************************/</emphasis>
+40 
+41 <emphasis role="preprocessor">#ifndef&#32;RMEM_H</emphasis>
+42 <emphasis role="preprocessor">#define&#32;RMEM_H</emphasis>
+43 
+44 <emphasis role="preprocessor">#include&#32;&lt;inttypes.h&gt;</emphasis>
+45 <emphasis role="preprocessor">#include&#32;&lt;stdbool.h&gt;</emphasis>
+46 
+47 <emphasis role="comment">//----------------------------------------------------------------------------------</emphasis>
+48 <emphasis role="comment">//&#32;Defines&#32;and&#32;Macros</emphasis>
+49 <emphasis role="comment">//----------------------------------------------------------------------------------</emphasis>
+50 <emphasis role="preprocessor">#if&#32;defined(_WIN32)&#32;&amp;&amp;&#32;defined(BUILD_LIBTYPE_SHARED)</emphasis>
+51 <emphasis role="preprocessor">&#32;&#32;&#32;&#32;#define&#32;RMEMAPI&#32;__declspec(dllexport)&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;</emphasis><emphasis role="comment">//&#32;We&#32;are&#32;building&#32;library&#32;as&#32;a&#32;Win32&#32;shared&#32;library&#32;(.dll)</emphasis>
+52 <emphasis role="preprocessor">#elif&#32;defined(_WIN32)&#32;&amp;&amp;&#32;defined(USE_LIBTYPE_SHARED)</emphasis>
+53 <emphasis role="preprocessor">&#32;&#32;&#32;&#32;#define&#32;RMEMAPI&#32;__declspec(dllimport)&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;</emphasis><emphasis role="comment">//&#32;We&#32;are&#32;using&#32;library&#32;as&#32;a&#32;Win32&#32;shared&#32;library&#32;(.dll)</emphasis>
+54 <emphasis role="preprocessor">#else</emphasis>
+55 <emphasis role="preprocessor">&#32;&#32;&#32;&#32;#define&#32;RMEMAPI&#32;&#32;&#32;</emphasis><emphasis role="comment">//&#32;We&#32;are&#32;building&#32;or&#32;using&#32;library&#32;as&#32;a&#32;static&#32;library&#32;(or&#32;Linux&#32;shared&#32;library)</emphasis>
+56 <emphasis role="preprocessor">#endif</emphasis>
+57 
+58 <emphasis role="comment">//----------------------------------------------------------------------------------</emphasis>
+59 <emphasis role="comment">//&#32;Types&#32;and&#32;Structures&#32;Definition</emphasis>
+60 <emphasis role="comment">//----------------------------------------------------------------------------------</emphasis>
+61 
+62 <emphasis role="comment">//&#32;Memory&#32;Pool</emphasis>
+63 <emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">struct&#32;</emphasis><link linkend="_struct_mem_node">MemNode</link>&#32;<link linkend="_struct_mem_node">MemNode</link>;
+64 <emphasis role="keyword">struct&#32;</emphasis><link linkend="_struct_mem_node">MemNode</link>&#32;{
+65 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;<link linkend="_struct_mem_node_1a25d408d84b37fb84391be86d9d4d6742">size</link>;
+66 &#32;&#32;&#32;&#32;<link linkend="_struct_mem_node">MemNode</link>&#32;*<link linkend="_struct_mem_node_1a5f3b6bf700e041f98ce932f7dbd17346">next</link>,&#32;*<link linkend="_struct_mem_node_1af37b191bd6144d0d96f7e657e5d0343a">prev</link>;
+67 };
+68 
+69 <emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">struct&#32;</emphasis><link linkend="_struct_alloc_list">AllocList</link>&#32;{
+70 &#32;&#32;&#32;&#32;<link linkend="_struct_mem_node">MemNode</link>&#32;*<link linkend="_struct_alloc_list_1ae9e5f4413d30f6ebfa24546f84aadf27">head</link>,&#32;*<link linkend="_struct_alloc_list_1af94cf5ecb379b27e7e4d2e3b61b91078">tail</link>;
+71 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;<link linkend="_struct_alloc_list_1a4119bf05815d5b75fed1df87904d6fbc">len</link>,&#32;<link linkend="_struct_alloc_list_1a648088a80b426cff08419bc4c4ca5529">maxNodes</link>;
+72 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">bool</emphasis>&#32;<link linkend="_struct_alloc_list_1a251c714685a6428176503803ba3f15ec">autoDefrag</link>&#32;:&#32;1;
+73 }&#32;<link linkend="__classes_2lib_2raylib_2src_2rmem_8h_1a5be068afeab468bfddffec0f8b5d71db">AllocList</link>;
+74 
+75 <emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">struct&#32;</emphasis><link linkend="_struct_stack">Stack</link>&#32;{
+76 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2external_2glfw_2deps_2vs2008_2stdint_8h_1aba7bc1797add20fe3efdf37ced1182c5">uint8_t</link>&#32;*<link linkend="_struct_stack_1abff65083487120b6c040a4d1d1575f01">mem</link>,&#32;*<link linkend="_struct_stack_1a00585a18232bbd61e7e52b6906f37d71">base</link>;
+77 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;<link linkend="_struct_stack_1a3a469595caaaf49bbce059efabbe07b5">size</link>;
+78 }&#32;<link linkend="__classes_2lib_2raylib_2src_2rmem_8h_1acccdaeb94a63f3757825012007215c0d">Stack</link>;
+79 
+80 <emphasis role="preprocessor">#define&#32;MEMPOOL_BUCKET_SIZE&#32;&#32;&#32;&#32;8</emphasis>
+81 <emphasis role="preprocessor">#define&#32;MEMPOOL_BUCKET_BITS&#32;&#32;&#32;&#32;3</emphasis>
+82 
+83 <emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">struct&#32;</emphasis><link linkend="_struct_mem_pool">MemPool</link>&#32;{
+84 &#32;&#32;&#32;&#32;<link linkend="_struct_alloc_list">AllocList</link>&#32;<link linkend="_struct_mem_pool_1a9941aea40b89ea9d5cf09a2e1e023094">freeList</link>;
+85 &#32;&#32;&#32;&#32;<link linkend="_struct_stack">Stack</link>&#32;<link linkend="_struct_mem_pool_1aef28c2854bc4ed3e10c9096be108b9b2">stack</link>;
+86 &#32;&#32;&#32;&#32;<link linkend="_struct_mem_node">MemNode</link>&#32;*<link linkend="_struct_mem_pool_1ab11b284c8ede641d0744745f7a4e2377">buckets</link>[<link linkend="__old_2_classes_2lib_2raylib_2src_2rmem_8h_1a5f395b8a3068ad9a269f4602498f7591">MEMPOOL_BUCKET_SIZE</link>];
+87 }&#32;<link linkend="__classes_2lib_2raylib_2src_2rmem_8h_1ad5db06a1517234bdc45c4b9dae4af28a">MemPool</link>;
+88 
+89 <emphasis role="comment">//&#32;Object&#32;Pool</emphasis>
+90 <emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">struct&#32;</emphasis><link linkend="_struct_obj_pool">ObjPool</link>&#32;{
+91 &#32;&#32;&#32;&#32;<link linkend="_struct_stack">Stack</link>&#32;<link linkend="_struct_obj_pool_1ad0602aa7e4e6f84cea6e9418acda60a9">stack</link>;
+92 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;<link linkend="_struct_obj_pool_1a9ac0a1c044a96149f47f32e258b358d2">objSize</link>,&#32;<link linkend="_struct_obj_pool_1aef3aabaf66c4582c22a2309652f35112">freeBlocks</link>;
+93 }&#32;<link linkend="__classes_2lib_2raylib_2src_2rmem_8h_1a48b7ab21b9b6f7e73ed6990850e47e44">ObjPool</link>;
+94 
+95 
+96 <emphasis role="comment">//&#32;Double-Ended&#32;Stack&#32;aka&#32;Deque</emphasis>
+97 <emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">struct&#32;</emphasis><link linkend="_struct_bi_stack">BiStack</link>&#32;{
+98 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2external_2glfw_2deps_2vs2008_2stdint_8h_1aba7bc1797add20fe3efdf37ced1182c5">uint8_t</link>&#32;*<link linkend="_struct_bi_stack_1aa14c927bef9c49205c7f3673a4b1d982">mem</link>,&#32;*<link linkend="_struct_bi_stack_1a082135201328a673b132fbbf0f77c390">front</link>,&#32;*<link linkend="_struct_bi_stack_1a337a97f1779ed3b8561abced26c53fef">back</link>;
+99 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;<link linkend="_struct_bi_stack_1ad9f960017e8a156646b0d4b2b1e2c9c2">size</link>;
+100 }&#32;<link linkend="__classes_2lib_2raylib_2src_2rmem_8h_1a0609ef0688090bca79a76499191d35e4">BiStack</link>;
+101 
+102 <emphasis role="preprocessor">#if&#32;defined(__cplusplus)</emphasis>
+103 <emphasis role="keyword">extern</emphasis>&#32;<emphasis role="stringliteral">&quot;C&quot;</emphasis>&#32;{&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Prevents&#32;name&#32;mangling&#32;of&#32;functions</emphasis>
+104 <emphasis role="preprocessor">#endif</emphasis>
+105 
+106 <emphasis role="comment">//------------------------------------------------------------------------------------</emphasis>
+107 <emphasis role="comment">//&#32;Functions&#32;Declaration&#32;-&#32;Memory&#32;Pool</emphasis>
+108 <emphasis role="comment">//------------------------------------------------------------------------------------</emphasis>
+109 <link linkend="__classes_2lib_2raylib_2src_2rmem_8h_1a58cad46c7f1b7a4ddda8346b3795c561">RMEMAPI</link>&#32;<link linkend="_struct_mem_pool">MemPool</link>&#32;<link linkend="__classes_2lib_2raylib_2src_2rmem_8h_1a324b26e5d1e3289a2b039856b079d808">CreateMemPool</link>(<emphasis role="keywordtype">size_t</emphasis>&#32;bytes);
+110 <link linkend="__classes_2lib_2raylib_2src_2rmem_8h_1a58cad46c7f1b7a4ddda8346b3795c561">RMEMAPI</link>&#32;<link linkend="_struct_mem_pool">MemPool</link>&#32;<link linkend="__classes_2lib_2raylib_2src_2rmem_8h_1abde4665ff2148c2527e6fca20cf61dc7">CreateMemPoolFromBuffer</link>(<emphasis role="keywordtype">void</emphasis>&#32;*<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1ad8a8baf08bc0399738960c9259571911">buf</link>,&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;bytes);
+111 <link linkend="__classes_2lib_2raylib_2src_2rmem_8h_1a58cad46c7f1b7a4ddda8346b3795c561">RMEMAPI</link>&#32;<emphasis role="keywordtype">void</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2rmem_8h_1aaf98a4c250b5e6670ba2533cb28e6ae9">DestroyMemPool</link>(<link linkend="_struct_mem_pool">MemPool</link>&#32;*mempool);
+112 
+113 <link linkend="__classes_2lib_2raylib_2src_2rmem_8h_1a58cad46c7f1b7a4ddda8346b3795c561">RMEMAPI</link>&#32;<emphasis role="keywordtype">void</emphasis>&#32;*<link linkend="__classes_2lib_2raylib_2src_2rmem_8h_1a23155a8a6f4ffe19db39a8318750166e">MemPoolAlloc</link>(<link linkend="_struct_mem_pool">MemPool</link>&#32;*mempool,&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;bytes);
+114 <link linkend="__classes_2lib_2raylib_2src_2rmem_8h_1a58cad46c7f1b7a4ddda8346b3795c561">RMEMAPI</link>&#32;<emphasis role="keywordtype">void</emphasis>&#32;*<link linkend="__classes_2lib_2raylib_2src_2rmem_8h_1a30a2cfa0a2f558123e74312a310909c4">MemPoolRealloc</link>(<link linkend="_struct_mem_pool">MemPool</link>&#32;*mempool,&#32;<emphasis role="keywordtype">void</emphasis>&#32;*ptr,&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;bytes);
+115 <link linkend="__classes_2lib_2raylib_2src_2rmem_8h_1a58cad46c7f1b7a4ddda8346b3795c561">RMEMAPI</link>&#32;<emphasis role="keywordtype">void</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2rmem_8h_1a71180071c9f54be796b3e131db0815e0">MemPoolFree</link>(<link linkend="_struct_mem_pool">MemPool</link>&#32;*mempool,&#32;<emphasis role="keywordtype">void</emphasis>&#32;*ptr);
+116 <link linkend="__classes_2lib_2raylib_2src_2rmem_8h_1a58cad46c7f1b7a4ddda8346b3795c561">RMEMAPI</link>&#32;<emphasis role="keywordtype">void</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2rmem_8h_1aadd725ed659a3b20dd7ce4b7f9915d2d">MemPoolCleanUp</link>(<link linkend="_struct_mem_pool">MemPool</link>&#32;*mempool,&#32;<emphasis role="keywordtype">void</emphasis>&#32;**ptrref);
+117 <link linkend="__classes_2lib_2raylib_2src_2rmem_8h_1a58cad46c7f1b7a4ddda8346b3795c561">RMEMAPI</link>&#32;<emphasis role="keywordtype">void</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2rmem_8h_1a79edd190fa353cc1857fa5c221485be7">MemPoolReset</link>(<link linkend="_struct_mem_pool">MemPool</link>&#32;*mempool);
+118 <link linkend="__classes_2lib_2raylib_2src_2rmem_8h_1a58cad46c7f1b7a4ddda8346b3795c561">RMEMAPI</link>&#32;<emphasis role="keywordtype">bool</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2rmem_8h_1a841e392000d4a990ad7a66abfd9724c2">MemPoolDefrag</link>(<link linkend="_struct_mem_pool">MemPool</link>&#32;*mempool);
+119 
+120 <link linkend="__classes_2lib_2raylib_2src_2rmem_8h_1a58cad46c7f1b7a4ddda8346b3795c561">RMEMAPI</link>&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2rmem_8h_1a0b2cd24960bb44ff0e90372304eeffa1">GetMemPoolFreeMemory</link>(<emphasis role="keyword">const</emphasis>&#32;<link linkend="_struct_mem_pool">MemPool</link>&#32;mempool);
+121 <link linkend="__classes_2lib_2raylib_2src_2rmem_8h_1a58cad46c7f1b7a4ddda8346b3795c561">RMEMAPI</link>&#32;<emphasis role="keywordtype">void</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2rmem_8h_1aee00c374febd8615b41c8c76eb503712">ToggleMemPoolAutoDefrag</link>(<link linkend="_struct_mem_pool">MemPool</link>&#32;*mempool);
+122 
+123 <emphasis role="comment">//------------------------------------------------------------------------------------</emphasis>
+124 <emphasis role="comment">//&#32;Functions&#32;Declaration&#32;-&#32;Object&#32;Pool</emphasis>
+125 <emphasis role="comment">//------------------------------------------------------------------------------------</emphasis>
+126 <link linkend="__classes_2lib_2raylib_2src_2rmem_8h_1a58cad46c7f1b7a4ddda8346b3795c561">RMEMAPI</link>&#32;<link linkend="_struct_obj_pool">ObjPool</link>&#32;<link linkend="__classes_2lib_2raylib_2src_2rmem_8h_1a3e07898887cd718d7cdc8a0d5d89c267">CreateObjPool</link>(<emphasis role="keywordtype">size_t</emphasis>&#32;objsize,&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a30ee67aa502329a88f4a203775adfa1a">len</link>);
+127 <link linkend="__classes_2lib_2raylib_2src_2rmem_8h_1a58cad46c7f1b7a4ddda8346b3795c561">RMEMAPI</link>&#32;<link linkend="_struct_obj_pool">ObjPool</link>&#32;<link linkend="__classes_2lib_2raylib_2src_2rmem_8h_1a591b70e2297ae3827682d8d7fc9d8c1a">CreateObjPoolFromBuffer</link>(<emphasis role="keywordtype">void</emphasis>&#32;*<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1ad8a8baf08bc0399738960c9259571911">buf</link>,&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;objsize,&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a30ee67aa502329a88f4a203775adfa1a">len</link>);
+128 <link linkend="__classes_2lib_2raylib_2src_2rmem_8h_1a58cad46c7f1b7a4ddda8346b3795c561">RMEMAPI</link>&#32;<emphasis role="keywordtype">void</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2rmem_8h_1a0d17353a55b91c5b1c12a21f497b7c12">DestroyObjPool</link>(<link linkend="_struct_obj_pool">ObjPool</link>&#32;*objpool);
+129 
+130 <link linkend="__classes_2lib_2raylib_2src_2rmem_8h_1a58cad46c7f1b7a4ddda8346b3795c561">RMEMAPI</link>&#32;<emphasis role="keywordtype">void</emphasis>&#32;*<link linkend="__classes_2lib_2raylib_2src_2rmem_8h_1a24d3b71c2d0754a1272693a743de823b">ObjPoolAlloc</link>(<link linkend="_struct_obj_pool">ObjPool</link>&#32;*objpool);
+131 <link linkend="__classes_2lib_2raylib_2src_2rmem_8h_1a58cad46c7f1b7a4ddda8346b3795c561">RMEMAPI</link>&#32;<emphasis role="keywordtype">void</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2rmem_8h_1a432354a4baead199c655c0be494b356d">ObjPoolFree</link>(<link linkend="_struct_obj_pool">ObjPool</link>&#32;*objpool,&#32;<emphasis role="keywordtype">void</emphasis>&#32;*ptr);
+132 <link linkend="__classes_2lib_2raylib_2src_2rmem_8h_1a58cad46c7f1b7a4ddda8346b3795c561">RMEMAPI</link>&#32;<emphasis role="keywordtype">void</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2rmem_8h_1a4c37937548eb1e7ca5b36e68eb0de7ec">ObjPoolCleanUp</link>(<link linkend="_struct_obj_pool">ObjPool</link>&#32;*objpool,&#32;<emphasis role="keywordtype">void</emphasis>&#32;**ptrref);
+133 
+134 <emphasis role="comment">//------------------------------------------------------------------------------------</emphasis>
+135 <emphasis role="comment">//&#32;Functions&#32;Declaration&#32;-&#32;Double-Ended&#32;Stack</emphasis>
+136 <emphasis role="comment">//------------------------------------------------------------------------------------</emphasis>
+137 <link linkend="__classes_2lib_2raylib_2src_2rmem_8h_1a58cad46c7f1b7a4ddda8346b3795c561">RMEMAPI</link>&#32;<link linkend="_struct_bi_stack">BiStack</link>&#32;<link linkend="__classes_2lib_2raylib_2src_2rmem_8h_1a31ecfc6c3a1ad97744971b9ffb39968b">CreateBiStack</link>(<emphasis role="keywordtype">size_t</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a30ee67aa502329a88f4a203775adfa1a">len</link>);
+138 <link linkend="__classes_2lib_2raylib_2src_2rmem_8h_1a58cad46c7f1b7a4ddda8346b3795c561">RMEMAPI</link>&#32;<link linkend="_struct_bi_stack">BiStack</link>&#32;<link linkend="__classes_2lib_2raylib_2src_2rmem_8h_1a0ae0bd4f39b0f0b8ff894f79c1a59291">CreateBiStackFromBuffer</link>(<emphasis role="keywordtype">void</emphasis>&#32;*<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1ad8a8baf08bc0399738960c9259571911">buf</link>,&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a30ee67aa502329a88f4a203775adfa1a">len</link>);
+139 <link linkend="__classes_2lib_2raylib_2src_2rmem_8h_1a58cad46c7f1b7a4ddda8346b3795c561">RMEMAPI</link>&#32;<emphasis role="keywordtype">void</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2rmem_8h_1ab61cff476c902bf9a8ad11aca5fa4d77">DestroyBiStack</link>(<link linkend="_struct_bi_stack">BiStack</link>&#32;*destack);
+140 
+141 <link linkend="__classes_2lib_2raylib_2src_2rmem_8h_1a58cad46c7f1b7a4ddda8346b3795c561">RMEMAPI</link>&#32;<emphasis role="keywordtype">void</emphasis>&#32;*<link linkend="__classes_2lib_2raylib_2src_2rmem_8h_1a32cb6037db90a3abab48c5600482e8eb">BiStackAllocFront</link>(<link linkend="_struct_bi_stack">BiStack</link>&#32;*destack,&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a30ee67aa502329a88f4a203775adfa1a">len</link>);
+142 <link linkend="__classes_2lib_2raylib_2src_2rmem_8h_1a58cad46c7f1b7a4ddda8346b3795c561">RMEMAPI</link>&#32;<emphasis role="keywordtype">void</emphasis>&#32;*<link linkend="__classes_2lib_2raylib_2src_2rmem_8h_1a45ee65071f7c621b1f45159b02422e7e">BiStackAllocBack</link>(<link linkend="_struct_bi_stack">BiStack</link>&#32;*destack,&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a30ee67aa502329a88f4a203775adfa1a">len</link>);
+143 
+144 <link linkend="__classes_2lib_2raylib_2src_2rmem_8h_1a58cad46c7f1b7a4ddda8346b3795c561">RMEMAPI</link>&#32;<emphasis role="keywordtype">void</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2rmem_8h_1acb462ea9db1343a547ed4e33ee101d76">BiStackResetFront</link>(<link linkend="_struct_bi_stack">BiStack</link>&#32;*destack);
+145 <link linkend="__classes_2lib_2raylib_2src_2rmem_8h_1a58cad46c7f1b7a4ddda8346b3795c561">RMEMAPI</link>&#32;<emphasis role="keywordtype">void</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2rmem_8h_1a873264b46e5c2591488ad1189b3fba49">BiStackResetBack</link>(<link linkend="_struct_bi_stack">BiStack</link>&#32;*destack);
+146 <link linkend="__classes_2lib_2raylib_2src_2rmem_8h_1a58cad46c7f1b7a4ddda8346b3795c561">RMEMAPI</link>&#32;<emphasis role="keywordtype">void</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2rmem_8h_1ae7861d19d0a5bff05c382d44a2c17f72">BiStackResetAll</link>(<link linkend="_struct_bi_stack">BiStack</link>&#32;*destack);
+147 
+148 <link linkend="__classes_2lib_2raylib_2src_2rmem_8h_1a58cad46c7f1b7a4ddda8346b3795c561">RMEMAPI</link>&#32;<link linkend="__classes_2lib_2external_2glfw_2deps_2vs2008_2stdint_8h_1abd3131a20f4053d808d4277db3e39a23">intptr_t</link>&#32;<link linkend="__classes_2lib_2raylib_2src_2rmem_8h_1a6098b4f8c34f0a67ee79f3102b16f657">BiStackMargins</link>(<link linkend="_struct_bi_stack">BiStack</link>&#32;destack);
+149 
+150 <emphasis role="preprocessor">#ifdef&#32;__cplusplus</emphasis>
+151 }
+152 <emphasis role="preprocessor">#endif</emphasis>
+153 
+154 <emphasis role="preprocessor">#endif&#32;</emphasis><emphasis role="comment">//&#32;RMEM_H</emphasis>
+155 
+156 <emphasis role="comment">/***********************************************************************************</emphasis>
+157 <emphasis role="comment">*</emphasis>
+158 <emphasis role="comment">*&#32;&#32;&#32;RMEM&#32;IMPLEMENTATION</emphasis>
+159 <emphasis role="comment">*</emphasis>
+160 <emphasis role="comment">************************************************************************************/</emphasis>
+161 
+162 <emphasis role="preprocessor">#if&#32;defined(RMEM_IMPLEMENTATION)</emphasis>
+163 
+164 <emphasis role="preprocessor">#include&#32;&lt;stdio.h&gt;</emphasis>&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Required&#32;for:&#32;malloc(),&#32;calloc(),&#32;free()</emphasis>
+165 
+166 <emphasis role="comment">//----------------------------------------------------------------------------------</emphasis>
+167 <emphasis role="comment">//&#32;Defines&#32;and&#32;Macros</emphasis>
+168 <emphasis role="comment">//----------------------------------------------------------------------------------</emphasis>
+169 
+170 <emphasis role="comment">//&#32;Make&#32;sure&#32;restrict&#32;type&#32;qualifier&#32;for&#32;pointers&#32;is&#32;defined</emphasis>
+171 <emphasis role="comment">//&#32;NOTE:&#32;Not&#32;supported&#32;by&#32;C++,&#32;it&#32;is&#32;a&#32;C&#32;only&#32;keyword</emphasis>
+172 <emphasis role="preprocessor">#if&#32;defined(_WIN32)&#32;||&#32;defined(_WIN64)&#32;||&#32;defined(__CYGWIN__)&#32;||&#32;defined(_MSC_VER)</emphasis>
+173 <emphasis role="preprocessor">&#32;&#32;&#32;&#32;#ifndef&#32;restrict</emphasis>
+174 <emphasis role="preprocessor">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;#define&#32;restrict&#32;__restrict</emphasis>
+175 <emphasis role="preprocessor">&#32;&#32;&#32;&#32;#endif</emphasis>
+176 <emphasis role="preprocessor">#endif</emphasis>
+177 
+178 <emphasis role="comment">//----------------------------------------------------------------------------------</emphasis>
+179 <emphasis role="comment">//&#32;Global&#32;Variables&#32;Definition</emphasis>
+180 <emphasis role="comment">//----------------------------------------------------------------------------------</emphasis>
+181 <emphasis role="comment">//&#32;...</emphasis>
+182 
+183 <emphasis role="comment">//----------------------------------------------------------------------------------</emphasis>
+184 <emphasis role="comment">//&#32;Module&#32;specific&#32;Functions&#32;Declaration</emphasis>
+185 <emphasis role="comment">//----------------------------------------------------------------------------------</emphasis>
+186 <emphasis role="keyword">static</emphasis>&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;__AlignSize(<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a3d1e3edfcf61ca2d831883e1afbad89e">size</link>,&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;align)
+187 {
+188 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a3d1e3edfcf61ca2d831883e1afbad89e">size</link>&#32;+&#32;(align&#32;-&#32;1))&#32;&amp;&#32;-align;
+189 }
+190 
+191 <emphasis role="comment">//----------------------------------------------------------------------------------</emphasis>
+192 <emphasis role="comment">//&#32;Module&#32;Functions&#32;Definition&#32;-&#32;Memory&#32;Pool</emphasis>
+193 <emphasis role="comment">//----------------------------------------------------------------------------------</emphasis>
+194 
+195 <link linkend="_struct_mem_pool">MemPool</link>&#32;<link linkend="__classes_2lib_2raylib_2src_2rmem_8h_1a324b26e5d1e3289a2b039856b079d808">CreateMemPool</link>(<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a3d1e3edfcf61ca2d831883e1afbad89e">size</link>)
+196 {
+197 &#32;&#32;&#32;&#32;<link linkend="_struct_mem_pool">MemPool</link>&#32;mempool&#32;=&#32;{&#32;0&#32;};
+198 
+199 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a3d1e3edfcf61ca2d831883e1afbad89e">size</link>&#32;==&#32;0UL)&#32;<emphasis role="keywordflow">return</emphasis>&#32;mempool;
+200 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>
+201 &#32;&#32;&#32;&#32;{
+202 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Align&#32;the&#32;mempool&#32;size&#32;to&#32;at&#32;least&#32;the&#32;size&#32;of&#32;an&#32;alloc&#32;node.</emphasis>
+203 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;mempool.<link linkend="_struct_mem_pool_1aef28c2854bc4ed3e10c9096be108b9b2">stack</link>.<link linkend="_struct_stack_1a3a469595caaaf49bbce059efabbe07b5">size</link>&#32;=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a3d1e3edfcf61ca2d831883e1afbad89e">size</link>;
+204 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;mempool.<link linkend="_struct_mem_pool_1aef28c2854bc4ed3e10c9096be108b9b2">stack</link>.<link linkend="_struct_stack_1abff65083487120b6c040a4d1d1575f01">mem</link>&#32;=&#32;malloc(mempool.<link linkend="_struct_mem_pool_1aef28c2854bc4ed3e10c9096be108b9b2">stack</link>.<link linkend="_struct_stack_1a3a469595caaaf49bbce059efabbe07b5">size</link>*<emphasis role="keyword">sizeof</emphasis>&#32;*mempool.<link linkend="_struct_mem_pool_1aef28c2854bc4ed3e10c9096be108b9b2">stack</link>.<link linkend="_struct_stack_1abff65083487120b6c040a4d1d1575f01">mem</link>);
+205 
+206 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(mempool.<link linkend="_struct_mem_pool_1aef28c2854bc4ed3e10c9096be108b9b2">stack</link>.<link linkend="_struct_stack_1abff65083487120b6c040a4d1d1575f01">mem</link>&#32;==&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>)
+207 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+208 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;mempool.<link linkend="_struct_mem_pool_1aef28c2854bc4ed3e10c9096be108b9b2">stack</link>.<link linkend="_struct_stack_1a3a469595caaaf49bbce059efabbe07b5">size</link>&#32;=&#32;0UL;
+209 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;mempool;
+210 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+211 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>
+212 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+213 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;mempool.<link linkend="_struct_mem_pool_1aef28c2854bc4ed3e10c9096be108b9b2">stack</link>.<link linkend="_struct_stack_1a00585a18232bbd61e7e52b6906f37d71">base</link>&#32;=&#32;mempool.<link linkend="_struct_mem_pool_1aef28c2854bc4ed3e10c9096be108b9b2">stack</link>.<link linkend="_struct_stack_1abff65083487120b6c040a4d1d1575f01">mem</link>&#32;+&#32;mempool.<link linkend="_struct_mem_pool_1aef28c2854bc4ed3e10c9096be108b9b2">stack</link>.<link linkend="_struct_stack_1a3a469595caaaf49bbce059efabbe07b5">size</link>;
+214 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;mempool;
+215 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+216 &#32;&#32;&#32;&#32;}
+217 }
+218 
+219 <link linkend="_struct_mem_pool">MemPool</link>&#32;<link linkend="__classes_2lib_2raylib_2src_2rmem_8h_1abde4665ff2148c2527e6fca20cf61dc7">CreateMemPoolFromBuffer</link>(<emphasis role="keywordtype">void</emphasis>&#32;*<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1ad8a8baf08bc0399738960c9259571911">buf</link>,&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a3d1e3edfcf61ca2d831883e1afbad89e">size</link>)
+220 {
+221 &#32;&#32;&#32;&#32;<link linkend="_struct_mem_pool">MemPool</link>&#32;mempool&#32;=&#32;{&#32;0&#32;};
+222 
+223 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;((<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a3d1e3edfcf61ca2d831883e1afbad89e">size</link>&#32;==&#32;0UL)&#32;||&#32;(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1ad8a8baf08bc0399738960c9259571911">buf</link>&#32;==&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>)&#32;||&#32;(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a3d1e3edfcf61ca2d831883e1afbad89e">size</link>&#32;&lt;=&#32;<emphasis role="keyword">sizeof</emphasis>(<link linkend="_struct_mem_node">MemNode</link>)))&#32;<emphasis role="keywordflow">return</emphasis>&#32;mempool;
+224 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>
+225 &#32;&#32;&#32;&#32;{
+226 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;mempool.<link linkend="_struct_mem_pool_1aef28c2854bc4ed3e10c9096be108b9b2">stack</link>.<link linkend="_struct_stack_1a3a469595caaaf49bbce059efabbe07b5">size</link>&#32;=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a3d1e3edfcf61ca2d831883e1afbad89e">size</link>;
+227 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;mempool.<link linkend="_struct_mem_pool_1aef28c2854bc4ed3e10c9096be108b9b2">stack</link>.<link linkend="_struct_stack_1abff65083487120b6c040a4d1d1575f01">mem</link>&#32;=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1ad8a8baf08bc0399738960c9259571911">buf</link>;
+228 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;mempool.<link linkend="_struct_mem_pool_1aef28c2854bc4ed3e10c9096be108b9b2">stack</link>.<link linkend="_struct_stack_1a00585a18232bbd61e7e52b6906f37d71">base</link>&#32;=&#32;mempool.<link linkend="_struct_mem_pool_1aef28c2854bc4ed3e10c9096be108b9b2">stack</link>.<link linkend="_struct_stack_1abff65083487120b6c040a4d1d1575f01">mem</link>&#32;+&#32;mempool.<link linkend="_struct_mem_pool_1aef28c2854bc4ed3e10c9096be108b9b2">stack</link>.<link linkend="_struct_stack_1a3a469595caaaf49bbce059efabbe07b5">size</link>;
+229 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;mempool;
+230 &#32;&#32;&#32;&#32;}
+231 }
+232 
+233 <emphasis role="keywordtype">void</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2rmem_8h_1aaf98a4c250b5e6670ba2533cb28e6ae9">DestroyMemPool</link>(<link linkend="_struct_mem_pool">MemPool</link>&#32;*<emphasis role="keyword">const</emphasis>&#32;mempool)
+234 {
+235 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;((mempool&#32;==&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>)&#32;||&#32;(mempool-&gt;<link linkend="_struct_mem_pool_1aef28c2854bc4ed3e10c9096be108b9b2">stack</link>.<link linkend="_struct_stack_1abff65083487120b6c040a4d1d1575f01">mem</link>&#32;==&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>))&#32;<emphasis role="keywordflow">return</emphasis>;
+236 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>
+237 &#32;&#32;&#32;&#32;{
+238 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;free(mempool-&gt;<link linkend="_struct_mem_pool_1aef28c2854bc4ed3e10c9096be108b9b2">stack</link>.<link linkend="_struct_stack_1abff65083487120b6c040a4d1d1575f01">mem</link>);
+239 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;*mempool&#32;=&#32;(<link linkend="__classes_2lib_2raylib_2src_2rmem_8h_1ad5db06a1517234bdc45c4b9dae4af28a">MemPool</link>){&#32;0&#32;};
+240 &#32;&#32;&#32;&#32;}
+241 }
+242 
+243 <emphasis role="keywordtype">void</emphasis>&#32;*<link linkend="__classes_2lib_2raylib_2src_2rmem_8h_1a23155a8a6f4ffe19db39a8318750166e">MemPoolAlloc</link>(<link linkend="_struct_mem_pool">MemPool</link>&#32;*<emphasis role="keyword">const</emphasis>&#32;mempool,&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a3d1e3edfcf61ca2d831883e1afbad89e">size</link>)
+244 {
+245 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;((mempool&#32;==&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>)&#32;||&#32;(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a3d1e3edfcf61ca2d831883e1afbad89e">size</link>&#32;==&#32;0UL)&#32;||&#32;(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a3d1e3edfcf61ca2d831883e1afbad89e">size</link>&#32;&gt;&#32;mempool-&gt;<link linkend="_struct_mem_pool_1aef28c2854bc4ed3e10c9096be108b9b2">stack</link>.<link linkend="_struct_stack_1a3a469595caaaf49bbce059efabbe07b5">size</link>))&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>;
+246 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>
+247 &#32;&#32;&#32;&#32;{
+248 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_struct_mem_node">MemNode</link>&#32;*new_mem&#32;=&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>;
+249 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;ALLOC_SIZE&#32;=&#32;__AlignSize(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a3d1e3edfcf61ca2d831883e1afbad89e">size</link>&#32;+&#32;<emphasis role="keyword">sizeof</emphasis>&#32;*new_mem,&#32;<emphasis role="keyword">sizeof</emphasis>(<link linkend="__classes_2lib_2external_2glfw_2deps_2vs2008_2stdint_8h_1abd3131a20f4053d808d4277db3e39a23">intptr_t</link>));
+250 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;BUCKET_INDEX&#32;=&#32;(ALLOC_SIZE&#32;&gt;&gt;&#32;<link linkend="__classes_2lib_2raylib_2src_2rmem_8h_1a04afcbb837a684c4f3d3b1b486287190">MEMPOOL_BUCKET_BITS</link>)&#32;-&#32;1;
+251 
+252 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;If&#32;the&#32;size&#32;is&#32;small&#32;enough,&#32;let&apos;s&#32;check&#32;if&#32;our&#32;buckets&#32;has&#32;a&#32;fitting&#32;memory&#32;block.</emphasis>
+253 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;((BUCKET_INDEX&#32;&lt;&#32;<link linkend="__classes_2lib_2raylib_2src_2rmem_8h_1a5f395b8a3068ad9a269f4602498f7591">MEMPOOL_BUCKET_SIZE</link>)&#32;&amp;&amp;&#32;
+254 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;(mempool-&gt;<link linkend="_struct_mem_pool_1ab11b284c8ede641d0744745f7a4e2377">buckets</link>[BUCKET_INDEX]&#32;!=&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>)&#32;&amp;&amp;&#32;
+255 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;(mempool-&gt;<link linkend="_struct_mem_pool_1ab11b284c8ede641d0744745f7a4e2377">buckets</link>[BUCKET_INDEX]-&gt;<link linkend="_struct_mem_node_1a25d408d84b37fb84391be86d9d4d6742">size</link>&#32;&gt;=&#32;ALLOC_SIZE))
+256 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+257 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;new_mem&#32;=&#32;mempool-&gt;<link linkend="_struct_mem_pool_1ab11b284c8ede641d0744745f7a4e2377">buckets</link>[BUCKET_INDEX];
+258 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;mempool-&gt;<link linkend="_struct_mem_pool_1ab11b284c8ede641d0744745f7a4e2377">buckets</link>[BUCKET_INDEX]&#32;=&#32;mempool-&gt;<link linkend="_struct_mem_pool_1ab11b284c8ede641d0744745f7a4e2377">buckets</link>[BUCKET_INDEX]-&gt;<link linkend="_struct_mem_node_1a5f3b6bf700e041f98ce932f7dbd17346">next</link>;
+259 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>(&#32;mempool-&gt;<link linkend="_struct_mem_pool_1ab11b284c8ede641d0744745f7a4e2377">buckets</link>[BUCKET_INDEX]&#32;!=&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>&#32;)
+260 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;mempool-&gt;<link linkend="_struct_mem_pool_1ab11b284c8ede641d0744745f7a4e2377">buckets</link>[BUCKET_INDEX]-&gt;<link linkend="_struct_mem_node_1af37b191bd6144d0d96f7e657e5d0343a">prev</link>&#32;=&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>;
+261 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+262 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>&#32;<emphasis role="keywordflow">if</emphasis>&#32;(mempool-&gt;<link linkend="_struct_mem_pool_1a9941aea40b89ea9d5cf09a2e1e023094">freeList</link>.<link linkend="_struct_alloc_list_1ae9e5f4413d30f6ebfa24546f84aadf27">head</link>&#32;!=&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>)
+263 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+264 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;MEM_SPLIT_THRESHOLD&#32;=&#32;16;
+265 
+266 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;If&#32;the&#32;freelist&#32;is&#32;valid,&#32;let&apos;s&#32;allocate&#32;FROM&#32;the&#32;freelist&#32;then!</emphasis>
+267 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(<link linkend="_struct_mem_node">MemNode</link>&#32;*inode&#32;=&#32;mempool-&gt;<link linkend="_struct_mem_pool_1a9941aea40b89ea9d5cf09a2e1e023094">freeList</link>.<link linkend="_struct_alloc_list_1ae9e5f4413d30f6ebfa24546f84aadf27">head</link>;&#32;inode&#32;!=&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>;&#32;inode&#32;=&#32;inode-&gt;next)
+268 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+269 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(inode-&gt;size&#32;&lt;&#32;ALLOC_SIZE)&#32;<emphasis role="keywordflow">continue</emphasis>;
+270 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>&#32;<emphasis role="keywordflow">if</emphasis>&#32;(inode-&gt;size&#32;&lt;=&#32;(ALLOC_SIZE&#32;+&#32;MEM_SPLIT_THRESHOLD))
+271 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+272 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Close&#32;in&#32;size&#32;-&#32;reduce&#32;fragmentation&#32;by&#32;not&#32;splitting.</emphasis>
+273 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;new_mem&#32;=&#32;inode;
+274 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;(inode-&gt;prev&#32;!=&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>)?&#32;(inode-&gt;prev-&gt;next&#32;=&#32;inode-&gt;next)&#32;:&#32;(mempool-&gt;<link linkend="_struct_mem_pool_1a9941aea40b89ea9d5cf09a2e1e023094">freeList</link>.<link linkend="_struct_alloc_list_1ae9e5f4413d30f6ebfa24546f84aadf27">head</link>&#32;=&#32;inode-&gt;<link linkend="_struct_mem_node_1a5f3b6bf700e041f98ce932f7dbd17346">next</link>);
+275 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;(inode-&gt;next&#32;!=&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>)?&#32;(inode-&gt;next-&gt;prev&#32;=&#32;inode-&gt;prev)&#32;:&#32;(mempool-&gt;<link linkend="_struct_mem_pool_1a9941aea40b89ea9d5cf09a2e1e023094">freeList</link>.<link linkend="_struct_alloc_list_1af94cf5ecb379b27e7e4d2e3b61b91078">tail</link>&#32;=&#32;inode-&gt;<link linkend="_struct_mem_node_1af37b191bd6144d0d96f7e657e5d0343a">prev</link>);
+276 
+277 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(mempool-&gt;<link linkend="_struct_mem_pool_1a9941aea40b89ea9d5cf09a2e1e023094">freeList</link>.<link linkend="_struct_alloc_list_1ae9e5f4413d30f6ebfa24546f84aadf27">head</link>&#32;!=&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>)&#32;mempool-&gt;<link linkend="_struct_mem_pool_1a9941aea40b89ea9d5cf09a2e1e023094">freeList</link>.<link linkend="_struct_alloc_list_1ae9e5f4413d30f6ebfa24546f84aadf27">head</link>-&gt;<link linkend="_struct_mem_node_1af37b191bd6144d0d96f7e657e5d0343a">prev</link>&#32;=&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>;
+278 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>&#32;mempool-&gt;<link linkend="_struct_mem_pool_1a9941aea40b89ea9d5cf09a2e1e023094">freeList</link>.<link linkend="_struct_alloc_list_1af94cf5ecb379b27e7e4d2e3b61b91078">tail</link>&#32;=&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>;
+279 
+280 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(mempool-&gt;<link linkend="_struct_mem_pool_1a9941aea40b89ea9d5cf09a2e1e023094">freeList</link>.<link linkend="_struct_alloc_list_1af94cf5ecb379b27e7e4d2e3b61b91078">tail</link>&#32;!=&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>)&#32;mempool-&gt;<link linkend="_struct_mem_pool_1a9941aea40b89ea9d5cf09a2e1e023094">freeList</link>.<link linkend="_struct_alloc_list_1af94cf5ecb379b27e7e4d2e3b61b91078">tail</link>-&gt;<link linkend="_struct_mem_node_1a5f3b6bf700e041f98ce932f7dbd17346">next</link>&#32;=&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>;
+281 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;mempool-&gt;<link linkend="_struct_mem_pool_1a9941aea40b89ea9d5cf09a2e1e023094">freeList</link>.<link linkend="_struct_alloc_list_1a4119bf05815d5b75fed1df87904d6fbc">len</link>--;
+282 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">break</emphasis>;
+283 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+284 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>
+285 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+286 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Split&#32;the&#32;memory&#32;chunk.</emphasis>
+287 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;new_mem&#32;=&#32;(<link linkend="_struct_mem_node">MemNode</link>&#32;*)((<link linkend="__classes_2lib_2external_2glfw_2deps_2vs2008_2stdint_8h_1aba7bc1797add20fe3efdf37ced1182c5">uint8_t</link>&#32;*)inode&#32;+&#32;(inode-&gt;size&#32;-&#32;ALLOC_SIZE));
+288 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;inode-&gt;<link linkend="_struct_mem_node_1a25d408d84b37fb84391be86d9d4d6742">size</link>&#32;-=&#32;ALLOC_SIZE;
+289 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;new_mem-&gt;<link linkend="_struct_mem_node_1a25d408d84b37fb84391be86d9d4d6742">size</link>&#32;=&#32;ALLOC_SIZE;
+290 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">break</emphasis>;
+291 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+292 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+293 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+294 
+295 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(new_mem&#32;==&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>)
+296 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+297 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;not&#32;enough&#32;memory&#32;to&#32;support&#32;the&#32;size!</emphasis>
+298 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;((mempool-&gt;<link linkend="_struct_mem_pool_1aef28c2854bc4ed3e10c9096be108b9b2">stack</link>.<link linkend="_struct_stack_1a00585a18232bbd61e7e52b6906f37d71">base</link>&#32;-&#32;ALLOC_SIZE)&#32;&lt;&#32;mempool-&gt;<link linkend="_struct_mem_pool_1aef28c2854bc4ed3e10c9096be108b9b2">stack</link>.<link linkend="_struct_stack_1abff65083487120b6c040a4d1d1575f01">mem</link>)&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>;
+299 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>
+300 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+301 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Couldn&apos;t&#32;allocate&#32;from&#32;a&#32;freelist,&#32;allocate&#32;from&#32;available&#32;mempool.</emphasis>
+302 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Subtract&#32;allocation&#32;size&#32;from&#32;the&#32;mempool.</emphasis>
+303 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;mempool-&gt;<link linkend="_struct_mem_pool_1aef28c2854bc4ed3e10c9096be108b9b2">stack</link>.<link linkend="_struct_stack_1a00585a18232bbd61e7e52b6906f37d71">base</link>&#32;-=&#32;ALLOC_SIZE;
+304 
+305 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Use&#32;the&#32;available&#32;mempool&#32;space&#32;as&#32;the&#32;new&#32;node.</emphasis>
+306 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;new_mem&#32;=&#32;(<link linkend="_struct_mem_node">MemNode</link>&#32;*)mempool-&gt;<link linkend="_struct_mem_pool_1aef28c2854bc4ed3e10c9096be108b9b2">stack</link>.<link linkend="_struct_stack_1a00585a18232bbd61e7e52b6906f37d71">base</link>;
+307 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;new_mem-&gt;<link linkend="_struct_mem_node_1a25d408d84b37fb84391be86d9d4d6742">size</link>&#32;=&#32;ALLOC_SIZE;
+308 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+309 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+310 
+311 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Visual&#32;of&#32;the&#32;allocation&#32;block.</emphasis>
+312 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;--------------</emphasis>
+313 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;|&#32;mem&#32;size&#32;&#32;&#32;|&#32;lowest&#32;addr&#32;of&#32;block</emphasis>
+314 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;|&#32;next&#32;node&#32;&#32;|&#32;12&#32;byte&#32;(32-bit)&#32;header</emphasis>
+315 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;|&#32;prev&#32;node&#32;&#32;|&#32;24&#32;byte&#32;(64-bit)&#32;header</emphasis>
+316 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;--------------</emphasis>
+317 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;|&#32;&#32;&#32;alloc&apos;d&#32;&#32;|</emphasis>
+318 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;|&#32;&#32;&#32;memory&#32;&#32;&#32;|</emphasis>
+319 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;|&#32;&#32;&#32;space&#32;&#32;&#32;&#32;|&#32;highest&#32;addr&#32;of&#32;block</emphasis>
+320 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;--------------</emphasis>
+321 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;new_mem-&gt;<link linkend="_struct_mem_node_1a5f3b6bf700e041f98ce932f7dbd17346">next</link>&#32;=&#32;new_mem-&gt;<link linkend="_struct_mem_node_1af37b191bd6144d0d96f7e657e5d0343a">prev</link>&#32;=&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>;
+322 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2external_2glfw_2deps_2vs2008_2stdint_8h_1aba7bc1797add20fe3efdf37ced1182c5">uint8_t</link>&#32;*<emphasis role="keyword">const</emphasis>&#32;final_mem&#32;=&#32;(<link linkend="__classes_2lib_2external_2glfw_2deps_2vs2008_2stdint_8h_1aba7bc1797add20fe3efdf37ced1182c5">uint8_t</link>&#32;*)new_mem&#32;+&#32;<emphasis role="keyword">sizeof</emphasis>&#32;*new_mem;
+323 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;memset(final_mem,&#32;0,&#32;new_mem-&gt;<link linkend="_struct_mem_node_1a25d408d84b37fb84391be86d9d4d6742">size</link>&#32;-&#32;<emphasis role="keyword">sizeof</emphasis>&#32;*new_mem);
+324 &#32;&#32;&#32;&#32;}
+325 }
+326 
+327 <emphasis role="keywordtype">void</emphasis>&#32;*<link linkend="__classes_2lib_2raylib_2src_2rmem_8h_1a30a2cfa0a2f558123e74312a310909c4">MemPoolRealloc</link>(<link linkend="_struct_mem_pool">MemPool</link>&#32;*<emphasis role="keyword">const</emphasis>&#32;restrict&#32;mempool,&#32;<emphasis role="keywordtype">void</emphasis>&#32;*ptr,&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a3d1e3edfcf61ca2d831883e1afbad89e">size</link>)
+328 {
+329 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;((mempool&#32;==&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>)&#32;||&#32;(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a3d1e3edfcf61ca2d831883e1afbad89e">size</link>&#32;&gt;&#32;mempool-&gt;stack.size))&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>;
+330 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;NULL&#32;ptr&#32;should&#32;make&#32;this&#32;work&#32;like&#32;regular&#32;Allocation.</emphasis>
+331 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>&#32;<emphasis role="keywordflow">if</emphasis>&#32;(ptr&#32;==&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>)&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2rmem_8h_1a23155a8a6f4ffe19db39a8318750166e">MemPoolAlloc</link>(mempool,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a3d1e3edfcf61ca2d831883e1afbad89e">size</link>);
+332 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>&#32;<emphasis role="keywordflow">if</emphasis>&#32;((<link linkend="__classes_2lib_2external_2glfw_2deps_2vs2008_2stdint_8h_1a31b85deecb45924320becd11d3ee16ce">uintptr_t</link>)ptr&#32;-&#32;<emphasis role="keyword">sizeof</emphasis>(<link linkend="_struct_mem_node">MemNode</link>)&#32;&lt;&#32;(<link linkend="__classes_2lib_2external_2glfw_2deps_2vs2008_2stdint_8h_1a31b85deecb45924320becd11d3ee16ce">uintptr_t</link>)mempool-&gt;stack.mem)&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>;
+333 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>
+334 &#32;&#32;&#32;&#32;{
+335 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_struct_mem_node">MemNode</link>&#32;*<emphasis role="keyword">const</emphasis>&#32;node&#32;=&#32;(<link linkend="_struct_mem_node">MemNode</link>&#32;*)((<link linkend="__classes_2lib_2external_2glfw_2deps_2vs2008_2stdint_8h_1aba7bc1797add20fe3efdf37ced1182c5">uint8_t</link>&#32;*)ptr&#32;-&#32;<emphasis role="keyword">sizeof</emphasis>&#32;*node);
+336 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;NODE_SIZE&#32;=&#32;<emphasis role="keyword">sizeof</emphasis>&#32;*node;
+337 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2external_2glfw_2deps_2vs2008_2stdint_8h_1aba7bc1797add20fe3efdf37ced1182c5">uint8_t</link>&#32;*<emphasis role="keyword">const</emphasis>&#32;resized_block&#32;=&#32;<link linkend="__classes_2lib_2raylib_2src_2rmem_8h_1a23155a8a6f4ffe19db39a8318750166e">MemPoolAlloc</link>(mempool,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a3d1e3edfcf61ca2d831883e1afbad89e">size</link>);
+338 
+339 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(resized_block&#32;==&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>)&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>;
+340 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>
+341 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+342 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_struct_mem_node">MemNode</link>&#32;*<emphasis role="keyword">const</emphasis>&#32;resized&#32;=&#32;(<link linkend="_struct_mem_node">MemNode</link>&#32;*)(resized_block&#32;-&#32;<emphasis role="keyword">sizeof</emphasis>&#32;*resized);
+343 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;memmove(resized_block,&#32;ptr,&#32;(node-&gt;<link linkend="_struct_mem_node_1a25d408d84b37fb84391be86d9d4d6742">size</link>&#32;&gt;&#32;resized-&gt;<link linkend="_struct_mem_node_1a25d408d84b37fb84391be86d9d4d6742">size</link>)?&#32;(resized-&gt;<link linkend="_struct_mem_node_1a25d408d84b37fb84391be86d9d4d6742">size</link>&#32;-&#32;NODE_SIZE)&#32;:&#32;(node-&gt;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a3d1e3edfcf61ca2d831883e1afbad89e">size</link>&#32;-&#32;NODE_SIZE));
+344 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2rmem_8h_1a71180071c9f54be796b3e131db0815e0">MemPoolFree</link>(mempool,&#32;ptr);
+345 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;resized_block;
+346 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+347 &#32;&#32;&#32;&#32;}
+348 }
+349 
+350 <emphasis role="keywordtype">void</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2rmem_8h_1a71180071c9f54be796b3e131db0815e0">MemPoolFree</link>(<link linkend="_struct_mem_pool">MemPool</link>&#32;*<emphasis role="keyword">const</emphasis>&#32;restrict&#32;mempool,&#32;<emphasis role="keywordtype">void</emphasis>&#32;*ptr)
+351 {
+352 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;((mempool&#32;==&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>)&#32;||&#32;(ptr&#32;==&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>)&#32;||&#32;((<link linkend="__classes_2lib_2external_2glfw_2deps_2vs2008_2stdint_8h_1a31b85deecb45924320becd11d3ee16ce">uintptr_t</link>)ptr&#32;-&#32;<emphasis role="keyword">sizeof</emphasis>(<link linkend="_struct_mem_node">MemNode</link>)&#32;&lt;&#32;(<link linkend="__classes_2lib_2external_2glfw_2deps_2vs2008_2stdint_8h_1a31b85deecb45924320becd11d3ee16ce">uintptr_t</link>)mempool-&gt;stack.mem))&#32;<emphasis role="keywordflow">return</emphasis>;
+353 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>
+354 &#32;&#32;&#32;&#32;{
+355 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Behind&#32;the&#32;actual&#32;pointer&#32;data&#32;is&#32;the&#32;allocation&#32;info.</emphasis>
+356 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_struct_mem_node">MemNode</link>&#32;*<emphasis role="keyword">const</emphasis>&#32;mem_node&#32;=&#32;(<link linkend="_struct_mem_node">MemNode</link>&#32;*)((<link linkend="__classes_2lib_2external_2glfw_2deps_2vs2008_2stdint_8h_1aba7bc1797add20fe3efdf37ced1182c5">uint8_t</link>&#32;*)ptr&#32;-&#32;<emphasis role="keyword">sizeof</emphasis>&#32;*mem_node);
+357 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;BUCKET_INDEX&#32;=&#32;(mem_node-&gt;<link linkend="_struct_mem_node_1a25d408d84b37fb84391be86d9d4d6742">size</link>&#32;&gt;&gt;&#32;<link linkend="__classes_2lib_2raylib_2src_2rmem_8h_1a04afcbb837a684c4f3d3b1b486287190">MEMPOOL_BUCKET_BITS</link>)&#32;-&#32;1;
+358 
+359 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Make&#32;sure&#32;the&#32;pointer&#32;data&#32;is&#32;valid.</emphasis>
+360 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(((<link linkend="__classes_2lib_2external_2glfw_2deps_2vs2008_2stdint_8h_1a31b85deecb45924320becd11d3ee16ce">uintptr_t</link>)mem_node&#32;&lt;&#32;(<link linkend="__classes_2lib_2external_2glfw_2deps_2vs2008_2stdint_8h_1a31b85deecb45924320becd11d3ee16ce">uintptr_t</link>)mempool-&gt;stack.base)&#32;||
+361 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;(((<link linkend="__classes_2lib_2external_2glfw_2deps_2vs2008_2stdint_8h_1a31b85deecb45924320becd11d3ee16ce">uintptr_t</link>)mem_node&#32;-&#32;(<link linkend="__classes_2lib_2external_2glfw_2deps_2vs2008_2stdint_8h_1a31b85deecb45924320becd11d3ee16ce">uintptr_t</link>)mempool-&gt;stack.mem)&#32;&gt;&#32;mempool-&gt;stack.size)&#32;||
+362 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;(mem_node-&gt;<link linkend="_struct_mem_node_1a25d408d84b37fb84391be86d9d4d6742">size</link>&#32;==&#32;0UL)&#32;||
+363 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;(mem_node-&gt;<link linkend="_struct_mem_node_1a25d408d84b37fb84391be86d9d4d6742">size</link>&#32;&gt;&#32;mempool-&gt;stack.size))&#32;<emphasis role="keywordflow">return</emphasis>;
+364 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;If&#32;the&#32;mem_node&#32;is&#32;right&#32;at&#32;the&#32;stack&#32;base&#32;ptr,&#32;then&#32;add&#32;it&#32;to&#32;the&#32;stack.</emphasis>
+365 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>&#32;<emphasis role="keywordflow">if</emphasis>&#32;((<link linkend="__classes_2lib_2external_2glfw_2deps_2vs2008_2stdint_8h_1a31b85deecb45924320becd11d3ee16ce">uintptr_t</link>)mem_node&#32;==&#32;(<link linkend="__classes_2lib_2external_2glfw_2deps_2vs2008_2stdint_8h_1a31b85deecb45924320becd11d3ee16ce">uintptr_t</link>)mempool-&gt;stack.base)
+366 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+367 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;mempool-&gt;stack.base&#32;+=&#32;mem_node-&gt;<link linkend="_struct_mem_node_1a25d408d84b37fb84391be86d9d4d6742">size</link>;
+368 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+369 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;attempted&#32;stack&#32;merge&#32;failed,&#32;try&#32;to&#32;place&#32;it&#32;into&#32;the&#32;memnode&#32;buckets</emphasis>
+370 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>&#32;<emphasis role="keywordflow">if</emphasis>&#32;(BUCKET_INDEX&#32;&lt;&#32;<link linkend="__classes_2lib_2raylib_2src_2rmem_8h_1a5f395b8a3068ad9a269f4602498f7591">MEMPOOL_BUCKET_SIZE</link>)
+371 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+372 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(mempool-&gt;buckets[BUCKET_INDEX]&#32;==&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>)&#32;mempool-&gt;buckets[BUCKET_INDEX]&#32;=&#32;mem_node;
+373 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>
+374 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+375 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(<link linkend="_struct_mem_node">MemNode</link>&#32;*n&#32;=&#32;mempool-&gt;buckets[BUCKET_INDEX];&#32;n&#32;!=&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>;&#32;n&#32;=&#32;n-&gt;next)&#32;<emphasis role="keywordflow">if</emphasis>(&#32;n==mem_node&#32;)&#32;<emphasis role="keywordflow">return</emphasis>;
+376 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;mempool-&gt;buckets[BUCKET_INDEX]-&gt;<link linkend="_struct_mem_node_1af37b191bd6144d0d96f7e657e5d0343a">prev</link>&#32;=&#32;mem_node;
+377 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;mem_node-&gt;<link linkend="_struct_mem_node_1a5f3b6bf700e041f98ce932f7dbd17346">next</link>&#32;=&#32;mempool-&gt;buckets[BUCKET_INDEX];
+378 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;mempool-&gt;buckets[BUCKET_INDEX]&#32;=&#32;mem_node;
+379 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+380 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+381 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Otherwise,&#32;we&#32;add&#32;it&#32;to&#32;the&#32;free&#32;list.</emphasis>
+382 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;We&#32;also&#32;check&#32;if&#32;the&#32;freelist&#32;already&#32;has&#32;the&#32;pointer&#32;so&#32;we&#32;can&#32;prevent&#32;double&#32;frees.</emphasis>
+383 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>&#32;<emphasis role="comment">/*if&#32;((mempool-&gt;freeList.len&#32;==&#32;0UL)&#32;||&#32;((uintptr_t)mempool-&gt;freeList.head&#32;&gt;=&#32;(uintptr_t)mempool-&gt;stack.mem&#32;&amp;&amp;&#32;(uintptr_t)mempool-&gt;freeList.head&#32;-&#32;(uintptr_t)mempool-&gt;stack.mem&#32;&lt;&#32;mempool-&gt;stack.size))*/</emphasis>
+384 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+385 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(<link linkend="_struct_mem_node">MemNode</link>&#32;*n&#32;=&#32;mempool-&gt;freeList.head;&#32;n&#32;!=&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>;&#32;n&#32;=&#32;n-&gt;next)&#32;<emphasis role="keywordflow">if</emphasis>&#32;(n&#32;==&#32;mem_node)&#32;<emphasis role="keywordflow">return</emphasis>;
+386 
+387 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;This&#32;code&#32;insertion&#32;sorts&#32;where&#32;largest&#32;size&#32;is&#32;last.</emphasis>
+388 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(mempool-&gt;freeList.head&#32;==&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>)
+389 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+390 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;mempool-&gt;freeList.head&#32;=&#32;mempool-&gt;freeList.tail&#32;=&#32;mem_node;
+391 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;mempool-&gt;freeList.len++;
+392 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+393 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>&#32;<emphasis role="keywordflow">if</emphasis>&#32;(mempool-&gt;freeList.head-&gt;size&#32;&gt;=&#32;mem_node-&gt;<link linkend="_struct_mem_node_1a25d408d84b37fb84391be86d9d4d6742">size</link>)
+394 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+395 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;mem_node-&gt;<link linkend="_struct_mem_node_1a5f3b6bf700e041f98ce932f7dbd17346">next</link>&#32;=&#32;mempool-&gt;freeList.head;
+396 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;mem_node-&gt;<link linkend="_struct_mem_node_1a5f3b6bf700e041f98ce932f7dbd17346">next</link>-&gt;<link linkend="_struct_mem_node_1af37b191bd6144d0d96f7e657e5d0343a">prev</link>&#32;=&#32;mem_node;
+397 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;mempool-&gt;freeList.head&#32;=&#32;mem_node;
+398 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;mempool-&gt;freeList.len++;
+399 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+400 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>&#32;<emphasis role="comment">//if&#32;(mempool-&gt;freeList.tail-&gt;size&#32;&lt;=&#32;mem_node-&gt;size)</emphasis>
+401 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+402 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;mem_node-&gt;<link linkend="_struct_mem_node_1af37b191bd6144d0d96f7e657e5d0343a">prev</link>&#32;=&#32;mempool-&gt;freeList.tail;
+403 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;mempool-&gt;freeList.tail-&gt;<link linkend="_struct_mem_node_1a5f3b6bf700e041f98ce932f7dbd17346">next</link>&#32;=&#32;mem_node;
+404 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;mempool-&gt;freeList.tail&#32;=&#32;mem_node;
+405 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;mempool-&gt;freeList.len++;
+406 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+407 
+408 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(mempool-&gt;freeList.autoDefrag&#32;&amp;&amp;&#32;(mempool-&gt;freeList.maxNodes&#32;!=&#32;0UL)&#32;&amp;&amp;&#32;(mempool-&gt;freeList.len&#32;&gt;&#32;mempool-&gt;freeList.maxNodes))&#32;<link linkend="__classes_2lib_2raylib_2src_2rmem_8h_1a841e392000d4a990ad7a66abfd9724c2">MemPoolDefrag</link>(mempool);
+409 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+410 &#32;&#32;&#32;&#32;}
+411 }
+412 
+413 <emphasis role="keywordtype">void</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2rmem_8h_1aadd725ed659a3b20dd7ce4b7f9915d2d">MemPoolCleanUp</link>(<link linkend="_struct_mem_pool">MemPool</link>&#32;*<emphasis role="keyword">const</emphasis>&#32;restrict&#32;mempool,&#32;<emphasis role="keywordtype">void</emphasis>&#32;**ptrref)
+414 {
+415 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;((mempool&#32;==&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>)&#32;||&#32;(ptrref&#32;==&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>)&#32;||&#32;(*ptrref&#32;==&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>))&#32;<emphasis role="keywordflow">return</emphasis>;
+416 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>
+417 &#32;&#32;&#32;&#32;{
+418 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2rmem_8h_1a71180071c9f54be796b3e131db0815e0">MemPoolFree</link>(mempool,&#32;*ptrref);
+419 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;*ptrref&#32;=&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>;
+420 &#32;&#32;&#32;&#32;}
+421 }
+422 
+423 <emphasis role="keywordtype">size_t</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2rmem_8h_1a0b2cd24960bb44ff0e90372304eeffa1">GetMemPoolFreeMemory</link>(<emphasis role="keyword">const</emphasis>&#32;<link linkend="_struct_mem_pool">MemPool</link>&#32;mempool)
+424 {
+425 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;total_remaining&#32;=&#32;(<link linkend="__classes_2lib_2external_2glfw_2deps_2vs2008_2stdint_8h_1a31b85deecb45924320becd11d3ee16ce">uintptr_t</link>)mempool.<link linkend="_struct_mem_pool_1aef28c2854bc4ed3e10c9096be108b9b2">stack</link>.<link linkend="_struct_stack_1a00585a18232bbd61e7e52b6906f37d71">base</link>&#32;-&#32;(<link linkend="__classes_2lib_2external_2glfw_2deps_2vs2008_2stdint_8h_1a31b85deecb45924320becd11d3ee16ce">uintptr_t</link>)mempool.<link linkend="_struct_mem_pool_1aef28c2854bc4ed3e10c9096be108b9b2">stack</link>.<link linkend="_struct_stack_1abff65083487120b6c040a4d1d1575f01">mem</link>;
+426 
+427 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(<link linkend="_struct_mem_node">MemNode</link>&#32;*n&#32;=&#32;mempool.<link linkend="_struct_mem_pool_1a9941aea40b89ea9d5cf09a2e1e023094">freeList</link>.<link linkend="_struct_alloc_list_1ae9e5f4413d30f6ebfa24546f84aadf27">head</link>;&#32;n&#32;!=&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>;&#32;n&#32;=&#32;n-&gt;next)&#32;total_remaining&#32;+=&#32;n-&gt;size;
+428 
+429 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(<emphasis role="keywordtype">int</emphasis>&#32;i&#32;=&#32;0;&#32;i&#32;&lt;&#32;<link linkend="__classes_2lib_2raylib_2src_2rmem_8h_1a5f395b8a3068ad9a269f4602498f7591">MEMPOOL_BUCKET_SIZE</link>;&#32;i++)&#32;<emphasis role="keywordflow">for</emphasis>&#32;(<link linkend="_struct_mem_node">MemNode</link>&#32;*n&#32;=&#32;mempool.buckets[i];&#32;n&#32;!=&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>;&#32;n&#32;=&#32;n-&gt;next)&#32;total_remaining&#32;+=&#32;n-&gt;size;
+430 
+431 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;total_remaining;
+432 }
+433 
+434 <emphasis role="keywordtype">void</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2rmem_8h_1a79edd190fa353cc1857fa5c221485be7">MemPoolReset</link>(<link linkend="_struct_mem_pool">MemPool</link>&#32;*<emphasis role="keyword">const</emphasis>&#32;mempool)
+435 {
+436 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(mempool&#32;==&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>)&#32;<emphasis role="keywordflow">return</emphasis>;
+437 &#32;&#32;&#32;&#32;mempool-&gt;<link linkend="_struct_mem_pool_1a9941aea40b89ea9d5cf09a2e1e023094">freeList</link>.<link linkend="_struct_alloc_list_1ae9e5f4413d30f6ebfa24546f84aadf27">head</link>&#32;=&#32;mempool-&gt;<link linkend="_struct_mem_pool_1a9941aea40b89ea9d5cf09a2e1e023094">freeList</link>.<link linkend="_struct_alloc_list_1af94cf5ecb379b27e7e4d2e3b61b91078">tail</link>&#32;=&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>;
+438 &#32;&#32;&#32;&#32;mempool-&gt;<link linkend="_struct_mem_pool_1a9941aea40b89ea9d5cf09a2e1e023094">freeList</link>.<link linkend="_struct_alloc_list_1a4119bf05815d5b75fed1df87904d6fbc">len</link>&#32;=&#32;0;
+439 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(<emphasis role="keywordtype">int</emphasis>&#32;i&#32;=&#32;0;&#32;i&#32;&lt;&#32;<link linkend="__classes_2lib_2raylib_2src_2rmem_8h_1a5f395b8a3068ad9a269f4602498f7591">MEMPOOL_BUCKET_SIZE</link>;&#32;i++)&#32;mempool-&gt;<link linkend="_struct_mem_pool_1ab11b284c8ede641d0744745f7a4e2377">buckets</link>[i]&#32;=&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>;
+440 &#32;&#32;&#32;&#32;mempool-&gt;<link linkend="_struct_mem_pool_1aef28c2854bc4ed3e10c9096be108b9b2">stack</link>.<link linkend="_struct_stack_1a00585a18232bbd61e7e52b6906f37d71">base</link>&#32;=&#32;mempool-&gt;<link linkend="_struct_mem_pool_1aef28c2854bc4ed3e10c9096be108b9b2">stack</link>.<link linkend="_struct_stack_1abff65083487120b6c040a4d1d1575f01">mem</link>&#32;+&#32;mempool-&gt;<link linkend="_struct_mem_pool_1aef28c2854bc4ed3e10c9096be108b9b2">stack</link>.<link linkend="_struct_stack_1a3a469595caaaf49bbce059efabbe07b5">size</link>;
+441 }
+442 
+443 <emphasis role="keywordtype">bool</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2rmem_8h_1a841e392000d4a990ad7a66abfd9724c2">MemPoolDefrag</link>(<link linkend="_struct_mem_pool">MemPool</link>&#32;*<emphasis role="keyword">const</emphasis>&#32;mempool)
+444 {
+445 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(mempool&#32;==&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>)&#32;<emphasis role="keywordflow">return</emphasis>&#32;<emphasis role="keyword">false</emphasis>;
+446 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>
+447 &#32;&#32;&#32;&#32;{
+448 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;If&#32;the&#32;memory&#32;pool&#32;has&#32;been&#32;entirely&#32;released,&#32;fully&#32;defrag&#32;it.</emphasis>
+449 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(mempool-&gt;<link linkend="_struct_mem_pool_1aef28c2854bc4ed3e10c9096be108b9b2">stack</link>.<link linkend="_struct_stack_1a3a469595caaaf49bbce059efabbe07b5">size</link>&#32;==&#32;<link linkend="__classes_2lib_2raylib_2src_2rmem_8h_1a0b2cd24960bb44ff0e90372304eeffa1">GetMemPoolFreeMemory</link>(*mempool))
+450 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+451 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2rmem_8h_1a79edd190fa353cc1857fa5c221485be7">MemPoolReset</link>(mempool);
+452 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<emphasis role="keyword">true</emphasis>;
+453 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+454 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>
+455 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+456 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(<emphasis role="keywordtype">int</emphasis>&#32;i&#32;=&#32;0;&#32;i&#32;&lt;&#32;<link linkend="__classes_2lib_2raylib_2src_2rmem_8h_1a5f395b8a3068ad9a269f4602498f7591">MEMPOOL_BUCKET_SIZE</link>;&#32;i++)
+457 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+458 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">while</emphasis>&#32;(mempool-&gt;<link linkend="_struct_mem_pool_1ab11b284c8ede641d0744745f7a4e2377">buckets</link>[i]&#32;!=&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>)
+459 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+460 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;((<link linkend="__classes_2lib_2external_2glfw_2deps_2vs2008_2stdint_8h_1a31b85deecb45924320becd11d3ee16ce">uintptr_t</link>)mempool-&gt;<link linkend="_struct_mem_pool_1ab11b284c8ede641d0744745f7a4e2377">buckets</link>[i]&#32;==&#32;(<link linkend="__classes_2lib_2external_2glfw_2deps_2vs2008_2stdint_8h_1a31b85deecb45924320becd11d3ee16ce">uintptr_t</link>)mempool-&gt;<link linkend="_struct_mem_pool_1aef28c2854bc4ed3e10c9096be108b9b2">stack</link>.<link linkend="_struct_stack_1a00585a18232bbd61e7e52b6906f37d71">base</link>)
+461 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+462 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;mempool-&gt;<link linkend="_struct_mem_pool_1aef28c2854bc4ed3e10c9096be108b9b2">stack</link>.<link linkend="_struct_stack_1a00585a18232bbd61e7e52b6906f37d71">base</link>&#32;+=&#32;mempool-&gt;<link linkend="_struct_mem_pool_1ab11b284c8ede641d0744745f7a4e2377">buckets</link>[i]-&gt;<link linkend="_struct_mem_node_1a25d408d84b37fb84391be86d9d4d6742">size</link>;
+463 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;mempool-&gt;<link linkend="_struct_mem_pool_1ab11b284c8ede641d0744745f7a4e2377">buckets</link>[i]-&gt;<link linkend="_struct_mem_node_1a25d408d84b37fb84391be86d9d4d6742">size</link>&#32;=&#32;0;
+464 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;mempool-&gt;<link linkend="_struct_mem_pool_1ab11b284c8ede641d0744745f7a4e2377">buckets</link>[i]&#32;=&#32;mempool-&gt;<link linkend="_struct_mem_pool_1ab11b284c8ede641d0744745f7a4e2377">buckets</link>[i]-&gt;<link linkend="_struct_mem_node_1a5f3b6bf700e041f98ce932f7dbd17346">next</link>;
+465 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(mempool-&gt;<link linkend="_struct_mem_pool_1ab11b284c8ede641d0744745f7a4e2377">buckets</link>[i]&#32;!=&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>)&#32;mempool-&gt;<link linkend="_struct_mem_pool_1ab11b284c8ede641d0744745f7a4e2377">buckets</link>[i]-&gt;<link linkend="_struct_mem_node_1af37b191bd6144d0d96f7e657e5d0343a">prev</link>&#32;=&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>;
+466 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+467 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>&#32;<emphasis role="keywordflow">break</emphasis>;
+468 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+469 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+470 
+471 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;PRE_DEFRAG_LEN&#32;=&#32;mempool-&gt;<link linkend="_struct_mem_pool_1a9941aea40b89ea9d5cf09a2e1e023094">freeList</link>.<link linkend="_struct_alloc_list_1a4119bf05815d5b75fed1df87904d6fbc">len</link>;
+472 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_struct_mem_node">MemNode</link>&#32;**node&#32;=&#32;&amp;mempool-&gt;<link linkend="_struct_mem_pool_1a9941aea40b89ea9d5cf09a2e1e023094">freeList</link>.<link linkend="_struct_alloc_list_1ae9e5f4413d30f6ebfa24546f84aadf27">head</link>;
+473 
+474 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">while</emphasis>&#32;(*node&#32;!=&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>)
+475 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+476 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;((<link linkend="__classes_2lib_2external_2glfw_2deps_2vs2008_2stdint_8h_1a31b85deecb45924320becd11d3ee16ce">uintptr_t</link>)*node&#32;==&#32;(<link linkend="__classes_2lib_2external_2glfw_2deps_2vs2008_2stdint_8h_1a31b85deecb45924320becd11d3ee16ce">uintptr_t</link>)mempool-&gt;<link linkend="_struct_mem_pool_1aef28c2854bc4ed3e10c9096be108b9b2">stack</link>.<link linkend="_struct_stack_1a00585a18232bbd61e7e52b6906f37d71">base</link>)
+477 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+478 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;If&#32;node&#32;is&#32;right&#32;at&#32;the&#32;stack,&#32;merge&#32;it&#32;back&#32;into&#32;the&#32;stack.</emphasis>
+479 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;mempool-&gt;<link linkend="_struct_mem_pool_1aef28c2854bc4ed3e10c9096be108b9b2">stack</link>.<link linkend="_struct_stack_1a00585a18232bbd61e7e52b6906f37d71">base</link>&#32;+=&#32;(*node)-&gt;size;
+480 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;(*node)-&gt;size&#32;=&#32;0UL;
+481 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;((*node)-&gt;prev&#32;!=&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>)?&#32;((*node)-&gt;prev-&gt;next&#32;=&#32;(*node)-&gt;next)&#32;:&#32;(mempool-&gt;<link linkend="_struct_mem_pool_1a9941aea40b89ea9d5cf09a2e1e023094">freeList</link>.<link linkend="_struct_alloc_list_1ae9e5f4413d30f6ebfa24546f84aadf27">head</link>&#32;=&#32;(*node)-&gt;<link linkend="_struct_mem_node_1a5f3b6bf700e041f98ce932f7dbd17346">next</link>);
+482 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;((*node)-&gt;next&#32;!=&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>)?&#32;((*node)-&gt;next-&gt;prev&#32;=&#32;(*node)-&gt;prev)&#32;:&#32;(mempool-&gt;<link linkend="_struct_mem_pool_1a9941aea40b89ea9d5cf09a2e1e023094">freeList</link>.<link linkend="_struct_alloc_list_1af94cf5ecb379b27e7e4d2e3b61b91078">tail</link>&#32;=&#32;(*node)-&gt;<link linkend="_struct_mem_node_1af37b191bd6144d0d96f7e657e5d0343a">prev</link>);
+483 
+484 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(mempool-&gt;<link linkend="_struct_mem_pool_1a9941aea40b89ea9d5cf09a2e1e023094">freeList</link>.<link linkend="_struct_alloc_list_1ae9e5f4413d30f6ebfa24546f84aadf27">head</link>&#32;!=&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>)&#32;mempool-&gt;<link linkend="_struct_mem_pool_1a9941aea40b89ea9d5cf09a2e1e023094">freeList</link>.<link linkend="_struct_alloc_list_1ae9e5f4413d30f6ebfa24546f84aadf27">head</link>-&gt;<link linkend="_struct_mem_node_1af37b191bd6144d0d96f7e657e5d0343a">prev</link>&#32;=&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>;
+485 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>&#32;mempool-&gt;<link linkend="_struct_mem_pool_1a9941aea40b89ea9d5cf09a2e1e023094">freeList</link>.<link linkend="_struct_alloc_list_1af94cf5ecb379b27e7e4d2e3b61b91078">tail</link>&#32;=&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>;
+486 
+487 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(mempool-&gt;<link linkend="_struct_mem_pool_1a9941aea40b89ea9d5cf09a2e1e023094">freeList</link>.<link linkend="_struct_alloc_list_1af94cf5ecb379b27e7e4d2e3b61b91078">tail</link>&#32;!=&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>)&#32;mempool-&gt;<link linkend="_struct_mem_pool_1a9941aea40b89ea9d5cf09a2e1e023094">freeList</link>.<link linkend="_struct_alloc_list_1af94cf5ecb379b27e7e4d2e3b61b91078">tail</link>-&gt;<link linkend="_struct_mem_node_1a5f3b6bf700e041f98ce932f7dbd17346">next</link>&#32;=&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>;
+488 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;mempool-&gt;<link linkend="_struct_mem_pool_1a9941aea40b89ea9d5cf09a2e1e023094">freeList</link>.<link linkend="_struct_alloc_list_1a4119bf05815d5b75fed1df87904d6fbc">len</link>--;
+489 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;node&#32;=&#32;&amp;mempool-&gt;<link linkend="_struct_mem_pool_1a9941aea40b89ea9d5cf09a2e1e023094">freeList</link>.<link linkend="_struct_alloc_list_1ae9e5f4413d30f6ebfa24546f84aadf27">head</link>;
+490 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+491 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>&#32;<emphasis role="keywordflow">if</emphasis>&#32;(((<link linkend="__classes_2lib_2external_2glfw_2deps_2vs2008_2stdint_8h_1a31b85deecb45924320becd11d3ee16ce">uintptr_t</link>)*node&#32;+&#32;(*node)-&gt;<link linkend="_struct_mem_node_1a25d408d84b37fb84391be86d9d4d6742">size</link>)&#32;==&#32;(<link linkend="__classes_2lib_2external_2glfw_2deps_2vs2008_2stdint_8h_1a31b85deecb45924320becd11d3ee16ce">uintptr_t</link>)(*node)-&gt;next)
+492 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+493 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Next&#32;node&#32;is&#32;at&#32;a&#32;higher&#32;address.</emphasis>
+494 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;(*node)-&gt;<link linkend="_struct_mem_node_1a25d408d84b37fb84391be86d9d4d6742">size</link>&#32;+=&#32;(*node)-&gt;next-&gt;size;
+495 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;(*node)-&gt;next-&gt;size&#32;=&#32;0UL;
+496 
+497 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;&lt;-[P&#32;Curr&#32;N]-&gt;&#32;&lt;-[P&#32;Next&#32;N]-&gt;&#32;&lt;-[P&#32;NextNext&#32;N]-&gt;</emphasis>
+498 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//</emphasis>
+499 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;|--------------------|</emphasis>
+500 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;&lt;-[P&#32;Curr&#32;N]-&gt;&#32;&lt;-[P&#32;Next&#32;N]-&gt;&#32;[P&#32;NextNext&#32;N]-&gt;</emphasis>
+501 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;((*node)-&gt;next-&gt;next&#32;!=&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>)&#32;(*node)-&gt;next-&gt;next-&gt;prev&#32;=&#32;*node;
+502 
+503 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;&lt;-[P&#32;Curr&#32;N]-&gt;&#32;&lt;-[P&#32;NextNext&#32;N]-&gt;</emphasis>
+504 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;(*node)-&gt;<link linkend="_struct_mem_node_1a5f3b6bf700e041f98ce932f7dbd17346">next</link>&#32;=&#32;(*node)-&gt;<link linkend="_struct_mem_node_1a5f3b6bf700e041f98ce932f7dbd17346">next</link>-&gt;<link linkend="_struct_mem_node_1a5f3b6bf700e041f98ce932f7dbd17346">next</link>;
+505 
+506 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;mempool-&gt;<link linkend="_struct_mem_pool_1a9941aea40b89ea9d5cf09a2e1e023094">freeList</link>.<link linkend="_struct_alloc_list_1a4119bf05815d5b75fed1df87904d6fbc">len</link>--;
+507 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;node&#32;=&#32;&amp;mempool-&gt;<link linkend="_struct_mem_pool_1a9941aea40b89ea9d5cf09a2e1e023094">freeList</link>.<link linkend="_struct_alloc_list_1ae9e5f4413d30f6ebfa24546f84aadf27">head</link>;
+508 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+509 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>&#32;<emphasis role="keywordflow">if</emphasis>&#32;((((<link linkend="__classes_2lib_2external_2glfw_2deps_2vs2008_2stdint_8h_1a31b85deecb45924320becd11d3ee16ce">uintptr_t</link>)*node&#32;+&#32;(*node)-&gt;<link linkend="_struct_mem_node_1a25d408d84b37fb84391be86d9d4d6742">size</link>)&#32;==&#32;(<link linkend="__classes_2lib_2external_2glfw_2deps_2vs2008_2stdint_8h_1a31b85deecb45924320becd11d3ee16ce">uintptr_t</link>)(*node)-&gt;prev)&#32;&amp;&amp;&#32;((*node)-&gt;prev-&gt;prev&#32;!=&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>))
+510 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+511 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Prev&#32;node&#32;is&#32;at&#32;a&#32;higher&#32;address.</emphasis>
+512 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;(*node)-&gt;<link linkend="_struct_mem_node_1a25d408d84b37fb84391be86d9d4d6742">size</link>&#32;+=&#32;(*node)-&gt;prev-&gt;size;
+513 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;(*node)-&gt;prev-&gt;size&#32;=&#32;0UL;
+514 
+515 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;&lt;-[P&#32;PrevPrev&#32;N]-&gt;&#32;&lt;-[P&#32;Prev&#32;N]-&gt;&#32;&lt;-[P&#32;Curr&#32;N]-&gt;</emphasis>
+516 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//</emphasis>
+517 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;|--------------------|</emphasis>
+518 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;&lt;-[P&#32;PrevPrev&#32;N]&#32;&lt;-[P&#32;Prev&#32;N]-&gt;&#32;&lt;-[P&#32;Curr&#32;N]-&gt;</emphasis>
+519 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;(*node)-&gt;prev-&gt;prev-&gt;next&#32;=&#32;*node;
+520 
+521 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;&lt;-[P&#32;PrevPrev&#32;N]-&gt;&#32;&lt;-[P&#32;Curr&#32;N]-&gt;</emphasis>
+522 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;(*node)-&gt;<link linkend="_struct_mem_node_1af37b191bd6144d0d96f7e657e5d0343a">prev</link>&#32;=&#32;(*node)-&gt;<link linkend="_struct_mem_node_1af37b191bd6144d0d96f7e657e5d0343a">prev</link>-&gt;<link linkend="_struct_mem_node_1af37b191bd6144d0d96f7e657e5d0343a">prev</link>;
+523 
+524 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;mempool-&gt;<link linkend="_struct_mem_pool_1a9941aea40b89ea9d5cf09a2e1e023094">freeList</link>.<link linkend="_struct_alloc_list_1a4119bf05815d5b75fed1df87904d6fbc">len</link>--;
+525 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;node&#32;=&#32;&amp;mempool-&gt;<link linkend="_struct_mem_pool_1a9941aea40b89ea9d5cf09a2e1e023094">freeList</link>.<link linkend="_struct_alloc_list_1ae9e5f4413d30f6ebfa24546f84aadf27">head</link>;
+526 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+527 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>&#32;<emphasis role="keywordflow">if</emphasis>&#32;((*node)-&gt;prev&#32;!=&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>&#32;&amp;&amp;&#32;(*node)-&gt;next&#32;!=&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>&#32;&amp;&amp;&#32;(<link linkend="__classes_2lib_2external_2glfw_2deps_2vs2008_2stdint_8h_1a31b85deecb45924320becd11d3ee16ce">uintptr_t</link>)*node&#32;-&#32;(*node)-&gt;<link linkend="_struct_mem_node_1a5f3b6bf700e041f98ce932f7dbd17346">next</link>-&gt;<link linkend="_struct_mem_node_1a25d408d84b37fb84391be86d9d4d6742">size</link>&#32;==&#32;(<link linkend="__classes_2lib_2external_2glfw_2deps_2vs2008_2stdint_8h_1a31b85deecb45924320becd11d3ee16ce">uintptr_t</link>)(*node)-&gt;next)
+528 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+529 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Next&#32;node&#32;is&#32;at&#32;a&#32;lower&#32;address.</emphasis>
+530 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;(*node)-&gt;<link linkend="_struct_mem_node_1a5f3b6bf700e041f98ce932f7dbd17346">next</link>-&gt;<link linkend="_struct_mem_node_1a25d408d84b37fb84391be86d9d4d6742">size</link>&#32;+=&#32;(*node)-&gt;size;
+531 
+532 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;(*node)-&gt;size&#32;=&#32;0UL;
+533 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;(*node)-&gt;next-&gt;prev&#32;=&#32;(*node)-&gt;prev;
+534 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;(*node)-&gt;prev-&gt;next&#32;=&#32;(*node)-&gt;next;
+535 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;*node&#32;=&#32;(*node)-&gt;<link linkend="_struct_mem_node_1a5f3b6bf700e041f98ce932f7dbd17346">next</link>;
+536 
+537 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;mempool-&gt;<link linkend="_struct_mem_pool_1a9941aea40b89ea9d5cf09a2e1e023094">freeList</link>.<link linkend="_struct_alloc_list_1a4119bf05815d5b75fed1df87904d6fbc">len</link>--;
+538 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;node&#32;=&#32;&amp;mempool-&gt;<link linkend="_struct_mem_pool_1a9941aea40b89ea9d5cf09a2e1e023094">freeList</link>.<link linkend="_struct_alloc_list_1ae9e5f4413d30f6ebfa24546f84aadf27">head</link>;
+539 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+540 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>&#32;<emphasis role="keywordflow">if</emphasis>&#32;((*node)-&gt;prev&#32;!=&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>&#32;&amp;&amp;&#32;(*node)-&gt;next&#32;!=&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>&#32;&amp;&amp;&#32;(<link linkend="__classes_2lib_2external_2glfw_2deps_2vs2008_2stdint_8h_1a31b85deecb45924320becd11d3ee16ce">uintptr_t</link>)*node&#32;-&#32;(*node)-&gt;<link linkend="_struct_mem_node_1af37b191bd6144d0d96f7e657e5d0343a">prev</link>-&gt;<link linkend="_struct_mem_node_1a25d408d84b37fb84391be86d9d4d6742">size</link>&#32;==&#32;(<link linkend="__classes_2lib_2external_2glfw_2deps_2vs2008_2stdint_8h_1a31b85deecb45924320becd11d3ee16ce">uintptr_t</link>)(*node)-&gt;prev)
+541 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+542 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Prev&#32;node&#32;is&#32;at&#32;a&#32;lower&#32;address.</emphasis>
+543 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;(*node)-&gt;<link linkend="_struct_mem_node_1af37b191bd6144d0d96f7e657e5d0343a">prev</link>-&gt;<link linkend="_struct_mem_node_1a25d408d84b37fb84391be86d9d4d6742">size</link>&#32;+=&#32;(*node)-&gt;size;
+544 
+545 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;(*node)-&gt;size&#32;=&#32;0UL;
+546 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;(*node)-&gt;next-&gt;prev&#32;=&#32;(*node)-&gt;prev;
+547 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;(*node)-&gt;prev-&gt;next&#32;=&#32;(*node)-&gt;next;
+548 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;*node&#32;=&#32;(*node)-&gt;<link linkend="_struct_mem_node_1af37b191bd6144d0d96f7e657e5d0343a">prev</link>;
+549 
+550 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;mempool-&gt;<link linkend="_struct_mem_pool_1a9941aea40b89ea9d5cf09a2e1e023094">freeList</link>.<link linkend="_struct_alloc_list_1a4119bf05815d5b75fed1df87904d6fbc">len</link>--;
+551 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;node&#32;=&#32;&amp;mempool-&gt;<link linkend="_struct_mem_pool_1a9941aea40b89ea9d5cf09a2e1e023094">freeList</link>.<link linkend="_struct_alloc_list_1ae9e5f4413d30f6ebfa24546f84aadf27">head</link>;
+552 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+553 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>
+554 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+555 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;node&#32;=&#32;&amp;(*node)-&gt;<link linkend="_struct_mem_node_1a5f3b6bf700e041f98ce932f7dbd17346">next</link>;
+556 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+557 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+558 
+559 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;PRE_DEFRAG_LEN&#32;&gt;&#32;mempool-&gt;<link linkend="_struct_mem_pool_1a9941aea40b89ea9d5cf09a2e1e023094">freeList</link>.<link linkend="_struct_alloc_list_1a4119bf05815d5b75fed1df87904d6fbc">len</link>;
+560 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+561 &#32;&#32;&#32;&#32;}
+562 }
+563 
+564 <emphasis role="keywordtype">void</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2rmem_8h_1aee00c374febd8615b41c8c76eb503712">ToggleMemPoolAutoDefrag</link>(<link linkend="_struct_mem_pool">MemPool</link>&#32;*<emphasis role="keyword">const</emphasis>&#32;mempool)
+565 {
+566 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(mempool&#32;==&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>)&#32;<emphasis role="keywordflow">return</emphasis>;
+567 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>&#32;mempool-&gt;<link linkend="_struct_mem_pool_1a9941aea40b89ea9d5cf09a2e1e023094">freeList</link>.<link linkend="_struct_alloc_list_1a251c714685a6428176503803ba3f15ec">autoDefrag</link>&#32;^=&#32;<emphasis role="keyword">true</emphasis>;
+568 }
+569 
+570 <emphasis role="comment">//----------------------------------------------------------------------------------</emphasis>
+571 <emphasis role="comment">//&#32;Module&#32;Functions&#32;Definition&#32;-&#32;Object&#32;Pool</emphasis>
+572 <emphasis role="comment">//----------------------------------------------------------------------------------</emphasis>
+573 <emphasis role="keyword">union&#32;</emphasis>ObjInfo&#32;{
+574 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2external_2glfw_2deps_2vs2008_2stdint_8h_1aba7bc1797add20fe3efdf37ced1182c5">uint8_t</link>&#32;*<emphasis role="keyword">const</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2rlgl_8h_1a0c8186d9b9b7880309c27230bbb5e69d">byte</link>;
+575 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;*<emphasis role="keyword">const</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a57f14e05b1900f16a2da82ade47d0c6d">index</link>;
+576 };
+577 
+578 <link linkend="_struct_obj_pool">ObjPool</link>&#32;<link linkend="__classes_2lib_2raylib_2src_2rmem_8h_1a3e07898887cd718d7cdc8a0d5d89c267">CreateObjPool</link>(<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;objsize,&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a30ee67aa502329a88f4a203775adfa1a">len</link>)
+579 {
+580 &#32;&#32;&#32;&#32;<link linkend="_struct_obj_pool">ObjPool</link>&#32;objpool&#32;=&#32;{&#32;0&#32;};
+581 
+582 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;((<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a30ee67aa502329a88f4a203775adfa1a">len</link>&#32;==&#32;0UL)&#32;||&#32;(objsize&#32;==&#32;0UL))&#32;<emphasis role="keywordflow">return</emphasis>&#32;objpool;
+583 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>
+584 &#32;&#32;&#32;&#32;{
+585 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;objpool.<link linkend="_struct_obj_pool_1a9ac0a1c044a96149f47f32e258b358d2">objSize</link>&#32;=&#32;__AlignSize(objsize,&#32;<emphasis role="keyword">sizeof</emphasis>(<emphasis role="keywordtype">size_t</emphasis>));
+586 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;objpool.<link linkend="_struct_obj_pool_1ad0602aa7e4e6f84cea6e9418acda60a9">stack</link>.<link linkend="_struct_stack_1a3a469595caaaf49bbce059efabbe07b5">size</link>&#32;=&#32;objpool.<link linkend="_struct_obj_pool_1aef3aabaf66c4582c22a2309652f35112">freeBlocks</link>&#32;=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a30ee67aa502329a88f4a203775adfa1a">len</link>;
+587 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;objpool.<link linkend="_struct_obj_pool_1ad0602aa7e4e6f84cea6e9418acda60a9">stack</link>.<link linkend="_struct_stack_1abff65083487120b6c040a4d1d1575f01">mem</link>&#32;=&#32;calloc(objpool.<link linkend="_struct_obj_pool_1ad0602aa7e4e6f84cea6e9418acda60a9">stack</link>.<link linkend="_struct_stack_1a3a469595caaaf49bbce059efabbe07b5">size</link>,&#32;objpool.<link linkend="_struct_obj_pool_1a9ac0a1c044a96149f47f32e258b358d2">objSize</link>);
+588 
+589 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(objpool.<link linkend="_struct_obj_pool_1ad0602aa7e4e6f84cea6e9418acda60a9">stack</link>.<link linkend="_struct_stack_1abff65083487120b6c040a4d1d1575f01">mem</link>&#32;==&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>)
+590 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+591 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;objpool.<link linkend="_struct_obj_pool_1ad0602aa7e4e6f84cea6e9418acda60a9">stack</link>.<link linkend="_struct_stack_1a3a469595caaaf49bbce059efabbe07b5">size</link>&#32;=&#32;0UL;
+592 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;objpool;
+593 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+594 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>
+595 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+596 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(<emphasis role="keywordtype">int</emphasis>&#32;i&#32;=&#32;0;&#32;i&#32;&lt;&#32;objpool.<link linkend="_struct_obj_pool_1aef3aabaf66c4582c22a2309652f35112">freeBlocks</link>;&#32;i++)
+597 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+598 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">union&#32;</emphasis>ObjInfo&#32;block&#32;=&#32;{&#32;.byte&#32;=&#32;&amp;objpool.<link linkend="_struct_obj_pool_1ad0602aa7e4e6f84cea6e9418acda60a9">stack</link>.<link linkend="_struct_stack_1abff65083487120b6c040a4d1d1575f01">mem</link>[i*objpool.<link linkend="_struct_obj_pool_1a9ac0a1c044a96149f47f32e258b358d2">objSize</link>]&#32;};
+599 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;*block.index&#32;=&#32;i&#32;+&#32;1;
+600 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+601 
+602 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;objpool.<link linkend="_struct_obj_pool_1ad0602aa7e4e6f84cea6e9418acda60a9">stack</link>.<link linkend="_struct_stack_1a00585a18232bbd61e7e52b6906f37d71">base</link>&#32;=&#32;objpool.<link linkend="_struct_obj_pool_1ad0602aa7e4e6f84cea6e9418acda60a9">stack</link>.<link linkend="_struct_stack_1abff65083487120b6c040a4d1d1575f01">mem</link>;
+603 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;objpool;
+604 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+605 &#32;&#32;&#32;&#32;}
+606 }
+607 
+608 <link linkend="_struct_obj_pool">ObjPool</link>&#32;<link linkend="__classes_2lib_2raylib_2src_2rmem_8h_1a591b70e2297ae3827682d8d7fc9d8c1a">CreateObjPoolFromBuffer</link>(<emphasis role="keywordtype">void</emphasis>&#32;*<emphasis role="keyword">const</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1ad8a8baf08bc0399738960c9259571911">buf</link>,&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;objsize,&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a30ee67aa502329a88f4a203775adfa1a">len</link>)
+609 {
+610 &#32;&#32;&#32;&#32;<link linkend="_struct_obj_pool">ObjPool</link>&#32;objpool&#32;=&#32;{&#32;0&#32;};
+611 
+612 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;If&#32;the&#32;object&#32;size&#32;isn&apos;t&#32;large&#32;enough&#32;to&#32;align&#32;to&#32;a&#32;size_t,&#32;then&#32;we&#32;can&apos;t&#32;use&#32;it.</emphasis>
+613 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;((<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1ad8a8baf08bc0399738960c9259571911">buf</link>&#32;==&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>)&#32;||&#32;(<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a30ee67aa502329a88f4a203775adfa1a">len</link>&#32;==&#32;0UL)&#32;||&#32;(objsize&#32;&lt;&#32;<emphasis role="keyword">sizeof</emphasis>(<emphasis role="keywordtype">size_t</emphasis>))&#32;||&#32;(objsize*<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a30ee67aa502329a88f4a203775adfa1a">len</link>&#32;!=&#32;__AlignSize(objsize,&#32;<emphasis role="keyword">sizeof</emphasis>(<emphasis role="keywordtype">size_t</emphasis>))*<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a30ee67aa502329a88f4a203775adfa1a">len</link>))&#32;<emphasis role="keywordflow">return</emphasis>&#32;objpool;
+614 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>
+615 &#32;&#32;&#32;&#32;{
+616 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;objpool.<link linkend="_struct_obj_pool_1a9ac0a1c044a96149f47f32e258b358d2">objSize</link>&#32;=&#32;__AlignSize(objsize,&#32;<emphasis role="keyword">sizeof</emphasis>(<emphasis role="keywordtype">size_t</emphasis>));
+617 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;objpool.<link linkend="_struct_obj_pool_1ad0602aa7e4e6f84cea6e9418acda60a9">stack</link>.<link linkend="_struct_stack_1a3a469595caaaf49bbce059efabbe07b5">size</link>&#32;=&#32;objpool.<link linkend="_struct_obj_pool_1aef3aabaf66c4582c22a2309652f35112">freeBlocks</link>&#32;=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a30ee67aa502329a88f4a203775adfa1a">len</link>;
+618 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;objpool.<link linkend="_struct_obj_pool_1ad0602aa7e4e6f84cea6e9418acda60a9">stack</link>.<link linkend="_struct_stack_1abff65083487120b6c040a4d1d1575f01">mem</link>&#32;=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1ad8a8baf08bc0399738960c9259571911">buf</link>;
+619 
+620 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(<emphasis role="keywordtype">int</emphasis>&#32;i&#32;=&#32;0;&#32;i&#32;&lt;&#32;objpool.<link linkend="_struct_obj_pool_1aef3aabaf66c4582c22a2309652f35112">freeBlocks</link>;&#32;i++)
+621 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+622 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">union&#32;</emphasis>ObjInfo&#32;block&#32;=&#32;{&#32;.byte&#32;=&#32;&amp;objpool.<link linkend="_struct_obj_pool_1ad0602aa7e4e6f84cea6e9418acda60a9">stack</link>.<link linkend="_struct_stack_1abff65083487120b6c040a4d1d1575f01">mem</link>[i*objpool.<link linkend="_struct_obj_pool_1a9ac0a1c044a96149f47f32e258b358d2">objSize</link>]&#32;};
+623 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;*block.index&#32;=&#32;i&#32;+&#32;1;
+624 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+625 
+626 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;objpool.<link linkend="_struct_obj_pool_1ad0602aa7e4e6f84cea6e9418acda60a9">stack</link>.<link linkend="_struct_stack_1a00585a18232bbd61e7e52b6906f37d71">base</link>&#32;=&#32;objpool.<link linkend="_struct_obj_pool_1ad0602aa7e4e6f84cea6e9418acda60a9">stack</link>.<link linkend="_struct_stack_1abff65083487120b6c040a4d1d1575f01">mem</link>;
+627 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;objpool;
+628 &#32;&#32;&#32;&#32;}
+629 }
+630 
+631 <emphasis role="keywordtype">void</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2rmem_8h_1a0d17353a55b91c5b1c12a21f497b7c12">DestroyObjPool</link>(<link linkend="_struct_obj_pool">ObjPool</link>&#32;*<emphasis role="keyword">const</emphasis>&#32;objpool)
+632 {
+633 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;((objpool&#32;==&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>)&#32;||&#32;(objpool-&gt;<link linkend="_struct_obj_pool_1ad0602aa7e4e6f84cea6e9418acda60a9">stack</link>.<link linkend="_struct_stack_1abff65083487120b6c040a4d1d1575f01">mem</link>&#32;==&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>))&#32;<emphasis role="keywordflow">return</emphasis>;
+634 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>
+635 &#32;&#32;&#32;&#32;{
+636 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;free(objpool-&gt;<link linkend="_struct_obj_pool_1ad0602aa7e4e6f84cea6e9418acda60a9">stack</link>.<link linkend="_struct_stack_1abff65083487120b6c040a4d1d1575f01">mem</link>);
+637 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;*objpool&#32;=&#32;(<link linkend="__classes_2lib_2raylib_2src_2rmem_8h_1a48b7ab21b9b6f7e73ed6990850e47e44">ObjPool</link>){0};
+638 &#32;&#32;&#32;&#32;}
+639 }
+640 
+641 <emphasis role="keywordtype">void</emphasis>&#32;*<link linkend="__classes_2lib_2raylib_2src_2rmem_8h_1a24d3b71c2d0754a1272693a743de823b">ObjPoolAlloc</link>(<link linkend="_struct_obj_pool">ObjPool</link>&#32;*<emphasis role="keyword">const</emphasis>&#32;objpool)
+642 {
+643 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(objpool&#32;==&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>)&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>;
+644 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>
+645 &#32;&#32;&#32;&#32;{
+646 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(objpool-&gt;<link linkend="_struct_obj_pool_1aef3aabaf66c4582c22a2309652f35112">freeBlocks</link>&#32;&gt;&#32;0UL)
+647 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+648 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;For&#32;first&#32;allocation,&#32;head&#32;points&#32;to&#32;the&#32;very&#32;first&#32;index.</emphasis>
+649 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Head&#32;=&#32;&amp;pool[0];</emphasis>
+650 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;ret&#32;=&#32;Head&#32;==&#32;ret&#32;=&#32;&amp;pool[0];</emphasis>
+651 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">union&#32;</emphasis>ObjInfo&#32;ret&#32;=&#32;{&#32;.byte&#32;=&#32;objpool-&gt;<link linkend="_struct_obj_pool_1ad0602aa7e4e6f84cea6e9418acda60a9">stack</link>.<link linkend="_struct_stack_1a00585a18232bbd61e7e52b6906f37d71">base</link>&#32;};
+652 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;objpool-&gt;<link linkend="_struct_obj_pool_1aef3aabaf66c4582c22a2309652f35112">freeBlocks</link>--;
+653 
+654 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;after&#32;allocating,&#32;we&#32;set&#32;head&#32;to&#32;the&#32;address&#32;of&#32;the&#32;index&#32;that&#32;*Head&#32;holds.</emphasis>
+655 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Head&#32;=&#32;&amp;pool[*Head&#32;*&#32;pool.objsize];</emphasis>
+656 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;objpool-&gt;<link linkend="_struct_obj_pool_1ad0602aa7e4e6f84cea6e9418acda60a9">stack</link>.<link linkend="_struct_stack_1a00585a18232bbd61e7e52b6906f37d71">base</link>&#32;=&#32;(objpool-&gt;<link linkend="_struct_obj_pool_1aef3aabaf66c4582c22a2309652f35112">freeBlocks</link>&#32;!=&#32;0UL)?&#32;objpool-&gt;<link linkend="_struct_obj_pool_1ad0602aa7e4e6f84cea6e9418acda60a9">stack</link>.<link linkend="_struct_stack_1abff65083487120b6c040a4d1d1575f01">mem</link>&#32;+&#32;(*ret.index*objpool-&gt;<link linkend="_struct_obj_pool_1a9ac0a1c044a96149f47f32e258b358d2">objSize</link>)&#32;:&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>;
+657 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;memset(ret.byte,&#32;0,&#32;objpool-&gt;<link linkend="_struct_obj_pool_1a9ac0a1c044a96149f47f32e258b358d2">objSize</link>);
+658 
+659 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;ret.byte;
+660 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+661 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>;
+662 &#32;&#32;&#32;&#32;}
+663 }
+664 
+665 <emphasis role="keywordtype">void</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2rmem_8h_1a432354a4baead199c655c0be494b356d">ObjPoolFree</link>(<link linkend="_struct_obj_pool">ObjPool</link>&#32;*<emphasis role="keyword">const</emphasis>&#32;restrict&#32;objpool,&#32;<emphasis role="keywordtype">void</emphasis>&#32;*ptr)
+666 {
+667 &#32;&#32;&#32;&#32;<emphasis role="keyword">union&#32;</emphasis>ObjInfo&#32;p&#32;=&#32;{&#32;.byte&#32;=&#32;ptr&#32;};
+668 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;((objpool&#32;==&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>)&#32;||&#32;(ptr&#32;==&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>)&#32;||&#32;(p.byte&#32;&lt;&#32;objpool-&gt;stack.mem)&#32;||&#32;(p.byte&#32;&gt;&#32;objpool-&gt;stack.mem&#32;+&#32;objpool-&gt;stack.size*objpool-&gt;objSize))&#32;<emphasis role="keywordflow">return</emphasis>;
+669 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>
+670 &#32;&#32;&#32;&#32;{
+671 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;When&#32;we&#32;free&#32;our&#32;pointer,&#32;we&#32;recycle&#32;the&#32;pointer&#32;space&#32;to&#32;store&#32;the&#32;previous&#32;index&#32;and&#32;then&#32;we&#32;push&#32;it&#32;as&#32;our&#32;new&#32;head.</emphasis>
+672 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;*p&#32;=&#32;index&#32;of&#32;Head&#32;in&#32;relation&#32;to&#32;the&#32;buffer;</emphasis>
+673 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Head&#32;=&#32;p;</emphasis>
+674 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;*p.index&#32;=&#32;(objpool-&gt;stack.base&#32;!=&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>)?&#32;(objpool-&gt;stack.base&#32;-&#32;objpool-&gt;stack.mem)/objpool-&gt;objSize&#32;:&#32;objpool-&gt;stack.size;
+675 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;objpool-&gt;stack.base&#32;=&#32;p.byte;
+676 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;objpool-&gt;freeBlocks++;
+677 &#32;&#32;&#32;&#32;}
+678 }
+679 
+680 <emphasis role="keywordtype">void</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2rmem_8h_1a4c37937548eb1e7ca5b36e68eb0de7ec">ObjPoolCleanUp</link>(<link linkend="_struct_obj_pool">ObjPool</link>&#32;*<emphasis role="keyword">const</emphasis>&#32;restrict&#32;objpool,&#32;<emphasis role="keywordtype">void</emphasis>&#32;**ptrref)
+681 {
+682 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;((objpool&#32;==&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>)&#32;||&#32;(ptrref&#32;==&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>)&#32;||&#32;(*ptrref&#32;==&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>))&#32;<emphasis role="keywordflow">return</emphasis>;
+683 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>
+684 &#32;&#32;&#32;&#32;{
+685 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2rmem_8h_1a432354a4baead199c655c0be494b356d">ObjPoolFree</link>(objpool,&#32;*ptrref);
+686 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;*ptrref&#32;=&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>;
+687 &#32;&#32;&#32;&#32;}
+688 }
+689 
+690 
+691 <emphasis role="comment">//----------------------------------------------------------------------------------</emphasis>
+692 <emphasis role="comment">//&#32;Module&#32;Functions&#32;Definition&#32;-&#32;Double-Ended&#32;Stack</emphasis>
+693 <emphasis role="comment">//----------------------------------------------------------------------------------</emphasis>
+694 <link linkend="_struct_bi_stack">BiStack</link>&#32;<link linkend="__classes_2lib_2raylib_2src_2rmem_8h_1a31ecfc6c3a1ad97744971b9ffb39968b">CreateBiStack</link>(<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a30ee67aa502329a88f4a203775adfa1a">len</link>)
+695 {
+696 &#32;&#32;&#32;&#32;<link linkend="_struct_bi_stack">BiStack</link>&#32;destack&#32;=&#32;{&#32;0&#32;};
+697 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a30ee67aa502329a88f4a203775adfa1a">len</link>&#32;==&#32;0UL)&#32;<emphasis role="keywordflow">return</emphasis>&#32;destack;
+698 
+699 &#32;&#32;&#32;&#32;destack.<link linkend="_struct_bi_stack_1ad9f960017e8a156646b0d4b2b1e2c9c2">size</link>&#32;=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a30ee67aa502329a88f4a203775adfa1a">len</link>;
+700 &#32;&#32;&#32;&#32;destack.<link linkend="_struct_bi_stack_1aa14c927bef9c49205c7f3673a4b1d982">mem</link>&#32;=&#32;malloc(<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a30ee67aa502329a88f4a203775adfa1a">len</link>*<emphasis role="keyword">sizeof</emphasis>&#32;*destack.<link linkend="_struct_bi_stack_1aa14c927bef9c49205c7f3673a4b1d982">mem</link>);
+701 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(destack.<link linkend="_struct_bi_stack_1aa14c927bef9c49205c7f3673a4b1d982">mem</link>==<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>)&#32;destack.<link linkend="_struct_bi_stack_1ad9f960017e8a156646b0d4b2b1e2c9c2">size</link>&#32;=&#32;0UL;
+702 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>
+703 &#32;&#32;&#32;&#32;{
+704 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;destack.<link linkend="_struct_bi_stack_1a082135201328a673b132fbbf0f77c390">front</link>&#32;=&#32;destack.<link linkend="_struct_bi_stack_1aa14c927bef9c49205c7f3673a4b1d982">mem</link>;
+705 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;destack.<link linkend="_struct_bi_stack_1a337a97f1779ed3b8561abced26c53fef">back</link>&#32;=&#32;destack.<link linkend="_struct_bi_stack_1aa14c927bef9c49205c7f3673a4b1d982">mem</link>&#32;+&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a30ee67aa502329a88f4a203775adfa1a">len</link>;
+706 &#32;&#32;&#32;&#32;}
+707 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;destack;
+708 }
+709 
+710 <link linkend="_struct_bi_stack">BiStack</link>&#32;<link linkend="__classes_2lib_2raylib_2src_2rmem_8h_1a0ae0bd4f39b0f0b8ff894f79c1a59291">CreateBiStackFromBuffer</link>(<emphasis role="keywordtype">void</emphasis>&#32;*<emphasis role="keyword">const</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1ad8a8baf08bc0399738960c9259571911">buf</link>,&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a30ee67aa502329a88f4a203775adfa1a">len</link>)
+711 {
+712 &#32;&#32;&#32;&#32;<link linkend="_struct_bi_stack">BiStack</link>&#32;destack&#32;=&#32;{&#32;0&#32;};
+713 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a30ee67aa502329a88f4a203775adfa1a">len</link>&#32;==&#32;0UL&#32;||&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1ad8a8baf08bc0399738960c9259571911">buf</link>&#32;==&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>)&#32;<emphasis role="keywordflow">return</emphasis>&#32;destack;
+714 &#32;&#32;&#32;&#32;destack.<link linkend="_struct_bi_stack_1ad9f960017e8a156646b0d4b2b1e2c9c2">size</link>&#32;=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a30ee67aa502329a88f4a203775adfa1a">len</link>;
+715 &#32;&#32;&#32;&#32;destack.<link linkend="_struct_bi_stack_1aa14c927bef9c49205c7f3673a4b1d982">mem</link>&#32;=&#32;destack.<link linkend="_struct_bi_stack_1a082135201328a673b132fbbf0f77c390">front</link>&#32;=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1ad8a8baf08bc0399738960c9259571911">buf</link>;
+716 &#32;&#32;&#32;&#32;destack.<link linkend="_struct_bi_stack_1a337a97f1779ed3b8561abced26c53fef">back</link>&#32;=&#32;destack.<link linkend="_struct_bi_stack_1aa14c927bef9c49205c7f3673a4b1d982">mem</link>&#32;+&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a30ee67aa502329a88f4a203775adfa1a">len</link>;
+717 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;destack;
+718 }
+719 
+720 <emphasis role="keywordtype">void</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2rmem_8h_1ab61cff476c902bf9a8ad11aca5fa4d77">DestroyBiStack</link>(<link linkend="_struct_bi_stack">BiStack</link>&#32;*<emphasis role="keyword">const</emphasis>&#32;destack)
+721 {
+722 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;((destack&#32;==&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>)&#32;||&#32;(destack-&gt;<link linkend="_struct_bi_stack_1aa14c927bef9c49205c7f3673a4b1d982">mem</link>&#32;==&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>))&#32;<emphasis role="keywordflow">return</emphasis>;
+723 &#32;&#32;&#32;&#32;free(destack-&gt;<link linkend="_struct_bi_stack_1aa14c927bef9c49205c7f3673a4b1d982">mem</link>);
+724 &#32;&#32;&#32;&#32;*destack&#32;=&#32;(<link linkend="__classes_2lib_2raylib_2src_2rmem_8h_1a0609ef0688090bca79a76499191d35e4">BiStack</link>){0};
+725 }
+726 
+727 <emphasis role="keywordtype">void</emphasis>&#32;*<link linkend="__classes_2lib_2raylib_2src_2rmem_8h_1a32cb6037db90a3abab48c5600482e8eb">BiStackAllocFront</link>(<link linkend="_struct_bi_stack">BiStack</link>&#32;*<emphasis role="keyword">const</emphasis>&#32;destack,&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a30ee67aa502329a88f4a203775adfa1a">len</link>)
+728 {
+729 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;((destack&#32;==&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>)&#32;||&#32;(destack-&gt;<link linkend="_struct_bi_stack_1aa14c927bef9c49205c7f3673a4b1d982">mem</link>&#32;==&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>))&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>;
+730 
+731 &#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;ALIGNED_LEN&#32;=&#32;__AlignSize(<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a30ee67aa502329a88f4a203775adfa1a">len</link>,&#32;<emphasis role="keyword">sizeof</emphasis>(<link linkend="__classes_2lib_2external_2glfw_2deps_2vs2008_2stdint_8h_1a31b85deecb45924320becd11d3ee16ce">uintptr_t</link>));
+732 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;front&#32;end&#32;stack&#32;is&#32;too&#32;high!</emphasis>
+733 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(destack-&gt;<link linkend="_struct_bi_stack_1a082135201328a673b132fbbf0f77c390">front</link>&#32;+&#32;ALIGNED_LEN&#32;&gt;=&#32;destack-&gt;<link linkend="_struct_bi_stack_1a337a97f1779ed3b8561abced26c53fef">back</link>)&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>;
+734 
+735 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2external_2glfw_2deps_2vs2008_2stdint_8h_1aba7bc1797add20fe3efdf37ced1182c5">uint8_t</link>&#32;*ptr&#32;=&#32;destack-&gt;<link linkend="_struct_bi_stack_1a082135201328a673b132fbbf0f77c390">front</link>;
+736 &#32;&#32;&#32;&#32;destack-&gt;<link linkend="_struct_bi_stack_1a082135201328a673b132fbbf0f77c390">front</link>&#32;+=&#32;ALIGNED_LEN;
+737 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;ptr;
+738 }
+739 
+740 <emphasis role="keywordtype">void</emphasis>&#32;*<link linkend="__classes_2lib_2raylib_2src_2rmem_8h_1a45ee65071f7c621b1f45159b02422e7e">BiStackAllocBack</link>(<link linkend="_struct_bi_stack">BiStack</link>&#32;*<emphasis role="keyword">const</emphasis>&#32;destack,&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a30ee67aa502329a88f4a203775adfa1a">len</link>)
+741 {
+742 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;((destack&#32;==&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>)&#32;||&#32;(destack-&gt;<link linkend="_struct_bi_stack_1aa14c927bef9c49205c7f3673a4b1d982">mem</link>&#32;==&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>))&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>;
+743 
+744 &#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;ALIGNED_LEN&#32;=&#32;__AlignSize(<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a30ee67aa502329a88f4a203775adfa1a">len</link>,&#32;<emphasis role="keyword">sizeof</emphasis>(<link linkend="__classes_2lib_2external_2glfw_2deps_2vs2008_2stdint_8h_1a31b85deecb45924320becd11d3ee16ce">uintptr_t</link>));
+745 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;back&#32;end&#32;stack&#32;is&#32;too&#32;low</emphasis>
+746 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(destack-&gt;<link linkend="_struct_bi_stack_1a337a97f1779ed3b8561abced26c53fef">back</link>&#32;-&#32;ALIGNED_LEN&#32;&lt;=&#32;destack-&gt;front)&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>;
+747 
+748 &#32;&#32;&#32;&#32;destack-&gt;<link linkend="_struct_bi_stack_1a337a97f1779ed3b8561abced26c53fef">back</link>&#32;-=&#32;ALIGNED_LEN;
+749 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;destack-&gt;<link linkend="_struct_bi_stack_1a337a97f1779ed3b8561abced26c53fef">back</link>;
+750 }
+751 
+752 <emphasis role="keywordtype">void</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2rmem_8h_1acb462ea9db1343a547ed4e33ee101d76">BiStackResetFront</link>(<link linkend="_struct_bi_stack">BiStack</link>&#32;*<emphasis role="keyword">const</emphasis>&#32;destack)
+753 {
+754 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;((destack&#32;==&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>)&#32;||&#32;(destack-&gt;<link linkend="_struct_bi_stack_1aa14c927bef9c49205c7f3673a4b1d982">mem</link>&#32;==&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>))&#32;<emphasis role="keywordflow">return</emphasis>;
+755 &#32;&#32;&#32;&#32;destack-&gt;<link linkend="_struct_bi_stack_1a082135201328a673b132fbbf0f77c390">front</link>&#32;=&#32;destack-&gt;<link linkend="_struct_bi_stack_1aa14c927bef9c49205c7f3673a4b1d982">mem</link>;
+756 }
+757 
+758 <emphasis role="keywordtype">void</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2rmem_8h_1a873264b46e5c2591488ad1189b3fba49">BiStackResetBack</link>(<link linkend="_struct_bi_stack">BiStack</link>&#32;*<emphasis role="keyword">const</emphasis>&#32;destack)
+759 {
+760 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;((destack&#32;==&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>)&#32;||&#32;(destack-&gt;<link linkend="_struct_bi_stack_1aa14c927bef9c49205c7f3673a4b1d982">mem</link>&#32;==&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>))&#32;<emphasis role="keywordflow">return</emphasis>;
+761 &#32;&#32;&#32;&#32;destack-&gt;<link linkend="_struct_bi_stack_1a337a97f1779ed3b8561abced26c53fef">back</link>&#32;=&#32;destack-&gt;<link linkend="_struct_bi_stack_1aa14c927bef9c49205c7f3673a4b1d982">mem</link>&#32;+&#32;destack-&gt;<link linkend="_struct_bi_stack_1ad9f960017e8a156646b0d4b2b1e2c9c2">size</link>;
+762 }
+763 
+764 <emphasis role="keywordtype">void</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2rmem_8h_1ae7861d19d0a5bff05c382d44a2c17f72">BiStackResetAll</link>(<link linkend="_struct_bi_stack">BiStack</link>&#32;*<emphasis role="keyword">const</emphasis>&#32;destack)
+765 {
+766 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2rmem_8h_1a873264b46e5c2591488ad1189b3fba49">BiStackResetBack</link>(destack);
+767 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2rmem_8h_1acb462ea9db1343a547ed4e33ee101d76">BiStackResetFront</link>(destack);
+768 }
+769 
+770 <link linkend="__classes_2lib_2external_2glfw_2deps_2vs2008_2stdint_8h_1abd3131a20f4053d808d4277db3e39a23">intptr_t</link>&#32;<link linkend="__classes_2lib_2raylib_2src_2rmem_8h_1a6098b4f8c34f0a67ee79f3102b16f657">BiStackMargins</link>(<emphasis role="keyword">const</emphasis>&#32;<link linkend="_struct_bi_stack">BiStack</link>&#32;destack)
+771 {
+772 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;destack.<link linkend="_struct_bi_stack_1a337a97f1779ed3b8561abced26c53fef">back</link>&#32;-&#32;destack.<link linkend="_struct_bi_stack_1a082135201328a673b132fbbf0f77c390">front</link>;
+773 }
+774 
+775 <emphasis role="preprocessor">#endif&#32;&#32;</emphasis><emphasis role="comment">//&#32;RMEM_IMPLEMENTATION</emphasis>
+</programlisting></section>

@@ -1,0 +1,1710 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<section xmlns="http://docbook.org/ns/docbook" version="5.0" xmlns:xlink="http://www.w3.org/1999/xlink" xml:id="__old_2_classes_2lib_2include_2c_09_09_2ext_2ropeimpl_8h_source" xml:lang="en-US">
+<title>ropeimpl.h</title>
+<indexterm><primary>C:/Users/HP/Documents/GitHub/Minero-Game/Old/Classes/lib/include/c++/ext/ropeimpl.h</primary></indexterm>
+Go to the documentation of this file.<programlisting linenumbering="unnumbered">1 <emphasis role="comment">//&#32;SGI&apos;s&#32;rope&#32;class&#32;implementation&#32;-*-&#32;C++&#32;-*-</emphasis>
+2 
+3 <emphasis role="comment">//&#32;Copyright&#32;(C)&#32;2001-2022&#32;Free&#32;Software&#32;Foundation,&#32;Inc.</emphasis>
+4 <emphasis role="comment">//</emphasis>
+5 <emphasis role="comment">//&#32;This&#32;file&#32;is&#32;part&#32;of&#32;the&#32;GNU&#32;ISO&#32;C++&#32;Library.&#32;&#32;This&#32;library&#32;is&#32;free</emphasis>
+6 <emphasis role="comment">//&#32;software;&#32;you&#32;can&#32;redistribute&#32;it&#32;and/or&#32;modify&#32;it&#32;under&#32;the</emphasis>
+7 <emphasis role="comment">//&#32;terms&#32;of&#32;the&#32;GNU&#32;General&#32;Public&#32;License&#32;as&#32;published&#32;by&#32;the</emphasis>
+8 <emphasis role="comment">//&#32;Free&#32;Software&#32;Foundation;&#32;either&#32;version&#32;3,&#32;or&#32;(at&#32;your&#32;option)</emphasis>
+9 <emphasis role="comment">//&#32;any&#32;later&#32;version.</emphasis>
+10 
+11 <emphasis role="comment">//&#32;This&#32;library&#32;is&#32;distributed&#32;in&#32;the&#32;hope&#32;that&#32;it&#32;will&#32;be&#32;useful,</emphasis>
+12 <emphasis role="comment">//&#32;but&#32;WITHOUT&#32;ANY&#32;WARRANTY;&#32;without&#32;even&#32;the&#32;implied&#32;warranty&#32;of</emphasis>
+13 <emphasis role="comment">//&#32;MERCHANTABILITY&#32;or&#32;FITNESS&#32;FOR&#32;A&#32;PARTICULAR&#32;PURPOSE.&#32;&#32;See&#32;the</emphasis>
+14 <emphasis role="comment">//&#32;GNU&#32;General&#32;Public&#32;License&#32;for&#32;more&#32;details.</emphasis>
+15 
+16 <emphasis role="comment">//&#32;Under&#32;Section&#32;7&#32;of&#32;GPL&#32;version&#32;3,&#32;you&#32;are&#32;granted&#32;additional</emphasis>
+17 <emphasis role="comment">//&#32;permissions&#32;described&#32;in&#32;the&#32;GCC&#32;Runtime&#32;Library&#32;Exception,&#32;version</emphasis>
+18 <emphasis role="comment">//&#32;3.1,&#32;as&#32;published&#32;by&#32;the&#32;Free&#32;Software&#32;Foundation.</emphasis>
+19 
+20 <emphasis role="comment">//&#32;You&#32;should&#32;have&#32;received&#32;a&#32;copy&#32;of&#32;the&#32;GNU&#32;General&#32;Public&#32;License&#32;and</emphasis>
+21 <emphasis role="comment">//&#32;a&#32;copy&#32;of&#32;the&#32;GCC&#32;Runtime&#32;Library&#32;Exception&#32;along&#32;with&#32;this&#32;program;</emphasis>
+22 <emphasis role="comment">//&#32;see&#32;the&#32;files&#32;COPYING3&#32;and&#32;COPYING.RUNTIME&#32;respectively.&#32;&#32;If&#32;not,&#32;see</emphasis>
+23 <emphasis role="comment">//&#32;&lt;http://www.gnu.org/licenses/&gt;.</emphasis>
+24 
+25 <emphasis role="comment">/*</emphasis>
+26 <emphasis role="comment">&#32;*&#32;Copyright&#32;(c)&#32;1997</emphasis>
+27 <emphasis role="comment">&#32;*&#32;Silicon&#32;Graphics&#32;Computer&#32;Systems,&#32;Inc.</emphasis>
+28 <emphasis role="comment">&#32;*</emphasis>
+29 <emphasis role="comment">&#32;*&#32;Permission&#32;to&#32;use,&#32;copy,&#32;modify,&#32;distribute&#32;and&#32;sell&#32;this&#32;software</emphasis>
+30 <emphasis role="comment">&#32;*&#32;and&#32;its&#32;documentation&#32;for&#32;any&#32;purpose&#32;is&#32;hereby&#32;granted&#32;without&#32;fee,</emphasis>
+31 <emphasis role="comment">&#32;*&#32;provided&#32;that&#32;the&#32;above&#32;copyright&#32;notice&#32;appear&#32;in&#32;all&#32;copies&#32;and</emphasis>
+32 <emphasis role="comment">&#32;*&#32;that&#32;both&#32;that&#32;copyright&#32;notice&#32;and&#32;this&#32;permission&#32;notice&#32;appear</emphasis>
+33 <emphasis role="comment">&#32;*&#32;in&#32;supporting&#32;documentation.&#32;&#32;Silicon&#32;Graphics&#32;makes&#32;no</emphasis>
+34 <emphasis role="comment">&#32;*&#32;representations&#32;about&#32;the&#32;suitability&#32;of&#32;this&#32;software&#32;for&#32;any</emphasis>
+35 <emphasis role="comment">&#32;*&#32;purpose.&#32;&#32;It&#32;is&#32;provided&#32;&quot;as&#32;is&quot;&#32;without&#32;express&#32;or&#32;implied&#32;warranty.</emphasis>
+36 <emphasis role="comment">&#32;*/</emphasis>
+37 
+43 <emphasis role="preprocessor">#include&#32;&lt;cstdio&gt;</emphasis>
+44 <emphasis role="preprocessor">#include&#32;&lt;ostream&gt;</emphasis>
+45 <emphasis role="preprocessor">#include&#32;&lt;bits/functexcept.h&gt;</emphasis>
+46 
+47 <emphasis role="preprocessor">#include&#32;&lt;ext/algorithm&gt;</emphasis>&#32;<emphasis role="comment">//&#32;For&#32;copy_n&#32;and&#32;lexicographical_compare_3way</emphasis>
+48 <emphasis role="preprocessor">#include&#32;&lt;ext/memory&gt;</emphasis>&#32;<emphasis role="comment">//&#32;For&#32;uninitialized_copy_n</emphasis>
+49 <emphasis role="preprocessor">#include&#32;&lt;ext/numeric&gt;</emphasis>&#32;<emphasis role="comment">//&#32;For&#32;power</emphasis>
+50 
+51 <emphasis role="keyword">namespace&#32;</emphasis><link linkend="_namespace____gnu__cxx">__gnu_cxx</link>&#32;<link linkend="__classes_2lib_2include_2c_09_09_2x86__64-w64-mingw32_2bits_2c_09_09config_8h_1a44377df0d3503f0b3d9ab316dd8ddf8b">_GLIBCXX_VISIBILITY</link>(default)
+52 {
+53 _GLIBCXX_BEGIN_NAMESPACE_VERSION
+54 
+55 &#32;&#32;<emphasis role="comment">//&#32;Set&#32;buf_start,&#32;buf_end,&#32;and&#32;buf_ptr&#32;appropriately,&#32;filling&#32;tmp_buf</emphasis>
+56 &#32;&#32;<emphasis role="comment">//&#32;if&#32;necessary.&#32;&#32;Assumes&#32;_M_path_end[leaf_index]&#32;and&#32;leaf_pos&#32;are&#32;correct.</emphasis>
+57 &#32;&#32;<emphasis role="comment">//&#32;Results&#32;in&#32;a&#32;valid&#32;buf_ptr&#32;if&#32;the&#32;iterator&#32;can&#32;be&#32;legitimately</emphasis>
+58 &#32;&#32;<emphasis role="comment">//&#32;dereferenced.</emphasis>
+59 &#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">class</emphasis>&#32;_CharT,&#32;<emphasis role="keyword">class</emphasis>&#32;_Alloc&gt;
+60 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+61 &#32;&#32;&#32;&#32;_Rope_iterator_base&lt;_CharT,&#32;_Alloc&gt;::
+62 &#32;&#32;&#32;&#32;_S_setbuf(_Rope_iterator_base&lt;_CharT,&#32;_Alloc&gt;&amp;&#32;__x)
+63 &#32;&#32;&#32;&#32;{
+64 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">using&#32;</emphasis>std::size_t;
+65 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;_RopeRep*&#32;__leaf&#32;=&#32;__x._M_path_end[__x._M_leaf_index];
+66 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;__leaf_pos&#32;=&#32;__x._M_leaf_pos;
+67 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;__pos&#32;=&#32;__x._M_current_pos;
+68 
+69 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">switch</emphasis>(__leaf-&gt;_M_tag)
+70 &#32;&#32;&#32;&#32;{
+71 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">case</emphasis>&#32;__detail::_S_leaf:
+72 &#32;&#32;&#32;&#32;&#32;&#32;__x._M_buf_start&#32;=&#32;((_Rope_RopeLeaf&lt;_CharT,&#32;_Alloc&gt;*)__leaf)-&gt;_M_data;
+73 &#32;&#32;&#32;&#32;&#32;&#32;__x._M_buf_ptr&#32;=&#32;__x._M_buf_start&#32;+&#32;(__pos&#32;-&#32;__leaf_pos);
+74 &#32;&#32;&#32;&#32;&#32;&#32;__x._M_buf_end&#32;=&#32;__x._M_buf_start&#32;+&#32;__leaf-&gt;_M_size;
+75 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">break</emphasis>;
+76 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">case</emphasis>&#32;__detail::_S_function:
+77 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">case</emphasis>&#32;__detail::_S_substringfn:
+78 &#32;&#32;&#32;&#32;&#32;&#32;{
+79 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;__len&#32;=&#32;_S_iterator_buf_len;
+80 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;__buf_start_pos&#32;=&#32;__leaf_pos;
+81 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;__leaf_end&#32;=&#32;__leaf_pos&#32;+&#32;__leaf-&gt;_M_size;
+82 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;char_producer&lt;_CharT&gt;*&#32;__fn&#32;=&#32;((_Rope_RopeFunction&lt;_CharT,
+83 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_Alloc&gt;*)__leaf)-&gt;_M_fn;
+84 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__buf_start_pos&#32;+&#32;__len&#32;&lt;=&#32;__pos)
+85 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+86 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__buf_start_pos&#32;=&#32;__pos&#32;-&#32;__len&#32;/&#32;4;
+87 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__buf_start_pos&#32;+&#32;__len&#32;&gt;&#32;__leaf_end)
+88 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__buf_start_pos&#32;=&#32;__leaf_end&#32;-&#32;__len;
+89 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+90 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__buf_start_pos&#32;+&#32;__len&#32;&gt;&#32;__leaf_end)
+91 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__len&#32;=&#32;__leaf_end&#32;-&#32;__buf_start_pos;
+92 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;(*__fn)(__buf_start_pos&#32;-&#32;__leaf_pos,&#32;__len,&#32;__x._M_tmp_buf);
+93 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__x._M_buf_ptr&#32;=&#32;__x._M_tmp_buf&#32;+&#32;(__pos&#32;-&#32;__buf_start_pos);
+94 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__x._M_buf_start&#32;=&#32;__x._M_tmp_buf;
+95 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__x._M_buf_end&#32;=&#32;__x._M_tmp_buf&#32;+&#32;__len;
+96 &#32;&#32;&#32;&#32;&#32;&#32;}
+97 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">break</emphasis>;
+98 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">default</emphasis>:
+99 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">break</emphasis>;
+100 &#32;&#32;&#32;&#32;}
+101 &#32;&#32;&#32;&#32;}
+102 
+103 &#32;&#32;<emphasis role="comment">//&#32;Set&#32;path&#32;and&#32;buffer&#32;inside&#32;a&#32;rope&#32;iterator.&#32;&#32;We&#32;assume&#32;that</emphasis>
+104 &#32;&#32;<emphasis role="comment">//&#32;pos&#32;and&#32;root&#32;are&#32;already&#32;set.</emphasis>
+105 &#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">class</emphasis>&#32;_CharT,&#32;<emphasis role="keyword">class</emphasis>&#32;_Alloc&gt;
+106 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+107 &#32;&#32;&#32;&#32;_Rope_iterator_base&lt;_CharT,&#32;_Alloc&gt;::
+108 &#32;&#32;&#32;&#32;_S_setcache(_Rope_iterator_base&lt;_CharT,&#32;_Alloc&gt;&amp;&#32;__x)
+109 &#32;&#32;&#32;&#32;{
+110 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">using&#32;</emphasis>std::size_t;
+111 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;_RopeRep*&#32;__path[int(__detail::_S_max_rope_depth)&#32;+&#32;1];
+112 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;_RopeRep*&#32;__curr_rope;
+113 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;__curr_depth&#32;=&#32;-1;&#32;&#32;<emphasis role="comment">/*&#32;index&#32;into&#32;path&#32;&#32;&#32;&#32;*/</emphasis>
+114 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;__curr_start_pos&#32;=&#32;0;
+115 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;__pos&#32;=&#32;__x._M_current_pos;
+116 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>&#32;__dirns&#32;=&#32;0;&#32;<emphasis role="comment">//&#32;Bit&#32;vector&#32;marking&#32;right&#32;turns&#32;in&#32;the&#32;path</emphasis>
+117 
+118 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__pos&#32;&gt;=&#32;__x._M_root-&gt;_M_size)
+119 &#32;&#32;&#32;&#32;{
+120 &#32;&#32;&#32;&#32;&#32;&#32;__x._M_buf_ptr&#32;=&#32;0;
+121 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>;
+122 &#32;&#32;&#32;&#32;}
+123 &#32;&#32;&#32;&#32;&#32;&#32;__curr_rope&#32;=&#32;__x._M_root;
+124 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(0&#32;!=&#32;__curr_rope-&gt;_M_c_string)
+125 &#32;&#32;&#32;&#32;{
+126 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">/*&#32;Treat&#32;the&#32;root&#32;as&#32;a&#32;leaf.&#32;*/</emphasis>
+127 &#32;&#32;&#32;&#32;&#32;&#32;__x._M_buf_start&#32;=&#32;__curr_rope-&gt;_M_c_string;
+128 &#32;&#32;&#32;&#32;&#32;&#32;__x._M_buf_end&#32;=&#32;__curr_rope-&gt;_M_c_string&#32;+&#32;__curr_rope-&gt;_M_size;
+129 &#32;&#32;&#32;&#32;&#32;&#32;__x._M_buf_ptr&#32;=&#32;__curr_rope-&gt;_M_c_string&#32;+&#32;__pos;
+130 &#32;&#32;&#32;&#32;&#32;&#32;__x._M_path_end[0]&#32;=&#32;__curr_rope;
+131 &#32;&#32;&#32;&#32;&#32;&#32;__x._M_leaf_index&#32;=&#32;0;
+132 &#32;&#32;&#32;&#32;&#32;&#32;__x._M_leaf_pos&#32;=&#32;0;
+133 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>;
+134 &#32;&#32;&#32;&#32;}
+135 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>(;;)
+136 &#32;&#32;&#32;&#32;{
+137 &#32;&#32;&#32;&#32;&#32;&#32;++__curr_depth;
+138 &#32;&#32;&#32;&#32;&#32;&#32;__path[__curr_depth]&#32;=&#32;__curr_rope;
+139 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">switch</emphasis>(__curr_rope-&gt;_M_tag)
+140 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+141 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">case</emphasis>&#32;__detail::_S_leaf:
+142 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">case</emphasis>&#32;__detail::_S_function:
+143 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">case</emphasis>&#32;__detail::_S_substringfn:
+144 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__x._M_leaf_pos&#32;=&#32;__curr_start_pos;
+145 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">goto</emphasis>&#32;done;
+146 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">case</emphasis>&#32;__detail::_S_concat:
+147 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+148 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_Rope_RopeConcatenation&lt;_CharT,&#32;_Alloc&gt;*&#32;__c&#32;=
+149 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;(_Rope_RopeConcatenation&lt;_CharT,&#32;_Alloc&gt;*)__curr_rope;
+150 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_RopeRep*&#32;__left&#32;=&#32;__c-&gt;_M_left;
+151 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;__left_len&#32;=&#32;__left-&gt;_M_size;
+152 
+153 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__dirns&#32;&lt;&lt;=&#32;1;
+154 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__pos&#32;&gt;=&#32;__curr_start_pos&#32;+&#32;__left_len)
+155 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+156 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__dirns&#32;|=&#32;1;
+157 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__curr_rope&#32;=&#32;__c-&gt;_M_right;
+158 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__curr_start_pos&#32;+=&#32;__left_len;
+159 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+160 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>
+161 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__curr_rope&#32;=&#32;__left;
+162 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+163 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">break</emphasis>;
+164 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+165 &#32;&#32;&#32;&#32;}
+166 &#32;&#32;&#32;&#32;done:
+167 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Copy&#32;last&#32;section&#32;of&#32;path&#32;into&#32;_M_path_end.</emphasis>
+168 &#32;&#32;&#32;&#32;&#32;&#32;{
+169 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;__i&#32;=&#32;-1;
+170 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;__j&#32;=&#32;__curr_depth&#32;+&#32;1&#32;-&#32;int(_S_path_cache_len);
+171 
+172 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__j&#32;&lt;&#32;0)&#32;__j&#32;=&#32;0;
+173 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">while</emphasis>&#32;(__j&#32;&lt;=&#32;__curr_depth)
+174 &#32;&#32;&#32;&#32;&#32;&#32;__x._M_path_end[++__i]&#32;=&#32;__path[__j++];
+175 &#32;&#32;&#32;&#32;__x._M_leaf_index&#32;=&#32;__i;
+176 &#32;&#32;&#32;&#32;&#32;&#32;}
+177 &#32;&#32;&#32;&#32;&#32;&#32;__x._M_path_directions&#32;=&#32;__dirns;
+178 &#32;&#32;&#32;&#32;&#32;&#32;_S_setbuf(__x);
+179 &#32;&#32;&#32;&#32;}
+180 
+181 &#32;&#32;<emphasis role="comment">//&#32;Specialized&#32;version&#32;of&#32;the&#32;above.&#32;&#32;Assumes&#32;that</emphasis>
+182 &#32;&#32;<emphasis role="comment">//&#32;the&#32;path&#32;cache&#32;is&#32;valid&#32;for&#32;the&#32;previous&#32;position.</emphasis>
+183 &#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">class</emphasis>&#32;_CharT,&#32;<emphasis role="keyword">class</emphasis>&#32;_Alloc&gt;
+184 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+185 &#32;&#32;&#32;&#32;_Rope_iterator_base&lt;_CharT,&#32;_Alloc&gt;::
+186 &#32;&#32;&#32;&#32;_S_setcache_for_incr(_Rope_iterator_base&lt;_CharT,&#32;_Alloc&gt;&amp;&#32;__x)
+187 &#32;&#32;&#32;&#32;{
+188 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">using&#32;</emphasis>std::size_t;
+189 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;__current_index&#32;=&#32;__x._M_leaf_index;
+190 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;_RopeRep*&#32;__current_node&#32;=&#32;__x._M_path_end[__current_index];
+191 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;__len&#32;=&#32;__current_node-&gt;_M_size;
+192 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;__node_start_pos&#32;=&#32;__x._M_leaf_pos;
+193 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>&#32;__dirns&#32;=&#32;__x._M_path_directions;
+194 &#32;&#32;&#32;&#32;&#32;&#32;_Rope_RopeConcatenation&lt;_CharT,&#32;_Alloc&gt;*&#32;__c;
+195 
+196 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__x._M_current_pos&#32;-&#32;__node_start_pos&#32;&lt;&#32;__len)
+197 &#32;&#32;&#32;&#32;{
+198 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">/*&#32;More&#32;stuff&#32;in&#32;this&#32;leaf,&#32;we&#32;just&#32;didn&apos;t&#32;cache&#32;it.&#32;*/</emphasis>
+199 &#32;&#32;&#32;&#32;&#32;&#32;_S_setbuf(__x);
+200 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>;
+201 &#32;&#32;&#32;&#32;}
+202 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;&#32;node_start_pos&#32;is&#32;starting&#32;position&#32;of&#32;last_node.</emphasis>
+203 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">while</emphasis>&#32;(--__current_index&#32;&gt;=&#32;0)
+204 &#32;&#32;&#32;&#32;{
+205 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(!(__dirns&#32;&amp;&#32;1)&#32;<emphasis role="comment">/*&#32;Path&#32;turned&#32;left&#32;*/</emphasis>)
+206 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">break</emphasis>;
+207 &#32;&#32;&#32;&#32;&#32;&#32;__current_node&#32;=&#32;__x._M_path_end[__current_index];
+208 &#32;&#32;&#32;&#32;&#32;&#32;__c&#32;=&#32;(_Rope_RopeConcatenation&lt;_CharT,&#32;_Alloc&gt;*)__current_node;
+209 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Otherwise&#32;we&#32;were&#32;in&#32;the&#32;right&#32;child.&#32;&#32;Thus&#32;we&#32;should&#32;pop</emphasis>
+210 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;the&#32;concatenation&#32;node.</emphasis>
+211 &#32;&#32;&#32;&#32;&#32;&#32;__node_start_pos&#32;-=&#32;__c-&gt;_M_left-&gt;_M_size;
+212 &#32;&#32;&#32;&#32;&#32;&#32;__dirns&#32;&gt;&gt;=&#32;1;
+213 &#32;&#32;&#32;&#32;}
+214 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__current_index&#32;&lt;&#32;0)
+215 &#32;&#32;&#32;&#32;{
+216 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;We&#32;underflowed&#32;the&#32;cache.&#32;Punt.</emphasis>
+217 &#32;&#32;&#32;&#32;&#32;&#32;_S_setcache(__x);
+218 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>;
+219 &#32;&#32;&#32;&#32;}
+220 &#32;&#32;&#32;&#32;&#32;&#32;__current_node&#32;=&#32;__x._M_path_end[__current_index];
+221 &#32;&#32;&#32;&#32;&#32;&#32;__c&#32;=&#32;(_Rope_RopeConcatenation&lt;_CharT,&#32;_Alloc&gt;*)__current_node;
+222 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;current_node&#32;is&#32;a&#32;concatenation&#32;node.&#32;&#32;We&#32;are&#32;positioned&#32;on&#32;the&#32;first</emphasis>
+223 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;character&#32;in&#32;its&#32;right&#32;child.</emphasis>
+224 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;node_start_pos&#32;is&#32;starting&#32;position&#32;of&#32;current_node.</emphasis>
+225 &#32;&#32;&#32;&#32;&#32;&#32;__node_start_pos&#32;+=&#32;__c-&gt;_M_left-&gt;_M_size;
+226 &#32;&#32;&#32;&#32;&#32;&#32;__current_node&#32;=&#32;__c-&gt;_M_right;
+227 &#32;&#32;&#32;&#32;&#32;&#32;__x._M_path_end[++__current_index]&#32;=&#32;__current_node;
+228 &#32;&#32;&#32;&#32;&#32;&#32;__dirns&#32;|=&#32;1;
+229 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">while</emphasis>&#32;(__detail::_S_concat&#32;==&#32;__current_node-&gt;_M_tag)
+230 &#32;&#32;&#32;&#32;{
+231 &#32;&#32;&#32;&#32;&#32;&#32;++__current_index;
+232 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(<emphasis role="keywordtype">int</emphasis>(_S_path_cache_len)&#32;==&#32;__current_index)
+233 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+234 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;__i;
+235 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(__i&#32;=&#32;0;&#32;__i&#32;&lt;&#32;int(_S_path_cache_len)&#32;-&#32;1;&#32;__i++)
+236 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__x._M_path_end[__i]&#32;=&#32;__x._M_path_end[__i+1];
+237 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;--__current_index;
+238 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+239 &#32;&#32;&#32;&#32;&#32;&#32;__current_node&#32;=
+240 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;((_Rope_RopeConcatenation&lt;_CharT,&#32;_Alloc&gt;*)__current_node)-&gt;_M_left;
+241 &#32;&#32;&#32;&#32;&#32;&#32;__x._M_path_end[__current_index]&#32;=&#32;__current_node;
+242 &#32;&#32;&#32;&#32;&#32;&#32;__dirns&#32;&lt;&lt;=&#32;1;
+243 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;node_start_pos&#32;is&#32;unchanged.</emphasis>
+244 &#32;&#32;&#32;&#32;}
+245 &#32;&#32;&#32;&#32;&#32;&#32;__x._M_leaf_index&#32;=&#32;__current_index;
+246 &#32;&#32;&#32;&#32;&#32;&#32;__x._M_leaf_pos&#32;=&#32;__node_start_pos;
+247 &#32;&#32;&#32;&#32;&#32;&#32;__x._M_path_directions&#32;=&#32;__dirns;
+248 &#32;&#32;&#32;&#32;&#32;&#32;_S_setbuf(__x);
+249 &#32;&#32;&#32;&#32;}
+250 
+251 &#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">class</emphasis>&#32;_CharT,&#32;<emphasis role="keyword">class</emphasis>&#32;_Alloc&gt;
+252 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+253 &#32;&#32;&#32;&#32;_Rope_iterator_base&lt;_CharT,&#32;_Alloc&gt;::
+254 &#32;&#32;&#32;&#32;_M_incr(std::size_t&#32;__n)
+255 &#32;&#32;&#32;&#32;{
+256 &#32;&#32;&#32;&#32;&#32;&#32;_M_current_pos&#32;+=&#32;__n;
+257 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(0&#32;!=&#32;_M_buf_ptr)
+258 &#32;&#32;&#32;&#32;{
+259 &#32;&#32;&#32;&#32;&#32;&#32;std::size_t&#32;__chars_left&#32;=&#32;_M_buf_end&#32;-&#32;_M_buf_ptr;
+260 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__chars_left&#32;&gt;&#32;__n)
+261 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_M_buf_ptr&#32;+=&#32;__n;
+262 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__chars_left&#32;==&#32;__n)
+263 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+264 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_M_buf_ptr&#32;+=&#32;__n;
+265 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_S_setcache_for_incr(*<emphasis role="keyword">this</emphasis>);
+266 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+267 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>
+268 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_M_buf_ptr&#32;=&#32;0;
+269 &#32;&#32;&#32;&#32;}
+270 &#32;&#32;&#32;&#32;}
+271 
+272 &#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">class</emphasis>&#32;_CharT,&#32;<emphasis role="keyword">class</emphasis>&#32;_Alloc&gt;
+273 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+274 &#32;&#32;&#32;&#32;_Rope_iterator_base&lt;_CharT,&#32;_Alloc&gt;::
+275 &#32;&#32;&#32;&#32;_M_decr(std::size_t&#32;__n)
+276 &#32;&#32;&#32;&#32;{
+277 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(0&#32;!=&#32;_M_buf_ptr)
+278 &#32;&#32;&#32;&#32;{
+279 &#32;&#32;&#32;&#32;&#32;&#32;std::size_t&#32;__chars_left&#32;=&#32;_M_buf_ptr&#32;-&#32;_M_buf_start;
+280 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__chars_left&#32;&gt;=&#32;__n)
+281 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_M_buf_ptr&#32;-=&#32;__n;
+282 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>
+283 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_M_buf_ptr&#32;=&#32;0;
+284 &#32;&#32;&#32;&#32;}
+285 &#32;&#32;&#32;&#32;&#32;&#32;_M_current_pos&#32;-=&#32;__n;
+286 &#32;&#32;&#32;&#32;}
+287 
+288 &#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">class</emphasis>&#32;_CharT,&#32;<emphasis role="keyword">class</emphasis>&#32;_Alloc&gt;
+289 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+290 &#32;&#32;&#32;&#32;_Rope_iterator&lt;_CharT,&#32;_Alloc&gt;::
+291 &#32;&#32;&#32;&#32;_M_check()
+292 &#32;&#32;&#32;&#32;{
+293 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(_M_root_rope-&gt;_M_tree_ptr&#32;!=&#32;this-&gt;_M_root)
+294 &#32;&#32;&#32;&#32;{
+295 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;_Rope&#32;was&#32;modified.&#32;&#32;Get&#32;things&#32;fixed&#32;up.</emphasis>
+296 &#32;&#32;&#32;&#32;&#32;&#32;_RopeRep::_S_unref(this-&gt;_M_root);
+297 &#32;&#32;&#32;&#32;&#32;&#32;this-&gt;_M_root&#32;=&#32;_M_root_rope-&gt;_M_tree_ptr;
+298 &#32;&#32;&#32;&#32;&#32;&#32;_RopeRep::_S_ref(this-&gt;_M_root);
+299 &#32;&#32;&#32;&#32;&#32;&#32;this-&gt;_M_buf_ptr&#32;=&#32;0;
+300 &#32;&#32;&#32;&#32;}
+301 &#32;&#32;&#32;&#32;}
+302 
+303 &#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">class</emphasis>&#32;_CharT,&#32;<emphasis role="keyword">class</emphasis>&#32;_Alloc&gt;
+304 &#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>
+305 &#32;&#32;&#32;&#32;_Rope_const_iterator&lt;_CharT,&#32;_Alloc&gt;::
+306 &#32;&#32;&#32;&#32;_Rope_const_iterator(<emphasis role="keyword">const</emphasis>&#32;_Rope_iterator&lt;_CharT,&#32;_Alloc&gt;&amp;&#32;__x)
+307 &#32;&#32;&#32;&#32;:&#32;_Rope_iterator_base&lt;_CharT,&#32;_Alloc&gt;(__x)
+308 &#32;&#32;&#32;&#32;{&#32;}
+309 
+310 &#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">class</emphasis>&#32;_CharT,&#32;<emphasis role="keyword">class</emphasis>&#32;_Alloc&gt;
+311 &#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>
+312 &#32;&#32;&#32;&#32;_Rope_iterator&lt;_CharT,&#32;_Alloc&gt;::
+313 &#32;&#32;&#32;&#32;_Rope_iterator(rope&lt;_CharT,&#32;_Alloc&gt;&amp;&#32;__r,&#32;std::size_t&#32;__pos)
+314 &#32;&#32;&#32;&#32;:&#32;_Rope_iterator_base&lt;_CharT,_Alloc&gt;(__r._M_tree_ptr,&#32;__pos),
+315 &#32;&#32;&#32;&#32;&#32;&#32;_M_root_rope(&amp;__r)
+316 &#32;&#32;&#32;&#32;{&#32;_RopeRep::_S_ref(this-&gt;_M_root);&#32;}
+317 
+318 &#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">class</emphasis>&#32;_CharT,&#32;<emphasis role="keyword">class</emphasis>&#32;_Alloc&gt;
+319 &#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;std::size_t
+320 &#32;&#32;&#32;&#32;rope&lt;_CharT,&#32;_Alloc&gt;::
+321 &#32;&#32;&#32;&#32;_S_char_ptr_len(<emphasis role="keyword">const</emphasis>&#32;_CharT*&#32;__s)
+322 &#32;&#32;&#32;&#32;{
+323 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;_CharT*&#32;__p&#32;=&#32;__s;
+324 &#32;&#32;&#32;&#32;&#32;&#32;
+325 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">while</emphasis>&#32;(!_S_is0(*__p))
+326 &#32;&#32;&#32;&#32;++__p;
+327 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;(__p&#32;-&#32;__s);
+328 &#32;&#32;&#32;&#32;}
+329 
+330 
+331 <emphasis role="preprocessor">#ifndef&#32;__GC</emphasis>
+332 
+333 &#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">class</emphasis>&#32;_CharT,&#32;<emphasis role="keyword">class</emphasis>&#32;_Alloc&gt;
+334 &#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>
+335 &#32;&#32;&#32;&#32;_Rope_RopeRep&lt;_CharT,&#32;_Alloc&gt;::
+336 &#32;&#32;&#32;&#32;_M_free_c_string()
+337 &#32;&#32;&#32;&#32;{
+338 &#32;&#32;&#32;&#32;&#32;&#32;_CharT*&#32;__cstr&#32;=&#32;_M_c_string;
+339 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(0&#32;!=&#32;__cstr)
+340 &#32;&#32;&#32;&#32;{
+341 &#32;&#32;&#32;&#32;&#32;&#32;std::size_t&#32;__size&#32;=&#32;this-&gt;_M_size&#32;+&#32;1;
+342 &#32;&#32;&#32;&#32;&#32;&#32;std::_Destroy(__cstr,&#32;__cstr&#32;+&#32;__size,&#32;_M_get_allocator());
+343 &#32;&#32;&#32;&#32;&#32;&#32;this-&gt;_Data_deallocate(__cstr,&#32;__size);
+344 &#32;&#32;&#32;&#32;}
+345 &#32;&#32;&#32;&#32;}
+346 
+347 &#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">class</emphasis>&#32;_CharT,&#32;<emphasis role="keyword">class</emphasis>&#32;_Alloc&gt;
+348 &#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>
+349 &#32;&#32;&#32;&#32;_Rope_RopeRep&lt;_CharT,&#32;_Alloc&gt;::
+350 &#32;&#32;&#32;&#32;_S_free_string(_CharT*&#32;__s,&#32;std::size_t&#32;__n,&#32;allocator_type&amp;&#32;__a)
+351 &#32;&#32;&#32;&#32;{
+352 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(!_S_is_basic_char_type((_CharT*)0))
+353 &#32;&#32;&#32;&#32;std::_Destroy(__s,&#32;__s&#32;+&#32;__n,&#32;__a);
+354 &#32;&#32;&#32;&#32;&#32;&#32;
+355 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;&#32;This&#32;has&#32;to&#32;be&#32;a&#32;static&#32;member,&#32;so&#32;this&#32;gets&#32;a&#32;bit&#32;messy</emphasis>
+356 &#32;&#32;&#32;&#32;&#32;&#32;__a.deallocate(__s,
+357 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_Rope_RopeLeaf&lt;_CharT,&#32;_Alloc&gt;::_S_rounded_up_size(__n));
+358 &#32;&#32;&#32;&#32;}
+359 
+360 &#32;&#32;<emphasis role="comment">//&#32;&#32;There&#32;are&#32;several&#32;reasons&#32;for&#32;not&#32;doing&#32;this&#32;with&#32;virtual&#32;destructors</emphasis>
+361 &#32;&#32;<emphasis role="comment">//&#32;&#32;and&#32;a&#32;class&#32;specific&#32;delete&#32;operator:</emphasis>
+362 &#32;&#32;<emphasis role="comment">//&#32;&#32;-&#32;A&#32;class&#32;specific&#32;delete&#32;operator&#32;can&apos;t&#32;easily&#32;get&#32;access&#32;to</emphasis>
+363 &#32;&#32;<emphasis role="comment">//&#32;&#32;&#32;&#32;allocator&#32;instances&#32;if&#32;we&#32;need&#32;them.</emphasis>
+364 &#32;&#32;<emphasis role="comment">//&#32;&#32;-&#32;Any&#32;virtual&#32;function&#32;would&#32;need&#32;a&#32;4&#32;or&#32;byte&#32;vtable&#32;pointer;</emphasis>
+365 &#32;&#32;<emphasis role="comment">//&#32;&#32;&#32;&#32;this&#32;only&#32;requires&#32;a&#32;one&#32;byte&#32;tag&#32;per&#32;object.</emphasis>
+366 &#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">class</emphasis>&#32;_CharT,&#32;<emphasis role="keyword">class</emphasis>&#32;_Alloc&gt;
+367 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+368 &#32;&#32;&#32;&#32;_Rope_RopeRep&lt;_CharT,&#32;_Alloc&gt;::
+369 &#32;&#32;&#32;&#32;_M_free_tree()
+370 &#32;&#32;&#32;&#32;{
+371 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">switch</emphasis>(_M_tag)
+372 &#32;&#32;&#32;&#32;{
+373 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">case</emphasis>&#32;__detail::_S_leaf:
+374 &#32;&#32;&#32;&#32;&#32;&#32;{
+375 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_Rope_RopeLeaf&lt;_CharT,&#32;_Alloc&gt;*&#32;__l
+376 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;=&#32;(_Rope_RopeLeaf&lt;_CharT,&#32;_Alloc&gt;*)<emphasis role="keyword">this</emphasis>;
+377 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__l-&gt;_Rope_RopeLeaf&lt;_CharT,&#32;_Alloc&gt;::~_Rope_RopeLeaf();
+378 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;this-&gt;_L_deallocate(__l,&#32;1);
+379 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">break</emphasis>;
+380 &#32;&#32;&#32;&#32;&#32;&#32;}
+381 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">case</emphasis>&#32;__detail::_S_concat:
+382 &#32;&#32;&#32;&#32;&#32;&#32;{
+383 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_Rope_RopeConcatenation&lt;_CharT,_Alloc&gt;*&#32;__c
+384 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;=&#32;(_Rope_RopeConcatenation&lt;_CharT,&#32;_Alloc&gt;*)<emphasis role="keyword">this</emphasis>;
+385 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__c-&gt;_Rope_RopeConcatenation&lt;_CharT,&#32;_Alloc&gt;::
+386 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;~_Rope_RopeConcatenation();
+387 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;this-&gt;_C_deallocate(__c,&#32;1);
+388 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">break</emphasis>;
+389 &#32;&#32;&#32;&#32;&#32;&#32;}
+390 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">case</emphasis>&#32;__detail::_S_function:
+391 &#32;&#32;&#32;&#32;&#32;&#32;{
+392 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_Rope_RopeFunction&lt;_CharT,&#32;_Alloc&gt;*&#32;__f
+393 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;=&#32;(_Rope_RopeFunction&lt;_CharT,&#32;_Alloc&gt;*)<emphasis role="keyword">this</emphasis>;
+394 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__f-&gt;_Rope_RopeFunction&lt;_CharT,&#32;_Alloc&gt;::~_Rope_RopeFunction();
+395 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;this-&gt;_F_deallocate(__f,&#32;1);
+396 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">break</emphasis>;
+397 &#32;&#32;&#32;&#32;&#32;&#32;}
+398 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">case</emphasis>&#32;__detail::_S_substringfn:
+399 &#32;&#32;&#32;&#32;&#32;&#32;{
+400 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_Rope_RopeSubstring&lt;_CharT,&#32;_Alloc&gt;*&#32;__ss&#32;=
+401 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;(_Rope_RopeSubstring&lt;_CharT,&#32;_Alloc&gt;*)<emphasis role="keyword">this</emphasis>;
+402 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__ss-&gt;_Rope_RopeSubstring&lt;_CharT,&#32;_Alloc&gt;::
+403 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;~_Rope_RopeSubstring();
+404 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;this-&gt;_S_deallocate(__ss,&#32;1);
+405 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">break</emphasis>;
+406 &#32;&#32;&#32;&#32;&#32;&#32;}
+407 &#32;&#32;&#32;&#32;}
+408 &#32;&#32;&#32;&#32;}
+409 <emphasis role="preprocessor">#else</emphasis>
+410 
+411 &#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">class</emphasis>&#32;_CharT,&#32;<emphasis role="keyword">class</emphasis>&#32;_Alloc&gt;
+412 &#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>
+413 &#32;&#32;&#32;&#32;_Rope_RopeRep&lt;_CharT,&#32;_Alloc&gt;::
+414 &#32;&#32;&#32;&#32;_S_free_string(<emphasis role="keyword">const</emphasis>&#32;_CharT*,&#32;std::size_t,&#32;allocator_type)
+415 &#32;&#32;&#32;&#32;{&#32;}
+416 
+417 <emphasis role="preprocessor">#endif</emphasis>
+418 
+419 &#32;&#32;<emphasis role="comment">//&#32;Concatenate&#32;a&#32;C&#32;string&#32;onto&#32;a&#32;leaf&#32;rope&#32;by&#32;copying&#32;the&#32;rope&#32;data.</emphasis>
+420 &#32;&#32;<emphasis role="comment">//&#32;Used&#32;for&#32;short&#32;ropes.</emphasis>
+421 &#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">class</emphasis>&#32;_CharT,&#32;<emphasis role="keyword">class</emphasis>&#32;_Alloc&gt;
+422 &#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;rope&lt;_CharT,&#32;_Alloc&gt;::_RopeLeaf*
+423 &#32;&#32;&#32;&#32;rope&lt;_CharT,&#32;_Alloc&gt;::
+424 &#32;&#32;&#32;&#32;_S_leaf_concat_char_iter(_RopeLeaf*&#32;__r,&#32;<emphasis role="keyword">const</emphasis>&#32;_CharT*&#32;__iter,
+425 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;std::size_t&#32;__len)
+426 &#32;&#32;&#32;&#32;{
+427 &#32;&#32;&#32;&#32;&#32;&#32;std::size_t&#32;__old_len&#32;=&#32;__r-&gt;_M_size;
+428 &#32;&#32;&#32;&#32;&#32;&#32;_CharT*&#32;__new_data&#32;=&#32;(_CharT*)
+429 &#32;&#32;&#32;&#32;rope::_Data_allocate(_S_rounded_up_size(__old_len&#32;+&#32;__len));
+430 &#32;&#32;&#32;&#32;&#32;&#32;_RopeLeaf*&#32;__result;
+431 
+432 &#32;&#32;&#32;&#32;&#32;&#32;uninitialized_copy_n(__r-&gt;_M_data,&#32;__old_len,&#32;__new_data);
+433 &#32;&#32;&#32;&#32;&#32;&#32;uninitialized_copy_n(__iter,&#32;__len,&#32;__new_data&#32;+&#32;__old_len);
+434 &#32;&#32;&#32;&#32;&#32;&#32;_S_cond_store_eos(__new_data[__old_len&#32;+&#32;__len]);
+435 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2bits_2exception__defines_8h_1a130bf0cd31a0783cd03563f46b46915b">__try</link>
+436 &#32;&#32;&#32;&#32;{
+437 &#32;&#32;&#32;&#32;&#32;&#32;__result&#32;=&#32;_S_new_RopeLeaf(__new_data,&#32;__old_len&#32;+&#32;__len,
+438 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__r-&gt;_M_get_allocator());
+439 &#32;&#32;&#32;&#32;}
+440 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2bits_2exception__defines_8h_1a9e51d2f324c18a996a3e4f9a6ba0f6c2">__catch</link>(...)
+441 &#32;&#32;&#32;&#32;{
+442 &#32;&#32;&#32;&#32;&#32;&#32;_RopeRep::__STL_FREE_STRING(__new_data,&#32;__old_len&#32;+&#32;__len,
+443 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__r-&gt;_M_get_allocator());
+444 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2bits_2exception__defines_8h_1a92ef03a5310b10a4243a6ec8f43494b5">__throw_exception_again</link>;
+445 &#32;&#32;&#32;&#32;}
+446 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__result;
+447 &#32;&#32;&#32;&#32;}
+448 
+449 <emphasis role="preprocessor">#ifndef&#32;__GC</emphasis>
+450 &#32;&#32;<emphasis role="comment">//&#32;As&#32;above,&#32;but&#32;it&apos;s&#32;OK&#32;to&#32;clobber&#32;original&#32;if&#32;refcount&#32;is&#32;1</emphasis>
+451 &#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">class</emphasis>&#32;_CharT,&#32;<emphasis role="keyword">class</emphasis>&#32;_Alloc&gt;
+452 &#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;rope&lt;_CharT,_Alloc&gt;::_RopeLeaf*
+453 &#32;&#32;&#32;&#32;rope&lt;_CharT,&#32;_Alloc&gt;::
+454 &#32;&#32;&#32;&#32;_S_destr_leaf_concat_char_iter(_RopeLeaf*&#32;__r,&#32;<emphasis role="keyword">const</emphasis>&#32;_CharT*&#32;__iter,
+455 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;std::size_t&#32;__len)
+456 &#32;&#32;&#32;&#32;{
+457 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__r-&gt;_M_ref_count&#32;&gt;&#32;1)
+458 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;_S_leaf_concat_char_iter(__r,&#32;__iter,&#32;__len);
+459 &#32;&#32;&#32;&#32;&#32;&#32;std::size_t&#32;__old_len&#32;=&#32;__r-&gt;_M_size;
+460 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(_S_allocated_capacity(__old_len)&#32;&gt;=&#32;__old_len&#32;+&#32;__len)
+461 &#32;&#32;&#32;&#32;{
+462 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;The&#32;space&#32;has&#32;been&#32;partially&#32;initialized&#32;for&#32;the&#32;standard</emphasis>
+463 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;character&#32;types.&#32;&#32;But&#32;that&#32;doesn&apos;t&#32;matter&#32;for&#32;those&#32;types.</emphasis>
+464 &#32;&#32;&#32;&#32;&#32;&#32;uninitialized_copy_n(__iter,&#32;__len,&#32;__r-&gt;_M_data&#32;+&#32;__old_len);
+465 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(_S_is_basic_char_type((_CharT*)0))
+466 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_S_cond_store_eos(__r-&gt;_M_data[__old_len&#32;+&#32;__len]);
+467 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__r-&gt;_M_c_string&#32;!=&#32;__r-&gt;_M_data&#32;&amp;&amp;&#32;0&#32;!=&#32;__r-&gt;_M_c_string)
+468 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+469 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__r-&gt;_M_free_c_string();
+470 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__r-&gt;_M_c_string&#32;=&#32;0;
+471 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+472 &#32;&#32;&#32;&#32;&#32;&#32;__r-&gt;_M_size&#32;=&#32;__old_len&#32;+&#32;__len;
+473 &#32;&#32;&#32;&#32;&#32;&#32;__r-&gt;_M_ref_count&#32;=&#32;2;
+474 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__r;
+475 &#32;&#32;&#32;&#32;}
+476 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>
+477 &#32;&#32;&#32;&#32;{
+478 &#32;&#32;&#32;&#32;&#32;&#32;_RopeLeaf*&#32;__result&#32;=&#32;_S_leaf_concat_char_iter(__r,&#32;__iter,&#32;__len);
+479 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__result;
+480 &#32;&#32;&#32;&#32;}
+481 &#32;&#32;&#32;&#32;}
+482 <emphasis role="preprocessor">#endif</emphasis>
+483 
+484 &#32;&#32;<emphasis role="comment">//&#32;Assumes&#32;left&#32;and&#32;right&#32;are&#32;not&#32;0.</emphasis>
+485 &#32;&#32;<emphasis role="comment">//&#32;Does&#32;not&#32;increment&#32;(nor&#32;decrement&#32;on&#32;exception)&#32;child&#32;reference&#32;counts.</emphasis>
+486 &#32;&#32;<emphasis role="comment">//&#32;Result&#32;has&#32;ref&#32;count&#32;1.</emphasis>
+487 &#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">class</emphasis>&#32;_CharT,&#32;<emphasis role="keyword">class</emphasis>&#32;_Alloc&gt;
+488 &#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;rope&lt;_CharT,&#32;_Alloc&gt;::_RopeRep*
+489 &#32;&#32;&#32;&#32;rope&lt;_CharT,&#32;_Alloc&gt;::
+490 &#32;&#32;&#32;&#32;_S_tree_concat(_RopeRep*&#32;__left,&#32;_RopeRep*&#32;__right)
+491 &#32;&#32;&#32;&#32;{
+492 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">using&#32;</emphasis>std::size_t;
+493 &#32;&#32;&#32;&#32;&#32;&#32;_RopeConcatenation*&#32;__result&#32;=&#32;_S_new_RopeConcatenation(__left,&#32;__right,
+494 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__left-&gt;
+495 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_M_get_allocator());
+496 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;__depth&#32;=&#32;__result-&gt;_M_depth;
+497 &#32;&#32;&#32;&#32;&#32;&#32;
+498 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__depth&#32;&gt;&#32;20
+499 &#32;&#32;&#32;&#32;&#32;&#32;&amp;&amp;&#32;(__result-&gt;_M_size&#32;&lt;&#32;1000
+500 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;||&#32;__depth&#32;&gt;&#32;<emphasis role="keywordtype">size_t</emphasis>(__detail::_S_max_rope_depth)))
+501 &#32;&#32;&#32;&#32;{
+502 &#32;&#32;&#32;&#32;&#32;&#32;_RopeRep*&#32;__balanced;
+503 
+504 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2bits_2exception__defines_8h_1a130bf0cd31a0783cd03563f46b46915b">__try</link>
+505 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+506 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__balanced&#32;=&#32;_S_balance(__result);
+507 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__result-&gt;_M_unref_nonnil();
+508 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+509 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2bits_2exception__defines_8h_1a9e51d2f324c18a996a3e4f9a6ba0f6c2">__catch</link>(...)
+510 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+511 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;rope::_C_deallocate(__result,1);
+512 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2bits_2exception__defines_8h_1a92ef03a5310b10a4243a6ec8f43494b5">__throw_exception_again</link>;
+513 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+514 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;In&#32;case&#32;of&#32;exception,&#32;we&#32;need&#32;to&#32;deallocate</emphasis>
+515 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;otherwise&#32;dangling&#32;result&#32;node.&#32;&#32;But&#32;caller</emphasis>
+516 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;still&#32;owns&#32;its&#32;children.&#32;&#32;Thus&#32;unref&#32;is</emphasis>
+517 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;inappropriate.</emphasis>
+518 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__balanced;
+519 &#32;&#32;&#32;&#32;}
+520 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>
+521 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__result;
+522 &#32;&#32;&#32;&#32;}
+523 
+524 &#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">class</emphasis>&#32;_CharT,&#32;<emphasis role="keyword">class</emphasis>&#32;_Alloc&gt;
+525 &#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;rope&lt;_CharT,&#32;_Alloc&gt;::_RopeRep*
+526 &#32;&#32;&#32;&#32;rope&lt;_CharT,&#32;_Alloc&gt;::
+527 &#32;&#32;&#32;&#32;_S_concat_char_iter(_RopeRep*&#32;__r,&#32;<emphasis role="keyword">const</emphasis>&#32;_CharT*__s,&#32;std::size_t&#32;__slen,
+528 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;allocator_type&amp;&#32;__a)
+529 &#32;&#32;&#32;&#32;{
+530 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">using&#32;</emphasis>std::size_t;
+531 &#32;&#32;&#32;&#32;&#32;&#32;_RopeRep*&#32;__result;
+532 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(0&#32;==&#32;__slen)
+533 &#32;&#32;&#32;&#32;{
+534 &#32;&#32;&#32;&#32;&#32;&#32;_S_ref(__r);
+535 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__r;
+536 &#32;&#32;&#32;&#32;}
+537 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(0&#32;==&#32;__r)
+538 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__STL_ROPE_FROM_UNOWNED_CHAR_PTR(__s,&#32;__slen,&#32;__a);
+539 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__r-&gt;_M_tag&#32;==&#32;__detail::_S_leaf
+540 &#32;&#32;&#32;&#32;&#32;&#32;&amp;&amp;&#32;__r-&gt;_M_size&#32;+&#32;__slen&#32;&lt;=&#32;<emphasis role="keywordtype">size_t</emphasis>(_S_copy_max))
+541 &#32;&#32;&#32;&#32;{
+542 &#32;&#32;&#32;&#32;&#32;&#32;__result&#32;=&#32;_S_leaf_concat_char_iter((_RopeLeaf*)__r,&#32;__s,&#32;__slen);
+543 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__result;
+544 &#32;&#32;&#32;&#32;}
+545 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__detail::_S_concat&#32;==&#32;__r-&gt;_M_tag
+546 &#32;&#32;&#32;&#32;&#32;&#32;&amp;&amp;&#32;__detail::_S_leaf&#32;==&#32;((_RopeConcatenation*)&#32;__r)-&gt;_M_right-&gt;_M_tag)
+547 &#32;&#32;&#32;&#32;{
+548 &#32;&#32;&#32;&#32;&#32;&#32;_RopeLeaf*&#32;__right&#32;=
+549 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;(_RopeLeaf*&#32;)(((_RopeConcatenation*&#32;)__r)-&gt;_M_right);
+550 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__right-&gt;_M_size&#32;+&#32;__slen&#32;&lt;=&#32;<emphasis role="keywordtype">size_t</emphasis>(_S_copy_max))
+551 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+552 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_RopeRep*&#32;__left&#32;=&#32;((_RopeConcatenation*)__r)-&gt;_M_left;
+553 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_RopeRep*&#32;__nright&#32;=
+554 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_S_leaf_concat_char_iter((_RopeLeaf*)__right,&#32;__s,&#32;__slen);
+555 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__left-&gt;_M_ref_nonnil();
+556 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2bits_2exception__defines_8h_1a130bf0cd31a0783cd03563f46b46915b">__try</link>
+557 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{&#32;__result&#32;=&#32;_S_tree_concat(__left,&#32;__nright);&#32;}
+558 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2bits_2exception__defines_8h_1a9e51d2f324c18a996a3e4f9a6ba0f6c2">__catch</link>(...)
+559 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+560 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_S_unref(__left);
+561 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_S_unref(__nright);
+562 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2bits_2exception__defines_8h_1a92ef03a5310b10a4243a6ec8f43494b5">__throw_exception_again</link>;
+563 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+564 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__result;
+565 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+566 &#32;&#32;&#32;&#32;}
+567 &#32;&#32;&#32;&#32;&#32;&#32;_RopeRep*&#32;__nright&#32;=&#32;__STL_ROPE_FROM_UNOWNED_CHAR_PTR(__s,&#32;__slen,&#32;__a);
+568 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2bits_2exception__defines_8h_1a130bf0cd31a0783cd03563f46b46915b">__try</link>
+569 &#32;&#32;&#32;&#32;{
+570 &#32;&#32;&#32;&#32;&#32;&#32;__r-&gt;_M_ref_nonnil();
+571 &#32;&#32;&#32;&#32;&#32;&#32;__result&#32;=&#32;_S_tree_concat(__r,&#32;__nright);
+572 &#32;&#32;&#32;&#32;}
+573 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2bits_2exception__defines_8h_1a9e51d2f324c18a996a3e4f9a6ba0f6c2">__catch</link>(...)
+574 &#32;&#32;&#32;&#32;{
+575 &#32;&#32;&#32;&#32;&#32;&#32;_S_unref(__r);
+576 &#32;&#32;&#32;&#32;&#32;&#32;_S_unref(__nright);
+577 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2bits_2exception__defines_8h_1a92ef03a5310b10a4243a6ec8f43494b5">__throw_exception_again</link>;
+578 &#32;&#32;&#32;&#32;}
+579 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__result;
+580 &#32;&#32;&#32;&#32;}
+581 
+582 <emphasis role="preprocessor">#ifndef&#32;__GC</emphasis>
+583 &#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">class</emphasis>&#32;_CharT,&#32;<emphasis role="keyword">class</emphasis>&#32;_Alloc&gt;
+584 &#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;rope&lt;_CharT,_Alloc&gt;::_RopeRep*
+585 &#32;&#32;&#32;&#32;rope&lt;_CharT,_Alloc&gt;::
+586 &#32;&#32;&#32;&#32;_S_destr_concat_char_iter(_RopeRep*&#32;__r,&#32;<emphasis role="keyword">const</emphasis>&#32;_CharT*&#32;__s,
+587 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;std::size_t&#32;__slen,&#32;allocator_type&amp;&#32;__a)
+588 &#32;&#32;&#32;&#32;{
+589 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">using&#32;</emphasis>std::size_t;
+590 &#32;&#32;&#32;&#32;&#32;&#32;_RopeRep*&#32;__result;
+591 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(0&#32;==&#32;__r)
+592 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__STL_ROPE_FROM_UNOWNED_CHAR_PTR(__s,&#32;__slen,&#32;__a);
+593 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;<link linkend="__classes_2lib_2include_2mmintrin_8h_1a7cee916b88079d74fdaf7856046abea3">__count</link>&#32;=&#32;__r-&gt;_M_ref_count;
+594 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;__orig_size&#32;=&#32;__r-&gt;_M_size;
+595 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(<link linkend="__classes_2lib_2include_2mmintrin_8h_1a7cee916b88079d74fdaf7856046abea3">__count</link>&#32;&gt;&#32;1)
+596 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;_S_concat_char_iter(__r,&#32;__s,&#32;__slen,&#32;__a);
+597 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(0&#32;==&#32;__slen)
+598 &#32;&#32;&#32;&#32;{
+599 &#32;&#32;&#32;&#32;&#32;&#32;__r-&gt;_M_ref_count&#32;=&#32;2;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;One&#32;more&#32;than&#32;before</emphasis>
+600 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__r;
+601 &#32;&#32;&#32;&#32;}
+602 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__orig_size&#32;+&#32;__slen&#32;&lt;=&#32;<emphasis role="keywordtype">size_t</emphasis>(_S_copy_max)
+603 &#32;&#32;&#32;&#32;&#32;&#32;&amp;&amp;&#32;__detail::_S_leaf&#32;==&#32;__r-&gt;_M_tag)
+604 &#32;&#32;&#32;&#32;{
+605 &#32;&#32;&#32;&#32;&#32;&#32;__result&#32;=&#32;_S_destr_leaf_concat_char_iter((_RopeLeaf*)__r,&#32;__s,&#32;
+606 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__slen);
+607 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__result;
+608 &#32;&#32;&#32;&#32;}
+609 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__detail::_S_concat&#32;==&#32;__r-&gt;_M_tag)
+610 &#32;&#32;&#32;&#32;{
+611 &#32;&#32;&#32;&#32;&#32;&#32;_RopeLeaf*&#32;__right&#32;=&#32;(_RopeLeaf*)(((_RopeConcatenation*)
+612 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__r)-&gt;_M_right);
+613 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__detail::_S_leaf&#32;==&#32;__right-&gt;_M_tag
+614 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&amp;&amp;&#32;__right-&gt;_M_size&#32;+&#32;__slen&#32;&lt;=&#32;<emphasis role="keywordtype">size_t</emphasis>(_S_copy_max))
+615 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+616 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_RopeRep*&#32;__new_right&#32;=
+617 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_S_destr_leaf_concat_char_iter(__right,&#32;__s,&#32;__slen);
+618 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__right&#32;==&#32;__new_right)
+619 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__new_right-&gt;_M_ref_count&#32;=&#32;1;
+620 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>
+621 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__right-&gt;_M_unref_nonnil();
+622 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__r-&gt;_M_ref_count&#32;=&#32;2;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;One&#32;more&#32;than&#32;before.</emphasis>
+623 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;((_RopeConcatenation*)__r)-&gt;_M_right&#32;=&#32;__new_right;
+624 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__r-&gt;_M_size&#32;=&#32;__orig_size&#32;+&#32;__slen;
+625 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(0&#32;!=&#32;__r-&gt;_M_c_string)
+626 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+627 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__r-&gt;_M_free_c_string();
+628 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__r-&gt;_M_c_string&#32;=&#32;0;
+629 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+630 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__r;
+631 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+632 &#32;&#32;&#32;&#32;}
+633 &#32;&#32;&#32;&#32;&#32;&#32;_RopeRep*&#32;__right&#32;=&#32;__STL_ROPE_FROM_UNOWNED_CHAR_PTR(__s,&#32;__slen,&#32;__a);
+634 &#32;&#32;&#32;&#32;&#32;&#32;__r-&gt;_M_ref_nonnil();
+635 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2bits_2exception__defines_8h_1a130bf0cd31a0783cd03563f46b46915b">__try</link>
+636 &#32;&#32;&#32;&#32;{&#32;__result&#32;=&#32;_S_tree_concat(__r,&#32;__right);&#32;}
+637 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2bits_2exception__defines_8h_1a9e51d2f324c18a996a3e4f9a6ba0f6c2">__catch</link>(...)
+638 &#32;&#32;&#32;&#32;{
+639 &#32;&#32;&#32;&#32;&#32;&#32;_S_unref(__r);
+640 &#32;&#32;&#32;&#32;&#32;&#32;_S_unref(__right);
+641 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2bits_2exception__defines_8h_1a92ef03a5310b10a4243a6ec8f43494b5">__throw_exception_again</link>;
+642 &#32;&#32;&#32;&#32;}
+643 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__result;
+644 &#32;&#32;&#32;&#32;}
+645 <emphasis role="preprocessor">#endif&#32;</emphasis><emphasis role="comment">/*&#32;!__GC&#32;*/</emphasis><emphasis role="preprocessor"></emphasis>
+646 &#32;&#32;
+647 &#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">class</emphasis>&#32;_CharT,&#32;<emphasis role="keyword">class</emphasis>&#32;_Alloc&gt;
+648 &#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;rope&lt;_CharT,&#32;_Alloc&gt;::_RopeRep*
+649 &#32;&#32;&#32;&#32;rope&lt;_CharT,&#32;_Alloc&gt;::
+650 &#32;&#32;&#32;&#32;_S_concat(_RopeRep*&#32;__left,&#32;_RopeRep*&#32;__right)
+651 &#32;&#32;&#32;&#32;{
+652 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">using&#32;</emphasis>std::size_t;
+653 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(0&#32;==&#32;__left)
+654 &#32;&#32;&#32;&#32;{
+655 &#32;&#32;&#32;&#32;&#32;&#32;_S_ref(__right);
+656 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__right;
+657 &#32;&#32;&#32;&#32;}
+658 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(0&#32;==&#32;__right)
+659 &#32;&#32;&#32;&#32;{
+660 &#32;&#32;&#32;&#32;&#32;&#32;__left-&gt;_M_ref_nonnil();
+661 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__left;
+662 &#32;&#32;&#32;&#32;}
+663 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__detail::_S_leaf&#32;==&#32;__right-&gt;_M_tag)
+664 &#32;&#32;&#32;&#32;{
+665 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__detail::_S_leaf&#32;==&#32;__left-&gt;_M_tag)
+666 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+667 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__right-&gt;_M_size&#32;+&#32;__left-&gt;_M_size&#32;&lt;=&#32;<emphasis role="keywordtype">size_t</emphasis>(_S_copy_max))
+668 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;_S_leaf_concat_char_iter((_RopeLeaf*)__left,
+669 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;((_RopeLeaf*)__right)-&gt;_M_data,
+670 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__right-&gt;_M_size);
+671 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+672 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__detail::_S_concat&#32;==&#32;__left-&gt;_M_tag
+673 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&amp;&amp;&#32;__detail::_S_leaf&#32;==&#32;((_RopeConcatenation*)
+674 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__left)-&gt;_M_right-&gt;_M_tag)
+675 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+676 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_RopeLeaf*&#32;__leftright&#32;=
+677 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;(_RopeLeaf*)(((_RopeConcatenation*)__left)-&gt;_M_right);
+678 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__leftright-&gt;_M_size
+679 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;+&#32;__right-&gt;_M_size&#32;&lt;=&#32;<emphasis role="keywordtype">size_t</emphasis>(_S_copy_max))
+680 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+681 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_RopeRep*&#32;__leftleft&#32;=&#32;((_RopeConcatenation*)__left)-&gt;_M_left;
+682 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_RopeRep*&#32;__rest&#32;=&#32;_S_leaf_concat_char_iter(__leftright,
+683 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;((_RopeLeaf*)
+684 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__right)-&gt;
+685 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_M_data,
+686 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__right-&gt;_M_size);
+687 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__leftleft-&gt;_M_ref_nonnil();
+688 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2bits_2exception__defines_8h_1a130bf0cd31a0783cd03563f46b46915b">__try</link>
+689 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>(_S_tree_concat(__leftleft,&#32;__rest));&#32;}
+690 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2bits_2exception__defines_8h_1a9e51d2f324c18a996a3e4f9a6ba0f6c2">__catch</link>(...)
+691 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+692 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_S_unref(__leftleft);
+693 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_S_unref(__rest);
+694 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2bits_2exception__defines_8h_1a92ef03a5310b10a4243a6ec8f43494b5">__throw_exception_again</link>;
+695 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+696 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+697 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+698 &#32;&#32;&#32;&#32;}
+699 &#32;&#32;&#32;&#32;&#32;&#32;__left-&gt;_M_ref_nonnil();
+700 &#32;&#32;&#32;&#32;&#32;&#32;__right-&gt;_M_ref_nonnil();
+701 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2bits_2exception__defines_8h_1a130bf0cd31a0783cd03563f46b46915b">__try</link>
+702 &#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>(_S_tree_concat(__left,&#32;__right));&#32;}
+703 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2bits_2exception__defines_8h_1a9e51d2f324c18a996a3e4f9a6ba0f6c2">__catch</link>(...)
+704 &#32;&#32;&#32;&#32;{
+705 &#32;&#32;&#32;&#32;&#32;&#32;_S_unref(__left);
+706 &#32;&#32;&#32;&#32;&#32;&#32;_S_unref(__right);
+707 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2bits_2exception__defines_8h_1a92ef03a5310b10a4243a6ec8f43494b5">__throw_exception_again</link>;
+708 &#32;&#32;&#32;&#32;}
+709 &#32;&#32;&#32;&#32;}
+710 
+711 &#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">class</emphasis>&#32;_CharT,&#32;<emphasis role="keyword">class</emphasis>&#32;_Alloc&gt;
+712 &#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;rope&lt;_CharT,&#32;_Alloc&gt;::_RopeRep*
+713 &#32;&#32;&#32;&#32;rope&lt;_CharT,&#32;_Alloc&gt;::
+714 &#32;&#32;&#32;&#32;_S_substring(_RopeRep*&#32;__base,&#32;std::size_t&#32;__start,&#32;std::size_t&#32;__endp1)
+715 &#32;&#32;&#32;&#32;{
+716 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">using&#32;</emphasis>std::size_t;
+717 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(0&#32;==&#32;__base)
+718 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;0;
+719 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;__len&#32;=&#32;__base-&gt;_M_size;
+720 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;__adj_endp1;
+721 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;__lazy_threshold&#32;=&#32;128;
+722 &#32;&#32;&#32;&#32;&#32;&#32;
+723 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__endp1&#32;&gt;=&#32;__len)
+724 &#32;&#32;&#32;&#32;{
+725 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(0&#32;==&#32;__start)
+726 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+727 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__base-&gt;_M_ref_nonnil();
+728 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__base;
+729 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+730 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>
+731 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__adj_endp1&#32;=&#32;__len;
+732 &#32;&#32;&#32;&#32;&#32;&#32;
+733 &#32;&#32;&#32;&#32;}
+734 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>
+735 &#32;&#32;&#32;&#32;__adj_endp1&#32;=&#32;__endp1;
+736 
+737 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">switch</emphasis>(__base-&gt;_M_tag)
+738 &#32;&#32;&#32;&#32;{
+739 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">case</emphasis>&#32;__detail::_S_concat:
+740 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+741 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_RopeConcatenation*&#32;__c&#32;=&#32;(_RopeConcatenation*)__base;
+742 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_RopeRep*&#32;__left&#32;=&#32;__c-&gt;_M_left;
+743 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_RopeRep*&#32;__right&#32;=&#32;__c-&gt;_M_right;
+744 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;__left_len&#32;=&#32;__left-&gt;_M_size;
+745 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_RopeRep*&#32;__result;
+746 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;
+747 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__adj_endp1&#32;&lt;=&#32;__left_len)
+748 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;_S_substring(__left,&#32;__start,&#32;__endp1);
+749 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__start&#32;&gt;=&#32;__left_len)
+750 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;_S_substring(__right,&#32;__start&#32;-&#32;__left_len,
+751 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__adj_endp1&#32;-&#32;__left_len);
+752 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_Self_destruct_ptr&#32;__left_result(_S_substring(__left,
+753 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__start,
+754 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__left_len));
+755 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_Self_destruct_ptr&#32;__right_result(_S_substring(__right,&#32;0,
+756 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__endp1&#32;
+757 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;-&#32;__left_len));
+758 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__result&#32;=&#32;_S_concat(__left_result,&#32;__right_result);
+759 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__result;
+760 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+761 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">case</emphasis>&#32;__detail::_S_leaf:
+762 &#32;&#32;&#32;&#32;&#32;&#32;{
+763 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_RopeLeaf*&#32;__l&#32;=&#32;(_RopeLeaf*)__base;
+764 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_RopeLeaf*&#32;__result;
+765 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;__result_len;
+766 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__start&#32;&gt;=&#32;__adj_endp1)
+767 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;0;
+768 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__result_len&#32;=&#32;__adj_endp1&#32;-&#32;__start;
+769 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__result_len&#32;&gt;&#32;__lazy_threshold)
+770 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">goto</emphasis>&#32;lazy;
+771 <emphasis role="preprocessor">#ifdef&#32;__GC</emphasis>
+772 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;_CharT*&#32;__section&#32;=&#32;__l-&gt;_M_data&#32;+&#32;__start;
+773 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__result&#32;=&#32;_S_new_RopeLeaf(__section,&#32;__result_len,
+774 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__base-&gt;_M_get_allocator());
+775 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__result-&gt;_M_c_string&#32;=&#32;0;&#32;&#32;<emphasis role="comment">//&#32;Not&#32;eos&#32;terminated.</emphasis>
+776 <emphasis role="preprocessor">#else</emphasis>
+777 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;We&#32;should&#32;sometimes&#32;create&#32;substring&#32;node&#32;instead.</emphasis>
+778 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__result&#32;=&#32;__STL_ROPE_FROM_UNOWNED_CHAR_PTR(__l-&gt;_M_data&#32;+&#32;__start,
+779 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__result_len,
+780 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__base-&gt;
+781 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_M_get_allocator());
+782 <emphasis role="preprocessor">#endif</emphasis>
+783 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__result;
+784 &#32;&#32;&#32;&#32;&#32;&#32;}
+785 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">case</emphasis>&#32;__detail::_S_substringfn:
+786 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Avoid&#32;introducing&#32;multiple&#32;layers&#32;of&#32;substring&#32;nodes.</emphasis>
+787 &#32;&#32;&#32;&#32;&#32;&#32;{
+788 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_RopeSubstring*&#32;__old&#32;=&#32;(_RopeSubstring*)__base;
+789 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;__result_len;
+790 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__start&#32;&gt;=&#32;__adj_endp1)
+791 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;0;
+792 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__result_len&#32;=&#32;__adj_endp1&#32;-&#32;__start;
+793 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__result_len&#32;&gt;&#32;__lazy_threshold)
+794 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+795 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_RopeSubstring*&#32;__result&#32;=
+796 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_S_new_RopeSubstring(__old-&gt;_M_base,
+797 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__start&#32;+&#32;__old-&gt;_M_start,
+798 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__adj_endp1&#32;-&#32;__start,
+799 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__base-&gt;_M_get_allocator());
+800 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__result;
+801 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;
+802 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}&#32;<emphasis role="comment">//&#32;***&#32;else&#32;fall&#32;through:&#32;***</emphasis>
+803 &#32;&#32;&#32;&#32;&#32;&#32;}
+804 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">case</emphasis>&#32;__detail::_S_function:
+805 &#32;&#32;&#32;&#32;&#32;&#32;{
+806 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_RopeFunction*&#32;__f&#32;=&#32;(_RopeFunction*)__base;
+807 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_CharT*&#32;__section;
+808 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;__result_len;
+809 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__start&#32;&gt;=&#32;__adj_endp1)
+810 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;0;
+811 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__result_len&#32;=&#32;__adj_endp1&#32;-&#32;__start;
+812 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;
+813 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__result_len&#32;&gt;&#32;__lazy_threshold)
+814 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">goto</emphasis>&#32;lazy;
+815 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__section&#32;=&#32;(_CharT*)
+816 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;rope::_Data_allocate(_S_rounded_up_size(__result_len));
+817 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2bits_2exception__defines_8h_1a130bf0cd31a0783cd03563f46b46915b">__try</link>
+818 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{&#32;(*(__f-&gt;_M_fn))(__start,&#32;__result_len,&#32;__section);&#32;}
+819 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2bits_2exception__defines_8h_1a9e51d2f324c18a996a3e4f9a6ba0f6c2">__catch</link>(...)
+820 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+821 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_RopeRep::__STL_FREE_STRING(__section,&#32;__result_len,
+822 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__base-&gt;_M_get_allocator());
+823 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2bits_2exception__defines_8h_1a92ef03a5310b10a4243a6ec8f43494b5">__throw_exception_again</link>;
+824 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+825 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_S_cond_store_eos(__section[__result_len]);
+826 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;_S_new_RopeLeaf(__section,&#32;__result_len,
+827 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__base-&gt;_M_get_allocator());
+828 &#32;&#32;&#32;&#32;&#32;&#32;}
+829 &#32;&#32;&#32;&#32;}
+830 &#32;&#32;&#32;&#32;lazy:
+831 &#32;&#32;&#32;&#32;&#32;&#32;{
+832 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Create&#32;substring&#32;node.</emphasis>
+833 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;_S_new_RopeSubstring(__base,&#32;__start,&#32;__adj_endp1&#32;-&#32;__start,
+834 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__base-&gt;_M_get_allocator());
+835 &#32;&#32;&#32;&#32;&#32;&#32;}
+836 &#32;&#32;&#32;&#32;}
+837 
+838 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">class</emphasis>&#32;_CharT&gt;
+839 &#32;&#32;&#32;&#32;<emphasis role="keyword">class&#32;</emphasis>_Rope_flatten_char_consumer
+840 &#32;&#32;&#32;&#32;:&#32;<emphasis role="keyword">public</emphasis>&#32;_Rope_char_consumer&lt;_CharT&gt;
+841 &#32;&#32;&#32;&#32;{
+842 &#32;&#32;&#32;&#32;<emphasis role="keyword">private</emphasis>:
+843 &#32;&#32;&#32;&#32;&#32;&#32;_CharT*&#32;_M_buf_ptr;
+844 &#32;&#32;&#32;&#32;<emphasis role="keyword">public</emphasis>:
+845 &#32;&#32;&#32;&#32;&#32;&#32;
+846 &#32;&#32;&#32;&#32;&#32;&#32;_Rope_flatten_char_consumer(_CharT*&#32;__buffer)
+847 &#32;&#32;&#32;&#32;&#32;&#32;{&#32;_M_buf_ptr&#32;=&#32;__buffer;&#32;}
+848 
+849 &#32;&#32;&#32;&#32;&#32;&#32;~_Rope_flatten_char_consumer()&#32;{}
+850 &#32;&#32;&#32;&#32;&#32;&#32;
+851 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">bool</emphasis>
+852 &#32;&#32;&#32;&#32;&#32;&#32;operator()(<emphasis role="keyword">const</emphasis>&#32;_CharT*&#32;__leaf,&#32;std::size_t&#32;__n)
+853 &#32;&#32;&#32;&#32;&#32;&#32;{
+854 &#32;&#32;&#32;&#32;uninitialized_copy_n(__leaf,&#32;__n,&#32;_M_buf_ptr);
+855 &#32;&#32;&#32;&#32;_M_buf_ptr&#32;+=&#32;__n;
+856 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<emphasis role="keyword">true</emphasis>;
+857 &#32;&#32;&#32;&#32;&#32;&#32;}
+858 &#32;&#32;&#32;&#32;};
+859 
+860 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">class</emphasis>&#32;_CharT&gt;
+861 &#32;&#32;&#32;&#32;<emphasis role="keyword">class&#32;</emphasis>_Rope_find_char_char_consumer
+862 &#32;&#32;&#32;&#32;:&#32;<emphasis role="keyword">public</emphasis>&#32;_Rope_char_consumer&lt;_CharT&gt;
+863 &#32;&#32;&#32;&#32;{
+864 &#32;&#32;&#32;&#32;<emphasis role="keyword">private</emphasis>:
+865 &#32;&#32;&#32;&#32;&#32;&#32;_CharT&#32;_M_pattern;
+866 &#32;&#32;&#32;&#32;<emphasis role="keyword">public</emphasis>:
+867 &#32;&#32;&#32;&#32;&#32;&#32;std::size_t&#32;_M_count;&#32;&#32;<emphasis role="comment">//&#32;Number&#32;of&#32;nonmatching&#32;characters</emphasis>
+868 &#32;&#32;&#32;&#32;&#32;&#32;
+869 &#32;&#32;&#32;&#32;&#32;&#32;_Rope_find_char_char_consumer(_CharT&#32;__p)
+870 &#32;&#32;&#32;&#32;&#32;&#32;:&#32;_M_pattern(__p),&#32;_M_count(0)&#32;{}
+871 &#32;&#32;&#32;&#32;
+872 &#32;&#32;&#32;&#32;&#32;&#32;~_Rope_find_char_char_consumer()&#32;{}
+873 &#32;&#32;&#32;&#32;&#32;&#32;
+874 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">bool</emphasis>
+875 &#32;&#32;&#32;&#32;&#32;&#32;operator()(<emphasis role="keyword">const</emphasis>&#32;_CharT*&#32;__leaf,&#32;std::size_t&#32;__n)
+876 &#32;&#32;&#32;&#32;&#32;&#32;{
+877 &#32;&#32;&#32;&#32;std::size_t&#32;__i;
+878 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(__i&#32;=&#32;0;&#32;__i&#32;&lt;&#32;__n;&#32;__i++)
+879 &#32;&#32;&#32;&#32;&#32;&#32;{
+880 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__leaf[__i]&#32;==&#32;_M_pattern)
+881 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+882 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_M_count&#32;+=&#32;__i;
+883 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<emphasis role="keyword">false</emphasis>;
+884 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+885 &#32;&#32;&#32;&#32;&#32;&#32;}
+886 &#32;&#32;&#32;&#32;_M_count&#32;+=&#32;__n;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<emphasis role="keyword">true</emphasis>;
+887 &#32;&#32;&#32;&#32;&#32;&#32;}
+888 &#32;&#32;&#32;&#32;};
+889 
+890 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">class</emphasis>&#32;_CharT,&#32;<emphasis role="keyword">class</emphasis>&#32;_Traits&gt;
+891 &#32;&#32;<emphasis role="comment">//&#32;Here&#32;_CharT&#32;is&#32;both&#32;the&#32;stream&#32;and&#32;rope&#32;character&#32;type.</emphasis>
+892 &#32;&#32;&#32;&#32;<emphasis role="keyword">class&#32;</emphasis>_Rope_insert_char_consumer
+893 &#32;&#32;&#32;&#32;:&#32;<emphasis role="keyword">public</emphasis>&#32;_Rope_char_consumer&lt;_CharT&gt;
+894 &#32;&#32;&#32;&#32;{
+895 &#32;&#32;&#32;&#32;<emphasis role="keyword">private</emphasis>:
+896 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;std::basic_ostream&lt;_CharT,_Traits&gt;&#32;_Insert_ostream;
+897 &#32;&#32;&#32;&#32;&#32;&#32;_Insert_ostream&amp;&#32;_M_o;
+898 &#32;&#32;&#32;&#32;<emphasis role="keyword">public</emphasis>:
+899 &#32;&#32;&#32;&#32;&#32;&#32;_Rope_insert_char_consumer(_Insert_ostream&amp;&#32;__writer)
+900 &#32;&#32;&#32;&#32;:&#32;_M_o(__writer)&#32;{}
+901 &#32;&#32;&#32;&#32;&#32;&#32;~_Rope_insert_char_consumer()&#32;{&#32;}
+902 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Caller&#32;is&#32;presumed&#32;to&#32;own&#32;the&#32;ostream</emphasis>
+903 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">bool</emphasis>&#32;operator()&#32;(<emphasis role="keyword">const</emphasis>&#32;_CharT*&#32;__leaf,&#32;std::size_t&#32;__n);
+904 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Returns&#32;true&#32;to&#32;continue&#32;traversal.</emphasis>
+905 &#32;&#32;&#32;&#32;};
+906 
+907 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">class</emphasis>&#32;_CharT,&#32;<emphasis role="keyword">class</emphasis>&#32;_Traits&gt;
+908 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">bool</emphasis>
+909 &#32;&#32;&#32;&#32;_Rope_insert_char_consumer&lt;_CharT,&#32;_Traits&gt;::
+910 &#32;&#32;&#32;&#32;operator()(<emphasis role="keyword">const</emphasis>&#32;_CharT*&#32;__leaf,&#32;std::size_t&#32;__n)
+911 &#32;&#32;&#32;&#32;{
+912 &#32;&#32;&#32;&#32;&#32;&#32;std::size_t&#32;__i;
+913 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;&#32;We&#32;assume&#32;that&#32;formatting&#32;is&#32;set&#32;up&#32;correctly&#32;for&#32;each&#32;element.</emphasis>
+914 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(__i&#32;=&#32;0;&#32;__i&#32;&lt;&#32;__n;&#32;__i++)
+915 &#32;&#32;&#32;&#32;_M_o.put(__leaf[__i]);
+916 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<emphasis role="keyword">true</emphasis>;
+917 &#32;&#32;&#32;&#32;}
+918 
+919 &#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">class</emphasis>&#32;_CharT,&#32;<emphasis role="keyword">class</emphasis>&#32;_Alloc&gt;
+920 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">bool</emphasis>
+921 &#32;&#32;&#32;&#32;rope&lt;_CharT,&#32;_Alloc&gt;::
+922 &#32;&#32;&#32;&#32;_S_apply_to_pieces(_Rope_char_consumer&lt;_CharT&gt;&amp;&#32;__c,&#32;<emphasis role="keyword">const</emphasis>&#32;_RopeRep*&#32;__r,
+923 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;std::size_t&#32;__begin,&#32;std::size_t&#32;__end)
+924 &#32;&#32;&#32;&#32;{
+925 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">using&#32;</emphasis>std::size_t;
+926 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(0&#32;==&#32;__r)
+927 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<emphasis role="keyword">true</emphasis>;
+928 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">switch</emphasis>(__r-&gt;_M_tag)
+929 &#32;&#32;&#32;&#32;{
+930 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">case</emphasis>&#32;__detail::_S_concat:
+931 &#32;&#32;&#32;&#32;&#32;&#32;{
+932 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_RopeConcatenation*&#32;__conc&#32;=&#32;(_RopeConcatenation*)__r;
+933 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_RopeRep*&#32;__left&#32;=&#32;&#32;__conc-&gt;_M_left;
+934 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;__left_len&#32;=&#32;__left-&gt;_M_size;
+935 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__begin&#32;&lt;&#32;__left_len)
+936 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+937 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;__left_end&#32;=&#32;std::min(__left_len,&#32;__end);
+938 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(!_S_apply_to_pieces(__c,&#32;__left,&#32;__begin,&#32;__left_end))
+939 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<emphasis role="keyword">false</emphasis>;
+940 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+941 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__end&#32;&gt;&#32;__left_len)
+942 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+943 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_RopeRep*&#32;__right&#32;=&#32;&#32;__conc-&gt;_M_right;
+944 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;__right_start&#32;=&#32;std::max(__left_len,&#32;__begin);
+945 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(!_S_apply_to_pieces(__c,&#32;__right,
+946 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__right_start&#32;-&#32;__left_len,
+947 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__end&#32;-&#32;__left_len))
+948 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<emphasis role="keyword">false</emphasis>;
+949 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+950 &#32;&#32;&#32;&#32;&#32;&#32;}
+951 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<emphasis role="keyword">true</emphasis>;
+952 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">case</emphasis>&#32;__detail::_S_leaf:
+953 &#32;&#32;&#32;&#32;&#32;&#32;{
+954 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_RopeLeaf*&#32;__l&#32;=&#32;(_RopeLeaf*)__r;
+955 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__c(__l-&gt;_M_data&#32;+&#32;__begin,&#32;__end&#32;-&#32;__begin);
+956 &#32;&#32;&#32;&#32;&#32;&#32;}
+957 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">case</emphasis>&#32;__detail::_S_function:
+958 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">case</emphasis>&#32;__detail::_S_substringfn:
+959 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+960 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_RopeFunction*&#32;__f&#32;=&#32;(_RopeFunction*)__r;
+961 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;__len&#32;=&#32;__end&#32;-&#32;__begin;
+962 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">bool</emphasis>&#32;__result;
+963 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_CharT*&#32;__buffer&#32;=
+964 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;(_CharT*)_Alloc().allocate(__len&#32;*&#32;<emphasis role="keyword">sizeof</emphasis>(_CharT));
+965 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2bits_2exception__defines_8h_1a130bf0cd31a0783cd03563f46b46915b">__try</link>
+966 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+967 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;(*(__f-&gt;_M_fn))(__begin,&#32;__len,&#32;__buffer);
+968 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__result&#32;=&#32;__c(__buffer,&#32;__len);
+969 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_Alloc().deallocate(__buffer,&#32;__len&#32;*&#32;<emphasis role="keyword">sizeof</emphasis>(_CharT));
+970 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+971 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2bits_2exception__defines_8h_1a9e51d2f324c18a996a3e4f9a6ba0f6c2">__catch</link>(...)
+972 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+973 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_Alloc().deallocate(__buffer,&#32;__len&#32;*&#32;<emphasis role="keyword">sizeof</emphasis>(_CharT));
+974 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2bits_2exception__defines_8h_1a92ef03a5310b10a4243a6ec8f43494b5">__throw_exception_again</link>;
+975 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+976 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__result;
+977 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+978 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">default</emphasis>:
+979 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<emphasis role="keyword">false</emphasis>;
+980 &#32;&#32;&#32;&#32;}
+981 &#32;&#32;&#32;&#32;}
+982 
+983 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">class</emphasis>&#32;_CharT,&#32;<emphasis role="keyword">class</emphasis>&#32;_Traits&gt;
+984 &#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>
+985 &#32;&#32;&#32;&#32;_Rope_fill(std::basic_ostream&lt;_CharT,&#32;_Traits&gt;&amp;&#32;__o,&#32;std::size_t&#32;__n)
+986 &#32;&#32;&#32;&#32;{
+987 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">char</emphasis>&#32;__f&#32;=&#32;__o.fill();
+988 &#32;&#32;&#32;&#32;&#32;&#32;std::size_t&#32;__i;
+989 &#32;&#32;&#32;&#32;&#32;&#32;
+990 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(__i&#32;=&#32;0;&#32;__i&#32;&lt;&#32;__n;&#32;__i++)
+991 &#32;&#32;&#32;&#32;__o.put(__f);
+992 &#32;&#32;&#32;&#32;}
+993 
+994 
+995 &#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">class</emphasis>&#32;_CharT&gt;
+996 &#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>
+997 &#32;&#32;&#32;&#32;_Rope_is_simple(_CharT*)
+998 &#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;<emphasis role="keyword">false</emphasis>;&#32;}
+999 
+1000 &#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>
+1001 &#32;&#32;_Rope_is_simple(<emphasis role="keywordtype">char</emphasis>*)
+1002 &#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;<emphasis role="keyword">true</emphasis>;&#32;}
+1003 
+1004 &#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>
+1005 &#32;&#32;_Rope_is_simple(<emphasis role="keywordtype">wchar_t</emphasis>*)
+1006 &#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;<emphasis role="keyword">true</emphasis>;&#32;}
+1007 
+1008 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">class</emphasis>&#32;_CharT,&#32;<emphasis role="keyword">class</emphasis>&#32;_Traits,&#32;<emphasis role="keyword">class</emphasis>&#32;_Alloc&gt;
+1009 &#32;&#32;&#32;&#32;std::basic_ostream&lt;_CharT,&#32;_Traits&gt;&amp;
+1010 &#32;&#32;&#32;&#32;<link linkend="_forward__declarations_8h_1ade7e3bc03b39cb3b5684a4c302832e3c">operator&lt;&lt;</link>(std::basic_ostream&lt;_CharT,&#32;_Traits&gt;&amp;&#32;__o,
+1011 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;rope&lt;_CharT,&#32;_Alloc&gt;&amp;&#32;__r)
+1012 &#32;&#32;&#32;&#32;{
+1013 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">using&#32;</emphasis>std::size_t;
+1014 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;__w&#32;=&#32;__o.width();
+1015 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">bool</emphasis>&#32;__left&#32;=&#32;<link linkend="__classes_2lib_2include_2stdbool_8h_1abb452686968e48b67397da5f97445f5b">bool</link>(__o.flags()&#32;&amp;&#32;std::ios::left);
+1016 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;__pad_len;
+1017 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;__rope_len&#32;=&#32;__r.size();
+1018 &#32;&#32;&#32;&#32;&#32;&#32;_Rope_insert_char_consumer&lt;_CharT,&#32;_Traits&gt;&#32;__c(__o);
+1019 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">bool</emphasis>&#32;__is_simple&#32;=&#32;_Rope_is_simple((_CharT*)0);
+1020 &#32;&#32;&#32;&#32;&#32;&#32;
+1021 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__rope_len&#32;&lt;&#32;__w)
+1022 &#32;&#32;&#32;&#32;__pad_len&#32;=&#32;__w&#32;-&#32;__rope_len;
+1023 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>
+1024 &#32;&#32;&#32;&#32;__pad_len&#32;=&#32;0;
+1025 
+1026 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(!__is_simple)
+1027 &#32;&#32;&#32;&#32;__o.width(__w&#32;/&#32;__rope_len);
+1028 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2bits_2exception__defines_8h_1a130bf0cd31a0783cd03563f46b46915b">__try</link>
+1029 &#32;&#32;&#32;&#32;{
+1030 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__is_simple&#32;&amp;&amp;&#32;!__left&#32;&amp;&amp;&#32;__pad_len&#32;&gt;&#32;0)
+1031 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_Rope_fill(__o,&#32;__pad_len);
+1032 &#32;&#32;&#32;&#32;&#32;&#32;__r.apply_to_pieces(0,&#32;__r.size(),&#32;__c);
+1033 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__is_simple&#32;&amp;&amp;&#32;__left&#32;&amp;&amp;&#32;__pad_len&#32;&gt;&#32;0)
+1034 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_Rope_fill(__o,&#32;__pad_len);
+1035 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(!__is_simple)
+1036 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__o.width(__w);
+1037 &#32;&#32;&#32;&#32;}
+1038 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2bits_2exception__defines_8h_1a9e51d2f324c18a996a3e4f9a6ba0f6c2">__catch</link>(...)
+1039 &#32;&#32;&#32;&#32;{
+1040 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(!__is_simple)
+1041 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__o.width(__w);
+1042 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2bits_2exception__defines_8h_1a92ef03a5310b10a4243a6ec8f43494b5">__throw_exception_again</link>;
+1043 &#32;&#32;&#32;&#32;}
+1044 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__o;
+1045 &#32;&#32;&#32;&#32;}
+1046 
+1047 &#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">class</emphasis>&#32;_CharT,&#32;<emphasis role="keyword">class</emphasis>&#32;_Alloc&gt;
+1048 &#32;&#32;&#32;&#32;_CharT*
+1049 &#32;&#32;&#32;&#32;rope&lt;_CharT,&#32;_Alloc&gt;::
+1050 &#32;&#32;&#32;&#32;_S_flatten(_RopeRep*&#32;__r,&#32;std::size_t&#32;__start,&#32;std::size_t&#32;__len,
+1051 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_CharT*&#32;__buffer)
+1052 &#32;&#32;&#32;&#32;{
+1053 &#32;&#32;&#32;&#32;&#32;&#32;_Rope_flatten_char_consumer&lt;_CharT&gt;&#32;__c(__buffer);
+1054 &#32;&#32;&#32;&#32;&#32;&#32;_S_apply_to_pieces(__c,&#32;__r,&#32;__start,&#32;__start&#32;+&#32;__len);
+1055 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>(__buffer&#32;+&#32;__len);
+1056 &#32;&#32;&#32;&#32;}
+1057 
+1058 &#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">class</emphasis>&#32;_CharT,&#32;<emphasis role="keyword">class</emphasis>&#32;_Alloc&gt;
+1059 &#32;&#32;&#32;&#32;std::size_t
+1060 &#32;&#32;&#32;&#32;rope&lt;_CharT,&#32;_Alloc&gt;::
+1061 &#32;&#32;&#32;&#32;find(_CharT&#32;__pattern,&#32;std::size_t&#32;__start)<emphasis role="keyword">&#32;const</emphasis>
+1062 <emphasis role="keyword">&#32;&#32;&#32;&#32;</emphasis>{
+1063 &#32;&#32;&#32;&#32;&#32;&#32;_Rope_find_char_char_consumer&lt;_CharT&gt;&#32;__c(__pattern);
+1064 &#32;&#32;&#32;&#32;&#32;&#32;_S_apply_to_pieces(__c,&#32;this-&gt;_M_tree_ptr,&#32;__start,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a3d1e3edfcf61ca2d831883e1afbad89e">size</link>());
+1065 &#32;&#32;&#32;&#32;&#32;&#32;size_type&#32;__result_pos&#32;=&#32;__start&#32;+&#32;__c._M_count;
+1066 <emphasis role="preprocessor">#ifndef&#32;__STL_OLD_ROPE_SEMANTICS</emphasis>
+1067 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__result_pos&#32;==&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a3d1e3edfcf61ca2d831883e1afbad89e">size</link>())
+1068 &#32;&#32;&#32;&#32;__result_pos&#32;=&#32;npos;
+1069 <emphasis role="preprocessor">#endif</emphasis>
+1070 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__result_pos;
+1071 &#32;&#32;&#32;&#32;}
+1072 
+1073 &#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">class</emphasis>&#32;_CharT,&#32;<emphasis role="keyword">class</emphasis>&#32;_Alloc&gt;
+1074 &#32;&#32;&#32;&#32;_CharT*
+1075 &#32;&#32;&#32;&#32;rope&lt;_CharT,&#32;_Alloc&gt;::
+1076 &#32;&#32;&#32;&#32;_S_flatten(_RopeRep*&#32;__r,&#32;_CharT*&#32;__buffer)
+1077 &#32;&#32;&#32;&#32;{
+1078 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(0&#32;==&#32;__r)
+1079 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__buffer;
+1080 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">switch</emphasis>(__r-&gt;_M_tag)
+1081 &#32;&#32;&#32;&#32;{
+1082 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">case</emphasis>&#32;__detail::_S_concat:
+1083 &#32;&#32;&#32;&#32;&#32;&#32;{
+1084 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_RopeConcatenation*&#32;__c&#32;=&#32;(_RopeConcatenation*)__r;
+1085 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_RopeRep*&#32;__left&#32;=&#32;__c-&gt;_M_left;
+1086 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_RopeRep*&#32;__right&#32;=&#32;__c-&gt;_M_right;
+1087 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_CharT*&#32;__rest&#32;=&#32;_S_flatten(__left,&#32;__buffer);
+1088 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;_S_flatten(__right,&#32;__rest);
+1089 &#32;&#32;&#32;&#32;&#32;&#32;}
+1090 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">case</emphasis>&#32;__detail::_S_leaf:
+1091 &#32;&#32;&#32;&#32;&#32;&#32;{
+1092 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_RopeLeaf*&#32;__l&#32;=&#32;(_RopeLeaf*)__r;
+1093 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;copy_n(__l-&gt;_M_data,&#32;__l-&gt;_M_size,&#32;__buffer).second;
+1094 &#32;&#32;&#32;&#32;&#32;&#32;}
+1095 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">case</emphasis>&#32;__detail::_S_function:
+1096 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">case</emphasis>&#32;__detail::_S_substringfn:
+1097 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;We&#32;don&apos;t&#32;yet&#32;do&#32;anything&#32;with&#32;substring&#32;nodes.</emphasis>
+1098 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;This&#32;needs&#32;to&#32;be&#32;fixed&#32;before&#32;ropefiles&#32;will&#32;work&#32;well.</emphasis>
+1099 &#32;&#32;&#32;&#32;&#32;&#32;{
+1100 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_RopeFunction*&#32;__f&#32;=&#32;(_RopeFunction*)__r;
+1101 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;(*(__f-&gt;_M_fn))(0,&#32;__f-&gt;_M_size,&#32;__buffer);
+1102 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__buffer&#32;+&#32;__f-&gt;_M_size;
+1103 &#32;&#32;&#32;&#32;&#32;&#32;}
+1104 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">default</emphasis>:
+1105 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;0;
+1106 &#32;&#32;&#32;&#32;}
+1107 &#32;&#32;&#32;&#32;}
+1108 
+1109 &#32;&#32;<emphasis role="comment">//&#32;This&#32;needs&#32;work&#32;for&#32;_CharT&#32;!=&#32;char</emphasis>
+1110 &#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">class</emphasis>&#32;_CharT,&#32;<emphasis role="keyword">class</emphasis>&#32;_Alloc&gt;
+1111 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+1112 &#32;&#32;&#32;&#32;rope&lt;_CharT,&#32;_Alloc&gt;::
+1113 &#32;&#32;&#32;&#32;_S_dump(_RopeRep*&#32;__r,&#32;<emphasis role="keywordtype">int</emphasis>&#32;__indent)
+1114 &#32;&#32;&#32;&#32;{
+1115 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">using&#32;</emphasis>std::printf;
+1116 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(<emphasis role="keywordtype">int</emphasis>&#32;__i&#32;=&#32;0;&#32;__i&#32;&lt;&#32;__indent;&#32;__i++)
+1117 &#32;&#32;&#32;&#32;putchar(<emphasis role="charliteral">&apos;&#32;&apos;</emphasis>);
+1118 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(0&#32;==&#32;__r)
+1119 &#32;&#32;&#32;&#32;{
+1120 &#32;&#32;&#32;&#32;&#32;&#32;printf(<emphasis role="stringliteral">&quot;NULL\n&quot;</emphasis>);
+1121 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>;
+1122 &#32;&#32;&#32;&#32;}
+1123 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__detail::_S_concat&#32;==&#32;__r-&gt;_M_tag)
+1124 &#32;&#32;&#32;&#32;{
+1125 &#32;&#32;&#32;&#32;&#32;&#32;_RopeConcatenation*&#32;__c&#32;=&#32;(_RopeConcatenation*)__r;
+1126 &#32;&#32;&#32;&#32;&#32;&#32;_RopeRep*&#32;__left&#32;=&#32;__c-&gt;_M_left;
+1127 &#32;&#32;&#32;&#32;&#32;&#32;_RopeRep*&#32;__right&#32;=&#32;__c-&gt;_M_right;
+1128 &#32;&#32;&#32;&#32;&#32;&#32;
+1129 <emphasis role="preprocessor">#ifdef&#32;__GC</emphasis>
+1130 &#32;&#32;&#32;&#32;&#32;&#32;printf(<emphasis role="stringliteral">&quot;Concatenation&#32;%p&#32;(depth&#32;=&#32;%d,&#32;len&#32;=&#32;%ld,&#32;%s&#32;balanced)\n&quot;</emphasis>,
+1131 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__r,&#32;__r-&gt;_M_depth,&#32;__r-&gt;_M_size,
+1132 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__r-&gt;_M_is_balanced?&#32;<emphasis role="stringliteral">&quot;&quot;</emphasis>&#32;:&#32;<emphasis role="stringliteral">&quot;not&quot;</emphasis>);
+1133 <emphasis role="preprocessor">#else</emphasis>
+1134 &#32;&#32;&#32;&#32;&#32;&#32;printf(<emphasis role="stringliteral">&quot;Concatenation&#32;%p&#32;(rc&#32;=&#32;%ld,&#32;depth&#32;=&#32;%d,&#32;&quot;</emphasis>
+1135 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="stringliteral">&quot;len&#32;=&#32;%ld,&#32;%s&#32;balanced)\n&quot;</emphasis>,
+1136 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__r,&#32;__r-&gt;_M_ref_count,&#32;__r-&gt;_M_depth,&#32;__r-&gt;_M_size,
+1137 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__r-&gt;_M_is_balanced?&#32;<emphasis role="stringliteral">&quot;&quot;</emphasis>&#32;:&#32;<emphasis role="stringliteral">&quot;not&quot;</emphasis>);
+1138 <emphasis role="preprocessor">#endif</emphasis>
+1139 &#32;&#32;&#32;&#32;&#32;&#32;_S_dump(__left,&#32;__indent&#32;+&#32;2);
+1140 &#32;&#32;&#32;&#32;&#32;&#32;_S_dump(__right,&#32;__indent&#32;+&#32;2);
+1141 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>;
+1142 &#32;&#32;&#32;&#32;}
+1143 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>
+1144 &#32;&#32;&#32;&#32;{
+1145 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>*&#32;__kind;
+1146 &#32;&#32;&#32;&#32;&#32;&#32;
+1147 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">switch</emphasis>&#32;(__r-&gt;_M_tag)
+1148 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+1149 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">case</emphasis>&#32;__detail::_S_leaf:
+1150 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__kind&#32;=&#32;<emphasis role="stringliteral">&quot;Leaf&quot;</emphasis>;
+1151 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">break</emphasis>;
+1152 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">case</emphasis>&#32;__detail::_S_function:
+1153 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__kind&#32;=&#32;<emphasis role="stringliteral">&quot;Function&quot;</emphasis>;
+1154 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">break</emphasis>;
+1155 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">case</emphasis>&#32;__detail::_S_substringfn:
+1156 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__kind&#32;=&#32;<emphasis role="stringliteral">&quot;Function&#32;representing&#32;substring&quot;</emphasis>;
+1157 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">break</emphasis>;
+1158 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">default</emphasis>:
+1159 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__kind&#32;=&#32;<emphasis role="stringliteral">&quot;(corrupted&#32;kind&#32;field!)&quot;</emphasis>;
+1160 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+1161 <emphasis role="preprocessor">#ifdef&#32;__GC</emphasis>
+1162 &#32;&#32;&#32;&#32;&#32;&#32;printf(<emphasis role="stringliteral">&quot;%s&#32;%p&#32;(depth&#32;=&#32;%d,&#32;len&#32;=&#32;%ld)&#32;&quot;</emphasis>,
+1163 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__kind,&#32;__r,&#32;__r-&gt;_M_depth,&#32;__r-&gt;_M_size);
+1164 <emphasis role="preprocessor">#else</emphasis>
+1165 &#32;&#32;&#32;&#32;&#32;&#32;printf(<emphasis role="stringliteral">&quot;%s&#32;%p&#32;(rc&#32;=&#32;%ld,&#32;depth&#32;=&#32;%d,&#32;len&#32;=&#32;%ld)&#32;&quot;</emphasis>,
+1166 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__kind,&#32;__r,&#32;__r-&gt;_M_ref_count,&#32;__r-&gt;_M_depth,&#32;__r-&gt;_M_size);
+1167 <emphasis role="preprocessor">#endif</emphasis>
+1168 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(_S_is_one_byte_char_type((_CharT*)0))
+1169 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+1170 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;__max_len&#32;=&#32;40;
+1171 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_Self_destruct_ptr&#32;__prefix(_S_substring(__r,&#32;0,&#32;__max_len));
+1172 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_CharT&#32;__buffer[__max_len&#32;+&#32;1];
+1173 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">bool</emphasis>&#32;__too_big&#32;=&#32;__r-&gt;_M_size&#32;&gt;&#32;__prefix-&gt;_M_size;
+1174 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;
+1175 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_S_flatten(__prefix,&#32;__buffer);
+1176 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__buffer[__prefix-&gt;_M_size]&#32;=&#32;_S_eos((_CharT*)0);
+1177 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;printf(<emphasis role="stringliteral">&quot;%s%s\n&quot;</emphasis>,&#32;(<emphasis role="keywordtype">char</emphasis>*)__buffer,
+1178 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__too_big?&#32;<emphasis role="stringliteral">&quot;...\n&quot;</emphasis>&#32;:&#32;<emphasis role="stringliteral">&quot;\n&quot;</emphasis>);
+1179 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+1180 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>
+1181 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;printf(<emphasis role="stringliteral">&quot;\n&quot;</emphasis>);
+1182 &#32;&#32;&#32;&#32;}
+1183 &#32;&#32;&#32;&#32;}
+1184 
+1185 &#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">class</emphasis>&#32;_CharT,&#32;<emphasis role="keyword">class</emphasis>&#32;_Alloc&gt;
+1186 &#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">long</emphasis>
+1187 &#32;&#32;&#32;&#32;rope&lt;_CharT,&#32;_Alloc&gt;::
+1188 &#32;&#32;&#32;&#32;_S_min_len[int(__detail::_S_max_rope_depth)&#32;+&#32;1]&#32;=&#32;{
+1189 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">/*&#32;0&#32;*/</emphasis>1,&#32;<emphasis role="comment">/*&#32;1&#32;*/</emphasis>2,&#32;<emphasis role="comment">/*&#32;2&#32;*/</emphasis>3,&#32;<emphasis role="comment">/*&#32;3&#32;*/</emphasis>5,&#32;<emphasis role="comment">/*&#32;4&#32;*/</emphasis>8,&#32;<emphasis role="comment">/*&#32;5&#32;*/</emphasis>13,&#32;<emphasis role="comment">/*&#32;6&#32;*/</emphasis>21,
+1190 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">/*&#32;7&#32;*/</emphasis>34,&#32;<emphasis role="comment">/*&#32;8&#32;*/</emphasis>55,&#32;<emphasis role="comment">/*&#32;9&#32;*/</emphasis>89,&#32;<emphasis role="comment">/*&#32;10&#32;*/</emphasis>144,&#32;<emphasis role="comment">/*&#32;11&#32;*/</emphasis>233,&#32;<emphasis role="comment">/*&#32;12&#32;*/</emphasis>377,
+1191 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">/*&#32;13&#32;*/</emphasis>610,&#32;<emphasis role="comment">/*&#32;14&#32;*/</emphasis>987,&#32;<emphasis role="comment">/*&#32;15&#32;*/</emphasis>1597,&#32;<emphasis role="comment">/*&#32;16&#32;*/</emphasis>2584,&#32;<emphasis role="comment">/*&#32;17&#32;*/</emphasis>4181,
+1192 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">/*&#32;18&#32;*/</emphasis>6765,&#32;<emphasis role="comment">/*&#32;19&#32;*/</emphasis>10946,&#32;<emphasis role="comment">/*&#32;20&#32;*/</emphasis>17711,&#32;<emphasis role="comment">/*&#32;21&#32;*/</emphasis>28657,&#32;<emphasis role="comment">/*&#32;22&#32;*/</emphasis>46368,
+1193 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">/*&#32;23&#32;*/</emphasis>75025,&#32;<emphasis role="comment">/*&#32;24&#32;*/</emphasis>121393,&#32;<emphasis role="comment">/*&#32;25&#32;*/</emphasis>196418,&#32;<emphasis role="comment">/*&#32;26&#32;*/</emphasis>317811,
+1194 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">/*&#32;27&#32;*/</emphasis>514229,&#32;<emphasis role="comment">/*&#32;28&#32;*/</emphasis>832040,&#32;<emphasis role="comment">/*&#32;29&#32;*/</emphasis>1346269,&#32;<emphasis role="comment">/*&#32;30&#32;*/</emphasis>2178309,
+1195 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">/*&#32;31&#32;*/</emphasis>3524578,&#32;<emphasis role="comment">/*&#32;32&#32;*/</emphasis>5702887,&#32;<emphasis role="comment">/*&#32;33&#32;*/</emphasis>9227465,&#32;<emphasis role="comment">/*&#32;34&#32;*/</emphasis>14930352,
+1196 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">/*&#32;35&#32;*/</emphasis>24157817,&#32;<emphasis role="comment">/*&#32;36&#32;*/</emphasis>39088169,&#32;<emphasis role="comment">/*&#32;37&#32;*/</emphasis>63245986,&#32;<emphasis role="comment">/*&#32;38&#32;*/</emphasis>102334155,
+1197 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">/*&#32;39&#32;*/</emphasis>165580141,&#32;<emphasis role="comment">/*&#32;40&#32;*/</emphasis>267914296,&#32;<emphasis role="comment">/*&#32;41&#32;*/</emphasis>433494437,
+1198 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">/*&#32;42&#32;*/</emphasis>701408733,&#32;<emphasis role="comment">/*&#32;43&#32;*/</emphasis>1134903170,&#32;<emphasis role="comment">/*&#32;44&#32;*/</emphasis>1836311903,
+1199 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">/*&#32;45&#32;*/</emphasis>2971215073u&#32;};
+1200 &#32;&#32;<emphasis role="comment">//&#32;These&#32;are&#32;Fibonacci&#32;numbers&#32;&lt;&#32;2**32.</emphasis>
+1201 
+1202 &#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">class</emphasis>&#32;_CharT,&#32;<emphasis role="keyword">class</emphasis>&#32;_Alloc&gt;
+1203 &#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;rope&lt;_CharT,&#32;_Alloc&gt;::_RopeRep*
+1204 &#32;&#32;&#32;&#32;rope&lt;_CharT,&#32;_Alloc&gt;::
+1205 &#32;&#32;&#32;&#32;_S_balance(_RopeRep*&#32;__r)
+1206 &#32;&#32;&#32;&#32;{
+1207 &#32;&#32;&#32;&#32;&#32;&#32;_RopeRep*&#32;__forest[int(__detail::_S_max_rope_depth)&#32;+&#32;1];
+1208 &#32;&#32;&#32;&#32;&#32;&#32;_RopeRep*&#32;__result&#32;=&#32;0;
+1209 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;__i;
+1210 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Invariant:</emphasis>
+1211 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;The&#32;concatenation&#32;of&#32;forest&#32;in&#32;descending&#32;order&#32;is&#32;equal&#32;to&#32;__r.</emphasis>
+1212 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;__forest[__i]._M_size&#32;&gt;=&#32;_S_min_len[__i]</emphasis>
+1213 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;__forest[__i]._M_depth&#32;=&#32;__i</emphasis>
+1214 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;References&#32;from&#32;forest&#32;are&#32;included&#32;in&#32;refcount.</emphasis>
+1215 &#32;&#32;&#32;&#32;&#32;&#32;
+1216 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(__i&#32;=&#32;0;&#32;__i&#32;&lt;=&#32;int(__detail::_S_max_rope_depth);&#32;++__i)
+1217 &#32;&#32;&#32;&#32;__forest[__i]&#32;=&#32;0;
+1218 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2bits_2exception__defines_8h_1a130bf0cd31a0783cd03563f46b46915b">__try</link>
+1219 &#32;&#32;&#32;&#32;{
+1220 &#32;&#32;&#32;&#32;&#32;&#32;_S_add_to_forest(__r,&#32;__forest);
+1221 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(__i&#32;=&#32;0;&#32;__i&#32;&lt;=&#32;int(__detail::_S_max_rope_depth);&#32;++__i)
+1222 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(0&#32;!=&#32;__forest[__i])
+1223 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+1224 <emphasis role="preprocessor">#ifndef&#32;__GC</emphasis>
+1225 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_Self_destruct_ptr&#32;__old(__result);
+1226 <emphasis role="preprocessor">#endif</emphasis>
+1227 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__result&#32;=&#32;_S_concat(__forest[__i],&#32;__result);
+1228 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__forest[__i]-&gt;_M_unref_nonnil();
+1229 <emphasis role="preprocessor">#if&#32;!defined(__GC)&#32;&amp;&amp;&#32;__cpp_exceptions</emphasis>
+1230 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__forest[__i]&#32;=&#32;0;
+1231 <emphasis role="preprocessor">#endif</emphasis>
+1232 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+1233 &#32;&#32;&#32;&#32;}
+1234 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2bits_2exception__defines_8h_1a9e51d2f324c18a996a3e4f9a6ba0f6c2">__catch</link>(...)
+1235 &#32;&#32;&#32;&#32;{
+1236 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>(__i&#32;=&#32;0;&#32;__i&#32;&lt;=&#32;int(__detail::_S_max_rope_depth);&#32;__i++)
+1237 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_S_unref(__forest[__i]);
+1238 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2bits_2exception__defines_8h_1a92ef03a5310b10a4243a6ec8f43494b5">__throw_exception_again</link>;
+1239 &#32;&#32;&#32;&#32;}
+1240 &#32;&#32;&#32;&#32;&#32;&#32;
+1241 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__result-&gt;_M_depth&#32;&gt;&#32;<emphasis role="keywordtype">int</emphasis>(__detail::_S_max_rope_depth))
+1242 &#32;&#32;&#32;&#32;std::__throw_length_error(<link linkend="__classes_2lib_2include_2c_09_09_2x86__64-w64-mingw32_2bits_2c_09_09config_8h_1ad90b1fa000da1666f104c4dd9c0d7f9b">__N</link>(<emphasis role="stringliteral">&quot;rope::_S_balance&quot;</emphasis>));
+1243 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>(__result);
+1244 &#32;&#32;&#32;&#32;}
+1245 
+1246 &#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">class</emphasis>&#32;_CharT,&#32;<emphasis role="keyword">class</emphasis>&#32;_Alloc&gt;
+1247 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+1248 &#32;&#32;&#32;&#32;rope&lt;_CharT,&#32;_Alloc&gt;::
+1249 &#32;&#32;&#32;&#32;_S_add_to_forest(_RopeRep*&#32;__r,&#32;_RopeRep**&#32;__forest)
+1250 &#32;&#32;&#32;&#32;{
+1251 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__r-&gt;_M_is_balanced)
+1252 &#32;&#32;&#32;&#32;{
+1253 &#32;&#32;&#32;&#32;&#32;&#32;_S_add_leaf_to_forest(__r,&#32;__forest);
+1254 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>;
+1255 &#32;&#32;&#32;&#32;}
+1256 
+1257 &#32;&#32;&#32;&#32;&#32;&#32;{
+1258 &#32;&#32;&#32;&#32;_RopeConcatenation*&#32;__c&#32;=&#32;(_RopeConcatenation*)__r;
+1259 &#32;&#32;&#32;&#32;
+1260 &#32;&#32;&#32;&#32;_S_add_to_forest(__c-&gt;_M_left,&#32;__forest);
+1261 &#32;&#32;&#32;&#32;_S_add_to_forest(__c-&gt;_M_right,&#32;__forest);
+1262 &#32;&#32;&#32;&#32;&#32;&#32;}
+1263 &#32;&#32;&#32;&#32;}
+1264 
+1265 
+1266 &#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">class</emphasis>&#32;_CharT,&#32;<emphasis role="keyword">class</emphasis>&#32;_Alloc&gt;
+1267 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+1268 &#32;&#32;&#32;&#32;rope&lt;_CharT,&#32;_Alloc&gt;::
+1269 &#32;&#32;&#32;&#32;_S_add_leaf_to_forest(_RopeRep*&#32;__r,&#32;_RopeRep**&#32;__forest)
+1270 &#32;&#32;&#32;&#32;{
+1271 &#32;&#32;&#32;&#32;&#32;&#32;_RopeRep*&#32;__insertee;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;included&#32;in&#32;refcount</emphasis>
+1272 &#32;&#32;&#32;&#32;&#32;&#32;_RopeRep*&#32;__too_tiny&#32;=&#32;0;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;included&#32;in&#32;refcount</emphasis>
+1273 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;__i;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;forest[0..__i-1]&#32;is&#32;empty</emphasis>
+1274 &#32;&#32;&#32;&#32;&#32;&#32;std::size_t&#32;__s&#32;=&#32;__r-&gt;_M_size;
+1275 &#32;&#32;&#32;&#32;&#32;&#32;
+1276 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(__i&#32;=&#32;0;&#32;__s&#32;&gt;=&#32;_S_min_len[__i+1]<emphasis role="comment">/*&#32;not&#32;this&#32;bucket&#32;*/</emphasis>;&#32;++__i)
+1277 &#32;&#32;&#32;&#32;{
+1278 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(0&#32;!=&#32;__forest[__i])
+1279 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+1280 <emphasis role="preprocessor">#ifndef&#32;__GC</emphasis>
+1281 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_Self_destruct_ptr&#32;__old(__too_tiny);
+1282 <emphasis role="preprocessor">#endif</emphasis>
+1283 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__too_tiny&#32;=&#32;_S_concat_and_set_balanced(__forest[__i],
+1284 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__too_tiny);
+1285 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__forest[__i]-&gt;_M_unref_nonnil();
+1286 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__forest[__i]&#32;=&#32;0;
+1287 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+1288 &#32;&#32;&#32;&#32;}
+1289 &#32;&#32;&#32;&#32;&#32;&#32;{
+1290 <emphasis role="preprocessor">#ifndef&#32;__GC</emphasis>
+1291 &#32;&#32;&#32;&#32;_Self_destruct_ptr&#32;__old(__too_tiny);
+1292 <emphasis role="preprocessor">#endif</emphasis>
+1293 &#32;&#32;&#32;&#32;__insertee&#32;=&#32;_S_concat_and_set_balanced(__too_tiny,&#32;__r);
+1294 &#32;&#32;&#32;&#32;&#32;&#32;}
+1295 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Too_tiny&#32;dead,&#32;and&#32;no&#32;longer&#32;included&#32;in&#32;refcount.</emphasis>
+1296 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Insertee&#32;is&#32;live&#32;and&#32;included.</emphasis>
+1297 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(;;&#32;++__i)
+1298 &#32;&#32;&#32;&#32;{
+1299 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(0&#32;!=&#32;__forest[__i])
+1300 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+1301 <emphasis role="preprocessor">#ifndef&#32;__GC</emphasis>
+1302 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_Self_destruct_ptr&#32;__old(__insertee);
+1303 <emphasis role="preprocessor">#endif</emphasis>
+1304 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__insertee&#32;=&#32;_S_concat_and_set_balanced(__forest[__i],
+1305 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__insertee);
+1306 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__forest[__i]-&gt;_M_unref_nonnil();
+1307 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__forest[__i]&#32;=&#32;0;
+1308 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+1309 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__i&#32;==&#32;<emphasis role="keywordtype">int</emphasis>(__detail::_S_max_rope_depth)
+1310 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;||&#32;__insertee-&gt;_M_size&#32;&lt;&#32;_S_min_len[__i+1])
+1311 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+1312 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__forest[__i]&#32;=&#32;__insertee;
+1313 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;refcount&#32;is&#32;OK&#32;since&#32;__insertee&#32;is&#32;now&#32;dead.</emphasis>
+1314 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>;
+1315 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+1316 &#32;&#32;&#32;&#32;}
+1317 &#32;&#32;&#32;&#32;}
+1318 
+1319 &#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">class</emphasis>&#32;_CharT,&#32;<emphasis role="keyword">class</emphasis>&#32;_Alloc&gt;
+1320 &#32;&#32;&#32;&#32;_CharT
+1321 &#32;&#32;&#32;&#32;rope&lt;_CharT,&#32;_Alloc&gt;::
+1322 &#32;&#32;&#32;&#32;_S_fetch(_RopeRep*&#32;__r,&#32;size_type&#32;__i)
+1323 &#32;&#32;&#32;&#32;{
+1324 &#32;&#32;&#32;&#32;&#32;&#32;__GC_CONST&#32;_CharT*&#32;__cstr&#32;=&#32;__r-&gt;_M_c_string;
+1325 &#32;&#32;&#32;&#32;&#32;&#32;
+1326 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(0&#32;!=&#32;__cstr)
+1327 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__cstr[__i];
+1328 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>(;;)
+1329 &#32;&#32;&#32;&#32;{
+1330 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">switch</emphasis>(__r-&gt;_M_tag)
+1331 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+1332 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">case</emphasis>&#32;__detail::_S_concat:
+1333 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+1334 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_RopeConcatenation*&#32;__c&#32;=&#32;(_RopeConcatenation*)__r;
+1335 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_RopeRep*&#32;__left&#32;=&#32;__c-&gt;_M_left;
+1336 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;std::size_t&#32;__left_len&#32;=&#32;__left-&gt;_M_size;
+1337 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;
+1338 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__i&#32;&gt;=&#32;__left_len)
+1339 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+1340 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__i&#32;-=&#32;__left_len;
+1341 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__r&#32;=&#32;__c-&gt;_M_right;
+1342 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}&#32;
+1343 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>
+1344 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__r&#32;=&#32;__left;
+1345 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+1346 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">break</emphasis>;
+1347 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">case</emphasis>&#32;__detail::_S_leaf:
+1348 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+1349 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_RopeLeaf*&#32;__l&#32;=&#32;(_RopeLeaf*)__r;
+1350 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__l-&gt;_M_data[__i];
+1351 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+1352 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">case</emphasis>&#32;__detail::_S_function:
+1353 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">case</emphasis>&#32;__detail::_S_substringfn:
+1354 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+1355 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_RopeFunction*&#32;__f&#32;=&#32;(_RopeFunction*)__r;
+1356 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_CharT&#32;__result;
+1357 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;
+1358 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;(*(__f-&gt;_M_fn))(__i,&#32;1,&#32;&amp;__result);
+1359 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__result;
+1360 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+1361 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+1362 &#32;&#32;&#32;&#32;}
+1363 &#32;&#32;&#32;&#32;}
+1364 &#32;&#32;
+1365 <emphasis role="preprocessor">#ifndef&#32;__GC</emphasis>
+1366 &#32;&#32;<emphasis role="comment">//&#32;Return&#32;a&#32;uniquely&#32;referenced&#32;character&#32;slot&#32;for&#32;the&#32;given</emphasis>
+1367 &#32;&#32;<emphasis role="comment">//&#32;position,&#32;or&#32;0&#32;if&#32;that&apos;s&#32;not&#32;possible.</emphasis>
+1368 &#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">class</emphasis>&#32;_CharT,&#32;<emphasis role="keyword">class</emphasis>&#32;_Alloc&gt;
+1369 &#32;&#32;&#32;&#32;_CharT*
+1370 &#32;&#32;&#32;&#32;rope&lt;_CharT,&#32;_Alloc&gt;::
+1371 &#32;&#32;&#32;&#32;_S_fetch_ptr(_RopeRep*&#32;__r,&#32;size_type&#32;__i)
+1372 &#32;&#32;&#32;&#32;{
+1373 &#32;&#32;&#32;&#32;&#32;&#32;_RopeRep*&#32;__clrstack[__detail::_S_max_rope_depth];
+1374 &#32;&#32;&#32;&#32;&#32;&#32;std::size_t&#32;__csptr&#32;=&#32;0;
+1375 &#32;&#32;&#32;&#32;&#32;&#32;
+1376 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>(;;)
+1377 &#32;&#32;&#32;&#32;{
+1378 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__r-&gt;_M_ref_count&#32;&gt;&#32;1)
+1379 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;0;
+1380 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">switch</emphasis>(__r-&gt;_M_tag)
+1381 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+1382 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">case</emphasis>&#32;__detail::_S_concat:
+1383 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+1384 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_RopeConcatenation*&#32;__c&#32;=&#32;(_RopeConcatenation*)__r;
+1385 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_RopeRep*&#32;__left&#32;=&#32;__c-&gt;_M_left;
+1386 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;std::size_t&#32;__left_len&#32;=&#32;__left-&gt;_M_size;
+1387 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;
+1388 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__c-&gt;_M_c_string&#32;!=&#32;0)
+1389 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__clrstack[__csptr++]&#32;=&#32;__c;
+1390 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__i&#32;&gt;=&#32;__left_len)
+1391 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+1392 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__i&#32;-=&#32;__left_len;
+1393 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__r&#32;=&#32;__c-&gt;_M_right;
+1394 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}&#32;
+1395 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>
+1396 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__r&#32;=&#32;__left;
+1397 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+1398 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">break</emphasis>;
+1399 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">case</emphasis>&#32;__detail::_S_leaf:
+1400 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+1401 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_RopeLeaf*&#32;__l&#32;=&#32;(_RopeLeaf*)__r;
+1402 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__l-&gt;_M_c_string&#32;!=&#32;__l-&gt;_M_data&#32;&amp;&amp;&#32;__l-&gt;_M_c_string&#32;!=&#32;0)
+1403 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__clrstack[__csptr++]&#32;=&#32;__l;
+1404 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">while</emphasis>&#32;(__csptr&#32;&gt;&#32;0)
+1405 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+1406 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;--&#32;__csptr;
+1407 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_RopeRep*&#32;__d&#32;=&#32;__clrstack[__csptr];
+1408 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__d-&gt;_M_free_c_string();
+1409 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__d-&gt;_M_c_string&#32;=&#32;0;
+1410 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+1411 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__l-&gt;_M_data&#32;+&#32;__i;
+1412 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+1413 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">case</emphasis>&#32;__detail::_S_function:
+1414 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">case</emphasis>&#32;__detail::_S_substringfn:
+1415 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;0;
+1416 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+1417 &#32;&#32;&#32;&#32;}
+1418 &#32;&#32;&#32;&#32;}
+1419 <emphasis role="preprocessor">#endif&#32;</emphasis><emphasis role="comment">/*&#32;__GC&#32;*/</emphasis><emphasis role="preprocessor"></emphasis>
+1420 
+1421 &#32;&#32;<emphasis role="comment">//&#32;The&#32;following&#32;could&#32;be&#32;implemented&#32;trivially&#32;using</emphasis>
+1422 &#32;&#32;<emphasis role="comment">//&#32;lexicographical_compare_3way.</emphasis>
+1423 &#32;&#32;<emphasis role="comment">//&#32;We&#32;do&#32;a&#32;little&#32;more&#32;work&#32;to&#32;avoid&#32;dealing&#32;with&#32;rope&#32;iterators&#32;for</emphasis>
+1424 &#32;&#32;<emphasis role="comment">//&#32;flat&#32;strings.</emphasis>
+1425 &#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">class</emphasis>&#32;_CharT,&#32;<emphasis role="keyword">class</emphasis>&#32;_Alloc&gt;
+1426 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>
+1427 &#32;&#32;&#32;&#32;rope&lt;_CharT,&#32;_Alloc&gt;::
+1428 &#32;&#32;&#32;&#32;_S_compare&#32;(<emphasis role="keyword">const</emphasis>&#32;_RopeRep*&#32;__left,&#32;<emphasis role="keyword">const</emphasis>&#32;_RopeRep*&#32;__right)
+1429 &#32;&#32;&#32;&#32;{
+1430 &#32;&#32;&#32;&#32;&#32;&#32;std::size_t&#32;__left_len;
+1431 &#32;&#32;&#32;&#32;&#32;&#32;std::size_t&#32;__right_len;
+1432 &#32;&#32;&#32;&#32;&#32;&#32;
+1433 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(0&#32;==&#32;__right)
+1434 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;0&#32;!=&#32;__left;
+1435 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(0&#32;==&#32;__left)
+1436 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;-1;
+1437 &#32;&#32;&#32;&#32;&#32;&#32;__left_len&#32;=&#32;__left-&gt;_M_size;
+1438 &#32;&#32;&#32;&#32;&#32;&#32;__right_len&#32;=&#32;__right-&gt;_M_size;
+1439 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__detail::_S_leaf&#32;==&#32;__left-&gt;_M_tag)
+1440 &#32;&#32;&#32;&#32;{
+1441 &#32;&#32;&#32;&#32;&#32;&#32;_RopeLeaf*&#32;__l&#32;=&#32;(_RopeLeaf*)&#32;__left;
+1442 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__detail::_S_leaf&#32;==&#32;__right-&gt;_M_tag)
+1443 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+1444 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_RopeLeaf*&#32;__r&#32;=&#32;(_RopeLeaf*)&#32;__right;
+1445 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;lexicographical_compare_3way(__l-&gt;_M_data,
+1446 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__l-&gt;_M_data&#32;+&#32;__left_len,
+1447 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__r-&gt;_M_data,&#32;__r-&gt;_M_data
+1448 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;+&#32;__right_len);
+1449 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+1450 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>
+1451 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+1452 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;const_iterator&#32;__rstart(__right,&#32;0);
+1453 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;const_iterator&#32;__rend(__right,&#32;__right_len);
+1454 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;lexicographical_compare_3way(__l-&gt;_M_data,&#32;__l-&gt;_M_data
+1455 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;+&#32;__left_len,
+1456 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__rstart,&#32;__rend);
+1457 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+1458 &#32;&#32;&#32;&#32;}
+1459 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>
+1460 &#32;&#32;&#32;&#32;{
+1461 &#32;&#32;&#32;&#32;&#32;&#32;const_iterator&#32;__lstart(__left,&#32;0);
+1462 &#32;&#32;&#32;&#32;&#32;&#32;const_iterator&#32;__lend(__left,&#32;__left_len);
+1463 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__detail::_S_leaf&#32;==&#32;__right-&gt;_M_tag)
+1464 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+1465 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_RopeLeaf*&#32;__r&#32;=&#32;(_RopeLeaf*)&#32;__right;
+1466 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;lexicographical_compare_3way(__lstart,&#32;__lend,
+1467 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__r-&gt;_M_data,&#32;__r-&gt;_M_data
+1468 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;+&#32;__right_len);
+1469 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+1470 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>
+1471 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+1472 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;const_iterator&#32;__rstart(__right,&#32;0);
+1473 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;const_iterator&#32;__rend(__right,&#32;__right_len);
+1474 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;lexicographical_compare_3way(__lstart,&#32;__lend,
+1475 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__rstart,&#32;__rend);
+1476 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+1477 &#32;&#32;&#32;&#32;}
+1478 &#32;&#32;&#32;&#32;}
+1479 
+1480 &#32;&#32;<emphasis role="comment">//&#32;Assignment&#32;to&#32;reference&#32;proxies.</emphasis>
+1481 &#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">class</emphasis>&#32;_CharT,&#32;<emphasis role="keyword">class</emphasis>&#32;_Alloc&gt;
+1482 &#32;&#32;&#32;&#32;_Rope_char_ref_proxy&lt;_CharT,&#32;_Alloc&gt;&amp;
+1483 &#32;&#32;&#32;&#32;_Rope_char_ref_proxy&lt;_CharT,&#32;_Alloc&gt;::
+1484 &#32;&#32;&#32;&#32;operator=(_CharT&#32;__c)
+1485 &#32;&#32;&#32;&#32;{
+1486 &#32;&#32;&#32;&#32;&#32;&#32;_RopeRep*&#32;__old&#32;=&#32;_M_root-&gt;_M_tree_ptr;
+1487 <emphasis role="preprocessor">#ifndef&#32;__GC</emphasis>
+1488 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;First&#32;check&#32;for&#32;the&#32;case&#32;in&#32;which&#32;everything&#32;is&#32;uniquely</emphasis>
+1489 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;referenced.&#32;&#32;In&#32;that&#32;case&#32;we&#32;can&#32;do&#32;this&#32;destructively.</emphasis>
+1490 &#32;&#32;&#32;&#32;&#32;&#32;_CharT*&#32;__ptr&#32;=&#32;_My_rope::_S_fetch_ptr(__old,&#32;_M_pos);
+1491 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(0&#32;!=&#32;__ptr)
+1492 &#32;&#32;&#32;&#32;{
+1493 &#32;&#32;&#32;&#32;&#32;&#32;*__ptr&#32;=&#32;__c;
+1494 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;*<emphasis role="keyword">this</emphasis>;
+1495 &#32;&#32;&#32;&#32;}
+1496 <emphasis role="preprocessor">#endif</emphasis>
+1497 &#32;&#32;&#32;&#32;&#32;&#32;_Self_destruct_ptr&#32;__left(_My_rope::_S_substring(__old,&#32;0,&#32;_M_pos));
+1498 &#32;&#32;&#32;&#32;&#32;&#32;_Self_destruct_ptr&#32;__right(_My_rope::_S_substring(__old,&#32;_M_pos&#32;+&#32;1,
+1499 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__old-&gt;_M_size));
+1500 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;_RopeRep::allocator_type&#32;__a&#32;=&#32;_M_root-&gt;_M_get_allocator();
+1501 &#32;&#32;&#32;&#32;&#32;&#32;_Self_destruct_ptr&#32;__result_left(_My_rope::
+1502 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_S_destr_concat_char_iter(__left,
+1503 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&amp;__c,&#32;1,
+1504 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__a));
+1505 
+1506 &#32;&#32;&#32;&#32;&#32;&#32;_RopeRep*&#32;__result&#32;=&#32;_My_rope::_S_concat(__result_left,&#32;__right);
+1507 <emphasis role="preprocessor">#ifndef&#32;__GC</emphasis>
+1508 &#32;&#32;&#32;&#32;&#32;&#32;_RopeRep::_S_unref(__old);
+1509 <emphasis role="preprocessor">#endif</emphasis>
+1510 &#32;&#32;&#32;&#32;&#32;&#32;_M_root-&gt;_M_tree_ptr&#32;=&#32;__result;
+1511 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;*<emphasis role="keyword">this</emphasis>;
+1512 &#32;&#32;&#32;&#32;}
+1513 
+1514 &#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">class</emphasis>&#32;_CharT,&#32;<emphasis role="keyword">class</emphasis>&#32;_Alloc&gt;
+1515 &#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;_Rope_char_ref_proxy&lt;_CharT,&#32;_Alloc&gt;::
+1516 &#32;&#32;&#32;&#32;operator&#32;_CharT()<emphasis role="keyword">&#32;const</emphasis>
+1517 <emphasis role="keyword">&#32;&#32;&#32;&#32;</emphasis>{
+1518 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(_M_current_valid)
+1519 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;_M_current;
+1520 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>
+1521 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;_My_rope::_S_fetch(_M_root-&gt;_M_tree_ptr,&#32;_M_pos);
+1522 &#32;&#32;&#32;&#32;}
+1523 
+1524 &#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">class</emphasis>&#32;_CharT,&#32;<emphasis role="keyword">class</emphasis>&#32;_Alloc&gt;
+1525 &#32;&#32;&#32;&#32;_Rope_char_ptr_proxy&lt;_CharT,&#32;_Alloc&gt;
+1526 &#32;&#32;&#32;&#32;_Rope_char_ref_proxy&lt;_CharT,&#32;_Alloc&gt;::
+1527 &#32;&#32;&#32;&#32;operator&amp;()<emphasis role="keyword">&#32;const</emphasis>
+1528 <emphasis role="keyword">&#32;&#32;&#32;&#32;</emphasis>{&#32;<emphasis role="keywordflow">return</emphasis>&#32;_Rope_char_ptr_proxy&lt;_CharT,&#32;_Alloc&gt;(*<emphasis role="keyword">this</emphasis>);&#32;}
+1529 
+1530 &#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">class</emphasis>&#32;_CharT,&#32;<emphasis role="keyword">class</emphasis>&#32;_Alloc&gt;
+1531 &#32;&#32;&#32;&#32;rope&lt;_CharT,&#32;_Alloc&gt;::
+1532 &#32;&#32;&#32;&#32;rope(std::size_t&#32;__n,&#32;_CharT&#32;__c,&#32;<emphasis role="keyword">const</emphasis>&#32;allocator_type&amp;&#32;__a)
+1533 &#32;&#32;&#32;&#32;:&#32;_Base(__a)
+1534 &#32;&#32;&#32;&#32;{
+1535 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">using&#32;</emphasis>std::__uninitialized_fill_n_a;
+1536 
+1537 &#32;&#32;&#32;&#32;&#32;&#32;rope&lt;_CharT,_Alloc&gt;&#32;__result;
+1538 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;std::size_t&#32;__exponentiate_threshold&#32;=&#32;32;
+1539 &#32;&#32;&#32;&#32;&#32;&#32;std::size_t&#32;__exponent;
+1540 &#32;&#32;&#32;&#32;&#32;&#32;std::size_t&#32;__rest;
+1541 &#32;&#32;&#32;&#32;&#32;&#32;_CharT*&#32;__rest_buffer;
+1542 &#32;&#32;&#32;&#32;&#32;&#32;_RopeRep*&#32;__remainder;
+1543 &#32;&#32;&#32;&#32;&#32;&#32;rope&lt;_CharT,&#32;_Alloc&gt;&#32;__remainder_rope;
+1544 
+1545 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(0&#32;==&#32;__n)
+1546 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>;
+1547 
+1548 &#32;&#32;&#32;&#32;&#32;&#32;__exponent&#32;=&#32;__n&#32;/&#32;__exponentiate_threshold;
+1549 &#32;&#32;&#32;&#32;&#32;&#32;__rest&#32;=&#32;__n&#32;%&#32;__exponentiate_threshold;
+1550 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(0&#32;==&#32;__rest)
+1551 &#32;&#32;&#32;&#32;__remainder&#32;=&#32;0;
+1552 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>
+1553 &#32;&#32;&#32;&#32;{
+1554 &#32;&#32;&#32;&#32;&#32;&#32;__rest_buffer&#32;=&#32;this-&gt;_Data_allocate(_S_rounded_up_size(__rest));
+1555 &#32;&#32;&#32;&#32;&#32;&#32;__uninitialized_fill_n_a(__rest_buffer,&#32;__rest,&#32;__c,
+1556 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_M_get_allocator());
+1557 &#32;&#32;&#32;&#32;&#32;&#32;_S_cond_store_eos(__rest_buffer[__rest]);
+1558 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2bits_2exception__defines_8h_1a130bf0cd31a0783cd03563f46b46915b">__try</link>
+1559 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{&#32;__remainder&#32;=&#32;_S_new_RopeLeaf(__rest_buffer,&#32;__rest,
+1560 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_M_get_allocator());&#32;}
+1561 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2bits_2exception__defines_8h_1a9e51d2f324c18a996a3e4f9a6ba0f6c2">__catch</link>(...)
+1562 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+1563 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_RopeRep::__STL_FREE_STRING(__rest_buffer,&#32;__rest,
+1564 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_M_get_allocator());
+1565 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2bits_2exception__defines_8h_1a92ef03a5310b10a4243a6ec8f43494b5">__throw_exception_again</link>;
+1566 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+1567 &#32;&#32;&#32;&#32;}
+1568 &#32;&#32;&#32;&#32;&#32;&#32;__remainder_rope._M_tree_ptr&#32;=&#32;__remainder;
+1569 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__exponent&#32;!=&#32;0)
+1570 &#32;&#32;&#32;&#32;{
+1571 &#32;&#32;&#32;&#32;&#32;&#32;_CharT*&#32;__base_buffer&#32;=
+1572 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;this-&gt;_Data_allocate(_S_rounded_up_size(__exponentiate_threshold));
+1573 &#32;&#32;&#32;&#32;&#32;&#32;_RopeLeaf*&#32;__base_leaf;
+1574 &#32;&#32;&#32;&#32;&#32;&#32;rope&#32;__base_rope;
+1575 &#32;&#32;&#32;&#32;&#32;&#32;__uninitialized_fill_n_a(__base_buffer,&#32;__exponentiate_threshold,&#32;__c,
+1576 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_M_get_allocator());
+1577 &#32;&#32;&#32;&#32;&#32;&#32;_S_cond_store_eos(__base_buffer[__exponentiate_threshold]);
+1578 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2bits_2exception__defines_8h_1a130bf0cd31a0783cd03563f46b46915b">__try</link>
+1579 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+1580 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__base_leaf&#32;=&#32;_S_new_RopeLeaf(__base_buffer,
+1581 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__exponentiate_threshold,
+1582 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_M_get_allocator());
+1583 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+1584 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2bits_2exception__defines_8h_1a9e51d2f324c18a996a3e4f9a6ba0f6c2">__catch</link>(...)
+1585 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+1586 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_RopeRep::__STL_FREE_STRING(__base_buffer,
+1587 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__exponentiate_threshold,
+1588 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_M_get_allocator());
+1589 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2bits_2exception__defines_8h_1a92ef03a5310b10a4243a6ec8f43494b5">__throw_exception_again</link>;
+1590 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+1591 &#32;&#32;&#32;&#32;&#32;&#32;__base_rope._M_tree_ptr&#32;=&#32;__base_leaf;
+1592 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(1&#32;==&#32;__exponent)
+1593 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__result&#32;=&#32;__base_rope;
+1594 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>
+1595 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__result&#32;=&#32;power(__base_rope,&#32;__exponent,
+1596 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_Rope_Concat_fn&lt;_CharT,&#32;_Alloc&gt;());
+1597 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;
+1598 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(0&#32;!=&#32;__remainder)
+1599 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__result&#32;+=&#32;__remainder_rope;
+1600 &#32;&#32;&#32;&#32;}
+1601 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>
+1602 &#32;&#32;&#32;&#32;__result&#32;=&#32;__remainder_rope;
+1603 &#32;&#32;&#32;&#32;&#32;&#32;
+1604 &#32;&#32;&#32;&#32;&#32;&#32;this-&gt;_M_tree_ptr&#32;=&#32;__result._M_tree_ptr;
+1605 &#32;&#32;&#32;&#32;&#32;&#32;this-&gt;_M_tree_ptr-&gt;_M_ref_nonnil();
+1606 &#32;&#32;&#32;&#32;}
+1607 &#32;&#32;&#32;&#32;&#32;&#32;
+1608 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">class</emphasis>&#32;_CharT,&#32;<emphasis role="keyword">class</emphasis>&#32;_Alloc&gt;
+1609 &#32;&#32;&#32;&#32;_CharT
+1610 &#32;&#32;&#32;&#32;rope&lt;_CharT,&#32;_Alloc&gt;::_S_empty_c_str[1];
+1611 &#32;&#32;&#32;&#32;&#32;&#32;
+1612 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">class</emphasis>&#32;_CharT,&#32;<emphasis role="keyword">class</emphasis>&#32;_Alloc&gt;
+1613 &#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;_CharT*
+1614 &#32;&#32;&#32;&#32;rope&lt;_CharT,&#32;_Alloc&gt;::
+1615 &#32;&#32;&#32;&#32;c_str()<emphasis role="keyword">&#32;const</emphasis>
+1616 <emphasis role="keyword">&#32;&#32;&#32;&#32;</emphasis>{
+1617 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(0&#32;==&#32;this-&gt;_M_tree_ptr)
+1618 &#32;&#32;&#32;&#32;{
+1619 &#32;&#32;&#32;&#32;&#32;&#32;_S_empty_c_str[0]&#32;=&#32;_S_eos((_CharT*)0);&#32;&#32;<emphasis role="comment">//&#32;Possibly&#32;redundant,</emphasis>
+1620 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;but&#32;probably&#32;fast.</emphasis>
+1621 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;_S_empty_c_str;
+1622 &#32;&#32;&#32;&#32;}
+1623 &#32;&#32;&#32;&#32;&#32;&#32;__gthread_mutex_lock&#32;(&amp;this-&gt;_M_tree_ptr-&gt;_M_c_string_lock);
+1624 &#32;&#32;&#32;&#32;&#32;&#32;__GC_CONST&#32;_CharT*&#32;__result&#32;=&#32;this-&gt;_M_tree_ptr-&gt;_M_c_string;
+1625 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(0&#32;==&#32;__result)
+1626 &#32;&#32;&#32;&#32;{
+1627 &#32;&#32;&#32;&#32;&#32;&#32;std::size_t&#32;__s&#32;=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a3d1e3edfcf61ca2d831883e1afbad89e">size</link>();
+1628 &#32;&#32;&#32;&#32;&#32;&#32;__result&#32;=&#32;this-&gt;_Data_allocate(__s&#32;+&#32;1);
+1629 &#32;&#32;&#32;&#32;&#32;&#32;_S_flatten(this-&gt;_M_tree_ptr,&#32;__result);
+1630 &#32;&#32;&#32;&#32;&#32;&#32;__result[__s]&#32;=&#32;_S_eos((_CharT*)0);
+1631 &#32;&#32;&#32;&#32;&#32;&#32;this-&gt;_M_tree_ptr-&gt;_M_c_string&#32;=&#32;__result;
+1632 &#32;&#32;&#32;&#32;}
+1633 &#32;&#32;&#32;&#32;&#32;&#32;__gthread_mutex_unlock&#32;(&amp;this-&gt;_M_tree_ptr-&gt;_M_c_string_lock);
+1634 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>(__result);
+1635 &#32;&#32;&#32;&#32;}
+1636 &#32;&#32;
+1637 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">class</emphasis>&#32;_CharT,&#32;<emphasis role="keyword">class</emphasis>&#32;_Alloc&gt;
+1638 &#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;_CharT*&#32;rope&lt;_CharT,&#32;_Alloc&gt;::
+1639 &#32;&#32;&#32;&#32;replace_with_c_str()
+1640 &#32;&#32;&#32;&#32;{
+1641 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(0&#32;==&#32;this-&gt;_M_tree_ptr)
+1642 &#32;&#32;&#32;&#32;{
+1643 &#32;&#32;&#32;&#32;&#32;&#32;_S_empty_c_str[0]&#32;=&#32;_S_eos((_CharT*)0);
+1644 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;_S_empty_c_str;
+1645 &#32;&#32;&#32;&#32;}
+1646 &#32;&#32;&#32;&#32;&#32;&#32;__GC_CONST&#32;_CharT*&#32;__old_c_string&#32;=&#32;this-&gt;_M_tree_ptr-&gt;_M_c_string;
+1647 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__detail::_S_leaf&#32;==&#32;this-&gt;_M_tree_ptr-&gt;_M_tag
+1648 &#32;&#32;&#32;&#32;&#32;&#32;&amp;&amp;&#32;0&#32;!=&#32;__old_c_string)
+1649 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>(__old_c_string);
+1650 &#32;&#32;&#32;&#32;&#32;&#32;std::size_t&#32;__s&#32;=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a3d1e3edfcf61ca2d831883e1afbad89e">size</link>();
+1651 &#32;&#32;&#32;&#32;&#32;&#32;_CharT*&#32;__result&#32;=&#32;this-&gt;_Data_allocate(_S_rounded_up_size(__s));
+1652 &#32;&#32;&#32;&#32;&#32;&#32;_S_flatten(this-&gt;_M_tree_ptr,&#32;__result);
+1653 &#32;&#32;&#32;&#32;&#32;&#32;__result[__s]&#32;=&#32;_S_eos((_CharT*)0);
+1654 &#32;&#32;&#32;&#32;&#32;&#32;this-&gt;_M_tree_ptr-&gt;_M_unref_nonnil();
+1655 &#32;&#32;&#32;&#32;&#32;&#32;this-&gt;_M_tree_ptr&#32;=&#32;_S_new_RopeLeaf(__result,&#32;__s,
+1656 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;this-&gt;_M_get_allocator());
+1657 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>(__result);
+1658 &#32;&#32;&#32;&#32;}
+1659 
+1660 &#32;&#32;<emphasis role="comment">//&#32;Algorithm&#32;specializations.&#32;&#32;More&#32;should&#32;be&#32;added.</emphasis>
+1661 &#32;&#32;
+1662 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">class</emphasis>&#32;_Rope_iterator&gt;&#32;&#32;<emphasis role="comment">//&#32;was&#32;templated&#32;on&#32;CharT&#32;and&#32;Alloc</emphasis>
+1663 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;VC++&#32;workaround</emphasis>
+1664 &#32;&#32;&#32;&#32;_Rope_rotate(_Rope_iterator&#32;__first,
+1665 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_Rope_iterator&#32;__middle,
+1666 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_Rope_iterator&#32;__last)
+1667 &#32;&#32;&#32;&#32;{
+1668 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">typename</emphasis>&#32;_Rope_iterator::value_type&#32;_CharT;
+1669 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">typename</emphasis>&#32;_Rope_iterator::_allocator_type&#32;_Alloc;
+1670 &#32;&#32;&#32;&#32;&#32;&#32;
+1671 &#32;&#32;&#32;&#32;&#32;&#32;rope&lt;_CharT,&#32;_Alloc&gt;&amp;&#32;__r(__first.container());
+1672 &#32;&#32;&#32;&#32;&#32;&#32;rope&lt;_CharT,&#32;_Alloc&gt;&#32;__prefix&#32;=&#32;__r.substr(0,&#32;__first.index());
+1673 &#32;&#32;&#32;&#32;&#32;&#32;rope&lt;_CharT,&#32;_Alloc&gt;&#32;__suffix&#32;=
+1674 &#32;&#32;&#32;&#32;__r.substr(__last.index(),&#32;__r.size()&#32;-&#32;__last.index());
+1675 &#32;&#32;&#32;&#32;&#32;&#32;rope&lt;_CharT,&#32;_Alloc&gt;&#32;__part1&#32;=
+1676 &#32;&#32;&#32;&#32;__r.substr(__middle.index(),&#32;__last.index()&#32;-&#32;__middle.index());
+1677 &#32;&#32;&#32;&#32;&#32;&#32;rope&lt;_CharT,&#32;_Alloc&gt;&#32;__part2&#32;=
+1678 &#32;&#32;&#32;&#32;__r.substr(__first.index(),&#32;__middle.index()&#32;-&#32;__first.index());
+1679 &#32;&#32;&#32;&#32;&#32;&#32;__r&#32;=&#32;__prefix;
+1680 &#32;&#32;&#32;&#32;&#32;&#32;__r&#32;+=&#32;__part1;
+1681 &#32;&#32;&#32;&#32;&#32;&#32;__r&#32;+=&#32;__part2;
+1682 &#32;&#32;&#32;&#32;&#32;&#32;__r&#32;+=&#32;__suffix;
+1683 &#32;&#32;&#32;&#32;}
+1684 
+1685 <emphasis role="preprocessor">#if&#32;!defined(__GNUC__)</emphasis>
+1686 &#32;&#32;<emphasis role="comment">//&#32;Appears&#32;to&#32;confuse&#32;g++</emphasis>
+1687 &#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>
+1688 &#32;&#32;rotate(_Rope_iterator&lt;<emphasis role="keywordtype">char</emphasis>,&#32;__STL_DEFAULT_ALLOCATOR(<emphasis role="keywordtype">char</emphasis>)&gt;&#32;__first,
+1689 &#32;&#32;&#32;&#32;&#32;_Rope_iterator&lt;<emphasis role="keywordtype">char</emphasis>,&#32;__STL_DEFAULT_ALLOCATOR(<emphasis role="keywordtype">char</emphasis>)&gt;&#32;__middle,
+1690 &#32;&#32;&#32;&#32;&#32;_Rope_iterator&lt;<emphasis role="keywordtype">char</emphasis>,&#32;__STL_DEFAULT_ALLOCATOR(<emphasis role="keywordtype">char</emphasis>)&gt;&#32;__last)
+1691 &#32;&#32;{&#32;_Rope_rotate(__first,&#32;__middle,&#32;__last);&#32;}
+1692 <emphasis role="preprocessor">#endif</emphasis>
+1693 
+1694 <emphasis role="preprocessor">#&#32;if&#32;0</emphasis>
+1695 &#32;&#32;<emphasis role="comment">//&#32;Probably&#32;not&#32;useful&#32;for&#32;several&#32;reasons:</emphasis>
+1696 &#32;&#32;<emphasis role="comment">//&#32;-&#32;for&#32;SGIs&#32;7.1&#32;compiler&#32;and&#32;probably&#32;some&#32;others,</emphasis>
+1697 &#32;&#32;<emphasis role="comment">//&#32;&#32;&#32;this&#32;forces&#32;lots&#32;of&#32;rope&lt;wchar_t,&#32;...&gt;&#32;instantiations,&#32;creating&#32;a</emphasis>
+1698 &#32;&#32;<emphasis role="comment">//&#32;&#32;&#32;code&#32;bloat&#32;and&#32;compile&#32;time&#32;problem.&#32;&#32;(Fixed&#32;in&#32;7.2.)</emphasis>
+1699 &#32;&#32;<emphasis role="comment">//&#32;-&#32;wchar_t&#32;is&#32;4&#32;bytes&#32;wide&#32;on&#32;most&#32;UNIX&#32;platforms,&#32;making&#32;it</emphasis>
+1700 &#32;&#32;<emphasis role="comment">//&#32;&#32;&#32;unattractive&#32;for&#32;unicode&#32;strings.&#32;&#32;Unsigned&#32;short&#32;may&#32;be&#32;a&#32;better</emphasis>
+1701 &#32;&#32;<emphasis role="comment">//&#32;&#32;&#32;character&#32;type.</emphasis>
+1702 &#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>
+1703 &#32;&#32;rotate(_Rope_iterator&lt;<emphasis role="keywordtype">wchar_t</emphasis>,&#32;__STL_DEFAULT_ALLOCATOR(<emphasis role="keywordtype">char</emphasis>)&gt;&#32;__first,
+1704 &#32;&#32;&#32;&#32;&#32;_Rope_iterator&lt;<emphasis role="keywordtype">wchar_t</emphasis>,&#32;__STL_DEFAULT_ALLOCATOR(<emphasis role="keywordtype">char</emphasis>)&gt;&#32;__middle,
+1705 &#32;&#32;&#32;&#32;&#32;_Rope_iterator&lt;<emphasis role="keywordtype">wchar_t</emphasis>,&#32;__STL_DEFAULT_ALLOCATOR(<emphasis role="keywordtype">char</emphasis>)&gt;&#32;__last)
+1706 &#32;&#32;{&#32;_Rope_rotate(__first,&#32;__middle,&#32;__last);&#32;}
+1707 <emphasis role="preprocessor">#&#32;endif</emphasis>
+1708 
+1709 _GLIBCXX_END_NAMESPACE_VERSION
+1710 }&#32;<emphasis role="comment">//&#32;namespace</emphasis>
+</programlisting></section>

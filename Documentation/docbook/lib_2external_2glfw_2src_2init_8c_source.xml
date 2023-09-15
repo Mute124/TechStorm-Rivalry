@@ -1,0 +1,541 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<section xmlns="http://docbook.org/ns/docbook" version="5.0" xmlns:xlink="http://www.w3.org/1999/xlink" xml:id="_lib_2external_2glfw_2src_2init_8c_source" xml:lang="en-US">
+<title>init.c</title>
+<indexterm><primary>C:/Users/HP/Documents/GitHub/Minero-Game/lib/external/glfw/src/init.c</primary></indexterm>
+Go to the documentation of this file.<programlisting linenumbering="unnumbered">1 <emphasis role="comment">//========================================================================</emphasis>
+2 <emphasis role="comment">//&#32;GLFW&#32;3.4&#32;-&#32;www.glfw.org</emphasis>
+3 <emphasis role="comment">//------------------------------------------------------------------------</emphasis>
+4 <emphasis role="comment">//&#32;Copyright&#32;(c)&#32;2002-2006&#32;Marcus&#32;Geelnard</emphasis>
+5 <emphasis role="comment">//&#32;Copyright&#32;(c)&#32;2006-2018&#32;Camilla&#32;Löwy&#32;&lt;elmindreda@glfw.org&gt;</emphasis>
+6 <emphasis role="comment">//</emphasis>
+7 <emphasis role="comment">//&#32;This&#32;software&#32;is&#32;provided&#32;&apos;as-is&apos;,&#32;without&#32;any&#32;express&#32;or&#32;implied</emphasis>
+8 <emphasis role="comment">//&#32;warranty.&#32;In&#32;no&#32;event&#32;will&#32;the&#32;authors&#32;be&#32;held&#32;liable&#32;for&#32;any&#32;damages</emphasis>
+9 <emphasis role="comment">//&#32;arising&#32;from&#32;the&#32;use&#32;of&#32;this&#32;software.</emphasis>
+10 <emphasis role="comment">//</emphasis>
+11 <emphasis role="comment">//&#32;Permission&#32;is&#32;granted&#32;to&#32;anyone&#32;to&#32;use&#32;this&#32;software&#32;for&#32;any&#32;purpose,</emphasis>
+12 <emphasis role="comment">//&#32;including&#32;commercial&#32;applications,&#32;and&#32;to&#32;alter&#32;it&#32;and&#32;redistribute&#32;it</emphasis>
+13 <emphasis role="comment">//&#32;freely,&#32;subject&#32;to&#32;the&#32;following&#32;restrictions:</emphasis>
+14 <emphasis role="comment">//</emphasis>
+15 <emphasis role="comment">//&#32;1.&#32;The&#32;origin&#32;of&#32;this&#32;software&#32;must&#32;not&#32;be&#32;misrepresented;&#32;you&#32;must&#32;not</emphasis>
+16 <emphasis role="comment">//&#32;&#32;&#32;&#32;claim&#32;that&#32;you&#32;wrote&#32;the&#32;original&#32;software.&#32;If&#32;you&#32;use&#32;this&#32;software</emphasis>
+17 <emphasis role="comment">//&#32;&#32;&#32;&#32;in&#32;a&#32;product,&#32;an&#32;acknowledgment&#32;in&#32;the&#32;product&#32;documentation&#32;would</emphasis>
+18 <emphasis role="comment">//&#32;&#32;&#32;&#32;be&#32;appreciated&#32;but&#32;is&#32;not&#32;required.</emphasis>
+19 <emphasis role="comment">//</emphasis>
+20 <emphasis role="comment">//&#32;2.&#32;Altered&#32;source&#32;versions&#32;must&#32;be&#32;plainly&#32;marked&#32;as&#32;such,&#32;and&#32;must&#32;not</emphasis>
+21 <emphasis role="comment">//&#32;&#32;&#32;&#32;be&#32;misrepresented&#32;as&#32;being&#32;the&#32;original&#32;software.</emphasis>
+22 <emphasis role="comment">//</emphasis>
+23 <emphasis role="comment">//&#32;3.&#32;This&#32;notice&#32;may&#32;not&#32;be&#32;removed&#32;or&#32;altered&#32;from&#32;any&#32;source</emphasis>
+24 <emphasis role="comment">//&#32;&#32;&#32;&#32;distribution.</emphasis>
+25 <emphasis role="comment">//</emphasis>
+26 <emphasis role="comment">//========================================================================</emphasis>
+27 <emphasis role="comment">//&#32;Please&#32;use&#32;C89&#32;style&#32;variable&#32;declarations&#32;in&#32;this&#32;file&#32;because&#32;VS&#32;2010</emphasis>
+28 <emphasis role="comment">//========================================================================</emphasis>
+29 
+30 <emphasis role="preprocessor">#include&#32;&quot;<link linkend="__old_2_classes_2lib_2raylib_2src_2external_2glfw_2src_2internal_8h">internal.h</link>&quot;</emphasis>
+31 
+32 <emphasis role="preprocessor">#include&#32;&lt;string.h&gt;</emphasis>
+33 <emphasis role="preprocessor">#include&#32;&lt;stdlib.h&gt;</emphasis>
+34 <emphasis role="preprocessor">#include&#32;&lt;stdio.h&gt;</emphasis>
+35 <emphasis role="preprocessor">#include&#32;&lt;stdarg.h&gt;</emphasis>
+36 <emphasis role="preprocessor">#include&#32;&lt;assert.h&gt;</emphasis>
+37 
+38 
+39 <emphasis role="comment">//&#32;NOTE:&#32;The&#32;global&#32;variables&#32;below&#32;comprise&#32;all&#32;mutable&#32;global&#32;data&#32;in&#32;GLFW</emphasis>
+40 <emphasis role="comment">//&#32;&#32;&#32;&#32;&#32;&#32;&#32;Any&#32;other&#32;mutable&#32;global&#32;variable&#32;is&#32;a&#32;bug</emphasis>
+41 
+42 <emphasis role="comment">//&#32;This&#32;contains&#32;all&#32;mutable&#32;state&#32;shared&#32;between&#32;compilation&#32;units&#32;of&#32;GLFW</emphasis>
+43 <emphasis role="comment">//</emphasis>
+44 <link linkend="_struct___g_l_f_wlibrary">_GLFWlibrary</link>&#32;<link linkend="__classes_2lib_2external_2glfw_2src_2init_8c_1a3007bc654ca6468ee69759007f70ba1e">_glfw</link>&#32;=&#32;{&#32;<link linkend="_group__init_1gac877fe3b627d21ef3a0a23e0a73ba8c5">GLFW_FALSE</link>&#32;};
+45 
+46 <emphasis role="comment">//&#32;These&#32;are&#32;outside&#32;of&#32;_glfw&#32;so&#32;they&#32;can&#32;be&#32;used&#32;before&#32;initialization&#32;and</emphasis>
+47 <emphasis role="comment">//&#32;after&#32;termination&#32;without&#32;special&#32;handling&#32;when&#32;_glfw&#32;is&#32;cleared&#32;to&#32;zero</emphasis>
+48 <emphasis role="comment">//</emphasis>
+49 <emphasis role="keyword">static</emphasis>&#32;<link linkend="_struct___g_l_f_werror">_GLFWerror</link>&#32;_glfwMainThreadError;
+50 <emphasis role="keyword">static</emphasis>&#32;<link linkend="_group__init_1ga8184701785c096b3862a75cda1bf44a3">GLFWerrorfun</link>&#32;_glfwErrorCallback;
+51 <emphasis role="keyword">static</emphasis>&#32;<link linkend="_struct_g_l_f_wallocator">GLFWallocator</link>&#32;_glfwInitAllocator;
+52 <emphasis role="keyword">static</emphasis>&#32;<link linkend="_struct___g_l_f_winitconfig">_GLFWinitconfig</link>&#32;_glfwInitHints&#32;=
+53 {
+54 &#32;&#32;&#32;&#32;<link linkend="_group__init_1ga2744fbb29b5631bb28802dbe0cf36eba">GLFW_TRUE</link>,&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;hat&#32;buttons</emphasis>
+55 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2external_2glfw_2include_2_g_l_f_w_2glfw3_8h_1ae78e673449c2a2b8c560ca1b1e283228">GLFW_ANGLE_PLATFORM_TYPE_NONE</link>,&#32;<emphasis role="comment">//&#32;ANGLE&#32;backend</emphasis>
+56 &#32;&#32;&#32;&#32;<link linkend="_group__init_1ga18b2d37374d0dea28cd69194fa85b859">GLFW_ANY_PLATFORM</link>,&#32;<emphasis role="comment">//&#32;preferred&#32;platform</emphasis>
+57 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>,&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;vkGetInstanceProcAddr&#32;function</emphasis>
+58 &#32;&#32;&#32;&#32;{
+59 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_group__init_1ga2744fbb29b5631bb28802dbe0cf36eba">GLFW_TRUE</link>,&#32;&#32;<emphasis role="comment">//&#32;macOS&#32;menu&#32;bar</emphasis>
+60 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_group__init_1ga2744fbb29b5631bb28802dbe0cf36eba">GLFW_TRUE</link>&#32;&#32;&#32;<emphasis role="comment">//&#32;macOS&#32;bundle&#32;chdir</emphasis>
+61 &#32;&#32;&#32;&#32;},
+62 &#32;&#32;&#32;&#32;{
+63 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_group__init_1ga2744fbb29b5631bb28802dbe0cf36eba">GLFW_TRUE</link>,&#32;&#32;<emphasis role="comment">//&#32;X11&#32;XCB&#32;Vulkan&#32;surface</emphasis>
+64 &#32;&#32;&#32;&#32;},
+65 };
+66 
+67 <emphasis role="comment">//&#32;The&#32;allocation&#32;function&#32;used&#32;when&#32;no&#32;custom&#32;allocator&#32;is&#32;set</emphasis>
+68 <emphasis role="comment">//</emphasis>
+69 <emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>*&#32;defaultAllocate(<emphasis role="keywordtype">size_t</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a3d1e3edfcf61ca2d831883e1afbad89e">size</link>,&#32;<emphasis role="keywordtype">void</emphasis>*&#32;user)
+70 {
+71 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;malloc(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a3d1e3edfcf61ca2d831883e1afbad89e">size</link>);
+72 }
+73 
+74 <emphasis role="comment">//&#32;The&#32;deallocation&#32;function&#32;used&#32;when&#32;no&#32;custom&#32;allocator&#32;is&#32;set</emphasis>
+75 <emphasis role="comment">//</emphasis>
+76 <emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>&#32;defaultDeallocate(<emphasis role="keywordtype">void</emphasis>*&#32;block,&#32;<emphasis role="keywordtype">void</emphasis>*&#32;user)
+77 {
+78 &#32;&#32;&#32;&#32;free(block);
+79 }
+80 
+81 <emphasis role="comment">//&#32;The&#32;reallocation&#32;function&#32;used&#32;when&#32;no&#32;custom&#32;allocator&#32;is&#32;set</emphasis>
+82 <emphasis role="comment">//</emphasis>
+83 <emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>*&#32;defaultReallocate(<emphasis role="keywordtype">void</emphasis>*&#32;block,&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a3d1e3edfcf61ca2d831883e1afbad89e">size</link>,&#32;<emphasis role="keywordtype">void</emphasis>*&#32;user)
+84 {
+85 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;realloc(block,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a3d1e3edfcf61ca2d831883e1afbad89e">size</link>);
+86 }
+87 
+88 <emphasis role="comment">//&#32;Terminate&#32;the&#32;library</emphasis>
+89 <emphasis role="comment">//</emphasis>
+90 <emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>&#32;terminate(<emphasis role="keywordtype">void</emphasis>)
+91 {
+92 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;i;
+93 
+94 &#32;&#32;&#32;&#32;memset(&amp;<link linkend="__classes_2lib_2external_2glfw_2src_2init_8c_1a3007bc654ca6468ee69759007f70ba1e">_glfw</link>.<link linkend="_struct___g_l_f_wlibrary_1a5ee445bbec186953fd231517cb036c84">callbacks</link>,&#32;0,&#32;<emphasis role="keyword">sizeof</emphasis>(<link linkend="__classes_2lib_2external_2glfw_2src_2init_8c_1a3007bc654ca6468ee69759007f70ba1e">_glfw</link>.<link linkend="_struct___g_l_f_wlibrary_1a5ee445bbec186953fd231517cb036c84">callbacks</link>));
+95 
+96 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">while</emphasis>&#32;(<link linkend="__classes_2lib_2external_2glfw_2src_2init_8c_1a3007bc654ca6468ee69759007f70ba1e">_glfw</link>.<link linkend="_struct___g_l_f_wlibrary_1a937f0cca52677efb92365dff58e28525">windowListHead</link>)
+97 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_group__window_1ga806747476b7247d292be3711c323ea10">glfwDestroyWindow</link>((<link linkend="_group__window_1ga3c96d80d363e67d13a41b5d1821f3242">GLFWwindow</link>*)&#32;<link linkend="__classes_2lib_2external_2glfw_2src_2init_8c_1a3007bc654ca6468ee69759007f70ba1e">_glfw</link>.<link linkend="_struct___g_l_f_wlibrary_1a937f0cca52677efb92365dff58e28525">windowListHead</link>);
+98 
+99 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">while</emphasis>&#32;(<link linkend="__classes_2lib_2external_2glfw_2src_2init_8c_1a3007bc654ca6468ee69759007f70ba1e">_glfw</link>.<link linkend="_struct___g_l_f_wlibrary_1a07324047eaa8b9c86a87c53a13b4f9ea">cursorListHead</link>)
+100 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_group__input_1ga27556b7122117bc1bbb4bb3cc003ea43">glfwDestroyCursor</link>((<link linkend="_group__input_1ga89261ae18c75e863aaf2656ecdd238f4">GLFWcursor</link>*)&#32;<link linkend="__classes_2lib_2external_2glfw_2src_2init_8c_1a3007bc654ca6468ee69759007f70ba1e">_glfw</link>.<link linkend="_struct___g_l_f_wlibrary_1a07324047eaa8b9c86a87c53a13b4f9ea">cursorListHead</link>);
+101 
+102 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(i&#32;=&#32;0;&#32;&#32;i&#32;&lt;&#32;<link linkend="__classes_2lib_2external_2glfw_2src_2init_8c_1a3007bc654ca6468ee69759007f70ba1e">_glfw</link>.<link linkend="_struct___g_l_f_wlibrary_1ae3f408467579cb3fb517fcd39fa23568">monitorCount</link>;&#32;&#32;i++)
+103 &#32;&#32;&#32;&#32;{
+104 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_struct___g_l_f_wmonitor">_GLFWmonitor</link>*&#32;monitor&#32;=&#32;<link linkend="__classes_2lib_2external_2glfw_2src_2init_8c_1a3007bc654ca6468ee69759007f70ba1e">_glfw</link>.<link linkend="_struct___g_l_f_wlibrary_1aeb9b7d6d135aa6a4a2dfac6eea072e31">monitors</link>[i];
+105 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(monitor-&gt;<link linkend="_struct___g_l_f_wmonitor_1a64188202c44980245af7cb1ce9a24d44">originalRamp</link>.<link linkend="_struct_g_l_f_wgammaramp_1ad620e1cffbff9a32c51bca46301b59a5">size</link>)
+106 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2external_2glfw_2src_2init_8c_1a3007bc654ca6468ee69759007f70ba1e">_glfw</link>.<link linkend="_struct___g_l_f_wlibrary_1a93b1c9522ac532d94b32072cf4bf1421">platform</link>.<link linkend="_struct___g_l_f_wplatform_1a19fbeb853775f208a69b0b718bfccd9f">setGammaRamp</link>(monitor,&#32;&amp;monitor-&gt;<link linkend="_struct___g_l_f_wmonitor_1a64188202c44980245af7cb1ce9a24d44">originalRamp</link>);
+107 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2external_2glfw_2src_2internal_8h_1a5555e8488ac56b446d0a28d3330666f6">_glfwFreeMonitor</link>(monitor);
+108 &#32;&#32;&#32;&#32;}
+109 
+110 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2external_2glfw_2src_2init_8c_1abcf72962b101a8a5c539da1a278b0e9e">_glfw_free</link>(<link linkend="__classes_2lib_2external_2glfw_2src_2init_8c_1a3007bc654ca6468ee69759007f70ba1e">_glfw</link>.<link linkend="_struct___g_l_f_wlibrary_1aeb9b7d6d135aa6a4a2dfac6eea072e31">monitors</link>);
+111 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2external_2glfw_2src_2init_8c_1a3007bc654ca6468ee69759007f70ba1e">_glfw</link>.<link linkend="_struct___g_l_f_wlibrary_1aeb9b7d6d135aa6a4a2dfac6eea072e31">monitors</link>&#32;=&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>;
+112 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2external_2glfw_2src_2init_8c_1a3007bc654ca6468ee69759007f70ba1e">_glfw</link>.<link linkend="_struct___g_l_f_wlibrary_1ae3f408467579cb3fb517fcd39fa23568">monitorCount</link>&#32;=&#32;0;
+113 
+114 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2external_2glfw_2src_2init_8c_1abcf72962b101a8a5c539da1a278b0e9e">_glfw_free</link>(<link linkend="__classes_2lib_2external_2glfw_2src_2init_8c_1a3007bc654ca6468ee69759007f70ba1e">_glfw</link>.<link linkend="_struct___g_l_f_wlibrary_1a2813cdd9e9de0a231073845f335200f9">mappings</link>);
+115 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2external_2glfw_2src_2init_8c_1a3007bc654ca6468ee69759007f70ba1e">_glfw</link>.<link linkend="_struct___g_l_f_wlibrary_1a2813cdd9e9de0a231073845f335200f9">mappings</link>&#32;=&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>;
+116 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2external_2glfw_2src_2init_8c_1a3007bc654ca6468ee69759007f70ba1e">_glfw</link>.<link linkend="_struct___g_l_f_wlibrary_1a974eecd4fb17f568673a0b16474268aa">mappingCount</link>&#32;=&#32;0;
+117 
+118 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2external_2glfw_2src_2internal_8h_1a7e9f009f4edffd3f2c938045981f13f1">_glfwTerminateVulkan</link>();
+119 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2external_2glfw_2src_2init_8c_1a3007bc654ca6468ee69759007f70ba1e">_glfw</link>.<link linkend="_struct___g_l_f_wlibrary_1a93b1c9522ac532d94b32072cf4bf1421">platform</link>.<link linkend="_struct___g_l_f_wplatform_1a1ce0b773c0ccda1732cbba81c6fe23d6">terminateJoysticks</link>();
+120 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2external_2glfw_2src_2init_8c_1a3007bc654ca6468ee69759007f70ba1e">_glfw</link>.<link linkend="_struct___g_l_f_wlibrary_1a93b1c9522ac532d94b32072cf4bf1421">platform</link>.<link linkend="_struct___g_l_f_wplatform_1ae38a3463850db981f29c857fe4d7805c">terminate</link>();
+121 
+122 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2external_2glfw_2src_2init_8c_1a3007bc654ca6468ee69759007f70ba1e">_glfw</link>.<link linkend="_struct___g_l_f_wlibrary_1aef3b20f1280cca7cae8316626af42c45">initialized</link>&#32;=&#32;<link linkend="_group__init_1gac877fe3b627d21ef3a0a23e0a73ba8c5">GLFW_FALSE</link>;
+123 
+124 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">while</emphasis>&#32;(<link linkend="__classes_2lib_2external_2glfw_2src_2init_8c_1a3007bc654ca6468ee69759007f70ba1e">_glfw</link>.<link linkend="_struct___g_l_f_wlibrary_1a77ff916c5b45760a4c1798d1869a8edf">errorListHead</link>)
+125 &#32;&#32;&#32;&#32;{
+126 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_struct___g_l_f_werror">_GLFWerror</link>*&#32;<link linkend="__classes_2lib_2glm_2test_2core_2core__func__integer__bit__count_8cpp_1ab34dedbf30a51859090cbab92fa60edb">error</link>&#32;=&#32;<link linkend="__classes_2lib_2external_2glfw_2src_2init_8c_1a3007bc654ca6468ee69759007f70ba1e">_glfw</link>.<link linkend="_struct___g_l_f_wlibrary_1a77ff916c5b45760a4c1798d1869a8edf">errorListHead</link>;
+127 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2external_2glfw_2src_2init_8c_1a3007bc654ca6468ee69759007f70ba1e">_glfw</link>.<link linkend="_struct___g_l_f_wlibrary_1a77ff916c5b45760a4c1798d1869a8edf">errorListHead</link>&#32;=&#32;<link linkend="__classes_2lib_2glm_2test_2core_2core__func__integer__bit__count_8cpp_1ab34dedbf30a51859090cbab92fa60edb">error</link>-&gt;next;
+128 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2external_2glfw_2src_2init_8c_1abcf72962b101a8a5c539da1a278b0e9e">_glfw_free</link>(error);
+129 &#32;&#32;&#32;&#32;}
+130 
+131 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2external_2glfw_2src_2internal_8h_1a36bee5cb6dd711c2278a0db7f5b81979">_glfwPlatformDestroyTls</link>(&amp;<link linkend="__classes_2lib_2external_2glfw_2src_2init_8c_1a3007bc654ca6468ee69759007f70ba1e">_glfw</link>.<link linkend="_struct___g_l_f_wlibrary_1aa267e959a6f2dae405c0c15220e0cfb2">contextSlot</link>);
+132 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2external_2glfw_2src_2internal_8h_1a36bee5cb6dd711c2278a0db7f5b81979">_glfwPlatformDestroyTls</link>(&amp;<link linkend="__classes_2lib_2external_2glfw_2src_2init_8c_1a3007bc654ca6468ee69759007f70ba1e">_glfw</link>.<link linkend="_struct___g_l_f_wlibrary_1a3c64f08c60bd21f7349ec252e65c6aa9">errorSlot</link>);
+133 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2external_2glfw_2src_2internal_8h_1a3731e795e959a80349337ee1e3887518">_glfwPlatformDestroyMutex</link>(&amp;<link linkend="__classes_2lib_2external_2glfw_2src_2init_8c_1a3007bc654ca6468ee69759007f70ba1e">_glfw</link>.<link linkend="_struct___g_l_f_wlibrary_1a1bc5de4505509cfb4911760237845ee2">errorLock</link>);
+134 
+135 &#32;&#32;&#32;&#32;memset(&amp;<link linkend="__classes_2lib_2external_2glfw_2src_2init_8c_1a3007bc654ca6468ee69759007f70ba1e">_glfw</link>,&#32;0,&#32;<emphasis role="keyword">sizeof</emphasis>(<link linkend="__classes_2lib_2external_2glfw_2src_2init_8c_1a3007bc654ca6468ee69759007f70ba1e">_glfw</link>));
+136 }
+137 
+138 
+142 
+143 <emphasis role="comment">//&#32;Encode&#32;a&#32;Unicode&#32;code&#32;point&#32;to&#32;a&#32;UTF-8&#32;stream</emphasis>
+144 <emphasis role="comment">//&#32;Based&#32;on&#32;cutef8&#32;by&#32;Jeff&#32;Bezanson&#32;(Public&#32;Domain)</emphasis>
+145 <emphasis role="comment">//</emphasis>
+146 <emphasis role="keywordtype">size_t</emphasis>&#32;<link linkend="__classes_2lib_2external_2glfw_2src_2init_8c_1a920bdd09bf605b918b93fbec1993c55b">_glfwEncodeUTF8</link>(<emphasis role="keywordtype">char</emphasis>*&#32;s,&#32;<link linkend="__classes_2lib_2external_2glfw_2deps_2vs2008_2stdint_8h_1a435d1572bf3f880d55459d9805097f62">uint32_t</link>&#32;codepoint)
+147 {
+148 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a22486c0c8d9f7d79a07bf22ecffeeb2f">count</link>&#32;=&#32;0;
+149 
+150 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(codepoint&#32;&lt;&#32;0x80)
+151 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;s[<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a22486c0c8d9f7d79a07bf22ecffeeb2f">count</link>++]&#32;=&#32;(char)&#32;codepoint;
+152 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>&#32;<emphasis role="keywordflow">if</emphasis>&#32;(codepoint&#32;&lt;&#32;0x800)
+153 &#32;&#32;&#32;&#32;{
+154 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;s[<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a22486c0c8d9f7d79a07bf22ecffeeb2f">count</link>++]&#32;=&#32;(codepoint&#32;&gt;&gt;&#32;6)&#32;|&#32;0xc0;
+155 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;s[<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a22486c0c8d9f7d79a07bf22ecffeeb2f">count</link>++]&#32;=&#32;(codepoint&#32;&amp;&#32;0x3f)&#32;|&#32;0x80;
+156 &#32;&#32;&#32;&#32;}
+157 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>&#32;<emphasis role="keywordflow">if</emphasis>&#32;(codepoint&#32;&lt;&#32;0x10000)
+158 &#32;&#32;&#32;&#32;{
+159 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;s[<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a22486c0c8d9f7d79a07bf22ecffeeb2f">count</link>++]&#32;=&#32;(codepoint&#32;&gt;&gt;&#32;12)&#32;|&#32;0xe0;
+160 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;s[<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a22486c0c8d9f7d79a07bf22ecffeeb2f">count</link>++]&#32;=&#32;((codepoint&#32;&gt;&gt;&#32;6)&#32;&amp;&#32;0x3f)&#32;|&#32;0x80;
+161 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;s[<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a22486c0c8d9f7d79a07bf22ecffeeb2f">count</link>++]&#32;=&#32;(codepoint&#32;&amp;&#32;0x3f)&#32;|&#32;0x80;
+162 &#32;&#32;&#32;&#32;}
+163 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>&#32;<emphasis role="keywordflow">if</emphasis>&#32;(codepoint&#32;&lt;&#32;0x110000)
+164 &#32;&#32;&#32;&#32;{
+165 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;s[<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a22486c0c8d9f7d79a07bf22ecffeeb2f">count</link>++]&#32;=&#32;(codepoint&#32;&gt;&gt;&#32;18)&#32;|&#32;0xf0;
+166 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;s[<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a22486c0c8d9f7d79a07bf22ecffeeb2f">count</link>++]&#32;=&#32;((codepoint&#32;&gt;&gt;&#32;12)&#32;&amp;&#32;0x3f)&#32;|&#32;0x80;
+167 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;s[<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a22486c0c8d9f7d79a07bf22ecffeeb2f">count</link>++]&#32;=&#32;((codepoint&#32;&gt;&gt;&#32;6)&#32;&amp;&#32;0x3f)&#32;|&#32;0x80;
+168 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;s[<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a22486c0c8d9f7d79a07bf22ecffeeb2f">count</link>++]&#32;=&#32;(codepoint&#32;&amp;&#32;0x3f)&#32;|&#32;0x80;
+169 &#32;&#32;&#32;&#32;}
+170 
+171 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a22486c0c8d9f7d79a07bf22ecffeeb2f">count</link>;
+172 }
+173 
+174 <emphasis role="comment">//&#32;Splits&#32;and&#32;translates&#32;a&#32;text/uri-list&#32;into&#32;separate&#32;file&#32;paths</emphasis>
+175 <emphasis role="comment">//&#32;NOTE:&#32;This&#32;function&#32;destroys&#32;the&#32;provided&#32;string</emphasis>
+176 <emphasis role="comment">//</emphasis>
+177 <emphasis role="keywordtype">char</emphasis>**&#32;<link linkend="__classes_2lib_2external_2glfw_2src_2init_8c_1a52c17edd88a6ec5bebc87d96ac5d00ae">_glfwParseUriList</link>(<emphasis role="keywordtype">char</emphasis>*&#32;text,&#32;<emphasis role="keywordtype">int</emphasis>*&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a22486c0c8d9f7d79a07bf22ecffeeb2f">count</link>)
+178 {
+179 &#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>*&#32;prefix&#32;=&#32;<emphasis role="stringliteral">&quot;file://&quot;</emphasis>;
+180 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">char</emphasis>**&#32;paths&#32;=&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>;
+181 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">char</emphasis>*&#32;line;
+182 
+183 &#32;&#32;&#32;&#32;*<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a22486c0c8d9f7d79a07bf22ecffeeb2f">count</link>&#32;=&#32;0;
+184 
+185 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">while</emphasis>&#32;((line&#32;=&#32;strtok(text,&#32;<emphasis role="stringliteral">&quot;\r\n&quot;</emphasis>)))
+186 &#32;&#32;&#32;&#32;{
+187 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">char</emphasis>*&#32;<link linkend="_classpath">path</link>;
+188 
+189 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;text&#32;=&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>;
+190 
+191 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(line[0]&#32;==&#32;<emphasis role="charliteral">&apos;#&apos;</emphasis>)
+192 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">continue</emphasis>;
+193 
+194 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(strncmp(line,&#32;prefix,&#32;strlen(prefix))&#32;==&#32;0)
+195 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+196 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;line&#32;+=&#32;strlen(prefix);
+197 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;TODO:&#32;Validate&#32;hostname</emphasis>
+198 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">while</emphasis>&#32;(*line&#32;!=&#32;<emphasis role="charliteral">&apos;/&apos;</emphasis>)
+199 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;line++;
+200 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+201 
+202 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;(*count)++;
+203 
+204 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_classpath">path</link>&#32;=&#32;<link linkend="__classes_2lib_2external_2glfw_2src_2init_8c_1a88a6e01ef5c1245a6d2a5e62b02e5678">_glfw_calloc</link>(strlen(line)&#32;+&#32;1,&#32;1);
+205 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;paths&#32;=&#32;<link linkend="__classes_2lib_2external_2glfw_2src_2init_8c_1a7ee3244d243d5778c712c1b3c98f8bc3">_glfw_realloc</link>(paths,&#32;*<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a22486c0c8d9f7d79a07bf22ecffeeb2f">count</link>&#32;*&#32;<emphasis role="keyword">sizeof</emphasis>(<emphasis role="keywordtype">char</emphasis>*));
+206 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;paths[*<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a22486c0c8d9f7d79a07bf22ecffeeb2f">count</link>&#32;-&#32;1]&#32;=&#32;<link linkend="_classpath">path</link>;
+207 
+208 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">while</emphasis>&#32;(*line)
+209 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+210 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(line[0]&#32;==&#32;<emphasis role="charliteral">&apos;%&apos;</emphasis>&#32;&amp;&amp;&#32;line[1]&#32;&amp;&amp;&#32;line[2])
+211 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+212 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>&#32;digits[3]&#32;=&#32;{&#32;line[1],&#32;line[2],&#32;<emphasis role="charliteral">&apos;\0&apos;</emphasis>&#32;};
+213 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;*<link linkend="_classpath">path</link>&#32;=&#32;(char)&#32;strtol(digits,&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>,&#32;16);
+214 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;line&#32;+=&#32;2;
+215 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+216 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>
+217 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;*<link linkend="_classpath">path</link>&#32;=&#32;*line;
+218 
+219 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_classpath">path</link>++;
+220 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;line++;
+221 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+222 &#32;&#32;&#32;&#32;}
+223 
+224 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;paths;
+225 }
+226 
+227 <emphasis role="keywordtype">char</emphasis>*&#32;<link linkend="__classes_2lib_2external_2glfw_2src_2init_8c_1af725e1f466a710a1fc590ff3726f1151">_glfw_strdup</link>(<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>*&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a633906574fe6e39b7f2840bed0e49832">source</link>)
+228 {
+229 &#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;<link linkend="_namespacelength">length</link>&#32;=&#32;strlen(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a633906574fe6e39b7f2840bed0e49832">source</link>);
+230 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">char</emphasis>*&#32;<link linkend="__classes_2lib_2glm_2test_2core_2core__func__integer_8cpp_1a937d4dd628a8858b443a399410d2600b">result</link>&#32;=&#32;<link linkend="__classes_2lib_2external_2glfw_2src_2init_8c_1a88a6e01ef5c1245a6d2a5e62b02e5678">_glfw_calloc</link>(<link linkend="_namespacelength">length</link>&#32;+&#32;1,&#32;1);
+231 &#32;&#32;&#32;&#32;strcpy(<link linkend="__classes_2lib_2glm_2test_2core_2core__func__integer_8cpp_1a937d4dd628a8858b443a399410d2600b">result</link>,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a633906574fe6e39b7f2840bed0e49832">source</link>);
+232 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="__classes_2lib_2glm_2test_2core_2core__func__integer_8cpp_1a937d4dd628a8858b443a399410d2600b">result</link>;
+233 }
+234 
+235 <emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2external_2glfw_2src_2init_8c_1afa5b80ef05733304e18066539f2fe702">_glfw_min</link>(<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1ac8729153468b5dcf13f971b21d84d4e5">a</link>,&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a6eba317e3cf44d6d26c04a5a8f197dcb">b</link>)
+236 {
+237 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1ac8729153468b5dcf13f971b21d84d4e5">a</link>&#32;&lt;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a6eba317e3cf44d6d26c04a5a8f197dcb">b</link>&#32;?&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1ac8729153468b5dcf13f971b21d84d4e5">a</link>&#32;:&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a6eba317e3cf44d6d26c04a5a8f197dcb">b</link>;
+238 }
+239 
+240 <emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2external_2glfw_2src_2init_8c_1a91120c4dfe80fbd3b162413f154a585f">_glfw_max</link>(<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1ac8729153468b5dcf13f971b21d84d4e5">a</link>,&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a6eba317e3cf44d6d26c04a5a8f197dcb">b</link>)
+241 {
+242 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1ac8729153468b5dcf13f971b21d84d4e5">a</link>&#32;&gt;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a6eba317e3cf44d6d26c04a5a8f197dcb">b</link>&#32;?&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1ac8729153468b5dcf13f971b21d84d4e5">a</link>&#32;:&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a6eba317e3cf44d6d26c04a5a8f197dcb">b</link>;
+243 }
+244 
+245 <emphasis role="keywordtype">float</emphasis>&#32;<link linkend="__classes_2lib_2external_2glfw_2src_2init_8c_1af27e3c452fbb2a7133339f77b72fcf37">_glfw_fminf</link>(<emphasis role="keywordtype">float</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1ac8729153468b5dcf13f971b21d84d4e5">a</link>,&#32;<emphasis role="keywordtype">float</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a6eba317e3cf44d6d26c04a5a8f197dcb">b</link>)
+246 {
+247 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1ac8729153468b5dcf13f971b21d84d4e5">a</link>&#32;!=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1ac8729153468b5dcf13f971b21d84d4e5">a</link>)
+248 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a6eba317e3cf44d6d26c04a5a8f197dcb">b</link>;
+249 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>&#32;<emphasis role="keywordflow">if</emphasis>&#32;(<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a6eba317e3cf44d6d26c04a5a8f197dcb">b</link>&#32;!=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a6eba317e3cf44d6d26c04a5a8f197dcb">b</link>)
+250 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1ac8729153468b5dcf13f971b21d84d4e5">a</link>;
+251 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>&#32;<emphasis role="keywordflow">if</emphasis>&#32;(<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1ac8729153468b5dcf13f971b21d84d4e5">a</link>&#32;&lt;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a6eba317e3cf44d6d26c04a5a8f197dcb">b</link>)
+252 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1ac8729153468b5dcf13f971b21d84d4e5">a</link>;
+253 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>
+254 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a6eba317e3cf44d6d26c04a5a8f197dcb">b</link>;
+255 }
+256 
+257 <emphasis role="keywordtype">float</emphasis>&#32;<link linkend="__classes_2lib_2external_2glfw_2src_2init_8c_1a159e9723ec02405ea951cea91b1cff30">_glfw_fmaxf</link>(<emphasis role="keywordtype">float</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1ac8729153468b5dcf13f971b21d84d4e5">a</link>,&#32;<emphasis role="keywordtype">float</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a6eba317e3cf44d6d26c04a5a8f197dcb">b</link>)
+258 {
+259 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1ac8729153468b5dcf13f971b21d84d4e5">a</link>&#32;!=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1ac8729153468b5dcf13f971b21d84d4e5">a</link>)
+260 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a6eba317e3cf44d6d26c04a5a8f197dcb">b</link>;
+261 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>&#32;<emphasis role="keywordflow">if</emphasis>&#32;(<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a6eba317e3cf44d6d26c04a5a8f197dcb">b</link>&#32;!=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a6eba317e3cf44d6d26c04a5a8f197dcb">b</link>)
+262 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1ac8729153468b5dcf13f971b21d84d4e5">a</link>;
+263 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>&#32;<emphasis role="keywordflow">if</emphasis>&#32;(<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1ac8729153468b5dcf13f971b21d84d4e5">a</link>&#32;&gt;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a6eba317e3cf44d6d26c04a5a8f197dcb">b</link>)
+264 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1ac8729153468b5dcf13f971b21d84d4e5">a</link>;
+265 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>
+266 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a6eba317e3cf44d6d26c04a5a8f197dcb">b</link>;
+267 }
+268 
+269 <emphasis role="keywordtype">void</emphasis>*&#32;<link linkend="__classes_2lib_2external_2glfw_2src_2init_8c_1a88a6e01ef5c1245a6d2a5e62b02e5678">_glfw_calloc</link>(<emphasis role="keywordtype">size_t</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a22486c0c8d9f7d79a07bf22ecffeeb2f">count</link>,&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a3d1e3edfcf61ca2d831883e1afbad89e">size</link>)
+270 {
+271 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a22486c0c8d9f7d79a07bf22ecffeeb2f">count</link>&#32;&amp;&amp;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a3d1e3edfcf61ca2d831883e1afbad89e">size</link>)
+272 &#32;&#32;&#32;&#32;{
+273 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>*&#32;block;
+274 
+275 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a22486c0c8d9f7d79a07bf22ecffeeb2f">count</link>&#32;&gt;&#32;<link linkend="__classes_2lib_2external_2glfw_2deps_2vs2008_2stdint_8h_1a3c75bb398badb69c7577b21486f9963f">SIZE_MAX</link>&#32;/&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a3d1e3edfcf61ca2d831883e1afbad89e">size</link>)
+276 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+277 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2external_2glfw_2src_2init_8c_1a3287b282ec57a4a89127ae51f49f10f5">_glfwInputError</link>(<link linkend="_group__errors_1gaaf2ef9aa8202c2b82ac2d921e554c687">GLFW_INVALID_VALUE</link>,&#32;<emphasis role="stringliteral">&quot;Allocation&#32;size&#32;overflow&quot;</emphasis>);
+278 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>;
+279 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+280 
+281 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;block&#32;=&#32;<link linkend="__classes_2lib_2external_2glfw_2src_2init_8c_1a3007bc654ca6468ee69759007f70ba1e">_glfw</link>.<link linkend="_struct___g_l_f_wlibrary_1a619cff4c7af731aa58dd3484d7fab761">allocator</link>.<link linkend="_struct_g_l_f_wallocator_1a18a798136f17a9cb105be18312193bf7">allocate</link>(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a22486c0c8d9f7d79a07bf22ecffeeb2f">count</link>&#32;*&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a3d1e3edfcf61ca2d831883e1afbad89e">size</link>,&#32;<link linkend="__classes_2lib_2external_2glfw_2src_2init_8c_1a3007bc654ca6468ee69759007f70ba1e">_glfw</link>.<link linkend="_struct___g_l_f_wlibrary_1a619cff4c7af731aa58dd3484d7fab761">allocator</link>.<link linkend="_struct_g_l_f_wallocator_1a238fcb348537cbf8f9f3ffb444cb0a6b">user</link>);
+282 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(block)
+283 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;memset(block,&#32;0,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a22486c0c8d9f7d79a07bf22ecffeeb2f">count</link>&#32;*&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a3d1e3edfcf61ca2d831883e1afbad89e">size</link>);
+284 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>
+285 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+286 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2external_2glfw_2src_2init_8c_1a3287b282ec57a4a89127ae51f49f10f5">_glfwInputError</link>(<link linkend="_group__errors_1ga9023953a2bcb98c2906afd071d21ee7f">GLFW_OUT_OF_MEMORY</link>,&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>);
+287 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>;
+288 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+289 &#32;&#32;&#32;&#32;}
+290 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>
+291 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>;
+292 }
+293 
+294 <emphasis role="keywordtype">void</emphasis>*&#32;<link linkend="__classes_2lib_2external_2glfw_2src_2init_8c_1a7ee3244d243d5778c712c1b3c98f8bc3">_glfw_realloc</link>(<emphasis role="keywordtype">void</emphasis>*&#32;block,&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a3d1e3edfcf61ca2d831883e1afbad89e">size</link>)
+295 {
+296 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(block&#32;&amp;&amp;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a3d1e3edfcf61ca2d831883e1afbad89e">size</link>)
+297 &#32;&#32;&#32;&#32;{
+298 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>*&#32;resized&#32;=&#32;<link linkend="__classes_2lib_2external_2glfw_2src_2init_8c_1a3007bc654ca6468ee69759007f70ba1e">_glfw</link>.<link linkend="_struct___g_l_f_wlibrary_1a619cff4c7af731aa58dd3484d7fab761">allocator</link>.<link linkend="_struct_g_l_f_wallocator_1af5a674af9e170095b968f467233437be">reallocate</link>(block,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a3d1e3edfcf61ca2d831883e1afbad89e">size</link>,&#32;<link linkend="__classes_2lib_2external_2glfw_2src_2init_8c_1a3007bc654ca6468ee69759007f70ba1e">_glfw</link>.<link linkend="_struct___g_l_f_wlibrary_1a619cff4c7af731aa58dd3484d7fab761">allocator</link>.<link linkend="_struct_g_l_f_wallocator_1a238fcb348537cbf8f9f3ffb444cb0a6b">user</link>);
+299 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(resized)
+300 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;resized;
+301 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>
+302 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+303 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2external_2glfw_2src_2init_8c_1a3287b282ec57a4a89127ae51f49f10f5">_glfwInputError</link>(<link linkend="_group__errors_1ga9023953a2bcb98c2906afd071d21ee7f">GLFW_OUT_OF_MEMORY</link>,&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>);
+304 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>;
+305 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+306 &#32;&#32;&#32;&#32;}
+307 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>&#32;<emphasis role="keywordflow">if</emphasis>&#32;(block)
+308 &#32;&#32;&#32;&#32;{
+309 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2external_2glfw_2src_2init_8c_1abcf72962b101a8a5c539da1a278b0e9e">_glfw_free</link>(block);
+310 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>;
+311 &#32;&#32;&#32;&#32;}
+312 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>
+313 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="__classes_2lib_2external_2glfw_2src_2init_8c_1a88a6e01ef5c1245a6d2a5e62b02e5678">_glfw_calloc</link>(1,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a3d1e3edfcf61ca2d831883e1afbad89e">size</link>);
+314 }
+315 
+316 <emphasis role="keywordtype">void</emphasis>&#32;<link linkend="__classes_2lib_2external_2glfw_2src_2init_8c_1abcf72962b101a8a5c539da1a278b0e9e">_glfw_free</link>(<emphasis role="keywordtype">void</emphasis>*&#32;block)
+317 {
+318 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(block)
+319 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2external_2glfw_2src_2init_8c_1a3007bc654ca6468ee69759007f70ba1e">_glfw</link>.<link linkend="_struct___g_l_f_wlibrary_1a619cff4c7af731aa58dd3484d7fab761">allocator</link>.<link linkend="_struct_g_l_f_wallocator_1ab74cf9a969e73e6eb65a6112a591a988">deallocate</link>(block,&#32;<link linkend="__classes_2lib_2external_2glfw_2src_2init_8c_1a3007bc654ca6468ee69759007f70ba1e">_glfw</link>.<link linkend="_struct___g_l_f_wlibrary_1a619cff4c7af731aa58dd3484d7fab761">allocator</link>.<link linkend="_struct_g_l_f_wallocator_1a238fcb348537cbf8f9f3ffb444cb0a6b">user</link>);
+320 }
+321 
+322 
+326 
+327 <emphasis role="comment">//&#32;Notifies&#32;shared&#32;code&#32;of&#32;an&#32;error</emphasis>
+328 <emphasis role="comment">//</emphasis>
+329 <emphasis role="keywordtype">void</emphasis>&#32;<link linkend="__classes_2lib_2external_2glfw_2src_2init_8c_1a3287b282ec57a4a89127ae51f49f10f5">_glfwInputError</link>(<emphasis role="keywordtype">int</emphasis>&#32;code,&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>*&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a3f8f226b5004bbc9a172e2bbf28ed102">format</link>,&#32;...)
+330 {
+331 &#32;&#32;&#32;&#32;<link linkend="_struct___g_l_f_werror">_GLFWerror</link>*&#32;<link linkend="__classes_2lib_2glm_2test_2core_2core__func__integer__bit__count_8cpp_1ab34dedbf30a51859090cbab92fa60edb">error</link>;
+332 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">char</emphasis>&#32;description[<link linkend="__classes_2lib_2external_2glfw_2src_2internal_8h_1af6333ef81718d365141bb1a64ed0c2e3">_GLFW_MESSAGE_SIZE</link>];
+333 
+334 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a3f8f226b5004bbc9a172e2bbf28ed102">format</link>)
+335 &#32;&#32;&#32;&#32;{
+336 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2stdarg_8h_1a8c1b94dabde2c11f430bb83e37bdb0a1">va_list</link>&#32;vl;
+337 
+338 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2stdarg_8h_1aa0628ab596c3d7e78f5e08c2d98e24da">va_start</link>(vl,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a3f8f226b5004bbc9a172e2bbf28ed102">format</link>);
+339 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;vsnprintf(description,&#32;<emphasis role="keyword">sizeof</emphasis>(description),&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a3f8f226b5004bbc9a172e2bbf28ed102">format</link>,&#32;vl);
+340 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2stdarg_8h_1a823b205416e9129825841b74c3bf8484">va_end</link>(vl);
+341 
+342 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;description[<emphasis role="keyword">sizeof</emphasis>(description)&#32;-&#32;1]&#32;=&#32;<emphasis role="charliteral">&apos;\0&apos;</emphasis>;
+343 &#32;&#32;&#32;&#32;}
+344 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>
+345 &#32;&#32;&#32;&#32;{
+346 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(code&#32;==&#32;<link linkend="_group__errors_1ga2374ee02c177f12e1fa76ff3ed15e14a">GLFW_NOT_INITIALIZED</link>)
+347 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;strcpy(description,&#32;<emphasis role="stringliteral">&quot;The&#32;GLFW&#32;library&#32;is&#32;not&#32;initialized&quot;</emphasis>);
+348 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>&#32;<emphasis role="keywordflow">if</emphasis>&#32;(code&#32;==&#32;<link linkend="_group__errors_1gaa8290386e9528ccb9e42a3a4e16fc0d0">GLFW_NO_CURRENT_CONTEXT</link>)
+349 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;strcpy(description,&#32;<emphasis role="stringliteral">&quot;There&#32;is&#32;no&#32;current&#32;context&quot;</emphasis>);
+350 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>&#32;<emphasis role="keywordflow">if</emphasis>&#32;(code&#32;==&#32;<link linkend="_group__errors_1ga76f6bb9c4eea73db675f096b404593ce">GLFW_INVALID_ENUM</link>)
+351 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;strcpy(description,&#32;<emphasis role="stringliteral">&quot;Invalid&#32;argument&#32;for&#32;enum&#32;parameter&quot;</emphasis>);
+352 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>&#32;<emphasis role="keywordflow">if</emphasis>&#32;(code&#32;==&#32;<link linkend="_group__errors_1gaaf2ef9aa8202c2b82ac2d921e554c687">GLFW_INVALID_VALUE</link>)
+353 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;strcpy(description,&#32;<emphasis role="stringliteral">&quot;Invalid&#32;value&#32;for&#32;parameter&quot;</emphasis>);
+354 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>&#32;<emphasis role="keywordflow">if</emphasis>&#32;(code&#32;==&#32;<link linkend="_group__errors_1ga9023953a2bcb98c2906afd071d21ee7f">GLFW_OUT_OF_MEMORY</link>)
+355 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;strcpy(description,&#32;<emphasis role="stringliteral">&quot;Out&#32;of&#32;memory&quot;</emphasis>);
+356 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>&#32;<emphasis role="keywordflow">if</emphasis>&#32;(code&#32;==&#32;<link linkend="_group__errors_1ga56882b290db23261cc6c053c40c2d08e">GLFW_API_UNAVAILABLE</link>)
+357 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;strcpy(description,&#32;<emphasis role="stringliteral">&quot;The&#32;requested&#32;API&#32;is&#32;unavailable&quot;</emphasis>);
+358 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>&#32;<emphasis role="keywordflow">if</emphasis>&#32;(code&#32;==&#32;<link linkend="_group__errors_1gad16c5565b4a69f9c2a9ac2c0dbc89462">GLFW_VERSION_UNAVAILABLE</link>)
+359 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;strcpy(description,&#32;<emphasis role="stringliteral">&quot;The&#32;requested&#32;API&#32;version&#32;is&#32;unavailable&quot;</emphasis>);
+360 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>&#32;<emphasis role="keywordflow">if</emphasis>&#32;(code&#32;==&#32;<link linkend="_group__errors_1gad44162d78100ea5e87cdd38426b8c7a1">GLFW_PLATFORM_ERROR</link>)
+361 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;strcpy(description,&#32;<emphasis role="stringliteral">&quot;A&#32;platform-specific&#32;error&#32;occurred&quot;</emphasis>);
+362 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>&#32;<emphasis role="keywordflow">if</emphasis>&#32;(code&#32;==&#32;<link linkend="_group__errors_1ga196e125ef261d94184e2b55c05762f14">GLFW_FORMAT_UNAVAILABLE</link>)
+363 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;strcpy(description,&#32;<emphasis role="stringliteral">&quot;The&#32;requested&#32;format&#32;is&#32;unavailable&quot;</emphasis>);
+364 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>&#32;<emphasis role="keywordflow">if</emphasis>&#32;(code&#32;==&#32;<link linkend="_group__errors_1gacff24d2757da752ae4c80bf452356487">GLFW_NO_WINDOW_CONTEXT</link>)
+365 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;strcpy(description,&#32;<emphasis role="stringliteral">&quot;The&#32;specified&#32;window&#32;has&#32;no&#32;context&quot;</emphasis>);
+366 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>&#32;<emphasis role="keywordflow">if</emphasis>&#32;(code&#32;==&#32;<link linkend="_group__errors_1ga09d6943923a70ddef3a085f5baee786c">GLFW_CURSOR_UNAVAILABLE</link>)
+367 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;strcpy(description,&#32;<emphasis role="stringliteral">&quot;The&#32;specified&#32;cursor&#32;shape&#32;is&#32;unavailable&quot;</emphasis>);
+368 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>&#32;<emphasis role="keywordflow">if</emphasis>&#32;(code&#32;==&#32;<link linkend="_group__errors_1ga526fba20a01504a8086c763b6ca53ce5">GLFW_FEATURE_UNAVAILABLE</link>)
+369 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;strcpy(description,&#32;<emphasis role="stringliteral">&quot;The&#32;requested&#32;feature&#32;cannot&#32;be&#32;implemented&#32;for&#32;this&#32;platform&quot;</emphasis>);
+370 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>&#32;<emphasis role="keywordflow">if</emphasis>&#32;(code&#32;==&#32;<link linkend="_group__errors_1ga5dda77e023e83151e8bd55a6758f946a">GLFW_FEATURE_UNIMPLEMENTED</link>)
+371 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;strcpy(description,&#32;<emphasis role="stringliteral">&quot;The&#32;requested&#32;feature&#32;has&#32;not&#32;yet&#32;been&#32;implemented&#32;for&#32;this&#32;platform&quot;</emphasis>);
+372 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>&#32;<emphasis role="keywordflow">if</emphasis>&#32;(code&#32;==&#32;<link linkend="_group__errors_1ga3608c6c29ab7a72f3bf019f4c3a2563d">GLFW_PLATFORM_UNAVAILABLE</link>)
+373 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;strcpy(description,&#32;<emphasis role="stringliteral">&quot;The&#32;requested&#32;platform&#32;is&#32;unavailable&quot;</emphasis>);
+374 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>
+375 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;strcpy(description,&#32;<emphasis role="stringliteral">&quot;ERROR:&#32;UNKNOWN&#32;GLFW&#32;ERROR&quot;</emphasis>);
+376 &#32;&#32;&#32;&#32;}
+377 
+378 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(<link linkend="__classes_2lib_2external_2glfw_2src_2init_8c_1a3007bc654ca6468ee69759007f70ba1e">_glfw</link>.<link linkend="_struct___g_l_f_wlibrary_1aef3b20f1280cca7cae8316626af42c45">initialized</link>)
+379 &#32;&#32;&#32;&#32;{
+380 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2glm_2test_2core_2core__func__integer__bit__count_8cpp_1ab34dedbf30a51859090cbab92fa60edb">error</link>&#32;=&#32;<link linkend="__classes_2lib_2external_2glfw_2src_2internal_8h_1a7d2f6e8ecd2e06f2e86d9446d642bd00">_glfwPlatformGetTls</link>(&amp;<link linkend="__classes_2lib_2external_2glfw_2src_2init_8c_1a3007bc654ca6468ee69759007f70ba1e">_glfw</link>.<link linkend="_struct___g_l_f_wlibrary_1a3c64f08c60bd21f7349ec252e65c6aa9">errorSlot</link>);
+381 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(!<link linkend="__classes_2lib_2glm_2test_2core_2core__func__integer__bit__count_8cpp_1ab34dedbf30a51859090cbab92fa60edb">error</link>)
+382 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+383 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2glm_2test_2core_2core__func__integer__bit__count_8cpp_1ab34dedbf30a51859090cbab92fa60edb">error</link>&#32;=&#32;<link linkend="__classes_2lib_2external_2glfw_2src_2init_8c_1a88a6e01ef5c1245a6d2a5e62b02e5678">_glfw_calloc</link>(1,&#32;<emphasis role="keyword">sizeof</emphasis>(<link linkend="_struct___g_l_f_werror">_GLFWerror</link>));
+384 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2external_2glfw_2src_2internal_8h_1a302f48b6d4dba6b3579449d8a43cfae7">_glfwPlatformSetTls</link>(&amp;<link linkend="__classes_2lib_2external_2glfw_2src_2init_8c_1a3007bc654ca6468ee69759007f70ba1e">_glfw</link>.<link linkend="_struct___g_l_f_wlibrary_1a3c64f08c60bd21f7349ec252e65c6aa9">errorSlot</link>,&#32;<link linkend="__classes_2lib_2glm_2test_2core_2core__func__integer__bit__count_8cpp_1ab34dedbf30a51859090cbab92fa60edb">error</link>);
+385 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2external_2glfw_2src_2internal_8h_1a2677e4d211fbe9b2dc96d16e91c98930">_glfwPlatformLockMutex</link>(&amp;<link linkend="__classes_2lib_2external_2glfw_2src_2init_8c_1a3007bc654ca6468ee69759007f70ba1e">_glfw</link>.<link linkend="_struct___g_l_f_wlibrary_1a1bc5de4505509cfb4911760237845ee2">errorLock</link>);
+386 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2glm_2test_2core_2core__func__integer__bit__count_8cpp_1ab34dedbf30a51859090cbab92fa60edb">error</link>-&gt;next&#32;=&#32;<link linkend="__classes_2lib_2external_2glfw_2src_2init_8c_1a3007bc654ca6468ee69759007f70ba1e">_glfw</link>.<link linkend="_struct___g_l_f_wlibrary_1a77ff916c5b45760a4c1798d1869a8edf">errorListHead</link>;
+387 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2external_2glfw_2src_2init_8c_1a3007bc654ca6468ee69759007f70ba1e">_glfw</link>.<link linkend="_struct___g_l_f_wlibrary_1a77ff916c5b45760a4c1798d1869a8edf">errorListHead</link>&#32;=&#32;<link linkend="__classes_2lib_2glm_2test_2core_2core__func__integer__bit__count_8cpp_1ab34dedbf30a51859090cbab92fa60edb">error</link>;
+388 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2external_2glfw_2src_2internal_8h_1a8b7744446237b1c292ba8a0b9d5e7f90">_glfwPlatformUnlockMutex</link>(&amp;<link linkend="__classes_2lib_2external_2glfw_2src_2init_8c_1a3007bc654ca6468ee69759007f70ba1e">_glfw</link>.<link linkend="_struct___g_l_f_wlibrary_1a1bc5de4505509cfb4911760237845ee2">errorLock</link>);
+389 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+390 &#32;&#32;&#32;&#32;}
+391 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>
+392 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2glm_2test_2core_2core__func__integer__bit__count_8cpp_1ab34dedbf30a51859090cbab92fa60edb">error</link>&#32;=&#32;&amp;_glfwMainThreadError;
+393 
+394 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2glm_2test_2core_2core__func__integer__bit__count_8cpp_1ab34dedbf30a51859090cbab92fa60edb">error</link>-&gt;code&#32;=&#32;code;
+395 &#32;&#32;&#32;&#32;strcpy(<link linkend="__classes_2lib_2glm_2test_2core_2core__func__integer__bit__count_8cpp_1ab34dedbf30a51859090cbab92fa60edb">error</link>-&gt;description,&#32;description);
+396 
+397 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(_glfwErrorCallback)
+398 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_glfwErrorCallback(code,&#32;description);
+399 }
+400 
+401 
+405 
+406 <link linkend="__classes_2lib_2external_2glfw_2include_2_g_l_f_w_2glfw3_8h_1a56da5036b2cc259351ae22fd6439bb47">GLFWAPI</link>&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="_group__init_1gab41771f0215a2e0afb4cf1cf98082d40">glfwInit</link>(<emphasis role="keywordtype">void</emphasis>)
+407 {
+408 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(<link linkend="__classes_2lib_2external_2glfw_2src_2init_8c_1a3007bc654ca6468ee69759007f70ba1e">_glfw</link>.<link linkend="_struct___g_l_f_wlibrary_1aef3b20f1280cca7cae8316626af42c45">initialized</link>)
+409 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="_group__init_1ga2744fbb29b5631bb28802dbe0cf36eba">GLFW_TRUE</link>;
+410 
+411 &#32;&#32;&#32;&#32;memset(&amp;<link linkend="__classes_2lib_2external_2glfw_2src_2init_8c_1a3007bc654ca6468ee69759007f70ba1e">_glfw</link>,&#32;0,&#32;<emphasis role="keyword">sizeof</emphasis>(<link linkend="__classes_2lib_2external_2glfw_2src_2init_8c_1a3007bc654ca6468ee69759007f70ba1e">_glfw</link>));
+412 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2external_2glfw_2src_2init_8c_1a3007bc654ca6468ee69759007f70ba1e">_glfw</link>.<link linkend="_struct___g_l_f_wlibrary_1a99728b89534b94ccddccc724067ea5b5">hints</link>.<link linkend="_struct___g_l_f_wlibrary_1a86550c51bab958a99de2e243e48dd8e8">init</link>&#32;=&#32;_glfwInitHints;
+413 
+414 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2external_2glfw_2src_2init_8c_1a3007bc654ca6468ee69759007f70ba1e">_glfw</link>.<link linkend="_struct___g_l_f_wlibrary_1a619cff4c7af731aa58dd3484d7fab761">allocator</link>&#32;=&#32;_glfwInitAllocator;
+415 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(!<link linkend="__classes_2lib_2external_2glfw_2src_2init_8c_1a3007bc654ca6468ee69759007f70ba1e">_glfw</link>.<link linkend="_struct___g_l_f_wlibrary_1a619cff4c7af731aa58dd3484d7fab761">allocator</link>.<link linkend="_struct_g_l_f_wallocator_1a18a798136f17a9cb105be18312193bf7">allocate</link>)
+416 &#32;&#32;&#32;&#32;{
+417 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2external_2glfw_2src_2init_8c_1a3007bc654ca6468ee69759007f70ba1e">_glfw</link>.<link linkend="_struct___g_l_f_wlibrary_1a619cff4c7af731aa58dd3484d7fab761">allocator</link>.<link linkend="_struct_g_l_f_wallocator_1a18a798136f17a9cb105be18312193bf7">allocate</link>&#32;&#32;&#32;=&#32;defaultAllocate;
+418 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2external_2glfw_2src_2init_8c_1a3007bc654ca6468ee69759007f70ba1e">_glfw</link>.<link linkend="_struct___g_l_f_wlibrary_1a619cff4c7af731aa58dd3484d7fab761">allocator</link>.<link linkend="_struct_g_l_f_wallocator_1af5a674af9e170095b968f467233437be">reallocate</link>&#32;=&#32;defaultReallocate;
+419 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2external_2glfw_2src_2init_8c_1a3007bc654ca6468ee69759007f70ba1e">_glfw</link>.<link linkend="_struct___g_l_f_wlibrary_1a619cff4c7af731aa58dd3484d7fab761">allocator</link>.<link linkend="_struct_g_l_f_wallocator_1ab74cf9a969e73e6eb65a6112a591a988">deallocate</link>&#32;=&#32;defaultDeallocate;
+420 &#32;&#32;&#32;&#32;}
+421 
+422 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(!<link linkend="__classes_2lib_2external_2glfw_2src_2internal_8h_1ad112b3b0da5acafb0091c6bcd8bc23d0">_glfwSelectPlatform</link>(<link linkend="__classes_2lib_2external_2glfw_2src_2init_8c_1a3007bc654ca6468ee69759007f70ba1e">_glfw</link>.<link linkend="_struct___g_l_f_wlibrary_1a99728b89534b94ccddccc724067ea5b5">hints</link>.<link linkend="_struct___g_l_f_wlibrary_1a86550c51bab958a99de2e243e48dd8e8">init</link>.<link linkend="_struct___g_l_f_winitconfig_1a253300e3d980415b24aeafb2b5ca3351">platformID</link>,&#32;&amp;<link linkend="__classes_2lib_2external_2glfw_2src_2init_8c_1a3007bc654ca6468ee69759007f70ba1e">_glfw</link>.<link linkend="_struct___g_l_f_wlibrary_1a93b1c9522ac532d94b32072cf4bf1421">platform</link>))
+423 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="_group__init_1gac877fe3b627d21ef3a0a23e0a73ba8c5">GLFW_FALSE</link>;
+424 
+425 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(!<link linkend="__classes_2lib_2external_2glfw_2src_2init_8c_1a3007bc654ca6468ee69759007f70ba1e">_glfw</link>.<link linkend="_struct___g_l_f_wlibrary_1a93b1c9522ac532d94b32072cf4bf1421">platform</link>.<link linkend="_struct___g_l_f_wplatform_1af3fcc5ce45ab22f1a7eeb13b35e06fa7">init</link>())
+426 &#32;&#32;&#32;&#32;{
+427 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;terminate();
+428 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="_group__init_1gac877fe3b627d21ef3a0a23e0a73ba8c5">GLFW_FALSE</link>;
+429 &#32;&#32;&#32;&#32;}
+430 
+431 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(!<link linkend="__classes_2lib_2external_2glfw_2src_2internal_8h_1a6c5f30449fe62f561c9b01f839ec0438">_glfwPlatformCreateMutex</link>(&amp;<link linkend="__classes_2lib_2external_2glfw_2src_2init_8c_1a3007bc654ca6468ee69759007f70ba1e">_glfw</link>.<link linkend="_struct___g_l_f_wlibrary_1a1bc5de4505509cfb4911760237845ee2">errorLock</link>)&#32;||
+432 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;!<link linkend="__classes_2lib_2external_2glfw_2src_2internal_8h_1afad94d57290ac85fbece14f93c41754f">_glfwPlatformCreateTls</link>(&amp;<link linkend="__classes_2lib_2external_2glfw_2src_2init_8c_1a3007bc654ca6468ee69759007f70ba1e">_glfw</link>.<link linkend="_struct___g_l_f_wlibrary_1a3c64f08c60bd21f7349ec252e65c6aa9">errorSlot</link>)&#32;||
+433 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;!<link linkend="__classes_2lib_2external_2glfw_2src_2internal_8h_1afad94d57290ac85fbece14f93c41754f">_glfwPlatformCreateTls</link>(&amp;<link linkend="__classes_2lib_2external_2glfw_2src_2init_8c_1a3007bc654ca6468ee69759007f70ba1e">_glfw</link>.<link linkend="_struct___g_l_f_wlibrary_1aa267e959a6f2dae405c0c15220e0cfb2">contextSlot</link>))
+434 &#32;&#32;&#32;&#32;{
+435 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;terminate();
+436 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="_group__init_1gac877fe3b627d21ef3a0a23e0a73ba8c5">GLFW_FALSE</link>;
+437 &#32;&#32;&#32;&#32;}
+438 
+439 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2external_2glfw_2src_2internal_8h_1a302f48b6d4dba6b3579449d8a43cfae7">_glfwPlatformSetTls</link>(&amp;<link linkend="__classes_2lib_2external_2glfw_2src_2init_8c_1a3007bc654ca6468ee69759007f70ba1e">_glfw</link>.<link linkend="_struct___g_l_f_wlibrary_1a3c64f08c60bd21f7349ec252e65c6aa9">errorSlot</link>,&#32;&amp;_glfwMainThreadError);
+440 
+441 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2external_2glfw_2src_2input_8c_1a1dab257a37caa6b39cfe9924c2487db6">_glfwInitGamepadMappings</link>();
+442 
+443 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2external_2glfw_2src_2cocoa__time_8c_1a6029c1379e357d7b4e8836e1c1ad2fa2">_glfwPlatformInitTimer</link>();
+444 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2external_2glfw_2src_2init_8c_1a3007bc654ca6468ee69759007f70ba1e">_glfw</link>.<link linkend="_struct___g_l_f_wlibrary_1a0fc0672333b17bc82c495f2e4176076e">timer</link>.<link linkend="_struct___g_l_f_wlibrary_1a1afbda4be41aa343745fc99acc9f895b">offset</link>&#32;=&#32;<link linkend="__classes_2lib_2external_2glfw_2src_2cocoa__time_8c_1a5ee7e09b380d3afdd3c2738b726a2a6e">_glfwPlatformGetTimerValue</link>();
+445 
+446 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2external_2glfw_2src_2init_8c_1a3007bc654ca6468ee69759007f70ba1e">_glfw</link>.<link linkend="_struct___g_l_f_wlibrary_1aef3b20f1280cca7cae8316626af42c45">initialized</link>&#32;=&#32;<link linkend="_group__init_1ga2744fbb29b5631bb28802dbe0cf36eba">GLFW_TRUE</link>;
+447 
+448 &#32;&#32;&#32;&#32;<link linkend="_group__window_1ga8050ddceed9dc6bd9d3aa35666195cd4">glfwDefaultWindowHints</link>();
+449 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="_group__init_1ga2744fbb29b5631bb28802dbe0cf36eba">GLFW_TRUE</link>;
+450 }
+451 
+452 <link linkend="__classes_2lib_2external_2glfw_2include_2_g_l_f_w_2glfw3_8h_1a56da5036b2cc259351ae22fd6439bb47">GLFWAPI</link>&#32;<emphasis role="keywordtype">void</emphasis>&#32;<link linkend="_group__init_1gafd90e6fd4819ea9e22e5e739519a6504">glfwTerminate</link>(<emphasis role="keywordtype">void</emphasis>)
+453 {
+454 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(!<link linkend="__classes_2lib_2external_2glfw_2src_2init_8c_1a3007bc654ca6468ee69759007f70ba1e">_glfw</link>.<link linkend="_struct___g_l_f_wlibrary_1aef3b20f1280cca7cae8316626af42c45">initialized</link>)
+455 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>;
+456 
+457 &#32;&#32;&#32;&#32;terminate();
+458 }
+459 
+460 <link linkend="__classes_2lib_2external_2glfw_2include_2_g_l_f_w_2glfw3_8h_1a56da5036b2cc259351ae22fd6439bb47">GLFWAPI</link>&#32;<emphasis role="keywordtype">void</emphasis>&#32;<link linkend="_group__init_1gac85e41aab1c2bd6fc740f4377d9e7e9f">glfwInitHint</link>(<emphasis role="keywordtype">int</emphasis>&#32;hint,&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="_classvalue">value</link>)
+461 {
+462 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">switch</emphasis>&#32;(hint)
+463 &#32;&#32;&#32;&#32;{
+464 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">case</emphasis>&#32;<link linkend="_group__init_1gab9c0534709fda03ec8959201da3a9a18">GLFW_JOYSTICK_HAT_BUTTONS</link>:
+465 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_glfwInitHints.<link linkend="_struct___g_l_f_winitconfig_1aad1f2044edaa145d86bed1fe2b61fa06">hatButtons</link>&#32;=&#32;<link linkend="_classvalue">value</link>;
+466 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>;
+467 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">case</emphasis>&#32;<link linkend="_group__init_1gaec269b24cf549ab46292c0125d8bbdce">GLFW_ANGLE_PLATFORM_TYPE</link>:
+468 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_glfwInitHints.<link linkend="_struct___g_l_f_winitconfig_1a6b47f84f808ef3b893e915bb3ada5fce">angleType</link>&#32;=&#32;<link linkend="_classvalue">value</link>;
+469 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>;
+470 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">case</emphasis>&#32;<link linkend="_group__init_1ga9d38bf1fdf4f91d6565401734a7cd967">GLFW_PLATFORM</link>:
+471 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_glfwInitHints.<link linkend="_struct___g_l_f_winitconfig_1a253300e3d980415b24aeafb2b5ca3351">platformID</link>&#32;=&#32;<link linkend="_classvalue">value</link>;
+472 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>;
+473 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">case</emphasis>&#32;<link linkend="_group__init_1gab937983147a3158d45f88fad7129d9f2">GLFW_COCOA_CHDIR_RESOURCES</link>:
+474 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_glfwInitHints.<link linkend="_struct___g_l_f_winitconfig_1a1d501755d3e826096a7a196edc0899a9">ns</link>.<link linkend="_struct___g_l_f_winitconfig_1a9a76e6c2480a3e6062947d2e9a0743c6">chdir</link>&#32;=&#32;<link linkend="_classvalue">value</link>;
+475 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>;
+476 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">case</emphasis>&#32;<link linkend="_group__init_1ga71e0b4ce2f2696a84a9b8c5e12dc70cf">GLFW_COCOA_MENUBAR</link>:
+477 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_glfwInitHints.<link linkend="_struct___g_l_f_winitconfig_1a1d501755d3e826096a7a196edc0899a9">ns</link>.<link linkend="_struct___g_l_f_winitconfig_1aeef44c014800b5e07490919431b446ce">menubar</link>&#32;=&#32;<link linkend="_classvalue">value</link>;
+478 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>;
+479 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">case</emphasis>&#32;<link linkend="_group__init_1gaa341e303ebeb8e4199b8ab8be84351f6">GLFW_X11_XCB_VULKAN_SURFACE</link>:
+480 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_glfwInitHints.<link linkend="_struct___g_l_f_winitconfig_1a087bfa96ff0ef980dfcdd1d61dd61165">x11</link>.<link linkend="_struct___g_l_f_winitconfig_1a8299abc62cc9ffe202a0e19b46b547cd">xcbVulkanSurface</link>&#32;=&#32;<link linkend="_classvalue">value</link>;
+481 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>;
+482 &#32;&#32;&#32;&#32;}
+483 
+484 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2external_2glfw_2src_2init_8c_1a3287b282ec57a4a89127ae51f49f10f5">_glfwInputError</link>(<link linkend="_group__errors_1ga76f6bb9c4eea73db675f096b404593ce">GLFW_INVALID_ENUM</link>,
+485 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="stringliteral">&quot;Invalid&#32;init&#32;hint&#32;0x%08X&quot;</emphasis>,&#32;hint);
+486 }
+487 
+488 <link linkend="__classes_2lib_2external_2glfw_2include_2_g_l_f_w_2glfw3_8h_1a56da5036b2cc259351ae22fd6439bb47">GLFWAPI</link>&#32;<emphasis role="keywordtype">void</emphasis>&#32;<link linkend="_group__init_1ga0f4c8556a21d9e774a0ba0332da1748e">glfwInitAllocator</link>(<emphasis role="keyword">const</emphasis>&#32;<link linkend="_struct_g_l_f_wallocator">GLFWallocator</link>*&#32;allocator)
+489 {
+490 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(allocator)
+491 &#32;&#32;&#32;&#32;{
+492 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(allocator-&gt;<link linkend="_struct_g_l_f_wallocator_1a18a798136f17a9cb105be18312193bf7">allocate</link>&#32;&amp;&amp;&#32;allocator-&gt;<link linkend="_struct_g_l_f_wallocator_1af5a674af9e170095b968f467233437be">reallocate</link>&#32;&amp;&amp;&#32;allocator-&gt;<link linkend="_struct_g_l_f_wallocator_1ab74cf9a969e73e6eb65a6112a591a988">deallocate</link>)
+493 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_glfwInitAllocator&#32;=&#32;*allocator;
+494 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>
+495 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2external_2glfw_2src_2init_8c_1a3287b282ec57a4a89127ae51f49f10f5">_glfwInputError</link>(<link linkend="_group__errors_1gaaf2ef9aa8202c2b82ac2d921e554c687">GLFW_INVALID_VALUE</link>,&#32;<emphasis role="stringliteral">&quot;Missing&#32;function&#32;in&#32;allocator&quot;</emphasis>);
+496 &#32;&#32;&#32;&#32;}
+497 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>
+498 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;memset(&amp;_glfwInitAllocator,&#32;0,&#32;<emphasis role="keyword">sizeof</emphasis>(<link linkend="_struct_g_l_f_wallocator">GLFWallocator</link>));
+499 }
+500 
+501 <link linkend="__classes_2lib_2external_2glfw_2include_2_g_l_f_w_2glfw3_8h_1a56da5036b2cc259351ae22fd6439bb47">GLFWAPI</link>&#32;<emphasis role="keywordtype">void</emphasis>&#32;<link linkend="__classes_2lib_2external_2glfw_2src_2init_8c_1a1712210f34c339a05adda69e3587ec00">glfwInitVulkanLoader</link>(<link linkend="__classes_2lib_2external_2glfw_2deps_2glad_2vulkan_8h_1a646be9b04ac763b5d4b7263756237906">PFN_vkGetInstanceProcAddr</link>&#32;loader)
+502 {
+503 &#32;&#32;&#32;&#32;_glfwInitHints.<link linkend="_struct___g_l_f_winitconfig_1a2f2e06428712bd200e781849a6281e6d">vulkanLoader</link>&#32;=&#32;loader;
+504 }
+505 
+506 <link linkend="__classes_2lib_2external_2glfw_2include_2_g_l_f_w_2glfw3_8h_1a56da5036b2cc259351ae22fd6439bb47">GLFWAPI</link>&#32;<emphasis role="keywordtype">void</emphasis>&#32;<link linkend="_group__init_1ga2402c7824ac0194c13722790ff9559ff">glfwGetVersion</link>(<emphasis role="keywordtype">int</emphasis>*&#32;major,&#32;<emphasis role="keywordtype">int</emphasis>*&#32;minor,&#32;<emphasis role="keywordtype">int</emphasis>*&#32;rev)
+507 {
+508 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(major&#32;!=&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>)
+509 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;*major&#32;=&#32;<link linkend="_group__init_1ga6337d9ea43b22fc529b2bba066b4a576">GLFW_VERSION_MAJOR</link>;
+510 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(minor&#32;!=&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>)
+511 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;*minor&#32;=&#32;<link linkend="_group__init_1gaf80d40f0aea7088ff337606e9c48f7a3">GLFW_VERSION_MINOR</link>;
+512 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(rev&#32;!=&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>)
+513 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;*rev&#32;=&#32;<link linkend="_group__init_1gab72ae2e2035d9ea461abc3495eac0502">GLFW_VERSION_REVISION</link>;
+514 }
+515 
+516 <link linkend="__classes_2lib_2external_2glfw_2include_2_g_l_f_w_2glfw3_8h_1a56da5036b2cc259351ae22fd6439bb47">GLFWAPI</link>&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="_group__init_1gaee7bac4c7e1b2769207747c1b5ae2f9e">glfwGetError</link>(<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>**&#32;description)
+517 {
+518 &#32;&#32;&#32;&#32;<link linkend="_struct___g_l_f_werror">_GLFWerror</link>*&#32;<link linkend="__classes_2lib_2glm_2test_2core_2core__func__integer__bit__count_8cpp_1ab34dedbf30a51859090cbab92fa60edb">error</link>;
+519 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;code&#32;=&#32;<link linkend="_group__errors_1gafa30deee5db4d69c4c93d116ed87dbf4">GLFW_NO_ERROR</link>;
+520 
+521 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(description)
+522 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;*description&#32;=&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>;
+523 
+524 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(<link linkend="__classes_2lib_2external_2glfw_2src_2init_8c_1a3007bc654ca6468ee69759007f70ba1e">_glfw</link>.<link linkend="_struct___g_l_f_wlibrary_1aef3b20f1280cca7cae8316626af42c45">initialized</link>)
+525 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2glm_2test_2core_2core__func__integer__bit__count_8cpp_1ab34dedbf30a51859090cbab92fa60edb">error</link>&#32;=&#32;<link linkend="__classes_2lib_2external_2glfw_2src_2internal_8h_1a7d2f6e8ecd2e06f2e86d9446d642bd00">_glfwPlatformGetTls</link>(&amp;<link linkend="__classes_2lib_2external_2glfw_2src_2init_8c_1a3007bc654ca6468ee69759007f70ba1e">_glfw</link>.<link linkend="_struct___g_l_f_wlibrary_1a3c64f08c60bd21f7349ec252e65c6aa9">errorSlot</link>);
+526 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>
+527 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2glm_2test_2core_2core__func__integer__bit__count_8cpp_1ab34dedbf30a51859090cbab92fa60edb">error</link>&#32;=&#32;&amp;_glfwMainThreadError;
+528 
+529 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(<link linkend="__classes_2lib_2glm_2test_2core_2core__func__integer__bit__count_8cpp_1ab34dedbf30a51859090cbab92fa60edb">error</link>)
+530 &#32;&#32;&#32;&#32;{
+531 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;code&#32;=&#32;<link linkend="__classes_2lib_2glm_2test_2core_2core__func__integer__bit__count_8cpp_1ab34dedbf30a51859090cbab92fa60edb">error</link>-&gt;code;
+532 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2glm_2test_2core_2core__func__integer__bit__count_8cpp_1ab34dedbf30a51859090cbab92fa60edb">error</link>-&gt;code&#32;=&#32;<link linkend="_group__errors_1gafa30deee5db4d69c4c93d116ed87dbf4">GLFW_NO_ERROR</link>;
+533 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(description&#32;&amp;&amp;&#32;code)
+534 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;*description&#32;=&#32;<link linkend="__classes_2lib_2glm_2test_2core_2core__func__integer__bit__count_8cpp_1ab34dedbf30a51859090cbab92fa60edb">error</link>-&gt;description;
+535 &#32;&#32;&#32;&#32;}
+536 
+537 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;code;
+538 }
+539 
+540 <link linkend="__classes_2lib_2external_2glfw_2include_2_g_l_f_w_2glfw3_8h_1a56da5036b2cc259351ae22fd6439bb47">GLFWAPI</link>&#32;<link linkend="_group__init_1ga8184701785c096b3862a75cda1bf44a3">GLFWerrorfun</link>&#32;<link linkend="_group__init_1ga746e2757d069eaea423349aca6ae097a">glfwSetErrorCallback</link>(<link linkend="_group__init_1ga8184701785c096b3862a75cda1bf44a3">GLFWerrorfun</link>&#32;cbfun)
+541 {
+542 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2external_2glfw_2src_2internal_8h_1aafb05e4264bc90b90636133fd00eecf6">_GLFW_SWAP</link>(<link linkend="_group__init_1ga8184701785c096b3862a75cda1bf44a3">GLFWerrorfun</link>,&#32;_glfwErrorCallback,&#32;cbfun);
+543 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;cbfun;
+544 }
+545 
+</programlisting></section>

@@ -1,0 +1,680 @@
+\doxysection{ranges\+\_\+util.\+h}
+\hypertarget{lib_2include_2c_09_09_2bits_2ranges__util_8h_source}{}\label{lib_2include_2c_09_09_2bits_2ranges__util_8h_source}\index{C:/Users/HP/Documents/GitHub/Minero-\/Game/lib/include/c++/bits/ranges\_util.h@{C:/Users/HP/Documents/GitHub/Minero-\/Game/lib/include/c++/bits/ranges\_util.h}}
+\mbox{\hyperlink{lib_2include_2c_09_09_2bits_2ranges__util_8h}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{comment}{//\ Utilities\ for\ representing\ and\ manipulating\ ranges\ -\/*-\/\ C++\ -\/*-\/}}
+\DoxyCodeLine{00002\ }
+\DoxyCodeLine{00003\ \textcolor{comment}{//\ Copyright\ (C)\ 2019-\/2022\ Free\ Software\ Foundation,\ Inc.}}
+\DoxyCodeLine{00004\ \textcolor{comment}{//}}
+\DoxyCodeLine{00005\ \textcolor{comment}{//\ This\ file\ is\ part\ of\ the\ GNU\ ISO\ C++\ Library.\ \ This\ library\ is\ free}}
+\DoxyCodeLine{00006\ \textcolor{comment}{//\ software;\ you\ can\ redistribute\ it\ and/or\ modify\ it\ under\ the}}
+\DoxyCodeLine{00007\ \textcolor{comment}{//\ terms\ of\ the\ GNU\ General\ Public\ License\ as\ published\ by\ the}}
+\DoxyCodeLine{00008\ \textcolor{comment}{//\ Free\ Software\ Foundation;\ either\ version\ 3,\ or\ (at\ your\ option)}}
+\DoxyCodeLine{00009\ \textcolor{comment}{//\ any\ later\ version.}}
+\DoxyCodeLine{00010\ }
+\DoxyCodeLine{00011\ \textcolor{comment}{//\ This\ library\ is\ distributed\ in\ the\ hope\ that\ it\ will\ be\ useful,}}
+\DoxyCodeLine{00012\ \textcolor{comment}{//\ but\ WITHOUT\ ANY\ WARRANTY;\ without\ even\ the\ implied\ warranty\ of}}
+\DoxyCodeLine{00013\ \textcolor{comment}{//\ MERCHANTABILITY\ or\ FITNESS\ FOR\ A\ PARTICULAR\ PURPOSE.\ \ See\ the}}
+\DoxyCodeLine{00014\ \textcolor{comment}{//\ GNU\ General\ Public\ License\ for\ more\ details.}}
+\DoxyCodeLine{00015\ }
+\DoxyCodeLine{00016\ \textcolor{comment}{//\ Under\ Section\ 7\ of\ GPL\ version\ 3,\ you\ are\ granted\ additional}}
+\DoxyCodeLine{00017\ \textcolor{comment}{//\ permissions\ described\ in\ the\ GCC\ Runtime\ Library\ Exception,\ version}}
+\DoxyCodeLine{00018\ \textcolor{comment}{//\ 3.1,\ as\ published\ by\ the\ Free\ Software\ Foundation.}}
+\DoxyCodeLine{00019\ }
+\DoxyCodeLine{00020\ \textcolor{comment}{//\ You\ should\ have\ received\ a\ copy\ of\ the\ GNU\ General\ Public\ License\ and}}
+\DoxyCodeLine{00021\ \textcolor{comment}{//\ a\ copy\ of\ the\ GCC\ Runtime\ Library\ Exception\ along\ with\ this\ program;}}
+\DoxyCodeLine{00022\ \textcolor{comment}{//\ see\ the\ files\ COPYING3\ and\ COPYING.RUNTIME\ respectively.\ \ If\ not,\ see}}
+\DoxyCodeLine{00023\ \textcolor{comment}{//\ <http://www.gnu.org/licenses/>.}}
+\DoxyCodeLine{00024\ }
+\DoxyCodeLine{00030\ \textcolor{preprocessor}{\#ifndef\ \_RANGES\_UTIL\_H}}
+\DoxyCodeLine{00031\ \textcolor{preprocessor}{\#define\ \_RANGES\_UTIL\_H\ 1}}
+\DoxyCodeLine{00032\ }
+\DoxyCodeLine{00033\ \textcolor{preprocessor}{\#if\ \_\_cplusplus\ >\ 201703L}}
+\DoxyCodeLine{00034\ \textcolor{preprocessor}{\#\ include\ <bits/ranges\_base.h>}}
+\DoxyCodeLine{00035\ \textcolor{preprocessor}{\#\ include\ <bits/utility.h>}}
+\DoxyCodeLine{00036\ }
+\DoxyCodeLine{00037\ \textcolor{preprocessor}{\#ifdef\ \_\_cpp\_lib\_ranges}}
+\DoxyCodeLine{00038\ \textcolor{keyword}{namespace\ }\mbox{\hyperlink{namespacestd}{std}}\ \mbox{\hyperlink{_classes_2lib_2include_2c_09_09_2x86__64-w64-mingw32_2bits_2c_09_09config_8h_a44377df0d3503f0b3d9ab316dd8ddf8b}{\_GLIBCXX\_VISIBILITY}}(default)}
+\DoxyCodeLine{00039\ \{}
+\DoxyCodeLine{00040\ \_GLIBCXX\_BEGIN\_NAMESPACE\_VERSION}
+\DoxyCodeLine{00041\ \textcolor{keyword}{namespace\ }ranges}
+\DoxyCodeLine{00042\ \{}
+\DoxyCodeLine{00043\ \ \ \textcolor{comment}{//\ C++20\ 24.5\ [range.utility]\ Range\ utilities}}
+\DoxyCodeLine{00044\ }
+\DoxyCodeLine{00045\ \ \ \textcolor{keyword}{namespace\ }\_\_detail}
+\DoxyCodeLine{00046\ \ \ \{}
+\DoxyCodeLine{00047\ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Range>}
+\DoxyCodeLine{00048\ \ \ \ \ \ \ \textcolor{keyword}{concept\ }\_\_simple\_view\ =\ view<\_Range>\ \&\&\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2glad_8h_a7b8ad0b27a927682837f95528fa454f5}{range<const\ \_Range>}}}
+\DoxyCodeLine{00049\ \ \ \ \ \&\&\ same\_as<iterator\_t<\_Range>,\ iterator\_t<const\ \_Range>>}
+\DoxyCodeLine{00050\ \ \ \ \ \&\&\ same\_as<sentinel\_t<\_Range>,\ sentinel\_t<const\ \_Range>>;}
+\DoxyCodeLine{00051\ }
+\DoxyCodeLine{00052\ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_It>}
+\DoxyCodeLine{00053\ \ \ \ \ \ \ \textcolor{keyword}{concept\ }\_\_has\_arrow\ =\ input\_iterator<\_It>}
+\DoxyCodeLine{00054\ \ \ \ \ \&\&\ (is\_pointer\_v<\_It>\ ||\ \textcolor{keyword}{requires}(\_It\ \_\_it)\ \{\ \_\_it.operator-\/>();\ \});}
+\DoxyCodeLine{00055\ }
+\DoxyCodeLine{00056\ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Tp,\ \textcolor{keyword}{typename}\ \_Up>}
+\DoxyCodeLine{00057\ \ \ \ \ \ \ \textcolor{keyword}{concept\ }\_\_different\_from}
+\DoxyCodeLine{00058\ \ \ \ \ =\ !same\_as<remove\_cvref\_t<\_Tp>,\ remove\_cvref\_t<\_Up>>;}
+\DoxyCodeLine{00059\ \ \ \}\ \textcolor{comment}{//\ namespace\ \_\_detail}}
+\DoxyCodeLine{00060\ }
+\DoxyCodeLine{00062\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Derived>}
+\DoxyCodeLine{00063\ \ \ \ \ \textcolor{keyword}{requires}\ is\_class\_v<\_Derived>\ \&\&\ same\_as<\_Derived,\ remove\_cv\_t<\_Derived>>}
+\DoxyCodeLine{00064\ \ \ \ \ \textcolor{keyword}{class\ }view\_interface}
+\DoxyCodeLine{00065\ \ \ \ \ \{}
+\DoxyCodeLine{00066\ \ \ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00067\ \ \ \ \ \ \ \textcolor{keyword}{constexpr}\ \_Derived\&\ \_M\_derived()\ noexcept}
+\DoxyCodeLine{00068\ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00069\ \ \ \ \ \textcolor{keyword}{static\_assert}(derived\_from<\_Derived,\ view\_interface<\_Derived>>);}
+\DoxyCodeLine{00070\ \ \ \ \ \textcolor{keyword}{static\_assert}(view<\_Derived>);}
+\DoxyCodeLine{00071\ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{static\_cast<}\_Derived\&\textcolor{keyword}{>}(*this);}
+\DoxyCodeLine{00072\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00073\ }
+\DoxyCodeLine{00074\ \ \ \ \ \ \ \textcolor{keyword}{constexpr}\ \textcolor{keyword}{const}\ \_Derived\&\ \_M\_derived()\ const\ noexcept}
+\DoxyCodeLine{00075\ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00076\ \ \ \ \ \textcolor{keyword}{static\_assert}(derived\_from<\_Derived,\ view\_interface<\_Derived>>);}
+\DoxyCodeLine{00077\ \ \ \ \ \textcolor{keyword}{static\_assert}(view<\_Derived>);}
+\DoxyCodeLine{00078\ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{static\_cast<}\textcolor{keyword}{const\ }\_Derived\&\textcolor{keyword}{>}(*this);}
+\DoxyCodeLine{00079\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00080\ }
+\DoxyCodeLine{00081\ \ \ \ \ \ \ \textcolor{keyword}{static}\ \textcolor{keyword}{constexpr}\ \textcolor{keywordtype}{bool}}
+\DoxyCodeLine{00082\ \ \ \ \ \ \ \_S\_bool(\textcolor{keywordtype}{bool})\ \textcolor{keyword}{noexcept};\ \textcolor{comment}{//\ not\ defined}}
+\DoxyCodeLine{00083\ }
+\DoxyCodeLine{00084\ \ \ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Tp>}
+\DoxyCodeLine{00085\ \ \ \ \ \textcolor{keyword}{static}\ \textcolor{keyword}{constexpr}\ \textcolor{keywordtype}{bool}}
+\DoxyCodeLine{00086\ \ \ \ \ \_S\_empty(\_Tp\&\ \_\_t)}
+\DoxyCodeLine{00087\ \ \ \ \ \textcolor{keyword}{noexcept}(\textcolor{keyword}{noexcept}(\_S\_bool(ranges::begin(\_\_t)\ ==\ ranges::end(\_\_t))))}
+\DoxyCodeLine{00088\ \ \ \ \ \{\ \textcolor{keywordflow}{return}\ ranges::begin(\_\_t)\ ==\ ranges::end(\_\_t);\ \}}
+\DoxyCodeLine{00089\ }
+\DoxyCodeLine{00090\ \ \ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Tp>}
+\DoxyCodeLine{00091\ \ \ \ \ \textcolor{keyword}{static}\ \textcolor{keyword}{constexpr}\ \textcolor{keyword}{auto}}
+\DoxyCodeLine{00092\ \ \ \ \ \_S\_size(\_Tp\&\ \_\_t)}
+\DoxyCodeLine{00093\ \ \ \ \ \textcolor{keyword}{noexcept}(\textcolor{keyword}{noexcept}(ranges::end(\_\_t)\ -\/\ ranges::begin(\_\_t)))}
+\DoxyCodeLine{00094\ \ \ \ \ \{\ \textcolor{keywordflow}{return}\ ranges::end(\_\_t)\ -\/\ ranges::begin(\_\_t);\ \}}
+\DoxyCodeLine{00095\ }
+\DoxyCodeLine{00096\ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00097\ \ \ \ \ \ \ \textcolor{keyword}{constexpr}\ \textcolor{keywordtype}{bool}}
+\DoxyCodeLine{00098\ \ \ \ \ \ \ empty()}
+\DoxyCodeLine{00099\ \ \ \ \ \ \ noexcept(noexcept(\_S\_empty(\_M\_derived())))}
+\DoxyCodeLine{00100\ \ \ \ \ \ \ requires\ forward\_range<\_Derived>}
+\DoxyCodeLine{00101\ \ \ \ \ \ \ \{\ \textcolor{keywordflow}{return}\ \_S\_empty(\_M\_derived());\ \}}
+\DoxyCodeLine{00102\ }
+\DoxyCodeLine{00103\ \ \ \ \ \ \ \textcolor{keyword}{constexpr}\ \textcolor{keywordtype}{bool}}
+\DoxyCodeLine{00104\ \ \ \ \ \ \ empty()\ const}
+\DoxyCodeLine{00105\ \ \ \ \ \ \ noexcept(noexcept(\_S\_empty(\_M\_derived())))}
+\DoxyCodeLine{00106\ \ \ \ \ \ \ requires\ forward\_range<const\ \_Derived>}
+\DoxyCodeLine{00107\ \ \ \ \ \ \ \{\ \textcolor{keywordflow}{return}\ \_S\_empty(\_M\_derived());\ \}}
+\DoxyCodeLine{00108\ }
+\DoxyCodeLine{00109\ \ \ \ \ \ \ \textcolor{keyword}{constexpr}\ \textcolor{keyword}{explicit}}
+\DoxyCodeLine{00110\ \ \ \ \ \ \ \textcolor{keyword}{operator}\ \mbox{\hyperlink{_classes_2lib_2include_2stdbool_8h_abb452686968e48b67397da5f97445f5b}{bool}}()\ noexcept(noexcept(ranges::empty(\_M\_derived())))}
+\DoxyCodeLine{00111\ \ \ \ \ \ \ requires\ requires\ \{\ ranges::empty(\_M\_derived());\ \}}
+\DoxyCodeLine{00112\ \ \ \ \ \ \ \{\ \textcolor{keywordflow}{return}\ !ranges::empty(\_M\_derived());\ \}}
+\DoxyCodeLine{00113\ }
+\DoxyCodeLine{00114\ \ \ \ \ \ \ \textcolor{keyword}{constexpr}\ \textcolor{keyword}{explicit}}
+\DoxyCodeLine{00115\ \ \ \ \ \ \ \textcolor{keyword}{operator}\ \mbox{\hyperlink{_classes_2lib_2include_2stdbool_8h_abb452686968e48b67397da5f97445f5b}{bool}}()\ const\ noexcept(noexcept(ranges::empty(\_M\_derived())))}
+\DoxyCodeLine{00116\ \ \ \ \ \ \ requires\ requires\ \{\ ranges::empty(\_M\_derived());\ \}}
+\DoxyCodeLine{00117\ \ \ \ \ \ \ \{\ \textcolor{keywordflow}{return}\ !ranges::empty(\_M\_derived());\ \}}
+\DoxyCodeLine{00118\ }
+\DoxyCodeLine{00119\ \ \ \ \ \ \ \textcolor{keyword}{constexpr}\ \textcolor{keyword}{auto}}
+\DoxyCodeLine{00120\ \ \ \ \ \ \ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_a89ce72163394e6aef63b551a8806e93f}{data}}()\ noexcept(noexcept(ranges::begin(\_M\_derived())))}
+\DoxyCodeLine{00121\ \ \ \ \ \ \ requires\ contiguous\_iterator<iterator\_t<\_Derived>>}
+\DoxyCodeLine{00122\ \ \ \ \ \ \ \{\ \textcolor{keywordflow}{return}\ std::to\_address(ranges::begin(\_M\_derived()));\ \}}
+\DoxyCodeLine{00123\ }
+\DoxyCodeLine{00124\ \ \ \ \ \ \ \textcolor{keyword}{constexpr}\ \textcolor{keyword}{auto}}
+\DoxyCodeLine{00125\ \ \ \ \ \ \ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_a89ce72163394e6aef63b551a8806e93f}{data}}()\ const\ noexcept(noexcept(ranges::begin(\_M\_derived())))}
+\DoxyCodeLine{00126\ \ \ \ \ \ \ requires\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2glad_8h_a7b8ad0b27a927682837f95528fa454f5}{range}}<const\ \_Derived>}
+\DoxyCodeLine{00127\ \ \ \ \ \&\&\ contiguous\_iterator<iterator\_t<const\ \_Derived>>}
+\DoxyCodeLine{00128\ \ \ \ \ \ \ \{\ \textcolor{keywordflow}{return}\ std::to\_address(ranges::begin(\_M\_derived()));\ \}}
+\DoxyCodeLine{00129\ }
+\DoxyCodeLine{00130\ \ \ \ \ \ \ \textcolor{keyword}{constexpr}\ \textcolor{keyword}{auto}}
+\DoxyCodeLine{00131\ \ \ \ \ \ \ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_a3d1e3edfcf61ca2d831883e1afbad89e}{size}}()\ noexcept(noexcept(\_S\_size(\_M\_derived())))}
+\DoxyCodeLine{00132\ \ \ \ \ \ \ requires\ forward\_range<\_Derived>}
+\DoxyCodeLine{00133\ \ \ \ \ \&\&\ sized\_sentinel\_for<sentinel\_t<\_Derived>,\ iterator\_t<\_Derived>>}
+\DoxyCodeLine{00134\ \ \ \ \ \ \ \{\ \textcolor{keywordflow}{return}\ \_S\_size(\_M\_derived());\ \}}
+\DoxyCodeLine{00135\ }
+\DoxyCodeLine{00136\ \ \ \ \ \ \ \textcolor{keyword}{constexpr}\ \textcolor{keyword}{auto}}
+\DoxyCodeLine{00137\ \ \ \ \ \ \ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_a3d1e3edfcf61ca2d831883e1afbad89e}{size}}()\ const\ noexcept(noexcept(\_S\_size(\_M\_derived())))}
+\DoxyCodeLine{00138\ \ \ \ \ \ \ requires\ forward\_range<const\ \_Derived>}
+\DoxyCodeLine{00139\ \ \ \ \ \&\&\ sized\_sentinel\_for<sentinel\_t<const\ \_Derived>,}
+\DoxyCodeLine{00140\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ iterator\_t<const\ \_Derived>>}
+\DoxyCodeLine{00141\ \ \ \ \ \ \ \{\ \textcolor{keywordflow}{return}\ \_S\_size(\_M\_derived());\ \}}
+\DoxyCodeLine{00142\ }
+\DoxyCodeLine{00143\ \ \ \ \ \ \ \textcolor{keyword}{constexpr}\ \textcolor{keyword}{decltype}(\textcolor{keyword}{auto})}
+\DoxyCodeLine{00144\ \ \ \ \ \ \ front()\ \textcolor{keyword}{requires}\ forward\_range<\_Derived>}
+\DoxyCodeLine{00145\ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00146\ \ \ \ \ \_\_glibcxx\_assert(!empty());}
+\DoxyCodeLine{00147\ \ \ \ \ \textcolor{keywordflow}{return}\ *ranges::begin(\_M\_derived());}
+\DoxyCodeLine{00148\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00149\ }
+\DoxyCodeLine{00150\ \ \ \ \ \ \ \textcolor{keyword}{constexpr}\ \textcolor{keyword}{decltype}(\textcolor{keyword}{auto})}
+\DoxyCodeLine{00151\ \ \ \ \ \ \ front()\ \textcolor{keyword}{const}\ \textcolor{keyword}{requires}\ forward\_range<const\ \_Derived>}
+\DoxyCodeLine{00152\ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00153\ \ \ \ \ \_\_glibcxx\_assert(!empty());}
+\DoxyCodeLine{00154\ \ \ \ \ \textcolor{keywordflow}{return}\ *ranges::begin(\_M\_derived());}
+\DoxyCodeLine{00155\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00156\ }
+\DoxyCodeLine{00157\ \ \ \ \ \ \ \textcolor{keyword}{constexpr}\ \textcolor{keyword}{decltype}(\textcolor{keyword}{auto})}
+\DoxyCodeLine{00158\ \ \ \ \ \ \ back()}
+\DoxyCodeLine{00159\ \ \ \ \ \ \ \textcolor{keyword}{requires}\ bidirectional\_range<\_Derived>\ \&\&\ common\_range<\_Derived>}
+\DoxyCodeLine{00160\ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00161\ \ \ \ \ \_\_glibcxx\_assert(!empty());}
+\DoxyCodeLine{00162\ \ \ \ \ \textcolor{keywordflow}{return}\ *ranges::prev(ranges::end(\_M\_derived()));}
+\DoxyCodeLine{00163\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00164\ }
+\DoxyCodeLine{00165\ \ \ \ \ \ \ \textcolor{keyword}{constexpr}\ \textcolor{keyword}{decltype}(\textcolor{keyword}{auto})}
+\DoxyCodeLine{00166\ \ \ \ \ \ \ back()\ \textcolor{keyword}{const}}
+\DoxyCodeLine{00167\ \ \ \ \ \ \ \textcolor{keyword}{requires}\ bidirectional\_range<const\ \_Derived>}
+\DoxyCodeLine{00168\ \ \ \ \ \&\&\ common\_range<const\ \_Derived>}
+\DoxyCodeLine{00169\ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00170\ \ \ \ \ \_\_glibcxx\_assert(!empty());}
+\DoxyCodeLine{00171\ \ \ \ \ \textcolor{keywordflow}{return}\ *ranges::prev(ranges::end(\_M\_derived()));}
+\DoxyCodeLine{00172\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00173\ }
+\DoxyCodeLine{00174\ \ \ \ \ \ \ \textcolor{keyword}{template}<random\_access\_range\ \_Range\ =\ \_Derived>}
+\DoxyCodeLine{00175\ \ \ \ \ \textcolor{keyword}{constexpr}\ \textcolor{keyword}{decltype}(\textcolor{keyword}{auto})}
+\DoxyCodeLine{00176\ \ \ \ \ \textcolor{keyword}{operator}[](range\_difference\_t<\_Range>\ \_\_n)}
+\DoxyCodeLine{00177\ \ \ \ \ \{\ \textcolor{keywordflow}{return}\ ranges::begin(\_M\_derived())[\_\_n];\ \}}
+\DoxyCodeLine{00178\ }
+\DoxyCodeLine{00179\ \ \ \ \ \ \ \textcolor{keyword}{template}<random\_access\_range\ \_Range\ =\ const\ \_Derived>}
+\DoxyCodeLine{00180\ \ \ \ \ \textcolor{keyword}{constexpr}\ \textcolor{keyword}{decltype}(\textcolor{keyword}{auto})}
+\DoxyCodeLine{00181\ \ \ \ \ \textcolor{keyword}{operator}[](range\_difference\_t<\_Range>\ \_\_n)\ \textcolor{keyword}{const}}
+\DoxyCodeLine{00182\ \ \ \ \ \{\ \textcolor{keywordflow}{return}\ ranges::begin(\_M\_derived())[\_\_n];\ \}}
+\DoxyCodeLine{00183\ \ \ \ \ \};}
+\DoxyCodeLine{00184\ }
+\DoxyCodeLine{00185\ \ \ \textcolor{keyword}{namespace\ }\_\_detail}
+\DoxyCodeLine{00186\ \ \ \{}
+\DoxyCodeLine{00187\ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_From,\ \textcolor{keyword}{typename}\ \_To>}
+\DoxyCodeLine{00188\ \ \ \ \ \ \ \textcolor{keyword}{concept\ }\_\_uses\_nonqualification\_pointer\_conversion}
+\DoxyCodeLine{00189\ \ \ \ \ =\ is\_pointer\_v<\_From>\ \&\&\ is\_pointer\_v<\_To>}
+\DoxyCodeLine{00190\ \ \ \ \ \ \ \&\&\ !convertible\_to<remove\_pointer\_t<\_From>(*)[],}
+\DoxyCodeLine{00191\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ remove\_pointer\_t<\_To>(*)[]>;}
+\DoxyCodeLine{00192\ }
+\DoxyCodeLine{00193\ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_From,\ \textcolor{keyword}{typename}\ \_To>}
+\DoxyCodeLine{00194\ \ \ \ \ \ \ \textcolor{keyword}{concept\ }\_\_convertible\_to\_non\_slicing\ =\ convertible\_to<\_From,\ \_To>}
+\DoxyCodeLine{00195\ \ \ \ \ \&\&\ !\_\_uses\_nonqualification\_pointer\_conversion<decay\_t<\_From>,}
+\DoxyCodeLine{00196\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ decay\_t<\_To>>;}
+\DoxyCodeLine{00197\ }
+\DoxyCodeLine{00198\ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Tp>}
+\DoxyCodeLine{00199\ \ \ \ \ \ \ \textcolor{keyword}{concept\ }\_\_pair\_like}
+\DoxyCodeLine{00200\ \ \ \ \ =\ !is\_reference\_v<\_Tp>\ \&\&\ \textcolor{keyword}{requires}(\_Tp\ \_\_t)}
+\DoxyCodeLine{00201\ \ \ \ \ \{}
+\DoxyCodeLine{00202\ \ \ \ \ \ \ \textcolor{keyword}{typename}\ tuple\_size<\_Tp>::type;}
+\DoxyCodeLine{00203\ \ \ \ \ \ \ \textcolor{keyword}{requires}\ derived\_from<tuple\_size<\_Tp>,\ integral\_constant<size\_t,\ 2>>;}
+\DoxyCodeLine{00204\ \ \ \ \ \ \ \textcolor{keyword}{typename}\ tuple\_element\_t<0,\ remove\_const\_t<\_Tp>>;}
+\DoxyCodeLine{00205\ \ \ \ \ \ \ \textcolor{keyword}{typename}\ tuple\_element\_t<1,\ remove\_const\_t<\_Tp>>;}
+\DoxyCodeLine{00206\ \ \ \ \ \ \ \{\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_afc5e04fa58feb228bb06199ff10caa22}{get<0>}}(\_\_t)\ \}\ -\/>\ convertible\_to<const\ tuple\_element\_t<0,\ \_Tp>\&>;}
+\DoxyCodeLine{00207\ \ \ \ \ \ \ \{\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_afc5e04fa58feb228bb06199ff10caa22}{get<1>}}(\_\_t)\ \}\ -\/>\ convertible\_to<const\ tuple\_element\_t<1,\ \_Tp>\&>;}
+\DoxyCodeLine{00208\ \ \ \ \ \};}
+\DoxyCodeLine{00209\ }
+\DoxyCodeLine{00210\ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Tp,\ \textcolor{keyword}{typename}\ \_Up,\ \textcolor{keyword}{typename}\ \_Vp>}
+\DoxyCodeLine{00211\ \ \ \ \ \ \ \textcolor{keyword}{concept\ }\_\_pair\_like\_convertible\_from}
+\DoxyCodeLine{00212\ \ \ \ \ =\ !\mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2glad_8h_a7b8ad0b27a927682837f95528fa454f5}{range<\_Tp>}}\ \&\&\ \_\_pair\_like<\_Tp>}
+\DoxyCodeLine{00213\ \ \ \ \ \&\&\ constructible\_from<\_Tp,\ \_Up,\ \_Vp>}
+\DoxyCodeLine{00214\ \ \ \ \ \&\&\ \_\_convertible\_to\_non\_slicing<\_Up,\ tuple\_element\_t<0,\ \_Tp>>}
+\DoxyCodeLine{00215\ \ \ \ \ \&\&\ convertible\_to<\_Vp,\ tuple\_element\_t<1,\ \_Tp>>;}
+\DoxyCodeLine{00216\ }
+\DoxyCodeLine{00217\ \ \ \}\ \textcolor{comment}{//\ namespace\ \_\_detail}}
+\DoxyCodeLine{00218\ }
+\DoxyCodeLine{00219\ \ \ \textcolor{keyword}{namespace\ }views\ \{\ \textcolor{keyword}{struct\ }\_Drop;\ \}\ \textcolor{comment}{//\ defined\ in\ <ranges>}}
+\DoxyCodeLine{00220\ }
+\DoxyCodeLine{00221\ \ \ \textcolor{keyword}{enum\ class}\ subrange\_kind\ :\ \textcolor{keywordtype}{bool}\ \{\ unsized,\ sized\ \};}
+\DoxyCodeLine{00222\ }
+\DoxyCodeLine{00224\ \ \ \textcolor{keyword}{template}<input\_or\_output\_iterator\ \_It,\ sentinel\_for<\_It>\ \_Sent\ =\ \_It,}
+\DoxyCodeLine{00225\ \ \ \ \ \ \ \ subrange\_kind\ \_Kind\ =\ sized\_sentinel\_for<\_Sent,\ \_It>}
+\DoxyCodeLine{00226\ \ \ \ \ \ \ \ \ \ ?\ subrange\_kind::sized\ :\ subrange\_kind::unsized>}
+\DoxyCodeLine{00227\ \ \ \ \ \textcolor{keyword}{requires}\ (\_Kind\ ==\ subrange\_kind::sized\ ||\ !sized\_sentinel\_for<\_Sent,\ \_It>)}
+\DoxyCodeLine{00228\ \ \ \ \ \textcolor{keyword}{class}\ subrange\ :\ public\ view\_interface<subrange<\_It,\ \_Sent,\ \_Kind>>}
+\DoxyCodeLine{00229\ \ \ \ \ \{}
+\DoxyCodeLine{00230\ \ \ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00231\ \ \ \ \ \ \ \textcolor{keyword}{static}\ \textcolor{keyword}{constexpr}\ \textcolor{keywordtype}{bool}\ \_S\_store\_size}
+\DoxyCodeLine{00232\ \ \ \ \ =\ \_Kind\ ==\ subrange\_kind::sized\ \&\&\ !sized\_sentinel\_for<\_Sent,\ \_It>;}
+\DoxyCodeLine{00233\ }
+\DoxyCodeLine{00234\ \ \ \ \ \ \ \textcolor{keyword}{friend}\ \textcolor{keyword}{struct\ }views::\_Drop;\ \textcolor{comment}{//\ Needs\ to\ inspect\ \_S\_store\_size.}}
+\DoxyCodeLine{00235\ }
+\DoxyCodeLine{00236\ \ \ \ \ \ \ \_It\ \_M\_begin\ =\ \_It();}
+\DoxyCodeLine{00237\ \ \ \ \ \ \ [[no\_unique\_address]]\ \_Sent\ \_M\_end\ =\ \_Sent();}
+\DoxyCodeLine{00238\ }
+\DoxyCodeLine{00239\ \ \ \ \ \ \ \textcolor{keyword}{using\ }\_\_size\_type}
+\DoxyCodeLine{00240\ \ \ \ \ =\ \_\_detail::\_\_make\_unsigned\_like\_t<iter\_difference\_t<\_It>>;}
+\DoxyCodeLine{00241\ }
+\DoxyCodeLine{00242\ \ \ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename},\ \textcolor{keywordtype}{bool}\ =\ \_S\_store\_size>}
+\DoxyCodeLine{00243\ \ \ \ \ \textcolor{keyword}{struct\ }\_Size}
+\DoxyCodeLine{00244\ \ \ \ \ \{\ \};}
+\DoxyCodeLine{00245\ }
+\DoxyCodeLine{00246\ \ \ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Tp>}
+\DoxyCodeLine{00247\ \ \ \ \ \textcolor{keyword}{struct\ }\_Size<\_Tp,\ \mbox{\hyperlink{_classes_2lib_2include_2stdbool_8h_a41f9c5fb8b08eb5dc3edce4dcb37fee7}{true}}>}
+\DoxyCodeLine{00248\ \ \ \ \ \{\ \_Tp\ \_M\_size;\ \};}
+\DoxyCodeLine{00249\ }
+\DoxyCodeLine{00250\ \ \ \ \ \ \ [[no\_unique\_address]]\ \_Size<\_\_size\_type>\ \_M\_size\ =\ \{\};}
+\DoxyCodeLine{00251\ }
+\DoxyCodeLine{00252\ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00253\ \ \ \ \ \ \ subrange()\ \textcolor{keyword}{requires}\ default\_initializable<\_It>\ =\ default;}
+\DoxyCodeLine{00254\ }
+\DoxyCodeLine{00255\ \ \ \ \ \ \ constexpr}
+\DoxyCodeLine{00256\ \ \ \ \ \ \ subrange(\_\_detail::\_\_convertible\_to\_non\_slicing<\_It>\ auto\ \_\_i,\ \_Sent\ \_\_s)}
+\DoxyCodeLine{00257\ \ \ \ \ \ \ noexcept(is\_nothrow\_constructible\_v<\_It,\ decltype(\_\_i)>}
+\DoxyCodeLine{00258\ \ \ \ \ \ \ \ \ \ \ \ \&\&\ is\_nothrow\_constructible\_v<\_Sent,\ \_Sent\&>)}
+\DoxyCodeLine{00259\ \ \ \ \ requires\ (!\_S\_store\_size)}
+\DoxyCodeLine{00260\ \ \ \ \ \ \ :\ \_M\_begin(\mbox{\hyperlink{namespacestd}{std}}::move(\_\_i)),\ \_M\_end(\_\_s)}
+\DoxyCodeLine{00261\ \ \ \ \ \ \ \{\ \}}
+\DoxyCodeLine{00262\ }
+\DoxyCodeLine{00263\ \ \ \ \ \ \ \textcolor{keyword}{constexpr}}
+\DoxyCodeLine{00264\ \ \ \ \ \ \ subrange(\_\_detail::\_\_convertible\_to\_non\_slicing<\_It>\ \textcolor{keyword}{auto}\ \_\_i,\ \_Sent\ \_\_s,}
+\DoxyCodeLine{00265\ \ \ \ \ \ \ \ \ \ \ \ \_\_size\_type\ \_\_n)}
+\DoxyCodeLine{00266\ \ \ \ \ \ \ \textcolor{keyword}{noexcept}(is\_nothrow\_constructible\_v<\_It,\ \textcolor{keyword}{decltype}(\_\_i)>}
+\DoxyCodeLine{00267\ \ \ \ \ \ \ \ \ \ \ \ \&\&\ is\_nothrow\_constructible\_v<\_Sent,\ \_Sent\&>)}
+\DoxyCodeLine{00268\ \ \ \ \ \textcolor{keyword}{requires}\ (\_Kind\ ==\ subrange\_kind::sized)}
+\DoxyCodeLine{00269\ \ \ \ \ \ \ :\ \_M\_begin(\mbox{\hyperlink{namespacestd}{std}}::\mbox{\hyperlink{namespacestd_ac7095819f6a8da64d69b1ee3029c52be}{move}}(\_\_i)),\ \_M\_end(\_\_s)}
+\DoxyCodeLine{00270\ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00271\ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keyword}{constexpr}\ (\_S\_store\_size)}
+\DoxyCodeLine{00272\ \ \ \ \ \ \ \_M\_size.\_M\_size\ =\ \_\_n;}
+\DoxyCodeLine{00273\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00274\ }
+\DoxyCodeLine{00275\ \ \ \ \ \ \ \textcolor{keyword}{template}<\_\_detail::\_\_different\_from<subrange>\ \_Rng>}
+\DoxyCodeLine{00276\ \ \ \ \ \textcolor{keyword}{requires}\ borrowed\_range<\_Rng>}
+\DoxyCodeLine{00277\ \ \ \ \ \ \ \&\&\ \_\_detail::\_\_convertible\_to\_non\_slicing<iterator\_t<\_Rng>,\ \_It>}
+\DoxyCodeLine{00278\ \ \ \ \ \ \ \&\&\ convertible\_to<sentinel\_t<\_Rng>,\ \_Sent>}
+\DoxyCodeLine{00279\ \ \ \ \ \textcolor{keyword}{constexpr}}
+\DoxyCodeLine{00280\ \ \ \ \ subrange(\_Rng\&\&\ \_\_r)}
+\DoxyCodeLine{00281\ \ \ \ \ \textcolor{keyword}{noexcept}(\textcolor{keyword}{noexcept}(subrange(\_\_r,\ ranges::size(\_\_r))))}
+\DoxyCodeLine{00282\ \ \ \ \ \textcolor{keyword}{requires}\ \_S\_store\_size\ \&\&\ sized\_range<\_Rng>}
+\DoxyCodeLine{00283\ \ \ \ \ :\ subrange(\_\_r,\ ranges::size(\_\_r))}
+\DoxyCodeLine{00284\ \ \ \ \ \{\ \}}
+\DoxyCodeLine{00285\ }
+\DoxyCodeLine{00286\ \ \ \ \ \ \ \textcolor{keyword}{template}<\_\_detail::\_\_different\_from<subrange>\ \_Rng>}
+\DoxyCodeLine{00287\ \ \ \ \ \textcolor{keyword}{requires}\ borrowed\_range<\_Rng>}
+\DoxyCodeLine{00288\ \ \ \ \ \ \ \&\&\ \_\_detail::\_\_convertible\_to\_non\_slicing<iterator\_t<\_Rng>,\ \_It>}
+\DoxyCodeLine{00289\ \ \ \ \ \ \ \&\&\ convertible\_to<sentinel\_t<\_Rng>,\ \_Sent>}
+\DoxyCodeLine{00290\ \ \ \ \ \textcolor{keyword}{constexpr}}
+\DoxyCodeLine{00291\ \ \ \ \ subrange(\_Rng\&\&\ \_\_r)}
+\DoxyCodeLine{00292\ \ \ \ \ \textcolor{keyword}{noexcept}(\textcolor{keyword}{noexcept}(subrange(ranges::begin(\_\_r),\ ranges::end(\_\_r))))}
+\DoxyCodeLine{00293\ \ \ \ \ \textcolor{keyword}{requires}\ (!\_S\_store\_size)}
+\DoxyCodeLine{00294\ \ \ \ \ :\ subrange(ranges::\mbox{\hyperlink{group__gtx__range_gaa752bdfcbfda8d0593318c4bf8a7dc6e}{begin}}(\_\_r),\ ranges::\mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2glad_8h_a432111147038972f06e049e18a837002}{end}}(\_\_r))}
+\DoxyCodeLine{00295\ \ \ \ \ \{\ \}}
+\DoxyCodeLine{00296\ }
+\DoxyCodeLine{00297\ \ \ \ \ \ \ \textcolor{keyword}{template}<borrowed\_range\ \_Rng>}
+\DoxyCodeLine{00298\ \ \ \ \ \textcolor{keyword}{requires}\ \_\_detail::\_\_convertible\_to\_non\_slicing<iterator\_t<\_Rng>,\ \_It>}
+\DoxyCodeLine{00299\ \ \ \ \ \ \ \&\&\ convertible\_to<sentinel\_t<\_Rng>,\ \_Sent>}
+\DoxyCodeLine{00300\ \ \ \ \ \textcolor{keyword}{constexpr}}
+\DoxyCodeLine{00301\ \ \ \ \ subrange(\_Rng\&\&\ \_\_r,\ \_\_size\_type\ \_\_n)}
+\DoxyCodeLine{00302\ \ \ \ \ \textcolor{keyword}{noexcept}(\textcolor{keyword}{noexcept}(subrange(ranges::begin(\_\_r),\ ranges::end(\_\_r),\ \_\_n)))}
+\DoxyCodeLine{00303\ \ \ \ \ \textcolor{keyword}{requires}\ (\_Kind\ ==\ subrange\_kind::sized)}
+\DoxyCodeLine{00304\ \ \ \ \ :\ subrange\{ranges::\mbox{\hyperlink{group__gtx__range_gaa752bdfcbfda8d0593318c4bf8a7dc6e}{begin}}(\_\_r),\ ranges::\mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2glad_8h_a432111147038972f06e049e18a837002}{end}}(\_\_r),\ \_\_n\}}
+\DoxyCodeLine{00305\ \ \ \ \ \{\ \}}
+\DoxyCodeLine{00306\ }
+\DoxyCodeLine{00307\ \ \ \ \ \ \ \textcolor{keyword}{template}<\_\_detail::\_\_different\_from<subrange>\ \_PairLike>}
+\DoxyCodeLine{00308\ \ \ \ \ \textcolor{keyword}{requires}\ \_\_detail::\_\_pair\_like\_convertible\_from<\_PairLike,\ \textcolor{keyword}{const}\ \_It\&,}
+\DoxyCodeLine{00309\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \_Sent\&>}
+\DoxyCodeLine{00310\ \ \ \ \ \textcolor{keyword}{constexpr}}
+\DoxyCodeLine{00311\ \ \ \ \ \textcolor{keyword}{operator}\ \_PairLike()\textcolor{keyword}{\ const}}
+\DoxyCodeLine{00312\ \textcolor{keyword}{\ \ \ \ }\{\ \textcolor{keywordflow}{return}\ \_PairLike(\_M\_begin,\ \_M\_end);\ \}}
+\DoxyCodeLine{00313\ }
+\DoxyCodeLine{00314\ \ \ \ \ \ \ \textcolor{keyword}{constexpr}\ \_It}
+\DoxyCodeLine{00315\ \ \ \ \ \ \ \mbox{\hyperlink{group__gtx__range_gaa752bdfcbfda8d0593318c4bf8a7dc6e}{begin}}()\ const\ requires\ copyable<\_It>}
+\DoxyCodeLine{00316\ \ \ \ \ \ \ \{\ \textcolor{keywordflow}{return}\ \_M\_begin;\ \}}
+\DoxyCodeLine{00317\ }
+\DoxyCodeLine{00318\ \ \ \ \ \ \ [[nodiscard]]\ \textcolor{keyword}{constexpr}\ \_It}
+\DoxyCodeLine{00319\ \ \ \ \ \ \ \mbox{\hyperlink{group__gtx__range_gaa752bdfcbfda8d0593318c4bf8a7dc6e}{begin}}()\ \textcolor{keyword}{requires}\ (!copyable<\_It>)}
+\DoxyCodeLine{00320\ \ \ \ \ \ \ \{\ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{namespacestd_ac7095819f6a8da64d69b1ee3029c52be}{std::move}}(\_M\_begin);\ \}}
+\DoxyCodeLine{00321\ }
+\DoxyCodeLine{00322\ \ \ \ \ \ \ \textcolor{keyword}{constexpr}\ \_Sent\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2glad_8h_a432111147038972f06e049e18a837002}{end}}()\textcolor{keyword}{\ const\ }\{\ \textcolor{keywordflow}{return}\ \_M\_end;\ \}}
+\DoxyCodeLine{00323\ }
+\DoxyCodeLine{00324\ \ \ \ \ \ \ \textcolor{keyword}{constexpr}\ \textcolor{keywordtype}{bool}\ empty()\textcolor{keyword}{\ const\ }\{\ \textcolor{keywordflow}{return}\ \_M\_begin\ ==\ \_M\_end;\ \}}
+\DoxyCodeLine{00325\ }
+\DoxyCodeLine{00326\ \ \ \ \ \ \ \textcolor{keyword}{constexpr}\ \_\_size\_type}
+\DoxyCodeLine{00327\ \ \ \ \ \ \ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_a3d1e3edfcf61ca2d831883e1afbad89e}{size}}()\ const\ requires\ (\_Kind\ ==\ subrange\_kind::sized)}
+\DoxyCodeLine{00328\ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00329\ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keyword}{constexpr}\ (\_S\_store\_size)}
+\DoxyCodeLine{00330\ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \_M\_size.\_M\_size;}
+\DoxyCodeLine{00331\ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{00332\ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \_\_detail::\_\_to\_unsigned\_like(\_M\_end\ -\/\ \_M\_begin);}
+\DoxyCodeLine{00333\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00334\ }
+\DoxyCodeLine{00335\ \ \ \ \ \ \ [[nodiscard]]\ \textcolor{keyword}{constexpr}\ subrange}
+\DoxyCodeLine{00336\ \ \ \ \ \ \ next(iter\_difference\_t<\_It>\ \_\_n\ =\ 1)\ const\ \&}
+\DoxyCodeLine{00337\ \ \ \ \ requires\ forward\_iterator<\_It>}
+\DoxyCodeLine{00338\ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00339\ \ \ \ \ \textcolor{keyword}{auto}\ \mbox{\hyperlink{_classes_2lib_2include_2xmmintrin_8h_ad56bf6b8c22ee698e455f99196a1fe12}{\_\_tmp}}\ =\ *\textcolor{keyword}{this};}
+\DoxyCodeLine{00340\ \ \ \ \ \mbox{\hyperlink{_classes_2lib_2include_2xmmintrin_8h_ad56bf6b8c22ee698e455f99196a1fe12}{\_\_tmp}}.advance(\_\_n);}
+\DoxyCodeLine{00341\ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{_classes_2lib_2include_2xmmintrin_8h_ad56bf6b8c22ee698e455f99196a1fe12}{\_\_tmp}};}
+\DoxyCodeLine{00342\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00343\ }
+\DoxyCodeLine{00344\ \ \ \ \ \ \ [[nodiscard]]\ \textcolor{keyword}{constexpr}\ subrange}
+\DoxyCodeLine{00345\ \ \ \ \ \ \ next(iter\_difference\_t<\_It>\ \_\_n\ =\ 1)\ \&\&}
+\DoxyCodeLine{00346\ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00347\ \ \ \ \ advance(\_\_n);}
+\DoxyCodeLine{00348\ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{namespacestd_ac7095819f6a8da64d69b1ee3029c52be}{std::move}}(*\textcolor{keyword}{this});}
+\DoxyCodeLine{00349\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00350\ }
+\DoxyCodeLine{00351\ \ \ \ \ \ \ [[nodiscard]]\ \textcolor{keyword}{constexpr}\ subrange}
+\DoxyCodeLine{00352\ \ \ \ \ \ \ prev(iter\_difference\_t<\_It>\ \_\_n\ =\ 1)\ const}
+\DoxyCodeLine{00353\ \ \ \ \ requires\ bidirectional\_iterator<\_It>}
+\DoxyCodeLine{00354\ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00355\ \ \ \ \ \textcolor{keyword}{auto}\ \mbox{\hyperlink{_classes_2lib_2include_2xmmintrin_8h_ad56bf6b8c22ee698e455f99196a1fe12}{\_\_tmp}}\ =\ *\textcolor{keyword}{this};}
+\DoxyCodeLine{00356\ \ \ \ \ \mbox{\hyperlink{_classes_2lib_2include_2xmmintrin_8h_ad56bf6b8c22ee698e455f99196a1fe12}{\_\_tmp}}.advance(-\/\_\_n);}
+\DoxyCodeLine{00357\ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{_classes_2lib_2include_2xmmintrin_8h_ad56bf6b8c22ee698e455f99196a1fe12}{\_\_tmp}};}
+\DoxyCodeLine{00358\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00359\ }
+\DoxyCodeLine{00360\ \ \ \ \ \ \ \textcolor{keyword}{constexpr}\ subrange\&}
+\DoxyCodeLine{00361\ \ \ \ \ \ \ advance(iter\_difference\_t<\_It>\ \_\_n)}
+\DoxyCodeLine{00362\ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00363\ \ \ \ \ \textcolor{comment}{//\ \_GLIBCXX\_RESOLVE\_LIB\_DEFECTS}}
+\DoxyCodeLine{00364\ \ \ \ \ \textcolor{comment}{//\ 3433.\ subrange::advance(n)\ has\ UB\ when\ n\ <\ 0}}
+\DoxyCodeLine{00365\ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keyword}{constexpr}\ (bidirectional\_iterator<\_It>)}
+\DoxyCodeLine{00366\ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\_\_n\ <\ 0)}
+\DoxyCodeLine{00367\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00368\ \ \ \ \ \ \ \ \ \ \ ranges::advance(\_M\_begin,\ \_\_n);}
+\DoxyCodeLine{00369\ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keyword}{constexpr}\ (\_S\_store\_size)}
+\DoxyCodeLine{00370\ \ \ \ \ \ \ \ \ \_M\_size.\_M\_size\ +=\ \_\_detail::\_\_to\_unsigned\_like(-\/\_\_n);}
+\DoxyCodeLine{00371\ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ *\textcolor{keyword}{this};}
+\DoxyCodeLine{00372\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00373\ }
+\DoxyCodeLine{00374\ \ \ \ \ \_\_glibcxx\_assert(\_\_n\ >=\ 0);}
+\DoxyCodeLine{00375\ \ \ \ \ \textcolor{keyword}{auto}\ \_\_d\ =\ \_\_n\ -\/\ ranges::advance(\_M\_begin,\ \_\_n,\ \_M\_end);}
+\DoxyCodeLine{00376\ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keyword}{constexpr}\ (\_S\_store\_size)}
+\DoxyCodeLine{00377\ \ \ \ \ \ \ \_M\_size.\_M\_size\ -\/=\ \_\_detail::\_\_to\_unsigned\_like(\_\_d);}
+\DoxyCodeLine{00378\ \ \ \ \ \textcolor{keywordflow}{return}\ *\textcolor{keyword}{this};}
+\DoxyCodeLine{00379\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00380\ \ \ \ \ \};}
+\DoxyCodeLine{00381\ }
+\DoxyCodeLine{00382\ \ \ \textcolor{keyword}{template}<input\_or\_output\_iterator\ \_It,\ sentinel\_for<\_It>\ \_Sent>}
+\DoxyCodeLine{00383\ \ \ \ \ subrange(\_It,\ \_Sent)\ -\/>\ subrange<\_It,\ \_Sent>;}
+\DoxyCodeLine{00384\ }
+\DoxyCodeLine{00385\ \ \ \textcolor{keyword}{template}<input\_or\_output\_iterator\ \_It,\ sentinel\_for<\_It>\ \_Sent>}
+\DoxyCodeLine{00386\ \ \ \ \ subrange(\_It,\ \_Sent,}
+\DoxyCodeLine{00387\ \ \ \ \ \ \ \ \ \ \_\_detail::\_\_make\_unsigned\_like\_t<iter\_difference\_t<\_It>>)}
+\DoxyCodeLine{00388\ \ \ \ \ \ \ -\/>\ subrange<\_It,\ \_Sent,\ subrange\_kind::sized>;}
+\DoxyCodeLine{00389\ }
+\DoxyCodeLine{00390\ \ \ \textcolor{keyword}{template}<borrowed\_range\ \_Rng>}
+\DoxyCodeLine{00391\ \ \ \ \ subrange(\_Rng\&\&)}
+\DoxyCodeLine{00392\ \ \ \ \ \ \ -\/>\ subrange<iterator\_t<\_Rng>,\ sentinel\_t<\_Rng>,}
+\DoxyCodeLine{00393\ \ \ \ \ \ \ \ \ \ (sized\_range<\_Rng>}
+\DoxyCodeLine{00394\ \ \ \ \ \ \ \ \ \ \ ||\ sized\_sentinel\_for<sentinel\_t<\_Rng>,\ iterator\_t<\_Rng>>)}
+\DoxyCodeLine{00395\ \ \ \ \ \ \ \ \ \ ?\ subrange\_kind::sized\ :\ subrange\_kind::unsized>;}
+\DoxyCodeLine{00396\ }
+\DoxyCodeLine{00397\ \ \ \textcolor{keyword}{template}<borrowed\_range\ \_Rng>}
+\DoxyCodeLine{00398\ \ \ \ \ subrange(\_Rng\&\&,}
+\DoxyCodeLine{00399\ \ \ \ \ \ \ \ \ \ \_\_detail::\_\_make\_unsigned\_like\_t<range\_difference\_t<\_Rng>>)}
+\DoxyCodeLine{00400\ \ \ \ \ \ \ -\/>\ subrange<iterator\_t<\_Rng>,\ sentinel\_t<\_Rng>,\ subrange\_kind::sized>;}
+\DoxyCodeLine{00401\ }
+\DoxyCodeLine{00402\ \ \ \textcolor{keyword}{template}<\textcolor{keywordtype}{size\_t}\ \_Num,\ \textcolor{keyword}{class}\ \_It,\ \textcolor{keyword}{class}\ \_Sent,\ subrange\_kind\ \_Kind>}
+\DoxyCodeLine{00403\ \ \ \ \ \textcolor{keyword}{requires}\ (\_Num\ <\ 2)}
+\DoxyCodeLine{00404\ \ \ \ \ \textcolor{keyword}{constexpr}\ \textcolor{keyword}{auto}}
+\DoxyCodeLine{00405\ \ \ \ \ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_afc5e04fa58feb228bb06199ff10caa22}{get}}(\textcolor{keyword}{const}\ subrange<\_It,\ \_Sent,\ \_Kind>\&\ \_\_r)}
+\DoxyCodeLine{00406\ \ \ \ \ \{}
+\DoxyCodeLine{00407\ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keyword}{constexpr}\ (\_Num\ ==\ 0)}
+\DoxyCodeLine{00408\ \ \ \ \ \textcolor{keywordflow}{return}\ \_\_r.begin();}
+\DoxyCodeLine{00409\ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{00410\ \ \ \ \ \textcolor{keywordflow}{return}\ \_\_r.end();}
+\DoxyCodeLine{00411\ \ \ \ \ \}}
+\DoxyCodeLine{00412\ }
+\DoxyCodeLine{00413\ \ \ \textcolor{keyword}{template}<\textcolor{keywordtype}{size\_t}\ \_Num,\ \textcolor{keyword}{class}\ \_It,\ \textcolor{keyword}{class}\ \_Sent,\ subrange\_kind\ \_Kind>}
+\DoxyCodeLine{00414\ \ \ \ \ \textcolor{keyword}{requires}\ (\_Num\ <\ 2)}
+\DoxyCodeLine{00415\ \ \ \ \ \textcolor{keyword}{constexpr}\ \textcolor{keyword}{auto}}
+\DoxyCodeLine{00416\ \ \ \ \ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_afc5e04fa58feb228bb06199ff10caa22}{get}}(subrange<\_It,\ \_Sent,\ \_Kind>\&\&\ \_\_r)}
+\DoxyCodeLine{00417\ \ \ \ \ \{}
+\DoxyCodeLine{00418\ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keyword}{constexpr}\ (\_Num\ ==\ 0)}
+\DoxyCodeLine{00419\ \ \ \ \ \textcolor{keywordflow}{return}\ \_\_r.begin();}
+\DoxyCodeLine{00420\ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{00421\ \ \ \ \ \textcolor{keywordflow}{return}\ \_\_r.end();}
+\DoxyCodeLine{00422\ \ \ \ \ \}}
+\DoxyCodeLine{00423\ }
+\DoxyCodeLine{00424\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_It,\ \textcolor{keyword}{typename}\ \_Sent,\ subrange\_kind\ \_Kind>}
+\DoxyCodeLine{00425\ \ \ \ \ \textcolor{keyword}{inline}\ \textcolor{keyword}{constexpr}\ \textcolor{keywordtype}{bool}}
+\DoxyCodeLine{00426\ \ \ \ \ \ \ enable\_borrowed\_range<subrange<\_It,\ \_Sent,\ \_Kind>>\ =\ \textcolor{keyword}{true};}
+\DoxyCodeLine{00427\ }
+\DoxyCodeLine{00428\ \ \ \textcolor{keyword}{template}<range\ \_Range>}
+\DoxyCodeLine{00429\ \ \ \ \ \textcolor{keyword}{using\ }borrowed\_subrange\_t\ =\ \_\_conditional\_t<borrowed\_range<\_Range>,}
+\DoxyCodeLine{00430\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ subrange<iterator\_t<\_Range>>,}
+\DoxyCodeLine{00431\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ dangling>;}
+\DoxyCodeLine{00432\ \}\ \textcolor{comment}{//\ namespace\ ranges}}
+\DoxyCodeLine{00433\ }
+\DoxyCodeLine{00434\ \textcolor{comment}{//\ The\ following\ ranges\ algorithms\ are\ used\ by\ <ranges>,\ and\ are\ defined\ here}}
+\DoxyCodeLine{00435\ \textcolor{comment}{//\ so\ that\ <ranges>\ can\ avoid\ including\ all\ of\ <bits/ranges\_algo.h>.}}
+\DoxyCodeLine{00436\ \textcolor{keyword}{namespace\ }ranges}
+\DoxyCodeLine{00437\ \{}
+\DoxyCodeLine{00438\ \ \ \textcolor{keyword}{struct\ }\_\_find\_fn}
+\DoxyCodeLine{00439\ \ \ \{}
+\DoxyCodeLine{00440\ \ \ \ \ \textcolor{keyword}{template}<input\_iterator\ \_Iter,\ sentinel\_for<\_Iter>\ \_Sent,\ \textcolor{keyword}{typename}\ \_Tp,}
+\DoxyCodeLine{00441\ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{typename}\ \_Proj\ =\ \textcolor{keywordtype}{id}entity>}
+\DoxyCodeLine{00442\ \ \ \ \ \ \ \textcolor{keyword}{requires}\ indirect\_binary\_predicate<ranges::equal\_to,}
+\DoxyCodeLine{00443\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ projected<\_Iter,\ \_Proj>,\ \textcolor{keyword}{const}\ \_Tp*>}
+\DoxyCodeLine{00444\ \ \ \ \ \ \ \textcolor{keyword}{constexpr}\ \_Iter}
+\DoxyCodeLine{00445\ \ \ \ \ \ \ operator()(\_Iter\ \_\_first,\ \_Sent\ \_\_last,}
+\DoxyCodeLine{00446\ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \_Tp\&\ \_\_value,\ \_Proj\ \_\_proj\ =\ \{\})\ \textcolor{keyword}{const}}
+\DoxyCodeLine{00447\ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00448\ \ \ \ \ \textcolor{keywordflow}{while}\ (\_\_first\ !=\ \_\_last}
+\DoxyCodeLine{00449\ \ \ \ \ \ \ \ \ \&\&\ !(std::\_\_invoke(\_\_proj,\ *\_\_first)\ ==\ \_\_value))}
+\DoxyCodeLine{00450\ \ \ \ \ \ \ ++\_\_first;}
+\DoxyCodeLine{00451\ \ \ \ \ \textcolor{keywordflow}{return}\ \_\_first;}
+\DoxyCodeLine{00452\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00453\ }
+\DoxyCodeLine{00454\ \ \ \ \ \textcolor{keyword}{template}<input\_range\ \_Range,\ \textcolor{keyword}{typename}\ \_Tp,\ \textcolor{keyword}{typename}\ \_Proj\ =\ \textcolor{keywordtype}{id}entity>}
+\DoxyCodeLine{00455\ \ \ \ \ \ \ \textcolor{keyword}{requires}\ indirect\_binary\_predicate<ranges::equal\_to,}
+\DoxyCodeLine{00456\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ projected<iterator\_t<\_Range>,\ \_Proj>,}
+\DoxyCodeLine{00457\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \_Tp*>}
+\DoxyCodeLine{00458\ \ \ \ \ \ \ \textcolor{keyword}{constexpr}\ borrowed\_iterator\_t<\_Range>}
+\DoxyCodeLine{00459\ \ \ \ \ \ \ operator()(\_Range\&\&\ \_\_r,\ \textcolor{keyword}{const}\ \_Tp\&\ \_\_value,\ \_Proj\ \_\_proj\ =\ \{\})\ \textcolor{keyword}{const}}
+\DoxyCodeLine{00460\ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00461\ \ \ \ \ \textcolor{keywordflow}{return}\ (*\textcolor{keyword}{this})(ranges::begin(\_\_r),\ ranges::end(\_\_r),}
+\DoxyCodeLine{00462\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_\_value,\ \mbox{\hyperlink{namespacestd_ac7095819f6a8da64d69b1ee3029c52be}{std::move}}(\_\_proj));}
+\DoxyCodeLine{00463\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00464\ \ \ \};}
+\DoxyCodeLine{00465\ }
+\DoxyCodeLine{00466\ \ \ \textcolor{keyword}{inline}\ \textcolor{keyword}{constexpr}\ \_\_find\_fn\ \mbox{\hyperlink{toml_8hpp_a334e40fb57f310a5de10f332f1914bf4}{find}}\{\};}
+\DoxyCodeLine{00467\ }
+\DoxyCodeLine{00468\ \ \ \textcolor{keyword}{struct\ }\_\_find\_if\_fn}
+\DoxyCodeLine{00469\ \ \ \{}
+\DoxyCodeLine{00470\ \ \ \ \ \textcolor{keyword}{template}<input\_iterator\ \_Iter,\ sentinel\_for<\_Iter>\ \_Sent,}
+\DoxyCodeLine{00471\ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{typename}\ \_Proj\ =\ \textcolor{keywordtype}{id}entity,}
+\DoxyCodeLine{00472\ \ \ \ \ \ \ \ \ \ indirect\_unary\_predicate<projected<\_Iter,\ \_Proj>>\ \_Pred>}
+\DoxyCodeLine{00473\ \ \ \ \ \ \ \textcolor{keyword}{constexpr}\ \_Iter}
+\DoxyCodeLine{00474\ \ \ \ \ \ \ operator()(\_Iter\ \_\_first,\ \_Sent\ \_\_last,}
+\DoxyCodeLine{00475\ \ \ \ \ \ \ \ \ \ \_Pred\ \_\_pred,\ \_Proj\ \_\_proj\ =\ \{\})\ \textcolor{keyword}{const}}
+\DoxyCodeLine{00476\ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00477\ \ \ \ \ \textcolor{keywordflow}{while}\ (\_\_first\ !=\ \_\_last}
+\DoxyCodeLine{00478\ \ \ \ \ \ \ \ \ \&\&\ !(\textcolor{keywordtype}{bool})std::\_\_invoke(\_\_pred,\ std::\_\_invoke(\_\_proj,\ *\_\_first)))}
+\DoxyCodeLine{00479\ \ \ \ \ \ \ ++\_\_first;}
+\DoxyCodeLine{00480\ \ \ \ \ \textcolor{keywordflow}{return}\ \_\_first;}
+\DoxyCodeLine{00481\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00482\ }
+\DoxyCodeLine{00483\ \ \ \ \ \textcolor{keyword}{template}<input\_range\ \_Range,\ \textcolor{keyword}{typename}\ \_Proj\ =\ \mbox{\hyperlink{group__ext__matrix__transform_ga81696f2b8d1db02ea1aff8da8f269314}{identity}},}
+\DoxyCodeLine{00484\ \ \ \ \ \ \ \ \ \ indirect\_unary\_predicate<projected<iterator\_t<\_Range>,\ \_Proj>>}
+\DoxyCodeLine{00485\ \ \ \ \ \ \ \ \ \ \ \ \_Pred>}
+\DoxyCodeLine{00486\ \ \ \ \ \ \ \textcolor{keyword}{constexpr}\ borrowed\_iterator\_t<\_Range>}
+\DoxyCodeLine{00487\ \ \ \ \ \ \ operator()(\_Range\&\&\ \_\_r,\ \_Pred\ \_\_pred,\ \_Proj\ \_\_proj\ =\ \{\})\ \textcolor{keyword}{const}}
+\DoxyCodeLine{00488\ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00489\ \ \ \ \ \textcolor{keywordflow}{return}\ (*\textcolor{keyword}{this})(ranges::begin(\_\_r),\ ranges::end(\_\_r),}
+\DoxyCodeLine{00490\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespacestd_ac7095819f6a8da64d69b1ee3029c52be}{std::move}}(\_\_pred),\ \mbox{\hyperlink{namespacestd_ac7095819f6a8da64d69b1ee3029c52be}{std::move}}(\_\_proj));}
+\DoxyCodeLine{00491\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00492\ \ \ \};}
+\DoxyCodeLine{00493\ }
+\DoxyCodeLine{00494\ \ \ \textcolor{keyword}{inline}\ \textcolor{keyword}{constexpr}\ \_\_find\_if\_fn\ \mbox{\hyperlink{namespacestd_a12540b98a8b3f5862173e50b92f1de81}{find\_if}}\{\};}
+\DoxyCodeLine{00495\ }
+\DoxyCodeLine{00496\ \ \ \textcolor{keyword}{struct\ }\_\_find\_if\_not\_fn}
+\DoxyCodeLine{00497\ \ \ \{}
+\DoxyCodeLine{00498\ \ \ \ \ \textcolor{keyword}{template}<input\_iterator\ \_Iter,\ sentinel\_for<\_Iter>\ \_Sent,}
+\DoxyCodeLine{00499\ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{typename}\ \_Proj\ =\ \textcolor{keywordtype}{id}entity,}
+\DoxyCodeLine{00500\ \ \ \ \ \ \ \ \ \ indirect\_unary\_predicate<projected<\_Iter,\ \_Proj>>\ \_Pred>}
+\DoxyCodeLine{00501\ \ \ \ \ \ \ \textcolor{keyword}{constexpr}\ \_Iter}
+\DoxyCodeLine{00502\ \ \ \ \ \ \ operator()(\_Iter\ \_\_first,\ \_Sent\ \_\_last,}
+\DoxyCodeLine{00503\ \ \ \ \ \ \ \ \ \ \_Pred\ \_\_pred,\ \_Proj\ \_\_proj\ =\ \{\})\ \textcolor{keyword}{const}}
+\DoxyCodeLine{00504\ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00505\ \ \ \ \ \textcolor{keywordflow}{while}\ (\_\_first\ !=\ \_\_last}
+\DoxyCodeLine{00506\ \ \ \ \ \ \ \ \ \&\&\ (\textcolor{keywordtype}{bool})std::\_\_invoke(\_\_pred,\ std::\_\_invoke(\_\_proj,\ *\_\_first)))}
+\DoxyCodeLine{00507\ \ \ \ \ \ \ ++\_\_first;}
+\DoxyCodeLine{00508\ \ \ \ \ \textcolor{keywordflow}{return}\ \_\_first;}
+\DoxyCodeLine{00509\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00510\ }
+\DoxyCodeLine{00511\ \ \ \ \ \textcolor{keyword}{template}<input\_range\ \_Range,\ \textcolor{keyword}{typename}\ \_Proj\ =\ \mbox{\hyperlink{group__ext__matrix__transform_ga81696f2b8d1db02ea1aff8da8f269314}{identity}},}
+\DoxyCodeLine{00512\ \ \ \ \ \ \ \ \ \ indirect\_unary\_predicate<projected<iterator\_t<\_Range>,\ \_Proj>>}
+\DoxyCodeLine{00513\ \ \ \ \ \ \ \ \ \ \ \ \_Pred>}
+\DoxyCodeLine{00514\ \ \ \ \ \ \ \textcolor{keyword}{constexpr}\ borrowed\_iterator\_t<\_Range>}
+\DoxyCodeLine{00515\ \ \ \ \ \ \ operator()(\_Range\&\&\ \_\_r,\ \_Pred\ \_\_pred,\ \_Proj\ \_\_proj\ =\ \{\})\ \textcolor{keyword}{const}}
+\DoxyCodeLine{00516\ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00517\ \ \ \ \ \textcolor{keywordflow}{return}\ (*\textcolor{keyword}{this})(ranges::begin(\_\_r),\ ranges::end(\_\_r),}
+\DoxyCodeLine{00518\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespacestd_ac7095819f6a8da64d69b1ee3029c52be}{std::move}}(\_\_pred),\ \mbox{\hyperlink{namespacestd_ac7095819f6a8da64d69b1ee3029c52be}{std::move}}(\_\_proj));}
+\DoxyCodeLine{00519\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00520\ \ \ \};}
+\DoxyCodeLine{00521\ }
+\DoxyCodeLine{00522\ \ \ \textcolor{keyword}{inline}\ \textcolor{keyword}{constexpr}\ \_\_find\_if\_not\_fn\ \mbox{\hyperlink{namespacestd_ae19772fb8787d5b9c35285c98dfa5d79}{find\_if\_not}}\{\};}
+\DoxyCodeLine{00523\ }
+\DoxyCodeLine{00524\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Iter1,\ \textcolor{keyword}{typename}\ \_Iter2>}
+\DoxyCodeLine{00525\ \ \ \ \ \textcolor{keyword}{struct\ }in\_in\_result}
+\DoxyCodeLine{00526\ \ \ \ \ \{}
+\DoxyCodeLine{00527\ \ \ \ \ \ \ [[no\_unique\_address]]\ \_Iter1\ in1;}
+\DoxyCodeLine{00528\ \ \ \ \ \ \ [[no\_unique\_address]]\ \_Iter2\ in2;}
+\DoxyCodeLine{00529\ }
+\DoxyCodeLine{00530\ \ \ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_IIter1,\ \textcolor{keyword}{typename}\ \_IIter2>}
+\DoxyCodeLine{00531\ \ \ \ \ \textcolor{keyword}{requires}\ convertible\_to<const\ \_Iter1\&,\ \_IIter1>}
+\DoxyCodeLine{00532\ \ \ \ \ \ \ \&\&\ convertible\_to<const\ \_Iter2\&,\ \_IIter2>}
+\DoxyCodeLine{00533\ \ \ \ \ \textcolor{keyword}{constexpr}}
+\DoxyCodeLine{00534\ \ \ \ \ \textcolor{keyword}{operator}\ in\_in\_result<\_IIter1,\ \_IIter2>()\ const\ \&}
+\DoxyCodeLine{00535\ \ \ \ \ \{\ \textcolor{keywordflow}{return}\ \{in1,\ in2\};\ \}}
+\DoxyCodeLine{00536\ }
+\DoxyCodeLine{00537\ \ \ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_IIter1,\ \textcolor{keyword}{typename}\ \_IIter2>}
+\DoxyCodeLine{00538\ \ \ \ \ \textcolor{keyword}{requires}\ convertible\_to<\_Iter1,\ \_IIter1>}
+\DoxyCodeLine{00539\ \ \ \ \ \ \ \&\&\ convertible\_to<\_Iter2,\ \_IIter2>}
+\DoxyCodeLine{00540\ \ \ \ \ \textcolor{keyword}{constexpr}}
+\DoxyCodeLine{00541\ \ \ \ \ \textcolor{keyword}{operator}\ in\_in\_result<\_IIter1,\ \_IIter2>()\ \&\&}
+\DoxyCodeLine{00542\ \ \ \ \ \{\ \textcolor{keywordflow}{return}\ \{\mbox{\hyperlink{namespacestd_ac7095819f6a8da64d69b1ee3029c52be}{std::move}}(in1),\ \mbox{\hyperlink{namespacestd_ac7095819f6a8da64d69b1ee3029c52be}{std::move}}(in2)\};\ \}}
+\DoxyCodeLine{00543\ \ \ \ \ \};}
+\DoxyCodeLine{00544\ }
+\DoxyCodeLine{00545\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Iter1,\ \textcolor{keyword}{typename}\ \_Iter2>}
+\DoxyCodeLine{00546\ \ \ \ \ \textcolor{keyword}{using\ }mismatch\_result\ =\ in\_in\_result<\_Iter1,\ \_Iter2>;}
+\DoxyCodeLine{00547\ }
+\DoxyCodeLine{00548\ \ \ \textcolor{keyword}{struct\ }\_\_mismatch\_fn}
+\DoxyCodeLine{00549\ \ \ \{}
+\DoxyCodeLine{00550\ \ \ \ \ \textcolor{keyword}{template}<input\_iterator\ \_Iter1,\ sentinel\_for<\_Iter1>\ \_Sent1,}
+\DoxyCodeLine{00551\ \ \ \ \ \ \ \ \ \ input\_iterator\ \_Iter2,\ sentinel\_for<\_Iter2>\ \_Sent2,}
+\DoxyCodeLine{00552\ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{typename}\ \_Pred\ =\ ranges::equal\_to,}
+\DoxyCodeLine{00553\ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{typename}\ \_Proj1\ =\ \textcolor{keywordtype}{id}entity,\ \textcolor{keyword}{typename}\ \_Proj2\ =\ \textcolor{keywordtype}{id}entity>}
+\DoxyCodeLine{00554\ \ \ \ \ \ \ \textcolor{keyword}{requires}\ indirectly\_comparable<\_Iter1,\ \_Iter2,\ \_Pred,\ \_Proj1,\ \_Proj2>}
+\DoxyCodeLine{00555\ \ \ \ \ \ \ \textcolor{keyword}{constexpr}\ mismatch\_result<\_Iter1,\ \_Iter2>}
+\DoxyCodeLine{00556\ \ \ \ \ \ \ operator()(\_Iter1\ \_\_first1,\ \_Sent1\ \_\_last1,}
+\DoxyCodeLine{00557\ \ \ \ \ \ \ \ \ \ \_Iter2\ \_\_first2,\ \_Sent2\ \_\_last2,\ \_Pred\ \_\_pred\ =\ \{\},}
+\DoxyCodeLine{00558\ \ \ \ \ \ \ \ \ \ \_Proj1\ \_\_proj1\ =\ \{\},\ \_Proj2\ \_\_proj2\ =\ \{\})\ \textcolor{keyword}{const}}
+\DoxyCodeLine{00559\ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00560\ \ \ \ \ \textcolor{keywordflow}{while}\ (\_\_first1\ !=\ \_\_last1\ \&\&\ \_\_first2\ !=\ \_\_last2}
+\DoxyCodeLine{00561\ \ \ \ \ \ \ \ \ \ \ \ \&\&\ (\textcolor{keywordtype}{bool})std::\_\_invoke(\_\_pred,}
+\DoxyCodeLine{00562\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::\_\_invoke(\_\_proj1,\ *\_\_first1),}
+\DoxyCodeLine{00563\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::\_\_invoke(\_\_proj2,\ *\_\_first2)))}
+\DoxyCodeLine{00564\ \ \ \ \ \{}
+\DoxyCodeLine{00565\ \ \ \ \ \ \ ++\_\_first1;}
+\DoxyCodeLine{00566\ \ \ \ \ \ \ ++\_\_first2;}
+\DoxyCodeLine{00567\ \ \ \ \ \}}
+\DoxyCodeLine{00568\ \ \ \ \ \textcolor{keywordflow}{return}\ \{\ \mbox{\hyperlink{namespacestd_ac7095819f6a8da64d69b1ee3029c52be}{std::move}}(\_\_first1),\ \mbox{\hyperlink{namespacestd_ac7095819f6a8da64d69b1ee3029c52be}{std::move}}(\_\_first2)\ \};}
+\DoxyCodeLine{00569\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00570\ }
+\DoxyCodeLine{00571\ \ \ \ \ \textcolor{keyword}{template}<input\_range\ \_Range1,\ input\_range\ \_Range2,}
+\DoxyCodeLine{00572\ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{typename}\ \_Pred\ =\ ranges::equal\_to,}
+\DoxyCodeLine{00573\ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{typename}\ \_Proj1\ =\ \mbox{\hyperlink{group__ext__matrix__transform_ga81696f2b8d1db02ea1aff8da8f269314}{identity}},\ \textcolor{keyword}{typename}\ \_Proj2\ =\ \mbox{\hyperlink{group__ext__matrix__transform_ga81696f2b8d1db02ea1aff8da8f269314}{identity}}>}
+\DoxyCodeLine{00574\ \ \ \ \ \ \ \textcolor{keyword}{requires}\ indirectly\_comparable<iterator\_t<\_Range1>,\ iterator\_t<\_Range2>,}
+\DoxyCodeLine{00575\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_Pred,\ \_Proj1,\ \_Proj2>}
+\DoxyCodeLine{00576\ \ \ \ \ \ \ \textcolor{keyword}{constexpr}\ mismatch\_result<iterator\_t<\_Range1>,\ iterator\_t<\_Range2>>}
+\DoxyCodeLine{00577\ \ \ \ \ \ \ operator()(\_Range1\&\&\ \_\_r1,\ \_Range2\&\&\ \_\_r2,\ \_Pred\ \_\_pred\ =\ \{\},}
+\DoxyCodeLine{00578\ \ \ \ \ \ \ \ \ \ \_Proj1\ \_\_proj1\ =\ \{\},\ \_Proj2\ \_\_proj2\ =\ \{\})\ \textcolor{keyword}{const}}
+\DoxyCodeLine{00579\ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00580\ \ \ \ \ \textcolor{keywordflow}{return}\ (*\textcolor{keyword}{this})(ranges::begin(\_\_r1),\ ranges::end(\_\_r1),}
+\DoxyCodeLine{00581\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ranges::begin(\_\_r2),\ ranges::end(\_\_r2),}
+\DoxyCodeLine{00582\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespacestd_ac7095819f6a8da64d69b1ee3029c52be}{std::move}}(\_\_pred),}
+\DoxyCodeLine{00583\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespacestd_ac7095819f6a8da64d69b1ee3029c52be}{std::move}}(\_\_proj1),\ \mbox{\hyperlink{namespacestd_ac7095819f6a8da64d69b1ee3029c52be}{std::move}}(\_\_proj2));}
+\DoxyCodeLine{00584\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00585\ \ \ \};}
+\DoxyCodeLine{00586\ }
+\DoxyCodeLine{00587\ \ \ \textcolor{keyword}{inline}\ \textcolor{keyword}{constexpr}\ \_\_mismatch\_fn\ \mbox{\hyperlink{namespacestd_a14e973b0980afe3afbceb376817e29f0}{mismatch}}\{\};}
+\DoxyCodeLine{00588\ }
+\DoxyCodeLine{00589\ \ \ \textcolor{keyword}{struct\ }\_\_search\_fn}
+\DoxyCodeLine{00590\ \ \ \{}
+\DoxyCodeLine{00591\ \ \ \ \ \textcolor{keyword}{template}<forward\_iterator\ \_Iter1,\ sentinel\_for<\_Iter1>\ \_Sent1,}
+\DoxyCodeLine{00592\ \ \ \ \ \ \ \ \ \ forward\_iterator\ \_Iter2,\ sentinel\_for<\_Iter2>\ \_Sent2,}
+\DoxyCodeLine{00593\ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{typename}\ \_Pred\ =\ ranges::equal\_to,}
+\DoxyCodeLine{00594\ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{typename}\ \_Proj1\ =\ \textcolor{keywordtype}{id}entity,\ \textcolor{keyword}{typename}\ \_Proj2\ =\ \textcolor{keywordtype}{id}entity>}
+\DoxyCodeLine{00595\ \ \ \ \ \ \ \textcolor{keyword}{requires}\ indirectly\_comparable<\_Iter1,\ \_Iter2,\ \_Pred,\ \_Proj1,\ \_Proj2>}
+\DoxyCodeLine{00596\ \ \ \ \ \ \ \textcolor{keyword}{constexpr}\ subrange<\_Iter1>}
+\DoxyCodeLine{00597\ \ \ \ \ \ \ operator()(\_Iter1\ \_\_first1,\ \_Sent1\ \_\_last1,}
+\DoxyCodeLine{00598\ \ \ \ \ \ \ \ \ \ \_Iter2\ \_\_first2,\ \_Sent2\ \_\_last2,\ \_Pred\ \_\_pred\ =\ \{\},}
+\DoxyCodeLine{00599\ \ \ \ \ \ \ \ \ \ \_Proj1\ \_\_proj1\ =\ \{\},\ \_Proj2\ \_\_proj2\ =\ \{\})\ \textcolor{keyword}{const}}
+\DoxyCodeLine{00600\ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00601\ \ \ \ \ \textcolor{keywordflow}{if}\ (\_\_first1\ ==\ \_\_last1\ ||\ \_\_first2\ ==\ \_\_last2)}
+\DoxyCodeLine{00602\ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \{\_\_first1,\ \_\_first1\};}
+\DoxyCodeLine{00603\ }
+\DoxyCodeLine{00604\ \ \ \ \ \textcolor{keywordflow}{for}\ (;;)}
+\DoxyCodeLine{00605\ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00606\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (;;)}
+\DoxyCodeLine{00607\ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00608\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\_\_first1\ ==\ \_\_last1)}
+\DoxyCodeLine{00609\ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \{\_\_first1,\ \_\_first1\};}
+\DoxyCodeLine{00610\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (std::\_\_invoke(\_\_pred,}
+\DoxyCodeLine{00611\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::\_\_invoke(\_\_proj1,\ *\_\_first1),}
+\DoxyCodeLine{00612\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::\_\_invoke(\_\_proj2,\ *\_\_first2)))}
+\DoxyCodeLine{00613\ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{00614\ \ \ \ \ \ \ \ \ ++\_\_first1;}
+\DoxyCodeLine{00615\ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00616\ \ \ \ \ \ \ \ \ \textcolor{keyword}{auto}\ \_\_cur1\ =\ \_\_first1;}
+\DoxyCodeLine{00617\ \ \ \ \ \ \ \ \ \textcolor{keyword}{auto}\ \_\_cur2\ =\ \_\_first2;}
+\DoxyCodeLine{00618\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (;;)}
+\DoxyCodeLine{00619\ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00620\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (++\_\_cur2\ ==\ \_\_last2)}
+\DoxyCodeLine{00621\ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \{\_\_first1,\ ++\_\_cur1\};}
+\DoxyCodeLine{00622\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (++\_\_cur1\ ==\ \_\_last1)}
+\DoxyCodeLine{00623\ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \{\_\_cur1,\ \_\_cur1\};}
+\DoxyCodeLine{00624\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (!(\textcolor{keywordtype}{bool})std::\_\_invoke(\_\_pred,}
+\DoxyCodeLine{00625\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::\_\_invoke(\_\_proj1,\ *\_\_cur1),}
+\DoxyCodeLine{00626\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::\_\_invoke(\_\_proj2,\ *\_\_cur2)))}
+\DoxyCodeLine{00627\ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00628\ \ \ \ \ \ \ \ \ \ \ \ \ ++\_\_first1;}
+\DoxyCodeLine{00629\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{00630\ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00631\ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00632\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00633\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00634\ }
+\DoxyCodeLine{00635\ \ \ \ \ \textcolor{keyword}{template}<forward\_range\ \_Range1,\ forward\_range\ \_Range2,}
+\DoxyCodeLine{00636\ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{typename}\ \_Pred\ =\ ranges::equal\_to,}
+\DoxyCodeLine{00637\ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{typename}\ \_Proj1\ =\ \mbox{\hyperlink{group__ext__matrix__transform_ga81696f2b8d1db02ea1aff8da8f269314}{identity}},\ \textcolor{keyword}{typename}\ \_Proj2\ =\ \mbox{\hyperlink{group__ext__matrix__transform_ga81696f2b8d1db02ea1aff8da8f269314}{identity}}>}
+\DoxyCodeLine{00638\ \ \ \ \ \ \ \textcolor{keyword}{requires}\ indirectly\_comparable<iterator\_t<\_Range1>,\ iterator\_t<\_Range2>,}
+\DoxyCodeLine{00639\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_Pred,\ \_Proj1,\ \_Proj2>}
+\DoxyCodeLine{00640\ \ \ \ \ \ \ \textcolor{keyword}{constexpr}\ borrowed\_subrange\_t<\_Range1>}
+\DoxyCodeLine{00641\ \ \ \ \ \ \ operator()(\_Range1\&\&\ \_\_r1,\ \_Range2\&\&\ \_\_r2,\ \_Pred\ \_\_pred\ =\ \{\},}
+\DoxyCodeLine{00642\ \ \ \ \ \ \ \ \ \ \_Proj1\ \_\_proj1\ =\ \{\},\ \_Proj2\ \_\_proj2\ =\ \{\})\ \textcolor{keyword}{const}}
+\DoxyCodeLine{00643\ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00644\ \ \ \ \ \textcolor{keywordflow}{return}\ (*\textcolor{keyword}{this})(ranges::begin(\_\_r1),\ ranges::end(\_\_r1),}
+\DoxyCodeLine{00645\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ranges::begin(\_\_r2),\ ranges::end(\_\_r2),}
+\DoxyCodeLine{00646\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespacestd_ac7095819f6a8da64d69b1ee3029c52be}{std::move}}(\_\_pred),}
+\DoxyCodeLine{00647\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespacestd_ac7095819f6a8da64d69b1ee3029c52be}{std::move}}(\_\_proj1),\ \mbox{\hyperlink{namespacestd_ac7095819f6a8da64d69b1ee3029c52be}{std::move}}(\_\_proj2));}
+\DoxyCodeLine{00648\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00649\ \ \ \};}
+\DoxyCodeLine{00650\ }
+\DoxyCodeLine{00651\ \ \ \textcolor{keyword}{inline}\ \textcolor{keyword}{constexpr}\ \_\_search\_fn\ \mbox{\hyperlink{namespacestd_a5a4354dff231af6d172e1f24befda7f2}{search}}\{\};}
+\DoxyCodeLine{00652\ \}\ \textcolor{comment}{//\ namespace\ ranges}}
+\DoxyCodeLine{00653\ }
+\DoxyCodeLine{00654\ \ \ \textcolor{keyword}{using\ }ranges::get;}
+\DoxyCodeLine{00655\ }
+\DoxyCodeLine{00656\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Iter,\ \textcolor{keyword}{typename}\ \_Sent,\ ranges::subrange\_kind\ \_Kind>}
+\DoxyCodeLine{00657\ \ \ \ \ \textcolor{keyword}{struct\ }tuple\_size<ranges::subrange<\_Iter,\ \_Sent,\ \_Kind>>}
+\DoxyCodeLine{00658\ \ \ \ \ :\ integral\_constant<size\_t,\ 2>}
+\DoxyCodeLine{00659\ \ \ \ \ \{\ \};}
+\DoxyCodeLine{00660\ }
+\DoxyCodeLine{00661\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Iter,\ \textcolor{keyword}{typename}\ \_Sent,\ ranges::subrange\_kind\ \_Kind>}
+\DoxyCodeLine{00662\ \ \ \ \ \textcolor{keyword}{struct\ }tuple\_element<0,\ ranges::subrange<\_Iter,\ \_Sent,\ \_Kind>>}
+\DoxyCodeLine{00663\ \ \ \ \ \{\ \textcolor{keyword}{using\ }\mbox{\hyperlink{_classes_2_gameobj_8h_a890efa53b3d7deeeced6f3a0d6653ed3}{type}}\ =\ \_Iter;\ \};}
+\DoxyCodeLine{00664\ }
+\DoxyCodeLine{00665\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Iter,\ \textcolor{keyword}{typename}\ \_Sent,\ ranges::subrange\_kind\ \_Kind>}
+\DoxyCodeLine{00666\ \ \ \ \ \textcolor{keyword}{struct\ }tuple\_element<1,\ ranges::subrange<\_Iter,\ \_Sent,\ \_Kind>>}
+\DoxyCodeLine{00667\ \ \ \ \ \{\ \textcolor{keyword}{using\ }\mbox{\hyperlink{_classes_2_gameobj_8h_a890efa53b3d7deeeced6f3a0d6653ed3}{type}}\ =\ \_Sent;\ \};}
+\DoxyCodeLine{00668\ }
+\DoxyCodeLine{00669\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Iter,\ \textcolor{keyword}{typename}\ \_Sent,\ ranges::subrange\_kind\ \_Kind>}
+\DoxyCodeLine{00670\ \ \ \ \ \textcolor{keyword}{struct\ }tuple\_element<0,\ const\ ranges::subrange<\_Iter,\ \_Sent,\ \_Kind>>}
+\DoxyCodeLine{00671\ \ \ \ \ \{\ \textcolor{keyword}{using\ }\mbox{\hyperlink{_classes_2_gameobj_8h_a890efa53b3d7deeeced6f3a0d6653ed3}{type}}\ =\ \_Iter;\ \};}
+\DoxyCodeLine{00672\ }
+\DoxyCodeLine{00673\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Iter,\ \textcolor{keyword}{typename}\ \_Sent,\ ranges::subrange\_kind\ \_Kind>}
+\DoxyCodeLine{00674\ \ \ \ \ \textcolor{keyword}{struct\ }tuple\_element<1,\ const\ ranges::subrange<\_Iter,\ \_Sent,\ \_Kind>>}
+\DoxyCodeLine{00675\ \ \ \ \ \{\ \textcolor{keyword}{using\ }\mbox{\hyperlink{_classes_2_gameobj_8h_a890efa53b3d7deeeced6f3a0d6653ed3}{type}}\ =\ \_Sent;\ \};}
+\DoxyCodeLine{00676\ }
+\DoxyCodeLine{00677\ \_GLIBCXX\_END\_NAMESPACE\_VERSION}
+\DoxyCodeLine{00678\ \}\ \textcolor{comment}{//\ namespace\ std}}
+\DoxyCodeLine{00679\ \textcolor{preprocessor}{\#endif\ }\textcolor{comment}{//\ library\ concepts}}
+\DoxyCodeLine{00680\ \textcolor{preprocessor}{\#endif\ }\textcolor{comment}{//\ C++20}}
+\DoxyCodeLine{00681\ \textcolor{preprocessor}{\#endif\ }\textcolor{comment}{//\ \_RANGES\_UTIL\_H}}
+
+\end{DoxyCode}

@@ -1,0 +1,952 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<section xmlns="http://docbook.org/ns/docbook" version="5.0" xmlns:xlink="http://www.w3.org/1999/xlink" xml:id="_lib_2include_2c_09_09_2bits_2unique__ptr_8h_source" xml:lang="en-US">
+<title>unique_ptr.h</title>
+<indexterm><primary>C:/Users/HP/Documents/GitHub/Minero-Game/lib/include/c++/bits/unique_ptr.h</primary></indexterm>
+Go to the documentation of this file.<programlisting linenumbering="unnumbered">1 <emphasis role="comment">//&#32;unique_ptr&#32;implementation&#32;-*-&#32;C++&#32;-*-</emphasis>
+2 
+3 <emphasis role="comment">//&#32;Copyright&#32;(C)&#32;2008-2022&#32;Free&#32;Software&#32;Foundation,&#32;Inc.</emphasis>
+4 <emphasis role="comment">//</emphasis>
+5 <emphasis role="comment">//&#32;This&#32;file&#32;is&#32;part&#32;of&#32;the&#32;GNU&#32;ISO&#32;C++&#32;Library.&#32;&#32;This&#32;library&#32;is&#32;free</emphasis>
+6 <emphasis role="comment">//&#32;software;&#32;you&#32;can&#32;redistribute&#32;it&#32;and/or&#32;modify&#32;it&#32;under&#32;the</emphasis>
+7 <emphasis role="comment">//&#32;terms&#32;of&#32;the&#32;GNU&#32;General&#32;Public&#32;License&#32;as&#32;published&#32;by&#32;the</emphasis>
+8 <emphasis role="comment">//&#32;Free&#32;Software&#32;Foundation;&#32;either&#32;version&#32;3,&#32;or&#32;(at&#32;your&#32;option)</emphasis>
+9 <emphasis role="comment">//&#32;any&#32;later&#32;version.</emphasis>
+10 
+11 <emphasis role="comment">//&#32;This&#32;library&#32;is&#32;distributed&#32;in&#32;the&#32;hope&#32;that&#32;it&#32;will&#32;be&#32;useful,</emphasis>
+12 <emphasis role="comment">//&#32;but&#32;WITHOUT&#32;ANY&#32;WARRANTY;&#32;without&#32;even&#32;the&#32;implied&#32;warranty&#32;of</emphasis>
+13 <emphasis role="comment">//&#32;MERCHANTABILITY&#32;or&#32;FITNESS&#32;FOR&#32;A&#32;PARTICULAR&#32;PURPOSE.&#32;&#32;See&#32;the</emphasis>
+14 <emphasis role="comment">//&#32;GNU&#32;General&#32;Public&#32;License&#32;for&#32;more&#32;details.</emphasis>
+15 
+16 <emphasis role="comment">//&#32;Under&#32;Section&#32;7&#32;of&#32;GPL&#32;version&#32;3,&#32;you&#32;are&#32;granted&#32;additional</emphasis>
+17 <emphasis role="comment">//&#32;permissions&#32;described&#32;in&#32;the&#32;GCC&#32;Runtime&#32;Library&#32;Exception,&#32;version</emphasis>
+18 <emphasis role="comment">//&#32;3.1,&#32;as&#32;published&#32;by&#32;the&#32;Free&#32;Software&#32;Foundation.</emphasis>
+19 
+20 <emphasis role="comment">//&#32;You&#32;should&#32;have&#32;received&#32;a&#32;copy&#32;of&#32;the&#32;GNU&#32;General&#32;Public&#32;License&#32;and</emphasis>
+21 <emphasis role="comment">//&#32;a&#32;copy&#32;of&#32;the&#32;GCC&#32;Runtime&#32;Library&#32;Exception&#32;along&#32;with&#32;this&#32;program;</emphasis>
+22 <emphasis role="comment">//&#32;see&#32;the&#32;files&#32;COPYING3&#32;and&#32;COPYING.RUNTIME&#32;respectively.&#32;&#32;If&#32;not,&#32;see</emphasis>
+23 <emphasis role="comment">//&#32;&lt;http://www.gnu.org/licenses/&gt;.</emphasis>
+24 
+30 <emphasis role="preprocessor">#ifndef&#32;_UNIQUE_PTR_H</emphasis>
+31 <emphasis role="preprocessor">#define&#32;_UNIQUE_PTR_H&#32;1</emphasis>
+32 
+33 <emphasis role="preprocessor">#include&#32;&lt;bits/c++config.h&gt;</emphasis>
+34 <emphasis role="preprocessor">#include&#32;&lt;debug/assertions.h&gt;</emphasis>
+35 <emphasis role="preprocessor">#include&#32;&lt;type_traits&gt;</emphasis>
+36 <emphasis role="preprocessor">#include&#32;&lt;tuple&gt;</emphasis>
+37 <emphasis role="preprocessor">#include&#32;&lt;bits/stl_function.h&gt;</emphasis>
+38 <emphasis role="preprocessor">#include&#32;&lt;bits/functional_hash.h&gt;</emphasis>
+39 <emphasis role="preprocessor">#if&#32;__cplusplus&#32;&gt;&#32;201703L</emphasis>
+40 <emphasis role="preprocessor">#&#32;include&#32;&lt;compare&gt;</emphasis>
+41 <emphasis role="preprocessor">#&#32;include&#32;&lt;ostream&gt;</emphasis>
+42 <emphasis role="preprocessor">#endif</emphasis>
+43 
+44 <emphasis role="preprocessor">#if&#32;__cplusplus&#32;&gt;&#32;202002L&#32;&amp;&amp;&#32;__cpp_constexpr_dynamic_alloc</emphasis>
+45 <emphasis role="preprocessor">#&#32;if&#32;__cpp_lib_constexpr_memory&#32;&lt;&#32;202202L</emphasis>
+46 <emphasis role="comment">//&#32;Defined&#32;with&#32;older&#32;value&#32;in&#32;bits/ptr_traits.h&#32;for&#32;C++20</emphasis>
+47 <emphasis role="preprocessor">#&#32;&#32;undef&#32;__cpp_lib_constexpr_memory</emphasis>
+48 <emphasis role="preprocessor">#&#32;&#32;define&#32;__cpp_lib_constexpr_memory&#32;202202L</emphasis>
+49 <emphasis role="preprocessor">#&#32;endif</emphasis>
+50 <emphasis role="preprocessor">#endif</emphasis>
+51 
+52 <emphasis role="keyword">namespace&#32;</emphasis><link linkend="_namespacestd">std</link>&#32;<link linkend="__classes_2lib_2include_2c_09_09_2x86__64-w64-mingw32_2bits_2c_09_09config_8h_1a44377df0d3503f0b3d9ab316dd8ddf8b">_GLIBCXX_VISIBILITY</link>(default)
+53 {
+54 _GLIBCXX_BEGIN_NAMESPACE_VERSION
+55 
+61 <emphasis role="preprocessor">#if&#32;_GLIBCXX_USE_DEPRECATED</emphasis>
+62 <emphasis role="preprocessor">#pragma&#32;GCC&#32;diagnostic&#32;push</emphasis>
+63 <emphasis role="preprocessor">#pragma&#32;GCC&#32;diagnostic&#32;ignored&#32;&quot;-Wdeprecated-declarations&quot;</emphasis>
+64 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&gt;&#32;<emphasis role="keyword">class&#32;</emphasis>auto_ptr;
+65 <emphasis role="preprocessor">#pragma&#32;GCC&#32;diagnostic&#32;pop</emphasis>
+66 <emphasis role="preprocessor">#endif</emphasis>
+67 
+70 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+71 &#32;&#32;&#32;&#32;<emphasis role="keyword">struct&#32;</emphasis>default_delete
+72 &#32;&#32;&#32;&#32;{
+74 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">constexpr</emphasis>&#32;default_delete()&#32;noexcept&#32;=&#32;default;
+75 
+81 &#32;&#32;&#32;&#32;&#32;&#32;template&lt;typename&#32;_Up,
+82 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;typename&#32;=&#32;_Require&lt;is_convertible&lt;_Up*,&#32;_Tp*&gt;&gt;&gt;
+83 &#32;&#32;&#32;&#32;_GLIBCXX23_CONSTEXPR
+84 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;default_delete(const&#32;default_delete&lt;_Up&gt;&amp;)&#32;noexcept&#32;{&#32;}
+85 
+87 &#32;&#32;&#32;&#32;&#32;&#32;_GLIBCXX23_CONSTEXPR
+88 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+89 &#32;&#32;&#32;&#32;&#32;&#32;operator()(_Tp*&#32;__ptr)<emphasis role="keyword">&#32;const</emphasis>
+90 <emphasis role="keyword">&#32;&#32;&#32;&#32;&#32;&#32;</emphasis>{
+91 &#32;&#32;&#32;&#32;<emphasis role="keyword">static_assert</emphasis>(!is_void&lt;_Tp&gt;::value,
+92 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="stringliteral">&quot;can&apos;t&#32;delete&#32;pointer&#32;to&#32;incomplete&#32;type&quot;</emphasis>);
+93 &#32;&#32;&#32;&#32;<emphasis role="keyword">static_assert</emphasis>(<emphasis role="keyword">sizeof</emphasis>(_Tp)&gt;0,
+94 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="stringliteral">&quot;can&apos;t&#32;delete&#32;pointer&#32;to&#32;incomplete&#32;type&quot;</emphasis>);
+95 &#32;&#32;&#32;&#32;<emphasis role="keyword">delete</emphasis>&#32;__ptr;
+96 &#32;&#32;&#32;&#32;&#32;&#32;}
+97 &#32;&#32;&#32;&#32;};
+98 
+99 &#32;&#32;<emphasis role="comment">//&#32;_GLIBCXX_RESOLVE_LIB_DEFECTS</emphasis>
+100 &#32;&#32;<emphasis role="comment">//&#32;DR&#32;740&#32;-&#32;omit&#32;specialization&#32;for&#32;array&#32;objects&#32;with&#32;a&#32;compile&#32;time&#32;length</emphasis>
+101 
+103 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+104 &#32;&#32;&#32;&#32;<emphasis role="keyword">struct&#32;</emphasis>default_delete&lt;_Tp[]&gt;
+105 &#32;&#32;&#32;&#32;{
+106 &#32;&#32;&#32;&#32;<emphasis role="keyword">public</emphasis>:
+108 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">constexpr</emphasis>&#32;default_delete()&#32;noexcept&#32;=&#32;default;
+109 
+119 &#32;&#32;&#32;&#32;&#32;&#32;template&lt;typename&#32;_Up,
+120 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;typename&#32;=&#32;_Require&lt;is_convertible&lt;_Up(*)[],&#32;_Tp(*)[]&gt;&gt;&gt;
+121 &#32;&#32;&#32;&#32;_GLIBCXX23_CONSTEXPR
+122 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;default_delete(const&#32;default_delete&lt;_Up[]&gt;&amp;)&#32;noexcept&#32;{&#32;}
+123 
+125 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Up&gt;
+126 &#32;&#32;&#32;&#32;_GLIBCXX23_CONSTEXPR
+127 &#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;enable_if&lt;is_convertible&lt;_Up(*)[],&#32;_Tp(*)[]&gt;<link linkend="_classvalue">::value</link>&gt;<link linkend="__classes_2_gameobj_8h_1a890efa53b3d7deeeced6f3a0d6653ed3">::type</link>
+128 &#32;&#32;&#32;&#32;operator()(_Up*&#32;__ptr)<emphasis role="keyword">&#32;const</emphasis>
+129 <emphasis role="keyword">&#32;&#32;&#32;&#32;</emphasis>{
+130 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">static_assert</emphasis>(<emphasis role="keyword">sizeof</emphasis>(_Tp)&gt;0,
+131 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="stringliteral">&quot;can&apos;t&#32;delete&#32;pointer&#32;to&#32;incomplete&#32;type&quot;</emphasis>);
+132 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">delete</emphasis>&#32;[]&#32;__ptr;
+133 &#32;&#32;&#32;&#32;}
+134 &#32;&#32;&#32;&#32;};
+135 
+137 
+138 &#32;&#32;<emphasis role="comment">//&#32;Manages&#32;the&#32;pointer&#32;and&#32;deleter&#32;of&#32;a&#32;unique_ptr</emphasis>
+139 &#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Dp&gt;
+140 &#32;&#32;&#32;&#32;<emphasis role="keyword">class&#32;</emphasis>__uniq_ptr_impl
+141 &#32;&#32;&#32;&#32;{
+142 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">typename</emphasis>&#32;_Up,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Ep,&#32;<emphasis role="keyword">typename</emphasis>&#32;=&#32;<emphasis role="keywordtype">void</emphasis>&gt;
+143 &#32;&#32;&#32;&#32;<emphasis role="keyword">struct&#32;</emphasis>_Ptr
+144 &#32;&#32;&#32;&#32;{
+145 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">using&#32;</emphasis><link linkend="__classes_2_gameobj_8h_1a890efa53b3d7deeeced6f3a0d6653ed3">type</link>&#32;=&#32;_Up*;
+146 &#32;&#32;&#32;&#32;};
+147 
+148 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">typename</emphasis>&#32;_Up,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Ep&gt;
+149 &#32;&#32;&#32;&#32;<emphasis role="keyword">struct</emphasis>
+150 &#32;&#32;&#32;&#32;_Ptr&lt;_Up,&#32;_Ep,&#32;__void_t&lt;typename&#32;remove_reference&lt;_Ep&gt;::type::pointer&gt;&gt;
+151 &#32;&#32;&#32;&#32;{
+152 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">using&#32;</emphasis><link linkend="__classes_2_gameobj_8h_1a890efa53b3d7deeeced6f3a0d6653ed3">type</link>&#32;=&#32;<emphasis role="keyword">typename</emphasis>&#32;remove_reference&lt;_Ep&gt;::type::pointer;
+153 &#32;&#32;&#32;&#32;};
+154 
+155 &#32;&#32;&#32;&#32;<emphasis role="keyword">public</emphasis>:
+156 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">using&#32;</emphasis>_DeleterConstraint&#32;=&#32;enable_if&lt;
+157 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__and_&lt;__not_&lt;is_pointer&lt;_Dp&gt;&gt;,
+158 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;is_default_constructible&lt;_Dp&gt;&gt;<link linkend="_classvalue">::value</link>&gt;;
+159 
+160 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">using&#32;</emphasis><link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1aca2093d4756bde9a55b94e9ff8d9c623">pointer</link>&#32;=&#32;<emphasis role="keyword">typename</emphasis>&#32;_Ptr&lt;_Tp,&#32;_Dp&gt;::type;
+161 
+162 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">static_assert</emphasis>(&#32;!is_rvalue_reference&lt;_Dp&gt;::value,
+163 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="stringliteral">&quot;unique_ptr&apos;s&#32;deleter&#32;type&#32;must&#32;be&#32;a&#32;function&#32;object&#32;type&quot;</emphasis>
+164 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="stringliteral">&quot;&#32;or&#32;an&#32;lvalue&#32;reference&#32;type&quot;</emphasis>&#32;);
+165 
+166 &#32;&#32;&#32;&#32;&#32;&#32;__uniq_ptr_impl()&#32;=&#32;<emphasis role="keywordflow">default</emphasis>;
+167 &#32;&#32;&#32;&#32;&#32;&#32;_GLIBCXX23_CONSTEXPR
+168 &#32;&#32;&#32;&#32;&#32;&#32;__uniq_ptr_impl(<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1aca2093d4756bde9a55b94e9ff8d9c623">pointer</link>&#32;__p)&#32;:&#32;_M_t()&#32;{&#32;_M_ptr()&#32;=&#32;__p;&#32;}
+169 
+170 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Del&gt;
+171 &#32;&#32;&#32;&#32;_GLIBCXX23_CONSTEXPR
+172 &#32;&#32;&#32;&#32;__uniq_ptr_impl(<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1aca2093d4756bde9a55b94e9ff8d9c623">pointer</link>&#32;__p,&#32;_Del&amp;&amp;&#32;__d)
+173 &#32;&#32;&#32;&#32;:&#32;_M_t(__p,&#32;<link linkend="_namespacestd">std</link>::forward&lt;_Del&gt;(__d))&#32;{&#32;}
+174 
+175 &#32;&#32;&#32;&#32;&#32;&#32;_GLIBCXX23_CONSTEXPR
+176 &#32;&#32;&#32;&#32;&#32;&#32;__uniq_ptr_impl(__uniq_ptr_impl&amp;&amp;&#32;__u)&#32;noexcept
+177 &#32;&#32;&#32;&#32;&#32;&#32;:&#32;_M_t(<link linkend="_namespacestd_1ac7095819f6a8da64d69b1ee3029c52be">std::move</link>(__u._M_t))
+178 &#32;&#32;&#32;&#32;&#32;&#32;{&#32;__u._M_ptr()&#32;=&#32;<emphasis role="keyword">nullptr</emphasis>;&#32;}
+179 
+180 &#32;&#32;&#32;&#32;&#32;&#32;_GLIBCXX23_CONSTEXPR
+181 &#32;&#32;&#32;&#32;&#32;&#32;__uniq_ptr_impl&amp;&#32;operator=(__uniq_ptr_impl&amp;&amp;&#32;__u)&#32;<emphasis role="keyword">noexcept</emphasis>
+182 &#32;&#32;&#32;&#32;&#32;&#32;{
+183 &#32;&#32;&#32;&#32;reset(__u.release());
+184 &#32;&#32;&#32;&#32;_M_deleter()&#32;=&#32;std::forward&lt;_Dp&gt;(__u._M_deleter());
+185 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;*<emphasis role="keyword">this</emphasis>;
+186 &#32;&#32;&#32;&#32;&#32;&#32;}
+187 
+188 &#32;&#32;&#32;&#32;&#32;&#32;_GLIBCXX23_CONSTEXPR
+189 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1aca2093d4756bde9a55b94e9ff8d9c623">pointer</link>&amp;&#32;&#32;&#32;_M_ptr()&#32;noexcept&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;std::get&lt;0&gt;(_M_t);&#32;}
+190 &#32;&#32;&#32;&#32;&#32;&#32;_GLIBCXX23_CONSTEXPR
+191 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1aca2093d4756bde9a55b94e9ff8d9c623">pointer</link>&#32;&#32;&#32;&#32;_M_ptr()&#32;const&#32;noexcept&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;std::get&lt;0&gt;(_M_t);&#32;}
+192 &#32;&#32;&#32;&#32;&#32;&#32;_GLIBCXX23_CONSTEXPR
+193 &#32;&#32;&#32;&#32;&#32;&#32;_Dp&amp;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_M_deleter()&#32;noexcept&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;std::get&lt;1&gt;(_M_t);&#32;}
+194 &#32;&#32;&#32;&#32;&#32;&#32;_GLIBCXX23_CONSTEXPR
+195 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;_Dp&amp;&#32;_M_deleter()&#32;const&#32;noexcept&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;std::get&lt;1&gt;(_M_t);&#32;}
+196 
+197 &#32;&#32;&#32;&#32;&#32;&#32;_GLIBCXX23_CONSTEXPR
+198 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>&#32;reset(<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1aca2093d4756bde9a55b94e9ff8d9c623">pointer</link>&#32;__p)&#32;<emphasis role="keyword">noexcept</emphasis>
+199 &#32;&#32;&#32;&#32;&#32;&#32;{
+200 &#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1aca2093d4756bde9a55b94e9ff8d9c623">pointer</link>&#32;__old_p&#32;=&#32;_M_ptr();
+201 &#32;&#32;&#32;&#32;_M_ptr()&#32;=&#32;__p;
+202 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__old_p)
+203 &#32;&#32;&#32;&#32;&#32;&#32;_M_deleter()(__old_p);
+204 &#32;&#32;&#32;&#32;&#32;&#32;}
+205 
+206 &#32;&#32;&#32;&#32;&#32;&#32;_GLIBCXX23_CONSTEXPR
+207 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1aca2093d4756bde9a55b94e9ff8d9c623">pointer</link>&#32;release()&#32;noexcept
+208 &#32;&#32;&#32;&#32;&#32;&#32;{
+209 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1aca2093d4756bde9a55b94e9ff8d9c623">pointer</link>&#32;__p&#32;=&#32;_M_ptr();
+210 &#32;&#32;&#32;&#32;_M_ptr()&#32;=&#32;<emphasis role="keyword">nullptr</emphasis>;
+211 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__p;
+212 &#32;&#32;&#32;&#32;&#32;&#32;}
+213 
+214 &#32;&#32;&#32;&#32;&#32;&#32;_GLIBCXX23_CONSTEXPR
+215 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+216 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_namespacestd_1a3ece115a1c8ed9020a20f1d0b70efda8">swap</link>(__uniq_ptr_impl&amp;&#32;__rhs)&#32;<emphasis role="keyword">noexcept</emphasis>
+217 &#32;&#32;&#32;&#32;&#32;&#32;{
+218 &#32;&#32;&#32;&#32;<emphasis role="keyword">using&#32;</emphasis><link linkend="_namespacestd_1a3ece115a1c8ed9020a20f1d0b70efda8">std::swap</link>;
+219 &#32;&#32;&#32;&#32;<link linkend="_namespacestd_1a3ece115a1c8ed9020a20f1d0b70efda8">swap</link>(this-&gt;_M_ptr(),&#32;__rhs._M_ptr());
+220 &#32;&#32;&#32;&#32;<link linkend="_namespacestd_1a3ece115a1c8ed9020a20f1d0b70efda8">swap</link>(this-&gt;_M_deleter(),&#32;__rhs._M_deleter());
+221 &#32;&#32;&#32;&#32;&#32;&#32;}
+222 
+223 &#32;&#32;&#32;&#32;<emphasis role="keyword">private</emphasis>:
+224 &#32;&#32;&#32;&#32;&#32;&#32;tuple&lt;pointer,&#32;_Dp&gt;&#32;_M_t;
+225 &#32;&#32;&#32;&#32;};
+226 
+227 &#32;&#32;<emphasis role="comment">//&#32;Defines&#32;move&#32;construction&#32;+&#32;assignment&#32;as&#32;either&#32;defaulted&#32;or&#32;deleted.</emphasis>
+228 &#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Dp,
+229 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">bool</emphasis>&#32;=&#32;is_move_constructible&lt;_Dp&gt;::value,
+230 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">bool</emphasis>&#32;=&#32;is_move_assignable&lt;_Dp&gt;::value&gt;
+231 &#32;&#32;&#32;&#32;<emphasis role="keyword">struct&#32;</emphasis>__uniq_ptr_data&#32;:&#32;__uniq_ptr_impl&lt;_Tp,&#32;_Dp&gt;
+232 &#32;&#32;&#32;&#32;{
+233 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">using&#32;</emphasis>__uniq_ptr_impl&lt;_Tp,&#32;_Dp&gt;::__uniq_ptr_impl;
+234 &#32;&#32;&#32;&#32;&#32;&#32;__uniq_ptr_data(__uniq_ptr_data&amp;&amp;)&#32;=&#32;<emphasis role="keywordflow">default</emphasis>;
+235 &#32;&#32;&#32;&#32;&#32;&#32;__uniq_ptr_data&amp;&#32;operator=(__uniq_ptr_data&amp;&amp;)&#32;=&#32;<emphasis role="keywordflow">default</emphasis>;
+236 &#32;&#32;&#32;&#32;};
+237 
+238 &#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Dp&gt;
+239 &#32;&#32;&#32;&#32;<emphasis role="keyword">struct&#32;</emphasis>__uniq_ptr_data&lt;_Tp,&#32;_Dp,&#32;<link linkend="__classes_2lib_2include_2stdbool_8h_1a41f9c5fb8b08eb5dc3edce4dcb37fee7">true</link>,&#32;<link linkend="__classes_2lib_2include_2stdbool_8h_1a65e9886d74aaee76545e83dd09011727">false</link>&gt;&#32;:&#32;__uniq_ptr_impl&lt;_Tp,&#32;_Dp&gt;
+240 &#32;&#32;&#32;&#32;{
+241 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">using&#32;</emphasis>__uniq_ptr_impl&lt;_Tp,&#32;_Dp&gt;::__uniq_ptr_impl;
+242 &#32;&#32;&#32;&#32;&#32;&#32;__uniq_ptr_data(__uniq_ptr_data&amp;&amp;)&#32;=&#32;<emphasis role="keywordflow">default</emphasis>;
+243 &#32;&#32;&#32;&#32;&#32;&#32;__uniq_ptr_data&amp;&#32;operator=(__uniq_ptr_data&amp;&amp;)&#32;=&#32;<emphasis role="keyword">delete</emphasis>;
+244 &#32;&#32;&#32;&#32;};
+245 
+246 &#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Dp&gt;
+247 &#32;&#32;&#32;&#32;<emphasis role="keyword">struct&#32;</emphasis>__uniq_ptr_data&lt;_Tp,&#32;_Dp,&#32;<link linkend="__classes_2lib_2include_2stdbool_8h_1a65e9886d74aaee76545e83dd09011727">false</link>,&#32;<link linkend="__classes_2lib_2include_2stdbool_8h_1a41f9c5fb8b08eb5dc3edce4dcb37fee7">true</link>&gt;&#32;:&#32;__uniq_ptr_impl&lt;_Tp,&#32;_Dp&gt;
+248 &#32;&#32;&#32;&#32;{
+249 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">using&#32;</emphasis>__uniq_ptr_impl&lt;_Tp,&#32;_Dp&gt;::__uniq_ptr_impl;
+250 &#32;&#32;&#32;&#32;&#32;&#32;__uniq_ptr_data(__uniq_ptr_data&amp;&amp;)&#32;=&#32;<emphasis role="keyword">delete</emphasis>;
+251 &#32;&#32;&#32;&#32;&#32;&#32;__uniq_ptr_data&amp;&#32;operator=(__uniq_ptr_data&amp;&amp;)&#32;=&#32;<emphasis role="keywordflow">default</emphasis>;
+252 &#32;&#32;&#32;&#32;};
+253 
+254 &#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Dp&gt;
+255 &#32;&#32;&#32;&#32;<emphasis role="keyword">struct&#32;</emphasis>__uniq_ptr_data&lt;_Tp,&#32;_Dp,&#32;<link linkend="__classes_2lib_2include_2stdbool_8h_1a65e9886d74aaee76545e83dd09011727">false</link>,&#32;<link linkend="__classes_2lib_2include_2stdbool_8h_1a65e9886d74aaee76545e83dd09011727">false</link>&gt;&#32;:&#32;__uniq_ptr_impl&lt;_Tp,&#32;_Dp&gt;
+256 &#32;&#32;&#32;&#32;{
+257 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">using&#32;</emphasis>__uniq_ptr_impl&lt;_Tp,&#32;_Dp&gt;::__uniq_ptr_impl;
+258 &#32;&#32;&#32;&#32;&#32;&#32;__uniq_ptr_data(__uniq_ptr_data&amp;&amp;)&#32;=&#32;<emphasis role="keyword">delete</emphasis>;
+259 &#32;&#32;&#32;&#32;&#32;&#32;__uniq_ptr_data&amp;&#32;operator=(__uniq_ptr_data&amp;&amp;)&#32;=&#32;<emphasis role="keyword">delete</emphasis>;
+260 &#32;&#32;&#32;&#32;};
+262 
+263 &#32;&#32;<emphasis role="comment">//&#32;20.7.1.2&#32;unique_ptr&#32;for&#32;single&#32;objects.</emphasis>
+264 
+268 &#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Dp&#32;=&#32;default_delete&lt;_Tp&gt;&gt;
+269 &#32;&#32;&#32;&#32;<emphasis role="keyword">class&#32;</emphasis>unique_ptr
+270 &#32;&#32;&#32;&#32;{
+271 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">typename</emphasis>&#32;_Up&gt;
+272 &#32;&#32;&#32;&#32;<emphasis role="keyword">using&#32;</emphasis>_DeleterConstraint&#32;=
+273 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;__uniq_ptr_impl&lt;_Tp,&#32;_Up&gt;::_DeleterConstraint::type;
+274 
+275 &#32;&#32;&#32;&#32;&#32;&#32;__uniq_ptr_data&lt;_Tp,&#32;_Dp&gt;&#32;_M_t;
+276 
+277 &#32;&#32;&#32;&#32;<emphasis role="keyword">public</emphasis>:
+278 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">using&#32;</emphasis><link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1aca2093d4756bde9a55b94e9ff8d9c623">pointer</link>&#32;&#32;&#32;=&#32;<emphasis role="keyword">typename</emphasis>&#32;__uniq_ptr_impl&lt;_Tp,&#32;_Dp&gt;::pointer;
+279 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">using&#32;</emphasis>element_type&#32;&#32;=&#32;_Tp;
+280 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">using&#32;</emphasis>deleter_type&#32;&#32;=&#32;_Dp;
+281 
+282 &#32;&#32;&#32;&#32;<emphasis role="keyword">private</emphasis>:
+283 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;helper&#32;template&#32;for&#32;detecting&#32;a&#32;safe&#32;conversion&#32;from&#32;another</emphasis>
+284 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;unique_ptr</emphasis>
+285 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Up,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Ep&gt;
+286 &#32;&#32;&#32;&#32;<emphasis role="keyword">using&#32;</emphasis>__safe_conversion_up&#32;=&#32;__and_&lt;
+287 &#32;&#32;&#32;&#32;&#32;&#32;is_convertible&lt;typename&#32;unique_ptr&lt;_Up,&#32;_Ep&gt;::pointer,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1aca2093d4756bde9a55b94e9ff8d9c623">pointer</link>&gt;,
+288 &#32;&#32;&#32;&#32;&#32;&#32;__not_&lt;is_array&lt;_Up&gt;&gt;
+289 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&gt;;
+290 
+291 &#32;&#32;&#32;&#32;<emphasis role="keyword">public</emphasis>:
+292 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Constructors.</emphasis>
+293 
+295 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Del&#32;=&#32;_Dp,&#32;<emphasis role="keyword">typename</emphasis>&#32;=&#32;_DeleterConstra<emphasis role="keywordtype">int</emphasis>&lt;_Del&gt;&gt;
+296 &#32;&#32;&#32;&#32;<emphasis role="keyword">constexpr</emphasis>&#32;unique_ptr()&#32;noexcept
+297 &#32;&#32;&#32;&#32;:&#32;_M_t()
+298 &#32;&#32;&#32;&#32;{&#32;}
+299 
+306 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Del&#32;=&#32;_Dp,&#32;<emphasis role="keyword">typename</emphasis>&#32;=&#32;_DeleterConstra<emphasis role="keywordtype">int</emphasis>&lt;_Del&gt;&gt;
+307 &#32;&#32;&#32;&#32;_GLIBCXX23_CONSTEXPR
+308 &#32;&#32;&#32;&#32;<emphasis role="keyword">explicit</emphasis>
+309 &#32;&#32;&#32;&#32;unique_ptr(<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1aca2093d4756bde9a55b94e9ff8d9c623">pointer</link>&#32;__p)&#32;noexcept
+310 &#32;&#32;&#32;&#32;:&#32;_M_t(__p)
+311 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{&#32;}
+312 
+320 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Del&#32;=&#32;deleter_type,
+321 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;=&#32;_Require&lt;is_copy_constructible&lt;_Del&gt;&gt;&gt;
+322 &#32;&#32;&#32;&#32;_GLIBCXX23_CONSTEXPR
+323 &#32;&#32;&#32;&#32;unique_ptr(<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1aca2093d4756bde9a55b94e9ff8d9c623">pointer</link>&#32;__p,&#32;<emphasis role="keyword">const</emphasis>&#32;deleter_type&amp;&#32;__d)&#32;noexcept
+324 &#32;&#32;&#32;&#32;:&#32;_M_t(__p,&#32;__d)&#32;{&#32;}
+325 
+333 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Del&#32;=&#32;deleter_type,
+334 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;=&#32;_Require&lt;is_move_constructible&lt;_Del&gt;&gt;&gt;
+335 &#32;&#32;&#32;&#32;_GLIBCXX23_CONSTEXPR
+336 &#32;&#32;&#32;&#32;unique_ptr(<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1aca2093d4756bde9a55b94e9ff8d9c623">pointer</link>&#32;__p,
+337 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__enable_if_t&lt;!is_lvalue_reference&lt;_Del&gt;::value,
+338 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_Del&amp;&amp;&gt;&#32;__d)&#32;noexcept
+339 &#32;&#32;&#32;&#32;:&#32;_M_t(__p,&#32;<link linkend="_namespacestd_1ac7095819f6a8da64d69b1ee3029c52be">std::move</link>(__d))
+340 &#32;&#32;&#32;&#32;{&#32;}
+341 
+342 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Del&#32;=&#32;deleter_type,
+343 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;_DelUnref&#32;=&#32;<emphasis role="keyword">typename</emphasis>&#32;remove_reference&lt;_Del&gt;::type&gt;
+344 &#32;&#32;&#32;&#32;_GLIBCXX23_CONSTEXPR
+345 &#32;&#32;&#32;&#32;unique_ptr(<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1aca2093d4756bde9a55b94e9ff8d9c623">pointer</link>,
+346 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__enable_if_t&lt;is_lvalue_reference&lt;_Del&gt;::value,
+347 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_DelUnref&amp;&amp;&gt;)&#32;=&#32;<emphasis role="keyword">delete</emphasis>;
+348 
+350 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Del&#32;=&#32;_Dp,&#32;<emphasis role="keyword">typename</emphasis>&#32;=&#32;_DeleterConstra<emphasis role="keywordtype">int</emphasis>&lt;_Del&gt;&gt;
+351 &#32;&#32;&#32;&#32;<emphasis role="keyword">constexpr</emphasis>&#32;unique_ptr(nullptr_t)&#32;noexcept
+352 &#32;&#32;&#32;&#32;:&#32;_M_t()
+353 &#32;&#32;&#32;&#32;{&#32;}
+354 
+355 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Move&#32;constructors.</emphasis>
+356 
+358 &#32;&#32;&#32;&#32;&#32;&#32;unique_ptr(unique_ptr&amp;&amp;)&#32;=&#32;<emphasis role="keywordflow">default</emphasis>;
+359 
+366 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Up,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Ep,&#32;<emphasis role="keyword">typename</emphasis>&#32;=&#32;_Require&lt;
+367 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__safe_conversion_up&lt;_Up,&#32;_Ep&gt;,
+368 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__conditional_t&lt;is_reference&lt;_Dp&gt;::value,
+369 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;is_same&lt;_Ep,&#32;_Dp&gt;,
+370 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;is_convertible&lt;_Ep,&#32;_Dp&gt;&gt;&gt;&gt;
+371 &#32;&#32;&#32;&#32;_GLIBCXX23_CONSTEXPR
+372 &#32;&#32;&#32;&#32;unique_ptr(unique_ptr&lt;_Up,&#32;_Ep&gt;&amp;&amp;&#32;__u)&#32;noexcept
+373 &#32;&#32;&#32;&#32;:&#32;_M_t(__u.release(),&#32;std::forward&lt;_Ep&gt;(__u.get_deleter()))
+374 &#32;&#32;&#32;&#32;{&#32;}
+375 
+376 <emphasis role="preprocessor">#if&#32;_GLIBCXX_USE_DEPRECATED</emphasis>
+377 <emphasis role="preprocessor">#pragma&#32;GCC&#32;diagnostic&#32;push</emphasis>
+378 <emphasis role="preprocessor">#pragma&#32;GCC&#32;diagnostic&#32;ignored&#32;&quot;-Wdeprecated-declarations&quot;</emphasis>
+380 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Up,&#32;<emphasis role="keyword">typename</emphasis>&#32;=&#32;_Require&lt;
+381 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;is_convertible&lt;_Up*,&#32;_Tp*&gt;,&#32;is_same&lt;_Dp,&#32;default_delete&lt;_Tp&gt;&gt;&gt;&gt;
+382 &#32;&#32;&#32;&#32;unique_ptr(auto_ptr&lt;_Up&gt;&amp;&amp;&#32;__u)&#32;<emphasis role="keyword">noexcept</emphasis>;
+383 <emphasis role="preprocessor">#pragma&#32;GCC&#32;diagnostic&#32;pop</emphasis>
+384 <emphasis role="preprocessor">#endif</emphasis>
+385 
+387 <emphasis role="preprocessor">#if&#32;__cplusplus&#32;&gt;&#32;202002L&#32;&amp;&amp;&#32;__cpp_constexpr_dynamic_alloc</emphasis>
+388 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">constexpr</emphasis>
+389 <emphasis role="preprocessor">#endif</emphasis>
+390 &#32;&#32;&#32;&#32;&#32;&#32;~unique_ptr()&#32;noexcept
+391 &#32;&#32;&#32;&#32;&#32;&#32;{
+392 &#32;&#32;&#32;&#32;<emphasis role="keyword">static_assert</emphasis>(__is_invocable&lt;deleter_type&amp;,&#32;pointer&gt;::value,
+393 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="stringliteral">&quot;unique_ptr&apos;s&#32;deleter&#32;must&#32;be&#32;invocable&#32;with&#32;a&#32;pointer&quot;</emphasis>);
+394 &#32;&#32;&#32;&#32;<emphasis role="keyword">auto</emphasis>&amp;&#32;__ptr&#32;=&#32;_M_t._M_ptr();
+395 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__ptr&#32;!=&#32;<emphasis role="keyword">nullptr</emphasis>)
+396 &#32;&#32;&#32;&#32;&#32;&#32;get_deleter()(<link linkend="_namespacestd_1ac7095819f6a8da64d69b1ee3029c52be">std::move</link>(__ptr));
+397 &#32;&#32;&#32;&#32;__ptr&#32;=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1aca2093d4756bde9a55b94e9ff8d9c623">pointer</link>();
+398 &#32;&#32;&#32;&#32;&#32;&#32;}
+399 
+400 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Assignment.</emphasis>
+401 
+406 &#32;&#32;&#32;&#32;&#32;&#32;unique_ptr&amp;&#32;operator=(unique_ptr&amp;&amp;)&#32;=&#32;<emphasis role="keywordflow">default</emphasis>;
+407 
+415 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Up,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Ep&gt;
+416 &#32;&#32;&#32;&#32;_GLIBCXX23_CONSTEXPR
+417 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;enable_if&lt;&#32;__and_&lt;
+418 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__safe_conversion_up&lt;_Up,&#32;_Ep&gt;,
+419 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;is_assignable&lt;deleter_type&amp;,&#32;_Ep&amp;&amp;&gt;
+420 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&gt;<link linkend="_classvalue">::value</link>,
+421 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;unique_ptr&amp;&gt;<link linkend="__classes_2_gameobj_8h_1a890efa53b3d7deeeced6f3a0d6653ed3">::type</link>
+422 &#32;&#32;&#32;&#32;operator=(unique_ptr&lt;_Up,&#32;_Ep&gt;&amp;&amp;&#32;__u)&#32;<emphasis role="keyword">noexcept</emphasis>
+423 &#32;&#32;&#32;&#32;{
+424 &#32;&#32;&#32;&#32;&#32;&#32;reset(__u.release());
+425 &#32;&#32;&#32;&#32;&#32;&#32;get_deleter()&#32;=&#32;std::forward&lt;_Ep&gt;(__u.get_deleter());
+426 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;*<emphasis role="keyword">this</emphasis>;
+427 &#32;&#32;&#32;&#32;}
+428 
+430 &#32;&#32;&#32;&#32;&#32;&#32;_GLIBCXX23_CONSTEXPR
+431 &#32;&#32;&#32;&#32;&#32;&#32;unique_ptr&amp;
+432 &#32;&#32;&#32;&#32;&#32;&#32;operator=(nullptr_t)&#32;<emphasis role="keyword">noexcept</emphasis>
+433 &#32;&#32;&#32;&#32;&#32;&#32;{
+434 &#32;&#32;&#32;&#32;reset();
+435 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;*<emphasis role="keyword">this</emphasis>;
+436 &#32;&#32;&#32;&#32;&#32;&#32;}
+437 
+438 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Observers.</emphasis>
+439 
+441 &#32;&#32;&#32;&#32;&#32;&#32;_GLIBCXX23_CONSTEXPR
+442 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;add_lvalue_reference&lt;element_type&gt;::type
+443 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_namespaceglm_1af22e465f8f6bc7d70648c93e05fb7247">operator*</link>()&#32;const&#32;noexcept(noexcept(*<link linkend="_namespacestd">std</link>::declval&lt;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1aca2093d4756bde9a55b94e9ff8d9c623">pointer</link>&gt;()))
+444 &#32;&#32;&#32;&#32;&#32;&#32;{
+445 &#32;&#32;&#32;&#32;__glibcxx_assert(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1afc5e04fa58feb228bb06199ff10caa22">get</link>()&#32;!=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1aca2093d4756bde9a55b94e9ff8d9c623">pointer</link>());
+446 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;*<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1afc5e04fa58feb228bb06199ff10caa22">get</link>();
+447 &#32;&#32;&#32;&#32;&#32;&#32;}
+448 
+450 &#32;&#32;&#32;&#32;&#32;&#32;_GLIBCXX23_CONSTEXPR
+451 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1aca2093d4756bde9a55b94e9ff8d9c623">pointer</link>
+452 &#32;&#32;&#32;&#32;&#32;&#32;operator-&gt;()&#32;const&#32;noexcept
+453 &#32;&#32;&#32;&#32;&#32;&#32;{
+454 &#32;&#32;&#32;&#32;<link linkend="_lib_2include_2c_09_09_2debug_2assertions_8h_1a6f2ef543506606e8ea3dbf0c52e61c5d">_GLIBCXX_DEBUG_PEDASSERT</link>(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1afc5e04fa58feb228bb06199ff10caa22">get</link>()&#32;!=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1aca2093d4756bde9a55b94e9ff8d9c623">pointer</link>());
+455 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1afc5e04fa58feb228bb06199ff10caa22">get</link>();
+456 &#32;&#32;&#32;&#32;&#32;&#32;}
+457 
+459 &#32;&#32;&#32;&#32;&#32;&#32;_GLIBCXX23_CONSTEXPR
+460 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1aca2093d4756bde9a55b94e9ff8d9c623">pointer</link>
+461 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1afc5e04fa58feb228bb06199ff10caa22">get</link>()&#32;const&#32;noexcept
+462 &#32;&#32;&#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;_M_t._M_ptr();&#32;}
+463 
+465 &#32;&#32;&#32;&#32;&#32;&#32;_GLIBCXX23_CONSTEXPR
+466 &#32;&#32;&#32;&#32;&#32;&#32;deleter_type&amp;
+467 &#32;&#32;&#32;&#32;&#32;&#32;get_deleter()&#32;noexcept
+468 &#32;&#32;&#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;_M_t._M_deleter();&#32;}
+469 
+471 &#32;&#32;&#32;&#32;&#32;&#32;_GLIBCXX23_CONSTEXPR
+472 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;deleter_type&amp;
+473 &#32;&#32;&#32;&#32;&#32;&#32;get_deleter()&#32;const&#32;noexcept
+474 &#32;&#32;&#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;_M_t._M_deleter();&#32;}
+475 
+477 &#32;&#32;&#32;&#32;&#32;&#32;_GLIBCXX23_CONSTEXPR
+478 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">explicit</emphasis>&#32;<emphasis role="keyword">operator</emphasis>&#32;<link linkend="__classes_2lib_2include_2stdbool_8h_1abb452686968e48b67397da5f97445f5b">bool</link>()&#32;const&#32;noexcept
+479 &#32;&#32;&#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1afc5e04fa58feb228bb06199ff10caa22">get</link>()&#32;==&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1aca2093d4756bde9a55b94e9ff8d9c623">pointer</link>()&#32;?&#32;<link linkend="__classes_2lib_2include_2stdbool_8h_1a65e9886d74aaee76545e83dd09011727">false</link>&#32;:&#32;<emphasis role="keyword">true</emphasis>;&#32;}
+480 
+481 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Modifiers.</emphasis>
+482 
+484 &#32;&#32;&#32;&#32;&#32;&#32;_GLIBCXX23_CONSTEXPR
+485 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1aca2093d4756bde9a55b94e9ff8d9c623">pointer</link>
+486 &#32;&#32;&#32;&#32;&#32;&#32;release()&#32;noexcept
+487 &#32;&#32;&#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;_M_t.release();&#32;}
+488 
+495 &#32;&#32;&#32;&#32;&#32;&#32;_GLIBCXX23_CONSTEXPR
+496 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+497 &#32;&#32;&#32;&#32;&#32;&#32;reset(<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1aca2093d4756bde9a55b94e9ff8d9c623">pointer</link>&#32;__p&#32;=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1aca2093d4756bde9a55b94e9ff8d9c623">pointer</link>())&#32;noexcept
+498 &#32;&#32;&#32;&#32;&#32;&#32;{
+499 &#32;&#32;&#32;&#32;<emphasis role="keyword">static_assert</emphasis>(__is_invocable&lt;deleter_type&amp;,&#32;pointer&gt;::value,
+500 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="stringliteral">&quot;unique_ptr&apos;s&#32;deleter&#32;must&#32;be&#32;invocable&#32;with&#32;a&#32;pointer&quot;</emphasis>);
+501 &#32;&#32;&#32;&#32;_M_t.reset(<link linkend="_namespacestd_1ac7095819f6a8da64d69b1ee3029c52be">std::move</link>(__p));
+502 &#32;&#32;&#32;&#32;&#32;&#32;}
+503 
+505 &#32;&#32;&#32;&#32;&#32;&#32;_GLIBCXX23_CONSTEXPR
+506 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+507 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_namespacestd_1a3ece115a1c8ed9020a20f1d0b70efda8">swap</link>(unique_ptr&amp;&#32;__u)&#32;<emphasis role="keyword">noexcept</emphasis>
+508 &#32;&#32;&#32;&#32;&#32;&#32;{
+509 &#32;&#32;&#32;&#32;<emphasis role="keyword">static_assert</emphasis>(__is_swappable&lt;_Dp&gt;::value,&#32;<emphasis role="stringliteral">&quot;deleter&#32;must&#32;be&#32;swappable&quot;</emphasis>);
+510 &#32;&#32;&#32;&#32;_M_t.swap(__u._M_t);
+511 &#32;&#32;&#32;&#32;&#32;&#32;}
+512 
+513 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Disable&#32;copy&#32;from&#32;lvalue.</emphasis>
+514 &#32;&#32;&#32;&#32;&#32;&#32;unique_ptr(<emphasis role="keyword">const</emphasis>&#32;unique_ptr&amp;)&#32;=&#32;<emphasis role="keyword">delete</emphasis>;
+515 &#32;&#32;&#32;&#32;&#32;&#32;unique_ptr&amp;&#32;operator=(<emphasis role="keyword">const</emphasis>&#32;unique_ptr&amp;)&#32;=&#32;<emphasis role="keyword">delete</emphasis>;
+516 &#32;&#32;};
+517 
+518 &#32;&#32;<emphasis role="comment">//&#32;20.7.1.3&#32;unique_ptr&#32;for&#32;array&#32;objects&#32;with&#32;a&#32;runtime&#32;length</emphasis>
+519 &#32;&#32;<emphasis role="comment">//&#32;[unique.ptr.runtime]</emphasis>
+520 &#32;&#32;<emphasis role="comment">//&#32;_GLIBCXX_RESOLVE_LIB_DEFECTS</emphasis>
+521 &#32;&#32;<emphasis role="comment">//&#32;DR&#32;740&#32;-&#32;omit&#32;specialization&#32;for&#32;array&#32;objects&#32;with&#32;a&#32;compile&#32;time&#32;length</emphasis>
+522 
+526 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Dp&gt;
+527 &#32;&#32;&#32;&#32;<emphasis role="keyword">class&#32;</emphasis>unique_ptr&lt;_Tp[],&#32;_Dp&gt;
+528 &#32;&#32;&#32;&#32;{
+529 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">typename</emphasis>&#32;_Up&gt;
+530 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">using&#32;</emphasis>_DeleterConstraint&#32;=
+531 &#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;__uniq_ptr_impl&lt;_Tp,&#32;_Up&gt;::_DeleterConstraint::type;
+532 
+533 &#32;&#32;&#32;&#32;&#32;&#32;__uniq_ptr_data&lt;_Tp,&#32;_Dp&gt;&#32;_M_t;
+534 
+535 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Up&gt;
+536 &#32;&#32;&#32;&#32;<emphasis role="keyword">using&#32;</emphasis>__remove_cv&#32;=&#32;<emphasis role="keyword">typename</emphasis>&#32;remove_cv&lt;_Up&gt;::type;
+537 
+538 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;like&#32;is_base_of&lt;_Tp,&#32;_Up&gt;&#32;but&#32;false&#32;if&#32;unqualified&#32;types&#32;are&#32;the&#32;same</emphasis>
+539 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Up&gt;
+540 &#32;&#32;&#32;&#32;<emphasis role="keyword">using&#32;</emphasis>__is_derived_Tp
+541 &#32;&#32;&#32;&#32;&#32;&#32;=&#32;__and_&lt;&#32;is_base_of&lt;_Tp,&#32;_Up&gt;,
+542 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__not_&lt;is_same&lt;__remove_cv&lt;_Tp&gt;,&#32;__remove_cv&lt;_Up&gt;&gt;&gt;&#32;&gt;;
+543 
+544 &#32;&#32;&#32;&#32;<emphasis role="keyword">public</emphasis>:
+545 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">using&#32;</emphasis><link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1aca2093d4756bde9a55b94e9ff8d9c623">pointer</link>&#32;&#32;&#32;=&#32;<emphasis role="keyword">typename</emphasis>&#32;__uniq_ptr_impl&lt;_Tp,&#32;_Dp&gt;::pointer;
+546 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">using&#32;</emphasis>element_type&#32;&#32;=&#32;_Tp;
+547 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">using&#32;</emphasis>deleter_type&#32;&#32;=&#32;_Dp;
+548 
+549 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;helper&#32;template&#32;for&#32;detecting&#32;a&#32;safe&#32;conversion&#32;from&#32;another</emphasis>
+550 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;unique_ptr</emphasis>
+551 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Up,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Ep,
+552 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;_UPtr&#32;=&#32;unique_ptr&lt;_Up,&#32;_Ep&gt;,
+553 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;_UP_pointer&#32;=&#32;<emphasis role="keyword">typename</emphasis>&#32;_UPtr::pointer,
+554 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;_UP_element_type&#32;=&#32;<emphasis role="keyword">typename</emphasis>&#32;_UPtr::element_type&gt;
+555 &#32;&#32;&#32;&#32;<emphasis role="keyword">using&#32;</emphasis>__safe_conversion_up&#32;=&#32;__and_&lt;
+556 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;is_array&lt;_Up&gt;,
+557 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;is_same&lt;pointer,&#32;element_type*&gt;,
+558 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;is_same&lt;_UP_pointer,&#32;_UP_element_type*&gt;,
+559 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;is_convertible&lt;_UP_element_type(*)[],&#32;element_type(*)[]&gt;
+560 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&gt;;
+561 
+562 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;helper&#32;template&#32;for&#32;detecting&#32;a&#32;safe&#32;conversion&#32;from&#32;a&#32;raw&#32;pointer</emphasis>
+563 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Up&gt;
+564 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">using&#32;</emphasis>__safe_conversion_raw&#32;=&#32;__and_&lt;
+565 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__or_&lt;__or_&lt;is_same&lt;_Up,&#32;pointer&gt;,
+566 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;is_same&lt;_Up,&#32;nullptr_t&gt;&gt;,
+567 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__and_&lt;is_pointer&lt;_Up&gt;,
+568 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;is_same&lt;pointer,&#32;element_type*&gt;,
+569 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;is_convertible&lt;
+570 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;remove_pointer&lt;_Up&gt;::type(*)[],
+571 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;element_type(*)[]&gt;
+572 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&gt;
+573 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&gt;
+574 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&gt;;
+575 
+576 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Constructors.</emphasis>
+577 
+579 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Del&#32;=&#32;_Dp,&#32;<emphasis role="keyword">typename</emphasis>&#32;=&#32;_DeleterConstra<emphasis role="keywordtype">int</emphasis>&lt;_Del&gt;&gt;
+580 &#32;&#32;&#32;&#32;<emphasis role="keyword">constexpr</emphasis>&#32;unique_ptr()&#32;noexcept
+581 &#32;&#32;&#32;&#32;:&#32;_M_t()
+582 &#32;&#32;&#32;&#32;{&#32;}
+583 
+591 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Up,
+592 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;_Vp&#32;=&#32;_Dp,
+593 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;=&#32;_DeleterConstraint&lt;_Vp&gt;,
+594 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;=&#32;<emphasis role="keyword">typename</emphasis>&#32;enable_if&lt;
+595 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__safe_conversion_raw&lt;_Up&gt;::value,&#32;<emphasis role="keywordtype">bool</emphasis>&gt;<link linkend="__classes_2_gameobj_8h_1a890efa53b3d7deeeced6f3a0d6653ed3">::type</link>&gt;
+596 &#32;&#32;&#32;&#32;_GLIBCXX23_CONSTEXPR
+597 &#32;&#32;&#32;&#32;<emphasis role="keyword">explicit</emphasis>
+598 &#32;&#32;&#32;&#32;unique_ptr(_Up&#32;__p)&#32;noexcept
+599 &#32;&#32;&#32;&#32;:&#32;_M_t(__p)
+600 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{&#32;}
+601 
+610 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Up,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Del&#32;=&#32;deleter_type,
+611 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;=&#32;_Require&lt;__safe_conversion_raw&lt;_Up&gt;,
+612 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;is_copy_constructible&lt;_Del&gt;&gt;&gt;
+613 &#32;&#32;&#32;&#32;_GLIBCXX23_CONSTEXPR
+614 &#32;&#32;&#32;&#32;unique_ptr(_Up&#32;__p,&#32;<emphasis role="keyword">const</emphasis>&#32;deleter_type&amp;&#32;__d)&#32;noexcept
+615 &#32;&#32;&#32;&#32;:&#32;_M_t(__p,&#32;__d)&#32;{&#32;}
+616 
+625 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Up,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Del&#32;=&#32;deleter_type,
+626 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;=&#32;_Require&lt;__safe_conversion_raw&lt;_Up&gt;,
+627 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;is_move_constructible&lt;_Del&gt;&gt;&gt;
+628 &#32;&#32;&#32;&#32;_GLIBCXX23_CONSTEXPR
+629 &#32;&#32;&#32;&#32;unique_ptr(_Up&#32;__p,
+630 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__enable_if_t&lt;!is_lvalue_reference&lt;_Del&gt;::value,
+631 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_Del&amp;&amp;&gt;&#32;__d)&#32;noexcept
+632 &#32;&#32;&#32;&#32;:&#32;_M_t(<link linkend="_namespacestd_1ac7095819f6a8da64d69b1ee3029c52be">std::move</link>(__p),&#32;<link linkend="_namespacestd_1ac7095819f6a8da64d69b1ee3029c52be">std::move</link>(__d))
+633 &#32;&#32;&#32;&#32;{&#32;}
+634 
+635 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Up,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Del&#32;=&#32;deleter_type,
+636 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;_DelUnref&#32;=&#32;<emphasis role="keyword">typename</emphasis>&#32;remove_reference&lt;_Del&gt;::type,
+637 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;=&#32;_Require&lt;__safe_conversion_raw&lt;_Up&gt;&gt;&gt;
+638 &#32;&#32;&#32;&#32;unique_ptr(_Up,
+639 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__enable_if_t&lt;is_lvalue_reference&lt;_Del&gt;::value,
+640 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_DelUnref&amp;&amp;&gt;)&#32;=&#32;<emphasis role="keyword">delete</emphasis>;
+641 
+643 &#32;&#32;&#32;&#32;&#32;&#32;unique_ptr(unique_ptr&amp;&amp;)&#32;=&#32;<emphasis role="keywordflow">default</emphasis>;
+644 
+646 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Del&#32;=&#32;_Dp,&#32;<emphasis role="keyword">typename</emphasis>&#32;=&#32;_DeleterConstra<emphasis role="keywordtype">int</emphasis>&lt;_Del&gt;&gt;
+647 &#32;&#32;&#32;&#32;<emphasis role="keyword">constexpr</emphasis>&#32;unique_ptr(nullptr_t)&#32;noexcept
+648 &#32;&#32;&#32;&#32;:&#32;_M_t()
+649 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{&#32;}
+650 
+651 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Up,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Ep,&#32;<emphasis role="keyword">typename</emphasis>&#32;=&#32;_Require&lt;
+652 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__safe_conversion_up&lt;_Up,&#32;_Ep&gt;,
+653 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__conditional_t&lt;is_reference&lt;_Dp&gt;::value,
+654 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;is_same&lt;_Ep,&#32;_Dp&gt;,
+655 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;is_convertible&lt;_Ep,&#32;_Dp&gt;&gt;&gt;&gt;
+656 &#32;&#32;&#32;&#32;_GLIBCXX23_CONSTEXPR
+657 &#32;&#32;&#32;&#32;unique_ptr(unique_ptr&lt;_Up,&#32;_Ep&gt;&amp;&amp;&#32;__u)&#32;noexcept
+658 &#32;&#32;&#32;&#32;:&#32;_M_t(__u.release(),&#32;std::forward&lt;_Ep&gt;(__u.get_deleter()))
+659 &#32;&#32;&#32;&#32;{&#32;}
+660 
+662 <emphasis role="preprocessor">#if&#32;__cplusplus&#32;&gt;&#32;202002L&#32;&amp;&amp;&#32;__cpp_constexpr_dynamic_alloc</emphasis>
+663 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">constexpr</emphasis>
+664 <emphasis role="preprocessor">#endif</emphasis>
+665 &#32;&#32;&#32;&#32;&#32;&#32;~unique_ptr()
+666 &#32;&#32;&#32;&#32;&#32;&#32;{
+667 &#32;&#32;&#32;&#32;<emphasis role="keyword">auto</emphasis>&amp;&#32;__ptr&#32;=&#32;_M_t._M_ptr();
+668 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__ptr&#32;!=&#32;<emphasis role="keyword">nullptr</emphasis>)
+669 &#32;&#32;&#32;&#32;&#32;&#32;get_deleter()(__ptr);
+670 &#32;&#32;&#32;&#32;__ptr&#32;=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1aca2093d4756bde9a55b94e9ff8d9c623">pointer</link>();
+671 &#32;&#32;&#32;&#32;&#32;&#32;}
+672 
+673 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Assignment.</emphasis>
+674 
+679 &#32;&#32;&#32;&#32;&#32;&#32;unique_ptr&amp;
+680 &#32;&#32;&#32;&#32;&#32;&#32;operator=(unique_ptr&amp;&amp;)&#32;=&#32;<emphasis role="keywordflow">default</emphasis>;
+681 
+689 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Up,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Ep&gt;
+690 &#32;&#32;&#32;&#32;_GLIBCXX23_CONSTEXPR
+691 &#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>
+692 &#32;&#32;&#32;&#32;enable_if&lt;__and_&lt;__safe_conversion_up&lt;_Up,&#32;_Ep&gt;,
+693 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;is_assignable&lt;deleter_type&amp;,&#32;_Ep&amp;&amp;&gt;
+694 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&gt;<link linkend="_classvalue">::value</link>,
+695 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;unique_ptr&amp;&gt;<link linkend="__classes_2_gameobj_8h_1a890efa53b3d7deeeced6f3a0d6653ed3">::type</link>
+696 &#32;&#32;&#32;&#32;operator=(unique_ptr&lt;_Up,&#32;_Ep&gt;&amp;&amp;&#32;__u)&#32;<emphasis role="keyword">noexcept</emphasis>
+697 &#32;&#32;&#32;&#32;{
+698 &#32;&#32;&#32;&#32;&#32;&#32;reset(__u.release());
+699 &#32;&#32;&#32;&#32;&#32;&#32;get_deleter()&#32;=&#32;std::forward&lt;_Ep&gt;(__u.get_deleter());
+700 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;*<emphasis role="keyword">this</emphasis>;
+701 &#32;&#32;&#32;&#32;}
+702 
+704 &#32;&#32;&#32;&#32;&#32;&#32;_GLIBCXX23_CONSTEXPR
+705 &#32;&#32;&#32;&#32;&#32;&#32;unique_ptr&amp;
+706 &#32;&#32;&#32;&#32;&#32;&#32;operator=(nullptr_t)&#32;<emphasis role="keyword">noexcept</emphasis>
+707 &#32;&#32;&#32;&#32;&#32;&#32;{
+708 &#32;&#32;&#32;&#32;reset();
+709 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;*<emphasis role="keyword">this</emphasis>;
+710 &#32;&#32;&#32;&#32;&#32;&#32;}
+711 
+712 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Observers.</emphasis>
+713 
+715 &#32;&#32;&#32;&#32;&#32;&#32;_GLIBCXX23_CONSTEXPR
+716 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;std::add_lvalue_reference&lt;element_type&gt;::type
+717 &#32;&#32;&#32;&#32;&#32;&#32;operator[](<emphasis role="keywordtype">size_t</emphasis>&#32;__i)<emphasis role="keyword">&#32;const</emphasis>
+718 <emphasis role="keyword">&#32;&#32;&#32;&#32;&#32;&#32;</emphasis>{
+719 &#32;&#32;&#32;&#32;__glibcxx_assert(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1afc5e04fa58feb228bb06199ff10caa22">get</link>()&#32;!=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1aca2093d4756bde9a55b94e9ff8d9c623">pointer</link>());
+720 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1afc5e04fa58feb228bb06199ff10caa22">get</link>()[__i];
+721 &#32;&#32;&#32;&#32;&#32;&#32;}
+722 
+724 &#32;&#32;&#32;&#32;&#32;&#32;_GLIBCXX23_CONSTEXPR
+725 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1aca2093d4756bde9a55b94e9ff8d9c623">pointer</link>
+726 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1afc5e04fa58feb228bb06199ff10caa22">get</link>()&#32;const&#32;noexcept
+727 &#32;&#32;&#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;_M_t._M_ptr();&#32;}
+728 
+730 &#32;&#32;&#32;&#32;&#32;&#32;_GLIBCXX23_CONSTEXPR
+731 &#32;&#32;&#32;&#32;&#32;&#32;deleter_type&amp;
+732 &#32;&#32;&#32;&#32;&#32;&#32;get_deleter()&#32;noexcept
+733 &#32;&#32;&#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;_M_t._M_deleter();&#32;}
+734 
+736 &#32;&#32;&#32;&#32;&#32;&#32;_GLIBCXX23_CONSTEXPR
+737 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;deleter_type&amp;
+738 &#32;&#32;&#32;&#32;&#32;&#32;get_deleter()&#32;const&#32;noexcept
+739 &#32;&#32;&#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;_M_t._M_deleter();&#32;}
+740 
+742 &#32;&#32;&#32;&#32;&#32;&#32;_GLIBCXX23_CONSTEXPR
+743 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">explicit</emphasis>&#32;<emphasis role="keyword">operator</emphasis>&#32;<link linkend="__classes_2lib_2include_2stdbool_8h_1abb452686968e48b67397da5f97445f5b">bool</link>()&#32;const&#32;noexcept
+744 &#32;&#32;&#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1afc5e04fa58feb228bb06199ff10caa22">get</link>()&#32;==&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1aca2093d4756bde9a55b94e9ff8d9c623">pointer</link>()&#32;?&#32;<link linkend="__classes_2lib_2include_2stdbool_8h_1a65e9886d74aaee76545e83dd09011727">false</link>&#32;:&#32;<emphasis role="keyword">true</emphasis>;&#32;}
+745 
+746 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Modifiers.</emphasis>
+747 
+749 &#32;&#32;&#32;&#32;&#32;&#32;_GLIBCXX23_CONSTEXPR
+750 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1aca2093d4756bde9a55b94e9ff8d9c623">pointer</link>
+751 &#32;&#32;&#32;&#32;&#32;&#32;release()&#32;noexcept
+752 &#32;&#32;&#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;_M_t.release();&#32;}
+753 
+760 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">typename</emphasis>&#32;_Up,
+761 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;=&#32;_Require&lt;
+762 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__or_&lt;is_same&lt;_Up,&#32;pointer&gt;,
+763 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__and_&lt;is_same&lt;pointer,&#32;element_type*&gt;,
+764 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;is_pointer&lt;_Up&gt;,
+765 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;is_convertible&lt;
+766 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;remove_pointer&lt;_Up&gt;::type(*)[],
+767 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;element_type(*)[]
+768 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&gt;
+769 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&gt;
+770 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&gt;
+771 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&gt;&gt;
+772 &#32;&#32;&#32;&#32;&#32;&#32;_GLIBCXX23_CONSTEXPR
+773 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+774 &#32;&#32;&#32;&#32;&#32;&#32;reset(_Up&#32;__p)&#32;<emphasis role="keyword">noexcept</emphasis>
+775 &#32;&#32;&#32;&#32;&#32;&#32;{&#32;_M_t.reset(<link linkend="_namespacestd_1ac7095819f6a8da64d69b1ee3029c52be">std::move</link>(__p));&#32;}
+776 
+777 &#32;&#32;&#32;&#32;&#32;&#32;_GLIBCXX23_CONSTEXPR
+778 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>&#32;reset(nullptr_t&#32;=&#32;<emphasis role="keyword">nullptr</emphasis>)&#32;noexcept
+779 &#32;&#32;&#32;&#32;&#32;&#32;{&#32;reset(<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1aca2093d4756bde9a55b94e9ff8d9c623">pointer</link>());&#32;}
+780 
+782 &#32;&#32;&#32;&#32;&#32;&#32;_GLIBCXX23_CONSTEXPR
+783 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+784 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_namespacestd_1a3ece115a1c8ed9020a20f1d0b70efda8">swap</link>(unique_ptr&amp;&#32;__u)&#32;<emphasis role="keyword">noexcept</emphasis>
+785 &#32;&#32;&#32;&#32;&#32;&#32;{
+786 &#32;&#32;&#32;&#32;<emphasis role="keyword">static_assert</emphasis>(__is_swappable&lt;_Dp&gt;::value,&#32;<emphasis role="stringliteral">&quot;deleter&#32;must&#32;be&#32;swappable&quot;</emphasis>);
+787 &#32;&#32;&#32;&#32;_M_t.swap(__u._M_t);
+788 &#32;&#32;&#32;&#32;&#32;&#32;}
+789 
+790 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Disable&#32;copy&#32;from&#32;lvalue.</emphasis>
+791 &#32;&#32;&#32;&#32;&#32;&#32;unique_ptr(<emphasis role="keyword">const</emphasis>&#32;unique_ptr&amp;)&#32;=&#32;<emphasis role="keyword">delete</emphasis>;
+792 &#32;&#32;&#32;&#32;&#32;&#32;unique_ptr&amp;&#32;operator=(<emphasis role="keyword">const</emphasis>&#32;unique_ptr&amp;)&#32;=&#32;<emphasis role="keyword">delete</emphasis>;
+793 &#32;&#32;&#32;&#32;};
+794 
+797 
+799 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Dp&gt;
+800 &#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>
+801 <emphasis role="preprocessor">#if&#32;__cplusplus&#32;&gt;&#32;201402L&#32;||&#32;!defined(__STRICT_ANSI__)&#32;</emphasis><emphasis role="comment">//&#32;c++1z&#32;or&#32;gnu++11</emphasis>
+802 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Constrained&#32;free&#32;swap&#32;overload,&#32;see&#32;p0185r1</emphasis>
+803 &#32;&#32;&#32;&#32;_GLIBCXX23_CONSTEXPR
+804 &#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;enable_if&lt;__is_swappable&lt;_Dp&gt;::value&gt;<link linkend="__classes_2_gameobj_8h_1a890efa53b3d7deeeced6f3a0d6653ed3">::type</link>
+805 <emphasis role="preprocessor">#else</emphasis>
+806 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+807 <emphasis role="preprocessor">#endif</emphasis>
+808 &#32;&#32;&#32;&#32;<link linkend="_namespacestd_1a3ece115a1c8ed9020a20f1d0b70efda8">swap</link>(unique_ptr&lt;_Tp,&#32;_Dp&gt;&amp;&#32;__x,
+809 &#32;&#32;&#32;&#32;&#32;unique_ptr&lt;_Tp,&#32;_Dp&gt;&amp;&#32;__y)&#32;<emphasis role="keyword">noexcept</emphasis>
+810 &#32;&#32;&#32;&#32;{&#32;__x.swap(__y);&#32;}
+811 
+812 <emphasis role="preprocessor">#if&#32;__cplusplus&#32;&gt;&#32;201402L&#32;||&#32;!defined(__STRICT_ANSI__)&#32;</emphasis><emphasis role="comment">//&#32;c++1z&#32;or&#32;gnu++11</emphasis>
+813 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Dp&gt;
+814 &#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;enable_if&lt;!__is_swappable&lt;_Dp&gt;::value&gt;<link linkend="__classes_2_gameobj_8h_1a890efa53b3d7deeeced6f3a0d6653ed3">::type</link>
+815 &#32;&#32;&#32;&#32;<link linkend="_namespacestd_1a3ece115a1c8ed9020a20f1d0b70efda8">swap</link>(unique_ptr&lt;_Tp,&#32;_Dp&gt;&amp;,
+816 &#32;&#32;&#32;&#32;&#32;unique_ptr&lt;_Tp,&#32;_Dp&gt;&amp;)&#32;=&#32;<emphasis role="keyword">delete</emphasis>;
+817 <emphasis role="preprocessor">#endif</emphasis>
+818 
+820 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Dp,
+821 &#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;_Up,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Ep&gt;
+822 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2x86__64-w64-mingw32_2bits_2c_09_09config_8h_1a56bc959ca1311889bcd1c5abb178ab59">_GLIBCXX_NODISCARD</link>&#32;_GLIBCXX23_CONSTEXPR
+823 &#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>
+824 &#32;&#32;&#32;&#32;<link linkend="_namespacenlohmann_1aaf11d1e42c5a671e7cd362ab0a182de1">operator==</link>(<emphasis role="keyword">const</emphasis>&#32;unique_ptr&lt;_Tp,&#32;_Dp&gt;&amp;&#32;__x,
+825 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;unique_ptr&lt;_Up,&#32;_Ep&gt;&amp;&#32;__y)
+826 &#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;__x.get()&#32;==&#32;__y.get();&#32;}
+827 
+829 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Dp&gt;
+830 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2x86__64-w64-mingw32_2bits_2c_09_09config_8h_1a56bc959ca1311889bcd1c5abb178ab59">_GLIBCXX_NODISCARD</link>&#32;_GLIBCXX23_CONSTEXPR
+831 &#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>
+832 &#32;&#32;&#32;&#32;<link linkend="_namespacenlohmann_1aaf11d1e42c5a671e7cd362ab0a182de1">operator==</link>(<emphasis role="keyword">const</emphasis>&#32;unique_ptr&lt;_Tp,&#32;_Dp&gt;&amp;&#32;__x,&#32;nullptr_t)&#32;<emphasis role="keyword">noexcept</emphasis>
+833 &#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;!__x;&#32;}
+834 
+835 <emphasis role="preprocessor">#ifndef&#32;__cpp_lib_three_way_comparison</emphasis>
+837 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Dp&gt;
+838 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2x86__64-w64-mingw32_2bits_2c_09_09config_8h_1a56bc959ca1311889bcd1c5abb178ab59">_GLIBCXX_NODISCARD</link>
+839 &#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>
+840 &#32;&#32;&#32;&#32;<link linkend="_namespacenlohmann_1aaf11d1e42c5a671e7cd362ab0a182de1">operator==</link>(nullptr_t,&#32;<emphasis role="keyword">const</emphasis>&#32;unique_ptr&lt;_Tp,&#32;_Dp&gt;&amp;&#32;__x)&#32;<emphasis role="keyword">noexcept</emphasis>
+841 &#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;!__x;&#32;}
+842 
+844 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Dp,
+845 &#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;_Up,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Ep&gt;
+846 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2x86__64-w64-mingw32_2bits_2c_09_09config_8h_1a56bc959ca1311889bcd1c5abb178ab59">_GLIBCXX_NODISCARD</link>
+847 &#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>
+848 &#32;&#32;&#32;&#32;<link linkend="_namespacenlohmann_1aa9fe6e8e15f1b1b242d291e7703f1b8d">operator!=</link>(<emphasis role="keyword">const</emphasis>&#32;unique_ptr&lt;_Tp,&#32;_Dp&gt;&amp;&#32;__x,
+849 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;unique_ptr&lt;_Up,&#32;_Ep&gt;&amp;&#32;__y)
+850 &#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;__x.get()&#32;!=&#32;__y.get();&#32;}
+851 
+853 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Dp&gt;
+854 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2x86__64-w64-mingw32_2bits_2c_09_09config_8h_1a56bc959ca1311889bcd1c5abb178ab59">_GLIBCXX_NODISCARD</link>
+855 &#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>
+856 &#32;&#32;&#32;&#32;<link linkend="_namespacenlohmann_1aa9fe6e8e15f1b1b242d291e7703f1b8d">operator!=</link>(<emphasis role="keyword">const</emphasis>&#32;unique_ptr&lt;_Tp,&#32;_Dp&gt;&amp;&#32;__x,&#32;nullptr_t)&#32;<emphasis role="keyword">noexcept</emphasis>
+857 &#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;(<emphasis role="keywordtype">bool</emphasis>)__x;&#32;}
+858 
+860 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Dp&gt;
+861 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2x86__64-w64-mingw32_2bits_2c_09_09config_8h_1a56bc959ca1311889bcd1c5abb178ab59">_GLIBCXX_NODISCARD</link>
+862 &#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>
+863 &#32;&#32;&#32;&#32;<link linkend="_namespacenlohmann_1aa9fe6e8e15f1b1b242d291e7703f1b8d">operator!=</link>(nullptr_t,&#32;<emphasis role="keyword">const</emphasis>&#32;unique_ptr&lt;_Tp,&#32;_Dp&gt;&amp;&#32;__x)&#32;<emphasis role="keyword">noexcept</emphasis>
+864 &#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;(<emphasis role="keywordtype">bool</emphasis>)__x;&#32;}
+865 <emphasis role="preprocessor">#endif&#32;</emphasis><emphasis role="comment">//&#32;three&#32;way&#32;comparison</emphasis>
+866 
+868 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Dp,
+869 &#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;_Up,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Ep&gt;
+870 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2x86__64-w64-mingw32_2bits_2c_09_09config_8h_1a56bc959ca1311889bcd1c5abb178ab59">_GLIBCXX_NODISCARD</link>&#32;_GLIBCXX23_CONSTEXPR
+871 &#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>
+872 &#32;&#32;&#32;&#32;<link linkend="_namespacenlohmann_1_1detail_1a09169efff3bd1771fff29bd92cea19e0">operator&lt;</link>(<emphasis role="keyword">const</emphasis>&#32;unique_ptr&lt;_Tp,&#32;_Dp&gt;&amp;&#32;__x,
+873 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;unique_ptr&lt;_Up,&#32;_Ep&gt;&amp;&#32;__y)
+874 &#32;&#32;&#32;&#32;{
+875 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">typename</emphasis>
+876 &#32;&#32;&#32;&#32;std::common_type&lt;typename&#32;unique_ptr&lt;_Tp,&#32;_Dp&gt;::pointer,
+877 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;unique_ptr&lt;_Up,&#32;_Ep&gt;::pointer&gt;<link linkend="__classes_2_gameobj_8h_1a890efa53b3d7deeeced6f3a0d6653ed3">::type</link>&#32;_CT;
+878 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;std::less&lt;_CT&gt;()(__x.get(),&#32;__y.get());
+879 &#32;&#32;&#32;&#32;}
+880 
+882 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Dp&gt;
+883 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2x86__64-w64-mingw32_2bits_2c_09_09config_8h_1a56bc959ca1311889bcd1c5abb178ab59">_GLIBCXX_NODISCARD</link>&#32;_GLIBCXX23_CONSTEXPR
+884 &#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>
+885 &#32;&#32;&#32;&#32;<link linkend="_namespacenlohmann_1_1detail_1a09169efff3bd1771fff29bd92cea19e0">operator&lt;</link>(<emphasis role="keyword">const</emphasis>&#32;unique_ptr&lt;_Tp,&#32;_Dp&gt;&amp;&#32;__x,&#32;nullptr_t)
+886 &#32;&#32;&#32;&#32;{
+887 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;std::less&lt;typename&#32;unique_ptr&lt;_Tp,&#32;_Dp&gt;::pointer&gt;()(__x.get(),
+888 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">nullptr</emphasis>);
+889 &#32;&#32;&#32;&#32;}
+890 
+892 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Dp&gt;
+893 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2x86__64-w64-mingw32_2bits_2c_09_09config_8h_1a56bc959ca1311889bcd1c5abb178ab59">_GLIBCXX_NODISCARD</link>&#32;_GLIBCXX23_CONSTEXPR
+894 &#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>
+895 &#32;&#32;&#32;&#32;<link linkend="_namespacenlohmann_1_1detail_1a09169efff3bd1771fff29bd92cea19e0">operator&lt;</link>(nullptr_t,&#32;<emphasis role="keyword">const</emphasis>&#32;unique_ptr&lt;_Tp,&#32;_Dp&gt;&amp;&#32;__x)
+896 &#32;&#32;&#32;&#32;{
+897 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;std::less&lt;typename&#32;unique_ptr&lt;_Tp,&#32;_Dp&gt;::pointer&gt;()(<emphasis role="keyword">nullptr</emphasis>,
+898 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__x.get());
+899 &#32;&#32;&#32;&#32;}
+900 
+902 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Dp,
+903 &#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;_Up,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Ep&gt;
+904 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2x86__64-w64-mingw32_2bits_2c_09_09config_8h_1a56bc959ca1311889bcd1c5abb178ab59">_GLIBCXX_NODISCARD</link>&#32;_GLIBCXX23_CONSTEXPR
+905 &#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>
+906 &#32;&#32;&#32;&#32;operator&lt;=(<emphasis role="keyword">const</emphasis>&#32;unique_ptr&lt;_Tp,&#32;_Dp&gt;&amp;&#32;__x,
+907 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;unique_ptr&lt;_Up,&#32;_Ep&gt;&amp;&#32;__y)
+908 &#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;!(__y&#32;&lt;&#32;__x);&#32;}
+909 
+911 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Dp&gt;
+912 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2x86__64-w64-mingw32_2bits_2c_09_09config_8h_1a56bc959ca1311889bcd1c5abb178ab59">_GLIBCXX_NODISCARD</link>&#32;_GLIBCXX23_CONSTEXPR
+913 &#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>
+914 &#32;&#32;&#32;&#32;operator&lt;=(<emphasis role="keyword">const</emphasis>&#32;unique_ptr&lt;_Tp,&#32;_Dp&gt;&amp;&#32;__x,&#32;nullptr_t)
+915 &#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;!(<emphasis role="keyword">nullptr</emphasis>&#32;&lt;&#32;__x);&#32;}
+916 
+918 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Dp&gt;
+919 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2x86__64-w64-mingw32_2bits_2c_09_09config_8h_1a56bc959ca1311889bcd1c5abb178ab59">_GLIBCXX_NODISCARD</link>&#32;_GLIBCXX23_CONSTEXPR
+920 &#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>
+921 &#32;&#32;&#32;&#32;operator&lt;=(nullptr_t,&#32;<emphasis role="keyword">const</emphasis>&#32;unique_ptr&lt;_Tp,&#32;_Dp&gt;&amp;&#32;__x)
+922 &#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;!(__x&#32;&lt;&#32;<emphasis role="keyword">nullptr</emphasis>);&#32;}
+923 
+925 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Dp,
+926 &#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;_Up,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Ep&gt;
+927 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2x86__64-w64-mingw32_2bits_2c_09_09config_8h_1a56bc959ca1311889bcd1c5abb178ab59">_GLIBCXX_NODISCARD</link>&#32;_GLIBCXX23_CONSTEXPR
+928 &#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>
+929 &#32;&#32;&#32;&#32;operator&gt;(<emphasis role="keyword">const</emphasis>&#32;unique_ptr&lt;_Tp,&#32;_Dp&gt;&amp;&#32;__x,
+930 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;unique_ptr&lt;_Up,&#32;_Ep&gt;&amp;&#32;__y)
+931 &#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;(__y&#32;&lt;&#32;__x);&#32;}
+932 
+934 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Dp&gt;
+935 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2x86__64-w64-mingw32_2bits_2c_09_09config_8h_1a56bc959ca1311889bcd1c5abb178ab59">_GLIBCXX_NODISCARD</link>&#32;_GLIBCXX23_CONSTEXPR
+936 &#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>
+937 &#32;&#32;&#32;&#32;operator&gt;(<emphasis role="keyword">const</emphasis>&#32;unique_ptr&lt;_Tp,&#32;_Dp&gt;&amp;&#32;__x,&#32;nullptr_t)
+938 &#32;&#32;&#32;&#32;{
+939 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;std::less&lt;typename&#32;unique_ptr&lt;_Tp,&#32;_Dp&gt;::pointer&gt;()(<emphasis role="keyword">nullptr</emphasis>,
+940 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__x.get());
+941 &#32;&#32;&#32;&#32;}
+942 
+944 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Dp&gt;
+945 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2x86__64-w64-mingw32_2bits_2c_09_09config_8h_1a56bc959ca1311889bcd1c5abb178ab59">_GLIBCXX_NODISCARD</link>&#32;_GLIBCXX23_CONSTEXPR
+946 &#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>
+947 &#32;&#32;&#32;&#32;operator&gt;(nullptr_t,&#32;<emphasis role="keyword">const</emphasis>&#32;unique_ptr&lt;_Tp,&#32;_Dp&gt;&amp;&#32;__x)
+948 &#32;&#32;&#32;&#32;{
+949 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;std::less&lt;typename&#32;unique_ptr&lt;_Tp,&#32;_Dp&gt;::pointer&gt;()(__x.get(),
+950 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">nullptr</emphasis>);
+951 &#32;&#32;&#32;&#32;}
+952 
+954 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Dp,
+955 &#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;_Up,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Ep&gt;
+956 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2x86__64-w64-mingw32_2bits_2c_09_09config_8h_1a56bc959ca1311889bcd1c5abb178ab59">_GLIBCXX_NODISCARD</link>&#32;_GLIBCXX23_CONSTEXPR
+957 &#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>
+958 &#32;&#32;&#32;&#32;operator&gt;=(<emphasis role="keyword">const</emphasis>&#32;unique_ptr&lt;_Tp,&#32;_Dp&gt;&amp;&#32;__x,
+959 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;unique_ptr&lt;_Up,&#32;_Ep&gt;&amp;&#32;__y)
+960 &#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;!(__x&#32;&lt;&#32;__y);&#32;}
+961 
+963 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Dp&gt;
+964 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2x86__64-w64-mingw32_2bits_2c_09_09config_8h_1a56bc959ca1311889bcd1c5abb178ab59">_GLIBCXX_NODISCARD</link>&#32;_GLIBCXX23_CONSTEXPR
+965 &#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>
+966 &#32;&#32;&#32;&#32;operator&gt;=(<emphasis role="keyword">const</emphasis>&#32;unique_ptr&lt;_Tp,&#32;_Dp&gt;&amp;&#32;__x,&#32;nullptr_t)
+967 &#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;!(__x&#32;&lt;&#32;<emphasis role="keyword">nullptr</emphasis>);&#32;}
+968 
+970 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Dp&gt;
+971 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2x86__64-w64-mingw32_2bits_2c_09_09config_8h_1a56bc959ca1311889bcd1c5abb178ab59">_GLIBCXX_NODISCARD</link>&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>
+972 &#32;&#32;&#32;&#32;operator&gt;=(nullptr_t,&#32;<emphasis role="keyword">const</emphasis>&#32;unique_ptr&lt;_Tp,&#32;_Dp&gt;&amp;&#32;__x)
+973 &#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;!(<emphasis role="keyword">nullptr</emphasis>&#32;&lt;&#32;__x);&#32;}
+974 
+975 <emphasis role="preprocessor">#ifdef&#32;__cpp_lib_three_way_comparison</emphasis>
+976 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Dp,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Up,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Ep&gt;
+977 &#32;&#32;&#32;&#32;<emphasis role="keyword">requires</emphasis>&#32;three_way_comparable_with&lt;typename&#32;unique_ptr&lt;_Tp,&#32;_Dp&gt;::pointer,
+978 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;unique_ptr&lt;_Up,&#32;_Ep&gt;::pointer&gt;
+979 &#32;&#32;&#32;&#32;_GLIBCXX23_CONSTEXPR
+980 &#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>
+981 &#32;&#32;&#32;&#32;compare_three_way_result_t&lt;typename&#32;unique_ptr&lt;_Tp,&#32;_Dp&gt;::pointer,
+982 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;unique_ptr&lt;_Up,&#32;_Ep&gt;::pointer&gt;
+983 &#32;&#32;&#32;&#32;operator&lt;=&gt;(<emphasis role="keyword">const</emphasis>&#32;unique_ptr&lt;_Tp,&#32;_Dp&gt;&amp;&#32;__x,
+984 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;unique_ptr&lt;_Up,&#32;_Ep&gt;&amp;&#32;__y)
+985 &#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;compare_three_way()(__x.get(),&#32;__y.get());&#32;}
+986 
+987 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Dp&gt;
+988 &#32;&#32;&#32;&#32;<emphasis role="keyword">requires</emphasis>&#32;three_way_comparable&lt;typename&#32;unique_ptr&lt;_Tp,&#32;_Dp&gt;::pointer&gt;
+989 &#32;&#32;&#32;&#32;_GLIBCXX23_CONSTEXPR
+990 &#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>
+991 &#32;&#32;&#32;&#32;compare_three_way_result_t&lt;typename&#32;unique_ptr&lt;_Tp,&#32;_Dp&gt;::pointer&gt;
+992 &#32;&#32;&#32;&#32;operator&lt;=&gt;(<emphasis role="keyword">const</emphasis>&#32;unique_ptr&lt;_Tp,&#32;_Dp&gt;&amp;&#32;__x,&#32;nullptr_t)
+993 &#32;&#32;&#32;&#32;{
+994 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">using&#32;</emphasis><link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1aca2093d4756bde9a55b94e9ff8d9c623">pointer</link>&#32;=&#32;<emphasis role="keyword">typename</emphasis>&#32;unique_ptr&lt;_Tp,&#32;_Dp&gt;::pointer;
+995 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;compare_three_way()(__x.get(),&#32;<emphasis role="keyword">static_cast&lt;</emphasis><link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1aca2093d4756bde9a55b94e9ff8d9c623">pointer</link><emphasis role="keyword">&gt;</emphasis>(<emphasis role="keyword">nullptr</emphasis>));
+996 &#32;&#32;&#32;&#32;}
+997 <emphasis role="preprocessor">#endif</emphasis>
+999 
+1001 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Up,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Ptr&#32;=&#32;<emphasis role="keyword">typename</emphasis>&#32;_Up::pointer,
+1002 &#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">bool</emphasis>&#32;=&#32;__poison_hash&lt;_Ptr&gt;::__enable_hash_call&gt;
+1003 &#32;&#32;&#32;&#32;<emphasis role="keyword">struct&#32;</emphasis>__uniq_ptr_hash
+1004 #<link linkend="__classes_2lib_2include_2pconfigintrin_8h_1aaca4765a01b6f3cd5edb899a1159f303">if</link>&#32;!&#32;_GLIBCXX_INLINE_VERSION
+1005 &#32;&#32;&#32;&#32;:&#32;<emphasis role="keyword">private</emphasis>&#32;__poison_hash&lt;_Ptr&gt;
+1006 <emphasis role="preprocessor">#endif</emphasis>
+1007 &#32;&#32;&#32;&#32;{
+1008 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">size_t</emphasis>
+1009 &#32;&#32;&#32;&#32;&#32;&#32;operator()(<emphasis role="keyword">const</emphasis>&#32;_Up&amp;&#32;__u)&#32;<emphasis role="keyword">const</emphasis>
+1010 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">noexcept</emphasis>(<emphasis role="keyword">noexcept</emphasis>(std::declval&lt;hash&lt;_Ptr&gt;&gt;()(std::declval&lt;_Ptr&gt;())))
+1011 &#32;&#32;&#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;hash&lt;_Ptr&gt;()(__u.get());&#32;}
+1012 &#32;&#32;&#32;&#32;};
+1013 
+1014 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Up,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Ptr&gt;
+1015 &#32;&#32;&#32;&#32;<emphasis role="keyword">struct&#32;</emphasis>__uniq_ptr_hash&lt;_Up,&#32;_Ptr,&#32;<link linkend="__classes_2lib_2include_2stdbool_8h_1a65e9886d74aaee76545e83dd09011727">false</link>&gt;
+1016 &#32;&#32;&#32;&#32;:&#32;<emphasis role="keyword">private</emphasis>&#32;__poison_hash&lt;_Ptr&gt;
+1017 &#32;&#32;&#32;&#32;{&#32;};
+1019 
+1021 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Dp&gt;
+1022 &#32;&#32;&#32;&#32;<emphasis role="keyword">struct&#32;</emphasis>hash&lt;unique_ptr&lt;_Tp,&#32;_Dp&gt;&gt;
+1023 &#32;&#32;&#32;&#32;:&#32;<emphasis role="keyword">public</emphasis>&#32;__hash_base&lt;size_t,&#32;unique_ptr&lt;_Tp,&#32;_Dp&gt;&gt;,
+1024 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">public</emphasis>&#32;__uniq_ptr_hash&lt;unique_ptr&lt;_Tp,&#32;_Dp&gt;&gt;
+1025 &#32;&#32;&#32;&#32;{&#32;};
+1026 
+1027 <emphasis role="preprocessor">#if&#32;__cplusplus&#32;&gt;=&#32;201402L</emphasis>
+1028 <emphasis role="preprocessor">#define&#32;__cpp_lib_make_unique&#32;201304L</emphasis>
+1029 
+1031 <emphasis role="keyword">namespace&#32;</emphasis>__detail
+1032 {
+1033 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+1034 &#32;&#32;&#32;&#32;<emphasis role="keyword">struct&#32;</emphasis>_MakeUniq
+1035 &#32;&#32;&#32;&#32;{&#32;<emphasis role="keyword">typedef</emphasis>&#32;unique_ptr&lt;_Tp&gt;&#32;__single_object;&#32;};
+1036 
+1037 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+1038 &#32;&#32;&#32;&#32;<emphasis role="keyword">struct&#32;</emphasis>_MakeUniq&lt;_Tp[]&gt;
+1039 &#32;&#32;&#32;&#32;{&#32;<emphasis role="keyword">typedef</emphasis>&#32;unique_ptr&lt;_Tp[]&gt;&#32;__array;&#32;};
+1040 
+1041 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp,&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;_Bound&gt;
+1042 &#32;&#32;&#32;&#32;<emphasis role="keyword">struct&#32;</emphasis>_MakeUniq&lt;_Tp[_Bound]&gt;
+1043 &#32;&#32;&#32;&#32;{&#32;<emphasis role="keyword">struct&#32;</emphasis>__invalid_type&#32;{&#32;};&#32;};
+1044 
+1045 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+1046 &#32;&#32;&#32;&#32;<emphasis role="keyword">using&#32;</emphasis>__unique_ptr_t&#32;=&#32;<emphasis role="keyword">typename</emphasis>&#32;_MakeUniq&lt;_Tp&gt;::__single_object;
+1047 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+1048 &#32;&#32;&#32;&#32;<emphasis role="keyword">using&#32;</emphasis>__unique_ptr_array_t&#32;=&#32;<emphasis role="keyword">typename</emphasis>&#32;_MakeUniq&lt;_Tp&gt;::__array;
+1049 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+1050 &#32;&#32;&#32;&#32;<emphasis role="keyword">using&#32;</emphasis>__invalid_make_unique_t&#32;=&#32;<emphasis role="keyword">typename</emphasis>&#32;_MakeUniq&lt;_Tp&gt;::__invalid_type;
+1051 }
+1053 
+1061 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp,&#32;<emphasis role="keyword">typename</emphasis>...&#32;_Args&gt;
+1062 &#32;&#32;&#32;&#32;_GLIBCXX23_CONSTEXPR
+1063 &#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;__detail::__unique_ptr_t&lt;_Tp&gt;
+1064 &#32;&#32;&#32;&#32;<link linkend="_namespace_catch_1_1_generators_1_1pf_1a015e8fcef2972da878a07023e40d46d8">make_unique</link>(_Args&amp;&amp;...&#32;__args)
+1065 &#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;unique_ptr&lt;_Tp&gt;(<emphasis role="keyword">new</emphasis>&#32;_Tp(std::forward&lt;_Args&gt;(__args)...));&#32;}
+1066 
+1076 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+1077 &#32;&#32;&#32;&#32;_GLIBCXX23_CONSTEXPR
+1078 &#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;__detail::__unique_ptr_array_t&lt;_Tp&gt;
+1079 &#32;&#32;&#32;&#32;<link linkend="_namespace_catch_1_1_generators_1_1pf_1a015e8fcef2972da878a07023e40d46d8">make_unique</link>(<emphasis role="keywordtype">size_t</emphasis>&#32;__num)
+1080 &#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;unique_ptr&lt;_Tp&gt;(<emphasis role="keyword">new</emphasis>&#32;remove_extent_t&lt;_Tp&gt;[__num]());&#32;}
+1081 
+1087 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp,&#32;<emphasis role="keyword">typename</emphasis>...&#32;_Args&gt;
+1088 &#32;&#32;&#32;&#32;__detail::__invalid_make_unique_t&lt;_Tp&gt;
+1089 &#32;&#32;&#32;&#32;<link linkend="_namespace_catch_1_1_generators_1_1pf_1a015e8fcef2972da878a07023e40d46d8">make_unique</link>(_Args&amp;&amp;...)&#32;=&#32;<emphasis role="keyword">delete</emphasis>;
+1090 
+1091 <emphasis role="preprocessor">#if&#32;__cplusplus&#32;&gt;&#32;201703L</emphasis>
+1098 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+1099 &#32;&#32;&#32;&#32;_GLIBCXX23_CONSTEXPR
+1100 &#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;__detail::__unique_ptr_t&lt;_Tp&gt;
+1101 &#32;&#32;&#32;&#32;make_unique_for_overwrite()
+1102 &#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;unique_ptr&lt;_Tp&gt;(<emphasis role="keyword">new</emphasis>&#32;_Tp);&#32;}
+1103 
+1111 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+1112 &#32;&#32;&#32;&#32;_GLIBCXX23_CONSTEXPR
+1113 &#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;__detail::__unique_ptr_array_t&lt;_Tp&gt;
+1114 &#32;&#32;&#32;&#32;make_unique_for_overwrite(<emphasis role="keywordtype">size_t</emphasis>&#32;__num)
+1115 &#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;unique_ptr&lt;_Tp&gt;(<emphasis role="keyword">new</emphasis>&#32;remove_extent_t&lt;_Tp&gt;[__num]);&#32;}
+1116 
+1122 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp,&#32;<emphasis role="keyword">typename</emphasis>...&#32;_Args&gt;
+1123 &#32;&#32;&#32;&#32;__detail::__invalid_make_unique_t&lt;_Tp&gt;
+1124 &#32;&#32;&#32;&#32;make_unique_for_overwrite(_Args&amp;&amp;...)&#32;=&#32;<emphasis role="keyword">delete</emphasis>;
+1125 <emphasis role="preprocessor">#endif&#32;</emphasis><emphasis role="comment">//&#32;C++20</emphasis>
+1126 
+1127 <emphasis role="preprocessor">#endif&#32;</emphasis><emphasis role="comment">//&#32;C++14</emphasis>
+1128 
+1129 <emphasis role="preprocessor">#if&#32;__cplusplus&#32;&gt;&#32;201703L&#32;&amp;&amp;&#32;__cpp_concepts</emphasis>
+1130 &#32;&#32;<emphasis role="comment">//&#32;_GLIBCXX_RESOLVE_LIB_DEFECTS</emphasis>
+1131 &#32;&#32;<emphasis role="comment">//&#32;2948.&#32;unique_ptr&#32;does&#32;not&#32;define&#32;operator&lt;&lt;&#32;for&#32;stream&#32;output</emphasis>
+1135 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_CharT,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Traits,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Tp,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Dp&gt;
+1136 &#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;basic_ostream&lt;_CharT,&#32;_Traits&gt;&amp;
+1137 &#32;&#32;&#32;&#32;<link linkend="_forward__declarations_8h_1ade7e3bc03b39cb3b5684a4c302832e3c">operator&lt;&lt;</link>(basic_ostream&lt;_CharT,&#32;_Traits&gt;&amp;&#32;__os,
+1138 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;unique_ptr&lt;_Tp,&#32;_Dp&gt;&amp;&#32;__p)
+1139 &#32;&#32;&#32;&#32;<emphasis role="keyword">requires</emphasis>&#32;<emphasis role="keyword">requires</emphasis>&#32;{&#32;__os&#32;&lt;&lt;&#32;__p.get();&#32;}
+1140 &#32;&#32;&#32;&#32;{
+1141 &#32;&#32;&#32;&#32;&#32;&#32;__os&#32;&lt;&lt;&#32;__p.get();
+1142 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__os;
+1143 &#32;&#32;&#32;&#32;}
+1144 <emphasis role="preprocessor">#endif&#32;</emphasis><emphasis role="comment">//&#32;C++20</emphasis>
+1145 
+1147 
+1148 <emphasis role="preprocessor">#if&#32;__cplusplus&#32;&gt;=&#32;201703L</emphasis>
+1149 &#32;&#32;<emphasis role="keyword">namespace&#32;</emphasis>__detail::__variant
+1150 &#32;&#32;{
+1151 &#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&gt;&#32;<emphasis role="keyword">struct&#32;</emphasis>_Never_valueless_alt;&#32;<emphasis role="comment">//&#32;see&#32;&lt;variant&gt;</emphasis>
+1152 
+1153 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Provide&#32;the&#32;strong&#32;exception-safety&#32;guarantee&#32;when&#32;emplacing&#32;a</emphasis>
+1154 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;unique_ptr&#32;into&#32;a&#32;variant.</emphasis>
+1155 &#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Del&gt;
+1156 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">struct&#32;</emphasis>_Never_valueless_alt&lt;<link linkend="_namespacestd">std</link>::unique_ptr&lt;_Tp,&#32;_Del&gt;&gt;
+1157 &#32;&#32;&#32;&#32;&#32;&#32;:&#32;std::true_type
+1158 &#32;&#32;&#32;&#32;&#32;&#32;{&#32;};
+1159 &#32;&#32;}&#32;&#32;<emphasis role="comment">//&#32;namespace&#32;__detail::__variant</emphasis>
+1160 <emphasis role="preprocessor">#endif&#32;</emphasis><emphasis role="comment">//&#32;C++17</emphasis>
+1161 
+1162 _GLIBCXX_END_NAMESPACE_VERSION
+1163 }&#32;<emphasis role="comment">//&#32;namespace</emphasis>
+1164 
+1165 <emphasis role="preprocessor">#endif&#32;</emphasis><emphasis role="comment">/*&#32;_UNIQUE_PTR_H&#32;*/</emphasis><emphasis role="preprocessor"></emphasis>
+</programlisting></section>

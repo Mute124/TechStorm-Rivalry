@@ -1,0 +1,625 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<section xmlns="http://docbook.org/ns/docbook" version="5.0" xmlns:xlink="http://www.w3.org/1999/xlink" xml:id="__classes_2lib_2external_2stb__rect__pack_8h_source" xml:lang="en-US">
+<title>stb_rect_pack.h</title>
+<indexterm><primary>C:/Users/HP/Documents/GitHub/Minero-Game/Classes/lib/external/stb_rect_pack.h</primary></indexterm>
+Go to the documentation of this file.<programlisting linenumbering="unnumbered">1 <emphasis role="comment">//&#32;stb_rect_pack.h&#32;-&#32;v1.01&#32;-&#32;public&#32;domain&#32;-&#32;rectangle&#32;packing</emphasis>
+2 <emphasis role="comment">//&#32;Sean&#32;Barrett&#32;2014</emphasis>
+3 <emphasis role="comment">//</emphasis>
+4 <emphasis role="comment">//&#32;Useful&#32;for&#32;e.g.&#32;packing&#32;rectangular&#32;textures&#32;into&#32;an&#32;atlas.</emphasis>
+5 <emphasis role="comment">//&#32;Does&#32;not&#32;do&#32;rotation.</emphasis>
+6 <emphasis role="comment">//</emphasis>
+7 <emphasis role="comment">//&#32;Before&#32;#including,</emphasis>
+8 <emphasis role="comment">//</emphasis>
+9 <emphasis role="comment">//&#32;&#32;&#32;&#32;#define&#32;STB_RECT_PACK_IMPLEMENTATION</emphasis>
+10 <emphasis role="comment">//</emphasis>
+11 <emphasis role="comment">//&#32;in&#32;the&#32;file&#32;that&#32;you&#32;want&#32;to&#32;have&#32;the&#32;implementation.</emphasis>
+12 <emphasis role="comment">//</emphasis>
+13 <emphasis role="comment">//&#32;Not&#32;necessarily&#32;the&#32;awesomest&#32;packing&#32;method,&#32;but&#32;better&#32;than</emphasis>
+14 <emphasis role="comment">//&#32;the&#32;totally&#32;naive&#32;one&#32;in&#32;stb_truetype&#32;(which&#32;is&#32;primarily&#32;what</emphasis>
+15 <emphasis role="comment">//&#32;this&#32;is&#32;meant&#32;to&#32;replace).</emphasis>
+16 <emphasis role="comment">//</emphasis>
+17 <emphasis role="comment">//&#32;Has&#32;only&#32;had&#32;a&#32;few&#32;tests&#32;run,&#32;may&#32;have&#32;issues.</emphasis>
+18 <emphasis role="comment">//</emphasis>
+19 <emphasis role="comment">//&#32;More&#32;docs&#32;to&#32;come.</emphasis>
+20 <emphasis role="comment">//</emphasis>
+21 <emphasis role="comment">//&#32;No&#32;memory&#32;allocations;&#32;uses&#32;qsort()&#32;and&#32;assert()&#32;from&#32;stdlib.</emphasis>
+22 <emphasis role="comment">//&#32;Can&#32;override&#32;those&#32;by&#32;defining&#32;STBRP_SORT&#32;and&#32;STBRP_ASSERT.</emphasis>
+23 <emphasis role="comment">//</emphasis>
+24 <emphasis role="comment">//&#32;This&#32;library&#32;currently&#32;uses&#32;the&#32;Skyline&#32;Bottom-Left&#32;algorithm.</emphasis>
+25 <emphasis role="comment">//</emphasis>
+26 <emphasis role="comment">//&#32;Please&#32;note:&#32;better&#32;rectangle&#32;packers&#32;are&#32;welcome!&#32;Please</emphasis>
+27 <emphasis role="comment">//&#32;implement&#32;them&#32;to&#32;the&#32;same&#32;API,&#32;but&#32;with&#32;a&#32;different&#32;init</emphasis>
+28 <emphasis role="comment">//&#32;function.</emphasis>
+29 <emphasis role="comment">//</emphasis>
+30 <emphasis role="comment">//&#32;Credits</emphasis>
+31 <emphasis role="comment">//</emphasis>
+32 <emphasis role="comment">//&#32;&#32;Library</emphasis>
+33 <emphasis role="comment">//&#32;&#32;&#32;&#32;Sean&#32;Barrett</emphasis>
+34 <emphasis role="comment">//&#32;&#32;Minor&#32;features</emphasis>
+35 <emphasis role="comment">//&#32;&#32;&#32;&#32;Martins&#32;Mozeiko</emphasis>
+36 <emphasis role="comment">//&#32;&#32;&#32;&#32;github:IntellectualKitty</emphasis>
+37 <emphasis role="comment">//</emphasis>
+38 <emphasis role="comment">//&#32;&#32;Bugfixes&#32;/&#32;warning&#32;fixes</emphasis>
+39 <emphasis role="comment">//&#32;&#32;&#32;&#32;Jeremy&#32;Jaussaud</emphasis>
+40 <emphasis role="comment">//&#32;&#32;&#32;&#32;Fabian&#32;Giesen</emphasis>
+41 <emphasis role="comment">//</emphasis>
+42 <emphasis role="comment">//&#32;Version&#32;history:</emphasis>
+43 <emphasis role="comment">//</emphasis>
+44 <emphasis role="comment">//&#32;&#32;&#32;&#32;&#32;1.01&#32;&#32;(2021-07-11)&#32;&#32;always&#32;use&#32;large&#32;rect&#32;mode,&#32;expose&#32;STBRP__MAXVAL&#32;in&#32;public&#32;section</emphasis>
+45 <emphasis role="comment">//&#32;&#32;&#32;&#32;&#32;1.00&#32;&#32;(2019-02-25)&#32;&#32;avoid&#32;small&#32;space&#32;waste;&#32;gracefully&#32;fail&#32;too-wide&#32;rectangles</emphasis>
+46 <emphasis role="comment">//&#32;&#32;&#32;&#32;&#32;0.99&#32;&#32;(2019-02-07)&#32;&#32;warning&#32;fixes</emphasis>
+47 <emphasis role="comment">//&#32;&#32;&#32;&#32;&#32;0.11&#32;&#32;(2017-03-03)&#32;&#32;return&#32;packing&#32;success/fail&#32;result</emphasis>
+48 <emphasis role="comment">//&#32;&#32;&#32;&#32;&#32;0.10&#32;&#32;(2016-10-25)&#32;&#32;remove&#32;cast-away-const&#32;to&#32;avoid&#32;warnings</emphasis>
+49 <emphasis role="comment">//&#32;&#32;&#32;&#32;&#32;0.09&#32;&#32;(2016-08-27)&#32;&#32;fix&#32;compiler&#32;warnings</emphasis>
+50 <emphasis role="comment">//&#32;&#32;&#32;&#32;&#32;0.08&#32;&#32;(2015-09-13)&#32;&#32;really&#32;fix&#32;bug&#32;with&#32;empty&#32;rects&#32;(w=0&#32;or&#32;h=0)</emphasis>
+51 <emphasis role="comment">//&#32;&#32;&#32;&#32;&#32;0.07&#32;&#32;(2015-09-13)&#32;&#32;fix&#32;bug&#32;with&#32;empty&#32;rects&#32;(w=0&#32;or&#32;h=0)</emphasis>
+52 <emphasis role="comment">//&#32;&#32;&#32;&#32;&#32;0.06&#32;&#32;(2015-04-15)&#32;&#32;added&#32;STBRP_SORT&#32;to&#32;allow&#32;replacing&#32;qsort</emphasis>
+53 <emphasis role="comment">//&#32;&#32;&#32;&#32;&#32;0.05:&#32;&#32;added&#32;STBRP_ASSERT&#32;to&#32;allow&#32;replacing&#32;assert</emphasis>
+54 <emphasis role="comment">//&#32;&#32;&#32;&#32;&#32;0.04:&#32;&#32;fixed&#32;minor&#32;bug&#32;in&#32;STBRP_LARGE_RECTS&#32;support</emphasis>
+55 <emphasis role="comment">//&#32;&#32;&#32;&#32;&#32;0.01:&#32;&#32;initial&#32;release</emphasis>
+56 <emphasis role="comment">//</emphasis>
+57 <emphasis role="comment">//&#32;LICENSE</emphasis>
+58 <emphasis role="comment">//</emphasis>
+59 <emphasis role="comment">//&#32;&#32;&#32;See&#32;end&#32;of&#32;file&#32;for&#32;license&#32;information.</emphasis>
+60 
+62 <emphasis role="comment">//</emphasis>
+63 <emphasis role="comment">//&#32;&#32;&#32;&#32;&#32;&#32;&#32;INCLUDE&#32;SECTION</emphasis>
+64 <emphasis role="comment">//</emphasis>
+65 
+66 <emphasis role="preprocessor">#ifndef&#32;STB_INCLUDE_STB_RECT_PACK_H</emphasis>
+67 <emphasis role="preprocessor">#define&#32;STB_INCLUDE_STB_RECT_PACK_H</emphasis>
+68 
+69 <emphasis role="preprocessor">#define&#32;STB_RECT_PACK_VERSION&#32;&#32;1</emphasis>
+70 
+71 <emphasis role="preprocessor">#ifdef&#32;STBRP_STATIC</emphasis>
+72 <emphasis role="preprocessor">#define&#32;STBRP_DEF&#32;static</emphasis>
+73 <emphasis role="preprocessor">#else</emphasis>
+74 <emphasis role="preprocessor">#define&#32;STBRP_DEF&#32;extern</emphasis>
+75 <emphasis role="preprocessor">#endif</emphasis>
+76 
+77 <emphasis role="preprocessor">#ifdef&#32;__cplusplus</emphasis>
+78 <emphasis role="keyword">extern</emphasis>&#32;<emphasis role="stringliteral">&quot;C&quot;</emphasis>&#32;{
+79 <emphasis role="preprocessor">#endif</emphasis>
+80 
+81 <emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">struct&#32;</emphasis><link linkend="_structstbrp__context">stbrp_context</link>&#32;<link linkend="_structstbrp__context">stbrp_context</link>;
+82 <emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">struct&#32;</emphasis><link linkend="_structstbrp__node">stbrp_node</link>&#32;&#32;&#32;&#32;<link linkend="_structstbrp__node">stbrp_node</link>;
+83 <emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">struct&#32;</emphasis><link linkend="_structstbrp__rect">stbrp_rect</link>&#32;&#32;&#32;&#32;<link linkend="_structstbrp__rect">stbrp_rect</link>;
+84 
+85 <emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2external_2stb__rect__pack_8h_1a4a396a45893c12de32e2d598abd6b302">stbrp_coord</link>;
+86 
+87 <emphasis role="preprocessor">#define&#32;STBRP__MAXVAL&#32;&#32;0x7fffffff</emphasis>
+88 <emphasis role="comment">//&#32;Mostly&#32;for&#32;internal&#32;use,&#32;but&#32;this&#32;is&#32;the&#32;maximum&#32;supported&#32;coordinate&#32;value.</emphasis>
+89 
+90 <link linkend="__classes_2lib_2external_2stb__rect__pack_8h_1a0b73f2d2521fb81afc056a823e3ca753">STBRP_DEF</link>&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2external_2stb__rect__pack_8h_1af038ae1b98573f24736c9a3eed0478ba">stbrp_pack_rects</link>&#32;(<link linkend="_structstbrp__context">stbrp_context</link>&#32;*context,&#32;<link linkend="_structstbrp__rect">stbrp_rect</link>&#32;*<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1ac34ca70e63c2ed89e7bf6ba3b4b62f1b">rects</link>,&#32;<emphasis role="keywordtype">int</emphasis>&#32;num_rects);
+91 <emphasis role="comment">//&#32;Assign&#32;packed&#32;locations&#32;to&#32;rectangles.&#32;The&#32;rectangles&#32;are&#32;of&#32;type</emphasis>
+92 <emphasis role="comment">//&#32;&apos;stbrp_rect&apos;&#32;defined&#32;below,&#32;stored&#32;in&#32;the&#32;array&#32;&apos;rects&apos;,&#32;and&#32;there</emphasis>
+93 <emphasis role="comment">//&#32;are&#32;&apos;num_rects&apos;&#32;many&#32;of&#32;them.</emphasis>
+94 <emphasis role="comment">//</emphasis>
+95 <emphasis role="comment">//&#32;Rectangles&#32;which&#32;are&#32;successfully&#32;packed&#32;have&#32;the&#32;&apos;was_packed&apos;&#32;flag</emphasis>
+96 <emphasis role="comment">//&#32;set&#32;to&#32;a&#32;non-zero&#32;value&#32;and&#32;&apos;x&apos;&#32;and&#32;&apos;y&apos;&#32;store&#32;the&#32;minimum&#32;location</emphasis>
+97 <emphasis role="comment">//&#32;on&#32;each&#32;axis&#32;(i.e.&#32;bottom-left&#32;in&#32;cartesian&#32;coordinates,&#32;top-left</emphasis>
+98 <emphasis role="comment">//&#32;if&#32;you&#32;imagine&#32;y&#32;increasing&#32;downwards).&#32;Rectangles&#32;which&#32;do&#32;not&#32;fit</emphasis>
+99 <emphasis role="comment">//&#32;have&#32;the&#32;&apos;was_packed&apos;&#32;flag&#32;set&#32;to&#32;0.</emphasis>
+100 <emphasis role="comment">//</emphasis>
+101 <emphasis role="comment">//&#32;You&#32;should&#32;not&#32;try&#32;to&#32;access&#32;the&#32;&apos;rects&apos;&#32;array&#32;from&#32;another&#32;thread</emphasis>
+102 <emphasis role="comment">//&#32;while&#32;this&#32;function&#32;is&#32;running,&#32;as&#32;the&#32;function&#32;temporarily&#32;reorders</emphasis>
+103 <emphasis role="comment">//&#32;the&#32;array&#32;while&#32;it&#32;executes.</emphasis>
+104 <emphasis role="comment">//</emphasis>
+105 <emphasis role="comment">//&#32;To&#32;pack&#32;into&#32;another&#32;rectangle,&#32;you&#32;need&#32;to&#32;call&#32;stbrp_init_target</emphasis>
+106 <emphasis role="comment">//&#32;again.&#32;To&#32;continue&#32;packing&#32;into&#32;the&#32;same&#32;rectangle,&#32;you&#32;can&#32;call</emphasis>
+107 <emphasis role="comment">//&#32;this&#32;function&#32;again.&#32;Calling&#32;this&#32;multiple&#32;times&#32;with&#32;multiple&#32;rect</emphasis>
+108 <emphasis role="comment">//&#32;arrays&#32;will&#32;probably&#32;produce&#32;worse&#32;packing&#32;results&#32;than&#32;calling&#32;it</emphasis>
+109 <emphasis role="comment">//&#32;a&#32;single&#32;time&#32;with&#32;the&#32;full&#32;rectangle&#32;array,&#32;but&#32;the&#32;option&#32;is</emphasis>
+110 <emphasis role="comment">//&#32;available.</emphasis>
+111 <emphasis role="comment">//</emphasis>
+112 <emphasis role="comment">//&#32;The&#32;function&#32;returns&#32;1&#32;if&#32;all&#32;of&#32;the&#32;rectangles&#32;were&#32;successfully</emphasis>
+113 <emphasis role="comment">//&#32;packed&#32;and&#32;0&#32;otherwise.</emphasis>
+114 
+115 <emphasis role="keyword">struct&#32;</emphasis><link linkend="_structstbrp__rect">stbrp_rect</link>
+116 {
+117 &#32;&#32;&#32;<emphasis role="comment">//&#32;reserved&#32;for&#32;your&#32;use:</emphasis>
+118 &#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_structstbrp__rect_1a92da8626bc99df041c0c3bfd01c25f7a">id</link>;
+119 
+120 &#32;&#32;&#32;<emphasis role="comment">//&#32;input:</emphasis>
+121 &#32;&#32;&#32;<link linkend="__old_2_classes_2lib_2raylib_2src_2external_2stb__rect__pack_8h_1ac2c2491b95dea6a298b7423dc762dfd9">stbrp_coord</link>&#32;&#32;&#32;&#32;<link linkend="_structstbrp__rect_1a248d43f1eb979c1e7b92ba6df431dec5">w</link>,&#32;<link linkend="_structstbrp__rect_1af68de2dadc7972b7c089d5e0c0558398">h</link>;
+122 
+123 &#32;&#32;&#32;<emphasis role="comment">//&#32;output:</emphasis>
+124 &#32;&#32;&#32;<link linkend="__old_2_classes_2lib_2raylib_2src_2external_2stb__rect__pack_8h_1ac2c2491b95dea6a298b7423dc762dfd9">stbrp_coord</link>&#32;&#32;&#32;&#32;<link linkend="_structstbrp__rect_1a4cc623a3e29f0bc0d3375f6645c84d18">x</link>,&#32;<link linkend="_structstbrp__rect_1ae3034c1fbf86043b568f5a4dddf946fa">y</link>;
+125 &#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_structstbrp__rect_1a74ba347755ce17f2f8a2ea66c612af49">was_packed</link>;&#32;&#32;<emphasis role="comment">//&#32;non-zero&#32;if&#32;valid&#32;packing</emphasis>
+126 
+127 };&#32;<emphasis role="comment">//&#32;16&#32;bytes,&#32;nominally</emphasis>
+128 
+129 
+130 <link linkend="__classes_2lib_2external_2stb__rect__pack_8h_1a0b73f2d2521fb81afc056a823e3ca753">STBRP_DEF</link>&#32;<emphasis role="keywordtype">void</emphasis>&#32;<link linkend="__classes_2lib_2external_2stb__rect__pack_8h_1a8b32f5ad458f614f5d419ef26cef5b3c">stbrp_init_target</link>&#32;(<link linkend="_structstbrp__context">stbrp_context</link>&#32;*context,&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a3ce386e55bbeb900c1b23e064b89bd04">width</link>,&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1aedd0ea77029b98ce91e47c19addcb68f">height</link>,&#32;<link linkend="_structstbrp__node">stbrp_node</link>&#32;*nodes,&#32;<emphasis role="keywordtype">int</emphasis>&#32;num_nodes);
+131 <emphasis role="comment">//&#32;Initialize&#32;a&#32;rectangle&#32;packer&#32;to:</emphasis>
+132 <emphasis role="comment">//&#32;&#32;&#32;&#32;pack&#32;a&#32;rectangle&#32;that&#32;is&#32;&apos;width&apos;&#32;by&#32;&apos;height&apos;&#32;in&#32;dimensions</emphasis>
+133 <emphasis role="comment">//&#32;&#32;&#32;&#32;using&#32;temporary&#32;storage&#32;provided&#32;by&#32;the&#32;array&#32;&apos;nodes&apos;,&#32;which&#32;is&#32;&apos;num_nodes&apos;&#32;long</emphasis>
+134 <emphasis role="comment">//</emphasis>
+135 <emphasis role="comment">//&#32;You&#32;must&#32;call&#32;this&#32;function&#32;every&#32;time&#32;you&#32;start&#32;packing&#32;into&#32;a&#32;new&#32;target.</emphasis>
+136 <emphasis role="comment">//</emphasis>
+137 <emphasis role="comment">//&#32;There&#32;is&#32;no&#32;&quot;shutdown&quot;&#32;function.&#32;The&#32;&apos;nodes&apos;&#32;memory&#32;must&#32;stay&#32;valid&#32;for</emphasis>
+138 <emphasis role="comment">//&#32;the&#32;following&#32;stbrp_pack_rects()&#32;call&#32;(or&#32;calls),&#32;but&#32;can&#32;be&#32;freed&#32;after</emphasis>
+139 <emphasis role="comment">//&#32;the&#32;call&#32;(or&#32;calls)&#32;finish.</emphasis>
+140 <emphasis role="comment">//</emphasis>
+141 <emphasis role="comment">//&#32;Note:&#32;to&#32;guarantee&#32;best&#32;results,&#32;either:</emphasis>
+142 <emphasis role="comment">//&#32;&#32;&#32;&#32;&#32;&#32;&#32;1.&#32;make&#32;sure&#32;&apos;num_nodes&apos;&#32;&gt;=&#32;&apos;width&apos;</emphasis>
+143 <emphasis role="comment">//&#32;&#32;&#32;or&#32;&#32;2.&#32;call&#32;stbrp_allow_out_of_mem()&#32;defined&#32;below&#32;with&#32;&apos;allow_out_of_mem&#32;=&#32;1&apos;</emphasis>
+144 <emphasis role="comment">//</emphasis>
+145 <emphasis role="comment">//&#32;If&#32;you&#32;don&apos;t&#32;do&#32;either&#32;of&#32;the&#32;above&#32;things,&#32;widths&#32;will&#32;be&#32;quantized&#32;to&#32;multiples</emphasis>
+146 <emphasis role="comment">//&#32;of&#32;small&#32;integers&#32;to&#32;guarantee&#32;the&#32;algorithm&#32;doesn&apos;t&#32;run&#32;out&#32;of&#32;temporary&#32;storage.</emphasis>
+147 <emphasis role="comment">//</emphasis>
+148 <emphasis role="comment">//&#32;If&#32;you&#32;do&#32;#2,&#32;then&#32;the&#32;non-quantized&#32;algorithm&#32;will&#32;be&#32;used,&#32;but&#32;the&#32;algorithm</emphasis>
+149 <emphasis role="comment">//&#32;may&#32;run&#32;out&#32;of&#32;temporary&#32;storage&#32;and&#32;be&#32;unable&#32;to&#32;pack&#32;some&#32;rectangles.</emphasis>
+150 
+151 <link linkend="__classes_2lib_2external_2stb__rect__pack_8h_1a0b73f2d2521fb81afc056a823e3ca753">STBRP_DEF</link>&#32;<emphasis role="keywordtype">void</emphasis>&#32;<link linkend="__classes_2lib_2external_2stb__rect__pack_8h_1a1babd70b223e571305fd9753a83a4fda">stbrp_setup_allow_out_of_mem</link>&#32;(<link linkend="_structstbrp__context">stbrp_context</link>&#32;*context,&#32;<emphasis role="keywordtype">int</emphasis>&#32;allow_out_of_mem);
+152 <emphasis role="comment">//&#32;Optionally&#32;call&#32;this&#32;function&#32;after&#32;init&#32;but&#32;before&#32;doing&#32;any&#32;packing&#32;to</emphasis>
+153 <emphasis role="comment">//&#32;change&#32;the&#32;handling&#32;of&#32;the&#32;out-of-temp-memory&#32;scenario,&#32;described&#32;above.</emphasis>
+154 <emphasis role="comment">//&#32;If&#32;you&#32;call&#32;init&#32;again,&#32;this&#32;will&#32;be&#32;reset&#32;to&#32;the&#32;default&#32;(false).</emphasis>
+155 
+156 
+157 <link linkend="__classes_2lib_2external_2stb__rect__pack_8h_1a0b73f2d2521fb81afc056a823e3ca753">STBRP_DEF</link>&#32;<emphasis role="keywordtype">void</emphasis>&#32;<link linkend="__classes_2lib_2external_2stb__rect__pack_8h_1a5a8223866c146933da3e152066bf61a1">stbrp_setup_heuristic</link>&#32;(<link linkend="_structstbrp__context">stbrp_context</link>&#32;*context,&#32;<emphasis role="keywordtype">int</emphasis>&#32;heuristic);
+158 <emphasis role="comment">//&#32;Optionally&#32;select&#32;which&#32;packing&#32;heuristic&#32;the&#32;library&#32;should&#32;use.&#32;Different</emphasis>
+159 <emphasis role="comment">//&#32;heuristics&#32;will&#32;produce&#32;better/worse&#32;results&#32;for&#32;different&#32;data&#32;sets.</emphasis>
+160 <emphasis role="comment">//&#32;If&#32;you&#32;call&#32;init&#32;again,&#32;this&#32;will&#32;be&#32;reset&#32;to&#32;the&#32;default.</emphasis>
+161 
+162 <emphasis role="keyword">enum</emphasis>
+163 {
+164 &#32;&#32;&#32;<link linkend="__classes_2lib_2external_2stb__rect__pack_8h_1a85c7862086c1f92e4fb4108e176d8140a5e4dd0b1cbee654bbfeebc5311f03525">STBRP_HEURISTIC_Skyline_default</link>=0,
+165 &#32;&#32;&#32;<link linkend="__classes_2lib_2external_2stb__rect__pack_8h_1a85c7862086c1f92e4fb4108e176d8140a13530b067fb1f9707dc0f9d51f8b074a">STBRP_HEURISTIC_Skyline_BL_sortHeight</link>&#32;=&#32;<link linkend="__classes_2lib_2external_2stb__rect__pack_8h_1a85c7862086c1f92e4fb4108e176d8140a5e4dd0b1cbee654bbfeebc5311f03525">STBRP_HEURISTIC_Skyline_default</link>,
+166 &#32;&#32;&#32;<link linkend="__classes_2lib_2external_2stb__rect__pack_8h_1a85c7862086c1f92e4fb4108e176d8140a11d62749c4405a231a6fd1dd9d46615c">STBRP_HEURISTIC_Skyline_BF_sortHeight</link>
+167 };
+168 
+169 
+171 <emphasis role="comment">//</emphasis>
+172 <emphasis role="comment">//&#32;the&#32;details&#32;of&#32;the&#32;following&#32;structures&#32;don&apos;t&#32;matter&#32;to&#32;you,&#32;but&#32;they&#32;must</emphasis>
+173 <emphasis role="comment">//&#32;be&#32;visible&#32;so&#32;you&#32;can&#32;handle&#32;the&#32;memory&#32;allocations&#32;for&#32;them</emphasis>
+174 
+175 <emphasis role="keyword">struct&#32;</emphasis><link linkend="_structstbrp__node">stbrp_node</link>
+176 {
+177 &#32;&#32;&#32;<link linkend="__old_2_classes_2lib_2raylib_2src_2external_2stb__rect__pack_8h_1ac2c2491b95dea6a298b7423dc762dfd9">stbrp_coord</link>&#32;&#32;<link linkend="_structstbrp__node_1a45ab31a88025db27d08040d715b129ea">x</link>,<link linkend="_structstbrp__node_1ad0415cb102a4f37aa45073653307e67e">y</link>;
+178 &#32;&#32;&#32;<link linkend="_structstbrp__node">stbrp_node</link>&#32;&#32;*<link linkend="_structstbrp__node_1a3c4a162b9ebf156eeae37a63ac587ac7">next</link>;
+179 };
+180 
+181 <emphasis role="keyword">struct&#32;</emphasis><link linkend="_structstbrp__context">stbrp_context</link>
+182 {
+183 &#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="_structstbrp__context_1a70cfcb2044ce8397cc440d28b30c09b2">width</link>;
+184 &#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="_structstbrp__context_1af3715a6f3faecfb4fac8f6ccbb71f9c7">height</link>;
+185 &#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="_structstbrp__context_1ae36053e2001a725aec2b5756dc990481">align</link>;
+186 &#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="_structstbrp__context_1a007509feee322404083034e4c2d3dc5d">init_mode</link>;
+187 &#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="_structstbrp__context_1a4b61a7f94e50a54c075e2a8f99f6503a">heuristic</link>;
+188 &#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="_structstbrp__context_1afa8105d4ef6d3e0ae5aaf8e1ed4b2c58">num_nodes</link>;
+189 &#32;&#32;&#32;<link linkend="_structstbrp__node">stbrp_node</link>&#32;*<link linkend="_structstbrp__context_1a920d5f646912f75e3c87c652210ab2ba">active_head</link>;
+190 &#32;&#32;&#32;<link linkend="_structstbrp__node">stbrp_node</link>&#32;*<link linkend="_structstbrp__context_1a8cfe2d49dad3d7af0951e04cc1ca7369">free_head</link>;
+191 &#32;&#32;&#32;<link linkend="_structstbrp__node">stbrp_node</link>&#32;<link linkend="_structstbrp__context_1ac16f33a537bfa13a664cfb50e3aab37e">extra</link>[2];&#32;<emphasis role="comment">//&#32;we&#32;allocate&#32;two&#32;extra&#32;nodes&#32;so&#32;optimal&#32;user-node-count&#32;is&#32;&apos;width&apos;&#32;not&#32;&apos;width+2&apos;</emphasis>
+192 };
+193 
+194 <emphasis role="preprocessor">#ifdef&#32;__cplusplus</emphasis>
+195 }
+196 <emphasis role="preprocessor">#endif</emphasis>
+197 
+198 <emphasis role="preprocessor">#endif</emphasis>
+199 
+201 <emphasis role="comment">//</emphasis>
+202 <emphasis role="comment">//&#32;&#32;&#32;&#32;&#32;IMPLEMENTATION&#32;SECTION</emphasis>
+203 <emphasis role="comment">//</emphasis>
+204 
+205 <emphasis role="preprocessor">#ifdef&#32;STB_RECT_PACK_IMPLEMENTATION</emphasis>
+206 <emphasis role="preprocessor">#ifndef&#32;STBRP_SORT</emphasis>
+207 <emphasis role="preprocessor">#include&#32;&lt;stdlib.h&gt;</emphasis>
+208 <emphasis role="preprocessor">#define&#32;STBRP_SORT&#32;qsort</emphasis>
+209 <emphasis role="preprocessor">#endif</emphasis>
+210 
+211 <emphasis role="preprocessor">#ifndef&#32;STBRP_ASSERT</emphasis>
+212 <emphasis role="preprocessor">#include&#32;&lt;assert.h&gt;</emphasis>
+213 <emphasis role="preprocessor">#define&#32;STBRP_ASSERT&#32;assert</emphasis>
+214 <emphasis role="preprocessor">#endif</emphasis>
+215 
+216 <emphasis role="preprocessor">#ifdef&#32;_MSC_VER</emphasis>
+217 <emphasis role="preprocessor">#define&#32;STBRP__NOTUSED(v)&#32;&#32;(void)(v)</emphasis>
+218 <emphasis role="preprocessor">#define&#32;STBRP__CDECL&#32;&#32;&#32;&#32;&#32;&#32;&#32;__cdecl</emphasis>
+219 <emphasis role="preprocessor">#else</emphasis>
+220 <emphasis role="preprocessor">#define&#32;STBRP__NOTUSED(v)&#32;&#32;(void)sizeof(v)</emphasis>
+221 <emphasis role="preprocessor">#define&#32;STBRP__CDECL</emphasis>
+222 <emphasis role="preprocessor">#endif</emphasis>
+223 
+224 <emphasis role="keyword">enum</emphasis>
+225 {
+226 &#32;&#32;&#32;STBRP__INIT_skyline&#32;=&#32;1
+227 };
+228 
+229 <link linkend="__classes_2lib_2external_2stb__rect__pack_8h_1a0b73f2d2521fb81afc056a823e3ca753">STBRP_DEF</link>&#32;<emphasis role="keywordtype">void</emphasis>&#32;<link linkend="__classes_2lib_2external_2stb__rect__pack_8h_1a5a8223866c146933da3e152066bf61a1">stbrp_setup_heuristic</link>(<link linkend="_structstbrp__context">stbrp_context</link>&#32;*context,&#32;<emphasis role="keywordtype">int</emphasis>&#32;heuristic)
+230 {
+231 &#32;&#32;&#32;<emphasis role="keywordflow">switch</emphasis>&#32;(context-&gt;<link linkend="_structstbrp__context_1a007509feee322404083034e4c2d3dc5d">init_mode</link>)&#32;{
+232 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">case</emphasis>&#32;STBRP__INIT_skyline:
+233 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;STBRP_ASSERT(heuristic&#32;==&#32;<link linkend="__classes_2lib_2external_2stb__rect__pack_8h_1a85c7862086c1f92e4fb4108e176d8140a13530b067fb1f9707dc0f9d51f8b074a">STBRP_HEURISTIC_Skyline_BL_sortHeight</link>&#32;||&#32;heuristic&#32;==&#32;<link linkend="__classes_2lib_2external_2stb__rect__pack_8h_1a85c7862086c1f92e4fb4108e176d8140a11d62749c4405a231a6fd1dd9d46615c">STBRP_HEURISTIC_Skyline_BF_sortHeight</link>);
+234 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;context-&gt;<link linkend="_structstbrp__context_1a4b61a7f94e50a54c075e2a8f99f6503a">heuristic</link>&#32;=&#32;<link linkend="_namespace____gnu__parallel_1abfff682f83a1eacf1b43ad2b33a1954fa7ebd97084fc43d5c74ee94f143b01a10">heuristic</link>;
+235 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">break</emphasis>;
+236 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">default</emphasis>:
+237 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;STBRP_ASSERT(0);
+238 &#32;&#32;&#32;}
+239 }
+240 
+241 <link linkend="__classes_2lib_2external_2stb__rect__pack_8h_1a0b73f2d2521fb81afc056a823e3ca753">STBRP_DEF</link>&#32;<emphasis role="keywordtype">void</emphasis>&#32;<link linkend="__classes_2lib_2external_2stb__rect__pack_8h_1a1babd70b223e571305fd9753a83a4fda">stbrp_setup_allow_out_of_mem</link>(<link linkend="_structstbrp__context">stbrp_context</link>&#32;*context,&#32;<emphasis role="keywordtype">int</emphasis>&#32;allow_out_of_mem)
+242 {
+243 &#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(allow_out_of_mem)
+244 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;if&#32;it&apos;s&#32;ok&#32;to&#32;run&#32;out&#32;of&#32;memory,&#32;then&#32;don&apos;t&#32;bother&#32;aligning&#32;them;</emphasis>
+245 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;this&#32;gives&#32;better&#32;packing,&#32;but&#32;may&#32;fail&#32;due&#32;to&#32;OOM&#32;(even&#32;though</emphasis>
+246 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;the&#32;rectangles&#32;easily&#32;fit).&#32;@TODO&#32;a&#32;smarter&#32;approach&#32;would&#32;be&#32;to&#32;only</emphasis>
+247 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;quantize&#32;once&#32;we&apos;ve&#32;hit&#32;OOM,&#32;then&#32;we&#32;could&#32;get&#32;rid&#32;of&#32;this&#32;parameter.</emphasis>
+248 &#32;&#32;&#32;&#32;&#32;&#32;context-&gt;<link linkend="_structstbrp__context_1ae36053e2001a725aec2b5756dc990481">align</link>&#32;=&#32;1;
+249 &#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>&#32;{
+250 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;if&#32;it&apos;s&#32;not&#32;ok&#32;to&#32;run&#32;out&#32;of&#32;memory,&#32;then&#32;quantize&#32;the&#32;widths</emphasis>
+251 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;so&#32;that&#32;num_nodes&#32;is&#32;always&#32;enough&#32;nodes.</emphasis>
+252 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//</emphasis>
+253 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;I.e.&#32;num_nodes&#32;*&#32;align&#32;&gt;=&#32;width</emphasis>
+254 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;align&#32;&gt;=&#32;width&#32;/&#32;num_nodes</emphasis>
+255 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;align&#32;=&#32;ceil(width/num_nodes)</emphasis>
+256 
+257 &#32;&#32;&#32;&#32;&#32;&#32;context-&gt;<link linkend="_structstbrp__context_1ae36053e2001a725aec2b5756dc990481">align</link>&#32;=&#32;(context-&gt;<link linkend="_structstbrp__context_1a70cfcb2044ce8397cc440d28b30c09b2">width</link>&#32;+&#32;context-&gt;<link linkend="_structstbrp__context_1afa8105d4ef6d3e0ae5aaf8e1ed4b2c58">num_nodes</link>-1)&#32;/&#32;context-&gt;<link linkend="_structstbrp__context_1afa8105d4ef6d3e0ae5aaf8e1ed4b2c58">num_nodes</link>;
+258 &#32;&#32;&#32;}
+259 }
+260 
+261 <link linkend="__classes_2lib_2external_2stb__rect__pack_8h_1a0b73f2d2521fb81afc056a823e3ca753">STBRP_DEF</link>&#32;<emphasis role="keywordtype">void</emphasis>&#32;<link linkend="__classes_2lib_2external_2stb__rect__pack_8h_1a8b32f5ad458f614f5d419ef26cef5b3c">stbrp_init_target</link>(<link linkend="_structstbrp__context">stbrp_context</link>&#32;*context,&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a3ce386e55bbeb900c1b23e064b89bd04">width</link>,&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1aedd0ea77029b98ce91e47c19addcb68f">height</link>,&#32;<link linkend="_structstbrp__node">stbrp_node</link>&#32;*nodes,&#32;<emphasis role="keywordtype">int</emphasis>&#32;num_nodes)
+262 {
+263 &#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;i;
+264 
+265 &#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(i=0;&#32;i&#32;&lt;&#32;num_nodes-1;&#32;++i)
+266 &#32;&#32;&#32;&#32;&#32;&#32;nodes[i].next&#32;=&#32;&amp;nodes[i+1];
+267 &#32;&#32;&#32;nodes[i].<link linkend="_structstbrp__node_1a3c4a162b9ebf156eeae37a63ac587ac7">next</link>&#32;=&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>;
+268 &#32;&#32;&#32;context-&gt;<link linkend="_structstbrp__context_1a007509feee322404083034e4c2d3dc5d">init_mode</link>&#32;=&#32;STBRP__INIT_skyline;
+269 &#32;&#32;&#32;context-&gt;<link linkend="_structstbrp__context_1a4b61a7f94e50a54c075e2a8f99f6503a">heuristic</link>&#32;=&#32;<link linkend="__classes_2lib_2external_2stb__rect__pack_8h_1a85c7862086c1f92e4fb4108e176d8140a5e4dd0b1cbee654bbfeebc5311f03525">STBRP_HEURISTIC_Skyline_default</link>;
+270 &#32;&#32;&#32;context-&gt;<link linkend="_structstbrp__context_1a8cfe2d49dad3d7af0951e04cc1ca7369">free_head</link>&#32;=&#32;&amp;nodes[0];
+271 &#32;&#32;&#32;context-&gt;<link linkend="_structstbrp__context_1a920d5f646912f75e3c87c652210ab2ba">active_head</link>&#32;=&#32;&amp;context-&gt;<link linkend="_structstbrp__context_1ac16f33a537bfa13a664cfb50e3aab37e">extra</link>[0];
+272 &#32;&#32;&#32;context-&gt;<link linkend="_structstbrp__context_1a70cfcb2044ce8397cc440d28b30c09b2">width</link>&#32;=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a3ce386e55bbeb900c1b23e064b89bd04">width</link>;
+273 &#32;&#32;&#32;context-&gt;<link linkend="_structstbrp__context_1af3715a6f3faecfb4fac8f6ccbb71f9c7">height</link>&#32;=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1aedd0ea77029b98ce91e47c19addcb68f">height</link>;
+274 &#32;&#32;&#32;context-&gt;<link linkend="_structstbrp__context_1afa8105d4ef6d3e0ae5aaf8e1ed4b2c58">num_nodes</link>&#32;=&#32;num_nodes;
+275 &#32;&#32;&#32;<link linkend="__classes_2lib_2external_2stb__rect__pack_8h_1a1babd70b223e571305fd9753a83a4fda">stbrp_setup_allow_out_of_mem</link>(context,&#32;0);
+276 
+277 &#32;&#32;&#32;<emphasis role="comment">//&#32;node&#32;0&#32;is&#32;the&#32;full&#32;width,&#32;node&#32;1&#32;is&#32;the&#32;sentinel&#32;(lets&#32;us&#32;not&#32;store&#32;width&#32;explicitly)</emphasis>
+278 &#32;&#32;&#32;context-&gt;<link linkend="_structstbrp__context_1ac16f33a537bfa13a664cfb50e3aab37e">extra</link>[0].<link linkend="_structstbrp__node_1a45ab31a88025db27d08040d715b129ea">x</link>&#32;=&#32;0;
+279 &#32;&#32;&#32;context-&gt;<link linkend="_structstbrp__context_1ac16f33a537bfa13a664cfb50e3aab37e">extra</link>[0].<link linkend="_structstbrp__node_1ad0415cb102a4f37aa45073653307e67e">y</link>&#32;=&#32;0;
+280 &#32;&#32;&#32;context-&gt;<link linkend="_structstbrp__context_1ac16f33a537bfa13a664cfb50e3aab37e">extra</link>[0].<link linkend="_structstbrp__node_1a3c4a162b9ebf156eeae37a63ac587ac7">next</link>&#32;=&#32;&amp;context-&gt;<link linkend="_structstbrp__context_1ac16f33a537bfa13a664cfb50e3aab37e">extra</link>[1];
+281 &#32;&#32;&#32;context-&gt;<link linkend="_structstbrp__context_1ac16f33a537bfa13a664cfb50e3aab37e">extra</link>[1].<link linkend="_structstbrp__node_1a45ab31a88025db27d08040d715b129ea">x</link>&#32;=&#32;(<link linkend="__classes_2lib_2external_2stb__rect__pack_8h_1a4a396a45893c12de32e2d598abd6b302">stbrp_coord</link>)&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a3ce386e55bbeb900c1b23e064b89bd04">width</link>;
+282 &#32;&#32;&#32;context-&gt;<link linkend="_structstbrp__context_1ac16f33a537bfa13a664cfb50e3aab37e">extra</link>[1].<link linkend="_structstbrp__node_1ad0415cb102a4f37aa45073653307e67e">y</link>&#32;=&#32;(1&lt;&lt;30);
+283 &#32;&#32;&#32;context-&gt;<link linkend="_structstbrp__context_1ac16f33a537bfa13a664cfb50e3aab37e">extra</link>[1].<link linkend="_structstbrp__node_1a3c4a162b9ebf156eeae37a63ac587ac7">next</link>&#32;=&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>;
+284 }
+285 
+286 <emphasis role="comment">//&#32;find&#32;minimum&#32;y&#32;position&#32;if&#32;it&#32;starts&#32;at&#32;x1</emphasis>
+287 <emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;stbrp__skyline_find_min_y(<link linkend="_structstbrp__context">stbrp_context</link>&#32;*c,&#32;<link linkend="_structstbrp__node">stbrp_node</link>&#32;*<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1ada771a798be00a696d20928c9a3371e7">first</link>,&#32;<emphasis role="keywordtype">int</emphasis>&#32;x0,&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a3ce386e55bbeb900c1b23e064b89bd04">width</link>,&#32;<emphasis role="keywordtype">int</emphasis>&#32;*pwaste)
+288 {
+289 &#32;&#32;&#32;<link linkend="_structstbrp__node">stbrp_node</link>&#32;*node&#32;=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1ada771a798be00a696d20928c9a3371e7">first</link>;
+290 &#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;x1&#32;=&#32;x0&#32;+&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a3ce386e55bbeb900c1b23e064b89bd04">width</link>;
+291 &#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;min_y,&#32;visited_width,&#32;waste_area;
+292 
+293 &#32;&#32;&#32;STBRP__NOTUSED(c);
+294 
+295 &#32;&#32;&#32;STBRP_ASSERT(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1ada771a798be00a696d20928c9a3371e7">first</link>-&gt;x&#32;&lt;=&#32;x0);
+296 
+297 <emphasis role="preprocessor">&#32;&#32;&#32;#if&#32;0</emphasis>
+298 &#32;&#32;&#32;<emphasis role="comment">//&#32;skip&#32;in&#32;case&#32;we&apos;re&#32;past&#32;the&#32;node</emphasis>
+299 &#32;&#32;&#32;<emphasis role="keywordflow">while</emphasis>&#32;(node-&gt;<link linkend="_structstbrp__node_1a3c4a162b9ebf156eeae37a63ac587ac7">next</link>-&gt;<link linkend="_structstbrp__node_1a45ab31a88025db27d08040d715b129ea">x</link>&#32;&lt;=&#32;x0)
+300 &#32;&#32;&#32;&#32;&#32;&#32;++node;
+301 <emphasis role="preprocessor">&#32;&#32;&#32;#else</emphasis>
+302 &#32;&#32;&#32;STBRP_ASSERT(node-&gt;<link linkend="_structstbrp__node_1a3c4a162b9ebf156eeae37a63ac587ac7">next</link>-&gt;<link linkend="_structstbrp__node_1a45ab31a88025db27d08040d715b129ea">x</link>&#32;&gt;&#32;x0);&#32;<emphasis role="comment">//&#32;we&#32;ended&#32;up&#32;handling&#32;this&#32;in&#32;the&#32;caller&#32;for&#32;efficiency</emphasis>
+303 <emphasis role="preprocessor">&#32;&#32;&#32;#endif</emphasis>
+304 
+305 &#32;&#32;&#32;STBRP_ASSERT(node-&gt;<link linkend="_structstbrp__node_1a45ab31a88025db27d08040d715b129ea">x</link>&#32;&lt;=&#32;x0);
+306 
+307 &#32;&#32;&#32;min_y&#32;=&#32;0;
+308 &#32;&#32;&#32;waste_area&#32;=&#32;0;
+309 &#32;&#32;&#32;visited_width&#32;=&#32;0;
+310 &#32;&#32;&#32;<emphasis role="keywordflow">while</emphasis>&#32;(node-&gt;<link linkend="_structstbrp__node_1a45ab31a88025db27d08040d715b129ea">x</link>&#32;&lt;&#32;x1)&#32;{
+311 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(node-&gt;<link linkend="_structstbrp__node_1ad0415cb102a4f37aa45073653307e67e">y</link>&#32;&gt;&#32;min_y)&#32;{
+312 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;raise&#32;min_y&#32;higher.</emphasis>
+313 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;we&apos;ve&#32;accounted&#32;for&#32;all&#32;waste&#32;up&#32;to&#32;min_y,</emphasis>
+314 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;but&#32;we&apos;ll&#32;now&#32;add&#32;more&#32;waste&#32;for&#32;everything&#32;we&apos;ve&#32;visted</emphasis>
+315 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;waste_area&#32;+=&#32;visited_width&#32;*&#32;(node-&gt;<link linkend="_structstbrp__node_1ad0415cb102a4f37aa45073653307e67e">y</link>&#32;-&#32;min_y);
+316 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;min_y&#32;=&#32;node-&gt;<link linkend="_structstbrp__node_1ad0415cb102a4f37aa45073653307e67e">y</link>;
+317 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;the&#32;first&#32;time&#32;through,&#32;visited_width&#32;might&#32;be&#32;reduced</emphasis>
+318 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(node-&gt;<link linkend="_structstbrp__node_1a45ab31a88025db27d08040d715b129ea">x</link>&#32;&lt;&#32;x0)
+319 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;visited_width&#32;+=&#32;node-&gt;<link linkend="_structstbrp__node_1a3c4a162b9ebf156eeae37a63ac587ac7">next</link>-&gt;<link linkend="_structstbrp__node_1a45ab31a88025db27d08040d715b129ea">x</link>&#32;-&#32;x0;
+320 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>
+321 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;visited_width&#32;+=&#32;node-&gt;<link linkend="_structstbrp__node_1a3c4a162b9ebf156eeae37a63ac587ac7">next</link>-&gt;<link linkend="_structstbrp__node_1a45ab31a88025db27d08040d715b129ea">x</link>&#32;-&#32;node-&gt;<link linkend="_structstbrp__node_1a45ab31a88025db27d08040d715b129ea">x</link>;
+322 &#32;&#32;&#32;&#32;&#32;&#32;}&#32;<emphasis role="keywordflow">else</emphasis>&#32;{
+323 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;add&#32;waste&#32;area</emphasis>
+324 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;under_width&#32;=&#32;node-&gt;<link linkend="_structstbrp__node_1a3c4a162b9ebf156eeae37a63ac587ac7">next</link>-&gt;<link linkend="_structstbrp__node_1a45ab31a88025db27d08040d715b129ea">x</link>&#32;-&#32;node-&gt;<link linkend="_structstbrp__node_1a45ab31a88025db27d08040d715b129ea">x</link>;
+325 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(under_width&#32;+&#32;visited_width&#32;&gt;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a3ce386e55bbeb900c1b23e064b89bd04">width</link>)
+326 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;under_width&#32;=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a3ce386e55bbeb900c1b23e064b89bd04">width</link>&#32;-&#32;visited_width;
+327 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;waste_area&#32;+=&#32;under_width&#32;*&#32;(min_y&#32;-&#32;node-&gt;<link linkend="_structstbrp__node_1ad0415cb102a4f37aa45073653307e67e">y</link>);
+328 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;visited_width&#32;+=&#32;under_width;
+329 &#32;&#32;&#32;&#32;&#32;&#32;}
+330 &#32;&#32;&#32;&#32;&#32;&#32;node&#32;=&#32;node-&gt;<link linkend="_structstbrp__node_1a3c4a162b9ebf156eeae37a63ac587ac7">next</link>;
+331 &#32;&#32;&#32;}
+332 
+333 &#32;&#32;&#32;*pwaste&#32;=&#32;waste_area;
+334 &#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;min_y;
+335 }
+336 
+337 <emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">struct</emphasis>
+338 {
+339 &#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1ac916c0825494ac3acd4457effd2823d2">x</link>,<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a4f27f1eebce8c31db01bb39fab9ef561">y</link>;
+340 &#32;&#32;&#32;<link linkend="_structstbrp__node">stbrp_node</link>&#32;**prev_link;
+341 }&#32;stbrp__findresult;
+342 
+343 <emphasis role="keyword">static</emphasis>&#32;stbrp__findresult&#32;stbrp__skyline_find_best_pos(<link linkend="_structstbrp__context">stbrp_context</link>&#32;*c,&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a3ce386e55bbeb900c1b23e064b89bd04">width</link>,&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1aedd0ea77029b98ce91e47c19addcb68f">height</link>)
+344 {
+345 &#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;best_waste&#32;=&#32;(1&lt;&lt;30),&#32;best_x,&#32;best_y&#32;=&#32;(1&#32;&lt;&lt;&#32;30);
+346 &#32;&#32;&#32;stbrp__findresult&#32;fr;
+347 &#32;&#32;&#32;<link linkend="_structstbrp__node">stbrp_node</link>&#32;**prev,&#32;*node,&#32;*tail,&#32;**best&#32;=&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>;
+348 
+349 &#32;&#32;&#32;<emphasis role="comment">//&#32;align&#32;to&#32;multiple&#32;of&#32;c-&gt;align</emphasis>
+350 &#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a3ce386e55bbeb900c1b23e064b89bd04">width</link>&#32;=&#32;(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a3ce386e55bbeb900c1b23e064b89bd04">width</link>&#32;+&#32;c-&gt;<link linkend="_structstbrp__context_1ae36053e2001a725aec2b5756dc990481">align</link>&#32;-&#32;1);
+351 &#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a3ce386e55bbeb900c1b23e064b89bd04">width</link>&#32;-=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a3ce386e55bbeb900c1b23e064b89bd04">width</link>&#32;%&#32;c-&gt;<link linkend="_structstbrp__context_1ae36053e2001a725aec2b5756dc990481">align</link>;
+352 &#32;&#32;&#32;STBRP_ASSERT(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a3ce386e55bbeb900c1b23e064b89bd04">width</link>&#32;%&#32;c-&gt;<link linkend="_structstbrp__context_1ae36053e2001a725aec2b5756dc990481">align</link>&#32;==&#32;0);
+353 
+354 &#32;&#32;&#32;<emphasis role="comment">//&#32;if&#32;it&#32;can&apos;t&#32;possibly&#32;fit,&#32;bail&#32;immediately</emphasis>
+355 &#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a3ce386e55bbeb900c1b23e064b89bd04">width</link>&#32;&gt;&#32;c-&gt;<link linkend="_structstbrp__context_1a70cfcb2044ce8397cc440d28b30c09b2">width</link>&#32;||&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1aedd0ea77029b98ce91e47c19addcb68f">height</link>&#32;&gt;&#32;c-&gt;<link linkend="_structstbrp__context_1af3715a6f3faecfb4fac8f6ccbb71f9c7">height</link>)&#32;{
+356 &#32;&#32;&#32;&#32;&#32;&#32;fr.prev_link&#32;=&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>;
+357 &#32;&#32;&#32;&#32;&#32;&#32;fr.x&#32;=&#32;fr.y&#32;=&#32;0;
+358 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;fr;
+359 &#32;&#32;&#32;}
+360 
+361 &#32;&#32;&#32;node&#32;=&#32;c-&gt;<link linkend="_structstbrp__context_1a920d5f646912f75e3c87c652210ab2ba">active_head</link>;
+362 &#32;&#32;&#32;prev&#32;=&#32;&amp;c-&gt;<link linkend="_structstbrp__context_1a920d5f646912f75e3c87c652210ab2ba">active_head</link>;
+363 &#32;&#32;&#32;<emphasis role="keywordflow">while</emphasis>&#32;(node-&gt;<link linkend="_structstbrp__node_1a45ab31a88025db27d08040d715b129ea">x</link>&#32;+&#32;width&#32;&lt;=&#32;c-&gt;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a3ce386e55bbeb900c1b23e064b89bd04">width</link>)&#32;{
+364 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a4f27f1eebce8c31db01bb39fab9ef561">y</link>,waste;
+365 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a4f27f1eebce8c31db01bb39fab9ef561">y</link>&#32;=&#32;stbrp__skyline_find_min_y(c,&#32;node,&#32;node-&gt;<link linkend="_structstbrp__node_1a45ab31a88025db27d08040d715b129ea">x</link>,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a3ce386e55bbeb900c1b23e064b89bd04">width</link>,&#32;&amp;waste);
+366 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(c-&gt;<link linkend="_structstbrp__context_1a4b61a7f94e50a54c075e2a8f99f6503a">heuristic</link>&#32;==&#32;<link linkend="__classes_2lib_2external_2stb__rect__pack_8h_1a85c7862086c1f92e4fb4108e176d8140a13530b067fb1f9707dc0f9d51f8b074a">STBRP_HEURISTIC_Skyline_BL_sortHeight</link>)&#32;{&#32;<emphasis role="comment">//&#32;actually&#32;just&#32;want&#32;to&#32;test&#32;BL</emphasis>
+367 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;bottom&#32;left</emphasis>
+368 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a4f27f1eebce8c31db01bb39fab9ef561">y</link>&#32;&lt;&#32;best_y)&#32;{
+369 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;best_y&#32;=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a4f27f1eebce8c31db01bb39fab9ef561">y</link>;
+370 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;best&#32;=&#32;prev;
+371 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+372 &#32;&#32;&#32;&#32;&#32;&#32;}&#32;<emphasis role="keywordflow">else</emphasis>&#32;{
+373 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;best-fit</emphasis>
+374 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a4f27f1eebce8c31db01bb39fab9ef561">y</link>&#32;+&#32;height&#32;&lt;=&#32;c-&gt;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1aedd0ea77029b98ce91e47c19addcb68f">height</link>)&#32;{
+375 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;can&#32;only&#32;use&#32;it&#32;if&#32;it&#32;first&#32;vertically</emphasis>
+376 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a4f27f1eebce8c31db01bb39fab9ef561">y</link>&#32;&lt;&#32;best_y&#32;||&#32;(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a4f27f1eebce8c31db01bb39fab9ef561">y</link>&#32;==&#32;best_y&#32;&amp;&amp;&#32;waste&#32;&lt;&#32;best_waste))&#32;{
+377 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;best_y&#32;=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a4f27f1eebce8c31db01bb39fab9ef561">y</link>;
+378 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;best_waste&#32;=&#32;waste;
+379 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;best&#32;=&#32;prev;
+380 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+381 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+382 &#32;&#32;&#32;&#32;&#32;&#32;}
+383 &#32;&#32;&#32;&#32;&#32;&#32;prev&#32;=&#32;&amp;node-&gt;<link linkend="_structstbrp__node_1a3c4a162b9ebf156eeae37a63ac587ac7">next</link>;
+384 &#32;&#32;&#32;&#32;&#32;&#32;node&#32;=&#32;node-&gt;<link linkend="_structstbrp__node_1a3c4a162b9ebf156eeae37a63ac587ac7">next</link>;
+385 &#32;&#32;&#32;}
+386 
+387 &#32;&#32;&#32;best_x&#32;=&#32;(best&#32;==&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>)&#32;?&#32;0&#32;:&#32;(*best)-&gt;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1ac916c0825494ac3acd4457effd2823d2">x</link>;
+388 
+389 &#32;&#32;&#32;<emphasis role="comment">//&#32;if&#32;doing&#32;best-fit&#32;(BF),&#32;we&#32;also&#32;have&#32;to&#32;try&#32;aligning&#32;right&#32;edge&#32;to&#32;each&#32;node&#32;position</emphasis>
+390 &#32;&#32;&#32;<emphasis role="comment">//</emphasis>
+391 &#32;&#32;&#32;<emphasis role="comment">//&#32;e.g,&#32;if&#32;fitting</emphasis>
+392 &#32;&#32;&#32;<emphasis role="comment">//</emphasis>
+393 &#32;&#32;&#32;<emphasis role="comment">//&#32;&#32;&#32;&#32;&#32;____________________</emphasis>
+394 &#32;&#32;&#32;<emphasis role="comment">//&#32;&#32;&#32;&#32;|____________________|</emphasis>
+395 &#32;&#32;&#32;<emphasis role="comment">//</emphasis>
+396 &#32;&#32;&#32;<emphasis role="comment">//&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;into</emphasis>
+397 &#32;&#32;&#32;<emphasis role="comment">//</emphasis>
+398 &#32;&#32;&#32;<emphasis role="comment">//&#32;&#32;&#32;|&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;|</emphasis>
+399 &#32;&#32;&#32;<emphasis role="comment">//&#32;&#32;&#32;|&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;____________|</emphasis>
+400 &#32;&#32;&#32;<emphasis role="comment">//&#32;&#32;&#32;|____________|</emphasis>
+401 &#32;&#32;&#32;<emphasis role="comment">//</emphasis>
+402 &#32;&#32;&#32;<emphasis role="comment">//&#32;then&#32;right-aligned&#32;reduces&#32;waste,&#32;but&#32;bottom-left&#32;BL&#32;is&#32;always&#32;chooses&#32;left-aligned</emphasis>
+403 &#32;&#32;&#32;<emphasis role="comment">//</emphasis>
+404 &#32;&#32;&#32;<emphasis role="comment">//&#32;This&#32;makes&#32;BF&#32;take&#32;about&#32;2x&#32;the&#32;time</emphasis>
+405 
+406 &#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(c-&gt;<link linkend="_structstbrp__context_1a4b61a7f94e50a54c075e2a8f99f6503a">heuristic</link>&#32;==&#32;<link linkend="__classes_2lib_2external_2stb__rect__pack_8h_1a85c7862086c1f92e4fb4108e176d8140a11d62749c4405a231a6fd1dd9d46615c">STBRP_HEURISTIC_Skyline_BF_sortHeight</link>)&#32;{
+407 &#32;&#32;&#32;&#32;&#32;&#32;tail&#32;=&#32;c-&gt;<link linkend="_structstbrp__context_1a920d5f646912f75e3c87c652210ab2ba">active_head</link>;
+408 &#32;&#32;&#32;&#32;&#32;&#32;node&#32;=&#32;c-&gt;<link linkend="_structstbrp__context_1a920d5f646912f75e3c87c652210ab2ba">active_head</link>;
+409 &#32;&#32;&#32;&#32;&#32;&#32;prev&#32;=&#32;&amp;c-&gt;<link linkend="_structstbrp__context_1a920d5f646912f75e3c87c652210ab2ba">active_head</link>;
+410 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;find&#32;first&#32;node&#32;that&apos;s&#32;admissible</emphasis>
+411 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">while</emphasis>&#32;(tail-&gt;<link linkend="_structstbrp__node_1a45ab31a88025db27d08040d715b129ea">x</link>&#32;&lt;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a3ce386e55bbeb900c1b23e064b89bd04">width</link>)
+412 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;tail&#32;=&#32;tail-&gt;<link linkend="_structstbrp__node_1a3c4a162b9ebf156eeae37a63ac587ac7">next</link>;
+413 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">while</emphasis>&#32;(tail)&#32;{
+414 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;xpos&#32;=&#32;tail-&gt;<link linkend="_structstbrp__node_1a45ab31a88025db27d08040d715b129ea">x</link>&#32;-&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a3ce386e55bbeb900c1b23e064b89bd04">width</link>;
+415 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a4f27f1eebce8c31db01bb39fab9ef561">y</link>,waste;
+416 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;STBRP_ASSERT(xpos&#32;&gt;=&#32;0);
+417 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;find&#32;the&#32;left&#32;position&#32;that&#32;matches&#32;this</emphasis>
+418 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">while</emphasis>&#32;(node-&gt;<link linkend="_structstbrp__node_1a3c4a162b9ebf156eeae37a63ac587ac7">next</link>-&gt;<link linkend="_structstbrp__node_1a45ab31a88025db27d08040d715b129ea">x</link>&#32;&lt;=&#32;xpos)&#32;{
+419 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;prev&#32;=&#32;&amp;node-&gt;<link linkend="_structstbrp__node_1a3c4a162b9ebf156eeae37a63ac587ac7">next</link>;
+420 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;node&#32;=&#32;node-&gt;<link linkend="_structstbrp__node_1a3c4a162b9ebf156eeae37a63ac587ac7">next</link>;
+421 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+422 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;STBRP_ASSERT(node-&gt;<link linkend="_structstbrp__node_1a3c4a162b9ebf156eeae37a63ac587ac7">next</link>-&gt;<link linkend="_structstbrp__node_1a45ab31a88025db27d08040d715b129ea">x</link>&#32;&gt;&#32;xpos&#32;&amp;&amp;&#32;node-&gt;<link linkend="_structstbrp__node_1a45ab31a88025db27d08040d715b129ea">x</link>&#32;&lt;=&#32;xpos);
+423 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a4f27f1eebce8c31db01bb39fab9ef561">y</link>&#32;=&#32;stbrp__skyline_find_min_y(c,&#32;node,&#32;xpos,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a3ce386e55bbeb900c1b23e064b89bd04">width</link>,&#32;&amp;waste);
+424 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a4f27f1eebce8c31db01bb39fab9ef561">y</link>&#32;+&#32;height&#32;&lt;=&#32;c-&gt;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1aedd0ea77029b98ce91e47c19addcb68f">height</link>)&#32;{
+425 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a4f27f1eebce8c31db01bb39fab9ef561">y</link>&#32;&lt;=&#32;best_y)&#32;{
+426 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a4f27f1eebce8c31db01bb39fab9ef561">y</link>&#32;&lt;&#32;best_y&#32;||&#32;waste&#32;&lt;&#32;best_waste&#32;||&#32;(waste==best_waste&#32;&amp;&amp;&#32;xpos&#32;&lt;&#32;best_x))&#32;{
+427 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;best_x&#32;=&#32;xpos;
+428 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;STBRP_ASSERT(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a4f27f1eebce8c31db01bb39fab9ef561">y</link>&#32;&lt;=&#32;best_y);
+429 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;best_y&#32;=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a4f27f1eebce8c31db01bb39fab9ef561">y</link>;
+430 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;best_waste&#32;=&#32;waste;
+431 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;best&#32;=&#32;prev;
+432 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+433 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+434 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+435 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;tail&#32;=&#32;tail-&gt;<link linkend="_structstbrp__node_1a3c4a162b9ebf156eeae37a63ac587ac7">next</link>;
+436 &#32;&#32;&#32;&#32;&#32;&#32;}
+437 &#32;&#32;&#32;}
+438 
+439 &#32;&#32;&#32;fr.prev_link&#32;=&#32;best;
+440 &#32;&#32;&#32;fr.<link linkend="_structstbrp__node_1a45ab31a88025db27d08040d715b129ea">x</link>&#32;=&#32;best_x;
+441 &#32;&#32;&#32;fr.y&#32;=&#32;best_y;
+442 &#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;fr;
+443 }
+444 
+445 <emphasis role="keyword">static</emphasis>&#32;stbrp__findresult&#32;stbrp__skyline_pack_rectangle(<link linkend="_structstbrp__context">stbrp_context</link>&#32;*context,&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a3ce386e55bbeb900c1b23e064b89bd04">width</link>,&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1aedd0ea77029b98ce91e47c19addcb68f">height</link>)
+446 {
+447 &#32;&#32;&#32;<emphasis role="comment">//&#32;find&#32;best&#32;position&#32;according&#32;to&#32;heuristic</emphasis>
+448 &#32;&#32;&#32;stbrp__findresult&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a1dbb21208b9047cc8031ca9c840d3c2f">res</link>&#32;=&#32;stbrp__skyline_find_best_pos(context,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a3ce386e55bbeb900c1b23e064b89bd04">width</link>,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1aedd0ea77029b98ce91e47c19addcb68f">height</link>);
+449 &#32;&#32;&#32;<link linkend="_structstbrp__node">stbrp_node</link>&#32;*node,&#32;*cur;
+450 
+451 &#32;&#32;&#32;<emphasis role="comment">//&#32;bail&#32;if:</emphasis>
+452 &#32;&#32;&#32;<emphasis role="comment">//&#32;&#32;&#32;&#32;1.&#32;it&#32;failed</emphasis>
+453 &#32;&#32;&#32;<emphasis role="comment">//&#32;&#32;&#32;&#32;2.&#32;the&#32;best&#32;node&#32;doesn&apos;t&#32;fit&#32;(we&#32;don&apos;t&#32;always&#32;check&#32;this)</emphasis>
+454 &#32;&#32;&#32;<emphasis role="comment">//&#32;&#32;&#32;&#32;3.&#32;we&apos;re&#32;out&#32;of&#32;memory</emphasis>
+455 &#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a1dbb21208b9047cc8031ca9c840d3c2f">res</link>.prev_link&#32;==&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>&#32;||&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a1dbb21208b9047cc8031ca9c840d3c2f">res</link>.y&#32;+&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1aedd0ea77029b98ce91e47c19addcb68f">height</link>&#32;&gt;&#32;context-&gt;<link linkend="_structstbrp__context_1af3715a6f3faecfb4fac8f6ccbb71f9c7">height</link>&#32;||&#32;context-&gt;<link linkend="_structstbrp__context_1a8cfe2d49dad3d7af0951e04cc1ca7369">free_head</link>&#32;==&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>)&#32;{
+456 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a1dbb21208b9047cc8031ca9c840d3c2f">res</link>.prev_link&#32;=&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>;
+457 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a1dbb21208b9047cc8031ca9c840d3c2f">res</link>;
+458 &#32;&#32;&#32;}
+459 
+460 &#32;&#32;&#32;<emphasis role="comment">//&#32;on&#32;success,&#32;create&#32;new&#32;node</emphasis>
+461 &#32;&#32;&#32;node&#32;=&#32;context-&gt;<link linkend="_structstbrp__context_1a8cfe2d49dad3d7af0951e04cc1ca7369">free_head</link>;
+462 &#32;&#32;&#32;node-&gt;<link linkend="_structstbrp__node_1a45ab31a88025db27d08040d715b129ea">x</link>&#32;=&#32;(<link linkend="__classes_2lib_2external_2stb__rect__pack_8h_1a4a396a45893c12de32e2d598abd6b302">stbrp_coord</link>)&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a1dbb21208b9047cc8031ca9c840d3c2f">res</link>.x;
+463 &#32;&#32;&#32;node-&gt;<link linkend="_structstbrp__node_1ad0415cb102a4f37aa45073653307e67e">y</link>&#32;=&#32;(<link linkend="__classes_2lib_2external_2stb__rect__pack_8h_1a4a396a45893c12de32e2d598abd6b302">stbrp_coord</link>)&#32;(<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a1dbb21208b9047cc8031ca9c840d3c2f">res</link>.y&#32;+&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1aedd0ea77029b98ce91e47c19addcb68f">height</link>);
+464 
+465 &#32;&#32;&#32;context-&gt;<link linkend="_structstbrp__context_1a8cfe2d49dad3d7af0951e04cc1ca7369">free_head</link>&#32;=&#32;node-&gt;<link linkend="_structstbrp__node_1a3c4a162b9ebf156eeae37a63ac587ac7">next</link>;
+466 
+467 &#32;&#32;&#32;<emphasis role="comment">//&#32;insert&#32;the&#32;new&#32;node&#32;into&#32;the&#32;right&#32;starting&#32;point,&#32;and</emphasis>
+468 &#32;&#32;&#32;<emphasis role="comment">//&#32;let&#32;&apos;cur&apos;&#32;point&#32;to&#32;the&#32;remaining&#32;nodes&#32;needing&#32;to&#32;be</emphasis>
+469 &#32;&#32;&#32;<emphasis role="comment">//&#32;stiched&#32;back&#32;in</emphasis>
+470 
+471 &#32;&#32;&#32;cur&#32;=&#32;*<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a1dbb21208b9047cc8031ca9c840d3c2f">res</link>.prev_link;
+472 &#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(cur-&gt;<link linkend="_structstbrp__node_1a45ab31a88025db27d08040d715b129ea">x</link>&#32;&lt;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a1dbb21208b9047cc8031ca9c840d3c2f">res</link>.x)&#32;{
+473 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;preserve&#32;the&#32;existing&#32;one,&#32;so&#32;start&#32;testing&#32;with&#32;the&#32;next&#32;one</emphasis>
+474 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_structstbrp__node">stbrp_node</link>&#32;*next&#32;=&#32;cur-&gt;<link linkend="_structstbrp__node_1a3c4a162b9ebf156eeae37a63ac587ac7">next</link>;
+475 &#32;&#32;&#32;&#32;&#32;&#32;cur-&gt;<link linkend="_structstbrp__node_1a3c4a162b9ebf156eeae37a63ac587ac7">next</link>&#32;=&#32;node;
+476 &#32;&#32;&#32;&#32;&#32;&#32;cur&#32;=&#32;next;
+477 &#32;&#32;&#32;}&#32;<emphasis role="keywordflow">else</emphasis>&#32;{
+478 &#32;&#32;&#32;&#32;&#32;&#32;*<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a1dbb21208b9047cc8031ca9c840d3c2f">res</link>.prev_link&#32;=&#32;node;
+479 &#32;&#32;&#32;}
+480 
+481 &#32;&#32;&#32;<emphasis role="comment">//&#32;from&#32;here,&#32;traverse&#32;cur&#32;and&#32;free&#32;the&#32;nodes,&#32;until&#32;we&#32;get&#32;to&#32;one</emphasis>
+482 &#32;&#32;&#32;<emphasis role="comment">//&#32;that&#32;shouldn&apos;t&#32;be&#32;freed</emphasis>
+483 &#32;&#32;&#32;<emphasis role="keywordflow">while</emphasis>&#32;(cur-&gt;<link linkend="_structstbrp__node_1a3c4a162b9ebf156eeae37a63ac587ac7">next</link>&#32;&amp;&amp;&#32;cur-&gt;<link linkend="_structstbrp__node_1a3c4a162b9ebf156eeae37a63ac587ac7">next</link>-&gt;<link linkend="_structstbrp__node_1a45ab31a88025db27d08040d715b129ea">x</link>&#32;&lt;=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a1dbb21208b9047cc8031ca9c840d3c2f">res</link>.x&#32;+&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a3ce386e55bbeb900c1b23e064b89bd04">width</link>)&#32;{
+484 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_structstbrp__node">stbrp_node</link>&#32;*next&#32;=&#32;cur-&gt;<link linkend="_structstbrp__node_1a3c4a162b9ebf156eeae37a63ac587ac7">next</link>;
+485 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;move&#32;the&#32;current&#32;node&#32;to&#32;the&#32;free&#32;list</emphasis>
+486 &#32;&#32;&#32;&#32;&#32;&#32;cur-&gt;<link linkend="_structstbrp__node_1a3c4a162b9ebf156eeae37a63ac587ac7">next</link>&#32;=&#32;context-&gt;<link linkend="_structstbrp__context_1a8cfe2d49dad3d7af0951e04cc1ca7369">free_head</link>;
+487 &#32;&#32;&#32;&#32;&#32;&#32;context-&gt;<link linkend="_structstbrp__context_1a8cfe2d49dad3d7af0951e04cc1ca7369">free_head</link>&#32;=&#32;cur;
+488 &#32;&#32;&#32;&#32;&#32;&#32;cur&#32;=&#32;next;
+489 &#32;&#32;&#32;}
+490 
+491 &#32;&#32;&#32;<emphasis role="comment">//&#32;stitch&#32;the&#32;list&#32;back&#32;in</emphasis>
+492 &#32;&#32;&#32;node-&gt;<link linkend="_structstbrp__node_1a3c4a162b9ebf156eeae37a63ac587ac7">next</link>&#32;=&#32;cur;
+493 
+494 &#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(cur-&gt;<link linkend="_structstbrp__node_1a45ab31a88025db27d08040d715b129ea">x</link>&#32;&lt;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a1dbb21208b9047cc8031ca9c840d3c2f">res</link>.x&#32;+&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a3ce386e55bbeb900c1b23e064b89bd04">width</link>)
+495 &#32;&#32;&#32;&#32;&#32;&#32;cur-&gt;<link linkend="_structstbrp__node_1a45ab31a88025db27d08040d715b129ea">x</link>&#32;=&#32;(<link linkend="__classes_2lib_2external_2stb__rect__pack_8h_1a4a396a45893c12de32e2d598abd6b302">stbrp_coord</link>)&#32;(<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a1dbb21208b9047cc8031ca9c840d3c2f">res</link>.x&#32;+&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a3ce386e55bbeb900c1b23e064b89bd04">width</link>);
+496 
+497 <emphasis role="preprocessor">#ifdef&#32;_DEBUG</emphasis>
+498 &#32;&#32;&#32;cur&#32;=&#32;context-&gt;<link linkend="_structstbrp__context_1a920d5f646912f75e3c87c652210ab2ba">active_head</link>;
+499 &#32;&#32;&#32;<emphasis role="keywordflow">while</emphasis>&#32;(cur-&gt;<link linkend="_structstbrp__node_1a45ab31a88025db27d08040d715b129ea">x</link>&#32;&lt;&#32;context-&gt;<link linkend="_structstbrp__context_1a70cfcb2044ce8397cc440d28b30c09b2">width</link>)&#32;{
+500 &#32;&#32;&#32;&#32;&#32;&#32;STBRP_ASSERT(cur-&gt;<link linkend="_structstbrp__node_1a45ab31a88025db27d08040d715b129ea">x</link>&#32;&lt;&#32;cur-&gt;<link linkend="_structstbrp__node_1a3c4a162b9ebf156eeae37a63ac587ac7">next</link>-&gt;<link linkend="_structstbrp__node_1a45ab31a88025db27d08040d715b129ea">x</link>);
+501 &#32;&#32;&#32;&#32;&#32;&#32;cur&#32;=&#32;cur-&gt;<link linkend="_structstbrp__node_1a3c4a162b9ebf156eeae37a63ac587ac7">next</link>;
+502 &#32;&#32;&#32;}
+503 &#32;&#32;&#32;STBRP_ASSERT(cur-&gt;<link linkend="_structstbrp__node_1a3c4a162b9ebf156eeae37a63ac587ac7">next</link>&#32;==&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>);
+504 
+505 &#32;&#32;&#32;{
+506 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a22486c0c8d9f7d79a07bf22ecffeeb2f">count</link>=0;
+507 &#32;&#32;&#32;&#32;&#32;&#32;cur&#32;=&#32;context-&gt;<link linkend="_structstbrp__context_1a920d5f646912f75e3c87c652210ab2ba">active_head</link>;
+508 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">while</emphasis>&#32;(cur)&#32;{
+509 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;cur&#32;=&#32;cur-&gt;<link linkend="_structstbrp__node_1a3c4a162b9ebf156eeae37a63ac587ac7">next</link>;
+510 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;++<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a22486c0c8d9f7d79a07bf22ecffeeb2f">count</link>;
+511 &#32;&#32;&#32;&#32;&#32;&#32;}
+512 &#32;&#32;&#32;&#32;&#32;&#32;cur&#32;=&#32;context-&gt;<link linkend="_structstbrp__context_1a8cfe2d49dad3d7af0951e04cc1ca7369">free_head</link>;
+513 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">while</emphasis>&#32;(cur)&#32;{
+514 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;cur&#32;=&#32;cur-&gt;<link linkend="_structstbrp__node_1a3c4a162b9ebf156eeae37a63ac587ac7">next</link>;
+515 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;++<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a22486c0c8d9f7d79a07bf22ecffeeb2f">count</link>;
+516 &#32;&#32;&#32;&#32;&#32;&#32;}
+517 &#32;&#32;&#32;&#32;&#32;&#32;STBRP_ASSERT(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a22486c0c8d9f7d79a07bf22ecffeeb2f">count</link>&#32;==&#32;context-&gt;<link linkend="_structstbrp__context_1afa8105d4ef6d3e0ae5aaf8e1ed4b2c58">num_nodes</link>+2);
+518 &#32;&#32;&#32;}
+519 <emphasis role="preprocessor">#endif</emphasis>
+520 
+521 &#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a1dbb21208b9047cc8031ca9c840d3c2f">res</link>;
+522 }
+523 
+524 <emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;STBRP__CDECL&#32;rect_height_compare(<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>&#32;*<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1ac8729153468b5dcf13f971b21d84d4e5">a</link>,&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>&#32;*<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a6eba317e3cf44d6d26c04a5a8f197dcb">b</link>)
+525 {
+526 &#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;<link linkend="_structstbrp__rect">stbrp_rect</link>&#32;*p&#32;=&#32;(<emphasis role="keyword">const</emphasis>&#32;<link linkend="_structstbrp__rect">stbrp_rect</link>&#32;*)&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1ac8729153468b5dcf13f971b21d84d4e5">a</link>;
+527 &#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;<link linkend="_structstbrp__rect">stbrp_rect</link>&#32;*q&#32;=&#32;(<emphasis role="keyword">const</emphasis>&#32;<link linkend="_structstbrp__rect">stbrp_rect</link>&#32;*)&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a6eba317e3cf44d6d26c04a5a8f197dcb">b</link>;
+528 &#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(p-&gt;<link linkend="_structstbrp__rect_1af68de2dadc7972b7c089d5e0c0558398">h</link>&#32;&gt;&#32;q-&gt;<link linkend="_structstbrp__rect_1af68de2dadc7972b7c089d5e0c0558398">h</link>)
+529 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;-1;
+530 &#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(p-&gt;<link linkend="_structstbrp__rect_1af68de2dadc7972b7c089d5e0c0558398">h</link>&#32;&lt;&#32;q-&gt;<link linkend="_structstbrp__rect_1af68de2dadc7972b7c089d5e0c0558398">h</link>)
+531 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;&#32;1;
+532 &#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;(p-&gt;<link linkend="_structstbrp__rect_1a248d43f1eb979c1e7b92ba6df431dec5">w</link>&#32;&gt;&#32;q-&gt;<link linkend="_structstbrp__rect_1a248d43f1eb979c1e7b92ba6df431dec5">w</link>)&#32;?&#32;-1&#32;:&#32;(p-&gt;<link linkend="_structstbrp__rect_1a248d43f1eb979c1e7b92ba6df431dec5">w</link>&#32;&lt;&#32;q-&gt;<link linkend="_structstbrp__rect_1a248d43f1eb979c1e7b92ba6df431dec5">w</link>);
+533 }
+534 
+535 <emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;STBRP__CDECL&#32;rect_original_order(<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>&#32;*<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1ac8729153468b5dcf13f971b21d84d4e5">a</link>,&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>&#32;*<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a6eba317e3cf44d6d26c04a5a8f197dcb">b</link>)
+536 {
+537 &#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;<link linkend="_structstbrp__rect">stbrp_rect</link>&#32;*p&#32;=&#32;(<emphasis role="keyword">const</emphasis>&#32;<link linkend="_structstbrp__rect">stbrp_rect</link>&#32;*)&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1ac8729153468b5dcf13f971b21d84d4e5">a</link>;
+538 &#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;<link linkend="_structstbrp__rect">stbrp_rect</link>&#32;*q&#32;=&#32;(<emphasis role="keyword">const</emphasis>&#32;<link linkend="_structstbrp__rect">stbrp_rect</link>&#32;*)&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a6eba317e3cf44d6d26c04a5a8f197dcb">b</link>;
+539 &#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;(p-&gt;<link linkend="_structstbrp__rect_1a74ba347755ce17f2f8a2ea66c612af49">was_packed</link>&#32;&lt;&#32;q-&gt;<link linkend="_structstbrp__rect_1a74ba347755ce17f2f8a2ea66c612af49">was_packed</link>)&#32;?&#32;-1&#32;:&#32;(p-&gt;<link linkend="_structstbrp__rect_1a74ba347755ce17f2f8a2ea66c612af49">was_packed</link>&#32;&gt;&#32;q-&gt;<link linkend="_structstbrp__rect_1a74ba347755ce17f2f8a2ea66c612af49">was_packed</link>);
+540 }
+541 
+542 <link linkend="__classes_2lib_2external_2stb__rect__pack_8h_1a0b73f2d2521fb81afc056a823e3ca753">STBRP_DEF</link>&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2external_2stb__rect__pack_8h_1af038ae1b98573f24736c9a3eed0478ba">stbrp_pack_rects</link>(<link linkend="_structstbrp__context">stbrp_context</link>&#32;*context,&#32;<link linkend="_structstbrp__rect">stbrp_rect</link>&#32;*<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1ac34ca70e63c2ed89e7bf6ba3b4b62f1b">rects</link>,&#32;<emphasis role="keywordtype">int</emphasis>&#32;num_rects)
+543 {
+544 &#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;i,&#32;all_rects_packed&#32;=&#32;1;
+545 
+546 &#32;&#32;&#32;<emphasis role="comment">//&#32;we&#32;use&#32;the&#32;&apos;was_packed&apos;&#32;field&#32;internally&#32;to&#32;allow&#32;sorting/unsorting</emphasis>
+547 &#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(i=0;&#32;i&#32;&lt;&#32;num_rects;&#32;++i)&#32;{
+548 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1ac34ca70e63c2ed89e7bf6ba3b4b62f1b">rects</link>[i].<link linkend="_structstbrp__rect_1a74ba347755ce17f2f8a2ea66c612af49">was_packed</link>&#32;=&#32;i;
+549 &#32;&#32;&#32;}
+550 
+551 &#32;&#32;&#32;<emphasis role="comment">//&#32;sort&#32;according&#32;to&#32;heuristic</emphasis>
+552 &#32;&#32;&#32;STBRP_SORT(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1ac34ca70e63c2ed89e7bf6ba3b4b62f1b">rects</link>,&#32;num_rects,&#32;<emphasis role="keyword">sizeof</emphasis>(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1ac34ca70e63c2ed89e7bf6ba3b4b62f1b">rects</link>[0]),&#32;rect_height_compare);
+553 
+554 &#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(i=0;&#32;i&#32;&lt;&#32;num_rects;&#32;++i)&#32;{
+555 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1ac34ca70e63c2ed89e7bf6ba3b4b62f1b">rects</link>[i].<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a1ad83f255afd4038129297b57ef91603">w</link>&#32;==&#32;0&#32;||&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1ac34ca70e63c2ed89e7bf6ba3b4b62f1b">rects</link>[i].h&#32;==&#32;0)&#32;{
+556 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1ac34ca70e63c2ed89e7bf6ba3b4b62f1b">rects</link>[i].x&#32;=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1ac34ca70e63c2ed89e7bf6ba3b4b62f1b">rects</link>[i].y&#32;=&#32;0;&#32;&#32;<emphasis role="comment">//&#32;empty&#32;rect&#32;needs&#32;no&#32;space</emphasis>
+557 &#32;&#32;&#32;&#32;&#32;&#32;}&#32;<emphasis role="keywordflow">else</emphasis>&#32;{
+558 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;stbrp__findresult&#32;fr&#32;=&#32;stbrp__skyline_pack_rectangle(context,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1ac34ca70e63c2ed89e7bf6ba3b4b62f1b">rects</link>[i].<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a1ad83f255afd4038129297b57ef91603">w</link>,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1ac34ca70e63c2ed89e7bf6ba3b4b62f1b">rects</link>[i].h);
+559 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(fr.prev_link)&#32;{
+560 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1ac34ca70e63c2ed89e7bf6ba3b4b62f1b">rects</link>[i].x&#32;=&#32;(<link linkend="__classes_2lib_2external_2stb__rect__pack_8h_1a4a396a45893c12de32e2d598abd6b302">stbrp_coord</link>)&#32;fr.x;
+561 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1ac34ca70e63c2ed89e7bf6ba3b4b62f1b">rects</link>[i].y&#32;=&#32;(<link linkend="__classes_2lib_2external_2stb__rect__pack_8h_1a4a396a45893c12de32e2d598abd6b302">stbrp_coord</link>)&#32;fr.y;
+562 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}&#32;<emphasis role="keywordflow">else</emphasis>&#32;{
+563 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1ac34ca70e63c2ed89e7bf6ba3b4b62f1b">rects</link>[i].x&#32;=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1ac34ca70e63c2ed89e7bf6ba3b4b62f1b">rects</link>[i].y&#32;=&#32;<link linkend="__classes_2lib_2external_2stb__rect__pack_8h_1a114ed17dfa71ac93774494ab6d14bfbc">STBRP__MAXVAL</link>;
+564 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+565 &#32;&#32;&#32;&#32;&#32;&#32;}
+566 &#32;&#32;&#32;}
+567 
+568 &#32;&#32;&#32;<emphasis role="comment">//&#32;unsort</emphasis>
+569 &#32;&#32;&#32;STBRP_SORT(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1ac34ca70e63c2ed89e7bf6ba3b4b62f1b">rects</link>,&#32;num_rects,&#32;<emphasis role="keyword">sizeof</emphasis>(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1ac34ca70e63c2ed89e7bf6ba3b4b62f1b">rects</link>[0]),&#32;rect_original_order);
+570 
+571 &#32;&#32;&#32;<emphasis role="comment">//&#32;set&#32;was_packed&#32;flags&#32;and&#32;all_rects_packed&#32;status</emphasis>
+572 &#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(i=0;&#32;i&#32;&lt;&#32;num_rects;&#32;++i)&#32;{
+573 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1ac34ca70e63c2ed89e7bf6ba3b4b62f1b">rects</link>[i].was_packed&#32;=&#32;!(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1ac34ca70e63c2ed89e7bf6ba3b4b62f1b">rects</link>[i].x&#32;==&#32;<link linkend="__classes_2lib_2external_2stb__rect__pack_8h_1a114ed17dfa71ac93774494ab6d14bfbc">STBRP__MAXVAL</link>&#32;&amp;&amp;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1ac34ca70e63c2ed89e7bf6ba3b4b62f1b">rects</link>[i].y&#32;==&#32;<link linkend="__classes_2lib_2external_2stb__rect__pack_8h_1a114ed17dfa71ac93774494ab6d14bfbc">STBRP__MAXVAL</link>);
+574 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(!<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1ac34ca70e63c2ed89e7bf6ba3b4b62f1b">rects</link>[i].was_packed)
+575 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;all_rects_packed&#32;=&#32;0;
+576 &#32;&#32;&#32;}
+577 
+578 &#32;&#32;&#32;<emphasis role="comment">//&#32;return&#32;the&#32;all_rects_packed&#32;status</emphasis>
+579 &#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;all_rects_packed;
+580 }
+581 <emphasis role="preprocessor">#endif</emphasis>
+582 
+583 <emphasis role="comment">/*</emphasis>
+584 <emphasis role="comment">------------------------------------------------------------------------------</emphasis>
+585 <emphasis role="comment">This&#32;software&#32;is&#32;available&#32;under&#32;2&#32;licenses&#32;--&#32;choose&#32;whichever&#32;you&#32;prefer.</emphasis>
+586 <emphasis role="comment">------------------------------------------------------------------------------</emphasis>
+587 <emphasis role="comment">ALTERNATIVE&#32;A&#32;-&#32;MIT&#32;License</emphasis>
+588 <emphasis role="comment">Copyright&#32;(c)&#32;2017&#32;Sean&#32;Barrett</emphasis>
+589 <emphasis role="comment">Permission&#32;is&#32;hereby&#32;granted,&#32;free&#32;of&#32;charge,&#32;to&#32;any&#32;person&#32;obtaining&#32;a&#32;copy&#32;of</emphasis>
+590 <emphasis role="comment">this&#32;software&#32;and&#32;associated&#32;documentation&#32;files&#32;(the&#32;&quot;Software&quot;),&#32;to&#32;deal&#32;in</emphasis>
+591 <emphasis role="comment">the&#32;Software&#32;without&#32;restriction,&#32;including&#32;without&#32;limitation&#32;the&#32;rights&#32;to</emphasis>
+592 <emphasis role="comment">use,&#32;copy,&#32;modify,&#32;merge,&#32;publish,&#32;distribute,&#32;sublicense,&#32;and/or&#32;sell&#32;copies</emphasis>
+593 <emphasis role="comment">of&#32;the&#32;Software,&#32;and&#32;to&#32;permit&#32;persons&#32;to&#32;whom&#32;the&#32;Software&#32;is&#32;furnished&#32;to&#32;do</emphasis>
+594 <emphasis role="comment">so,&#32;subject&#32;to&#32;the&#32;following&#32;conditions:</emphasis>
+595 <emphasis role="comment">The&#32;above&#32;copyright&#32;notice&#32;and&#32;this&#32;permission&#32;notice&#32;shall&#32;be&#32;included&#32;in&#32;all</emphasis>
+596 <emphasis role="comment">copies&#32;or&#32;substantial&#32;portions&#32;of&#32;the&#32;Software.</emphasis>
+597 <emphasis role="comment">THE&#32;SOFTWARE&#32;IS&#32;PROVIDED&#32;&quot;AS&#32;IS&quot;,&#32;WITHOUT&#32;WARRANTY&#32;OF&#32;ANY&#32;KIND,&#32;EXPRESS&#32;OR</emphasis>
+598 <emphasis role="comment">IMPLIED,&#32;INCLUDING&#32;BUT&#32;NOT&#32;LIMITED&#32;TO&#32;THE&#32;WARRANTIES&#32;OF&#32;MERCHANTABILITY,</emphasis>
+599 <emphasis role="comment">FITNESS&#32;FOR&#32;A&#32;PARTICULAR&#32;PURPOSE&#32;AND&#32;NONINFRINGEMENT.&#32;IN&#32;NO&#32;EVENT&#32;SHALL&#32;THE</emphasis>
+600 <emphasis role="comment">AUTHORS&#32;OR&#32;COPYRIGHT&#32;HOLDERS&#32;BE&#32;LIABLE&#32;FOR&#32;ANY&#32;CLAIM,&#32;DAMAGES&#32;OR&#32;OTHER</emphasis>
+601 <emphasis role="comment">LIABILITY,&#32;WHETHER&#32;IN&#32;AN&#32;ACTION&#32;OF&#32;CONTRACT,&#32;TORT&#32;OR&#32;OTHERWISE,&#32;ARISING&#32;FROM,</emphasis>
+602 <emphasis role="comment">OUT&#32;OF&#32;OR&#32;IN&#32;CONNECTION&#32;WITH&#32;THE&#32;SOFTWARE&#32;OR&#32;THE&#32;USE&#32;OR&#32;OTHER&#32;DEALINGS&#32;IN&#32;THE</emphasis>
+603 <emphasis role="comment">SOFTWARE.</emphasis>
+604 <emphasis role="comment">------------------------------------------------------------------------------</emphasis>
+605 <emphasis role="comment">ALTERNATIVE&#32;B&#32;-&#32;Public&#32;Domain&#32;(www.unlicense.org)</emphasis>
+606 <emphasis role="comment">This&#32;is&#32;free&#32;and&#32;unencumbered&#32;software&#32;released&#32;into&#32;the&#32;public&#32;domain.</emphasis>
+607 <emphasis role="comment">Anyone&#32;is&#32;free&#32;to&#32;copy,&#32;modify,&#32;publish,&#32;use,&#32;compile,&#32;sell,&#32;or&#32;distribute&#32;this</emphasis>
+608 <emphasis role="comment">software,&#32;either&#32;in&#32;source&#32;code&#32;form&#32;or&#32;as&#32;a&#32;compiled&#32;binary,&#32;for&#32;any&#32;purpose,</emphasis>
+609 <emphasis role="comment">commercial&#32;or&#32;non-commercial,&#32;and&#32;by&#32;any&#32;means.</emphasis>
+610 <emphasis role="comment">In&#32;jurisdictions&#32;that&#32;recognize&#32;copyright&#32;laws,&#32;the&#32;author&#32;or&#32;authors&#32;of&#32;this</emphasis>
+611 <emphasis role="comment">software&#32;dedicate&#32;any&#32;and&#32;all&#32;copyright&#32;interest&#32;in&#32;the&#32;software&#32;to&#32;the&#32;public</emphasis>
+612 <emphasis role="comment">domain.&#32;We&#32;make&#32;this&#32;dedication&#32;for&#32;the&#32;benefit&#32;of&#32;the&#32;public&#32;at&#32;large&#32;and&#32;to</emphasis>
+613 <emphasis role="comment">the&#32;detriment&#32;of&#32;our&#32;heirs&#32;and&#32;successors.&#32;We&#32;intend&#32;this&#32;dedication&#32;to&#32;be&#32;an</emphasis>
+614 <emphasis role="comment">overt&#32;act&#32;of&#32;relinquishment&#32;in&#32;perpetuity&#32;of&#32;all&#32;present&#32;and&#32;future&#32;rights&#32;to</emphasis>
+615 <emphasis role="comment">this&#32;software&#32;under&#32;copyright&#32;law.</emphasis>
+616 <emphasis role="comment">THE&#32;SOFTWARE&#32;IS&#32;PROVIDED&#32;&quot;AS&#32;IS&quot;,&#32;WITHOUT&#32;WARRANTY&#32;OF&#32;ANY&#32;KIND,&#32;EXPRESS&#32;OR</emphasis>
+617 <emphasis role="comment">IMPLIED,&#32;INCLUDING&#32;BUT&#32;NOT&#32;LIMITED&#32;TO&#32;THE&#32;WARRANTIES&#32;OF&#32;MERCHANTABILITY,</emphasis>
+618 <emphasis role="comment">FITNESS&#32;FOR&#32;A&#32;PARTICULAR&#32;PURPOSE&#32;AND&#32;NONINFRINGEMENT.&#32;IN&#32;NO&#32;EVENT&#32;SHALL&#32;THE</emphasis>
+619 <emphasis role="comment">AUTHORS&#32;BE&#32;LIABLE&#32;FOR&#32;ANY&#32;CLAIM,&#32;DAMAGES&#32;OR&#32;OTHER&#32;LIABILITY,&#32;WHETHER&#32;IN&#32;AN</emphasis>
+620 <emphasis role="comment">ACTION&#32;OF&#32;CONTRACT,&#32;TORT&#32;OR&#32;OTHERWISE,&#32;ARISING&#32;FROM,&#32;OUT&#32;OF&#32;OR&#32;IN&#32;CONNECTION</emphasis>
+621 <emphasis role="comment">WITH&#32;THE&#32;SOFTWARE&#32;OR&#32;THE&#32;USE&#32;OR&#32;OTHER&#32;DEALINGS&#32;IN&#32;THE&#32;SOFTWARE.</emphasis>
+622 <emphasis role="comment">------------------------------------------------------------------------------</emphasis>
+623 <emphasis role="comment">*/</emphasis>
+</programlisting></section>

@@ -1,0 +1,216 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<section xmlns="http://docbook.org/ns/docbook" version="5.0" xmlns:xlink="http://www.w3.org/1999/xlink" xml:id="__old_2_classes_2lib_2raylib_2src_2external_2glfw_2src_2cocoa__platform_8h_source" xml:lang="en-US">
+<title>cocoa_platform.h</title>
+<indexterm><primary>C:/Users/HP/Documents/GitHub/Minero-Game/Old/Classes/lib/raylib/src/external/glfw/src/cocoa_platform.h</primary></indexterm>
+Go to the documentation of this file.<programlisting linenumbering="unnumbered">1 <emphasis role="comment">//========================================================================</emphasis>
+2 <emphasis role="comment">//&#32;GLFW&#32;3.4&#32;macOS&#32;-&#32;www.glfw.org</emphasis>
+3 <emphasis role="comment">//------------------------------------------------------------------------</emphasis>
+4 <emphasis role="comment">//&#32;Copyright&#32;(c)&#32;2009-2019&#32;Camilla&#32;Löwy&#32;&lt;elmindreda@glfw.org&gt;</emphasis>
+5 <emphasis role="comment">//</emphasis>
+6 <emphasis role="comment">//&#32;This&#32;software&#32;is&#32;provided&#32;&apos;as-is&apos;,&#32;without&#32;any&#32;express&#32;or&#32;implied</emphasis>
+7 <emphasis role="comment">//&#32;warranty.&#32;In&#32;no&#32;event&#32;will&#32;the&#32;authors&#32;be&#32;held&#32;liable&#32;for&#32;any&#32;damages</emphasis>
+8 <emphasis role="comment">//&#32;arising&#32;from&#32;the&#32;use&#32;of&#32;this&#32;software.</emphasis>
+9 <emphasis role="comment">//</emphasis>
+10 <emphasis role="comment">//&#32;Permission&#32;is&#32;granted&#32;to&#32;anyone&#32;to&#32;use&#32;this&#32;software&#32;for&#32;any&#32;purpose,</emphasis>
+11 <emphasis role="comment">//&#32;including&#32;commercial&#32;applications,&#32;and&#32;to&#32;alter&#32;it&#32;and&#32;redistribute&#32;it</emphasis>
+12 <emphasis role="comment">//&#32;freely,&#32;subject&#32;to&#32;the&#32;following&#32;restrictions:</emphasis>
+13 <emphasis role="comment">//</emphasis>
+14 <emphasis role="comment">//&#32;1.&#32;The&#32;origin&#32;of&#32;this&#32;software&#32;must&#32;not&#32;be&#32;misrepresented;&#32;you&#32;must&#32;not</emphasis>
+15 <emphasis role="comment">//&#32;&#32;&#32;&#32;claim&#32;that&#32;you&#32;wrote&#32;the&#32;original&#32;software.&#32;If&#32;you&#32;use&#32;this&#32;software</emphasis>
+16 <emphasis role="comment">//&#32;&#32;&#32;&#32;in&#32;a&#32;product,&#32;an&#32;acknowledgment&#32;in&#32;the&#32;product&#32;documentation&#32;would</emphasis>
+17 <emphasis role="comment">//&#32;&#32;&#32;&#32;be&#32;appreciated&#32;but&#32;is&#32;not&#32;required.</emphasis>
+18 <emphasis role="comment">//</emphasis>
+19 <emphasis role="comment">//&#32;2.&#32;Altered&#32;source&#32;versions&#32;must&#32;be&#32;plainly&#32;marked&#32;as&#32;such,&#32;and&#32;must&#32;not</emphasis>
+20 <emphasis role="comment">//&#32;&#32;&#32;&#32;be&#32;misrepresented&#32;as&#32;being&#32;the&#32;original&#32;software.</emphasis>
+21 <emphasis role="comment">//</emphasis>
+22 <emphasis role="comment">//&#32;3.&#32;This&#32;notice&#32;may&#32;not&#32;be&#32;removed&#32;or&#32;altered&#32;from&#32;any&#32;source</emphasis>
+23 <emphasis role="comment">//&#32;&#32;&#32;&#32;distribution.</emphasis>
+24 <emphasis role="comment">//</emphasis>
+25 <emphasis role="comment">//========================================================================</emphasis>
+26 
+27 <emphasis role="preprocessor">#include&#32;&lt;stdint.h&gt;</emphasis>
+28 <emphasis role="preprocessor">#include&#32;&lt;dlfcn.h&gt;</emphasis>
+29 
+30 <emphasis role="preprocessor">#include&#32;&lt;Carbon/Carbon.h&gt;</emphasis>
+31 
+32 <emphasis role="comment">//&#32;NOTE:&#32;All&#32;of&#32;NSGL&#32;was&#32;deprecated&#32;in&#32;the&#32;10.14&#32;SDK</emphasis>
+33 <emphasis role="comment">//&#32;&#32;&#32;&#32;&#32;&#32;&#32;This&#32;disables&#32;the&#32;pointless&#32;warnings&#32;for&#32;every&#32;symbol&#32;we&#32;use</emphasis>
+34 <emphasis role="preprocessor">#define&#32;GL_SILENCE_DEPRECATION</emphasis>
+35 
+36 <emphasis role="preprocessor">#if&#32;defined(__OBJC__)</emphasis>
+37 <emphasis role="preprocessor">#import&#32;&lt;Cocoa/Cocoa.h&gt;</emphasis>
+38 <emphasis role="preprocessor">#else</emphasis>
+39 <emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>*&#32;<link linkend="__classes_2lib_2external_2glfw_2src_2cocoa__platform_8h_1ae52362b10d585638f5b96140e90f1b7a">id</link>;
+40 <emphasis role="preprocessor">#endif</emphasis>
+41 
+42 <emphasis role="comment">//&#32;NOTE:&#32;Many&#32;Cocoa&#32;enum&#32;values&#32;have&#32;been&#32;renamed&#32;and&#32;we&#32;need&#32;to&#32;build&#32;across</emphasis>
+43 <emphasis role="comment">//&#32;&#32;&#32;&#32;&#32;&#32;&#32;SDK&#32;versions&#32;where&#32;one&#32;is&#32;unavailable&#32;or&#32;the&#32;other&#32;deprecated</emphasis>
+44 <emphasis role="comment">//&#32;&#32;&#32;&#32;&#32;&#32;&#32;We&#32;use&#32;the&#32;newer&#32;names&#32;in&#32;code&#32;and&#32;these&#32;macros&#32;to&#32;handle&#32;compatibility</emphasis>
+45 <emphasis role="preprocessor">#if&#32;MAC_OS_X_VERSION_MAX_ALLOWED&#32;&lt;&#32;101200</emphasis>
+46 <emphasis role="preprocessor">&#32;#define&#32;NSBitmapFormatAlphaNonpremultiplied&#32;NSAlphaNonpremultipliedBitmapFormat</emphasis>
+47 <emphasis role="preprocessor">&#32;#define&#32;NSEventMaskAny&#32;NSAnyEventMask</emphasis>
+48 <emphasis role="preprocessor">&#32;#define&#32;NSEventMaskKeyUp&#32;NSKeyUpMask</emphasis>
+49 <emphasis role="preprocessor">&#32;#define&#32;NSEventModifierFlagCapsLock&#32;NSAlphaShiftKeyMask</emphasis>
+50 <emphasis role="preprocessor">&#32;#define&#32;NSEventModifierFlagCommand&#32;NSCommandKeyMask</emphasis>
+51 <emphasis role="preprocessor">&#32;#define&#32;NSEventModifierFlagControl&#32;NSControlKeyMask</emphasis>
+52 <emphasis role="preprocessor">&#32;#define&#32;NSEventModifierFlagDeviceIndependentFlagsMask&#32;NSDeviceIndependentModifierFlagsMask</emphasis>
+53 <emphasis role="preprocessor">&#32;#define&#32;NSEventModifierFlagOption&#32;NSAlternateKeyMask</emphasis>
+54 <emphasis role="preprocessor">&#32;#define&#32;NSEventModifierFlagShift&#32;NSShiftKeyMask</emphasis>
+55 <emphasis role="preprocessor">&#32;#define&#32;NSEventTypeApplicationDefined&#32;NSApplicationDefined</emphasis>
+56 <emphasis role="preprocessor">&#32;#define&#32;NSWindowStyleMaskBorderless&#32;NSBorderlessWindowMask</emphasis>
+57 <emphasis role="preprocessor">&#32;#define&#32;NSWindowStyleMaskClosable&#32;NSClosableWindowMask</emphasis>
+58 <emphasis role="preprocessor">&#32;#define&#32;NSWindowStyleMaskMiniaturizable&#32;NSMiniaturizableWindowMask</emphasis>
+59 <emphasis role="preprocessor">&#32;#define&#32;NSWindowStyleMaskResizable&#32;NSResizableWindowMask</emphasis>
+60 <emphasis role="preprocessor">&#32;#define&#32;NSWindowStyleMaskTitled&#32;NSTitledWindowMask</emphasis>
+61 <emphasis role="preprocessor">#endif</emphasis>
+62 
+63 <emphasis role="keyword">typedef</emphasis>&#32;<link linkend="__classes_2lib_2external_2glfw_2deps_2glad_2vulkan_8h_1abb605a7700670dd8420cc3841b939444">VkFlags</link>&#32;<link linkend="__classes_2lib_2external_2glfw_2src_2cocoa__platform_8h_1a14404bdb209ed794c16c4f334fd4bb72">VkMacOSSurfaceCreateFlagsMVK</link>;
+64 <emphasis role="keyword">typedef</emphasis>&#32;<link linkend="__classes_2lib_2external_2glfw_2deps_2glad_2vulkan_8h_1abb605a7700670dd8420cc3841b939444">VkFlags</link>&#32;<link linkend="__classes_2lib_2external_2glfw_2src_2cocoa__platform_8h_1aae18aa7224ec796b5da935a8d72bdda3">VkMetalSurfaceCreateFlagsEXT</link>;
+65 
+66 <emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">struct&#32;</emphasis><link linkend="_struct_vk_mac_o_s_surface_create_info_m_v_k">VkMacOSSurfaceCreateInfoMVK</link>
+67 {
+68 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2external_2glfw_2deps_2glad_2vulkan_8h_1aff9f2b99398eb80a2b5a146bc5534ce8">VkStructureType</link>&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_struct_vk_mac_o_s_surface_create_info_m_v_k_1a0481299a494983a09cae465f5d3ee2c9">sType</link>;
+69 &#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>*&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_struct_vk_mac_o_s_surface_create_info_m_v_k_1a07a4d28f19186190ffc4504a75d771dc">pNext</link>;
+70 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2external_2glfw_2src_2cocoa__platform_8h_1a14404bdb209ed794c16c4f334fd4bb72">VkMacOSSurfaceCreateFlagsMVK</link>&#32;&#32;&#32;&#32;<link linkend="_struct_vk_mac_o_s_surface_create_info_m_v_k_1abd512a37bda1e8eb6b378d69091ae086">flags</link>;
+71 &#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>*&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_struct_vk_mac_o_s_surface_create_info_m_v_k_1a47a311e77efad7aad8c95edbd7180e5f">pView</link>;
+72 }&#32;<link linkend="__classes_2lib_2external_2glfw_2src_2cocoa__platform_8h_1a42e989201ac4f3cf7187faea56ba606b">VkMacOSSurfaceCreateInfoMVK</link>;
+73 
+74 <emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">struct&#32;</emphasis><link linkend="_struct_vk_metal_surface_create_info_e_x_t">VkMetalSurfaceCreateInfoEXT</link>
+75 {
+76 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2external_2glfw_2deps_2glad_2vulkan_8h_1aff9f2b99398eb80a2b5a146bc5534ce8">VkStructureType</link>&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_struct_vk_metal_surface_create_info_e_x_t_1a906dabb9d8f3c49d19c9a4bb9e91a4e4">sType</link>;
+77 &#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>*&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_struct_vk_metal_surface_create_info_e_x_t_1a18f990f46140c2237a36efe257b88c20">pNext</link>;
+78 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2external_2glfw_2src_2cocoa__platform_8h_1aae18aa7224ec796b5da935a8d72bdda3">VkMetalSurfaceCreateFlagsEXT</link>&#32;&#32;&#32;&#32;<link linkend="_struct_vk_metal_surface_create_info_e_x_t_1a337e7107ee29d9856884329d78c40ff2">flags</link>;
+79 &#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>*&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_struct_vk_metal_surface_create_info_e_x_t_1a26360cdb32e9d952cf9925a0359fd12c">pLayer</link>;
+80 }&#32;<link linkend="__classes_2lib_2external_2glfw_2src_2cocoa__platform_8h_1a2c5f6cb19895f037dc0e44e08a4d4f98">VkMetalSurfaceCreateInfoEXT</link>;
+81 
+82 <emphasis role="keyword">typedef</emphasis>&#32;<link linkend="__classes_2lib_2external_2glfw_2deps_2glad_2vulkan_8h_1abe3614d1bd40772bc2398a4a86ea4a45">VkResult</link>&#32;(<link linkend="__classes_2lib_2external_2glfw_2include_2_g_l_f_w_2glfw3_8h_1a428a91acf2c2439dc1a257708ee1f805">APIENTRY</link>&#32;*<link linkend="__classes_2lib_2external_2glfw_2src_2cocoa__platform_8h_1ab2687cc7bf8e358e33493cd6d03d5719">PFN_vkCreateMacOSSurfaceMVK</link>)(<link linkend="__classes_2lib_2external_2glfw_2src_2internal_8h_1a25ae5082a7c01af345570ed09d724881">VkInstance</link>,<emphasis role="keyword">const</emphasis>&#32;<link linkend="_struct_vk_mac_o_s_surface_create_info_m_v_k">VkMacOSSurfaceCreateInfoMVK</link>*,<emphasis role="keyword">const</emphasis>&#32;<link linkend="_struct_vk_allocation_callbacks">VkAllocationCallbacks</link>*,<link linkend="__classes_2lib_2external_2glfw_2src_2internal_8h_1a09787d7da5f3146095ed80ceccc2d794">VkSurfaceKHR</link>*);
+83 <emphasis role="keyword">typedef</emphasis>&#32;<link linkend="__classes_2lib_2external_2glfw_2deps_2glad_2vulkan_8h_1abe3614d1bd40772bc2398a4a86ea4a45">VkResult</link>&#32;(<link linkend="__classes_2lib_2external_2glfw_2include_2_g_l_f_w_2glfw3_8h_1a428a91acf2c2439dc1a257708ee1f805">APIENTRY</link>&#32;*<link linkend="__classes_2lib_2external_2glfw_2src_2cocoa__platform_8h_1a8641dabc3c27896ae83eee97378a305d">PFN_vkCreateMetalSurfaceEXT</link>)(<link linkend="__classes_2lib_2external_2glfw_2src_2internal_8h_1a25ae5082a7c01af345570ed09d724881">VkInstance</link>,<emphasis role="keyword">const</emphasis>&#32;<link linkend="_struct_vk_metal_surface_create_info_e_x_t">VkMetalSurfaceCreateInfoEXT</link>*,<emphasis role="keyword">const</emphasis>&#32;<link linkend="_struct_vk_allocation_callbacks">VkAllocationCallbacks</link>*,<link linkend="__classes_2lib_2external_2glfw_2src_2internal_8h_1a09787d7da5f3146095ed80ceccc2d794">VkSurfaceKHR</link>*);
+84 
+85 <emphasis role="preprocessor">#include&#32;&quot;<link linkend="__old_2_classes_2lib_2raylib_2src_2external_2glfw_2src_2posix__thread_8h">posix_thread.h</link>&quot;</emphasis>
+86 <emphasis role="preprocessor">#include&#32;&quot;<link linkend="__old_2_classes_2lib_2raylib_2src_2external_2glfw_2src_2cocoa__joystick_8h">cocoa_joystick.h</link>&quot;</emphasis>
+87 <emphasis role="preprocessor">#include&#32;&quot;<link linkend="__old_2_classes_2lib_2raylib_2src_2external_2glfw_2src_2nsgl__context_8h">nsgl_context.h</link>&quot;</emphasis>
+88 <emphasis role="preprocessor">#include&#32;&quot;<link linkend="__old_2_classes_2lib_2raylib_2src_2external_2glfw_2src_2egl__context_8h">egl_context.h</link>&quot;</emphasis>
+89 <emphasis role="preprocessor">#include&#32;&quot;<link linkend="__old_2_classes_2lib_2raylib_2src_2external_2glfw_2src_2osmesa__context_8h">osmesa_context.h</link>&quot;</emphasis>
+90 
+91 <emphasis role="preprocessor">#define&#32;_glfw_dlopen(name)&#32;dlopen(name,&#32;RTLD_LAZY&#32;|&#32;RTLD_LOCAL)</emphasis>
+92 <emphasis role="preprocessor">#define&#32;_glfw_dlclose(handle)&#32;dlclose(handle)</emphasis>
+93 <emphasis role="preprocessor">#define&#32;_glfw_dlsym(handle,&#32;name)&#32;dlsym(handle,&#32;name)</emphasis>
+94 
+95 <emphasis role="preprocessor">#define&#32;_GLFW_EGL_NATIVE_WINDOW&#32;&#32;((EGLNativeWindowType)&#32;window-&gt;ns.view)</emphasis>
+96 <emphasis role="preprocessor">#define&#32;_GLFW_EGL_NATIVE_DISPLAY&#32;EGL_DEFAULT_DISPLAY</emphasis>
+97 
+98 <emphasis role="preprocessor">#define&#32;_GLFW_PLATFORM_WINDOW_STATE&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_GLFWwindowNS&#32;&#32;ns</emphasis>
+99 <emphasis role="preprocessor">#define&#32;_GLFW_PLATFORM_LIBRARY_WINDOW_STATE&#32;_GLFWlibraryNS&#32;ns</emphasis>
+100 <emphasis role="preprocessor">#define&#32;_GLFW_PLATFORM_LIBRARY_TIMER_STATE&#32;&#32;_GLFWtimerNS&#32;&#32;&#32;ns</emphasis>
+101 <emphasis role="preprocessor">#define&#32;_GLFW_PLATFORM_MONITOR_STATE&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_GLFWmonitorNS&#32;ns</emphasis>
+102 <emphasis role="preprocessor">#define&#32;_GLFW_PLATFORM_CURSOR_STATE&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_GLFWcursorNS&#32;&#32;ns</emphasis>
+103 
+104 <emphasis role="comment">//&#32;HIToolbox.framework&#32;pointer&#32;typedefs</emphasis>
+105 <emphasis role="preprocessor">#define&#32;kTISPropertyUnicodeKeyLayoutData&#32;_glfw.ns.tis.kPropertyUnicodeKeyLayoutData</emphasis>
+106 <emphasis role="keyword">typedef</emphasis>&#32;TISInputSourceRef&#32;(*<link linkend="__classes_2lib_2external_2glfw_2src_2cocoa__platform_8h_1a72a0ccbedaac666af1a88063ed08a6d0">PFN_TISCopyCurrentKeyboardLayoutInputSource</link>)(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a0f7193911e632cd84da4082d5c628fe3">void</link>);
+107 <emphasis role="preprocessor">#define&#32;TISCopyCurrentKeyboardLayoutInputSource&#32;_glfw.ns.tis.CopyCurrentKeyboardLayoutInputSource</emphasis>
+108 <emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>*&#32;(*PFN_TISGetInputSourceProperty)(TISInputSourceRef,CFStringRef);
+109 <emphasis role="preprocessor">#define&#32;TISGetInputSourceProperty&#32;_glfw.ns.tis.GetInputSourceProperty</emphasis>
+110 <emphasis role="keyword">typedef</emphasis>&#32;UInt8&#32;(*<link linkend="__classes_2lib_2external_2glfw_2src_2cocoa__platform_8h_1a83c8472c4652357183d8763fe1c43c88">PFN_LMGetKbdType</link>)(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a0f7193911e632cd84da4082d5c628fe3">void</link>);
+111 <emphasis role="preprocessor">#define&#32;LMGetKbdType&#32;_glfw.ns.tis.GetKbdType</emphasis>
+112 
+113 
+114 <emphasis role="comment">//&#32;Cocoa-specific&#32;per-window&#32;data</emphasis>
+115 <emphasis role="comment">//</emphasis>
+116 <emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">struct&#32;</emphasis><link linkend="_struct___g_l_f_wwindow_n_s">_GLFWwindowNS</link>
+117 {
+118 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">id</emphasis>&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_struct___g_l_f_wwindow_n_s_1a2a4f012e935383d09b043e4376099160">object</link>;
+119 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">id</emphasis>&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_struct___g_l_f_wwindow_n_s_1a97ed2f5df9e3df607bb3ce0dc0512e66">delegate</link>;
+120 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">id</emphasis>&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_struct___g_l_f_wwindow_n_s_1a58bca42aa517b4df7049ae5f7e179ce5">view</link>;
+121 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">id</emphasis>&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_struct___g_l_f_wwindow_n_s_1adcc9751c33d4d0f8b7805c70b87a274c">layer</link>;
+122 
+123 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2external_2glfw_2src_2internal_8h_1ac5743c31bece872e24528b5a45e354c5">GLFWbool</link>&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_struct___g_l_f_wwindow_n_s_1aba794b171b420bd12e584102718dd8d8">maximized</link>;
+124 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2external_2glfw_2src_2internal_8h_1ac5743c31bece872e24528b5a45e354c5">GLFWbool</link>&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_struct___g_l_f_wwindow_n_s_1a4daffa2fc86a5c1e08448bb66e1d3590">retina</link>;
+125 
+126 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Cached&#32;window&#32;properties&#32;to&#32;filter&#32;out&#32;duplicate&#32;events</emphasis>
+127 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_struct___g_l_f_wwindow_n_s_1a2021f816702ff4291f4233390e327ca9">width</link>,&#32;<link linkend="_struct___g_l_f_wwindow_n_s_1a3c1fd6b77ea5a654c6f8a6f94c000da2">height</link>;
+128 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_struct___g_l_f_wwindow_n_s_1a7509ebede4d15d543c1023d44c25b2dd">fbWidth</link>,&#32;<link linkend="_struct___g_l_f_wwindow_n_s_1a27a8fea5bb97a12b26b512b70839511b">fbHeight</link>;
+129 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">float</emphasis>&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_struct___g_l_f_wwindow_n_s_1ac79b7ec60fef530cd8379d6c55cc319b">xscale</link>,&#32;<link linkend="_struct___g_l_f_wwindow_n_s_1aacaab4080a1a56e89a53bc3da899b191">yscale</link>;
+130 
+131 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;The&#32;total&#32;sum&#32;of&#32;the&#32;distances&#32;the&#32;cursor&#32;has&#32;been&#32;warped</emphasis>
+132 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;since&#32;the&#32;last&#32;cursor&#32;motion&#32;event&#32;was&#32;processed</emphasis>
+133 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;This&#32;is&#32;kept&#32;to&#32;counteract&#32;Cocoa&#32;doing&#32;the&#32;same&#32;internally</emphasis>
+134 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">double</emphasis>&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_struct___g_l_f_wwindow_n_s_1a555c7d7b038ef8ad4c3dbfc9028ba876">cursorWarpDeltaX</link>,&#32;<link linkend="_struct___g_l_f_wwindow_n_s_1a5e1e0b5476a0a670edfc62cfbec712bb">cursorWarpDeltaY</link>;
+135 
+136 }&#32;<link linkend="__classes_2lib_2external_2glfw_2src_2cocoa__platform_8h_1a73113de6dd1a95c93cf5e18a9792d4fc">_GLFWwindowNS</link>;
+137 
+138 <emphasis role="comment">//&#32;Cocoa-specific&#32;global&#32;data</emphasis>
+139 <emphasis role="comment">//</emphasis>
+140 <emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">struct&#32;</emphasis><link linkend="_struct___g_l_f_wlibrary_n_s">_GLFWlibraryNS</link>
+141 {
+142 &#32;&#32;&#32;&#32;CGEventSourceRef&#32;&#32;&#32;&#32;<link linkend="_struct___g_l_f_wlibrary_n_s_1ae0297b6477cfe5406d6cad47791ff524">eventSource</link>;
+143 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">id</emphasis>&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_struct___g_l_f_wlibrary_n_s_1ac9bef9b96260dd26ad1a9e7287b4d812">delegate</link>;
+144 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2external_2glfw_2src_2internal_8h_1ac5743c31bece872e24528b5a45e354c5">GLFWbool</link>&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_struct___g_l_f_wlibrary_n_s_1a554108547fc19827a484e6ea081db00f">finishedLaunching</link>;
+145 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2external_2glfw_2src_2internal_8h_1ac5743c31bece872e24528b5a45e354c5">GLFWbool</link>&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_struct___g_l_f_wlibrary_n_s_1ad8ad77fbd27eebcef8d5cb033ab0e6ea">cursorHidden</link>;
+146 &#32;&#32;&#32;&#32;TISInputSourceRef&#32;&#32;&#32;<link linkend="_struct___g_l_f_wlibrary_n_s_1a0f5eff37bafb4c2eaddf8ba2ec1360e2">inputSource</link>;
+147 &#32;&#32;&#32;&#32;IOHIDManagerRef&#32;&#32;&#32;&#32;&#32;<link linkend="_struct___g_l_f_wlibrary_n_s_1a3d2f5238158b7433be1f4e61df37b82d">hidManager</link>;
+148 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">id</emphasis>&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_struct___g_l_f_wlibrary_n_s_1a3173595db852c86e0b5ca99611275f32">unicodeData</link>;
+149 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">id</emphasis>&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_struct___g_l_f_wlibrary_n_s_1ac2dad25afbf3b551482d81ede0678fa8">helper</link>;
+150 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">id</emphasis>&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_struct___g_l_f_wlibrary_n_s_1a8837d4147c80790b7c4c9890818261e0">keyUpMonitor</link>;
+151 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">id</emphasis>&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_struct___g_l_f_wlibrary_n_s_1aa070c6433c921e5b62877b510780408f">nibObjects</link>;
+152 
+153 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">char</emphasis>&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_struct___g_l_f_wlibrary_n_s_1a95ccbfbb7317e628c2c65e29b6a3ee7c">keynames</link>[<link linkend="_group__keys_1ga442cbaef7bfb9a4ba13594dd7fbf2789">GLFW_KEY_LAST</link>&#32;+&#32;1][17];
+154 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">short</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_struct___g_l_f_wlibrary_n_s_1a0e7d152d4a94118ba6f0f1ab908fb374">keycodes</link>[256];
+155 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">short</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_struct___g_l_f_wlibrary_n_s_1a3008527859d51143d101d5bf6b3c2dab">scancodes</link>[<link linkend="_group__keys_1ga442cbaef7bfb9a4ba13594dd7fbf2789">GLFW_KEY_LAST</link>&#32;+&#32;1];
+156 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">char</emphasis>*&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_struct___g_l_f_wlibrary_n_s_1a48b3543ddb896aa136a38652fbb0cb31">clipboardString</link>;
+157 &#32;&#32;&#32;&#32;CGPoint&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_struct___g_l_f_wlibrary_n_s_1a3d3a67c517278e6991aa6bbdd3047ac4">cascadePoint</link>;
+158 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Where&#32;to&#32;place&#32;the&#32;cursor&#32;when&#32;re-enabled</emphasis>
+159 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">double</emphasis>&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_struct___g_l_f_wlibrary_n_s_1a93e4d1c23cf55dd073b61d9f8436ade9">restoreCursorPosX</link>,&#32;<link linkend="_struct___g_l_f_wlibrary_n_s_1a55f14c4b5ad2723de5e6217c550f45aa">restoreCursorPosY</link>;
+160 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;The&#32;window&#32;whose&#32;disabled&#32;cursor&#32;mode&#32;is&#32;active</emphasis>
+161 &#32;&#32;&#32;&#32;<link linkend="_struct___g_l_f_wwindow">_GLFWwindow</link>*&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_struct___g_l_f_wlibrary_n_s_1aff92835dc4d94450998f4ae3889972cb">disabledCursorWindow</link>;
+162 
+163 &#32;&#32;&#32;&#32;<emphasis role="keyword">struct&#32;</emphasis>{
+164 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;CFBundleRef&#32;&#32;&#32;&#32;&#32;<link linkend="_struct___g_l_f_wlibrary_n_s_1a4092245999e589dc59c5d90f47c51fc0">bundle</link>;
+165 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__old_2_classes_2lib_2raylib_2src_2external_2glfw_2src_2cocoa__platform_8h_1a72a0ccbedaac666af1a88063ed08a6d0">PFN_TISCopyCurrentKeyboardLayoutInputSource</link>&#32;<link linkend="_struct___g_l_f_wlibrary_n_s_1a332008478c35c35cf5eedf2ff7f8513b">CopyCurrentKeyboardLayoutInputSource</link>;
+166 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__old_2_classes_2lib_2raylib_2src_2external_2glfw_2src_2cocoa__platform_8h_1a843483ae376ea9b657c6ee2c9b746ed5">PFN_TISGetInputSourceProperty</link>&#32;<link linkend="_struct___g_l_f_wlibrary_n_s_1aac719437d912cfe8792ee2c068177016">GetInputSourceProperty</link>;
+167 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__old_2_classes_2lib_2raylib_2src_2external_2glfw_2src_2cocoa__platform_8h_1a83c8472c4652357183d8763fe1c43c88">PFN_LMGetKbdType</link>&#32;<link linkend="_struct___g_l_f_wlibrary_n_s_1a76160446e7250a0cd655d1c72031e211">GetKbdType</link>;
+168 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;CFStringRef&#32;&#32;&#32;&#32;&#32;<link linkend="_struct___g_l_f_wlibrary_n_s_1aa612dad7ef8c29f419f54e02c4466ddc">kPropertyUnicodeKeyLayoutData</link>;
+169 &#32;&#32;&#32;&#32;}&#32;<link linkend="_struct___g_l_f_wlibrary_n_s_1ab96fc6a7c9d729c635d84971650f8ccd">tis</link>;
+170 
+171 }&#32;<link linkend="__classes_2lib_2external_2glfw_2src_2cocoa__platform_8h_1a1df7eacd671483033fa1bca96b53851a">_GLFWlibraryNS</link>;
+172 
+173 <emphasis role="comment">//&#32;Cocoa-specific&#32;per-monitor&#32;data</emphasis>
+174 <emphasis role="comment">//</emphasis>
+175 <emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">struct&#32;</emphasis><link linkend="_struct___g_l_f_wmonitor_n_s">_GLFWmonitorNS</link>
+176 {
+177 &#32;&#32;&#32;&#32;CGDirectDisplayID&#32;&#32;&#32;<link linkend="_struct___g_l_f_wmonitor_n_s_1abe7227de7971669512a8448962927652">displayID</link>;
+178 &#32;&#32;&#32;&#32;CGDisplayModeRef&#32;&#32;&#32;&#32;<link linkend="_struct___g_l_f_wmonitor_n_s_1af7a340549b552ac7715eecc374e8de88">previousMode</link>;
+179 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2external_2glfw_2deps_2vs2008_2stdint_8h_1a435d1572bf3f880d55459d9805097f62">uint32_t</link>&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_struct___g_l_f_wmonitor_n_s_1a0d57aadff800a614e0ea769b3b3c99d3">unitNumber</link>;
+180 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">id</emphasis>&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_struct___g_l_f_wmonitor_n_s_1ae8adf32dfdf6110e40287c76da7e0cc3">screen</link>;
+181 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">double</emphasis>&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_struct___g_l_f_wmonitor_n_s_1a369316e35478c5c734eb11bfb2e0ecda">fallbackRefreshRate</link>;
+182 
+183 }&#32;<link linkend="__classes_2lib_2external_2glfw_2src_2cocoa__platform_8h_1a3bf114d2babf94d396cace8f65c2678f">_GLFWmonitorNS</link>;
+184 
+185 <emphasis role="comment">//&#32;Cocoa-specific&#32;per-cursor&#32;data</emphasis>
+186 <emphasis role="comment">//</emphasis>
+187 <emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">struct&#32;</emphasis><link linkend="_struct___g_l_f_wcursor_n_s">_GLFWcursorNS</link>
+188 {
+189 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">id</emphasis>&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_struct___g_l_f_wcursor_n_s_1a863a8b16c5105f5ccde6c2149d66373c">object</link>;
+190 
+191 }&#32;<link linkend="__classes_2lib_2external_2glfw_2src_2cocoa__platform_8h_1ab75bf37bccaafec182e1b5f83c1c821b">_GLFWcursorNS</link>;
+192 
+193 <emphasis role="comment">//&#32;Cocoa-specific&#32;global&#32;timer&#32;data</emphasis>
+194 <emphasis role="comment">//</emphasis>
+195 <emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">struct&#32;</emphasis><link linkend="_struct___g_l_f_wtimer_n_s">_GLFWtimerNS</link>
+196 {
+197 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2external_2glfw_2deps_2vs2008_2stdint_8h_1aec6fcb673ff035718c238c8c9d544c47">uint64_t</link>&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_struct___g_l_f_wtimer_n_s_1adfd434dcfe1b44d3419584706aefbd85">frequency</link>;
+198 
+199 }&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glfw_2src_2cocoa__platform_8h_1a4c2e8b526d44483d6775b767904b8cbf">_GLFWtimerNS</link>;
+200 
+201 
+202 <emphasis role="keywordtype">void</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glfw_2src_2cocoa__platform_8h_1a111b3e3aae5e9d74046ea1980ae4d2d3">_glfwInitTimerNS</link>(<emphasis role="keywordtype">void</emphasis>);
+203 
+204 <emphasis role="keywordtype">void</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glfw_2src_2cocoa__platform_8h_1af80ef4003623e26e842c72c6fc5666ae">_glfwPollMonitorsNS</link>(<emphasis role="keywordtype">void</emphasis>);
+205 <emphasis role="keywordtype">void</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glfw_2src_2cocoa__platform_8h_1ab9bea8895a54b593404797696663f6ee">_glfwSetVideoModeNS</link>(<link linkend="_struct___g_l_f_wmonitor">_GLFWmonitor</link>*&#32;monitor,&#32;<emphasis role="keyword">const</emphasis>&#32;<link linkend="_struct_g_l_f_wvidmode">GLFWvidmode</link>*&#32;desired);
+206 <emphasis role="keywordtype">void</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glfw_2src_2cocoa__platform_8h_1a2048e4d4e33a8344cb38f7de19e14b6c">_glfwRestoreVideoModeNS</link>(<link linkend="_struct___g_l_f_wmonitor">_GLFWmonitor</link>*&#32;monitor);
+207 
+208 <emphasis role="keywordtype">float</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glfw_2src_2cocoa__platform_8h_1a283d1c441c4cd978cc5725f71bac269d">_glfwTransformYNS</link>(<emphasis role="keywordtype">float</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a4f27f1eebce8c31db01bb39fab9ef561">y</link>);
+209 
+210 <emphasis role="keywordtype">void</emphasis>*&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glfw_2src_2cocoa__platform_8h_1a45a78b0fcb9b240d40637fe540fa45e5">_glfwLoadLocalVulkanLoaderNS</link>(<emphasis role="keywordtype">void</emphasis>);
+211 
+</programlisting></section>

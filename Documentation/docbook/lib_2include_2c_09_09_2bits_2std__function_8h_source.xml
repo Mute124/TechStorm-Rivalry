@@ -1,0 +1,612 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<section xmlns="http://docbook.org/ns/docbook" version="5.0" xmlns:xlink="http://www.w3.org/1999/xlink" xml:id="_lib_2include_2c_09_09_2bits_2std__function_8h_source" xml:lang="en-US">
+<title>std_function.h</title>
+<indexterm><primary>C:/Users/HP/Documents/GitHub/Minero-Game/lib/include/c++/bits/std_function.h</primary></indexterm>
+Go to the documentation of this file.<programlisting linenumbering="unnumbered">1 <emphasis role="comment">//&#32;Implementation&#32;of&#32;std::function&#32;-*-&#32;C++&#32;-*-</emphasis>
+2 
+3 <emphasis role="comment">//&#32;Copyright&#32;(C)&#32;2004-2022&#32;Free&#32;Software&#32;Foundation,&#32;Inc.</emphasis>
+4 <emphasis role="comment">//</emphasis>
+5 <emphasis role="comment">//&#32;This&#32;file&#32;is&#32;part&#32;of&#32;the&#32;GNU&#32;ISO&#32;C++&#32;Library.&#32;&#32;This&#32;library&#32;is&#32;free</emphasis>
+6 <emphasis role="comment">//&#32;software;&#32;you&#32;can&#32;redistribute&#32;it&#32;and/or&#32;modify&#32;it&#32;under&#32;the</emphasis>
+7 <emphasis role="comment">//&#32;terms&#32;of&#32;the&#32;GNU&#32;General&#32;Public&#32;License&#32;as&#32;published&#32;by&#32;the</emphasis>
+8 <emphasis role="comment">//&#32;Free&#32;Software&#32;Foundation;&#32;either&#32;version&#32;3,&#32;or&#32;(at&#32;your&#32;option)</emphasis>
+9 <emphasis role="comment">//&#32;any&#32;later&#32;version.</emphasis>
+10 
+11 <emphasis role="comment">//&#32;This&#32;library&#32;is&#32;distributed&#32;in&#32;the&#32;hope&#32;that&#32;it&#32;will&#32;be&#32;useful,</emphasis>
+12 <emphasis role="comment">//&#32;but&#32;WITHOUT&#32;ANY&#32;WARRANTY;&#32;without&#32;even&#32;the&#32;implied&#32;warranty&#32;of</emphasis>
+13 <emphasis role="comment">//&#32;MERCHANTABILITY&#32;or&#32;FITNESS&#32;FOR&#32;A&#32;PARTICULAR&#32;PURPOSE.&#32;&#32;See&#32;the</emphasis>
+14 <emphasis role="comment">//&#32;GNU&#32;General&#32;Public&#32;License&#32;for&#32;more&#32;details.</emphasis>
+15 
+16 <emphasis role="comment">//&#32;Under&#32;Section&#32;7&#32;of&#32;GPL&#32;version&#32;3,&#32;you&#32;are&#32;granted&#32;additional</emphasis>
+17 <emphasis role="comment">//&#32;permissions&#32;described&#32;in&#32;the&#32;GCC&#32;Runtime&#32;Library&#32;Exception,&#32;version</emphasis>
+18 <emphasis role="comment">//&#32;3.1,&#32;as&#32;published&#32;by&#32;the&#32;Free&#32;Software&#32;Foundation.</emphasis>
+19 
+20 <emphasis role="comment">//&#32;You&#32;should&#32;have&#32;received&#32;a&#32;copy&#32;of&#32;the&#32;GNU&#32;General&#32;Public&#32;License&#32;and</emphasis>
+21 <emphasis role="comment">//&#32;a&#32;copy&#32;of&#32;the&#32;GCC&#32;Runtime&#32;Library&#32;Exception&#32;along&#32;with&#32;this&#32;program;</emphasis>
+22 <emphasis role="comment">//&#32;see&#32;the&#32;files&#32;COPYING3&#32;and&#32;COPYING.RUNTIME&#32;respectively.&#32;&#32;If&#32;not,&#32;see</emphasis>
+23 <emphasis role="comment">//&#32;&lt;http://www.gnu.org/licenses/&gt;.</emphasis>
+24 
+30 <emphasis role="preprocessor">#ifndef&#32;_GLIBCXX_STD_FUNCTION_H</emphasis>
+31 <emphasis role="preprocessor">#define&#32;_GLIBCXX_STD_FUNCTION_H&#32;1</emphasis>
+32 
+33 <emphasis role="preprocessor">#pragma&#32;GCC&#32;system_header</emphasis>
+34 
+35 <emphasis role="preprocessor">#if&#32;__cplusplus&#32;&lt;&#32;201103L</emphasis>
+36 <emphasis role="preprocessor">#&#32;include&#32;&lt;bits/c++0x_warning.h&gt;</emphasis>
+37 <emphasis role="preprocessor">#else</emphasis>
+38 
+39 <emphasis role="preprocessor">#include&#32;&lt;typeinfo&gt;</emphasis>
+40 <emphasis role="preprocessor">#include&#32;&lt;bits/stl_function.h&gt;</emphasis>
+41 <emphasis role="preprocessor">#include&#32;&lt;bits/invoke.h&gt;</emphasis>
+42 <emphasis role="preprocessor">#include&#32;&lt;bits/refwrap.h&gt;</emphasis>
+43 <emphasis role="preprocessor">#include&#32;&lt;bits/functexcept.h&gt;</emphasis>
+44 
+45 <emphasis role="keyword">namespace&#32;</emphasis><link linkend="_namespacestd">std</link>&#32;<link linkend="__classes_2lib_2include_2c_09_09_2x86__64-w64-mingw32_2bits_2c_09_09config_8h_1a44377df0d3503f0b3d9ab316dd8ddf8b">_GLIBCXX_VISIBILITY</link>(default)
+46 {
+47 _GLIBCXX_BEGIN_NAMESPACE_VERSION
+48 
+54 &#32;&#32;<emphasis role="keyword">class&#32;</emphasis>bad_function_call&#32;:&#32;<emphasis role="keyword">public</emphasis>&#32;<link linkend="_classstd_1_1exception">std::exception</link>
+55 &#32;&#32;{
+56 &#32;&#32;<emphasis role="keyword">public</emphasis>:
+57 &#32;&#32;&#32;&#32;<emphasis role="keyword">virtual</emphasis>&#32;~bad_function_call()&#32;noexcept;
+58 
+59 &#32;&#32;&#32;&#32;const&#32;<emphasis role="keywordtype">char</emphasis>*&#32;what()&#32;const&#32;noexcept;
+60 &#32;&#32;};
+61 
+68 &#32;&#32;template&lt;typename&#32;_Tp&gt;
+69 &#32;&#32;&#32;&#32;struct&#32;__is_location_invariant
+70 &#32;&#32;&#32;&#32;:&#32;is_trivially_copyable&lt;_Tp&gt;::<link linkend="__classes_2_gameobj_8h_1a890efa53b3d7deeeced6f3a0d6653ed3">type</link>
+71 &#32;&#32;&#32;&#32;{&#32;};
+72 
+73 &#32;&#32;<emphasis role="keyword">class&#32;</emphasis>_Undefined_class;
+74 
+75 &#32;&#32;<emphasis role="keyword">union&#32;</emphasis>_Nocopy_types
+76 &#32;&#32;{
+77 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>*&#32;&#32;&#32;&#32;&#32;&#32;&#32;_M_object;
+78 &#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>*&#32;_M_const_object;
+79 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a0f7193911e632cd84da4082d5c628fe3">void</link>&#32;(*_M_function_pointer)();
+80 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a0f7193911e632cd84da4082d5c628fe3">void</link>&#32;(_Undefined_class::*_M_member_pointer)();
+81 &#32;&#32;};
+82 
+83 &#32;&#32;<emphasis role="keyword">union&#32;</emphasis>[[gnu::may_alias]]&#32;_Any_data
+84 &#32;&#32;{
+85 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>*&#32;&#32;&#32;&#32;&#32;&#32;&#32;_M_access()&#32;&#32;&#32;&#32;&#32;&#32;&#32;noexcept&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;&amp;_M_pod_data[0];&#32;}
+86 &#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>*&#32;_M_access()&#32;const&#32;noexcept&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;&amp;_M_pod_data[0];&#32;}
+87 
+88 &#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+89 &#32;&#32;&#32;&#32;&#32;&#32;_Tp&amp;
+90 &#32;&#32;&#32;&#32;&#32;&#32;_M_access()&#32;noexcept
+91 &#32;&#32;&#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;*<emphasis role="keyword">static_cast&lt;</emphasis>_Tp*<emphasis role="keyword">&gt;</emphasis>(_M_access());&#32;}
+92 
+93 &#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+94 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;_Tp&amp;
+95 &#32;&#32;&#32;&#32;&#32;&#32;_M_access()&#32;const&#32;noexcept
+96 &#32;&#32;&#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;*<emphasis role="keyword">static_cast&lt;</emphasis><emphasis role="keyword">const&#32;</emphasis>_Tp*<emphasis role="keyword">&gt;</emphasis>(_M_access());&#32;}
+97 
+98 &#32;&#32;&#32;&#32;_Nocopy_types&#32;_M_unused;
+99 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">char</emphasis>&#32;_M_pod_data[<emphasis role="keyword">sizeof</emphasis>(_Nocopy_types)];
+100 &#32;&#32;};
+101 
+102 &#32;&#32;<emphasis role="keyword">enum</emphasis>&#32;_Manager_operation
+103 &#32;&#32;{
+104 &#32;&#32;&#32;&#32;__get_type_info,
+105 &#32;&#32;&#32;&#32;__get_functor_ptr,
+106 &#32;&#32;&#32;&#32;__clone_functor,
+107 &#32;&#32;&#32;&#32;__destroy_functor
+108 &#32;&#32;};
+109 
+110 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Signature&gt;
+111 &#32;&#32;&#32;&#32;<emphasis role="keyword">class&#32;</emphasis>function;
+112 
+114 &#32;&#32;<emphasis role="keyword">class&#32;</emphasis>_Function_base
+115 &#32;&#32;{
+116 &#32;&#32;<emphasis role="keyword">public</emphasis>:
+117 &#32;&#32;&#32;&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;_M_max_size&#32;=&#32;<emphasis role="keyword">sizeof</emphasis>(_Nocopy_types);
+118 &#32;&#32;&#32;&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;_M_max_align&#32;=&#32;__alignof__(_Nocopy_types);
+119 
+120 &#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Functor&gt;
+121 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">class&#32;</emphasis>_Base_manager
+122 &#32;&#32;&#32;&#32;&#32;&#32;{
+123 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">protected</emphasis>:
+124 &#32;&#32;&#32;&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>&#32;__stored_locally&#32;=
+125 &#32;&#32;&#32;&#32;(__is_location_invariant&lt;_Functor&gt;::value
+126 &#32;&#32;&#32;&#32;&#32;&amp;&amp;&#32;<emphasis role="keyword">sizeof</emphasis>(_Functor)&#32;&lt;=&#32;_M_max_size
+127 &#32;&#32;&#32;&#32;&#32;&amp;&amp;&#32;__alignof__(_Functor)&#32;&lt;=&#32;_M_max_align
+128 &#32;&#32;&#32;&#32;&#32;&amp;&amp;&#32;(_M_max_align&#32;%&#32;__alignof__(_Functor)&#32;==&#32;0));
+129 
+130 &#32;&#32;&#32;&#32;<emphasis role="keyword">using&#32;</emphasis>_Local_storage&#32;=&#32;integral_constant&lt;bool,&#32;__stored_locally&gt;;
+131 
+132 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Retrieve&#32;a&#32;pointer&#32;to&#32;the&#32;function&#32;object</emphasis>
+133 &#32;&#32;&#32;&#32;<emphasis role="keyword">static</emphasis>&#32;_Functor*
+134 &#32;&#32;&#32;&#32;_M_get_pointer(<emphasis role="keyword">const</emphasis>&#32;_Any_data&amp;&#32;__source)&#32;<emphasis role="keyword">noexcept</emphasis>
+135 &#32;&#32;&#32;&#32;{
+136 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;_GLIBCXX17_CONSTEXPR&#32;(__stored_locally)
+137 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+138 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;_Functor&amp;&#32;__f&#32;=&#32;__source._M_access&lt;_Functor&gt;();
+139 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<emphasis role="keyword">const_cast&lt;</emphasis>_Functor*<emphasis role="keyword">&gt;</emphasis>(std::__addressof(__f));
+140 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+141 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>&#32;<emphasis role="comment">//&#32;have&#32;stored&#32;a&#32;pointer</emphasis>
+142 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__source._M_access&lt;_Functor*&gt;();
+143 &#32;&#32;&#32;&#32;}
+144 
+145 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">private</emphasis>:
+146 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Construct&#32;a&#32;location-invariant&#32;function&#32;object&#32;that&#32;fits&#32;within</emphasis>
+147 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;an&#32;_Any_data&#32;structure.</emphasis>
+148 &#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Fn&gt;
+149 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>
+150 &#32;&#32;&#32;&#32;&#32;&#32;_M_create(_Any_data&amp;&#32;__dest,&#32;_Fn&amp;&amp;&#32;__f,&#32;true_type)
+151 &#32;&#32;&#32;&#32;&#32;&#32;{
+152 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;::new&#32;(__dest._M_access())&#32;_Functor(<link linkend="_namespacestd">std</link>::forward&lt;_Fn&gt;(__f));
+153 &#32;&#32;&#32;&#32;&#32;&#32;}
+154 
+155 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Construct&#32;a&#32;function&#32;object&#32;on&#32;the&#32;heap&#32;and&#32;store&#32;a&#32;pointer.</emphasis>
+156 &#32;&#32;&#32;&#32;template&lt;typename&#32;_Fn&gt;
+157 &#32;&#32;&#32;&#32;&#32;&#32;static&#32;<emphasis role="keywordtype">void</emphasis>
+158 &#32;&#32;&#32;&#32;&#32;&#32;_M_create(_Any_data&amp;&#32;__dest,&#32;_Fn&amp;&amp;&#32;__f,&#32;false_type)
+159 &#32;&#32;&#32;&#32;&#32;&#32;{
+160 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__dest._M_access&lt;_Functor*&gt;()
+161 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;=&#32;<emphasis role="keyword">new</emphasis>&#32;_Functor(std::forward&lt;_Fn&gt;(__f));
+162 &#32;&#32;&#32;&#32;&#32;&#32;}
+163 
+164 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Destroy&#32;an&#32;object&#32;stored&#32;in&#32;the&#32;internal&#32;buffer.</emphasis>
+165 &#32;&#32;&#32;&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>
+166 &#32;&#32;&#32;&#32;_M_destroy(_Any_data&amp;&#32;__victim,&#32;true_type)
+167 &#32;&#32;&#32;&#32;{
+168 &#32;&#32;&#32;&#32;&#32;&#32;__victim._M_access&lt;_Functor&gt;().~_Functor();
+169 &#32;&#32;&#32;&#32;}
+170 
+171 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Destroy&#32;an&#32;object&#32;located&#32;on&#32;the&#32;heap.</emphasis>
+172 &#32;&#32;&#32;&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>
+173 &#32;&#32;&#32;&#32;_M_destroy(_Any_data&amp;&#32;__victim,&#32;false_type)
+174 &#32;&#32;&#32;&#32;{
+175 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">delete</emphasis>&#32;__victim._M_access&lt;_Functor*&gt;();
+176 &#32;&#32;&#32;&#32;}
+177 
+178 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">public</emphasis>:
+179 &#32;&#32;&#32;&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>
+180 &#32;&#32;&#32;&#32;_M_manager(_Any_data&amp;&#32;__dest,&#32;<emphasis role="keyword">const</emphasis>&#32;_Any_data&amp;&#32;__source,
+181 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_Manager_operation&#32;__op)
+182 &#32;&#32;&#32;&#32;{
+183 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">switch</emphasis>&#32;(__op)
+184 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+185 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">case</emphasis>&#32;__get_type_info:
+186 <emphasis role="preprocessor">#if&#32;__cpp_rtti</emphasis>
+187 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__dest._M_access&lt;<emphasis role="keyword">const</emphasis>&#32;type_info*&gt;()&#32;=&#32;&amp;<emphasis role="keyword">typeid</emphasis>(_Functor);
+188 <emphasis role="preprocessor">#else</emphasis>
+189 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__dest._M_access&lt;<emphasis role="keyword">const</emphasis>&#32;type_info*&gt;()&#32;=&#32;<emphasis role="keyword">nullptr</emphasis>;
+190 <emphasis role="preprocessor">#endif</emphasis>
+191 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">break</emphasis>;
+192 
+193 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">case</emphasis>&#32;__get_functor_ptr:
+194 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__dest._M_access&lt;_Functor*&gt;()&#32;=&#32;_M_get_pointer(__source);
+195 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">break</emphasis>;
+196 
+197 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">case</emphasis>&#32;__clone_functor:
+198 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_M_init_functor(__dest,
+199 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;*<emphasis role="keyword">const_cast&lt;</emphasis><emphasis role="keyword">const&#32;</emphasis>_Functor*<emphasis role="keyword">&gt;</emphasis>(_M_get_pointer(__source)));
+200 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">break</emphasis>;
+201 
+202 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">case</emphasis>&#32;__destroy_functor:
+203 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_M_destroy(__dest,&#32;_Local_storage());
+204 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">break</emphasis>;
+205 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+206 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<emphasis role="keyword">false</emphasis>;
+207 &#32;&#32;&#32;&#32;}
+208 
+209 &#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Fn&gt;
+210 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>
+211 &#32;&#32;&#32;&#32;&#32;&#32;_M_init_functor(_Any_data&amp;&#32;__functor,&#32;_Fn&amp;&amp;&#32;__f)
+212 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">noexcept</emphasis>(__and_&lt;_Local_storage,
+213 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;is_nothrow_constructible&lt;_Functor,&#32;_Fn&gt;&gt;<link linkend="_classvalue">::value</link>)
+214 &#32;&#32;&#32;&#32;&#32;&#32;{
+215 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_M_create(__functor,&#32;std::forward&lt;_Fn&gt;(__f),&#32;_Local_storage());
+216 &#32;&#32;&#32;&#32;&#32;&#32;}
+217 
+218 &#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Signature&gt;
+219 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>
+220 &#32;&#32;&#32;&#32;&#32;&#32;_M_not_empty_function(<emphasis role="keyword">const</emphasis>&#32;function&lt;_Signature&gt;&amp;&#32;__f)&#32;<emphasis role="keyword">noexcept</emphasis>
+221 &#32;&#32;&#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;<emphasis role="keyword">static_cast&lt;</emphasis><emphasis role="keywordtype">bool</emphasis><emphasis role="keyword">&gt;</emphasis>(__f);&#32;}
+222 
+223 &#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+224 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>
+225 &#32;&#32;&#32;&#32;&#32;&#32;_M_not_empty_function(_Tp*&#32;__fp)&#32;<emphasis role="keyword">noexcept</emphasis>
+226 &#32;&#32;&#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;__fp&#32;!=&#32;<emphasis role="keyword">nullptr</emphasis>;&#32;}
+227 
+228 &#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Class,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+229 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>
+230 &#32;&#32;&#32;&#32;&#32;&#32;_M_not_empty_function(_Tp&#32;_Class::*&#32;__mp)&#32;noexcept
+231 &#32;&#32;&#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;__mp&#32;!=&#32;<emphasis role="keyword">nullptr</emphasis>;&#32;}
+232 
+233 &#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+234 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>
+235 &#32;&#32;&#32;&#32;&#32;&#32;_M_not_empty_function(<emphasis role="keyword">const</emphasis>&#32;_Tp&amp;)&#32;<emphasis role="keyword">noexcept</emphasis>
+236 &#32;&#32;&#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;<emphasis role="keyword">true</emphasis>;&#32;}
+237 &#32;&#32;&#32;&#32;&#32;&#32;};
+238 
+239 &#32;&#32;&#32;&#32;_Function_base()&#32;=&#32;<emphasis role="keywordflow">default</emphasis>;
+240 
+241 &#32;&#32;&#32;&#32;~_Function_base()
+242 &#32;&#32;&#32;&#32;{
+243 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(_M_manager)
+244 &#32;&#32;&#32;&#32;_M_manager(_M_functor,&#32;_M_functor,&#32;__destroy_functor);
+245 &#32;&#32;&#32;&#32;}
+246 
+247 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">bool</emphasis>&#32;_M_empty()<emphasis role="keyword">&#32;const&#32;</emphasis>{&#32;<emphasis role="keywordflow">return</emphasis>&#32;!_M_manager;&#32;}
+248 
+249 &#32;&#32;&#32;&#32;<emphasis role="keyword">using&#32;</emphasis>_Manager_type
+250 &#32;&#32;&#32;&#32;&#32;&#32;=&#32;<link linkend="__classes_2lib_2include_2stdbool_8h_1abb452686968e48b67397da5f97445f5b">bool</link>&#32;(*)(_Any_data&amp;,&#32;<emphasis role="keyword">const</emphasis>&#32;_Any_data&amp;,&#32;_Manager_operation);
+251 
+252 &#32;&#32;&#32;&#32;_Any_data&#32;&#32;&#32;&#32;&#32;_M_functor{};
+253 &#32;&#32;&#32;&#32;_Manager_type&#32;_M_manager{};
+254 &#32;&#32;};
+255 
+256 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Signature,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Functor&gt;
+257 &#32;&#32;&#32;&#32;<emphasis role="keyword">class&#32;</emphasis>_Function_handler;
+258 
+259 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Res,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Functor,&#32;<emphasis role="keyword">typename</emphasis>...&#32;_ArgTypes&gt;
+260 &#32;&#32;&#32;&#32;<emphasis role="keyword">class&#32;</emphasis>_Function_handler&lt;_Res(_ArgTypes...),&#32;_Functor&gt;
+261 &#32;&#32;&#32;&#32;:&#32;<emphasis role="keyword">public</emphasis>&#32;_Function_base::_Base_manager&lt;_Functor&gt;
+262 &#32;&#32;&#32;&#32;{
+263 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">using&#32;</emphasis>_Base&#32;=&#32;_Function_base::_Base_manager&lt;_Functor&gt;;
+264 
+265 &#32;&#32;&#32;&#32;<emphasis role="keyword">public</emphasis>:
+266 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>
+267 &#32;&#32;&#32;&#32;&#32;&#32;_M_manager(_Any_data&amp;&#32;__dest,&#32;<emphasis role="keyword">const</emphasis>&#32;_Any_data&amp;&#32;__source,
+268 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_Manager_operation&#32;__op)
+269 &#32;&#32;&#32;&#32;&#32;&#32;{
+270 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">switch</emphasis>&#32;(__op)
+271 &#32;&#32;&#32;&#32;&#32;&#32;{
+272 <emphasis role="preprocessor">#if&#32;__cpp_rtti</emphasis>
+273 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">case</emphasis>&#32;__get_type_info:
+274 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__dest._M_access&lt;<emphasis role="keyword">const</emphasis>&#32;type_info*&gt;()&#32;=&#32;&amp;<emphasis role="keyword">typeid</emphasis>(_Functor);
+275 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">break</emphasis>;
+276 <emphasis role="preprocessor">#endif</emphasis>
+277 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">case</emphasis>&#32;__get_functor_ptr:
+278 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__dest._M_access&lt;_Functor*&gt;()&#32;=&#32;_Base::_M_get_pointer(__source);
+279 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">break</emphasis>;
+280 
+281 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">default</emphasis>:
+282 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_Base::_M_manager(__dest,&#32;__source,&#32;__op);
+283 &#32;&#32;&#32;&#32;&#32;&#32;}
+284 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<emphasis role="keyword">false</emphasis>;
+285 &#32;&#32;&#32;&#32;&#32;&#32;}
+286 
+287 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">static</emphasis>&#32;_Res
+288 &#32;&#32;&#32;&#32;&#32;&#32;_M_invoke(<emphasis role="keyword">const</emphasis>&#32;_Any_data&amp;&#32;__functor,&#32;_ArgTypes&amp;&amp;...&#32;__args)
+289 &#32;&#32;&#32;&#32;&#32;&#32;{
+290 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;std::__invoke_r&lt;_Res&gt;(*_Base::_M_get_pointer(__functor),
+291 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;std::forward&lt;_ArgTypes&gt;(__args)...);
+292 &#32;&#32;&#32;&#32;&#32;&#32;}
+293 
+294 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Fn&gt;
+295 &#32;&#32;&#32;&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keyword">constexpr</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>
+296 &#32;&#32;&#32;&#32;_S_nothrow_init()&#32;noexcept
+297 &#32;&#32;&#32;&#32;{
+298 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__and_&lt;<emphasis role="keyword">typename</emphasis>&#32;_Base::_Local_storage,
+299 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;is_nothrow_constructible&lt;_Functor,&#32;_Fn&gt;&gt;<link linkend="_classvalue">::value</link>;
+300 &#32;&#32;&#32;&#32;}
+301 &#32;&#32;&#32;&#32;};
+302 
+303 &#32;&#32;<emphasis role="comment">//&#32;Specialization&#32;for&#32;invalid&#32;types</emphasis>
+304 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;&gt;
+305 &#32;&#32;&#32;&#32;<emphasis role="keyword">class&#32;</emphasis>_Function_handler&lt;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a0f7193911e632cd84da4082d5c628fe3">void</link>,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a0f7193911e632cd84da4082d5c628fe3">void</link>&gt;
+306 &#32;&#32;&#32;&#32;{
+307 &#32;&#32;&#32;&#32;<emphasis role="keyword">public</emphasis>:
+308 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>
+309 &#32;&#32;&#32;&#32;&#32;&#32;_M_manager(_Any_data&amp;,&#32;<emphasis role="keyword">const</emphasis>&#32;_Any_data&amp;,&#32;_Manager_operation)
+310 &#32;&#32;&#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;<emphasis role="keyword">false</emphasis>;&#32;}
+311 &#32;&#32;&#32;&#32;};
+312 
+313 &#32;&#32;<emphasis role="comment">//&#32;Avoids&#32;instantiating&#32;ill-formed&#32;specializations&#32;of&#32;_Function_handler</emphasis>
+314 &#32;&#32;<emphasis role="comment">//&#32;in&#32;std::function&lt;_Signature&gt;::target&lt;_Functor&gt;().</emphasis>
+315 &#32;&#32;<emphasis role="comment">//&#32;e.g.&#32;_Function_handler&lt;Sig,&#32;void()&gt;&#32;and&#32;_Function_handler&lt;Sig,&#32;void&gt;</emphasis>
+316 &#32;&#32;<emphasis role="comment">//&#32;would&#32;be&#32;ill-formed.</emphasis>
+317 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Signature,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Functor,
+318 &#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">bool</emphasis>&#32;__valid&#32;=&#32;is_object&lt;_Functor&gt;::value&gt;
+319 &#32;&#32;&#32;&#32;<emphasis role="keyword">struct&#32;</emphasis>_Target_handler
+320 &#32;&#32;&#32;&#32;:&#32;_Function_handler&lt;_Signature,&#32;typename&#32;remove_cv&lt;_Functor&gt;::type&gt;
+321 &#32;&#32;&#32;&#32;{&#32;};
+322 
+323 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Signature,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Functor&gt;
+324 &#32;&#32;&#32;&#32;<emphasis role="keyword">struct&#32;</emphasis>_Target_handler&lt;_Signature,&#32;_Functor,&#32;<link linkend="__classes_2lib_2include_2stdbool_8h_1a65e9886d74aaee76545e83dd09011727">false</link>&gt;
+325 &#32;&#32;&#32;&#32;:&#32;_Function_handler&lt;void,&#32;void&gt;
+326 &#32;&#32;&#32;&#32;{&#32;};
+327 
+333 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Res,&#32;<emphasis role="keyword">typename</emphasis>...&#32;_ArgTypes&gt;
+334 &#32;&#32;&#32;&#32;<emphasis role="keyword">class&#32;</emphasis>function&lt;_Res(_ArgTypes...)&gt;
+335 &#32;&#32;&#32;&#32;:&#32;<emphasis role="keyword">public</emphasis>&#32;_Maybe_unary_or_binary_function&lt;_Res,&#32;_ArgTypes...&gt;,
+336 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">private</emphasis>&#32;_Function_base
+337 &#32;&#32;&#32;&#32;{
+338 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Equivalent&#32;to&#32;std::decay_t&#32;except&#32;that&#32;it&#32;produces&#32;an&#32;invalid&#32;type</emphasis>
+339 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;if&#32;the&#32;decayed&#32;type&#32;is&#32;the&#32;current&#32;specialization&#32;of&#32;std::function.</emphasis>
+340 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Func,
+341 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">bool</emphasis>&#32;_Self&#32;=&#32;is_same&lt;__remove_cvref_t&lt;_Func&gt;,&#32;function&gt;<link linkend="_classvalue">::value</link>&gt;
+342 &#32;&#32;&#32;&#32;<emphasis role="keyword">using&#32;</emphasis>_Decay_t
+343 &#32;&#32;&#32;&#32;&#32;&#32;=&#32;<emphasis role="keyword">typename</emphasis>&#32;__enable_if_t&lt;!_Self,&#32;decay&lt;_Func&gt;&gt;<link linkend="__classes_2_gameobj_8h_1a890efa53b3d7deeeced6f3a0d6653ed3">::type</link>;
+344 
+345 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Func,
+346 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;_DFunc&#32;=&#32;_Decay_t&lt;_Func&gt;,
+347 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;_Res2&#32;=&#32;__invoke_result&lt;_DFunc&amp;,&#32;_ArgTypes...&gt;&gt;
+348 &#32;&#32;&#32;&#32;<emphasis role="keyword">struct&#32;</emphasis>_Callable
+349 &#32;&#32;&#32;&#32;:&#32;__is_invocable_impl&lt;_Res2,&#32;_Res&gt;::type
+350 &#32;&#32;&#32;&#32;{&#32;};
+351 
+352 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Cond,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Tp&#32;=&#32;<emphasis role="keywordtype">void</emphasis>&gt;
+353 &#32;&#32;&#32;&#32;<emphasis role="keyword">using&#32;</emphasis>_Requires&#32;=&#32;__enable_if_t&lt;_Cond::value,&#32;_Tp&gt;;
+354 
+355 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Functor&gt;
+356 &#32;&#32;&#32;&#32;<emphasis role="keyword">using&#32;</emphasis>_Handler
+357 &#32;&#32;&#32;&#32;&#32;&#32;=&#32;_Function_handler&lt;_Res(_ArgTypes...),&#32;__decay_t&lt;_Functor&gt;&gt;;
+358 
+359 &#32;&#32;&#32;&#32;<emphasis role="keyword">public</emphasis>:
+360 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;_Res&#32;result_type;
+361 
+362 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;[3.7.2.1]&#32;construct/copy/destroy</emphasis>
+363 
+368 &#32;&#32;&#32;&#32;&#32;&#32;function()&#32;noexcept
+369 &#32;&#32;&#32;&#32;&#32;&#32;:&#32;_Function_base()&#32;{&#32;}
+370 
+375 &#32;&#32;&#32;&#32;&#32;&#32;function(nullptr_t)&#32;noexcept
+376 &#32;&#32;&#32;&#32;&#32;&#32;:&#32;_Function_base()&#32;{&#32;}
+377 
+386 &#32;&#32;&#32;&#32;&#32;&#32;function(<emphasis role="keyword">const</emphasis>&#32;function&amp;&#32;__x)
+387 &#32;&#32;&#32;&#32;&#32;&#32;:&#32;_Function_base()
+388 &#32;&#32;&#32;&#32;&#32;&#32;{
+389 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(<emphasis role="keyword">static_cast&lt;</emphasis><emphasis role="keywordtype">bool</emphasis><emphasis role="keyword">&gt;</emphasis>(__x))
+390 &#32;&#32;&#32;&#32;&#32;&#32;{
+391 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__x._M_manager(_M_functor,&#32;__x._M_functor,&#32;__clone_functor);
+392 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_M_invoker&#32;=&#32;__x._M_invoker;
+393 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_M_manager&#32;=&#32;__x._M_manager;
+394 &#32;&#32;&#32;&#32;&#32;&#32;}
+395 &#32;&#32;&#32;&#32;&#32;&#32;}
+396 
+404 &#32;&#32;&#32;&#32;&#32;&#32;function(function&amp;&amp;&#32;__x)&#32;noexcept
+405 &#32;&#32;&#32;&#32;&#32;&#32;:&#32;_Function_base(),&#32;_M_invoker(__x._M_invoker)
+406 &#32;&#32;&#32;&#32;&#32;&#32;{
+407 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(<emphasis role="keyword">static_cast&lt;</emphasis><emphasis role="keywordtype">bool</emphasis><emphasis role="keyword">&gt;</emphasis>(__x))
+408 &#32;&#32;&#32;&#32;&#32;&#32;{
+409 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_M_functor&#32;=&#32;__x._M_functor;
+410 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_M_manager&#32;=&#32;__x._M_manager;
+411 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__x._M_manager&#32;=&#32;<emphasis role="keyword">nullptr</emphasis>;
+412 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__x._M_invoker&#32;=&#32;<emphasis role="keyword">nullptr</emphasis>;
+413 &#32;&#32;&#32;&#32;&#32;&#32;}
+414 &#32;&#32;&#32;&#32;&#32;&#32;}
+415 
+431 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;_GLIBCXX_RESOLVE_LIB_DEFECTS</emphasis>
+432 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;2774.&#32;std::function&#32;construction&#32;vs&#32;assignment</emphasis>
+433 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Functor,
+434 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;_Constraints&#32;=&#32;_Requires&lt;_Callable&lt;_Functor&gt;&gt;&gt;
+435 &#32;&#32;&#32;&#32;function(_Functor&amp;&amp;&#32;__f)
+436 &#32;&#32;&#32;&#32;<emphasis role="keyword">noexcept</emphasis>(_Handler&lt;_Functor&gt;::template&#32;_S_nothrow_init&lt;_Functor&gt;())
+437 &#32;&#32;&#32;&#32;:&#32;_Function_base()
+438 &#32;&#32;&#32;&#32;{
+439 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">static_assert</emphasis>(is_copy_constructible&lt;__decay_t&lt;_Functor&gt;&gt;<link linkend="_classvalue">::value</link>,
+440 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="stringliteral">&quot;std::function&#32;target&#32;must&#32;be&#32;copy-constructible&quot;</emphasis>);
+441 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">static_assert</emphasis>(is_constructible&lt;__decay_t&lt;_Functor&gt;,&#32;_Functor&gt;<link linkend="_classvalue">::value</link>,
+442 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="stringliteral">&quot;std::function&#32;target&#32;must&#32;be&#32;constructible&#32;from&#32;the&#32;&quot;</emphasis>
+443 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="stringliteral">&quot;constructor&#32;argument&quot;</emphasis>);
+444 
+445 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">using&#32;</emphasis>_My_handler&#32;=&#32;_Handler&lt;_Functor&gt;;
+446 
+447 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(_My_handler::_M_not_empty_function(__f))
+448 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+449 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_My_handler::_M_init_functor(_M_functor,
+450 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;std::forward&lt;_Functor&gt;(__f));
+451 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_M_invoker&#32;=&#32;&amp;_My_handler::_M_invoke;
+452 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_M_manager&#32;=&#32;&amp;_My_handler::_M_manager;
+453 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+454 &#32;&#32;&#32;&#32;}
+455 
+468 &#32;&#32;&#32;&#32;&#32;&#32;function&amp;
+469 &#32;&#32;&#32;&#32;&#32;&#32;operator=(<emphasis role="keyword">const</emphasis>&#32;function&amp;&#32;__x)
+470 &#32;&#32;&#32;&#32;&#32;&#32;{
+471 &#32;&#32;&#32;&#32;function(__x).swap(*<emphasis role="keyword">this</emphasis>);
+472 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;*<emphasis role="keyword">this</emphasis>;
+473 &#32;&#32;&#32;&#32;&#32;&#32;}
+474 
+486 &#32;&#32;&#32;&#32;&#32;&#32;function&amp;
+487 &#32;&#32;&#32;&#32;&#32;&#32;operator=(function&amp;&amp;&#32;__x)&#32;<emphasis role="keyword">noexcept</emphasis>
+488 &#32;&#32;&#32;&#32;&#32;&#32;{
+489 &#32;&#32;&#32;&#32;function(<link linkend="_namespacestd_1ac7095819f6a8da64d69b1ee3029c52be">std::move</link>(__x)).swap(*<emphasis role="keyword">this</emphasis>);
+490 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;*<emphasis role="keyword">this</emphasis>;
+491 &#32;&#32;&#32;&#32;&#32;&#32;}
+492 
+500 &#32;&#32;&#32;&#32;&#32;&#32;function&amp;
+501 &#32;&#32;&#32;&#32;&#32;&#32;operator=(nullptr_t)&#32;<emphasis role="keyword">noexcept</emphasis>
+502 &#32;&#32;&#32;&#32;&#32;&#32;{
+503 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(_M_manager)
+504 &#32;&#32;&#32;&#32;&#32;&#32;{
+505 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_M_manager(_M_functor,&#32;_M_functor,&#32;__destroy_functor);
+506 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_M_manager&#32;=&#32;<emphasis role="keyword">nullptr</emphasis>;
+507 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_M_invoker&#32;=&#32;<emphasis role="keyword">nullptr</emphasis>;
+508 &#32;&#32;&#32;&#32;&#32;&#32;}
+509 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;*<emphasis role="keyword">this</emphasis>;
+510 &#32;&#32;&#32;&#32;&#32;&#32;}
+511 
+529 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Functor&gt;
+530 &#32;&#32;&#32;&#32;_Requires&lt;_Callable&lt;_Functor&gt;,&#32;function&amp;&gt;
+531 &#32;&#32;&#32;&#32;operator=(_Functor&amp;&amp;&#32;__f)
+532 &#32;&#32;&#32;&#32;<emphasis role="keyword">noexcept</emphasis>(_Handler&lt;_Functor&gt;::template&#32;_S_nothrow_init&lt;_Functor&gt;())
+533 &#32;&#32;&#32;&#32;{
+534 &#32;&#32;&#32;&#32;&#32;&#32;function(std::forward&lt;_Functor&gt;(__f)).swap(*<emphasis role="keyword">this</emphasis>);
+535 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;*<emphasis role="keyword">this</emphasis>;
+536 &#32;&#32;&#32;&#32;}
+537 
+539 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Functor&gt;
+540 &#32;&#32;&#32;&#32;function&amp;
+541 &#32;&#32;&#32;&#32;operator=(reference_wrapper&lt;_Functor&gt;&#32;__f)&#32;<emphasis role="keyword">noexcept</emphasis>
+542 &#32;&#32;&#32;&#32;{
+543 &#32;&#32;&#32;&#32;&#32;&#32;function(__f).swap(*<emphasis role="keyword">this</emphasis>);
+544 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;*<emphasis role="keyword">this</emphasis>;
+545 &#32;&#32;&#32;&#32;}
+546 
+547 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;[3.7.2.2]&#32;function&#32;modifiers</emphasis>
+548 
+556 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>&#32;<link linkend="_namespacestd_1a3ece115a1c8ed9020a20f1d0b70efda8">swap</link>(function&amp;&#32;__x)&#32;<emphasis role="keyword">noexcept</emphasis>
+557 &#32;&#32;&#32;&#32;&#32;&#32;{
+558 &#32;&#32;&#32;&#32;<link linkend="_namespacestd_1a3ece115a1c8ed9020a20f1d0b70efda8">std::swap</link>(_M_functor,&#32;__x._M_functor);
+559 &#32;&#32;&#32;&#32;<link linkend="_namespacestd_1a3ece115a1c8ed9020a20f1d0b70efda8">std::swap</link>(_M_manager,&#32;__x._M_manager);
+560 &#32;&#32;&#32;&#32;<link linkend="_namespacestd_1a3ece115a1c8ed9020a20f1d0b70efda8">std::swap</link>(_M_invoker,&#32;__x._M_invoker);
+561 &#32;&#32;&#32;&#32;&#32;&#32;}
+562 
+563 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;[3.7.2.3]&#32;function&#32;capacity</emphasis>
+564 
+573 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">explicit</emphasis>&#32;<emphasis role="keyword">operator</emphasis>&#32;<link linkend="__classes_2lib_2include_2stdbool_8h_1abb452686968e48b67397da5f97445f5b">bool</link>()&#32;const&#32;noexcept
+574 &#32;&#32;&#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;!_M_empty();&#32;}
+575 
+576 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;[3.7.2.4]&#32;function&#32;invocation</emphasis>
+577 
+586 &#32;&#32;&#32;&#32;&#32;&#32;_Res
+587 &#32;&#32;&#32;&#32;&#32;&#32;operator()(_ArgTypes...&#32;__args)<emphasis role="keyword">&#32;const</emphasis>
+588 <emphasis role="keyword">&#32;&#32;&#32;&#32;&#32;&#32;</emphasis>{
+589 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(_M_empty())
+590 &#32;&#32;&#32;&#32;&#32;&#32;__throw_bad_function_call();
+591 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;_M_invoker(_M_functor,&#32;std::forward&lt;_ArgTypes&gt;(__args)...);
+592 &#32;&#32;&#32;&#32;&#32;&#32;}
+593 
+594 <emphasis role="preprocessor">#if&#32;__cpp_rtti</emphasis>
+595 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;[3.7.2.5]&#32;function&#32;target&#32;access</emphasis>
+605 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;type_info&amp;
+606 &#32;&#32;&#32;&#32;&#32;&#32;target_type()&#32;const&#32;noexcept
+607 &#32;&#32;&#32;&#32;&#32;&#32;{
+608 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(_M_manager)
+609 &#32;&#32;&#32;&#32;&#32;&#32;{
+610 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_Any_data&#32;__typeinfo_result;
+611 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_M_manager(__typeinfo_result,&#32;_M_functor,&#32;__get_type_info);
+612 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(<emphasis role="keyword">auto</emphasis>&#32;__ti&#32;=&#32;&#32;__typeinfo_result._M_access&lt;<emphasis role="keyword">const</emphasis>&#32;type_info*&gt;())
+613 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;*__ti;
+614 &#32;&#32;&#32;&#32;&#32;&#32;}
+615 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<emphasis role="keyword">typeid</emphasis>(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a0f7193911e632cd84da4082d5c628fe3">void</link>);
+616 &#32;&#32;&#32;&#32;&#32;&#32;}
+617 <emphasis role="preprocessor">#endif</emphasis>
+618 
+630 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Functor&gt;
+631 &#32;&#32;&#32;&#32;_Functor*
+632 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1af9d0cbbbeb7414e786c41899e5a856d7">target</link>()&#32;noexcept
+633 &#32;&#32;&#32;&#32;{
+634 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;function*&#32;__const_this&#32;=&#32;<emphasis role="keyword">this</emphasis>;
+635 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;_Functor*&#32;__func&#32;=&#32;__const_this-&gt;template&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1af9d0cbbbeb7414e786c41899e5a856d7">target&lt;_Functor&gt;</link>();
+636 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;If&#32;is_function_v&lt;_Functor&gt;&#32;is&#32;true&#32;then&#32;const_cast&lt;_Functor*&gt;</emphasis>
+637 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;would&#32;be&#32;ill-formed,&#32;so&#32;use&#32;*const_cast&lt;_Functor**&gt;&#32;instead.</emphasis>
+638 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;*<emphasis role="keyword">const_cast&lt;</emphasis>_Functor**<emphasis role="keyword">&gt;</emphasis>(&amp;__func);
+639 &#32;&#32;&#32;&#32;}
+640 
+641 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Functor&gt;
+642 &#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;_Functor*
+643 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1af9d0cbbbeb7414e786c41899e5a856d7">target</link>()&#32;const&#32;noexcept
+644 &#32;&#32;&#32;&#32;{
+645 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;_GLIBCXX17_CONSTEXPR&#32;(is_object&lt;_Functor&gt;::value)
+646 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+647 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;For&#32;C++11&#32;and&#32;C++14&#32;if-constexpr&#32;is&#32;not&#32;used&#32;above,&#32;so</emphasis>
+648 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;_Target_handler&#32;avoids&#32;ill-formed&#32;_Function_handler&#32;types.</emphasis>
+649 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">using&#32;</emphasis>_Handler&#32;=&#32;_Target_handler&lt;_Res(_ArgTypes...),&#32;_Functor&gt;;
+650 
+651 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(_M_manager&#32;==&#32;&amp;_Handler::_M_manager
+652 #<emphasis role="keywordflow">if</emphasis>&#32;__cpp_rtti
+653 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;||&#32;(_M_manager&#32;&amp;&amp;&#32;<emphasis role="keyword">typeid</emphasis>(_Functor)&#32;==&#32;target_type())
+654 #endif
+655 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;)
+656 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+657 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_Any_data&#32;__ptr;
+658 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_M_manager(__ptr,&#32;_M_functor,&#32;__get_functor_ptr);
+659 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__ptr._M_access&lt;<emphasis role="keyword">const</emphasis>&#32;_Functor*&gt;();
+660 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+661 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+662 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<emphasis role="keyword">nullptr</emphasis>;
+663 &#32;&#32;&#32;&#32;}
+665 
+666 &#32;&#32;&#32;&#32;<emphasis role="keyword">private</emphasis>:
+667 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">using&#32;</emphasis>_Invoker_type&#32;=&#32;_Res&#32;(*)(<emphasis role="keyword">const</emphasis>&#32;_Any_data&amp;,&#32;_ArgTypes&amp;&amp;...);
+668 &#32;&#32;&#32;&#32;&#32;&#32;_Invoker_type&#32;_M_invoker&#32;=&#32;<emphasis role="keyword">nullptr</emphasis>;
+669 &#32;&#32;&#32;&#32;};
+670 
+671 <emphasis role="preprocessor">#if&#32;__cpp_deduction_guides&#32;&gt;=&#32;201606</emphasis>
+672 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&gt;
+673 &#32;&#32;&#32;&#32;<emphasis role="keyword">struct&#32;</emphasis>__function_guide_helper
+674 &#32;&#32;&#32;&#32;{&#32;};
+675 
+676 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Res,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Tp,&#32;<emphasis role="keywordtype">bool</emphasis>&#32;_Nx,&#32;<emphasis role="keyword">typename</emphasis>...&#32;_Args&gt;
+677 &#32;&#32;&#32;&#32;<emphasis role="keyword">struct&#32;</emphasis>__function_guide_helper&lt;
+678 &#32;&#32;&#32;&#32;&#32;&#32;_Res&#32;(_Tp::*)&#32;(_Args...)&#32;noexcept(_Nx)
+679 &#32;&#32;&#32;&#32;&gt;
+680 &#32;&#32;&#32;&#32;{&#32;<emphasis role="keyword">using&#32;</emphasis><link linkend="__classes_2_gameobj_8h_1a890efa53b3d7deeeced6f3a0d6653ed3">type</link>&#32;=&#32;_Res(_Args...);&#32;};
+681 
+682 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Res,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Tp,&#32;<emphasis role="keywordtype">bool</emphasis>&#32;_Nx,&#32;<emphasis role="keyword">typename</emphasis>...&#32;_Args&gt;
+683 &#32;&#32;&#32;&#32;<emphasis role="keyword">struct&#32;</emphasis>__function_guide_helper&lt;
+684 &#32;&#32;&#32;&#32;&#32;&#32;_Res&#32;(_Tp::*)&#32;(_Args...)&#32;&amp;&#32;noexcept(_Nx)
+685 &#32;&#32;&#32;&#32;&gt;
+686 &#32;&#32;&#32;&#32;{&#32;<emphasis role="keyword">using&#32;</emphasis><link linkend="__classes_2_gameobj_8h_1a890efa53b3d7deeeced6f3a0d6653ed3">type</link>&#32;=&#32;_Res(_Args...);&#32;};
+687 
+688 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Res,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Tp,&#32;<emphasis role="keywordtype">bool</emphasis>&#32;_Nx,&#32;<emphasis role="keyword">typename</emphasis>...&#32;_Args&gt;
+689 &#32;&#32;&#32;&#32;<emphasis role="keyword">struct&#32;</emphasis>__function_guide_helper&lt;
+690 &#32;&#32;&#32;&#32;&#32;&#32;_Res&#32;(_Tp::*)&#32;(_Args...)&#32;const&#32;noexcept(_Nx)
+691 &#32;&#32;&#32;&#32;&gt;
+692 &#32;&#32;&#32;&#32;{&#32;<emphasis role="keyword">using&#32;</emphasis><link linkend="__classes_2_gameobj_8h_1a890efa53b3d7deeeced6f3a0d6653ed3">type</link>&#32;=&#32;_Res(_Args...);&#32;};
+693 
+694 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Res,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Tp,&#32;<emphasis role="keywordtype">bool</emphasis>&#32;_Nx,&#32;<emphasis role="keyword">typename</emphasis>...&#32;_Args&gt;
+695 &#32;&#32;&#32;&#32;<emphasis role="keyword">struct&#32;</emphasis>__function_guide_helper&lt;
+696 &#32;&#32;&#32;&#32;&#32;&#32;_Res&#32;(_Tp::*)&#32;(_Args...)&#32;const&#32;&amp;&#32;noexcept(_Nx)
+697 &#32;&#32;&#32;&#32;&gt;
+698 &#32;&#32;&#32;&#32;{&#32;<emphasis role="keyword">using&#32;</emphasis><link linkend="__classes_2_gameobj_8h_1a890efa53b3d7deeeced6f3a0d6653ed3">type</link>&#32;=&#32;_Res(_Args...);&#32;};
+699 
+700 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Res,&#32;<emphasis role="keyword">typename</emphasis>...&#32;_ArgTypes&gt;
+701 &#32;&#32;&#32;&#32;function(_Res(*)(_ArgTypes...))&#32;-&gt;&#32;function&lt;_Res(_ArgTypes...)&gt;;
+702 
+703 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Functor,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Signature&#32;=&#32;<emphasis role="keyword">typename</emphasis>
+704 &#32;&#32;&#32;&#32;&#32;&#32;&#32;__function_guide_helper&lt;<emphasis role="keyword">decltype</emphasis>(&amp;_Functor::operator())&gt;<link linkend="__classes_2_gameobj_8h_1a890efa53b3d7deeeced6f3a0d6653ed3">::type</link>&gt;
+705 &#32;&#32;&#32;&#32;function(_Functor)&#32;-&gt;&#32;function&lt;_Signature&gt;;
+706 <emphasis role="preprocessor">#endif</emphasis>
+707 
+708 &#32;&#32;<emphasis role="comment">//&#32;[20.7.15.2.6]&#32;null&#32;pointer&#32;comparisons</emphasis>
+709 
+716 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Res,&#32;<emphasis role="keyword">typename</emphasis>...&#32;_Args&gt;
+717 &#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>
+718 &#32;&#32;&#32;&#32;<link linkend="_namespacenlohmann_1aaf11d1e42c5a671e7cd362ab0a182de1">operator==</link>(<emphasis role="keyword">const</emphasis>&#32;function&lt;_Res(_Args...)&gt;&amp;&#32;__f,&#32;nullptr_t)&#32;<emphasis role="keyword">noexcept</emphasis>
+719 &#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;!<emphasis role="keyword">static_cast&lt;</emphasis><emphasis role="keywordtype">bool</emphasis><emphasis role="keyword">&gt;</emphasis>(__f);&#32;}
+720 
+721 <emphasis role="preprocessor">#if&#32;__cpp_impl_three_way_comparison&#32;&lt;&#32;201907L</emphasis>
+723 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Res,&#32;<emphasis role="keyword">typename</emphasis>...&#32;_Args&gt;
+724 &#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>
+725 &#32;&#32;&#32;&#32;<link linkend="_namespacenlohmann_1aaf11d1e42c5a671e7cd362ab0a182de1">operator==</link>(nullptr_t,&#32;<emphasis role="keyword">const</emphasis>&#32;function&lt;_Res(_Args...)&gt;&amp;&#32;__f)&#32;<emphasis role="keyword">noexcept</emphasis>
+726 &#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;!<emphasis role="keyword">static_cast&lt;</emphasis><emphasis role="keywordtype">bool</emphasis><emphasis role="keyword">&gt;</emphasis>(__f);&#32;}
+727 
+734 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Res,&#32;<emphasis role="keyword">typename</emphasis>...&#32;_Args&gt;
+735 &#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>
+736 &#32;&#32;&#32;&#32;<link linkend="_namespacenlohmann_1aa9fe6e8e15f1b1b242d291e7703f1b8d">operator!=</link>(<emphasis role="keyword">const</emphasis>&#32;function&lt;_Res(_Args...)&gt;&amp;&#32;__f,&#32;nullptr_t)&#32;<emphasis role="keyword">noexcept</emphasis>
+737 &#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;<emphasis role="keyword">static_cast&lt;</emphasis><emphasis role="keywordtype">bool</emphasis><emphasis role="keyword">&gt;</emphasis>(__f);&#32;}
+738 
+740 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Res,&#32;<emphasis role="keyword">typename</emphasis>...&#32;_Args&gt;
+741 &#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>
+742 &#32;&#32;&#32;&#32;<link linkend="_namespacenlohmann_1aa9fe6e8e15f1b1b242d291e7703f1b8d">operator!=</link>(nullptr_t,&#32;<emphasis role="keyword">const</emphasis>&#32;function&lt;_Res(_Args...)&gt;&amp;&#32;__f)&#32;<emphasis role="keyword">noexcept</emphasis>
+743 &#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;<emphasis role="keyword">static_cast&lt;</emphasis><emphasis role="keywordtype">bool</emphasis><emphasis role="keyword">&gt;</emphasis>(__f);&#32;}
+744 <emphasis role="preprocessor">#endif</emphasis>
+745 
+746 &#32;&#32;<emphasis role="comment">//&#32;[20.7.15.2.7]&#32;specialized&#32;algorithms</emphasis>
+747 
+753 &#32;&#32;<emphasis role="comment">//&#32;_GLIBCXX_RESOLVE_LIB_DEFECTS</emphasis>
+754 &#32;&#32;<emphasis role="comment">//&#32;2062.&#32;Effect&#32;contradictions&#32;w/o&#32;no-throw&#32;guarantee&#32;of&#32;std::function&#32;swaps</emphasis>
+755 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Res,&#32;<emphasis role="keyword">typename</emphasis>...&#32;_Args&gt;
+756 &#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>
+757 &#32;&#32;&#32;&#32;<link linkend="_namespacestd_1a3ece115a1c8ed9020a20f1d0b70efda8">swap</link>(function&lt;_Res(_Args...)&gt;&amp;&#32;__x,&#32;function&lt;_Res(_Args...)&gt;&amp;&#32;__y)&#32;<emphasis role="keyword">noexcept</emphasis>
+758 &#32;&#32;&#32;&#32;{&#32;__x.swap(__y);&#32;}
+759 
+760 <emphasis role="preprocessor">#if&#32;__cplusplus&#32;&gt;=&#32;201703L</emphasis>
+761 &#32;&#32;<emphasis role="keyword">namespace&#32;</emphasis>__detail::__variant
+762 &#32;&#32;{
+763 &#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&gt;&#32;<emphasis role="keyword">struct&#32;</emphasis>_Never_valueless_alt;&#32;<emphasis role="comment">//&#32;see&#32;&lt;variant&gt;</emphasis>
+764 
+765 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Provide&#32;the&#32;strong&#32;exception-safety&#32;guarantee&#32;when&#32;emplacing&#32;a</emphasis>
+766 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;function&#32;into&#32;a&#32;variant.</emphasis>
+767 &#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Signature&gt;
+768 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">struct&#32;</emphasis>_Never_valueless_alt&lt;<link linkend="_namespacestd">std</link>::function&lt;_Signature&gt;&gt;
+769 &#32;&#32;&#32;&#32;&#32;&#32;:&#32;std::true_type
+770 &#32;&#32;&#32;&#32;&#32;&#32;{&#32;};
+771 &#32;&#32;}&#32;&#32;<emphasis role="comment">//&#32;namespace&#32;__detail::__variant</emphasis>
+772 <emphasis role="preprocessor">#endif&#32;</emphasis><emphasis role="comment">//&#32;C++17</emphasis>
+773 
+774 _GLIBCXX_END_NAMESPACE_VERSION
+775 }&#32;<emphasis role="comment">//&#32;namespace&#32;std</emphasis>
+776 
+777 <emphasis role="preprocessor">#endif&#32;</emphasis><emphasis role="comment">//&#32;C++11</emphasis>
+778 <emphasis role="preprocessor">#endif&#32;</emphasis><emphasis role="comment">//&#32;_GLIBCXX_STD_FUNCTION_H</emphasis>
+</programlisting></section>

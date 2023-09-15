@@ -1,0 +1,1592 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<section xmlns="http://docbook.org/ns/docbook" version="5.0" xmlns:xlink="http://www.w3.org/1999/xlink" xml:id="__classes_2lib_2raylib_2src_2external_2tinyobj__loader__c_8h_source" xml:lang="en-US">
+<title>tinyobj_loader_c.h</title>
+<indexterm><primary>C:/Users/HP/Documents/GitHub/Minero-Game/Classes/lib/raylib/src/external/tinyobj_loader_c.h</primary></indexterm>
+Go to the documentation of this file.<programlisting linenumbering="unnumbered">1 <emphasis role="comment">/*</emphasis>
+2 <emphasis role="comment">&#32;&#32;&#32;The&#32;MIT&#32;License&#32;(MIT)</emphasis>
+3 <emphasis role="comment"></emphasis>
+4 <emphasis role="comment">&#32;&#32;&#32;Copyright&#32;(c)&#32;2016&#32;-&#32;2019&#32;Syoyo&#32;Fujita&#32;and&#32;many&#32;contributors.</emphasis>
+5 <emphasis role="comment"></emphasis>
+6 <emphasis role="comment">&#32;&#32;&#32;Permission&#32;is&#32;hereby&#32;granted,&#32;free&#32;of&#32;charge,&#32;to&#32;any&#32;person&#32;obtaining&#32;a&#32;copy</emphasis>
+7 <emphasis role="comment">&#32;&#32;&#32;of&#32;this&#32;software&#32;and&#32;associated&#32;documentation&#32;files&#32;(the&#32;&quot;Software&quot;),&#32;to&#32;deal</emphasis>
+8 <emphasis role="comment">&#32;&#32;&#32;in&#32;the&#32;Software&#32;without&#32;restriction,&#32;including&#32;without&#32;limitation&#32;the&#32;rights</emphasis>
+9 <emphasis role="comment">&#32;&#32;&#32;to&#32;use,&#32;copy,&#32;modify,&#32;merge,&#32;publish,&#32;distribute,&#32;sublicense,&#32;and/or&#32;sell</emphasis>
+10 <emphasis role="comment">&#32;&#32;&#32;copies&#32;of&#32;the&#32;Software,&#32;and&#32;to&#32;permit&#32;persons&#32;to&#32;whom&#32;the&#32;Software&#32;is</emphasis>
+11 <emphasis role="comment">&#32;&#32;&#32;furnished&#32;to&#32;do&#32;so,&#32;subject&#32;to&#32;the&#32;following&#32;conditions:</emphasis>
+12 <emphasis role="comment"></emphasis>
+13 <emphasis role="comment">&#32;&#32;&#32;The&#32;above&#32;copyright&#32;notice&#32;and&#32;this&#32;permission&#32;notice&#32;shall&#32;be&#32;included&#32;in</emphasis>
+14 <emphasis role="comment">&#32;&#32;&#32;all&#32;copies&#32;or&#32;substantial&#32;portions&#32;of&#32;the&#32;Software.</emphasis>
+15 <emphasis role="comment"></emphasis>
+16 <emphasis role="comment">&#32;&#32;&#32;THE&#32;SOFTWARE&#32;IS&#32;PROVIDED&#32;&quot;AS&#32;IS&quot;,&#32;WITHOUT&#32;WARRANTY&#32;OF&#32;ANY&#32;KIND,&#32;EXPRESS&#32;OR</emphasis>
+17 <emphasis role="comment">&#32;&#32;&#32;IMPLIED,&#32;INCLUDING&#32;BUT&#32;NOT&#32;LIMITED&#32;TO&#32;THE&#32;WARRANTIES&#32;OF&#32;MERCHANTABILITY,</emphasis>
+18 <emphasis role="comment">&#32;&#32;&#32;FITNESS&#32;FOR&#32;A&#32;PARTICULAR&#32;PURPOSE&#32;AND&#32;NONINFRINGEMENT.&#32;IN&#32;NO&#32;EVENT&#32;SHALL&#32;THE</emphasis>
+19 <emphasis role="comment">&#32;&#32;&#32;AUTHORS&#32;OR&#32;COPYRIGHT&#32;HOLDERS&#32;BE&#32;LIABLE&#32;FOR&#32;ANY&#32;CLAIM,&#32;DAMAGES&#32;OR&#32;OTHER</emphasis>
+20 <emphasis role="comment">&#32;&#32;&#32;LIABILITY,&#32;WHETHER&#32;IN&#32;AN&#32;ACTION&#32;OF&#32;CONTRACT,&#32;TORT&#32;OR&#32;OTHERWISE,&#32;ARISING&#32;FROM,</emphasis>
+21 <emphasis role="comment">&#32;&#32;&#32;OUT&#32;OF&#32;OR&#32;IN&#32;CONNECTION&#32;WITH&#32;THE&#32;SOFTWARE&#32;OR&#32;THE&#32;USE&#32;OR&#32;OTHER&#32;DEALINGS&#32;IN</emphasis>
+22 <emphasis role="comment">&#32;&#32;&#32;THE&#32;SOFTWARE.</emphasis>
+23 <emphasis role="comment">&#32;&#32;&#32;*/</emphasis>
+24 <emphasis role="preprocessor">#ifndef&#32;TINOBJ_LOADER_C_H_</emphasis>
+25 <emphasis role="preprocessor">#define&#32;TINOBJ_LOADER_C_H_</emphasis>
+26 
+27 <emphasis role="comment">/*&#32;@todo&#32;{&#32;Remove&#32;stddef&#32;dependency.&#32;unsigned&#32;int?&#32;}&#32;---&gt;&#32;RAY:&#32;DONE.&#32;*/</emphasis>
+28 <emphasis role="comment">//#include&#32;&lt;stddef.h&gt;</emphasis>
+29 
+30 <emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">struct&#32;</emphasis>{
+31 &#32;&#32;<emphasis role="keywordtype">char</emphasis>&#32;*<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a14d7642df08c5cb68e4fb90cc8a73509">name</link>;
+32 
+33 &#32;&#32;<emphasis role="keywordtype">float</emphasis>&#32;ambient[3];
+34 &#32;&#32;<emphasis role="keywordtype">float</emphasis>&#32;diffuse[3];
+35 &#32;&#32;<emphasis role="keywordtype">float</emphasis>&#32;specular[3];
+36 &#32;&#32;<emphasis role="keywordtype">float</emphasis>&#32;transmittance[3];
+37 &#32;&#32;<emphasis role="keywordtype">float</emphasis>&#32;emission[3];
+38 &#32;&#32;<emphasis role="keywordtype">float</emphasis>&#32;shininess;
+39 &#32;&#32;<emphasis role="keywordtype">float</emphasis>&#32;ior;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">/*&#32;index&#32;of&#32;refraction&#32;*/</emphasis>
+40 &#32;&#32;<emphasis role="keywordtype">float</emphasis>&#32;dissolve;&#32;<emphasis role="comment">/*&#32;1&#32;==&#32;opaque;&#32;0&#32;==&#32;fully&#32;transparent&#32;*/</emphasis>
+41 &#32;&#32;<emphasis role="comment">/*&#32;illumination&#32;model&#32;(see&#32;http://www.fileformat.info/format/material/)&#32;*/</emphasis>
+42 &#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;illum;
+43 
+44 &#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;pad0;
+45 
+46 &#32;&#32;<emphasis role="keywordtype">char</emphasis>&#32;*ambient_texname;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">/*&#32;map_Ka&#32;*/</emphasis>
+47 &#32;&#32;<emphasis role="keywordtype">char</emphasis>&#32;*diffuse_texname;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">/*&#32;map_Kd&#32;*/</emphasis>
+48 &#32;&#32;<emphasis role="keywordtype">char</emphasis>&#32;*specular_texname;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">/*&#32;map_Ks&#32;*/</emphasis>
+49 &#32;&#32;<emphasis role="keywordtype">char</emphasis>&#32;*specular_highlight_texname;&#32;<emphasis role="comment">/*&#32;map_Ns&#32;*/</emphasis>
+50 &#32;&#32;<emphasis role="keywordtype">char</emphasis>&#32;*bump_texname;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">/*&#32;map_bump,&#32;bump&#32;*/</emphasis>
+51 &#32;&#32;<emphasis role="keywordtype">char</emphasis>&#32;*displacement_texname;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">/*&#32;disp&#32;*/</emphasis>
+52 &#32;&#32;<emphasis role="keywordtype">char</emphasis>&#32;*alpha_texname;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">/*&#32;map_d&#32;*/</emphasis>
+53 }&#32;<link linkend="_structtinyobj__material__t">tinyobj_material_t</link>;
+54 
+55 <emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">struct&#32;</emphasis>{
+56 &#32;&#32;<emphasis role="keywordtype">char</emphasis>&#32;*<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a14d7642df08c5cb68e4fb90cc8a73509">name</link>;&#32;<emphasis role="comment">/*&#32;group&#32;name&#32;or&#32;object&#32;name.&#32;*/</emphasis>
+57 &#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;face_offset;
+58 &#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="_namespacelength">length</link>;
+59 }&#32;<link linkend="_structtinyobj__shape__t">tinyobj_shape_t</link>;
+60 
+61 <emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">struct&#32;</emphasis>{&#32;<emphasis role="keywordtype">int</emphasis>&#32;v_idx,&#32;vt_idx,&#32;vn_idx;&#32;}&#32;<link linkend="_structtinyobj__vertex__index__t">tinyobj_vertex_index_t</link>;
+62 
+63 <emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">struct&#32;</emphasis>{
+64 &#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;num_vertices;
+65 &#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;num_normals;
+66 &#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;num_texcoords;
+67 &#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;num_faces;
+68 &#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;num_face_num_verts;
+69 
+70 &#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;pad0;
+71 
+72 &#32;&#32;<emphasis role="keywordtype">float</emphasis>&#32;*vertices;
+73 &#32;&#32;<emphasis role="keywordtype">float</emphasis>&#32;*normals;
+74 &#32;&#32;<emphasis role="keywordtype">float</emphasis>&#32;*texcoords;
+75 &#32;&#32;<link linkend="_structtinyobj__vertex__index__t">tinyobj_vertex_index_t</link>&#32;*faces;
+76 &#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;*face_num_verts;
+77 &#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;*material_ids;
+78 }&#32;<link linkend="_structtinyobj__attrib__t">tinyobj_attrib_t</link>;
+79 
+80 
+81 <emphasis role="preprocessor">#define&#32;TINYOBJ_FLAG_TRIANGULATE&#32;(1&#32;&lt;&lt;&#32;0)</emphasis>
+82 
+83 <emphasis role="preprocessor">#define&#32;TINYOBJ_INVALID_INDEX&#32;(0x80000000)</emphasis>
+84 
+85 <emphasis role="preprocessor">#define&#32;TINYOBJ_SUCCESS&#32;(0)</emphasis>
+86 <emphasis role="preprocessor">#define&#32;TINYOBJ_ERROR_EMPTY&#32;(-1)</emphasis>
+87 <emphasis role="preprocessor">#define&#32;TINYOBJ_ERROR_INVALID_PARAMETER&#32;(-2)</emphasis>
+88 <emphasis role="preprocessor">#define&#32;TINYOBJ_ERROR_FILE_OPERATION&#32;(-3)</emphasis>
+89 
+90 <emphasis role="comment">/*&#32;Parse&#32;wavefront&#32;.obj(.obj&#32;string&#32;data&#32;is&#32;expanded&#32;to&#32;linear&#32;char&#32;array&#32;`buf&apos;)</emphasis>
+91 <emphasis role="comment">&#32;*&#32;flags&#32;are&#32;combination&#32;of&#32;TINYOBJ_FLAG_***</emphasis>
+92 <emphasis role="comment">&#32;*&#32;Returns&#32;TINYOBJ_SUCCESS&#32;if&#32;things&#32;goes&#32;well.</emphasis>
+93 <emphasis role="comment">&#32;*&#32;Returns&#32;TINYOBJ_ERR_***&#32;when&#32;there&#32;is&#32;an&#32;error.</emphasis>
+94 <emphasis role="comment">&#32;*/</emphasis>
+95 <emphasis role="keyword">extern</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2external_2tinyobj__loader__c_8h_1a02754adee35155e9c1c7c30521d50236">tinyobj_parse_obj</link>(<link linkend="_structtinyobj__attrib__t">tinyobj_attrib_t</link>&#32;*attrib,&#32;<link linkend="_structtinyobj__shape__t">tinyobj_shape_t</link>&#32;**shapes,
+96 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;*num_shapes,&#32;<link linkend="_structtinyobj__material__t">tinyobj_material_t</link>&#32;**materials,
+97 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;*num_materials,&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>&#32;*<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1ad8a8baf08bc0399738960c9259571911">buf</link>,&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a30ee67aa502329a88f4a203775adfa1a">len</link>,
+98 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a3d4f56e54693280c6d9b1177c12c867d">flags</link>);
+99 <emphasis role="keyword">extern</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2external_2tinyobj__loader__c_8h_1a0e123c2815260c55b713330372186e90">tinyobj_parse_mtl_file</link>(<link linkend="_structtinyobj__material__t">tinyobj_material_t</link>&#32;**materials_out,
+100 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;*num_materials_out,
+101 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>&#32;*<link linkend="__classes_2lib_2m_i_n_i-master_2tests_2testhuge_8cpp_1a42a21beb8018ac623f4d09db1343b9cf">filename</link>);
+102 
+103 <emphasis role="keyword">extern</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>&#32;<link linkend="__classes_2lib_2external_2tinyobj__loader__c_8h_1aba2a90f2297d1db1561b9352a8a432bf">tinyobj_attrib_init</link>(<link linkend="_structtinyobj__attrib__t">tinyobj_attrib_t</link>&#32;*attrib);
+104 <emphasis role="keyword">extern</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>&#32;<link linkend="__classes_2lib_2external_2tinyobj__loader__c_8h_1a3050df1d9712ca30d38e97204b11095b">tinyobj_attrib_free</link>(<link linkend="_structtinyobj__attrib__t">tinyobj_attrib_t</link>&#32;*attrib);
+105 <emphasis role="keyword">extern</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>&#32;<link linkend="__classes_2lib_2external_2tinyobj__loader__c_8h_1ace2ac9b9dc2459375d9ee5b5cf4a4101">tinyobj_shapes_free</link>(<link linkend="_structtinyobj__shape__t">tinyobj_shape_t</link>&#32;*shapes,&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;num_shapes);
+106 <emphasis role="keyword">extern</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>&#32;<link linkend="__classes_2lib_2external_2tinyobj__loader__c_8h_1acec0cf6431160a1ad3f305e8cb4b3781">tinyobj_materials_free</link>(<link linkend="_structtinyobj__material__t">tinyobj_material_t</link>&#32;*materials,
+107 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;num_materials);
+108 
+109 <emphasis role="preprocessor">#ifdef&#32;TINYOBJ_LOADER_C_IMPLEMENTATION</emphasis>
+110 <emphasis role="preprocessor">#include&#32;&lt;stdio.h&gt;</emphasis>
+111 <emphasis role="preprocessor">#include&#32;&lt;assert.h&gt;</emphasis>
+112 <emphasis role="preprocessor">#include&#32;&lt;string.h&gt;</emphasis>
+113 <emphasis role="preprocessor">#include&#32;&lt;errno.h&gt;</emphasis>
+114 
+115 <emphasis role="preprocessor">#if&#32;defined(TINYOBJ_MALLOC)&#32;&amp;&amp;&#32;defined(TINYOBJ_REALLOC)&#32;&amp;&amp;&#32;defined(TINYOBJ_CALLOC)&#32;&amp;&amp;&#32;defined(TINYOBJ_FREE)</emphasis>
+116 <emphasis role="comment">/*&#32;ok&#32;*/</emphasis>
+117 <emphasis role="preprocessor">#elif&#32;!defined(TINYOBJ_MALLOC)&#32;&amp;&amp;&#32;!defined(TINYOBJ_REALLOC)&#32;&amp;&amp;&#32;!defined(TINYOBJ_CALLOC)&#32;&amp;&amp;&#32;!defined(TINYOBJ_FREE)</emphasis>
+118 <emphasis role="comment">/*&#32;ok&#32;*/</emphasis>
+119 <emphasis role="preprocessor">#else</emphasis>
+120 <emphasis role="preprocessor">#error&#32;&quot;Must&#32;define&#32;all&#32;or&#32;none&#32;of&#32;TINYOBJ_MALLOC,&#32;TINYOBJ_REALLOC,&#32;TINYOBJ_CALLOC&#32;and&#32;TINYOBJ_FREE.&quot;</emphasis>
+121 <emphasis role="preprocessor">#endif</emphasis>
+122 
+123 <emphasis role="preprocessor">#ifndef&#32;TINYOBJ_MALLOC</emphasis>
+124 <emphasis role="preprocessor">#include&#32;&lt;stdlib.h&gt;</emphasis>
+125 <emphasis role="preprocessor">#define&#32;TINYOBJ_MALLOC&#32;malloc</emphasis>
+126 <emphasis role="preprocessor">#define&#32;TINYOBJ_REALLOC&#32;realloc</emphasis>
+127 <emphasis role="preprocessor">#define&#32;TINYOBJ_CALLOC&#32;calloc</emphasis>
+128 <emphasis role="preprocessor">#define&#32;TINYOBJ_FREE&#32;free</emphasis>
+129 <emphasis role="preprocessor">#endif</emphasis>
+130 
+131 <emphasis role="preprocessor">#define&#32;TINYOBJ_MAX_FACES_PER_F_LINE&#32;(16)</emphasis>
+132 
+133 <emphasis role="preprocessor">#define&#32;IS_SPACE(x)&#32;(((x)&#32;==&#32;&apos;&#32;&apos;)&#32;||&#32;((x)&#32;==&#32;&apos;\t&apos;))</emphasis>
+134 <emphasis role="preprocessor">#define&#32;IS_DIGIT(x)&#32;((unsigned&#32;int)((x)&#32;-&#32;&apos;0&apos;)&#32;&lt;&#32;(unsigned&#32;int)(10))</emphasis>
+135 <emphasis role="preprocessor">#define&#32;IS_NEW_LINE(x)&#32;(((x)&#32;==&#32;&apos;\r&apos;)&#32;||&#32;((x)&#32;==&#32;&apos;\n&apos;)&#32;||&#32;((x)&#32;==&#32;&apos;\0&apos;))</emphasis>
+136 
+137 <emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>&#32;skip_space(<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>&#32;**token)&#32;{
+138 &#32;&#32;<emphasis role="keywordflow">while</emphasis>&#32;((*token)[0]&#32;==&#32;<emphasis role="charliteral">&apos;&#32;&apos;</emphasis>&#32;||&#32;(*token)[0]&#32;==&#32;<emphasis role="charliteral">&apos;\t&apos;</emphasis>)&#32;{
+139 &#32;&#32;&#32;&#32;(*token)++;
+140 &#32;&#32;}
+141 }
+142 
+143 <emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>&#32;skip_space_and_cr(<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>&#32;**token)&#32;{
+144 &#32;&#32;<emphasis role="keywordflow">while</emphasis>&#32;((*token)[0]&#32;==&#32;<emphasis role="charliteral">&apos;&#32;&apos;</emphasis>&#32;||&#32;(*token)[0]&#32;==&#32;<emphasis role="charliteral">&apos;\t&apos;</emphasis>&#32;||&#32;(*token)[0]&#32;==&#32;<emphasis role="charliteral">&apos;\r&apos;</emphasis>)&#32;{
+145 &#32;&#32;&#32;&#32;(*token)++;
+146 &#32;&#32;}
+147 }
+148 
+149 <emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;until_space(<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>&#32;*token)&#32;{
+150 &#32;&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>&#32;*p&#32;=&#32;token;
+151 &#32;&#32;<emphasis role="keywordflow">while</emphasis>&#32;(p[0]&#32;!=&#32;<emphasis role="charliteral">&apos;\0&apos;</emphasis>&#32;&amp;&amp;&#32;p[0]&#32;!=&#32;<emphasis role="charliteral">&apos;&#32;&apos;</emphasis>&#32;&amp;&amp;&#32;p[0]&#32;!=&#32;<emphasis role="charliteral">&apos;\t&apos;</emphasis>&#32;&amp;&amp;&#32;p[0]&#32;!=&#32;<emphasis role="charliteral">&apos;\r&apos;</emphasis>)&#32;{
+152 &#32;&#32;&#32;&#32;p++;
+153 &#32;&#32;}
+154 
+155 &#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;(<emphasis role="keywordtype">int</emphasis>)(p&#32;-&#32;token);
+156 }
+157 
+158 <emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;length_until_newline(<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>&#32;*token,&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;n)&#32;{
+159 &#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a30ee67aa502329a88f4a203775adfa1a">len</link>&#32;=&#32;0;
+160 
+161 &#32;&#32;<emphasis role="comment">/*&#32;Assume&#32;token[n-1]&#32;=&#32;&apos;\0&apos;&#32;*/</emphasis>
+162 &#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a30ee67aa502329a88f4a203775adfa1a">len</link>&#32;=&#32;0;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a30ee67aa502329a88f4a203775adfa1a">len</link>&#32;&lt;&#32;n&#32;-&#32;1;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a30ee67aa502329a88f4a203775adfa1a">len</link>++)&#32;{
+163 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(token[<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a30ee67aa502329a88f4a203775adfa1a">len</link>]&#32;==&#32;<emphasis role="charliteral">&apos;\n&apos;</emphasis>)&#32;{
+164 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">break</emphasis>;
+165 &#32;&#32;&#32;&#32;}
+166 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;((token[<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a30ee67aa502329a88f4a203775adfa1a">len</link>]&#32;==&#32;<emphasis role="charliteral">&apos;\r&apos;</emphasis>)&#32;&amp;&amp;&#32;((<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a30ee67aa502329a88f4a203775adfa1a">len</link>&#32;&lt;&#32;(n&#32;-&#32;2))&#32;&amp;&amp;&#32;(token[<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a30ee67aa502329a88f4a203775adfa1a">len</link>&#32;+&#32;1]&#32;!=&#32;<emphasis role="charliteral">&apos;\n&apos;</emphasis>)))&#32;{
+167 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">break</emphasis>;
+168 &#32;&#32;&#32;&#32;}
+169 &#32;&#32;}
+170 
+171 &#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a30ee67aa502329a88f4a203775adfa1a">len</link>;
+172 }
+173 
+174 <emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;length_until_line_feed(<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>&#32;*token,&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;n)&#32;{
+175 &#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a30ee67aa502329a88f4a203775adfa1a">len</link>&#32;=&#32;0;
+176 
+177 &#32;&#32;<emphasis role="comment">/*&#32;Assume&#32;token[n-1]&#32;=&#32;&apos;\0&apos;&#32;*/</emphasis>
+178 &#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a30ee67aa502329a88f4a203775adfa1a">len</link>&#32;=&#32;0;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a30ee67aa502329a88f4a203775adfa1a">len</link>&#32;&lt;&#32;n;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a30ee67aa502329a88f4a203775adfa1a">len</link>++)&#32;{
+179 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;((token[<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a30ee67aa502329a88f4a203775adfa1a">len</link>]&#32;==&#32;<emphasis role="charliteral">&apos;\n&apos;</emphasis>)&#32;||&#32;(token[<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a30ee67aa502329a88f4a203775adfa1a">len</link>]&#32;==&#32;<emphasis role="charliteral">&apos;\r&apos;</emphasis>))&#32;{
+180 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">break</emphasis>;
+181 &#32;&#32;&#32;&#32;}
+182 &#32;&#32;}
+183 
+184 &#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a30ee67aa502329a88f4a203775adfa1a">len</link>;
+185 }
+186 
+187 <emphasis role="comment">/*&#32;http://stackoverflow.com/questions/5710091/how-does-atoi-function-in-c-work</emphasis>
+188 <emphasis role="comment">*/</emphasis>
+189 <emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;my_atoi(<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>&#32;*c)&#32;{
+190 &#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="_classvalue">value</link>&#32;=&#32;0;
+191 &#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="_namespacesign">sign</link>&#32;=&#32;1;
+192 &#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(*c&#32;==&#32;<emphasis role="charliteral">&apos;+&apos;</emphasis>&#32;||&#32;*c&#32;==&#32;<emphasis role="charliteral">&apos;-&apos;</emphasis>)&#32;{
+193 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(*c&#32;==&#32;<emphasis role="charliteral">&apos;-&apos;</emphasis>)&#32;<link linkend="_namespacesign">sign</link>&#32;=&#32;-1;
+194 &#32;&#32;&#32;&#32;c++;
+195 &#32;&#32;}
+196 &#32;&#32;<emphasis role="keywordflow">while</emphasis>&#32;(((*c)&#32;&gt;=&#32;<emphasis role="charliteral">&apos;0&apos;</emphasis>)&#32;&amp;&amp;&#32;((*c)&#32;&lt;=&#32;<emphasis role="charliteral">&apos;9&apos;</emphasis>))&#32;{&#32;<emphasis role="comment">/*&#32;isdigit(*c)&#32;*/</emphasis>
+197 &#32;&#32;&#32;&#32;<link linkend="_classvalue">value</link>&#32;*=&#32;10;
+198 &#32;&#32;&#32;&#32;<link linkend="_classvalue">value</link>&#32;+=&#32;(int)(*c&#32;-&#32;<emphasis role="charliteral">&apos;0&apos;</emphasis>);
+199 &#32;&#32;&#32;&#32;c++;
+200 &#32;&#32;}
+201 &#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="_classvalue">value</link>&#32;*&#32;<link linkend="_namespacesign">sign</link>;
+202 }
+203 
+204 <emphasis role="comment">/*&#32;Make&#32;index&#32;zero-base,&#32;and&#32;also&#32;support&#32;relative&#32;index.&#32;*/</emphasis>
+205 <emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;fixIndex(<emphasis role="keywordtype">int</emphasis>&#32;idx,&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;n)&#32;{
+206 &#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(idx&#32;&gt;&#32;0)&#32;<emphasis role="keywordflow">return</emphasis>&#32;idx&#32;-&#32;1;
+207 &#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(idx&#32;==&#32;0)&#32;<emphasis role="keywordflow">return</emphasis>&#32;0;
+208 &#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;(<emphasis role="keywordtype">int</emphasis>)n&#32;+&#32;idx;&#32;<emphasis role="comment">/*&#32;negative&#32;value&#32;=&#32;relative&#32;*/</emphasis>
+209 }
+210 
+211 <emphasis role="comment">/*&#32;Parse&#32;raw&#32;triples:&#32;i,&#32;i/j/k,&#32;i//k,&#32;i/j&#32;*/</emphasis>
+212 <emphasis role="keyword">static</emphasis>&#32;<link linkend="_structtinyobj__vertex__index__t">tinyobj_vertex_index_t</link>&#32;parseRawTriple(<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>&#32;**token)&#32;{
+213 &#32;&#32;<link linkend="_structtinyobj__vertex__index__t">tinyobj_vertex_index_t</link>&#32;vi;
+214 &#32;&#32;<emphasis role="comment">/*&#32;0x80000000&#32;=&#32;-2147483648&#32;=&#32;invalid&#32;*/</emphasis>
+215 &#32;&#32;vi.<link linkend="_structtinyobj__vertex__index__t_1a02e878758d97d1636f367dd9d6173a40">v_idx</link>&#32;=&#32;(int)(0x80000000);
+216 &#32;&#32;vi.<link linkend="_structtinyobj__vertex__index__t_1a854df2d4b08855097bea57c20954c06b">vn_idx</link>&#32;=&#32;(int)(0x80000000);
+217 &#32;&#32;vi.<link linkend="_structtinyobj__vertex__index__t_1a83347e206fede381e2b4d3315e39d311">vt_idx</link>&#32;=&#32;(int)(0x80000000);
+218 
+219 &#32;&#32;vi.<link linkend="_structtinyobj__vertex__index__t_1a02e878758d97d1636f367dd9d6173a40">v_idx</link>&#32;=&#32;my_atoi((*token));
+220 &#32;&#32;<emphasis role="keywordflow">while</emphasis>&#32;((*token)[0]&#32;!=&#32;<emphasis role="charliteral">&apos;\0&apos;</emphasis>&#32;&amp;&amp;&#32;(*token)[0]&#32;!=&#32;<emphasis role="charliteral">&apos;/&apos;</emphasis>&#32;&amp;&amp;&#32;(*token)[0]&#32;!=&#32;<emphasis role="charliteral">&apos;&#32;&apos;</emphasis>&#32;&amp;&amp;
+221 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;(*token)[0]&#32;!=&#32;<emphasis role="charliteral">&apos;\t&apos;</emphasis>&#32;&amp;&amp;&#32;(*token)[0]&#32;!=&#32;<emphasis role="charliteral">&apos;\r&apos;</emphasis>)&#32;{
+222 &#32;&#32;&#32;&#32;(*token)++;
+223 &#32;&#32;}
+224 &#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;((*token)[0]&#32;!=&#32;<emphasis role="charliteral">&apos;/&apos;</emphasis>)&#32;{
+225 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;vi;
+226 &#32;&#32;}
+227 &#32;&#32;(*token)++;
+228 
+229 &#32;&#32;<emphasis role="comment">/*&#32;i//k&#32;*/</emphasis>
+230 &#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;((*token)[0]&#32;==&#32;<emphasis role="charliteral">&apos;/&apos;</emphasis>)&#32;{
+231 &#32;&#32;&#32;&#32;(*token)++;
+232 &#32;&#32;&#32;&#32;vi.<link linkend="_structtinyobj__vertex__index__t_1a854df2d4b08855097bea57c20954c06b">vn_idx</link>&#32;=&#32;my_atoi((*token));
+233 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">while</emphasis>&#32;((*token)[0]&#32;!=&#32;<emphasis role="charliteral">&apos;\0&apos;</emphasis>&#32;&amp;&amp;&#32;(*token)[0]&#32;!=&#32;<emphasis role="charliteral">&apos;/&apos;</emphasis>&#32;&amp;&amp;&#32;(*token)[0]&#32;!=&#32;<emphasis role="charliteral">&apos;&#32;&apos;</emphasis>&#32;&amp;&amp;
+234 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;(*token)[0]&#32;!=&#32;<emphasis role="charliteral">&apos;\t&apos;</emphasis>&#32;&amp;&amp;&#32;(*token)[0]&#32;!=&#32;<emphasis role="charliteral">&apos;\r&apos;</emphasis>)&#32;{
+235 &#32;&#32;&#32;&#32;&#32;&#32;(*token)++;
+236 &#32;&#32;&#32;&#32;}
+237 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;vi;
+238 &#32;&#32;}
+239 
+240 &#32;&#32;<emphasis role="comment">/*&#32;i/j/k&#32;or&#32;i/j&#32;*/</emphasis>
+241 &#32;&#32;vi.<link linkend="_structtinyobj__vertex__index__t_1a83347e206fede381e2b4d3315e39d311">vt_idx</link>&#32;=&#32;my_atoi((*token));
+242 &#32;&#32;<emphasis role="keywordflow">while</emphasis>&#32;((*token)[0]&#32;!=&#32;<emphasis role="charliteral">&apos;\0&apos;</emphasis>&#32;&amp;&amp;&#32;(*token)[0]&#32;!=&#32;<emphasis role="charliteral">&apos;/&apos;</emphasis>&#32;&amp;&amp;&#32;(*token)[0]&#32;!=&#32;<emphasis role="charliteral">&apos;&#32;&apos;</emphasis>&#32;&amp;&amp;
+243 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;(*token)[0]&#32;!=&#32;<emphasis role="charliteral">&apos;\t&apos;</emphasis>&#32;&amp;&amp;&#32;(*token)[0]&#32;!=&#32;<emphasis role="charliteral">&apos;\r&apos;</emphasis>)&#32;{
+244 &#32;&#32;&#32;&#32;(*token)++;
+245 &#32;&#32;}
+246 &#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;((*token)[0]&#32;!=&#32;<emphasis role="charliteral">&apos;/&apos;</emphasis>)&#32;{
+247 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;vi;
+248 &#32;&#32;}
+249 
+250 &#32;&#32;<emphasis role="comment">/*&#32;i/j/k&#32;*/</emphasis>
+251 &#32;&#32;(*token)++;&#32;<emphasis role="comment">/*&#32;skip&#32;&apos;/&apos;&#32;*/</emphasis>
+252 &#32;&#32;vi.<link linkend="_structtinyobj__vertex__index__t_1a854df2d4b08855097bea57c20954c06b">vn_idx</link>&#32;=&#32;my_atoi((*token));
+253 &#32;&#32;<emphasis role="keywordflow">while</emphasis>&#32;((*token)[0]&#32;!=&#32;<emphasis role="charliteral">&apos;\0&apos;</emphasis>&#32;&amp;&amp;&#32;(*token)[0]&#32;!=&#32;<emphasis role="charliteral">&apos;/&apos;</emphasis>&#32;&amp;&amp;&#32;(*token)[0]&#32;!=&#32;<emphasis role="charliteral">&apos;&#32;&apos;</emphasis>&#32;&amp;&amp;
+254 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;(*token)[0]&#32;!=&#32;<emphasis role="charliteral">&apos;\t&apos;</emphasis>&#32;&amp;&amp;&#32;(*token)[0]&#32;!=&#32;<emphasis role="charliteral">&apos;\r&apos;</emphasis>)&#32;{
+255 &#32;&#32;&#32;&#32;(*token)++;
+256 &#32;&#32;}
+257 &#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;vi;
+258 }
+259 
+260 <emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;parseInt(<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>&#32;**token)&#32;{
+261 &#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;i&#32;=&#32;0;
+262 &#32;&#32;skip_space(token);
+263 &#32;&#32;i&#32;=&#32;my_atoi((*token));
+264 &#32;&#32;(*token)&#32;+=&#32;until_space((*token));
+265 &#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;i;
+266 }
+267 
+268 <emphasis role="comment">/*</emphasis>
+269 <emphasis role="comment">&#32;*&#32;Tries&#32;to&#32;parse&#32;a&#32;floating&#32;point&#32;number&#32;located&#32;at&#32;s.</emphasis>
+270 <emphasis role="comment">&#32;*</emphasis>
+271 <emphasis role="comment">&#32;*&#32;s_end&#32;should&#32;be&#32;a&#32;location&#32;in&#32;the&#32;string&#32;where&#32;reading&#32;should&#32;absolutely</emphasis>
+272 <emphasis role="comment">&#32;*&#32;stop.&#32;For&#32;example&#32;at&#32;the&#32;end&#32;of&#32;the&#32;string,&#32;to&#32;prevent&#32;buffer&#32;overflows.</emphasis>
+273 <emphasis role="comment">&#32;*</emphasis>
+274 <emphasis role="comment">&#32;*&#32;Parses&#32;the&#32;following&#32;EBNF&#32;grammar:</emphasis>
+275 <emphasis role="comment">&#32;*&#32;&#32;&#32;sign&#32;&#32;&#32;&#32;=&#32;&quot;+&quot;&#32;|&#32;&quot;-&quot;&#32;;</emphasis>
+276 <emphasis role="comment">&#32;*&#32;&#32;&#32;END&#32;&#32;&#32;&#32;&#32;=&#32;?&#32;anything&#32;not&#32;in&#32;digit&#32;?</emphasis>
+277 <emphasis role="comment">&#32;*&#32;&#32;&#32;digit&#32;&#32;&#32;=&#32;&quot;0&quot;&#32;|&#32;&quot;1&quot;&#32;|&#32;&quot;2&quot;&#32;|&#32;&quot;3&quot;&#32;|&#32;&quot;4&quot;&#32;|&#32;&quot;5&quot;&#32;|&#32;&quot;6&quot;&#32;|&#32;&quot;7&quot;&#32;|&#32;&quot;8&quot;&#32;|&#32;&quot;9&quot;&#32;;</emphasis>
+278 <emphasis role="comment">&#32;*&#32;&#32;&#32;integer&#32;=&#32;[sign]&#32;,&#32;digit&#32;,&#32;{digit}&#32;;</emphasis>
+279 <emphasis role="comment">&#32;*&#32;&#32;&#32;decimal&#32;=&#32;integer&#32;,&#32;[&quot;.&quot;&#32;,&#32;integer]&#32;;</emphasis>
+280 <emphasis role="comment">&#32;*&#32;&#32;&#32;float&#32;&#32;&#32;=&#32;(&#32;decimal&#32;,&#32;END&#32;)&#32;|&#32;(&#32;decimal&#32;,&#32;(&quot;E&quot;&#32;|&#32;&quot;e&quot;)&#32;,&#32;integer&#32;,&#32;END&#32;)&#32;;</emphasis>
+281 <emphasis role="comment">&#32;*</emphasis>
+282 <emphasis role="comment">&#32;*&#32;&#32;Valid&#32;strings&#32;are&#32;for&#32;example:</emphasis>
+283 <emphasis role="comment">&#32;*&#32;&#32;&#32;-0&#32;&#32;+3.1417e+2&#32;&#32;-0.0E-3&#32;&#32;1.0324&#32;&#32;-1.41&#32;&#32;&#32;11e2</emphasis>
+284 <emphasis role="comment">&#32;*</emphasis>
+285 <emphasis role="comment">&#32;*&#32;If&#32;the&#32;parsing&#32;is&#32;a&#32;success,&#32;result&#32;is&#32;set&#32;to&#32;the&#32;parsed&#32;value&#32;and&#32;true</emphasis>
+286 <emphasis role="comment">&#32;*&#32;is&#32;returned.</emphasis>
+287 <emphasis role="comment">&#32;*</emphasis>
+288 <emphasis role="comment">&#32;*&#32;The&#32;function&#32;is&#32;greedy&#32;and&#32;will&#32;parse&#32;until&#32;any&#32;of&#32;the&#32;following&#32;happens:</emphasis>
+289 <emphasis role="comment">&#32;*&#32;&#32;-&#32;a&#32;non-conforming&#32;character&#32;is&#32;encountered.</emphasis>
+290 <emphasis role="comment">&#32;*&#32;&#32;-&#32;s_end&#32;is&#32;reached.</emphasis>
+291 <emphasis role="comment">&#32;*</emphasis>
+292 <emphasis role="comment">&#32;*&#32;The&#32;following&#32;situations&#32;triggers&#32;a&#32;failure:</emphasis>
+293 <emphasis role="comment">&#32;*&#32;&#32;-&#32;s&#32;&gt;=&#32;s_end.</emphasis>
+294 <emphasis role="comment">&#32;*&#32;&#32;-&#32;parse&#32;failure.</emphasis>
+295 <emphasis role="comment">&#32;*/</emphasis>
+296 <emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;tryParseDouble(<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>&#32;*s,&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>&#32;*s_end,&#32;<emphasis role="keywordtype">double</emphasis>&#32;*<link linkend="__classes_2lib_2glm_2test_2core_2core__func__integer_8cpp_1a937d4dd628a8858b443a399410d2600b">result</link>)&#32;{
+297 &#32;&#32;<emphasis role="keywordtype">double</emphasis>&#32;mantissa&#32;=&#32;0.0;
+298 &#32;&#32;<emphasis role="comment">/*&#32;This&#32;exponent&#32;is&#32;base&#32;2&#32;rather&#32;than&#32;10.</emphasis>
+299 <emphasis role="comment">&#32;&#32;&#32;*&#32;However&#32;the&#32;exponent&#32;we&#32;parse&#32;is&#32;supposed&#32;to&#32;be&#32;one&#32;of&#32;ten,</emphasis>
+300 <emphasis role="comment">&#32;&#32;&#32;*&#32;thus&#32;we&#32;must&#32;take&#32;care&#32;to&#32;convert&#32;the&#32;exponent/and&#32;or&#32;the</emphasis>
+301 <emphasis role="comment">&#32;&#32;&#32;*&#32;mantissa&#32;to&#32;a&#32;*&#32;2^E,&#32;where&#32;a&#32;is&#32;the&#32;mantissa&#32;and&#32;E&#32;is&#32;the</emphasis>
+302 <emphasis role="comment">&#32;&#32;&#32;*&#32;exponent.</emphasis>
+303 <emphasis role="comment">&#32;&#32;&#32;*&#32;To&#32;get&#32;the&#32;final&#32;double&#32;we&#32;will&#32;use&#32;ldexp,&#32;it&#32;requires&#32;the</emphasis>
+304 <emphasis role="comment">&#32;&#32;&#32;*&#32;exponent&#32;to&#32;be&#32;in&#32;base&#32;2.</emphasis>
+305 <emphasis role="comment">&#32;&#32;&#32;*/</emphasis>
+306 &#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;exponent&#32;=&#32;0;
+307 
+308 &#32;&#32;<emphasis role="comment">/*&#32;NOTE:&#32;THESE&#32;MUST&#32;BE&#32;DECLARED&#32;HERE&#32;SINCE&#32;WE&#32;ARE&#32;NOT&#32;ALLOWED</emphasis>
+309 <emphasis role="comment">&#32;&#32;&#32;*&#32;TO&#32;JUMP&#32;OVER&#32;DEFINITIONS.</emphasis>
+310 <emphasis role="comment">&#32;&#32;&#32;*/</emphasis>
+311 &#32;&#32;<emphasis role="keywordtype">char</emphasis>&#32;<link linkend="_namespacesign">sign</link>&#32;=&#32;<emphasis role="charliteral">&apos;+&apos;</emphasis>;
+312 &#32;&#32;<emphasis role="keywordtype">char</emphasis>&#32;exp_sign&#32;=&#32;<emphasis role="charliteral">&apos;+&apos;</emphasis>;
+313 &#32;&#32;<emphasis role="keywordtype">char</emphasis>&#32;<emphasis role="keyword">const</emphasis>&#32;*curr&#32;=&#32;s;
+314 
+315 &#32;&#32;<emphasis role="comment">/*&#32;How&#32;many&#32;characters&#32;were&#32;read&#32;in&#32;a&#32;loop.&#32;*/</emphasis>
+316 &#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;read&#32;=&#32;0;
+317 &#32;&#32;<emphasis role="comment">/*&#32;Tells&#32;whether&#32;a&#32;loop&#32;terminated&#32;due&#32;to&#32;reaching&#32;s_end.&#32;*/</emphasis>
+318 &#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;end_not_reached&#32;=&#32;0;
+319 
+320 &#32;&#32;<emphasis role="comment">/*</emphasis>
+321 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;BEGIN&#32;PARSING.</emphasis>
+322 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;*/</emphasis>
+323 
+324 &#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(s&#32;&gt;=&#32;s_end)&#32;{
+325 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;0;&#32;<emphasis role="comment">/*&#32;fail&#32;*/</emphasis>
+326 &#32;&#32;}
+327 
+328 &#32;&#32;<emphasis role="comment">/*&#32;Find&#32;out&#32;what&#32;sign&#32;we&apos;ve&#32;got.&#32;*/</emphasis>
+329 &#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(*curr&#32;==&#32;<emphasis role="charliteral">&apos;+&apos;</emphasis>&#32;||&#32;*curr&#32;==&#32;<emphasis role="charliteral">&apos;-&apos;</emphasis>)&#32;{
+330 &#32;&#32;&#32;&#32;<link linkend="_namespacesign">sign</link>&#32;=&#32;*curr;
+331 &#32;&#32;&#32;&#32;curr++;
+332 &#32;&#32;}&#32;<emphasis role="keywordflow">else</emphasis>&#32;<emphasis role="keywordflow">if</emphasis>&#32;(IS_DIGIT(*curr))&#32;{&#32;<emphasis role="comment">/*&#32;Pass&#32;through.&#32;*/</emphasis>
+333 &#32;&#32;}&#32;<emphasis role="keywordflow">else</emphasis>&#32;{
+334 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">goto</emphasis>&#32;fail;
+335 &#32;&#32;}
+336 
+337 &#32;&#32;<emphasis role="comment">/*&#32;Read&#32;the&#32;integer&#32;part.&#32;*/</emphasis>
+338 &#32;&#32;end_not_reached&#32;=&#32;(curr&#32;!=&#32;s_end);
+339 &#32;&#32;<emphasis role="keywordflow">while</emphasis>&#32;(end_not_reached&#32;&amp;&amp;&#32;IS_DIGIT(*curr))&#32;{
+340 &#32;&#32;&#32;&#32;mantissa&#32;*=&#32;10;
+341 &#32;&#32;&#32;&#32;mantissa&#32;+=&#32;(int)(*curr&#32;-&#32;0x30);
+342 &#32;&#32;&#32;&#32;curr++;
+343 &#32;&#32;&#32;&#32;read++;
+344 &#32;&#32;&#32;&#32;end_not_reached&#32;=&#32;(curr&#32;!=&#32;s_end);
+345 &#32;&#32;}
+346 
+347 &#32;&#32;<emphasis role="comment">/*&#32;We&#32;must&#32;make&#32;sure&#32;we&#32;actually&#32;got&#32;something.&#32;*/</emphasis>
+348 &#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(read&#32;==&#32;0)&#32;<emphasis role="keywordflow">goto</emphasis>&#32;fail;
+349 &#32;&#32;<emphasis role="comment">/*&#32;We&#32;allow&#32;numbers&#32;of&#32;form&#32;&quot;#&quot;,&#32;&quot;###&quot;&#32;etc.&#32;*/</emphasis>
+350 &#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(!end_not_reached)&#32;<emphasis role="keywordflow">goto</emphasis>&#32;assemble;
+351 
+352 &#32;&#32;<emphasis role="comment">/*&#32;Read&#32;the&#32;decimal&#32;part.&#32;*/</emphasis>
+353 &#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(*curr&#32;==&#32;<emphasis role="charliteral">&apos;.&apos;</emphasis>)&#32;{
+354 &#32;&#32;&#32;&#32;curr++;
+355 &#32;&#32;&#32;&#32;read&#32;=&#32;1;
+356 &#32;&#32;&#32;&#32;end_not_reached&#32;=&#32;(curr&#32;!=&#32;s_end);
+357 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">while</emphasis>&#32;(end_not_reached&#32;&amp;&amp;&#32;IS_DIGIT(*curr))&#32;{
+358 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">/*&#32;pow(10.0,&#32;-read)&#32;*/</emphasis>
+359 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">double</emphasis>&#32;frac_value&#32;=&#32;1.0;
+360 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a0fdda94b8b7e64884690244028f455ba">f</link>;
+361 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a0fdda94b8b7e64884690244028f455ba">f</link>&#32;=&#32;0;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a0fdda94b8b7e64884690244028f455ba">f</link>&#32;&lt;&#32;read;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a0fdda94b8b7e64884690244028f455ba">f</link>++)&#32;{
+362 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;frac_value&#32;*=&#32;0.1;
+363 &#32;&#32;&#32;&#32;&#32;&#32;}
+364 &#32;&#32;&#32;&#32;&#32;&#32;mantissa&#32;+=&#32;(int)(*curr&#32;-&#32;0x30)&#32;*&#32;frac_value;
+365 &#32;&#32;&#32;&#32;&#32;&#32;read++;
+366 &#32;&#32;&#32;&#32;&#32;&#32;curr++;
+367 &#32;&#32;&#32;&#32;&#32;&#32;end_not_reached&#32;=&#32;(curr&#32;!=&#32;s_end);
+368 &#32;&#32;&#32;&#32;}
+369 &#32;&#32;}&#32;<emphasis role="keywordflow">else</emphasis>&#32;<emphasis role="keywordflow">if</emphasis>&#32;(*curr&#32;==&#32;<emphasis role="charliteral">&apos;e&apos;</emphasis>&#32;||&#32;*curr&#32;==&#32;<emphasis role="charliteral">&apos;E&apos;</emphasis>)&#32;{
+370 &#32;&#32;}&#32;<emphasis role="keywordflow">else</emphasis>&#32;{
+371 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">goto</emphasis>&#32;assemble;
+372 &#32;&#32;}
+373 
+374 &#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(!end_not_reached)&#32;<emphasis role="keywordflow">goto</emphasis>&#32;assemble;
+375 
+376 &#32;&#32;<emphasis role="comment">/*&#32;Read&#32;the&#32;exponent&#32;part.&#32;*/</emphasis>
+377 &#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(*curr&#32;==&#32;<emphasis role="charliteral">&apos;e&apos;</emphasis>&#32;||&#32;*curr&#32;==&#32;<emphasis role="charliteral">&apos;E&apos;</emphasis>)&#32;{
+378 &#32;&#32;&#32;&#32;curr++;
+379 &#32;&#32;&#32;&#32;<emphasis role="comment">/*&#32;Figure&#32;out&#32;if&#32;a&#32;sign&#32;is&#32;present&#32;and&#32;if&#32;it&#32;is.&#32;*/</emphasis>
+380 &#32;&#32;&#32;&#32;end_not_reached&#32;=&#32;(curr&#32;!=&#32;s_end);
+381 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(end_not_reached&#32;&amp;&amp;&#32;(*curr&#32;==&#32;<emphasis role="charliteral">&apos;+&apos;</emphasis>&#32;||&#32;*curr&#32;==&#32;<emphasis role="charliteral">&apos;-&apos;</emphasis>))&#32;{
+382 &#32;&#32;&#32;&#32;&#32;&#32;exp_sign&#32;=&#32;*curr;
+383 &#32;&#32;&#32;&#32;&#32;&#32;curr++;
+384 &#32;&#32;&#32;&#32;}&#32;<emphasis role="keywordflow">else</emphasis>&#32;<emphasis role="keywordflow">if</emphasis>&#32;(IS_DIGIT(*curr))&#32;{&#32;<emphasis role="comment">/*&#32;Pass&#32;through.&#32;*/</emphasis>
+385 &#32;&#32;&#32;&#32;}&#32;<emphasis role="keywordflow">else</emphasis>&#32;{
+386 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">/*&#32;Empty&#32;E&#32;is&#32;not&#32;allowed.&#32;*/</emphasis>
+387 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">goto</emphasis>&#32;fail;
+388 &#32;&#32;&#32;&#32;}
+389 
+390 &#32;&#32;&#32;&#32;read&#32;=&#32;0;
+391 &#32;&#32;&#32;&#32;end_not_reached&#32;=&#32;(curr&#32;!=&#32;s_end);
+392 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">while</emphasis>&#32;(end_not_reached&#32;&amp;&amp;&#32;IS_DIGIT(*curr))&#32;{
+393 &#32;&#32;&#32;&#32;&#32;&#32;exponent&#32;*=&#32;10;
+394 &#32;&#32;&#32;&#32;&#32;&#32;exponent&#32;+=&#32;(int)(*curr&#32;-&#32;0x30);
+395 &#32;&#32;&#32;&#32;&#32;&#32;curr++;
+396 &#32;&#32;&#32;&#32;&#32;&#32;read++;
+397 &#32;&#32;&#32;&#32;&#32;&#32;end_not_reached&#32;=&#32;(curr&#32;!=&#32;s_end);
+398 &#32;&#32;&#32;&#32;}
+399 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(read&#32;==&#32;0)&#32;<emphasis role="keywordflow">goto</emphasis>&#32;fail;
+400 &#32;&#32;}
+401 
+402 assemble&#32;:
+403 
+404 &#32;&#32;{
+405 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">double</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1ac8729153468b5dcf13f971b21d84d4e5">a</link>&#32;=&#32;1.0;&#32;<emphasis role="comment">/*&#32;=&#32;pow(5.0,&#32;exponent);&#32;*/</emphasis>
+406 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">double</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a6eba317e3cf44d6d26c04a5a8f197dcb">b</link>&#32;&#32;=&#32;1.0;&#32;<emphasis role="comment">/*&#32;=&#32;2.0^exponent&#32;*/</emphasis>
+407 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;i;
+408 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(i&#32;=&#32;0;&#32;i&#32;&lt;&#32;exponent;&#32;i++)&#32;{
+409 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1ac8729153468b5dcf13f971b21d84d4e5">a</link>&#32;=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1ac8729153468b5dcf13f971b21d84d4e5">a</link>&#32;*&#32;5.0;
+410 &#32;&#32;&#32;&#32;}
+411 
+412 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(i&#32;=&#32;0;&#32;i&#32;&lt;&#32;exponent;&#32;i++)&#32;{
+413 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a6eba317e3cf44d6d26c04a5a8f197dcb">b</link>&#32;=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a6eba317e3cf44d6d26c04a5a8f197dcb">b</link>&#32;*&#32;2.0;
+414 &#32;&#32;&#32;&#32;}
+415 
+416 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(exp_sign&#32;==&#32;<emphasis role="charliteral">&apos;-&apos;</emphasis>)&#32;{
+417 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1ac8729153468b5dcf13f971b21d84d4e5">a</link>&#32;=&#32;1.0&#32;/&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1ac8729153468b5dcf13f971b21d84d4e5">a</link>;
+418 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a6eba317e3cf44d6d26c04a5a8f197dcb">b</link>&#32;=&#32;1.0&#32;/&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a6eba317e3cf44d6d26c04a5a8f197dcb">b</link>;
+419 &#32;&#32;&#32;&#32;}
+420 
+421 &#32;&#32;&#32;&#32;*<link linkend="__classes_2lib_2glm_2test_2core_2core__func__integer_8cpp_1a937d4dd628a8858b443a399410d2600b">result</link>&#32;=
+422 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">/*&#32;(sign&#32;==&#32;&apos;+&apos;&#32;?&#32;1&#32;:&#32;-1)&#32;*&#32;ldexp(mantissa&#32;*&#32;pow(5.0,&#32;exponent),</emphasis>
+423 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;exponent);&#32;*/</emphasis>
+424 &#32;&#32;&#32;&#32;&#32;&#32;(<link linkend="_namespacesign">sign</link>&#32;==&#32;<emphasis role="charliteral">&apos;+&apos;</emphasis>&#32;?&#32;1&#32;:&#32;-1)&#32;*&#32;(mantissa&#32;*&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1ac8729153468b5dcf13f971b21d84d4e5">a</link>&#32;*&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a6eba317e3cf44d6d26c04a5a8f197dcb">b</link>);
+425 &#32;&#32;}
+426 
+427 &#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;1;
+428 fail:
+429 &#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;0;
+430 }
+431 
+432 <emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">float</emphasis>&#32;parseFloat(<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>&#32;**token)&#32;{
+433 &#32;&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>&#32;*<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a432111147038972f06e049e18a837002">end</link>;
+434 &#32;&#32;<emphasis role="keywordtype">double</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1aa857b95cc76669c2a9109239ef40a47c">val</link>&#32;=&#32;0.0;
+435 &#32;&#32;<emphasis role="keywordtype">float</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a0fdda94b8b7e64884690244028f455ba">f</link>&#32;=&#32;0.0f;
+436 &#32;&#32;skip_space(token);
+437 &#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a432111147038972f06e049e18a837002">end</link>&#32;=&#32;(*token)&#32;+&#32;until_space((*token));
+438 &#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1aa857b95cc76669c2a9109239ef40a47c">val</link>&#32;=&#32;0.0;
+439 &#32;&#32;tryParseDouble((*token),&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a432111147038972f06e049e18a837002">end</link>,&#32;&amp;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1aa857b95cc76669c2a9109239ef40a47c">val</link>);
+440 &#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a0fdda94b8b7e64884690244028f455ba">f</link>&#32;=&#32;(float)(<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1aa857b95cc76669c2a9109239ef40a47c">val</link>);
+441 &#32;&#32;(*token)&#32;=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a432111147038972f06e049e18a837002">end</link>;
+442 &#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a0fdda94b8b7e64884690244028f455ba">f</link>;
+443 }
+444 
+445 <emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>&#32;parseFloat2(<emphasis role="keywordtype">float</emphasis>&#32;*<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1ac916c0825494ac3acd4457effd2823d2">x</link>,&#32;<emphasis role="keywordtype">float</emphasis>&#32;*<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a4f27f1eebce8c31db01bb39fab9ef561">y</link>,&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>&#32;**token)&#32;{
+446 &#32;&#32;(*x)&#32;=&#32;parseFloat(token);
+447 &#32;&#32;(*y)&#32;=&#32;parseFloat(token);
+448 }
+449 
+450 <emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>&#32;parseFloat3(<emphasis role="keywordtype">float</emphasis>&#32;*<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1ac916c0825494ac3acd4457effd2823d2">x</link>,&#32;<emphasis role="keywordtype">float</emphasis>&#32;*<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a4f27f1eebce8c31db01bb39fab9ef561">y</link>,&#32;<emphasis role="keywordtype">float</emphasis>&#32;*<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1ab26e6a0e7d142ed28ac773f12a73f458">z</link>,&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>&#32;**token)&#32;{
+451 &#32;&#32;(*x)&#32;=&#32;parseFloat(token);
+452 &#32;&#32;(*y)&#32;=&#32;parseFloat(token);
+453 &#32;&#32;(*z)&#32;=&#32;parseFloat(token);
+454 }
+455 
+456 <emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;my_strnlen(<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>&#32;*s,&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;n)&#32;{
+457 &#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>&#32;*p&#32;=&#32;memchr(s,&#32;0,&#32;n);
+458 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;p&#32;?&#32;(<emphasis role="keywordtype">unsigned</emphasis>&#32;int)(p&#32;-&#32;s)&#32;:&#32;n;
+459 }
+460 
+461 <emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>&#32;*my_strdup(<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>&#32;*s,&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;max_length)&#32;{
+462 &#32;&#32;<emphasis role="keywordtype">char</emphasis>&#32;*d;
+463 &#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a30ee67aa502329a88f4a203775adfa1a">len</link>;
+464 
+465 &#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(s&#32;==&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>)&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>;
+466 
+467 &#32;&#32;<emphasis role="comment">/*&#32;Do&#32;not&#32;consider&#32;CRLF&#32;line&#32;ending(#19)&#32;*/</emphasis>
+468 &#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a30ee67aa502329a88f4a203775adfa1a">len</link>&#32;=&#32;length_until_line_feed(s,&#32;max_length);
+469 &#32;&#32;<emphasis role="comment">/*&#32;len&#32;=&#32;strlen(s);&#32;*/</emphasis>
+470 
+471 &#32;&#32;<emphasis role="comment">/*&#32;trim&#32;line&#32;ending&#32;and&#32;append&#32;&apos;\0&apos;&#32;*/</emphasis>
+472 &#32;&#32;d&#32;=&#32;(<emphasis role="keywordtype">char</emphasis>&#32;*)<link linkend="__classes_2lib_2raylib_2src_2models_8c_1aeec461dcd9ee071791bae051a7839fac">TINYOBJ_MALLOC</link>(<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a30ee67aa502329a88f4a203775adfa1a">len</link>&#32;+&#32;1);&#32;<emphasis role="comment">/*&#32;+&#32;&apos;\0&apos;&#32;*/</emphasis>
+473 &#32;&#32;memcpy(d,&#32;s,&#32;(<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>)(<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a30ee67aa502329a88f4a203775adfa1a">len</link>));
+474 &#32;&#32;d[<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a30ee67aa502329a88f4a203775adfa1a">len</link>]&#32;=&#32;<emphasis role="charliteral">&apos;\0&apos;</emphasis>;
+475 
+476 &#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;d;
+477 }
+478 
+479 <emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>&#32;*my_strndup(<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>&#32;*s,&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a30ee67aa502329a88f4a203775adfa1a">len</link>)&#32;{
+480 &#32;&#32;<emphasis role="keywordtype">char</emphasis>&#32;*d;
+481 &#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;slen;
+482 
+483 &#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(s&#32;==&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>)&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>;
+484 &#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a30ee67aa502329a88f4a203775adfa1a">len</link>&#32;==&#32;0)&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>;
+485 
+486 &#32;&#32;slen&#32;=&#32;my_strnlen(s,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a30ee67aa502329a88f4a203775adfa1a">len</link>);
+487 &#32;&#32;d&#32;=&#32;(<emphasis role="keywordtype">char</emphasis>&#32;*)<link linkend="__classes_2lib_2raylib_2src_2models_8c_1aeec461dcd9ee071791bae051a7839fac">TINYOBJ_MALLOC</link>(slen&#32;+&#32;1);&#32;<emphasis role="comment">/*&#32;+&#32;&apos;\0&apos;&#32;*/</emphasis>
+488 &#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(!d)&#32;{
+489 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>;
+490 &#32;&#32;}
+491 &#32;&#32;memcpy(d,&#32;s,&#32;slen);
+492 &#32;&#32;d[slen]&#32;=&#32;<emphasis role="charliteral">&apos;\0&apos;</emphasis>;
+493 
+494 &#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;d;
+495 }
+496 
+497 <emphasis role="keywordtype">char</emphasis>&#32;*dynamic_fgets(<emphasis role="keywordtype">char</emphasis>&#32;**<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1ad8a8baf08bc0399738960c9259571911">buf</link>,&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;*<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a3d1e3edfcf61ca2d831883e1afbad89e">size</link>,&#32;FILE&#32;*file)&#32;{
+498 &#32;&#32;<emphasis role="keywordtype">char</emphasis>&#32;*<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1ae60229696c2ec17c9e00af4899bf738e">offset</link>;
+499 &#32;&#32;<emphasis role="keywordtype">char</emphasis>&#32;*ret;
+500 &#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;old_size;
+501 
+502 &#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(!(ret&#32;=&#32;fgets(*<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1ad8a8baf08bc0399738960c9259571911">buf</link>,&#32;(<emphasis role="keywordtype">int</emphasis>)*<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a3d1e3edfcf61ca2d831883e1afbad89e">size</link>,&#32;file)))&#32;{
+503 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;ret;
+504 &#32;&#32;}
+505 
+506 &#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>&#32;!=&#32;strchr(*<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1ad8a8baf08bc0399738960c9259571911">buf</link>,&#32;<emphasis role="charliteral">&apos;\n&apos;</emphasis>))&#32;{
+507 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;ret;
+508 &#32;&#32;}
+509 
+510 &#32;&#32;<emphasis role="keywordflow">do</emphasis>&#32;{
+511 &#32;&#32;&#32;&#32;old_size&#32;=&#32;*<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a3d1e3edfcf61ca2d831883e1afbad89e">size</link>;
+512 &#32;&#32;&#32;&#32;*<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a3d1e3edfcf61ca2d831883e1afbad89e">size</link>&#32;*=&#32;2;
+513 &#32;&#32;&#32;&#32;*<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1ad8a8baf08bc0399738960c9259571911">buf</link>&#32;=&#32;(<emphasis role="keywordtype">char</emphasis>*)<link linkend="__classes_2lib_2raylib_2src_2models_8c_1a79a293ab816eed7834bb05d7eb5e7b96">TINYOBJ_REALLOC</link>(*<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1ad8a8baf08bc0399738960c9259571911">buf</link>,&#32;*<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a3d1e3edfcf61ca2d831883e1afbad89e">size</link>);
+514 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1ae60229696c2ec17c9e00af4899bf738e">offset</link>&#32;=&#32;&amp;((*buf)[old_size&#32;-&#32;1]);
+515 
+516 &#32;&#32;&#32;&#32;ret&#32;=&#32;fgets(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1ae60229696c2ec17c9e00af4899bf738e">offset</link>,&#32;(<emphasis role="keywordtype">int</emphasis>)(old_size&#32;+&#32;1),&#32;file);
+517 &#32;&#32;}&#32;<emphasis role="keywordflow">while</emphasis>(ret&#32;&amp;&amp;&#32;(<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>&#32;==&#32;strchr(*<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1ad8a8baf08bc0399738960c9259571911">buf</link>,&#32;<emphasis role="charliteral">&apos;\n&apos;</emphasis>)));
+518 
+519 &#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;ret;
+520 }
+521 
+522 <emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>&#32;initMaterial(<link linkend="_structtinyobj__material__t">tinyobj_material_t</link>&#32;*material)&#32;{
+523 &#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;i;
+524 &#32;&#32;material-&gt;<link linkend="_structtinyobj__material__t_1a6e0a8bd459e97c2977bcb941e82771cc">name</link>&#32;=&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>;
+525 &#32;&#32;material-&gt;<link linkend="_structtinyobj__material__t_1a1ad5cf52c452ba6c3b71f196e5728530">ambient_texname</link>&#32;=&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>;
+526 &#32;&#32;material-&gt;<link linkend="_structtinyobj__material__t_1ae2dfb0d9f0eb3d20cbf0cccc1792b552">diffuse_texname</link>&#32;=&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>;
+527 &#32;&#32;material-&gt;<link linkend="_structtinyobj__material__t_1a9c9efa7f41788515f63147f9e239b1fd">specular_texname</link>&#32;=&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>;
+528 &#32;&#32;material-&gt;<link linkend="_structtinyobj__material__t_1a49f976418de77f6a931649e1669c378b">specular_highlight_texname</link>&#32;=&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>;
+529 &#32;&#32;material-&gt;<link linkend="_structtinyobj__material__t_1a621a80c84d1cd8d8d922d7a46097bbe8">bump_texname</link>&#32;=&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>;
+530 &#32;&#32;material-&gt;<link linkend="_structtinyobj__material__t_1a75b9d7b691917b890d8a618d0c49afc2">displacement_texname</link>&#32;=&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>;
+531 &#32;&#32;material-&gt;<link linkend="_structtinyobj__material__t_1a214dca02e22cb67a07c5cf005f41bda8">alpha_texname</link>&#32;=&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>;
+532 &#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(i&#32;=&#32;0;&#32;i&#32;&lt;&#32;3;&#32;i++)&#32;{
+533 &#32;&#32;&#32;&#32;material-&gt;<link linkend="_structtinyobj__material__t_1ae6ecb11e001c13ead1f10986f4b4071a">ambient</link>[i]&#32;=&#32;0.f;
+534 &#32;&#32;&#32;&#32;material-&gt;<link linkend="_structtinyobj__material__t_1ab3e492ad79bebe33ab184b4aeff7c8d6">diffuse</link>[i]&#32;=&#32;0.f;
+535 &#32;&#32;&#32;&#32;material-&gt;<link linkend="_structtinyobj__material__t_1a7e26307830aeb757fb2e9c2f85786b7e">specular</link>[i]&#32;=&#32;0.f;
+536 &#32;&#32;&#32;&#32;material-&gt;<link linkend="_structtinyobj__material__t_1acaf05c76e76c420275c33699910c8a39">transmittance</link>[i]&#32;=&#32;0.f;
+537 &#32;&#32;&#32;&#32;material-&gt;<link linkend="_structtinyobj__material__t_1a903555f6a185fcfbb000965c378b6b42">emission</link>[i]&#32;=&#32;0.f;
+538 &#32;&#32;}
+539 &#32;&#32;material-&gt;<link linkend="_structtinyobj__material__t_1a80dd3536d1409c717646d22400310399">illum</link>&#32;=&#32;0;
+540 &#32;&#32;material-&gt;<link linkend="_structtinyobj__material__t_1a778a6cac58cb220e3aaa6f605ed91768">dissolve</link>&#32;=&#32;1.f;
+541 &#32;&#32;material-&gt;<link linkend="_structtinyobj__material__t_1abcfdbe397d5faee7092d4eeedd381427">shininess</link>&#32;=&#32;1.f;
+542 &#32;&#32;material-&gt;<link linkend="_structtinyobj__material__t_1a7c34f5c8feeca96da40ac08f61553818">ior</link>&#32;=&#32;1.f;
+543 }
+544 
+545 <emphasis role="comment">/*&#32;Implementation&#32;of&#32;string&#32;to&#32;int&#32;hashtable&#32;*/</emphasis>
+546 
+547 <emphasis role="preprocessor">#define&#32;HASH_TABLE_ERROR&#32;1&#32;</emphasis>
+548 <emphasis role="preprocessor">#define&#32;HASH_TABLE_SUCCESS&#32;0</emphasis>
+549 
+550 <emphasis role="preprocessor">#define&#32;HASH_TABLE_DEFAULT_SIZE&#32;10</emphasis>
+551 
+552 <emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">struct&#32;</emphasis>hash_table_entry_t
+553 {
+554 &#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">long</emphasis>&#32;hash;
+555 &#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;filled;
+556 &#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;pad0;
+557 &#32;&#32;<emphasis role="keywordtype">long</emphasis>&#32;<link linkend="_classvalue">value</link>;
+558 
+559 &#32;&#32;<emphasis role="keyword">struct&#32;</emphasis>hash_table_entry_t*&#32;next;
+560 }&#32;hash_table_entry_t;
+561 
+562 <emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">struct</emphasis>
+563 {
+564 &#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">long</emphasis>*&#32;hashes;
+565 &#32;&#32;hash_table_entry_t*&#32;entries;
+566 &#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;capacity;
+567 &#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;n;
+568 }&#32;hash_table_t;
+569 
+570 <emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">long</emphasis>&#32;hash_djb2(<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>*&#32;str)
+571 {
+572 &#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">long</emphasis>&#32;hash&#32;=&#32;5381;
+573 &#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;c;
+574 
+575 &#32;&#32;<emphasis role="keywordflow">while</emphasis>&#32;((c&#32;=&#32;*str++))&#32;{
+576 &#32;&#32;&#32;&#32;hash&#32;=&#32;((hash&#32;&lt;&lt;&#32;5)&#32;+&#32;hash)&#32;+&#32;(<emphasis role="keywordtype">unsigned</emphasis>&#32;long)(c);
+577 &#32;&#32;}
+578 
+579 &#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;hash;
+580 }
+581 
+582 <emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>&#32;create_hash_table(<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;start_capacity,&#32;hash_table_t*&#32;hash_table)
+583 {
+584 &#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(start_capacity&#32;&lt;&#32;1)
+585 &#32;&#32;&#32;&#32;start_capacity&#32;=&#32;HASH_TABLE_DEFAULT_SIZE;
+586 &#32;&#32;hash_table-&gt;hashes&#32;=&#32;(<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">long</emphasis>*)&#32;<link linkend="__classes_2lib_2raylib_2src_2models_8c_1aeec461dcd9ee071791bae051a7839fac">TINYOBJ_MALLOC</link>(start_capacity&#32;*&#32;<emphasis role="keyword">sizeof</emphasis>(<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">long</emphasis>));
+587 &#32;&#32;hash_table-&gt;entries&#32;=&#32;(hash_table_entry_t*)&#32;<link linkend="__classes_2lib_2raylib_2src_2models_8c_1a0d24acd0c10adbf9a7446669083b4ac9">TINYOBJ_CALLOC</link>(start_capacity,&#32;<emphasis role="keyword">sizeof</emphasis>(hash_table_entry_t));
+588 &#32;&#32;hash_table-&gt;capacity&#32;=&#32;start_capacity;
+589 &#32;&#32;hash_table-&gt;n&#32;=&#32;0;
+590 }
+591 
+592 <emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>&#32;destroy_hash_table(hash_table_t*&#32;hash_table)
+593 {
+594 &#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2models_8c_1adaa01af854bdfb1bb4de59c64c782da4">TINYOBJ_FREE</link>(hash_table-&gt;entries);
+595 &#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2models_8c_1adaa01af854bdfb1bb4de59c64c782da4">TINYOBJ_FREE</link>(hash_table-&gt;hashes);
+596 }
+597 
+598 <emphasis role="comment">/*&#32;Insert&#32;with&#32;quadratic&#32;probing&#32;*/</emphasis>
+599 <emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;hash_table_insert_value(<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">long</emphasis>&#32;hash,&#32;<emphasis role="keywordtype">long</emphasis>&#32;<link linkend="_classvalue">value</link>,&#32;hash_table_t*&#32;hash_table)
+600 {
+601 &#32;&#32;<emphasis role="comment">/*&#32;Insert&#32;value&#32;*/</emphasis>
+602 &#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;start_index&#32;=&#32;hash&#32;%&#32;hash_table-&gt;capacity;
+603 &#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a57f14e05b1900f16a2da82ade47d0c6d">index</link>&#32;=&#32;start_index;
+604 &#32;&#32;hash_table_entry_t*&#32;start_entry&#32;=&#32;hash_table-&gt;entries&#32;+&#32;start_index;
+605 &#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;i;
+606 &#32;&#32;hash_table_entry_t*&#32;<link linkend="_namespacefind_l_s_b_1a9f3e2ce1c42e4e79e3976f44c44b77f9">entry</link>;
+607 
+608 &#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(i&#32;=&#32;1;&#32;hash_table-&gt;entries[<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a57f14e05b1900f16a2da82ade47d0c6d">index</link>].filled;&#32;i++)
+609 &#32;&#32;{
+610 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(i&#32;&gt;=&#32;hash_table-&gt;capacity)
+611 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;HASH_TABLE_ERROR;
+612 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a57f14e05b1900f16a2da82ade47d0c6d">index</link>&#32;=&#32;(start_index&#32;+&#32;(i&#32;*&#32;i))&#32;%&#32;hash_table-&gt;capacity;&#32;
+613 &#32;&#32;}
+614 
+615 &#32;&#32;<link linkend="_namespacefind_l_s_b_1a9f3e2ce1c42e4e79e3976f44c44b77f9">entry</link>&#32;=&#32;hash_table-&gt;entries&#32;+&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a57f14e05b1900f16a2da82ade47d0c6d">index</link>;
+616 &#32;&#32;<link linkend="_namespacefind_l_s_b_1a9f3e2ce1c42e4e79e3976f44c44b77f9">entry</link>-&gt;hash&#32;=&#32;hash;
+617 &#32;&#32;<link linkend="_namespacefind_l_s_b_1a9f3e2ce1c42e4e79e3976f44c44b77f9">entry</link>-&gt;filled&#32;=&#32;1;
+618 &#32;&#32;<link linkend="_namespacefind_l_s_b_1a9f3e2ce1c42e4e79e3976f44c44b77f9">entry</link>-&gt;value&#32;=&#32;<link linkend="_classvalue">value</link>;
+619 
+620 &#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a57f14e05b1900f16a2da82ade47d0c6d">index</link>&#32;!=&#32;start_index)&#32;{
+621 &#32;&#32;&#32;&#32;<emphasis role="comment">/*&#32;This&#32;is&#32;a&#32;new&#32;entry,&#32;but&#32;not&#32;the&#32;start&#32;entry,&#32;hence&#32;we&#32;need&#32;to&#32;add&#32;a&#32;next&#32;pointer&#32;to&#32;our&#32;entry&#32;*/</emphasis>
+622 &#32;&#32;&#32;&#32;<link linkend="_namespacefind_l_s_b_1a9f3e2ce1c42e4e79e3976f44c44b77f9">entry</link>-&gt;next&#32;=&#32;start_entry-&gt;next;
+623 &#32;&#32;&#32;&#32;start_entry-&gt;next&#32;=&#32;<link linkend="_namespacefind_l_s_b_1a9f3e2ce1c42e4e79e3976f44c44b77f9">entry</link>;
+624 &#32;&#32;}
+625 
+626 &#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;HASH_TABLE_SUCCESS;
+627 }
+628 
+629 <emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;hash_table_insert(<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">long</emphasis>&#32;hash,&#32;<emphasis role="keywordtype">long</emphasis>&#32;<link linkend="_classvalue">value</link>,&#32;hash_table_t*&#32;hash_table)
+630 {
+631 &#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;ret&#32;=&#32;hash_table_insert_value(hash,&#32;<link linkend="_classvalue">value</link>,&#32;hash_table);
+632 &#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(ret&#32;==&#32;HASH_TABLE_SUCCESS)
+633 &#32;&#32;{
+634 &#32;&#32;&#32;&#32;hash_table-&gt;hashes[hash_table-&gt;n]&#32;=&#32;hash;
+635 &#32;&#32;&#32;&#32;hash_table-&gt;n++;
+636 &#32;&#32;}
+637 &#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;ret;
+638 }
+639 
+640 <emphasis role="keyword">static</emphasis>&#32;hash_table_entry_t*&#32;hash_table_find(<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">long</emphasis>&#32;hash,&#32;hash_table_t*&#32;hash_table)
+641 {
+642 &#32;&#32;hash_table_entry_t*&#32;<link linkend="_namespacefind_l_s_b_1a9f3e2ce1c42e4e79e3976f44c44b77f9">entry</link>&#32;=&#32;hash_table-&gt;entries&#32;+&#32;(hash&#32;%&#32;hash_table-&gt;capacity);
+643 &#32;&#32;<emphasis role="keywordflow">while</emphasis>&#32;(entry)
+644 &#32;&#32;{
+645 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(<link linkend="_namespacefind_l_s_b_1a9f3e2ce1c42e4e79e3976f44c44b77f9">entry</link>-&gt;hash&#32;==&#32;hash&#32;&amp;&amp;&#32;<link linkend="_namespacefind_l_s_b_1a9f3e2ce1c42e4e79e3976f44c44b77f9">entry</link>-&gt;filled)
+646 &#32;&#32;&#32;&#32;{
+647 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="_namespacefind_l_s_b_1a9f3e2ce1c42e4e79e3976f44c44b77f9">entry</link>;
+648 &#32;&#32;&#32;&#32;}
+649 &#32;&#32;&#32;&#32;<link linkend="_namespacefind_l_s_b_1a9f3e2ce1c42e4e79e3976f44c44b77f9">entry</link>&#32;=&#32;<link linkend="_namespacefind_l_s_b_1a9f3e2ce1c42e4e79e3976f44c44b77f9">entry</link>-&gt;next;
+650 &#32;&#32;}
+651 &#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>;
+652 }
+653 
+654 <emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>&#32;hash_table_maybe_grow(<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;new_n,&#32;hash_table_t*&#32;hash_table)
+655 {
+656 &#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;new_capacity;
+657 &#32;&#32;hash_table_t&#32;new_hash_table;
+658 &#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;i;
+659 
+660 &#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(new_n&#32;&lt;=&#32;hash_table-&gt;capacity)&#32;{
+661 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>;
+662 &#32;&#32;}
+663 &#32;&#32;new_capacity&#32;=&#32;2&#32;*&#32;((2&#32;*&#32;hash_table-&gt;capacity)&#32;&gt;&#32;new_n&#32;?&#32;hash_table-&gt;capacity&#32;:&#32;new_n);
+664 &#32;&#32;<emphasis role="comment">/*&#32;Create&#32;a&#32;new&#32;hash&#32;table.&#32;We&apos;re&#32;not&#32;calling&#32;create_hash_table&#32;because&#32;we&#32;want&#32;to&#32;realloc&#32;the&#32;hash&#32;array&#32;*/</emphasis>
+665 &#32;&#32;new_hash_table.hashes&#32;=&#32;hash_table-&gt;hashes&#32;=&#32;(<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">long</emphasis>*)&#32;<link linkend="__classes_2lib_2raylib_2src_2models_8c_1a79a293ab816eed7834bb05d7eb5e7b96">TINYOBJ_REALLOC</link>((<emphasis role="keywordtype">void</emphasis>*)&#32;hash_table-&gt;hashes,&#32;<emphasis role="keyword">sizeof</emphasis>(<emphasis role="keywordtype">unsigned</emphasis>&#32;long)&#32;*&#32;new_capacity);
+666 &#32;&#32;new_hash_table.entries&#32;=&#32;(hash_table_entry_t*)&#32;<link linkend="__classes_2lib_2raylib_2src_2models_8c_1a0d24acd0c10adbf9a7446669083b4ac9">TINYOBJ_CALLOC</link>(new_capacity,&#32;<emphasis role="keyword">sizeof</emphasis>(hash_table_entry_t));
+667 &#32;&#32;new_hash_table.capacity&#32;=&#32;new_capacity;
+668 &#32;&#32;new_hash_table.n&#32;=&#32;hash_table-&gt;n;
+669 
+670 &#32;&#32;<emphasis role="comment">/*&#32;Rehash&#32;*/</emphasis>
+671 &#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(i&#32;=&#32;0;&#32;i&#32;&lt;&#32;hash_table-&gt;capacity;&#32;i++)
+672 &#32;&#32;{
+673 &#32;&#32;&#32;&#32;hash_table_entry_t*&#32;<link linkend="_namespacefind_l_s_b_1a9f3e2ce1c42e4e79e3976f44c44b77f9">entry</link>&#32;=&#32;hash_table_find(hash_table-&gt;hashes[i],&#32;hash_table);
+674 &#32;&#32;&#32;&#32;hash_table_insert_value(hash_table-&gt;hashes[i],&#32;<link linkend="_namespacefind_l_s_b_1a9f3e2ce1c42e4e79e3976f44c44b77f9">entry</link>-&gt;value,&#32;&amp;new_hash_table);
+675 &#32;&#32;}
+676 
+677 &#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2models_8c_1adaa01af854bdfb1bb4de59c64c782da4">TINYOBJ_FREE</link>(hash_table-&gt;entries);
+678 &#32;&#32;(*hash_table)&#32;=&#32;new_hash_table;
+679 }
+680 
+681 <emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;hash_table_exists(<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>*&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a14d7642df08c5cb68e4fb90cc8a73509">name</link>,&#32;hash_table_t*&#32;hash_table)
+682 {
+683 &#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;hash_table_find(hash_djb2((<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>*)<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a14d7642df08c5cb68e4fb90cc8a73509">name</link>),&#32;hash_table)&#32;!=&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>;
+684 }
+685 
+686 <emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>&#32;hash_table_set(<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>*&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a14d7642df08c5cb68e4fb90cc8a73509">name</link>,&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1aa857b95cc76669c2a9109239ef40a47c">val</link>,&#32;hash_table_t*&#32;hash_table)
+687 {
+688 &#32;&#32;<emphasis role="comment">/*&#32;Hash&#32;name&#32;*/</emphasis>
+689 &#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">long</emphasis>&#32;hash&#32;=&#32;hash_djb2((<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>&#32;*)<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a14d7642df08c5cb68e4fb90cc8a73509">name</link>);
+690 
+691 &#32;&#32;hash_table_entry_t*&#32;<link linkend="_namespacefind_l_s_b_1a9f3e2ce1c42e4e79e3976f44c44b77f9">entry</link>&#32;=&#32;hash_table_find(hash,&#32;hash_table);
+692 &#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(entry)
+693 &#32;&#32;{
+694 &#32;&#32;&#32;&#32;<link linkend="_namespacefind_l_s_b_1a9f3e2ce1c42e4e79e3976f44c44b77f9">entry</link>-&gt;value&#32;=&#32;(long)<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1aa857b95cc76669c2a9109239ef40a47c">val</link>;
+695 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>;
+696 &#32;&#32;}
+697 
+698 &#32;&#32;<emphasis role="comment">/*&#32;Expand&#32;if&#32;necessary</emphasis>
+699 <emphasis role="comment">&#32;&#32;&#32;*&#32;Grow&#32;until&#32;the&#32;element&#32;has&#32;been&#32;added</emphasis>
+700 <emphasis role="comment">&#32;&#32;&#32;*/</emphasis>
+701 &#32;&#32;<emphasis role="keywordflow">do</emphasis>
+702 &#32;&#32;{
+703 &#32;&#32;&#32;&#32;hash_table_maybe_grow(hash_table-&gt;n&#32;+&#32;1,&#32;hash_table);
+704 &#32;&#32;}
+705 &#32;&#32;<emphasis role="keywordflow">while</emphasis>&#32;(hash_table_insert(hash,&#32;(<emphasis role="keywordtype">long</emphasis>)<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1aa857b95cc76669c2a9109239ef40a47c">val</link>,&#32;hash_table)&#32;!=&#32;HASH_TABLE_SUCCESS);
+706 }
+707 
+708 <emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">long</emphasis>&#32;hash_table_get(<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>*&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a14d7642df08c5cb68e4fb90cc8a73509">name</link>,&#32;hash_table_t*&#32;hash_table)
+709 {
+710 &#32;&#32;hash_table_entry_t*&#32;ret&#32;=&#32;hash_table_find(hash_djb2((<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>*)(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a14d7642df08c5cb68e4fb90cc8a73509">name</link>)),&#32;hash_table);
+711 &#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;ret-&gt;value;
+712 }
+713 
+714 <emphasis role="keyword">static</emphasis>&#32;<link linkend="_structtinyobj__material__t">tinyobj_material_t</link>&#32;*tinyobj_material_add(<link linkend="_structtinyobj__material__t">tinyobj_material_t</link>&#32;*prev,
+715 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;num_materials,
+716 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_structtinyobj__material__t">tinyobj_material_t</link>&#32;*new_mat)&#32;{
+717 &#32;&#32;<link linkend="_structtinyobj__material__t">tinyobj_material_t</link>&#32;*<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a92034251bfd455d524a9b5610cddba00">dst</link>;
+718 &#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a92034251bfd455d524a9b5610cddba00">dst</link>&#32;=&#32;(<link linkend="_structtinyobj__material__t">tinyobj_material_t</link>&#32;*)<link linkend="__classes_2lib_2raylib_2src_2models_8c_1a79a293ab816eed7834bb05d7eb5e7b96">TINYOBJ_REALLOC</link>(
+719 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;prev,&#32;<emphasis role="keyword">sizeof</emphasis>(<link linkend="_structtinyobj__material__t">tinyobj_material_t</link>)&#32;*&#32;(num_materials&#32;+&#32;1));
+720 
+721 &#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a92034251bfd455d524a9b5610cddba00">dst</link>[num_materials]&#32;=&#32;(*new_mat);&#32;<emphasis role="comment">/*&#32;Just&#32;copy&#32;pointer&#32;for&#32;char*&#32;members&#32;*/</emphasis>
+722 &#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a92034251bfd455d524a9b5610cddba00">dst</link>;
+723 }
+724 
+725 <emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;tinyobj_parse_and_index_mtl_file(<link linkend="_structtinyobj__material__t">tinyobj_material_t</link>&#32;**materials_out,
+726 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;*num_materials_out,
+727 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>&#32;*<link linkend="__classes_2lib_2m_i_n_i-master_2tests_2testhuge_8cpp_1a42a21beb8018ac623f4d09db1343b9cf">filename</link>,
+728 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;hash_table_t*&#32;material_table)&#32;{
+729 &#32;&#32;<link linkend="_structtinyobj__material__t">tinyobj_material_t</link>&#32;material;
+730 &#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;buffer_size&#32;=&#32;128;
+731 &#32;&#32;<emphasis role="keywordtype">char</emphasis>&#32;*linebuf;
+732 &#32;&#32;FILE&#32;*fp;
+733 &#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;num_materials&#32;=&#32;0;
+734 &#32;&#32;<link linkend="_structtinyobj__material__t">tinyobj_material_t</link>&#32;*materials&#32;=&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>;
+735 &#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;has_previous_material&#32;=&#32;0;
+736 &#32;&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>&#32;*line_end&#32;=&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>;
+737 
+738 &#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(materials_out&#32;==&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>)&#32;{
+739 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="__classes_2lib_2external_2tinyobj__loader__c_8h_1a41fbea9d4d17475e5f679ab25513b1d9">TINYOBJ_ERROR_INVALID_PARAMETER</link>;
+740 &#32;&#32;}
+741 
+742 &#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(num_materials_out&#32;==&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>)&#32;{
+743 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="__classes_2lib_2external_2tinyobj__loader__c_8h_1a41fbea9d4d17475e5f679ab25513b1d9">TINYOBJ_ERROR_INVALID_PARAMETER</link>;
+744 &#32;&#32;}
+745 
+746 &#32;&#32;(*materials_out)&#32;=&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>;
+747 &#32;&#32;(*num_materials_out)&#32;=&#32;0;
+748 
+749 &#32;&#32;fp&#32;=&#32;fopen(<link linkend="__classes_2lib_2m_i_n_i-master_2tests_2testhuge_8cpp_1a42a21beb8018ac623f4d09db1343b9cf">filename</link>,&#32;<emphasis role="stringliteral">&quot;r&quot;</emphasis>);
+750 &#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(!fp)&#32;{
+751 &#32;&#32;&#32;&#32;<emphasis role="comment">//fprintf(stderr,&#32;&quot;TINYOBJ:&#32;Error&#32;reading&#32;file&#32;&apos;%s&apos;:&#32;%s&#32;(%d)\n&quot;,&#32;filename,&#32;strerror(errno),&#32;errno);&#32;&#32;&#32;&#32;&#32;//&#32;@raysan5:&#32;commented</emphasis>
+752 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="__classes_2lib_2external_2tinyobj__loader__c_8h_1ac5c6849c1d0f6ae634566d7cfb5262ad">TINYOBJ_ERROR_FILE_OPERATION</link>;
+753 &#32;&#32;}
+754 
+755 &#32;&#32;<emphasis role="comment">/*&#32;Create&#32;a&#32;default&#32;material&#32;*/</emphasis>
+756 &#32;&#32;initMaterial(&amp;material);
+757 
+758 &#32;&#32;linebuf&#32;=&#32;(<emphasis role="keywordtype">char</emphasis>*)<link linkend="__classes_2lib_2raylib_2src_2models_8c_1aeec461dcd9ee071791bae051a7839fac">TINYOBJ_MALLOC</link>(buffer_size);
+759 &#32;&#32;<emphasis role="keywordflow">while</emphasis>&#32;(<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>&#32;!=&#32;dynamic_fgets(&amp;linebuf,&#32;&amp;buffer_size,&#32;fp))&#32;{
+760 &#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>&#32;*token&#32;=&#32;linebuf;
+761 
+762 &#32;&#32;&#32;&#32;line_end&#32;=&#32;token&#32;+&#32;strlen(token);
+763 
+764 &#32;&#32;&#32;&#32;<emphasis role="comment">/*&#32;Skip&#32;leading&#32;space.&#32;*/</emphasis>
+765 &#32;&#32;&#32;&#32;token&#32;+=&#32;strspn(token,&#32;<emphasis role="stringliteral">&quot;&#32;\t&quot;</emphasis>);
+766 
+767 &#32;&#32;&#32;&#32;assert(token);
+768 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(token[0]&#32;==&#32;<emphasis role="charliteral">&apos;\0&apos;</emphasis>)&#32;<emphasis role="keywordflow">continue</emphasis>;&#32;<emphasis role="comment">/*&#32;empty&#32;line&#32;*/</emphasis>
+769 
+770 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(token[0]&#32;==&#32;<emphasis role="charliteral">&apos;#&apos;</emphasis>)&#32;<emphasis role="keywordflow">continue</emphasis>;&#32;<emphasis role="comment">/*&#32;comment&#32;line&#32;*/</emphasis>
+771 
+772 &#32;&#32;&#32;&#32;<emphasis role="comment">/*&#32;new&#32;mtl&#32;*/</emphasis>
+773 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;((0&#32;==&#32;strncmp(token,&#32;<emphasis role="stringliteral">&quot;newmtl&quot;</emphasis>,&#32;6))&#32;&amp;&amp;&#32;IS_SPACE((token[6])))&#32;{
+774 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">char</emphasis>&#32;namebuf[4096];
+775 
+776 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">/*&#32;flush&#32;previous&#32;material.&#32;*/</emphasis>
+777 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(has_previous_material)&#32;{
+778 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;materials&#32;=&#32;tinyobj_material_add(materials,&#32;num_materials,&#32;&amp;material);
+779 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;num_materials++;
+780 &#32;&#32;&#32;&#32;&#32;&#32;}&#32;<emphasis role="keywordflow">else</emphasis>&#32;{
+781 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;has_previous_material&#32;=&#32;1;
+782 &#32;&#32;&#32;&#32;&#32;&#32;}
+783 
+784 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">/*&#32;initial&#32;temporary&#32;material&#32;*/</emphasis>
+785 &#32;&#32;&#32;&#32;&#32;&#32;initMaterial(&amp;material);
+786 
+787 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">/*&#32;set&#32;new&#32;mtl&#32;name&#32;*/</emphasis>
+788 &#32;&#32;&#32;&#32;&#32;&#32;token&#32;+=&#32;7;
+789 <emphasis role="preprocessor">#ifdef&#32;_MSC_VER</emphasis>
+790 &#32;&#32;&#32;&#32;&#32;&#32;sscanf_s(token,&#32;<emphasis role="stringliteral">&quot;%s&quot;</emphasis>,&#32;namebuf,&#32;(<emphasis role="keywordtype">unsigned</emphasis>)_countof(namebuf));
+791 <emphasis role="preprocessor">#else</emphasis>
+792 &#32;&#32;&#32;&#32;&#32;&#32;sscanf(token,&#32;<emphasis role="stringliteral">&quot;%s&quot;</emphasis>,&#32;namebuf);
+793 <emphasis role="preprocessor">#endif</emphasis>
+794 &#32;&#32;&#32;&#32;&#32;&#32;material.<link linkend="_structtinyobj__material__t_1a6e0a8bd459e97c2977bcb941e82771cc">name</link>&#32;=&#32;my_strdup(namebuf,&#32;(<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>)&#32;(line_end&#32;-&#32;token));
+795 
+796 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">/*&#32;Add&#32;material&#32;to&#32;material&#32;table&#32;*/</emphasis>
+797 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(material_table)
+798 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;hash_table_set(material.<link linkend="_structtinyobj__material__t_1a6e0a8bd459e97c2977bcb941e82771cc">name</link>,&#32;num_materials,&#32;material_table);
+799 
+800 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">continue</emphasis>;
+801 &#32;&#32;&#32;&#32;}
+802 
+803 &#32;&#32;&#32;&#32;<emphasis role="comment">/*&#32;ambient&#32;*/</emphasis>
+804 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(token[0]&#32;==&#32;<emphasis role="charliteral">&apos;K&apos;</emphasis>&#32;&amp;&amp;&#32;token[1]&#32;==&#32;<emphasis role="charliteral">&apos;a&apos;</emphasis>&#32;&amp;&amp;&#32;IS_SPACE((token[2])))&#32;{
+805 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">float</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1abe08814c2f72843fde4d8df41440d5a0">r</link>,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a9cd653b1648845554169fbc3a3f6d37a">g</link>,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a6eba317e3cf44d6d26c04a5a8f197dcb">b</link>;
+806 &#32;&#32;&#32;&#32;&#32;&#32;token&#32;+=&#32;2;
+807 &#32;&#32;&#32;&#32;&#32;&#32;parseFloat3(&amp;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1abe08814c2f72843fde4d8df41440d5a0">r</link>,&#32;&amp;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a9cd653b1648845554169fbc3a3f6d37a">g</link>,&#32;&amp;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a6eba317e3cf44d6d26c04a5a8f197dcb">b</link>,&#32;&amp;token);
+808 &#32;&#32;&#32;&#32;&#32;&#32;material.<link linkend="_structtinyobj__material__t_1ae6ecb11e001c13ead1f10986f4b4071a">ambient</link>[0]&#32;=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1abe08814c2f72843fde4d8df41440d5a0">r</link>;
+809 &#32;&#32;&#32;&#32;&#32;&#32;material.<link linkend="_structtinyobj__material__t_1ae6ecb11e001c13ead1f10986f4b4071a">ambient</link>[1]&#32;=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a9cd653b1648845554169fbc3a3f6d37a">g</link>;
+810 &#32;&#32;&#32;&#32;&#32;&#32;material.<link linkend="_structtinyobj__material__t_1ae6ecb11e001c13ead1f10986f4b4071a">ambient</link>[2]&#32;=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a6eba317e3cf44d6d26c04a5a8f197dcb">b</link>;
+811 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">continue</emphasis>;
+812 &#32;&#32;&#32;&#32;}
+813 
+814 &#32;&#32;&#32;&#32;<emphasis role="comment">/*&#32;diffuse&#32;*/</emphasis>
+815 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(token[0]&#32;==&#32;<emphasis role="charliteral">&apos;K&apos;</emphasis>&#32;&amp;&amp;&#32;token[1]&#32;==&#32;<emphasis role="charliteral">&apos;d&apos;</emphasis>&#32;&amp;&amp;&#32;IS_SPACE((token[2])))&#32;{
+816 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">float</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1abe08814c2f72843fde4d8df41440d5a0">r</link>,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a9cd653b1648845554169fbc3a3f6d37a">g</link>,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a6eba317e3cf44d6d26c04a5a8f197dcb">b</link>;
+817 &#32;&#32;&#32;&#32;&#32;&#32;token&#32;+=&#32;2;
+818 &#32;&#32;&#32;&#32;&#32;&#32;parseFloat3(&amp;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1abe08814c2f72843fde4d8df41440d5a0">r</link>,&#32;&amp;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a9cd653b1648845554169fbc3a3f6d37a">g</link>,&#32;&amp;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a6eba317e3cf44d6d26c04a5a8f197dcb">b</link>,&#32;&amp;token);
+819 &#32;&#32;&#32;&#32;&#32;&#32;material.<link linkend="_structtinyobj__material__t_1ab3e492ad79bebe33ab184b4aeff7c8d6">diffuse</link>[0]&#32;=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1abe08814c2f72843fde4d8df41440d5a0">r</link>;
+820 &#32;&#32;&#32;&#32;&#32;&#32;material.<link linkend="_structtinyobj__material__t_1ab3e492ad79bebe33ab184b4aeff7c8d6">diffuse</link>[1]&#32;=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a9cd653b1648845554169fbc3a3f6d37a">g</link>;
+821 &#32;&#32;&#32;&#32;&#32;&#32;material.<link linkend="_structtinyobj__material__t_1ab3e492ad79bebe33ab184b4aeff7c8d6">diffuse</link>[2]&#32;=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a6eba317e3cf44d6d26c04a5a8f197dcb">b</link>;
+822 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">continue</emphasis>;
+823 &#32;&#32;&#32;&#32;}
+824 
+825 &#32;&#32;&#32;&#32;<emphasis role="comment">/*&#32;specular&#32;*/</emphasis>
+826 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(token[0]&#32;==&#32;<emphasis role="charliteral">&apos;K&apos;</emphasis>&#32;&amp;&amp;&#32;token[1]&#32;==&#32;<emphasis role="charliteral">&apos;s&apos;</emphasis>&#32;&amp;&amp;&#32;IS_SPACE((token[2])))&#32;{
+827 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">float</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1abe08814c2f72843fde4d8df41440d5a0">r</link>,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a9cd653b1648845554169fbc3a3f6d37a">g</link>,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a6eba317e3cf44d6d26c04a5a8f197dcb">b</link>;
+828 &#32;&#32;&#32;&#32;&#32;&#32;token&#32;+=&#32;2;
+829 &#32;&#32;&#32;&#32;&#32;&#32;parseFloat3(&amp;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1abe08814c2f72843fde4d8df41440d5a0">r</link>,&#32;&amp;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a9cd653b1648845554169fbc3a3f6d37a">g</link>,&#32;&amp;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a6eba317e3cf44d6d26c04a5a8f197dcb">b</link>,&#32;&amp;token);
+830 &#32;&#32;&#32;&#32;&#32;&#32;material.<link linkend="_structtinyobj__material__t_1a7e26307830aeb757fb2e9c2f85786b7e">specular</link>[0]&#32;=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1abe08814c2f72843fde4d8df41440d5a0">r</link>;
+831 &#32;&#32;&#32;&#32;&#32;&#32;material.<link linkend="_structtinyobj__material__t_1a7e26307830aeb757fb2e9c2f85786b7e">specular</link>[1]&#32;=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a9cd653b1648845554169fbc3a3f6d37a">g</link>;
+832 &#32;&#32;&#32;&#32;&#32;&#32;material.<link linkend="_structtinyobj__material__t_1a7e26307830aeb757fb2e9c2f85786b7e">specular</link>[2]&#32;=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a6eba317e3cf44d6d26c04a5a8f197dcb">b</link>;
+833 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">continue</emphasis>;
+834 &#32;&#32;&#32;&#32;}
+835 
+836 &#32;&#32;&#32;&#32;<emphasis role="comment">/*&#32;transmittance&#32;*/</emphasis>
+837 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(token[0]&#32;==&#32;<emphasis role="charliteral">&apos;K&apos;</emphasis>&#32;&amp;&amp;&#32;token[1]&#32;==&#32;<emphasis role="charliteral">&apos;t&apos;</emphasis>&#32;&amp;&amp;&#32;IS_SPACE((token[2])))&#32;{
+838 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">float</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1abe08814c2f72843fde4d8df41440d5a0">r</link>,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a9cd653b1648845554169fbc3a3f6d37a">g</link>,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a6eba317e3cf44d6d26c04a5a8f197dcb">b</link>;
+839 &#32;&#32;&#32;&#32;&#32;&#32;token&#32;+=&#32;2;
+840 &#32;&#32;&#32;&#32;&#32;&#32;parseFloat3(&amp;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1abe08814c2f72843fde4d8df41440d5a0">r</link>,&#32;&amp;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a9cd653b1648845554169fbc3a3f6d37a">g</link>,&#32;&amp;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a6eba317e3cf44d6d26c04a5a8f197dcb">b</link>,&#32;&amp;token);
+841 &#32;&#32;&#32;&#32;&#32;&#32;material.<link linkend="_structtinyobj__material__t_1acaf05c76e76c420275c33699910c8a39">transmittance</link>[0]&#32;=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1abe08814c2f72843fde4d8df41440d5a0">r</link>;
+842 &#32;&#32;&#32;&#32;&#32;&#32;material.<link linkend="_structtinyobj__material__t_1acaf05c76e76c420275c33699910c8a39">transmittance</link>[1]&#32;=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a9cd653b1648845554169fbc3a3f6d37a">g</link>;
+843 &#32;&#32;&#32;&#32;&#32;&#32;material.<link linkend="_structtinyobj__material__t_1acaf05c76e76c420275c33699910c8a39">transmittance</link>[2]&#32;=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a6eba317e3cf44d6d26c04a5a8f197dcb">b</link>;
+844 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">continue</emphasis>;
+845 &#32;&#32;&#32;&#32;}
+846 
+847 &#32;&#32;&#32;&#32;<emphasis role="comment">/*&#32;ior(index&#32;of&#32;refraction)&#32;*/</emphasis>
+848 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(token[0]&#32;==&#32;<emphasis role="charliteral">&apos;N&apos;</emphasis>&#32;&amp;&amp;&#32;token[1]&#32;==&#32;<emphasis role="charliteral">&apos;i&apos;</emphasis>&#32;&amp;&amp;&#32;IS_SPACE((token[2])))&#32;{
+849 &#32;&#32;&#32;&#32;&#32;&#32;token&#32;+=&#32;2;
+850 &#32;&#32;&#32;&#32;&#32;&#32;material.<link linkend="_structtinyobj__material__t_1a7c34f5c8feeca96da40ac08f61553818">ior</link>&#32;=&#32;parseFloat(&amp;token);
+851 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">continue</emphasis>;
+852 &#32;&#32;&#32;&#32;}
+853 
+854 &#32;&#32;&#32;&#32;<emphasis role="comment">/*&#32;emission&#32;*/</emphasis>
+855 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(token[0]&#32;==&#32;<emphasis role="charliteral">&apos;K&apos;</emphasis>&#32;&amp;&amp;&#32;token[1]&#32;==&#32;<emphasis role="charliteral">&apos;e&apos;</emphasis>&#32;&amp;&amp;&#32;IS_SPACE(token[2]))&#32;{
+856 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">float</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1abe08814c2f72843fde4d8df41440d5a0">r</link>,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a9cd653b1648845554169fbc3a3f6d37a">g</link>,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a6eba317e3cf44d6d26c04a5a8f197dcb">b</link>;
+857 &#32;&#32;&#32;&#32;&#32;&#32;token&#32;+=&#32;2;
+858 &#32;&#32;&#32;&#32;&#32;&#32;parseFloat3(&amp;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1abe08814c2f72843fde4d8df41440d5a0">r</link>,&#32;&amp;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a9cd653b1648845554169fbc3a3f6d37a">g</link>,&#32;&amp;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a6eba317e3cf44d6d26c04a5a8f197dcb">b</link>,&#32;&amp;token);
+859 &#32;&#32;&#32;&#32;&#32;&#32;material.<link linkend="_structtinyobj__material__t_1a903555f6a185fcfbb000965c378b6b42">emission</link>[0]&#32;=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1abe08814c2f72843fde4d8df41440d5a0">r</link>;
+860 &#32;&#32;&#32;&#32;&#32;&#32;material.<link linkend="_structtinyobj__material__t_1a903555f6a185fcfbb000965c378b6b42">emission</link>[1]&#32;=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a9cd653b1648845554169fbc3a3f6d37a">g</link>;
+861 &#32;&#32;&#32;&#32;&#32;&#32;material.<link linkend="_structtinyobj__material__t_1a903555f6a185fcfbb000965c378b6b42">emission</link>[2]&#32;=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a6eba317e3cf44d6d26c04a5a8f197dcb">b</link>;
+862 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">continue</emphasis>;
+863 &#32;&#32;&#32;&#32;}
+864 
+865 &#32;&#32;&#32;&#32;<emphasis role="comment">/*&#32;shininess&#32;*/</emphasis>
+866 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(token[0]&#32;==&#32;<emphasis role="charliteral">&apos;N&apos;</emphasis>&#32;&amp;&amp;&#32;token[1]&#32;==&#32;<emphasis role="charliteral">&apos;s&apos;</emphasis>&#32;&amp;&amp;&#32;IS_SPACE(token[2]))&#32;{
+867 &#32;&#32;&#32;&#32;&#32;&#32;token&#32;+=&#32;2;
+868 &#32;&#32;&#32;&#32;&#32;&#32;material.<link linkend="_structtinyobj__material__t_1abcfdbe397d5faee7092d4eeedd381427">shininess</link>&#32;=&#32;parseFloat(&amp;token);
+869 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">continue</emphasis>;
+870 &#32;&#32;&#32;&#32;}
+871 
+872 &#32;&#32;&#32;&#32;<emphasis role="comment">/*&#32;illum&#32;model&#32;*/</emphasis>
+873 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(0&#32;==&#32;strncmp(token,&#32;<emphasis role="stringliteral">&quot;illum&quot;</emphasis>,&#32;5)&#32;&amp;&amp;&#32;IS_SPACE(token[5]))&#32;{
+874 &#32;&#32;&#32;&#32;&#32;&#32;token&#32;+=&#32;6;
+875 &#32;&#32;&#32;&#32;&#32;&#32;material.<link linkend="_structtinyobj__material__t_1a80dd3536d1409c717646d22400310399">illum</link>&#32;=&#32;parseInt(&amp;token);
+876 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">continue</emphasis>;
+877 &#32;&#32;&#32;&#32;}
+878 
+879 &#32;&#32;&#32;&#32;<emphasis role="comment">/*&#32;dissolve&#32;*/</emphasis>
+880 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;((token[0]&#32;==&#32;<emphasis role="charliteral">&apos;d&apos;</emphasis>&#32;&amp;&amp;&#32;IS_SPACE(token[1])))&#32;{
+881 &#32;&#32;&#32;&#32;&#32;&#32;token&#32;+=&#32;1;
+882 &#32;&#32;&#32;&#32;&#32;&#32;material.<link linkend="_structtinyobj__material__t_1a778a6cac58cb220e3aaa6f605ed91768">dissolve</link>&#32;=&#32;parseFloat(&amp;token);
+883 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">continue</emphasis>;
+884 &#32;&#32;&#32;&#32;}
+885 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(token[0]&#32;==&#32;<emphasis role="charliteral">&apos;T&apos;</emphasis>&#32;&amp;&amp;&#32;token[1]&#32;==&#32;<emphasis role="charliteral">&apos;r&apos;</emphasis>&#32;&amp;&amp;&#32;IS_SPACE(token[2]))&#32;{
+886 &#32;&#32;&#32;&#32;&#32;&#32;token&#32;+=&#32;2;
+887 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">/*&#32;Invert&#32;value&#32;of&#32;Tr(assume&#32;Tr&#32;is&#32;in&#32;range&#32;[0,&#32;1])&#32;*/</emphasis>
+888 &#32;&#32;&#32;&#32;&#32;&#32;material.<link linkend="_structtinyobj__material__t_1a778a6cac58cb220e3aaa6f605ed91768">dissolve</link>&#32;=&#32;1.0f&#32;-&#32;parseFloat(&amp;token);
+889 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">continue</emphasis>;
+890 &#32;&#32;&#32;&#32;}
+891 
+892 &#32;&#32;&#32;&#32;<emphasis role="comment">/*&#32;ambient&#32;texture&#32;*/</emphasis>
+893 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;((0&#32;==&#32;strncmp(token,&#32;<emphasis role="stringliteral">&quot;map_Ka&quot;</emphasis>,&#32;6))&#32;&amp;&amp;&#32;IS_SPACE(token[6]))&#32;{
+894 &#32;&#32;&#32;&#32;&#32;&#32;token&#32;+=&#32;7;
+895 &#32;&#32;&#32;&#32;&#32;&#32;material.<link linkend="_structtinyobj__material__t_1a1ad5cf52c452ba6c3b71f196e5728530">ambient_texname</link>&#32;=&#32;my_strdup(token,&#32;(<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>)&#32;(line_end&#32;-&#32;token));
+896 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">continue</emphasis>;
+897 &#32;&#32;&#32;&#32;}
+898 
+899 &#32;&#32;&#32;&#32;<emphasis role="comment">/*&#32;diffuse&#32;texture&#32;*/</emphasis>
+900 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;((0&#32;==&#32;strncmp(token,&#32;<emphasis role="stringliteral">&quot;map_Kd&quot;</emphasis>,&#32;6))&#32;&amp;&amp;&#32;IS_SPACE(token[6]))&#32;{
+901 &#32;&#32;&#32;&#32;&#32;&#32;token&#32;+=&#32;7;
+902 &#32;&#32;&#32;&#32;&#32;&#32;material.<link linkend="_structtinyobj__material__t_1ae2dfb0d9f0eb3d20cbf0cccc1792b552">diffuse_texname</link>&#32;=&#32;my_strdup(token,&#32;(<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>)&#32;(line_end&#32;-&#32;token));
+903 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">continue</emphasis>;
+904 &#32;&#32;&#32;&#32;}
+905 
+906 &#32;&#32;&#32;&#32;<emphasis role="comment">/*&#32;specular&#32;texture&#32;*/</emphasis>
+907 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;((0&#32;==&#32;strncmp(token,&#32;<emphasis role="stringliteral">&quot;map_Ks&quot;</emphasis>,&#32;6))&#32;&amp;&amp;&#32;IS_SPACE(token[6]))&#32;{
+908 &#32;&#32;&#32;&#32;&#32;&#32;token&#32;+=&#32;7;
+909 &#32;&#32;&#32;&#32;&#32;&#32;material.<link linkend="_structtinyobj__material__t_1a9c9efa7f41788515f63147f9e239b1fd">specular_texname</link>&#32;=&#32;my_strdup(token,&#32;(<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>)&#32;(line_end&#32;-&#32;token));
+910 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">continue</emphasis>;
+911 &#32;&#32;&#32;&#32;}
+912 
+913 &#32;&#32;&#32;&#32;<emphasis role="comment">/*&#32;specular&#32;highlight&#32;texture&#32;*/</emphasis>
+914 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;((0&#32;==&#32;strncmp(token,&#32;<emphasis role="stringliteral">&quot;map_Ns&quot;</emphasis>,&#32;6))&#32;&amp;&amp;&#32;IS_SPACE(token[6]))&#32;{
+915 &#32;&#32;&#32;&#32;&#32;&#32;token&#32;+=&#32;7;
+916 &#32;&#32;&#32;&#32;&#32;&#32;material.<link linkend="_structtinyobj__material__t_1a49f976418de77f6a931649e1669c378b">specular_highlight_texname</link>&#32;=&#32;my_strdup(token,&#32;(<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>)&#32;(line_end&#32;-&#32;token));
+917 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">continue</emphasis>;
+918 &#32;&#32;&#32;&#32;}
+919 
+920 &#32;&#32;&#32;&#32;<emphasis role="comment">/*&#32;bump&#32;texture&#32;*/</emphasis>
+921 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;((0&#32;==&#32;strncmp(token,&#32;<emphasis role="stringliteral">&quot;map_bump&quot;</emphasis>,&#32;8))&#32;&amp;&amp;&#32;IS_SPACE(token[8]))&#32;{
+922 &#32;&#32;&#32;&#32;&#32;&#32;token&#32;+=&#32;9;
+923 &#32;&#32;&#32;&#32;&#32;&#32;material.<link linkend="_structtinyobj__material__t_1a621a80c84d1cd8d8d922d7a46097bbe8">bump_texname</link>&#32;=&#32;my_strdup(token,&#32;(<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>)&#32;(line_end&#32;-&#32;token));
+924 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">continue</emphasis>;
+925 &#32;&#32;&#32;&#32;}
+926 
+927 &#32;&#32;&#32;&#32;<emphasis role="comment">/*&#32;alpha&#32;texture&#32;*/</emphasis>
+928 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;((0&#32;==&#32;strncmp(token,&#32;<emphasis role="stringliteral">&quot;map_d&quot;</emphasis>,&#32;5))&#32;&amp;&amp;&#32;IS_SPACE(token[5]))&#32;{
+929 &#32;&#32;&#32;&#32;&#32;&#32;token&#32;+=&#32;6;
+930 &#32;&#32;&#32;&#32;&#32;&#32;material.<link linkend="_structtinyobj__material__t_1a214dca02e22cb67a07c5cf005f41bda8">alpha_texname</link>&#32;=&#32;my_strdup(token,&#32;(<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>)&#32;(line_end&#32;-&#32;token));
+931 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">continue</emphasis>;
+932 &#32;&#32;&#32;&#32;}
+933 
+934 &#32;&#32;&#32;&#32;<emphasis role="comment">/*&#32;bump&#32;texture&#32;*/</emphasis>
+935 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;((0&#32;==&#32;strncmp(token,&#32;<emphasis role="stringliteral">&quot;bump&quot;</emphasis>,&#32;4))&#32;&amp;&amp;&#32;IS_SPACE(token[4]))&#32;{
+936 &#32;&#32;&#32;&#32;&#32;&#32;token&#32;+=&#32;5;
+937 &#32;&#32;&#32;&#32;&#32;&#32;material.<link linkend="_structtinyobj__material__t_1a621a80c84d1cd8d8d922d7a46097bbe8">bump_texname</link>&#32;=&#32;my_strdup(token,&#32;(<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>)&#32;(line_end&#32;-&#32;token));
+938 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">continue</emphasis>;
+939 &#32;&#32;&#32;&#32;}
+940 
+941 &#32;&#32;&#32;&#32;<emphasis role="comment">/*&#32;displacement&#32;texture&#32;*/</emphasis>
+942 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;((0&#32;==&#32;strncmp(token,&#32;<emphasis role="stringliteral">&quot;disp&quot;</emphasis>,&#32;4))&#32;&amp;&amp;&#32;IS_SPACE(token[4]))&#32;{
+943 &#32;&#32;&#32;&#32;&#32;&#32;token&#32;+=&#32;5;
+944 &#32;&#32;&#32;&#32;&#32;&#32;material.<link linkend="_structtinyobj__material__t_1a75b9d7b691917b890d8a618d0c49afc2">displacement_texname</link>&#32;=&#32;my_strdup(token,&#32;(<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>)&#32;(line_end&#32;-&#32;token));
+945 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">continue</emphasis>;
+946 &#32;&#32;&#32;&#32;}
+947 
+948 &#32;&#32;&#32;&#32;<emphasis role="comment">/*&#32;@todo&#32;{&#32;unknown&#32;parameter&#32;}&#32;*/</emphasis>
+949 &#32;&#32;}
+950 
+951 &#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(material.<link linkend="_structtinyobj__material__t_1a6e0a8bd459e97c2977bcb941e82771cc">name</link>)&#32;{
+952 &#32;&#32;&#32;&#32;<emphasis role="comment">/*&#32;Flush&#32;last&#32;material&#32;element&#32;*/</emphasis>
+953 &#32;&#32;&#32;&#32;materials&#32;=&#32;tinyobj_material_add(materials,&#32;num_materials,&#32;&amp;material);
+954 &#32;&#32;&#32;&#32;num_materials++;
+955 &#32;&#32;}
+956 
+957 &#32;&#32;(*num_materials_out)&#32;=&#32;num_materials;
+958 &#32;&#32;(*materials_out)&#32;=&#32;materials;
+959 
+960 &#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(linebuf)&#32;{
+961 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2models_8c_1adaa01af854bdfb1bb4de59c64c782da4">TINYOBJ_FREE</link>(linebuf);
+962 &#32;&#32;}
+963 
+964 &#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="__classes_2lib_2external_2tinyobj__loader__c_8h_1a53a030dcd2b97fe2c58613e2ee991e4e">TINYOBJ_SUCCESS</link>;
+965 }
+966 
+967 <emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2external_2tinyobj__loader__c_8h_1a0e123c2815260c55b713330372186e90">tinyobj_parse_mtl_file</link>(<link linkend="_structtinyobj__material__t">tinyobj_material_t</link>&#32;**materials_out,
+968 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;*num_materials_out,
+969 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>&#32;*<link linkend="__classes_2lib_2m_i_n_i-master_2tests_2testhuge_8cpp_1a42a21beb8018ac623f4d09db1343b9cf">filename</link>)&#32;{
+970 &#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;tinyobj_parse_and_index_mtl_file(materials_out,&#32;num_materials_out,&#32;<link linkend="__classes_2lib_2m_i_n_i-master_2tests_2testhuge_8cpp_1a42a21beb8018ac623f4d09db1343b9cf">filename</link>,&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>);
+971 }&#32;
+972 
+973 
+974 <emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">enum</emphasis>&#32;{
+975 &#32;&#32;COMMAND_EMPTY,
+976 &#32;&#32;COMMAND_V,
+977 &#32;&#32;COMMAND_VN,
+978 &#32;&#32;COMMAND_VT,
+979 &#32;&#32;COMMAND_F,
+980 &#32;&#32;COMMAND_G,
+981 &#32;&#32;COMMAND_O,
+982 &#32;&#32;COMMAND_USEMTL,
+983 &#32;&#32;COMMAND_MTLLIB
+984 
+985 }&#32;CommandType;
+986 
+987 <emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">struct&#32;</emphasis>{
+988 &#32;&#32;<emphasis role="keywordtype">float</emphasis>&#32;vx,&#32;vy,&#32;vz;
+989 &#32;&#32;<emphasis role="keywordtype">float</emphasis>&#32;nx,&#32;ny,&#32;nz;
+990 &#32;&#32;<emphasis role="keywordtype">float</emphasis>&#32;tx,&#32;ty;
+991 
+992 &#32;&#32;<emphasis role="comment">/*&#32;@todo&#32;{&#32;Use&#32;dynamic&#32;array&#32;}&#32;*/</emphasis>
+993 &#32;&#32;<link linkend="_structtinyobj__vertex__index__t">tinyobj_vertex_index_t</link>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a0fdda94b8b7e64884690244028f455ba">f</link>[TINYOBJ_MAX_FACES_PER_F_LINE];
+994 &#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;num_f;
+995 
+996 &#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;f_num_verts[TINYOBJ_MAX_FACES_PER_F_LINE];
+997 &#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;num_f_num_verts;
+998 
+999 &#32;&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>&#32;*group_name;
+1000 &#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;group_name_len;
+1001 &#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;pad0;
+1002 
+1003 &#32;&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>&#32;*object_name;
+1004 &#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;object_name_len;
+1005 &#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;pad1;
+1006 
+1007 &#32;&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>&#32;*material_name;
+1008 &#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;material_name_len;
+1009 &#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;pad2;
+1010 
+1011 &#32;&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>&#32;*mtllib_name;
+1012 &#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;mtllib_name_len;
+1013 
+1014 &#32;&#32;CommandType&#32;<link linkend="__classes_2_gameobj_8h_1a890efa53b3d7deeeced6f3a0d6653ed3">type</link>;
+1015 }&#32;Command;
+1016 
+1017 <emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="_namespacem_i_n_i_1_1_i_n_i_parser_1a35c71b789896a8d02f6ca9a8b08824b6">parseLine</link>(Command&#32;*command,&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>&#32;*p,&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;p_len,
+1018 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;triangulate)&#32;{
+1019 &#32;&#32;<emphasis role="keywordtype">char</emphasis>&#32;linebuf[4096];
+1020 &#32;&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>&#32;*token;
+1021 &#32;&#32;assert(p_len&#32;&lt;&#32;4095);
+1022 
+1023 &#32;&#32;memcpy(linebuf,&#32;p,&#32;p_len);
+1024 &#32;&#32;linebuf[p_len]&#32;=&#32;<emphasis role="charliteral">&apos;\0&apos;</emphasis>;
+1025 
+1026 &#32;&#32;token&#32;=&#32;linebuf;
+1027 
+1028 &#32;&#32;command-&gt;type&#32;=&#32;COMMAND_EMPTY;
+1029 
+1030 &#32;&#32;<emphasis role="comment">/*&#32;Skip&#32;leading&#32;space.&#32;*/</emphasis>
+1031 &#32;&#32;skip_space(&amp;token);
+1032 
+1033 &#32;&#32;assert(token);
+1034 &#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(token[0]&#32;==&#32;<emphasis role="charliteral">&apos;\0&apos;</emphasis>)&#32;{&#32;<emphasis role="comment">/*&#32;empty&#32;line&#32;*/</emphasis>
+1035 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;0;
+1036 &#32;&#32;}
+1037 
+1038 &#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(token[0]&#32;==&#32;<emphasis role="charliteral">&apos;#&apos;</emphasis>)&#32;{&#32;<emphasis role="comment">/*&#32;comment&#32;line&#32;*/</emphasis>
+1039 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;0;
+1040 &#32;&#32;}
+1041 
+1042 &#32;&#32;<emphasis role="comment">/*&#32;vertex&#32;*/</emphasis>
+1043 &#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(token[0]&#32;==&#32;<emphasis role="charliteral">&apos;v&apos;</emphasis>&#32;&amp;&amp;&#32;IS_SPACE((token[1])))&#32;{
+1044 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">float</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1ac916c0825494ac3acd4457effd2823d2">x</link>,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a4f27f1eebce8c31db01bb39fab9ef561">y</link>,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1ab26e6a0e7d142ed28ac773f12a73f458">z</link>;
+1045 &#32;&#32;&#32;&#32;token&#32;+=&#32;2;
+1046 &#32;&#32;&#32;&#32;parseFloat3(&amp;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1ac916c0825494ac3acd4457effd2823d2">x</link>,&#32;&amp;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a4f27f1eebce8c31db01bb39fab9ef561">y</link>,&#32;&amp;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1ab26e6a0e7d142ed28ac773f12a73f458">z</link>,&#32;&amp;token);
+1047 &#32;&#32;&#32;&#32;command-&gt;vx&#32;=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1ac916c0825494ac3acd4457effd2823d2">x</link>;
+1048 &#32;&#32;&#32;&#32;command-&gt;vy&#32;=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a4f27f1eebce8c31db01bb39fab9ef561">y</link>;
+1049 &#32;&#32;&#32;&#32;command-&gt;vz&#32;=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1ab26e6a0e7d142ed28ac773f12a73f458">z</link>;
+1050 &#32;&#32;&#32;&#32;command-&gt;type&#32;=&#32;COMMAND_V;
+1051 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;1;
+1052 &#32;&#32;}
+1053 
+1054 &#32;&#32;<emphasis role="comment">/*&#32;normal&#32;*/</emphasis>
+1055 &#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(token[0]&#32;==&#32;<emphasis role="charliteral">&apos;v&apos;</emphasis>&#32;&amp;&amp;&#32;token[1]&#32;==&#32;<emphasis role="charliteral">&apos;n&apos;</emphasis>&#32;&amp;&amp;&#32;IS_SPACE((token[2])))&#32;{
+1056 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">float</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1ac916c0825494ac3acd4457effd2823d2">x</link>,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a4f27f1eebce8c31db01bb39fab9ef561">y</link>,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1ab26e6a0e7d142ed28ac773f12a73f458">z</link>;
+1057 &#32;&#32;&#32;&#32;token&#32;+=&#32;3;
+1058 &#32;&#32;&#32;&#32;parseFloat3(&amp;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1ac916c0825494ac3acd4457effd2823d2">x</link>,&#32;&amp;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a4f27f1eebce8c31db01bb39fab9ef561">y</link>,&#32;&amp;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1ab26e6a0e7d142ed28ac773f12a73f458">z</link>,&#32;&amp;token);
+1059 &#32;&#32;&#32;&#32;command-&gt;nx&#32;=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1ac916c0825494ac3acd4457effd2823d2">x</link>;
+1060 &#32;&#32;&#32;&#32;command-&gt;ny&#32;=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a4f27f1eebce8c31db01bb39fab9ef561">y</link>;
+1061 &#32;&#32;&#32;&#32;command-&gt;nz&#32;=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1ab26e6a0e7d142ed28ac773f12a73f458">z</link>;
+1062 &#32;&#32;&#32;&#32;command-&gt;type&#32;=&#32;COMMAND_VN;
+1063 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;1;
+1064 &#32;&#32;}
+1065 
+1066 &#32;&#32;<emphasis role="comment">/*&#32;texcoord&#32;*/</emphasis>
+1067 &#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(token[0]&#32;==&#32;<emphasis role="charliteral">&apos;v&apos;</emphasis>&#32;&amp;&amp;&#32;token[1]&#32;==&#32;<emphasis role="charliteral">&apos;t&apos;</emphasis>&#32;&amp;&amp;&#32;IS_SPACE((token[2])))&#32;{
+1068 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">float</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1ac916c0825494ac3acd4457effd2823d2">x</link>,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a4f27f1eebce8c31db01bb39fab9ef561">y</link>;
+1069 &#32;&#32;&#32;&#32;token&#32;+=&#32;3;
+1070 &#32;&#32;&#32;&#32;parseFloat2(&amp;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1ac916c0825494ac3acd4457effd2823d2">x</link>,&#32;&amp;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a4f27f1eebce8c31db01bb39fab9ef561">y</link>,&#32;&amp;token);
+1071 &#32;&#32;&#32;&#32;command-&gt;tx&#32;=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1ac916c0825494ac3acd4457effd2823d2">x</link>;
+1072 &#32;&#32;&#32;&#32;command-&gt;ty&#32;=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a4f27f1eebce8c31db01bb39fab9ef561">y</link>;
+1073 &#32;&#32;&#32;&#32;command-&gt;type&#32;=&#32;COMMAND_VT;
+1074 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;1;
+1075 &#32;&#32;}
+1076 
+1077 &#32;&#32;<emphasis role="comment">/*&#32;face&#32;*/</emphasis>
+1078 &#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(token[0]&#32;==&#32;<emphasis role="charliteral">&apos;f&apos;</emphasis>&#32;&amp;&amp;&#32;IS_SPACE((token[1])))&#32;{
+1079 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;num_f&#32;=&#32;0;
+1080 
+1081 &#32;&#32;&#32;&#32;<link linkend="_structtinyobj__vertex__index__t">tinyobj_vertex_index_t</link>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a0fdda94b8b7e64884690244028f455ba">f</link>[TINYOBJ_MAX_FACES_PER_F_LINE];
+1082 &#32;&#32;&#32;&#32;token&#32;+=&#32;2;
+1083 &#32;&#32;&#32;&#32;skip_space(&amp;token);
+1084 
+1085 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">while</emphasis>&#32;(!IS_NEW_LINE(token[0]))&#32;{
+1086 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_structtinyobj__vertex__index__t">tinyobj_vertex_index_t</link>&#32;vi&#32;=&#32;parseRawTriple(&amp;token);
+1087 &#32;&#32;&#32;&#32;&#32;&#32;skip_space_and_cr(&amp;token);
+1088 
+1089 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a0fdda94b8b7e64884690244028f455ba">f</link>[num_f]&#32;=&#32;vi;
+1090 &#32;&#32;&#32;&#32;&#32;&#32;num_f++;
+1091 &#32;&#32;&#32;&#32;}
+1092 
+1093 &#32;&#32;&#32;&#32;command-&gt;type&#32;=&#32;COMMAND_F;
+1094 
+1095 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(triangulate)&#32;{
+1096 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;k;
+1097 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;n&#32;=&#32;0;
+1098 
+1099 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_structtinyobj__vertex__index__t">tinyobj_vertex_index_t</link>&#32;i0&#32;=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a0fdda94b8b7e64884690244028f455ba">f</link>[0];
+1100 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_structtinyobj__vertex__index__t">tinyobj_vertex_index_t</link>&#32;i1;
+1101 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_structtinyobj__vertex__index__t">tinyobj_vertex_index_t</link>&#32;i2&#32;=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a0fdda94b8b7e64884690244028f455ba">f</link>[1];
+1102 
+1103 &#32;&#32;&#32;&#32;&#32;&#32;assert(3&#32;*&#32;num_f&#32;&lt;&#32;TINYOBJ_MAX_FACES_PER_F_LINE);
+1104 
+1105 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(k&#32;=&#32;2;&#32;k&#32;&lt;&#32;num_f;&#32;k++)&#32;{
+1106 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;i1&#32;=&#32;i2;
+1107 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;i2&#32;=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a0fdda94b8b7e64884690244028f455ba">f</link>[k];
+1108 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;command-&gt;f[3&#32;*&#32;n&#32;+&#32;0]&#32;=&#32;i0;
+1109 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;command-&gt;f[3&#32;*&#32;n&#32;+&#32;1]&#32;=&#32;i1;
+1110 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;command-&gt;f[3&#32;*&#32;n&#32;+&#32;2]&#32;=&#32;i2;
+1111 
+1112 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;command-&gt;f_num_verts[n]&#32;=&#32;3;
+1113 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;n++;
+1114 &#32;&#32;&#32;&#32;&#32;&#32;}
+1115 &#32;&#32;&#32;&#32;&#32;&#32;command-&gt;num_f&#32;=&#32;3&#32;*&#32;n;
+1116 &#32;&#32;&#32;&#32;&#32;&#32;command-&gt;num_f_num_verts&#32;=&#32;n;
+1117 
+1118 &#32;&#32;&#32;&#32;}&#32;<emphasis role="keywordflow">else</emphasis>&#32;{
+1119 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;k&#32;=&#32;0;
+1120 &#32;&#32;&#32;&#32;&#32;&#32;assert(num_f&#32;&lt;&#32;TINYOBJ_MAX_FACES_PER_F_LINE);
+1121 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(k&#32;=&#32;0;&#32;k&#32;&lt;&#32;num_f;&#32;k++)&#32;{
+1122 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;command-&gt;f[k]&#32;=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a0fdda94b8b7e64884690244028f455ba">f</link>[k];
+1123 &#32;&#32;&#32;&#32;&#32;&#32;}
+1124 
+1125 &#32;&#32;&#32;&#32;&#32;&#32;command-&gt;num_f&#32;=&#32;num_f;
+1126 &#32;&#32;&#32;&#32;&#32;&#32;command-&gt;f_num_verts[0]&#32;=&#32;(int)num_f;
+1127 &#32;&#32;&#32;&#32;&#32;&#32;command-&gt;num_f_num_verts&#32;=&#32;1;
+1128 &#32;&#32;&#32;&#32;}
+1129 
+1130 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;1;
+1131 &#32;&#32;}
+1132 
+1133 &#32;&#32;<emphasis role="comment">/*&#32;use&#32;mtl&#32;*/</emphasis>
+1134 &#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;((0&#32;==&#32;strncmp(token,&#32;<emphasis role="stringliteral">&quot;usemtl&quot;</emphasis>,&#32;6))&#32;&amp;&amp;&#32;IS_SPACE((token[6])))&#32;{
+1135 &#32;&#32;&#32;&#32;token&#32;+=&#32;7;
+1136 
+1137 &#32;&#32;&#32;&#32;skip_space(&amp;token);
+1138 &#32;&#32;&#32;&#32;command-&gt;material_name&#32;=&#32;p&#32;+&#32;(token&#32;-&#32;linebuf);
+1139 &#32;&#32;&#32;&#32;command-&gt;material_name_len&#32;=&#32;(<emphasis role="keywordtype">unsigned</emphasis>&#32;int)length_until_newline(
+1140 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;token,&#32;(p_len&#32;-&#32;(<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>)(token&#32;-&#32;linebuf))&#32;+&#32;1);
+1141 &#32;&#32;&#32;&#32;command-&gt;type&#32;=&#32;COMMAND_USEMTL;
+1142 
+1143 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;1;
+1144 &#32;&#32;}
+1145 
+1146 &#32;&#32;<emphasis role="comment">/*&#32;load&#32;mtl&#32;*/</emphasis>
+1147 &#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;((0&#32;==&#32;strncmp(token,&#32;<emphasis role="stringliteral">&quot;mtllib&quot;</emphasis>,&#32;6))&#32;&amp;&amp;&#32;IS_SPACE((token[6])))&#32;{
+1148 &#32;&#32;&#32;&#32;<emphasis role="comment">/*&#32;By&#32;specification,&#32;`mtllib`&#32;should&#32;be&#32;appear&#32;only&#32;once&#32;in&#32;.obj&#32;*/</emphasis>
+1149 &#32;&#32;&#32;&#32;token&#32;+=&#32;7;
+1150 
+1151 &#32;&#32;&#32;&#32;skip_space(&amp;token);
+1152 &#32;&#32;&#32;&#32;command-&gt;mtllib_name&#32;=&#32;p&#32;+&#32;(token&#32;-&#32;linebuf);
+1153 &#32;&#32;&#32;&#32;command-&gt;mtllib_name_len&#32;=&#32;(<emphasis role="keywordtype">unsigned</emphasis>&#32;int)length_until_newline(
+1154 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;token,&#32;p_len&#32;-&#32;(<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>)(token&#32;-&#32;linebuf))&#32;+
+1155 &#32;&#32;&#32;&#32;&#32;&#32;1;
+1156 &#32;&#32;&#32;&#32;command-&gt;type&#32;=&#32;COMMAND_MTLLIB;
+1157 
+1158 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;1;
+1159 &#32;&#32;}
+1160 
+1161 &#32;&#32;<emphasis role="comment">/*&#32;group&#32;name&#32;*/</emphasis>
+1162 &#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(token[0]&#32;==&#32;<emphasis role="charliteral">&apos;g&apos;</emphasis>&#32;&amp;&amp;&#32;IS_SPACE((token[1])))&#32;{
+1163 &#32;&#32;&#32;&#32;<emphasis role="comment">/*&#32;@todo&#32;{&#32;multiple&#32;group&#32;name.&#32;}&#32;*/</emphasis>
+1164 &#32;&#32;&#32;&#32;token&#32;+=&#32;2;
+1165 
+1166 &#32;&#32;&#32;&#32;command-&gt;group_name&#32;=&#32;p&#32;+&#32;(token&#32;-&#32;linebuf);
+1167 &#32;&#32;&#32;&#32;command-&gt;group_name_len&#32;=&#32;(<emphasis role="keywordtype">unsigned</emphasis>&#32;int)length_until_newline(
+1168 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;token,&#32;p_len&#32;-&#32;(<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>)(token&#32;-&#32;linebuf))&#32;+
+1169 &#32;&#32;&#32;&#32;&#32;&#32;1;
+1170 &#32;&#32;&#32;&#32;command-&gt;type&#32;=&#32;COMMAND_G;
+1171 
+1172 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;1;
+1173 &#32;&#32;}
+1174 
+1175 &#32;&#32;<emphasis role="comment">/*&#32;object&#32;name&#32;*/</emphasis>
+1176 &#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(token[0]&#32;==&#32;<emphasis role="charliteral">&apos;o&apos;</emphasis>&#32;&amp;&amp;&#32;IS_SPACE((token[1])))&#32;{
+1177 &#32;&#32;&#32;&#32;<emphasis role="comment">/*&#32;@todo&#32;{&#32;multiple&#32;object&#32;name?&#32;}&#32;*/</emphasis>
+1178 &#32;&#32;&#32;&#32;token&#32;+=&#32;2;
+1179 
+1180 &#32;&#32;&#32;&#32;command-&gt;object_name&#32;=&#32;p&#32;+&#32;(token&#32;-&#32;linebuf);
+1181 &#32;&#32;&#32;&#32;command-&gt;object_name_len&#32;=&#32;(<emphasis role="keywordtype">unsigned</emphasis>&#32;int)length_until_newline(
+1182 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;token,&#32;p_len&#32;-&#32;(<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>)(token&#32;-&#32;linebuf))&#32;+
+1183 &#32;&#32;&#32;&#32;&#32;&#32;1;
+1184 &#32;&#32;&#32;&#32;command-&gt;type&#32;=&#32;COMMAND_O;
+1185 
+1186 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;1;
+1187 &#32;&#32;}
+1188 
+1189 &#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;0;
+1190 }
+1191 
+1192 <emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">struct&#32;</emphasis>{
+1193 &#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;pos;
+1194 &#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a30ee67aa502329a88f4a203775adfa1a">len</link>;
+1195 }&#32;LineInfo;
+1196 
+1197 <emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;is_line_ending(<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>&#32;*p,&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;i,&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;end_i)&#32;{
+1198 &#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(p[i]&#32;==&#32;<emphasis role="charliteral">&apos;\0&apos;</emphasis>)&#32;<emphasis role="keywordflow">return</emphasis>&#32;1;
+1199 &#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(p[i]&#32;==&#32;<emphasis role="charliteral">&apos;\n&apos;</emphasis>)&#32;<emphasis role="keywordflow">return</emphasis>&#32;1;&#32;<emphasis role="comment">/*&#32;this&#32;includes&#32;\r\n&#32;*/</emphasis>
+1200 &#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(p[i]&#32;==&#32;<emphasis role="charliteral">&apos;\r&apos;</emphasis>)&#32;{
+1201 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(((i&#32;+&#32;1)&#32;&lt;&#32;end_i)&#32;&amp;&amp;&#32;(p[i&#32;+&#32;1]&#32;!=&#32;<emphasis role="charliteral">&apos;\n&apos;</emphasis>))&#32;{&#32;<emphasis role="comment">/*&#32;detect&#32;only&#32;\r&#32;case&#32;*/</emphasis>
+1202 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;1;
+1203 &#32;&#32;&#32;&#32;}
+1204 &#32;&#32;}
+1205 &#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;0;
+1206 }
+1207 
+1208 <emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2external_2tinyobj__loader__c_8h_1a02754adee35155e9c1c7c30521d50236">tinyobj_parse_obj</link>(<link linkend="_structtinyobj__attrib__t">tinyobj_attrib_t</link>&#32;*attrib,&#32;<link linkend="_structtinyobj__shape__t">tinyobj_shape_t</link>&#32;**shapes,
+1209 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;*num_shapes,&#32;<link linkend="_structtinyobj__material__t">tinyobj_material_t</link>&#32;**materials_out,
+1210 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;*num_materials_out,&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>&#32;*<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1ad8a8baf08bc0399738960c9259571911">buf</link>,&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a30ee67aa502329a88f4a203775adfa1a">len</link>,
+1211 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a3d4f56e54693280c6d9b1177c12c867d">flags</link>)&#32;{
+1212 &#32;&#32;LineInfo&#32;*line_infos&#32;=&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>;
+1213 &#32;&#32;Command&#32;*commands&#32;=&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>;
+1214 &#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;num_lines&#32;=&#32;0;
+1215 
+1216 &#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;num_v&#32;=&#32;0;
+1217 &#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;num_vn&#32;=&#32;0;
+1218 &#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;num_vt&#32;=&#32;0;
+1219 &#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;num_f&#32;=&#32;0;
+1220 &#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;num_faces&#32;=&#32;0;
+1221 
+1222 &#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;mtllib_line_index&#32;=&#32;-1;
+1223 
+1224 &#32;&#32;<link linkend="_structtinyobj__material__t">tinyobj_material_t</link>&#32;*materials&#32;=&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>;
+1225 &#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;num_materials&#32;=&#32;0;
+1226 
+1227 &#32;&#32;hash_table_t&#32;material_table;
+1228 
+1229 &#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a30ee67aa502329a88f4a203775adfa1a">len</link>&#32;&lt;&#32;1)&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="__classes_2lib_2external_2tinyobj__loader__c_8h_1a41fbea9d4d17475e5f679ab25513b1d9">TINYOBJ_ERROR_INVALID_PARAMETER</link>;
+1230 &#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(attrib&#32;==&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>)&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="__classes_2lib_2external_2tinyobj__loader__c_8h_1a41fbea9d4d17475e5f679ab25513b1d9">TINYOBJ_ERROR_INVALID_PARAMETER</link>;
+1231 &#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(shapes&#32;==&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>)&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="__classes_2lib_2external_2tinyobj__loader__c_8h_1a41fbea9d4d17475e5f679ab25513b1d9">TINYOBJ_ERROR_INVALID_PARAMETER</link>;
+1232 &#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(num_shapes&#32;==&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>)&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="__classes_2lib_2external_2tinyobj__loader__c_8h_1a41fbea9d4d17475e5f679ab25513b1d9">TINYOBJ_ERROR_INVALID_PARAMETER</link>;
+1233 &#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1ad8a8baf08bc0399738960c9259571911">buf</link>&#32;==&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>)&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="__classes_2lib_2external_2tinyobj__loader__c_8h_1a41fbea9d4d17475e5f679ab25513b1d9">TINYOBJ_ERROR_INVALID_PARAMETER</link>;
+1234 &#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(materials_out&#32;==&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>)&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="__classes_2lib_2external_2tinyobj__loader__c_8h_1a41fbea9d4d17475e5f679ab25513b1d9">TINYOBJ_ERROR_INVALID_PARAMETER</link>;
+1235 &#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(num_materials_out&#32;==&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>)&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="__classes_2lib_2external_2tinyobj__loader__c_8h_1a41fbea9d4d17475e5f679ab25513b1d9">TINYOBJ_ERROR_INVALID_PARAMETER</link>;
+1236 
+1237 &#32;&#32;<link linkend="__classes_2lib_2external_2tinyobj__loader__c_8h_1aba2a90f2297d1db1561b9352a8a432bf">tinyobj_attrib_init</link>(attrib);
+1238 &#32;&#32;&#32;<emphasis role="comment">/*&#32;1.&#32;Find&#32;&apos;\n&apos;&#32;and&#32;create&#32;line&#32;data.&#32;*/</emphasis>
+1239 &#32;&#32;{
+1240 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;i;
+1241 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;end_idx&#32;=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a30ee67aa502329a88f4a203775adfa1a">len</link>;
+1242 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;prev_pos&#32;=&#32;0;
+1243 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;line_no&#32;=&#32;0;
+1244 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;last_line_ending&#32;=&#32;0;
+1245 
+1246 &#32;&#32;&#32;&#32;<emphasis role="comment">/*&#32;Count&#32;#&#32;of&#32;lines.&#32;*/</emphasis>
+1247 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(i&#32;=&#32;0;&#32;i&#32;&lt;&#32;end_idx;&#32;i++)&#32;{
+1248 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(is_line_ending(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1ad8a8baf08bc0399738960c9259571911">buf</link>,&#32;i,&#32;end_idx))&#32;{
+1249 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;num_lines++;
+1250 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;last_line_ending&#32;=&#32;i;
+1251 &#32;&#32;&#32;&#32;&#32;&#32;}
+1252 &#32;&#32;&#32;&#32;}
+1253 &#32;&#32;&#32;&#32;<emphasis role="comment">/*&#32;The&#32;last&#32;char&#32;from&#32;the&#32;input&#32;may&#32;not&#32;be&#32;a&#32;line</emphasis>
+1254 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;*&#32;ending&#32;character&#32;so&#32;add&#32;an&#32;extra&#32;line&#32;if&#32;there</emphasis>
+1255 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;*&#32;are&#32;more&#32;characters&#32;after&#32;the&#32;last&#32;line&#32;ending</emphasis>
+1256 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;*&#32;that&#32;was&#32;found.&#32;*/</emphasis>
+1257 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(end_idx&#32;-&#32;last_line_ending&#32;&gt;&#32;0)&#32;{
+1258 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;num_lines++;
+1259 &#32;&#32;&#32;&#32;}
+1260 
+1261 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(num_lines&#32;==&#32;0)&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="__classes_2lib_2external_2tinyobj__loader__c_8h_1a9b55ac6beb00debc9f2fa528f997e797">TINYOBJ_ERROR_EMPTY</link>;
+1262 
+1263 &#32;&#32;&#32;&#32;line_infos&#32;=&#32;(LineInfo&#32;*)<link linkend="__classes_2lib_2raylib_2src_2models_8c_1aeec461dcd9ee071791bae051a7839fac">TINYOBJ_MALLOC</link>(<emphasis role="keyword">sizeof</emphasis>(LineInfo)&#32;*&#32;num_lines);
+1264 
+1265 &#32;&#32;&#32;&#32;<emphasis role="comment">/*&#32;Fill&#32;line&#32;infos.&#32;*/</emphasis>
+1266 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(i&#32;=&#32;0;&#32;i&#32;&lt;&#32;end_idx;&#32;i++)&#32;{
+1267 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(is_line_ending(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1ad8a8baf08bc0399738960c9259571911">buf</link>,&#32;i,&#32;end_idx))&#32;{
+1268 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;line_infos[line_no].pos&#32;=&#32;prev_pos;
+1269 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;line_infos[line_no].len&#32;=&#32;i&#32;-&#32;prev_pos;
+1270 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;prev_pos&#32;=&#32;i&#32;+&#32;1;
+1271 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;line_no++;
+1272 &#32;&#32;&#32;&#32;&#32;&#32;}
+1273 &#32;&#32;&#32;&#32;}
+1274 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(end_idx&#32;-&#32;last_line_ending&#32;&gt;&#32;0)&#32;{
+1275 &#32;&#32;&#32;&#32;&#32;&#32;line_infos[line_no].pos&#32;=&#32;prev_pos;
+1276 &#32;&#32;&#32;&#32;&#32;&#32;line_infos[line_no].len&#32;=&#32;end_idx&#32;-&#32;1&#32;-&#32;last_line_ending;
+1277 &#32;&#32;&#32;&#32;}
+1278 &#32;&#32;}
+1279 
+1280 &#32;&#32;commands&#32;=&#32;(Command&#32;*)<link linkend="__classes_2lib_2raylib_2src_2models_8c_1aeec461dcd9ee071791bae051a7839fac">TINYOBJ_MALLOC</link>(<emphasis role="keyword">sizeof</emphasis>(Command)&#32;*&#32;num_lines);&#32;
+1281 
+1282 &#32;&#32;create_hash_table(HASH_TABLE_DEFAULT_SIZE,&#32;&amp;material_table);
+1283 
+1284 &#32;&#32;<emphasis role="comment">/*&#32;2.&#32;parse&#32;each&#32;line&#32;*/</emphasis>
+1285 &#32;&#32;{
+1286 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;i&#32;=&#32;0;
+1287 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(i&#32;=&#32;0;&#32;i&#32;&lt;&#32;num_lines;&#32;i++)&#32;{
+1288 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;ret&#32;=&#32;<link linkend="_namespacem_i_n_i_1_1_i_n_i_parser_1a35c71b789896a8d02f6ca9a8b08824b6">parseLine</link>(&amp;commands[i],&#32;&amp;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1ad8a8baf08bc0399738960c9259571911">buf</link>[line_infos[i].pos],
+1289 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;line_infos[i].<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a30ee67aa502329a88f4a203775adfa1a">len</link>,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a3d4f56e54693280c6d9b1177c12c867d">flags</link>&#32;&amp;&#32;<link linkend="__classes_2lib_2external_2tinyobj__loader__c_8h_1a9f9c5d965da9c5e5da7a569e132b65bc">TINYOBJ_FLAG_TRIANGULATE</link>);
+1290 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(ret)&#32;{
+1291 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(commands[i].<link linkend="__classes_2_gameobj_8h_1a890efa53b3d7deeeced6f3a0d6653ed3">type</link>&#32;==&#32;COMMAND_V)&#32;{
+1292 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;num_v++;
+1293 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}&#32;<emphasis role="keywordflow">else</emphasis>&#32;<emphasis role="keywordflow">if</emphasis>&#32;(commands[i].<link linkend="__classes_2_gameobj_8h_1a890efa53b3d7deeeced6f3a0d6653ed3">type</link>&#32;==&#32;COMMAND_VN)&#32;{
+1294 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;num_vn++;
+1295 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}&#32;<emphasis role="keywordflow">else</emphasis>&#32;<emphasis role="keywordflow">if</emphasis>&#32;(commands[i].<link linkend="__classes_2_gameobj_8h_1a890efa53b3d7deeeced6f3a0d6653ed3">type</link>&#32;==&#32;COMMAND_VT)&#32;{
+1296 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;num_vt++;
+1297 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}&#32;<emphasis role="keywordflow">else</emphasis>&#32;<emphasis role="keywordflow">if</emphasis>&#32;(commands[i].<link linkend="__classes_2_gameobj_8h_1a890efa53b3d7deeeced6f3a0d6653ed3">type</link>&#32;==&#32;COMMAND_F)&#32;{
+1298 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;num_f&#32;+=&#32;commands[i].num_f;
+1299 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;num_faces&#32;+=&#32;commands[i].num_f_num_verts;
+1300 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+1301 
+1302 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(commands[i].<link linkend="__classes_2_gameobj_8h_1a890efa53b3d7deeeced6f3a0d6653ed3">type</link>&#32;==&#32;COMMAND_MTLLIB)&#32;{
+1303 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;mtllib_line_index&#32;=&#32;(int)i;
+1304 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+1305 &#32;&#32;&#32;&#32;&#32;&#32;}
+1306 &#32;&#32;&#32;&#32;}
+1307 &#32;&#32;}
+1308 
+1309 &#32;&#32;<emphasis role="comment">/*&#32;line_infos&#32;are&#32;not&#32;used&#32;anymore.&#32;Release&#32;memory.&#32;*/</emphasis>
+1310 &#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(line_infos)&#32;{
+1311 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2models_8c_1adaa01af854bdfb1bb4de59c64c782da4">TINYOBJ_FREE</link>(line_infos);
+1312 &#32;&#32;}
+1313 
+1314 &#32;&#32;<emphasis role="comment">/*&#32;Load&#32;material(if&#32;exits)&#32;*/</emphasis>
+1315 &#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(mtllib_line_index&#32;&gt;=&#32;0&#32;&amp;&amp;&#32;commands[mtllib_line_index].mtllib_name&#32;&amp;&amp;
+1316 &#32;&#32;&#32;&#32;&#32;&#32;commands[mtllib_line_index].mtllib_name_len&#32;&gt;&#32;0)&#32;{
+1317 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">char</emphasis>&#32;*<link linkend="__classes_2lib_2m_i_n_i-master_2tests_2testhuge_8cpp_1a42a21beb8018ac623f4d09db1343b9cf">filename</link>&#32;=&#32;my_strndup(commands[mtllib_line_index].mtllib_name,
+1318 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;commands[mtllib_line_index].mtllib_name_len);
+1319 
+1320 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;ret&#32;=&#32;tinyobj_parse_and_index_mtl_file(&amp;materials,&#32;&amp;num_materials,&#32;<link linkend="__classes_2lib_2m_i_n_i-master_2tests_2testhuge_8cpp_1a42a21beb8018ac623f4d09db1343b9cf">filename</link>,&#32;&amp;material_table);
+1321 
+1322 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(ret&#32;!=&#32;<link linkend="__classes_2lib_2external_2tinyobj__loader__c_8h_1a53a030dcd2b97fe2c58613e2ee991e4e">TINYOBJ_SUCCESS</link>)&#32;{
+1323 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">/*&#32;warning.&#32;*/</emphasis>
+1324 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//fprintf(stderr,&#32;&quot;TINYOBJ:&#32;Failed&#32;to&#32;parse&#32;material&#32;file&#32;&apos;%s&apos;:&#32;%d\n&quot;,&#32;filename,&#32;ret);&#32;&#32;&#32;&#32;&#32;//&#32;@raysan5:&#32;commented</emphasis>
+1325 &#32;&#32;&#32;&#32;}
+1326 
+1327 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2models_8c_1adaa01af854bdfb1bb4de59c64c782da4">TINYOBJ_FREE</link>(<link linkend="__classes_2lib_2m_i_n_i-master_2tests_2testhuge_8cpp_1a42a21beb8018ac623f4d09db1343b9cf">filename</link>);
+1328 
+1329 &#32;&#32;}
+1330 
+1331 &#32;&#32;<emphasis role="comment">/*&#32;Construct&#32;attributes&#32;*/</emphasis>
+1332 
+1333 &#32;&#32;{
+1334 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;v_count&#32;=&#32;0;
+1335 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;n_count&#32;=&#32;0;
+1336 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;t_count&#32;=&#32;0;
+1337 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;f_count&#32;=&#32;0;
+1338 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;face_count&#32;=&#32;0;
+1339 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;material_id&#32;=&#32;-1;&#32;<emphasis role="comment">/*&#32;-1&#32;=&#32;default&#32;unknown&#32;material.&#32;*/</emphasis>
+1340 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;i&#32;=&#32;0;
+1341 
+1342 &#32;&#32;&#32;&#32;attrib-&gt;<link linkend="_structtinyobj__attrib__t_1aa0fb5c9b82c477d1720cf6a0437b0e9e">vertices</link>&#32;=&#32;(<emphasis role="keywordtype">float</emphasis>&#32;*)<link linkend="__classes_2lib_2raylib_2src_2models_8c_1aeec461dcd9ee071791bae051a7839fac">TINYOBJ_MALLOC</link>(<emphasis role="keyword">sizeof</emphasis>(<emphasis role="keywordtype">float</emphasis>)&#32;*&#32;num_v&#32;*&#32;3);
+1343 &#32;&#32;&#32;&#32;attrib-&gt;<link linkend="_structtinyobj__attrib__t_1a7c7f26f1c413814b48a04c5d9411484f">num_vertices</link>&#32;=&#32;(<emphasis role="keywordtype">unsigned</emphasis>&#32;int)num_v;
+1344 &#32;&#32;&#32;&#32;attrib-&gt;<link linkend="_structtinyobj__attrib__t_1a0fa1110cead6820a749b4cb9fcafd49e">normals</link>&#32;=&#32;(<emphasis role="keywordtype">float</emphasis>&#32;*)<link linkend="__classes_2lib_2raylib_2src_2models_8c_1aeec461dcd9ee071791bae051a7839fac">TINYOBJ_MALLOC</link>(<emphasis role="keyword">sizeof</emphasis>(<emphasis role="keywordtype">float</emphasis>)&#32;*&#32;num_vn&#32;*&#32;3);
+1345 &#32;&#32;&#32;&#32;attrib-&gt;<link linkend="_structtinyobj__attrib__t_1ab9ff2c299446a65b59148e58c6d65d28">num_normals</link>&#32;=&#32;(<emphasis role="keywordtype">unsigned</emphasis>&#32;int)num_vn;
+1346 &#32;&#32;&#32;&#32;attrib-&gt;<link linkend="_structtinyobj__attrib__t_1a505f249054ea1df1d3391c098f392f8b">texcoords</link>&#32;=&#32;(<emphasis role="keywordtype">float</emphasis>&#32;*)<link linkend="__classes_2lib_2raylib_2src_2models_8c_1aeec461dcd9ee071791bae051a7839fac">TINYOBJ_MALLOC</link>(<emphasis role="keyword">sizeof</emphasis>(<emphasis role="keywordtype">float</emphasis>)&#32;*&#32;num_vt&#32;*&#32;2);
+1347 &#32;&#32;&#32;&#32;attrib-&gt;<link linkend="_structtinyobj__attrib__t_1a634b502114b1e5fd5a78799a7ce29d01">num_texcoords</link>&#32;=&#32;(<emphasis role="keywordtype">unsigned</emphasis>&#32;int)num_vt;
+1348 &#32;&#32;&#32;&#32;attrib-&gt;<link linkend="_structtinyobj__attrib__t_1a1d5d978adf16c112780e2a5e13fcad83">faces</link>&#32;=&#32;(<link linkend="_structtinyobj__vertex__index__t">tinyobj_vertex_index_t</link>&#32;*)<link linkend="__classes_2lib_2raylib_2src_2models_8c_1aeec461dcd9ee071791bae051a7839fac">TINYOBJ_MALLOC</link>(<emphasis role="keyword">sizeof</emphasis>(<link linkend="_structtinyobj__vertex__index__t">tinyobj_vertex_index_t</link>)&#32;*&#32;num_f);
+1349 &#32;&#32;&#32;&#32;attrib-&gt;<link linkend="_structtinyobj__attrib__t_1a75dae84e396ba710732694a55e0b84a8">face_num_verts</link>&#32;=&#32;(<emphasis role="keywordtype">int</emphasis>&#32;*)<link linkend="__classes_2lib_2raylib_2src_2models_8c_1aeec461dcd9ee071791bae051a7839fac">TINYOBJ_MALLOC</link>(<emphasis role="keyword">sizeof</emphasis>(<emphasis role="keywordtype">int</emphasis>)&#32;*&#32;num_faces);
+1350 &#32;&#32;&#32;&#32;
+1351 &#32;&#32;&#32;&#32;attrib-&gt;<link linkend="_structtinyobj__attrib__t_1a2e41275f74eee10f110874148f36c3d6">num_faces</link>&#32;=&#32;(<emphasis role="keywordtype">unsigned</emphasis>&#32;int)num_faces;
+1352 &#32;&#32;&#32;&#32;attrib-&gt;<link linkend="_structtinyobj__attrib__t_1a46de4e4f36a7a5c4eb99245f1cfa60c0">num_face_num_verts</link>&#32;=&#32;(<emphasis role="keywordtype">unsigned</emphasis>&#32;int)num_f;
+1353 &#32;&#32;&#32;&#32;
+1354 &#32;&#32;&#32;&#32;attrib-&gt;<link linkend="_structtinyobj__attrib__t_1adbf8006f62cc1079ee03c8c0d35f44f2">material_ids</link>&#32;=&#32;(<emphasis role="keywordtype">int</emphasis>&#32;*)<link linkend="__classes_2lib_2raylib_2src_2models_8c_1aeec461dcd9ee071791bae051a7839fac">TINYOBJ_MALLOC</link>(<emphasis role="keyword">sizeof</emphasis>(<emphasis role="keywordtype">int</emphasis>)&#32;*&#32;num_faces);
+1355 
+1356 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(i&#32;=&#32;0;&#32;i&#32;&lt;&#32;num_lines;&#32;i++)&#32;{
+1357 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(commands[i].<link linkend="__classes_2_gameobj_8h_1a890efa53b3d7deeeced6f3a0d6653ed3">type</link>&#32;==&#32;COMMAND_EMPTY)&#32;{
+1358 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">continue</emphasis>;
+1359 &#32;&#32;&#32;&#32;&#32;&#32;}&#32;<emphasis role="keywordflow">else</emphasis>&#32;<emphasis role="keywordflow">if</emphasis>&#32;(commands[i].<link linkend="__classes_2_gameobj_8h_1a890efa53b3d7deeeced6f3a0d6653ed3">type</link>&#32;==&#32;COMMAND_USEMTL)&#32;{
+1360 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">/*&#32;@todo</emphasis>
+1361 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;if&#32;(commands[t][i].material_name&#32;&amp;&amp;</emphasis>
+1362 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;commands[t][i].material_name_len&#32;&gt;&#32;0)&#32;{</emphasis>
+1363 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;std::string&#32;material_name(commands[t][i].material_name,</emphasis>
+1364 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;commands[t][i].material_name_len);</emphasis>
+1365 <emphasis role="comment"></emphasis>
+1366 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;if&#32;(material_map.find(material_name)&#32;!=&#32;material_map.end())&#32;{</emphasis>
+1367 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;material_id&#32;=&#32;material_map[material_name];</emphasis>
+1368 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}&#32;else&#32;{</emphasis>
+1369 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;//&#32;Assign&#32;invalid&#32;material&#32;ID</emphasis>
+1370 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;material_id&#32;=&#32;-1;</emphasis>
+1371 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}</emphasis>
+1372 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}</emphasis>
+1373 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;*/</emphasis>
+1374 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(commands[i].material_name&#32;&amp;&amp;
+1375 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;commands[i].material_name_len&#32;&gt;0)&#32;
+1376 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+1377 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">/*&#32;Create&#32;a&#32;null&#32;terminated&#32;string&#32;*/</emphasis>
+1378 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">char</emphasis>*&#32;material_name_null_term&#32;=&#32;(<emphasis role="keywordtype">char</emphasis>*)&#32;<link linkend="__classes_2lib_2raylib_2src_2models_8c_1aeec461dcd9ee071791bae051a7839fac">TINYOBJ_MALLOC</link>(commands[i].material_name_len&#32;+&#32;1);
+1379 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;memcpy((<emphasis role="keywordtype">void</emphasis>*)&#32;material_name_null_term,&#32;(<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>*)&#32;commands[i].material_name,&#32;commands[i].material_name_len);
+1380 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;material_name_null_term[commands[i].material_name_len&#32;-&#32;1]&#32;=&#32;0;
+1381 
+1382 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(hash_table_exists(material_name_null_term,&#32;&amp;material_table))
+1383 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;material_id&#32;=&#32;(int)hash_table_get(material_name_null_term,&#32;&amp;material_table);
+1384 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>
+1385 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;material_id&#32;=&#32;-1;
+1386 
+1387 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2models_8c_1adaa01af854bdfb1bb4de59c64c782da4">TINYOBJ_FREE</link>(material_name_null_term);
+1388 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+1389 &#32;&#32;&#32;&#32;&#32;&#32;}&#32;<emphasis role="keywordflow">else</emphasis>&#32;<emphasis role="keywordflow">if</emphasis>&#32;(commands[i].<link linkend="__classes_2_gameobj_8h_1a890efa53b3d7deeeced6f3a0d6653ed3">type</link>&#32;==&#32;COMMAND_V)&#32;{
+1390 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;attrib-&gt;<link linkend="_structtinyobj__attrib__t_1aa0fb5c9b82c477d1720cf6a0437b0e9e">vertices</link>[3&#32;*&#32;v_count&#32;+&#32;0]&#32;=&#32;commands[i].vx;
+1391 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;attrib-&gt;<link linkend="_structtinyobj__attrib__t_1aa0fb5c9b82c477d1720cf6a0437b0e9e">vertices</link>[3&#32;*&#32;v_count&#32;+&#32;1]&#32;=&#32;commands[i].vy;
+1392 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;attrib-&gt;<link linkend="_structtinyobj__attrib__t_1aa0fb5c9b82c477d1720cf6a0437b0e9e">vertices</link>[3&#32;*&#32;v_count&#32;+&#32;2]&#32;=&#32;commands[i].vz;
+1393 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;v_count++;
+1394 &#32;&#32;&#32;&#32;&#32;&#32;}&#32;<emphasis role="keywordflow">else</emphasis>&#32;<emphasis role="keywordflow">if</emphasis>&#32;(commands[i].<link linkend="__classes_2_gameobj_8h_1a890efa53b3d7deeeced6f3a0d6653ed3">type</link>&#32;==&#32;COMMAND_VN)&#32;{
+1395 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;attrib-&gt;<link linkend="_structtinyobj__attrib__t_1a0fa1110cead6820a749b4cb9fcafd49e">normals</link>[3&#32;*&#32;n_count&#32;+&#32;0]&#32;=&#32;commands[i].nx;
+1396 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;attrib-&gt;<link linkend="_structtinyobj__attrib__t_1a0fa1110cead6820a749b4cb9fcafd49e">normals</link>[3&#32;*&#32;n_count&#32;+&#32;1]&#32;=&#32;commands[i].ny;
+1397 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;attrib-&gt;<link linkend="_structtinyobj__attrib__t_1a0fa1110cead6820a749b4cb9fcafd49e">normals</link>[3&#32;*&#32;n_count&#32;+&#32;2]&#32;=&#32;commands[i].nz;
+1398 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;n_count++;
+1399 &#32;&#32;&#32;&#32;&#32;&#32;}&#32;<emphasis role="keywordflow">else</emphasis>&#32;<emphasis role="keywordflow">if</emphasis>&#32;(commands[i].<link linkend="__classes_2_gameobj_8h_1a890efa53b3d7deeeced6f3a0d6653ed3">type</link>&#32;==&#32;COMMAND_VT)&#32;{
+1400 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;attrib-&gt;<link linkend="_structtinyobj__attrib__t_1a505f249054ea1df1d3391c098f392f8b">texcoords</link>[2&#32;*&#32;t_count&#32;+&#32;0]&#32;=&#32;commands[i].tx;
+1401 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;attrib-&gt;<link linkend="_structtinyobj__attrib__t_1a505f249054ea1df1d3391c098f392f8b">texcoords</link>[2&#32;*&#32;t_count&#32;+&#32;1]&#32;=&#32;commands[i].ty;
+1402 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;t_count++;
+1403 &#32;&#32;&#32;&#32;&#32;&#32;}&#32;<emphasis role="keywordflow">else</emphasis>&#32;<emphasis role="keywordflow">if</emphasis>&#32;(commands[i].<link linkend="__classes_2_gameobj_8h_1a890efa53b3d7deeeced6f3a0d6653ed3">type</link>&#32;==&#32;COMMAND_F)&#32;{
+1404 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;k&#32;=&#32;0;
+1405 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(k&#32;=&#32;0;&#32;k&#32;&lt;&#32;commands[i].num_f;&#32;k++)&#32;{
+1406 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_structtinyobj__vertex__index__t">tinyobj_vertex_index_t</link>&#32;vi&#32;=&#32;commands[i].f[k];
+1407 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;v_idx&#32;=&#32;fixIndex(vi.<link linkend="_structtinyobj__vertex__index__t_1a02e878758d97d1636f367dd9d6173a40">v_idx</link>,&#32;v_count);
+1408 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;vn_idx&#32;=&#32;fixIndex(vi.<link linkend="_structtinyobj__vertex__index__t_1a854df2d4b08855097bea57c20954c06b">vn_idx</link>,&#32;n_count);
+1409 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;vt_idx&#32;=&#32;fixIndex(vi.<link linkend="_structtinyobj__vertex__index__t_1a83347e206fede381e2b4d3315e39d311">vt_idx</link>,&#32;t_count);
+1410 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;attrib-&gt;<link linkend="_structtinyobj__attrib__t_1a1d5d978adf16c112780e2a5e13fcad83">faces</link>[f_count&#32;+&#32;k].<link linkend="_structtinyobj__vertex__index__t_1a02e878758d97d1636f367dd9d6173a40">v_idx</link>&#32;=&#32;v_idx;
+1411 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;attrib-&gt;<link linkend="_structtinyobj__attrib__t_1a1d5d978adf16c112780e2a5e13fcad83">faces</link>[f_count&#32;+&#32;k].<link linkend="_structtinyobj__vertex__index__t_1a854df2d4b08855097bea57c20954c06b">vn_idx</link>&#32;=&#32;vn_idx;
+1412 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;attrib-&gt;<link linkend="_structtinyobj__attrib__t_1a1d5d978adf16c112780e2a5e13fcad83">faces</link>[f_count&#32;+&#32;k].<link linkend="_structtinyobj__vertex__index__t_1a83347e206fede381e2b4d3315e39d311">vt_idx</link>&#32;=&#32;vt_idx;
+1413 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+1414 
+1415 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(k&#32;=&#32;0;&#32;k&#32;&lt;&#32;commands[i].num_f_num_verts;&#32;k++)&#32;{
+1416 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;attrib-&gt;<link linkend="_structtinyobj__attrib__t_1adbf8006f62cc1079ee03c8c0d35f44f2">material_ids</link>[face_count&#32;+&#32;k]&#32;=&#32;material_id;
+1417 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;attrib-&gt;<link linkend="_structtinyobj__attrib__t_1a75dae84e396ba710732694a55e0b84a8">face_num_verts</link>[face_count&#32;+&#32;k]&#32;=&#32;commands[i].f_num_verts[k];
+1418 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+1419 
+1420 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;f_count&#32;+=&#32;commands[i].num_f;
+1421 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;face_count&#32;+=&#32;commands[i].num_f_num_verts;
+1422 &#32;&#32;&#32;&#32;&#32;&#32;}
+1423 &#32;&#32;&#32;&#32;}
+1424 &#32;&#32;}
+1425 
+1426 &#32;&#32;<emphasis role="comment">/*&#32;5.&#32;Construct&#32;shape&#32;information.&#32;*/</emphasis>
+1427 &#32;&#32;{
+1428 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;face_count&#32;=&#32;0;
+1429 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;i&#32;=&#32;0;
+1430 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;n&#32;=&#32;0;
+1431 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;shape_idx&#32;=&#32;0;
+1432 
+1433 &#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>&#32;*shape_name&#32;=&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>;
+1434 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;shape_name_len&#32;=&#32;0;
+1435 &#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>&#32;*prev_shape_name&#32;=&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>;
+1436 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;prev_shape_name_len&#32;=&#32;0;
+1437 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;prev_shape_face_offset&#32;=&#32;0;
+1438 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;prev_face_offset&#32;=&#32;0;
+1439 &#32;&#32;&#32;&#32;<link linkend="_structtinyobj__shape__t">tinyobj_shape_t</link>&#32;prev_shape&#32;=&#32;{<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>,&#32;0,&#32;0};
+1440 
+1441 &#32;&#32;&#32;&#32;<emphasis role="comment">/*&#32;Find&#32;the&#32;number&#32;of&#32;shapes&#32;in&#32;.obj&#32;*/</emphasis>
+1442 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(i&#32;=&#32;0;&#32;i&#32;&lt;&#32;num_lines;&#32;i++)&#32;{
+1443 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(commands[i].<link linkend="__classes_2_gameobj_8h_1a890efa53b3d7deeeced6f3a0d6653ed3">type</link>&#32;==&#32;COMMAND_O&#32;||&#32;commands[i].<link linkend="__classes_2_gameobj_8h_1a890efa53b3d7deeeced6f3a0d6653ed3">type</link>&#32;==&#32;COMMAND_G)&#32;{
+1444 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;n++;
+1445 &#32;&#32;&#32;&#32;&#32;&#32;}
+1446 &#32;&#32;&#32;&#32;}
+1447 
+1448 &#32;&#32;&#32;&#32;<emphasis role="comment">/*&#32;Allocate&#32;array&#32;of&#32;shapes&#32;with&#32;maximum&#32;possible&#32;size(+1&#32;for&#32;unnamed</emphasis>
+1449 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;*&#32;group/object).</emphasis>
+1450 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;*&#32;Actual&#32;#&#32;of&#32;shapes&#32;found&#32;in&#32;.obj&#32;is&#32;determined&#32;in&#32;the&#32;later&#32;*/</emphasis>
+1451 &#32;&#32;&#32;&#32;(*shapes)&#32;=&#32;(<link linkend="_structtinyobj__shape__t">tinyobj_shape_t</link>*)<link linkend="__classes_2lib_2raylib_2src_2models_8c_1aeec461dcd9ee071791bae051a7839fac">TINYOBJ_MALLOC</link>(<emphasis role="keyword">sizeof</emphasis>(<link linkend="_structtinyobj__shape__t">tinyobj_shape_t</link>)&#32;*&#32;(n&#32;+&#32;1));
+1452 
+1453 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(i&#32;=&#32;0;&#32;i&#32;&lt;&#32;num_lines;&#32;i++)&#32;{
+1454 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(commands[i].<link linkend="__classes_2_gameobj_8h_1a890efa53b3d7deeeced6f3a0d6653ed3">type</link>&#32;==&#32;COMMAND_O&#32;||&#32;commands[i].<link linkend="__classes_2_gameobj_8h_1a890efa53b3d7deeeced6f3a0d6653ed3">type</link>&#32;==&#32;COMMAND_G)&#32;{
+1455 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(commands[i].<link linkend="__classes_2_gameobj_8h_1a890efa53b3d7deeeced6f3a0d6653ed3">type</link>&#32;==&#32;COMMAND_O)&#32;{
+1456 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;shape_name&#32;=&#32;commands[i].object_name;
+1457 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;shape_name_len&#32;=&#32;commands[i].object_name_len;
+1458 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}&#32;<emphasis role="keywordflow">else</emphasis>&#32;{
+1459 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;shape_name&#32;=&#32;commands[i].group_name;
+1460 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;shape_name_len&#32;=&#32;commands[i].group_name_len;
+1461 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+1462 
+1463 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(face_count&#32;==&#32;0)&#32;{
+1464 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">/*&#32;&apos;o&apos;&#32;or&#32;&apos;g&apos;&#32;appears&#32;before&#32;any&#32;&apos;f&apos;&#32;*/</emphasis>
+1465 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;prev_shape_name&#32;=&#32;shape_name;
+1466 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;prev_shape_name_len&#32;=&#32;shape_name_len;
+1467 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;prev_shape_face_offset&#32;=&#32;face_count;
+1468 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;prev_face_offset&#32;=&#32;face_count;
+1469 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}&#32;<emphasis role="keywordflow">else</emphasis>&#32;{
+1470 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(shape_idx&#32;==&#32;0)&#32;{
+1471 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">/*&#32;&apos;o&apos;&#32;or&#32;&apos;g&apos;&#32;after&#32;some&#32;&apos;v&apos;&#32;lines.&#32;*/</emphasis>
+1472 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;(*shapes)[shape_idx].<link linkend="_structtinyobj__shape__t_1a86609fe00f3ed571f4513ceae0f963a4">name</link>&#32;=&#32;my_strndup(
+1473 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;prev_shape_name,&#32;prev_shape_name_len);&#32;<emphasis role="comment">/*&#32;may&#32;be&#32;NULL&#32;*/</emphasis>
+1474 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;(*shapes)[shape_idx].face_offset&#32;=&#32;prev_shape.<link linkend="_structtinyobj__shape__t_1af95c01e32f5a8843776f3d754580dd3c">face_offset</link>;
+1475 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;(*shapes)[shape_idx].length&#32;=&#32;face_count&#32;-&#32;prev_face_offset;
+1476 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;shape_idx++;
+1477 
+1478 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;prev_face_offset&#32;=&#32;face_count;
+1479 
+1480 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}&#32;<emphasis role="keywordflow">else</emphasis>&#32;{
+1481 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;((face_count&#32;-&#32;prev_face_offset)&#32;&gt;&#32;0)&#32;{
+1482 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;(*shapes)[shape_idx].name&#32;=
+1483 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;my_strndup(prev_shape_name,&#32;prev_shape_name_len);
+1484 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;(*shapes)[shape_idx].face_offset&#32;=&#32;prev_face_offset;
+1485 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;(*shapes)[shape_idx].length&#32;=&#32;face_count&#32;-&#32;prev_face_offset;
+1486 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;shape_idx++;
+1487 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;prev_face_offset&#32;=&#32;face_count;
+1488 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+1489 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+1490 
+1491 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">/*&#32;Record&#32;shape&#32;info&#32;for&#32;succeeding&#32;&apos;o&apos;&#32;or&#32;&apos;g&apos;&#32;command.&#32;*/</emphasis>
+1492 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;prev_shape_name&#32;=&#32;shape_name;
+1493 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;prev_shape_name_len&#32;=&#32;shape_name_len;
+1494 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;prev_shape_face_offset&#32;=&#32;face_count;
+1495 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+1496 &#32;&#32;&#32;&#32;&#32;&#32;}
+1497 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(commands[i].<link linkend="__classes_2_gameobj_8h_1a890efa53b3d7deeeced6f3a0d6653ed3">type</link>&#32;==&#32;COMMAND_F)&#32;{
+1498 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;face_count++;
+1499 &#32;&#32;&#32;&#32;&#32;&#32;}
+1500 &#32;&#32;&#32;&#32;}
+1501 
+1502 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;((face_count&#32;-&#32;prev_face_offset)&#32;&gt;&#32;0)&#32;{
+1503 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="_namespacelength">length</link>&#32;=&#32;face_count&#32;-&#32;prev_shape_face_offset;
+1504 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(<link linkend="_namespacelength">length</link>&#32;&gt;&#32;0)&#32;{
+1505 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;(*shapes)[shape_idx].name&#32;=
+1506 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;my_strndup(prev_shape_name,&#32;prev_shape_name_len);
+1507 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;(*shapes)[shape_idx].face_offset&#32;=&#32;prev_face_offset;
+1508 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;(*shapes)[shape_idx].length&#32;=&#32;face_count&#32;-&#32;prev_face_offset;
+1509 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;shape_idx++;
+1510 &#32;&#32;&#32;&#32;&#32;&#32;}
+1511 &#32;&#32;&#32;&#32;}&#32;<emphasis role="keywordflow">else</emphasis>&#32;{
+1512 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">/*&#32;Guess&#32;no&#32;&apos;v&apos;&#32;line&#32;occurrence&#32;after&#32;&apos;o&apos;&#32;or&#32;&apos;g&apos;,&#32;so&#32;discards&#32;current</emphasis>
+1513 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;*&#32;shape&#32;information.&#32;*/</emphasis>
+1514 &#32;&#32;&#32;&#32;}
+1515 
+1516 &#32;&#32;&#32;&#32;(*num_shapes)&#32;=&#32;shape_idx;
+1517 &#32;&#32;}
+1518 
+1519 &#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(commands)&#32;{
+1520 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2models_8c_1adaa01af854bdfb1bb4de59c64c782da4">TINYOBJ_FREE</link>(commands);
+1521 &#32;&#32;}
+1522 
+1523 &#32;&#32;destroy_hash_table(&amp;material_table);
+1524 &#32;&#32;
+1525 &#32;&#32;(*materials_out)&#32;=&#32;materials;
+1526 &#32;&#32;(*num_materials_out)&#32;=&#32;num_materials;
+1527 
+1528 &#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="__classes_2lib_2external_2tinyobj__loader__c_8h_1a53a030dcd2b97fe2c58613e2ee991e4e">TINYOBJ_SUCCESS</link>;
+1529 }
+1530 
+1531 <emphasis role="keywordtype">void</emphasis>&#32;<link linkend="__classes_2lib_2external_2tinyobj__loader__c_8h_1aba2a90f2297d1db1561b9352a8a432bf">tinyobj_attrib_init</link>(<link linkend="_structtinyobj__attrib__t">tinyobj_attrib_t</link>&#32;*attrib)&#32;{
+1532 &#32;&#32;attrib-&gt;<link linkend="_structtinyobj__attrib__t_1aa0fb5c9b82c477d1720cf6a0437b0e9e">vertices</link>&#32;=&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>;
+1533 &#32;&#32;attrib-&gt;<link linkend="_structtinyobj__attrib__t_1a7c7f26f1c413814b48a04c5d9411484f">num_vertices</link>&#32;=&#32;0;
+1534 &#32;&#32;attrib-&gt;<link linkend="_structtinyobj__attrib__t_1a0fa1110cead6820a749b4cb9fcafd49e">normals</link>&#32;=&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>;
+1535 &#32;&#32;attrib-&gt;<link linkend="_structtinyobj__attrib__t_1ab9ff2c299446a65b59148e58c6d65d28">num_normals</link>&#32;=&#32;0;
+1536 &#32;&#32;attrib-&gt;<link linkend="_structtinyobj__attrib__t_1a505f249054ea1df1d3391c098f392f8b">texcoords</link>&#32;=&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>;
+1537 &#32;&#32;attrib-&gt;<link linkend="_structtinyobj__attrib__t_1a634b502114b1e5fd5a78799a7ce29d01">num_texcoords</link>&#32;=&#32;0;
+1538 &#32;&#32;attrib-&gt;<link linkend="_structtinyobj__attrib__t_1a1d5d978adf16c112780e2a5e13fcad83">faces</link>&#32;=&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>;
+1539 &#32;&#32;attrib-&gt;<link linkend="_structtinyobj__attrib__t_1a2e41275f74eee10f110874148f36c3d6">num_faces</link>&#32;=&#32;0;
+1540 &#32;&#32;attrib-&gt;<link linkend="_structtinyobj__attrib__t_1a75dae84e396ba710732694a55e0b84a8">face_num_verts</link>&#32;=&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>;
+1541 &#32;&#32;attrib-&gt;<link linkend="_structtinyobj__attrib__t_1a46de4e4f36a7a5c4eb99245f1cfa60c0">num_face_num_verts</link>&#32;=&#32;0;
+1542 &#32;&#32;attrib-&gt;<link linkend="_structtinyobj__attrib__t_1adbf8006f62cc1079ee03c8c0d35f44f2">material_ids</link>&#32;=&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>;
+1543 }
+1544 
+1545 <emphasis role="keywordtype">void</emphasis>&#32;<link linkend="__classes_2lib_2external_2tinyobj__loader__c_8h_1a3050df1d9712ca30d38e97204b11095b">tinyobj_attrib_free</link>(<link linkend="_structtinyobj__attrib__t">tinyobj_attrib_t</link>&#32;*attrib)&#32;{
+1546 &#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(attrib-&gt;<link linkend="_structtinyobj__attrib__t_1aa0fb5c9b82c477d1720cf6a0437b0e9e">vertices</link>)&#32;<link linkend="__classes_2lib_2raylib_2src_2models_8c_1adaa01af854bdfb1bb4de59c64c782da4">TINYOBJ_FREE</link>(attrib-&gt;<link linkend="_structtinyobj__attrib__t_1aa0fb5c9b82c477d1720cf6a0437b0e9e">vertices</link>);
+1547 &#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(attrib-&gt;<link linkend="_structtinyobj__attrib__t_1a0fa1110cead6820a749b4cb9fcafd49e">normals</link>)&#32;<link linkend="__classes_2lib_2raylib_2src_2models_8c_1adaa01af854bdfb1bb4de59c64c782da4">TINYOBJ_FREE</link>(attrib-&gt;<link linkend="_structtinyobj__attrib__t_1a0fa1110cead6820a749b4cb9fcafd49e">normals</link>);
+1548 &#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(attrib-&gt;<link linkend="_structtinyobj__attrib__t_1a505f249054ea1df1d3391c098f392f8b">texcoords</link>)&#32;<link linkend="__classes_2lib_2raylib_2src_2models_8c_1adaa01af854bdfb1bb4de59c64c782da4">TINYOBJ_FREE</link>(attrib-&gt;<link linkend="_structtinyobj__attrib__t_1a505f249054ea1df1d3391c098f392f8b">texcoords</link>);
+1549 &#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(attrib-&gt;<link linkend="_structtinyobj__attrib__t_1a1d5d978adf16c112780e2a5e13fcad83">faces</link>)&#32;<link linkend="__classes_2lib_2raylib_2src_2models_8c_1adaa01af854bdfb1bb4de59c64c782da4">TINYOBJ_FREE</link>(attrib-&gt;<link linkend="_structtinyobj__attrib__t_1a1d5d978adf16c112780e2a5e13fcad83">faces</link>);
+1550 &#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(attrib-&gt;<link linkend="_structtinyobj__attrib__t_1a75dae84e396ba710732694a55e0b84a8">face_num_verts</link>)&#32;<link linkend="__classes_2lib_2raylib_2src_2models_8c_1adaa01af854bdfb1bb4de59c64c782da4">TINYOBJ_FREE</link>(attrib-&gt;<link linkend="_structtinyobj__attrib__t_1a75dae84e396ba710732694a55e0b84a8">face_num_verts</link>);
+1551 &#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(attrib-&gt;<link linkend="_structtinyobj__attrib__t_1adbf8006f62cc1079ee03c8c0d35f44f2">material_ids</link>)&#32;<link linkend="__classes_2lib_2raylib_2src_2models_8c_1adaa01af854bdfb1bb4de59c64c782da4">TINYOBJ_FREE</link>(attrib-&gt;<link linkend="_structtinyobj__attrib__t_1adbf8006f62cc1079ee03c8c0d35f44f2">material_ids</link>);
+1552 }
+1553 
+1554 <emphasis role="keywordtype">void</emphasis>&#32;<link linkend="__classes_2lib_2external_2tinyobj__loader__c_8h_1ace2ac9b9dc2459375d9ee5b5cf4a4101">tinyobj_shapes_free</link>(<link linkend="_structtinyobj__shape__t">tinyobj_shape_t</link>&#32;*shapes,&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;num_shapes)&#32;{
+1555 &#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;i;
+1556 &#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(shapes&#32;==&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>)&#32;<emphasis role="keywordflow">return</emphasis>;
+1557 
+1558 &#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(i&#32;=&#32;0;&#32;i&#32;&lt;&#32;num_shapes;&#32;i++)&#32;{
+1559 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(shapes[i].<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a14d7642df08c5cb68e4fb90cc8a73509">name</link>)&#32;<link linkend="__classes_2lib_2raylib_2src_2models_8c_1adaa01af854bdfb1bb4de59c64c782da4">TINYOBJ_FREE</link>(shapes[i].<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a14d7642df08c5cb68e4fb90cc8a73509">name</link>);
+1560 &#32;&#32;}
+1561 
+1562 &#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2models_8c_1adaa01af854bdfb1bb4de59c64c782da4">TINYOBJ_FREE</link>(shapes);
+1563 }
+1564 
+1565 <emphasis role="keywordtype">void</emphasis>&#32;<link linkend="__classes_2lib_2external_2tinyobj__loader__c_8h_1acec0cf6431160a1ad3f305e8cb4b3781">tinyobj_materials_free</link>(<link linkend="_structtinyobj__material__t">tinyobj_material_t</link>&#32;*materials,
+1566 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;num_materials)&#32;{
+1567 &#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;i;
+1568 &#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(materials&#32;==&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>)&#32;<emphasis role="keywordflow">return</emphasis>;
+1569 
+1570 &#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(i&#32;=&#32;0;&#32;i&#32;&lt;&#32;num_materials;&#32;i++)&#32;{
+1571 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(materials[i].<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a14d7642df08c5cb68e4fb90cc8a73509">name</link>)&#32;<link linkend="__classes_2lib_2raylib_2src_2models_8c_1adaa01af854bdfb1bb4de59c64c782da4">TINYOBJ_FREE</link>(materials[i].<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a14d7642df08c5cb68e4fb90cc8a73509">name</link>);
+1572 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(materials[i].ambient_texname)&#32;<link linkend="__classes_2lib_2raylib_2src_2models_8c_1adaa01af854bdfb1bb4de59c64c782da4">TINYOBJ_FREE</link>(materials[i].ambient_texname);
+1573 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(materials[i].diffuse_texname)&#32;<link linkend="__classes_2lib_2raylib_2src_2models_8c_1adaa01af854bdfb1bb4de59c64c782da4">TINYOBJ_FREE</link>(materials[i].diffuse_texname);
+1574 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(materials[i].specular_texname)&#32;<link linkend="__classes_2lib_2raylib_2src_2models_8c_1adaa01af854bdfb1bb4de59c64c782da4">TINYOBJ_FREE</link>(materials[i].specular_texname);
+1575 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(materials[i].specular_highlight_texname)
+1576 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2models_8c_1adaa01af854bdfb1bb4de59c64c782da4">TINYOBJ_FREE</link>(materials[i].specular_highlight_texname);
+1577 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(materials[i].bump_texname)&#32;<link linkend="__classes_2lib_2raylib_2src_2models_8c_1adaa01af854bdfb1bb4de59c64c782da4">TINYOBJ_FREE</link>(materials[i].bump_texname);
+1578 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(materials[i].displacement_texname)
+1579 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2models_8c_1adaa01af854bdfb1bb4de59c64c782da4">TINYOBJ_FREE</link>(materials[i].displacement_texname);
+1580 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(materials[i].alpha_texname)&#32;<link linkend="__classes_2lib_2raylib_2src_2models_8c_1adaa01af854bdfb1bb4de59c64c782da4">TINYOBJ_FREE</link>(materials[i].alpha_texname);
+1581 &#32;&#32;}
+1582 
+1583 &#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2models_8c_1adaa01af854bdfb1bb4de59c64c782da4">TINYOBJ_FREE</link>(materials);
+1584 }
+1585 <emphasis role="preprocessor">#endif&#32;</emphasis><emphasis role="comment">/*&#32;TINYOBJ_LOADER_C_IMPLEMENTATION&#32;*/</emphasis><emphasis role="preprocessor"></emphasis>
+1586 
+1587 <emphasis role="preprocessor">#endif&#32;</emphasis><emphasis role="comment">/*&#32;TINOBJ_LOADER_C_H_&#32;*/</emphasis><emphasis role="preprocessor"></emphasis>
+</programlisting></section>

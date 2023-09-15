@@ -1,0 +1,360 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<section xmlns="http://docbook.org/ns/docbook" version="5.0" xmlns:xlink="http://www.w3.org/1999/xlink" xml:id="__old_2_classes_2lib_2include_2c_09_09_2bits_2atomic__futex_8h_source" xml:lang="en-US">
+<title>atomic_futex.h</title>
+<indexterm><primary>C:/Users/HP/Documents/GitHub/Minero-Game/Old/Classes/lib/include/c++/bits/atomic_futex.h</primary></indexterm>
+Go to the documentation of this file.<programlisting linenumbering="unnumbered">1 <emphasis role="comment">//&#32;-*-&#32;C++&#32;-*-&#32;header.</emphasis>
+2 
+3 <emphasis role="comment">//&#32;Copyright&#32;(C)&#32;2015-2022&#32;Free&#32;Software&#32;Foundation,&#32;Inc.</emphasis>
+4 <emphasis role="comment">//</emphasis>
+5 <emphasis role="comment">//&#32;This&#32;file&#32;is&#32;part&#32;of&#32;the&#32;GNU&#32;ISO&#32;C++&#32;Library.&#32;&#32;This&#32;library&#32;is&#32;free</emphasis>
+6 <emphasis role="comment">//&#32;software;&#32;you&#32;can&#32;redistribute&#32;it&#32;and/or&#32;modify&#32;it&#32;under&#32;the</emphasis>
+7 <emphasis role="comment">//&#32;terms&#32;of&#32;the&#32;GNU&#32;General&#32;Public&#32;License&#32;as&#32;published&#32;by&#32;the</emphasis>
+8 <emphasis role="comment">//&#32;Free&#32;Software&#32;Foundation;&#32;either&#32;version&#32;3,&#32;or&#32;(at&#32;your&#32;option)</emphasis>
+9 <emphasis role="comment">//&#32;any&#32;later&#32;version.</emphasis>
+10 
+11 <emphasis role="comment">//&#32;This&#32;library&#32;is&#32;distributed&#32;in&#32;the&#32;hope&#32;that&#32;it&#32;will&#32;be&#32;useful,</emphasis>
+12 <emphasis role="comment">//&#32;but&#32;WITHOUT&#32;ANY&#32;WARRANTY;&#32;without&#32;even&#32;the&#32;implied&#32;warranty&#32;of</emphasis>
+13 <emphasis role="comment">//&#32;MERCHANTABILITY&#32;or&#32;FITNESS&#32;FOR&#32;A&#32;PARTICULAR&#32;PURPOSE.&#32;&#32;See&#32;the</emphasis>
+14 <emphasis role="comment">//&#32;GNU&#32;General&#32;Public&#32;License&#32;for&#32;more&#32;details.</emphasis>
+15 
+16 <emphasis role="comment">//&#32;Under&#32;Section&#32;7&#32;of&#32;GPL&#32;version&#32;3,&#32;you&#32;are&#32;granted&#32;additional</emphasis>
+17 <emphasis role="comment">//&#32;permissions&#32;described&#32;in&#32;the&#32;GCC&#32;Runtime&#32;Library&#32;Exception,&#32;version</emphasis>
+18 <emphasis role="comment">//&#32;3.1,&#32;as&#32;published&#32;by&#32;the&#32;Free&#32;Software&#32;Foundation.</emphasis>
+19 
+20 <emphasis role="comment">//&#32;You&#32;should&#32;have&#32;received&#32;a&#32;copy&#32;of&#32;the&#32;GNU&#32;General&#32;Public&#32;License&#32;and</emphasis>
+21 <emphasis role="comment">//&#32;a&#32;copy&#32;of&#32;the&#32;GCC&#32;Runtime&#32;Library&#32;Exception&#32;along&#32;with&#32;this&#32;program;</emphasis>
+22 <emphasis role="comment">//&#32;see&#32;the&#32;files&#32;COPYING3&#32;and&#32;COPYING.RUNTIME&#32;respectively.&#32;&#32;If&#32;not,&#32;see</emphasis>
+23 <emphasis role="comment">//&#32;&lt;http://www.gnu.org/licenses/&gt;.</emphasis>
+24 
+30 <emphasis role="preprocessor">#ifndef&#32;_GLIBCXX_ATOMIC_FUTEX_H</emphasis>
+31 <emphasis role="preprocessor">#define&#32;_GLIBCXX_ATOMIC_FUTEX_H&#32;1</emphasis>
+32 
+33 <emphasis role="preprocessor">#pragma&#32;GCC&#32;system_header</emphasis>
+34 
+35 <emphasis role="preprocessor">#include&#32;&lt;atomic&gt;</emphasis>
+36 <emphasis role="preprocessor">#if&#32;!&#32;(defined(_GLIBCXX_HAVE_LINUX_FUTEX)&#32;&amp;&amp;&#32;ATOMIC_INT_LOCK_FREE&#32;&gt;&#32;1)</emphasis>
+37 <emphasis role="preprocessor">#include&#32;&lt;mutex&gt;</emphasis>
+38 <emphasis role="preprocessor">#include&#32;&lt;condition_variable&gt;</emphasis>
+39 <emphasis role="preprocessor">#endif</emphasis>
+40 <emphasis role="preprocessor">#include&#32;&lt;bits/chrono.h&gt;</emphasis>
+41 
+42 <emphasis role="preprocessor">#ifndef&#32;_GLIBCXX_ALWAYS_INLINE</emphasis>
+43 <emphasis role="preprocessor">#define&#32;_GLIBCXX_ALWAYS_INLINE&#32;inline&#32;__attribute__((__always_inline__))</emphasis>
+44 <emphasis role="preprocessor">#endif</emphasis>
+45 
+46 <emphasis role="keyword">namespace&#32;</emphasis><link linkend="_namespacestd">std</link>&#32;<link linkend="__classes_2lib_2include_2c_09_09_2x86__64-w64-mingw32_2bits_2c_09_09config_8h_1a44377df0d3503f0b3d9ab316dd8ddf8b">_GLIBCXX_VISIBILITY</link>(default)
+47 {
+48 _GLIBCXX_BEGIN_NAMESPACE_VERSION
+49 
+50 <emphasis role="preprocessor">#ifdef&#32;_GLIBCXX_HAS_GTHREADS</emphasis>
+51 <emphasis role="preprocessor">#if&#32;defined(_GLIBCXX_HAVE_LINUX_FUTEX)&#32;&amp;&amp;&#32;ATOMIC_INT_LOCK_FREE&#32;&gt;&#32;1</emphasis>
+52 &#32;&#32;<emphasis role="keyword">struct&#32;</emphasis>__atomic_futex_unsigned_base
+53 &#32;&#32;{
+54 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;__s&#32;and&#32;__ns&#32;are&#32;measured&#32;against&#32;CLOCK_REALTIME.&#32;Returns&#32;false</emphasis>
+55 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;iff&#32;a&#32;timeout&#32;occurred.</emphasis>
+56 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">bool</emphasis>
+57 &#32;&#32;&#32;&#32;_M_futex_wait_until(<emphasis role="keywordtype">unsigned</emphasis>&#32;*__addr,&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<link linkend="__classes_2lib_2include_2stdatomic_8h_1a15181bfd16829c92971879064b9d8dbb">__val</link>,&#32;<emphasis role="keywordtype">bool</emphasis>&#32;__has_timeout,
+58 &#32;&#32;&#32;&#32;chrono::seconds&#32;__s,&#32;chrono::nanoseconds&#32;__ns);
+59 
+60 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;__s&#32;and&#32;__ns&#32;are&#32;measured&#32;against&#32;CLOCK_MONOTONIC.&#32;Returns</emphasis>
+61 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;false&#32;iff&#32;a&#32;timeout&#32;occurred.</emphasis>
+62 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">bool</emphasis>
+63 &#32;&#32;&#32;&#32;_M_futex_wait_until_steady(<emphasis role="keywordtype">unsigned</emphasis>&#32;*__addr,&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<link linkend="__classes_2lib_2include_2stdatomic_8h_1a15181bfd16829c92971879064b9d8dbb">__val</link>,
+64 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">bool</emphasis>&#32;__has_timeout,&#32;chrono::seconds&#32;__s,&#32;chrono::nanoseconds&#32;__ns);
+65 
+66 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;This&#32;can&#32;be&#32;executed&#32;after&#32;the&#32;object&#32;has&#32;been&#32;destroyed.</emphasis>
+67 &#32;&#32;&#32;&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>&#32;_M_futex_notify_all(<emphasis role="keywordtype">unsigned</emphasis>*&#32;__addr);
+68 &#32;&#32;};
+69 
+70 &#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keywordtype">unsigned</emphasis>&#32;_Waiter_bit&#32;=&#32;0x80000000&gt;
+71 &#32;&#32;<emphasis role="keyword">class&#32;</emphasis>__atomic_futex_unsigned&#32;:&#32;__atomic_futex_unsigned_base
+72 &#32;&#32;{
+73 &#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;chrono::steady_clock&#32;__clock_t;
+74 
+75 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;This&#32;must&#32;be&#32;lock-free&#32;and&#32;at&#32;offset&#32;0.</emphasis>
+76 &#32;&#32;&#32;&#32;atomic&lt;unsigned&gt;&#32;_M_data;
+77 
+78 &#32;&#32;<emphasis role="keyword">public</emphasis>:
+79 &#32;&#32;&#32;&#32;<emphasis role="keyword">explicit</emphasis>
+80 &#32;&#32;&#32;&#32;__atomic_futex_unsigned(<emphasis role="keywordtype">unsigned</emphasis>&#32;__data)&#32;:&#32;_M_data(__data)
+81 &#32;&#32;&#32;&#32;{&#32;}
+82 
+83 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2bits_2atomic__base_8h_1a18755778007fe831d100a2355bd3a653">_GLIBCXX_ALWAYS_INLINE</link>&#32;<emphasis role="keywordtype">unsigned</emphasis>
+84 &#32;&#32;&#32;&#32;_M_load(<link linkend="__classes_2lib_2include_2stdatomic_8h_1a17c2de5ae768960284c047a320f17d1b">memory_order</link>&#32;__mo)
+85 &#32;&#32;&#32;&#32;{
+86 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;_M_data.load(__mo)&#32;&amp;&#32;~_Waiter_bit;
+87 &#32;&#32;&#32;&#32;}
+88 
+89 &#32;&#32;<emphasis role="keyword">private</emphasis>:
+90 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;If&#32;a&#32;timeout&#32;occurs,&#32;returns&#32;a&#32;current&#32;value&#32;after&#32;the&#32;timeout;</emphasis>
+91 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;otherwise,&#32;returns&#32;the&#32;operand&apos;s&#32;value&#32;if&#32;equal&#32;is&#32;true&#32;or&#32;a&#32;different</emphasis>
+92 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;value&#32;if&#32;equal&#32;is&#32;false.</emphasis>
+93 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;The&#32;assumed&#32;value&#32;is&#32;the&#32;caller&apos;s&#32;assumption&#32;about&#32;the&#32;current&#32;value</emphasis>
+94 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;when&#32;making&#32;the&#32;call.</emphasis>
+95 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;__s&#32;and&#32;__ns&#32;are&#32;measured&#32;against&#32;CLOCK_REALTIME.</emphasis>
+96 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>
+97 &#32;&#32;&#32;&#32;_M_load_and_test_until(<emphasis role="keywordtype">unsigned</emphasis>&#32;__assumed,&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;__operand,
+98 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">bool</emphasis>&#32;__equal,&#32;<link linkend="__classes_2lib_2include_2stdatomic_8h_1a17c2de5ae768960284c047a320f17d1b">memory_order</link>&#32;__mo,&#32;<emphasis role="keywordtype">bool</emphasis>&#32;__has_timeout,
+99 &#32;&#32;&#32;&#32;chrono::seconds&#32;__s,&#32;chrono::nanoseconds&#32;__ns)
+100 &#32;&#32;&#32;&#32;{
+101 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(;;)
+102 &#32;&#32;&#32;&#32;{
+103 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Don&apos;t&#32;bother&#32;checking&#32;the&#32;value&#32;again&#32;because&#32;we&#32;expect&#32;the&#32;caller</emphasis>
+104 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;to&#32;have&#32;done&#32;it&#32;recently.</emphasis>
+105 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;memory_order_relaxed&#32;is&#32;sufficient&#32;because&#32;we&#32;can&#32;rely&#32;on&#32;just&#32;the</emphasis>
+106 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;modification&#32;order&#32;(store_notify&#32;uses&#32;an&#32;atomic&#32;RMW&#32;operation&#32;too),</emphasis>
+107 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;and&#32;the&#32;futex&#32;syscalls&#32;synchronize&#32;between&#32;themselves.</emphasis>
+108 &#32;&#32;&#32;&#32;&#32;&#32;_M_data.fetch_or(_Waiter_bit,&#32;<link linkend="__classes_2lib_2include_2stdatomic_8h_1a17c2de5ae768960284c047a320f17d1bac6489d0374e297a776f6a3db7ea5654a">memory_order_relaxed</link>);
+109 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">bool</emphasis>&#32;__ret&#32;=&#32;_M_futex_wait_until((<emphasis role="keywordtype">unsigned</emphasis>*)(<emphasis role="keywordtype">void</emphasis>*)&amp;_M_data,
+110 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__assumed&#32;|&#32;_Waiter_bit,
+111 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__has_timeout,&#32;__s,&#32;__ns);
+112 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Fetch&#32;the&#32;current&#32;value&#32;after&#32;waiting&#32;(clears&#32;_Waiter_bit).</emphasis>
+113 &#32;&#32;&#32;&#32;&#32;&#32;__assumed&#32;=&#32;_M_load(__mo);
+114 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(!__ret&#32;||&#32;((__operand&#32;==&#32;__assumed)&#32;==&#32;__equal))
+115 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__assumed;
+116 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;TODO&#32;adapt&#32;wait&#32;time</emphasis>
+117 &#32;&#32;&#32;&#32;}
+118 &#32;&#32;&#32;&#32;}
+119 
+120 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;If&#32;a&#32;timeout&#32;occurs,&#32;returns&#32;a&#32;current&#32;value&#32;after&#32;the&#32;timeout;</emphasis>
+121 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;otherwise,&#32;returns&#32;the&#32;operand&apos;s&#32;value&#32;if&#32;equal&#32;is&#32;true&#32;or&#32;a&#32;different</emphasis>
+122 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;value&#32;if&#32;equal&#32;is&#32;false.</emphasis>
+123 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;The&#32;assumed&#32;value&#32;is&#32;the&#32;caller&apos;s&#32;assumption&#32;about&#32;the&#32;current&#32;value</emphasis>
+124 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;when&#32;making&#32;the&#32;call.</emphasis>
+125 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;__s&#32;and&#32;__ns&#32;are&#32;measured&#32;against&#32;CLOCK_MONOTONIC.</emphasis>
+126 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>
+127 &#32;&#32;&#32;&#32;_M_load_and_test_until_steady(<emphasis role="keywordtype">unsigned</emphasis>&#32;__assumed,&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;__operand,
+128 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">bool</emphasis>&#32;__equal,&#32;<link linkend="__classes_2lib_2include_2stdatomic_8h_1a17c2de5ae768960284c047a320f17d1b">memory_order</link>&#32;__mo,&#32;<emphasis role="keywordtype">bool</emphasis>&#32;__has_timeout,
+129 &#32;&#32;&#32;&#32;chrono::seconds&#32;__s,&#32;chrono::nanoseconds&#32;__ns)
+130 &#32;&#32;&#32;&#32;{
+131 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(;;)
+132 &#32;&#32;&#32;&#32;{
+133 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Don&apos;t&#32;bother&#32;checking&#32;the&#32;value&#32;again&#32;because&#32;we&#32;expect&#32;the&#32;caller</emphasis>
+134 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;to&#32;have&#32;done&#32;it&#32;recently.</emphasis>
+135 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;memory_order_relaxed&#32;is&#32;sufficient&#32;because&#32;we&#32;can&#32;rely&#32;on&#32;just&#32;the</emphasis>
+136 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;modification&#32;order&#32;(store_notify&#32;uses&#32;an&#32;atomic&#32;RMW&#32;operation&#32;too),</emphasis>
+137 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;and&#32;the&#32;futex&#32;syscalls&#32;synchronize&#32;between&#32;themselves.</emphasis>
+138 &#32;&#32;&#32;&#32;&#32;&#32;_M_data.fetch_or(_Waiter_bit,&#32;<link linkend="__classes_2lib_2include_2stdatomic_8h_1a17c2de5ae768960284c047a320f17d1bac6489d0374e297a776f6a3db7ea5654a">memory_order_relaxed</link>);
+139 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">bool</emphasis>&#32;__ret&#32;=&#32;_M_futex_wait_until_steady((<emphasis role="keywordtype">unsigned</emphasis>*)(<emphasis role="keywordtype">void</emphasis>*)&amp;_M_data,
+140 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__assumed&#32;|&#32;_Waiter_bit,
+141 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__has_timeout,&#32;__s,&#32;__ns);
+142 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Fetch&#32;the&#32;current&#32;value&#32;after&#32;waiting&#32;(clears&#32;_Waiter_bit).</emphasis>
+143 &#32;&#32;&#32;&#32;&#32;&#32;__assumed&#32;=&#32;_M_load(__mo);
+144 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(!__ret&#32;||&#32;((__operand&#32;==&#32;__assumed)&#32;==&#32;__equal))
+145 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__assumed;
+146 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;TODO&#32;adapt&#32;wait&#32;time</emphasis>
+147 &#32;&#32;&#32;&#32;}
+148 &#32;&#32;&#32;&#32;}
+149 
+150 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Returns&#32;the&#32;operand&apos;s&#32;value&#32;if&#32;equal&#32;is&#32;true&#32;or&#32;a&#32;different&#32;value&#32;if</emphasis>
+151 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;equal&#32;is&#32;false.</emphasis>
+152 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;The&#32;assumed&#32;value&#32;is&#32;the&#32;caller&apos;s&#32;assumption&#32;about&#32;the&#32;current&#32;value</emphasis>
+153 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;when&#32;making&#32;the&#32;call.</emphasis>
+154 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>
+155 &#32;&#32;&#32;&#32;_M_load_and_test(<emphasis role="keywordtype">unsigned</emphasis>&#32;__assumed,&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;__operand,
+156 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">bool</emphasis>&#32;__equal,&#32;<link linkend="__classes_2lib_2include_2stdatomic_8h_1a17c2de5ae768960284c047a320f17d1b">memory_order</link>&#32;__mo)
+157 &#32;&#32;&#32;&#32;{
+158 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;_M_load_and_test_until(__assumed,&#32;__operand,&#32;__equal,&#32;__mo,
+159 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">false</emphasis>,&#32;{},&#32;{});
+160 &#32;&#32;&#32;&#32;}
+161 
+162 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;If&#32;a&#32;timeout&#32;occurs,&#32;returns&#32;a&#32;current&#32;value&#32;after&#32;the&#32;timeout;</emphasis>
+163 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;otherwise,&#32;returns&#32;the&#32;operand&apos;s&#32;value&#32;if&#32;equal&#32;is&#32;true&#32;or&#32;a&#32;different</emphasis>
+164 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;value&#32;if&#32;equal&#32;is&#32;false.</emphasis>
+165 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;The&#32;assumed&#32;value&#32;is&#32;the&#32;caller&apos;s&#32;assumption&#32;about&#32;the&#32;current&#32;value</emphasis>
+166 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;when&#32;making&#32;the&#32;call.</emphasis>
+167 &#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Dur&gt;
+168 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>
+169 &#32;&#32;&#32;&#32;_M_load_and_test_until_impl(<emphasis role="keywordtype">unsigned</emphasis>&#32;__assumed,&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;__operand,
+170 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">bool</emphasis>&#32;__equal,&#32;<link linkend="__classes_2lib_2include_2stdatomic_8h_1a17c2de5ae768960284c047a320f17d1b">memory_order</link>&#32;__mo,
+171 &#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;chrono::time_point&lt;std::chrono::system_clock,&#32;_Dur&gt;&amp;&#32;__atime)
+172 &#32;&#32;&#32;&#32;{
+173 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">auto</emphasis>&#32;__s&#32;=&#32;chrono::time_point_cast&lt;chrono::seconds&gt;(__atime);
+174 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">auto</emphasis>&#32;__ns&#32;=&#32;chrono::duration_cast&lt;chrono::nanoseconds&gt;(__atime&#32;-&#32;__s);
+175 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;XXX&#32;correct?</emphasis>
+176 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;_M_load_and_test_until(__assumed,&#32;__operand,&#32;__equal,&#32;__mo,
+177 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">true</emphasis>,&#32;__s.time_since_epoch(),&#32;__ns);
+178 &#32;&#32;&#32;&#32;}
+179 
+180 &#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Dur&gt;
+181 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>
+182 &#32;&#32;&#32;&#32;_M_load_and_test_until_impl(<emphasis role="keywordtype">unsigned</emphasis>&#32;__assumed,&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;__operand,
+183 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">bool</emphasis>&#32;__equal,&#32;<link linkend="__classes_2lib_2include_2stdatomic_8h_1a17c2de5ae768960284c047a320f17d1b">memory_order</link>&#32;__mo,
+184 &#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;chrono::time_point&lt;std::chrono::steady_clock,&#32;_Dur&gt;&amp;&#32;__atime)
+185 &#32;&#32;&#32;&#32;{
+186 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">auto</emphasis>&#32;__s&#32;=&#32;chrono::time_point_cast&lt;chrono::seconds&gt;(__atime);
+187 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">auto</emphasis>&#32;__ns&#32;=&#32;chrono::duration_cast&lt;chrono::nanoseconds&gt;(__atime&#32;-&#32;__s);
+188 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;XXX&#32;correct?</emphasis>
+189 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;_M_load_and_test_until_steady(__assumed,&#32;__operand,&#32;__equal,&#32;__mo,
+190 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">true</emphasis>,&#32;__s.time_since_epoch(),&#32;__ns);
+191 &#32;&#32;&#32;&#32;}
+192 
+193 &#32;&#32;<emphasis role="keyword">public</emphasis>:
+194 
+195 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2bits_2atomic__base_8h_1a18755778007fe831d100a2355bd3a653">_GLIBCXX_ALWAYS_INLINE</link>&#32;<emphasis role="keywordtype">unsigned</emphasis>
+196 &#32;&#32;&#32;&#32;_M_load_when_not_equal(<emphasis role="keywordtype">unsigned</emphasis>&#32;<link linkend="__classes_2lib_2include_2stdatomic_8h_1a15181bfd16829c92971879064b9d8dbb">__val</link>,&#32;<link linkend="__classes_2lib_2include_2stdatomic_8h_1a17c2de5ae768960284c047a320f17d1b">memory_order</link>&#32;__mo)
+197 &#32;&#32;&#32;&#32;{
+198 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;__i&#32;=&#32;_M_load(__mo);
+199 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;((__i&#32;&amp;&#32;~_Waiter_bit)&#32;!=&#32;<link linkend="__classes_2lib_2include_2stdatomic_8h_1a15181bfd16829c92971879064b9d8dbb">__val</link>)
+200 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;(__i&#32;&amp;&#32;~_Waiter_bit);
+201 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;TODO&#32;Spin-wait&#32;first.</emphasis>
+202 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;_M_load_and_test(__i,&#32;<link linkend="__classes_2lib_2include_2stdatomic_8h_1a15181bfd16829c92971879064b9d8dbb">__val</link>,&#32;<emphasis role="keyword">false</emphasis>,&#32;__mo);
+203 &#32;&#32;&#32;&#32;}
+204 
+205 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2bits_2atomic__base_8h_1a18755778007fe831d100a2355bd3a653">_GLIBCXX_ALWAYS_INLINE</link>&#32;<emphasis role="keywordtype">void</emphasis>
+206 &#32;&#32;&#32;&#32;_M_load_when_equal(<emphasis role="keywordtype">unsigned</emphasis>&#32;<link linkend="__classes_2lib_2include_2stdatomic_8h_1a15181bfd16829c92971879064b9d8dbb">__val</link>,&#32;<link linkend="__classes_2lib_2include_2stdatomic_8h_1a17c2de5ae768960284c047a320f17d1b">memory_order</link>&#32;__mo)
+207 &#32;&#32;&#32;&#32;{
+208 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;__i&#32;=&#32;_M_load(__mo);
+209 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;((__i&#32;&amp;&#32;~_Waiter_bit)&#32;==&#32;<link linkend="__classes_2lib_2include_2stdatomic_8h_1a15181bfd16829c92971879064b9d8dbb">__val</link>)
+210 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>;
+211 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;TODO&#32;Spin-wait&#32;first.</emphasis>
+212 &#32;&#32;&#32;&#32;&#32;&#32;_M_load_and_test(__i,&#32;<link linkend="__classes_2lib_2include_2stdatomic_8h_1a15181bfd16829c92971879064b9d8dbb">__val</link>,&#32;<emphasis role="keyword">true</emphasis>,&#32;__mo);
+213 &#32;&#32;&#32;&#32;}
+214 
+215 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Returns&#32;false&#32;iff&#32;a&#32;timeout&#32;occurred.</emphasis>
+216 &#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Rep,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Period&gt;
+217 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2bits_2atomic__base_8h_1a18755778007fe831d100a2355bd3a653">_GLIBCXX_ALWAYS_INLINE</link>&#32;<emphasis role="keywordtype">bool</emphasis>
+218 &#32;&#32;&#32;&#32;&#32;&#32;_M_load_when_equal_for(<emphasis role="keywordtype">unsigned</emphasis>&#32;<link linkend="__classes_2lib_2include_2stdatomic_8h_1a15181bfd16829c92971879064b9d8dbb">__val</link>,&#32;<link linkend="__classes_2lib_2include_2stdatomic_8h_1a17c2de5ae768960284c047a320f17d1b">memory_order</link>&#32;__mo,
+219 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;chrono::duration&lt;_Rep,&#32;_Period&gt;&amp;&#32;__rtime)
+220 &#32;&#32;&#32;&#32;&#32;&#32;{
+221 &#32;&#32;&#32;&#32;<emphasis role="keyword">using&#32;</emphasis>__dur&#32;=&#32;<emphasis role="keyword">typename</emphasis>&#32;__clock_t::duration;
+222 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;_M_load_when_equal_until(<link linkend="__classes_2lib_2include_2stdatomic_8h_1a15181bfd16829c92971879064b9d8dbb">__val</link>,&#32;__mo,
+223 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__clock_t::now()&#32;+&#32;chrono::__detail::ceil&lt;__dur&gt;(__rtime));
+224 &#32;&#32;&#32;&#32;&#32;&#32;}
+225 
+226 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Returns&#32;false&#32;iff&#32;a&#32;timeout&#32;occurred.</emphasis>
+227 &#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Clock,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Duration&gt;
+228 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2bits_2atomic__base_8h_1a18755778007fe831d100a2355bd3a653">_GLIBCXX_ALWAYS_INLINE</link>&#32;<emphasis role="keywordtype">bool</emphasis>
+229 &#32;&#32;&#32;&#32;&#32;&#32;_M_load_when_equal_until(<emphasis role="keywordtype">unsigned</emphasis>&#32;<link linkend="__classes_2lib_2include_2stdatomic_8h_1a15181bfd16829c92971879064b9d8dbb">__val</link>,&#32;<link linkend="__classes_2lib_2include_2stdatomic_8h_1a17c2de5ae768960284c047a320f17d1b">memory_order</link>&#32;__mo,
+230 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;chrono::time_point&lt;_Clock,&#32;_Duration&gt;&amp;&#32;__atime)
+231 &#32;&#32;&#32;&#32;&#32;&#32;{
+232 &#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;_Clock::time_point&#32;__c_entry&#32;=&#32;_Clock::now();
+233 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">do</emphasis>&#32;{
+234 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;__clock_t::time_point&#32;__s_entry&#32;=&#32;__clock_t::now();
+235 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keyword">auto</emphasis>&#32;__delta&#32;=&#32;__atime&#32;-&#32;__c_entry;
+236 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keyword">auto</emphasis>&#32;__s_atime&#32;=&#32;__s_entry&#32;+
+237 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;chrono::__detail::ceil&lt;__clock_t::duration&gt;(__delta);
+238 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(_M_load_when_equal_until(<link linkend="__classes_2lib_2include_2stdatomic_8h_1a15181bfd16829c92971879064b9d8dbb">__val</link>,&#32;__mo,&#32;__s_atime))
+239 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<emphasis role="keyword">true</emphasis>;
+240 &#32;&#32;&#32;&#32;&#32;&#32;__c_entry&#32;=&#32;_Clock::now();
+241 &#32;&#32;&#32;&#32;}&#32;<emphasis role="keywordflow">while</emphasis>&#32;(__c_entry&#32;&lt;&#32;__atime);
+242 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<emphasis role="keyword">false</emphasis>;
+243 &#32;&#32;&#32;&#32;&#32;&#32;}
+244 
+245 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Returns&#32;false&#32;iff&#32;a&#32;timeout&#32;occurred.</emphasis>
+246 &#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Duration&gt;
+247 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2bits_2atomic__base_8h_1a18755778007fe831d100a2355bd3a653">_GLIBCXX_ALWAYS_INLINE</link>&#32;<emphasis role="keywordtype">bool</emphasis>
+248 &#32;&#32;&#32;&#32;_M_load_when_equal_until(<emphasis role="keywordtype">unsigned</emphasis>&#32;<link linkend="__classes_2lib_2include_2stdatomic_8h_1a15181bfd16829c92971879064b9d8dbb">__val</link>,&#32;<link linkend="__classes_2lib_2include_2stdatomic_8h_1a17c2de5ae768960284c047a320f17d1b">memory_order</link>&#32;__mo,
+249 &#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;chrono::time_point&lt;std::chrono::system_clock,&#32;_Duration&gt;&amp;&#32;__atime)
+250 &#32;&#32;&#32;&#32;{
+251 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;__i&#32;=&#32;_M_load(__mo);
+252 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;((__i&#32;&amp;&#32;~_Waiter_bit)&#32;==&#32;<link linkend="__classes_2lib_2include_2stdatomic_8h_1a15181bfd16829c92971879064b9d8dbb">__val</link>)
+253 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<emphasis role="keyword">true</emphasis>;
+254 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;TODO&#32;Spin-wait&#32;first.&#32;&#32;Ignore&#32;effect&#32;on&#32;timeout.</emphasis>
+255 &#32;&#32;&#32;&#32;&#32;&#32;__i&#32;=&#32;_M_load_and_test_until_impl(__i,&#32;<link linkend="__classes_2lib_2include_2stdatomic_8h_1a15181bfd16829c92971879064b9d8dbb">__val</link>,&#32;<emphasis role="keyword">true</emphasis>,&#32;__mo,&#32;__atime);
+256 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;(__i&#32;&amp;&#32;~_Waiter_bit)&#32;==&#32;<link linkend="__classes_2lib_2include_2stdatomic_8h_1a15181bfd16829c92971879064b9d8dbb">__val</link>;
+257 &#32;&#32;&#32;&#32;}
+258 
+259 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Returns&#32;false&#32;iff&#32;a&#32;timeout&#32;occurred.</emphasis>
+260 &#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Duration&gt;
+261 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2bits_2atomic__base_8h_1a18755778007fe831d100a2355bd3a653">_GLIBCXX_ALWAYS_INLINE</link>&#32;<emphasis role="keywordtype">bool</emphasis>
+262 &#32;&#32;&#32;&#32;_M_load_when_equal_until(<emphasis role="keywordtype">unsigned</emphasis>&#32;<link linkend="__classes_2lib_2include_2stdatomic_8h_1a15181bfd16829c92971879064b9d8dbb">__val</link>,&#32;<link linkend="__classes_2lib_2include_2stdatomic_8h_1a17c2de5ae768960284c047a320f17d1b">memory_order</link>&#32;__mo,
+263 &#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;chrono::time_point&lt;std::chrono::steady_clock,&#32;_Duration&gt;&amp;&#32;__atime)
+264 &#32;&#32;&#32;&#32;{
+265 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;__i&#32;=&#32;_M_load(__mo);
+266 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;((__i&#32;&amp;&#32;~_Waiter_bit)&#32;==&#32;<link linkend="__classes_2lib_2include_2stdatomic_8h_1a15181bfd16829c92971879064b9d8dbb">__val</link>)
+267 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<emphasis role="keyword">true</emphasis>;
+268 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;TODO&#32;Spin-wait&#32;first.&#32;&#32;Ignore&#32;effect&#32;on&#32;timeout.</emphasis>
+269 &#32;&#32;&#32;&#32;&#32;&#32;__i&#32;=&#32;_M_load_and_test_until_impl(__i,&#32;<link linkend="__classes_2lib_2include_2stdatomic_8h_1a15181bfd16829c92971879064b9d8dbb">__val</link>,&#32;<emphasis role="keyword">true</emphasis>,&#32;__mo,&#32;__atime);
+270 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;(__i&#32;&amp;&#32;~_Waiter_bit)&#32;==&#32;<link linkend="__classes_2lib_2include_2stdatomic_8h_1a15181bfd16829c92971879064b9d8dbb">__val</link>;
+271 &#32;&#32;&#32;&#32;}
+272 
+273 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2bits_2atomic__base_8h_1a18755778007fe831d100a2355bd3a653">_GLIBCXX_ALWAYS_INLINE</link>&#32;<emphasis role="keywordtype">void</emphasis>
+274 &#32;&#32;&#32;&#32;_M_store_notify_all(<emphasis role="keywordtype">unsigned</emphasis>&#32;<link linkend="__classes_2lib_2include_2stdatomic_8h_1a15181bfd16829c92971879064b9d8dbb">__val</link>,&#32;<link linkend="__classes_2lib_2include_2stdatomic_8h_1a17c2de5ae768960284c047a320f17d1b">memory_order</link>&#32;__mo)
+275 &#32;&#32;&#32;&#32;{
+276 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>*&#32;__futex&#32;=&#32;(<emphasis role="keywordtype">unsigned</emphasis>&#32;*)(<emphasis role="keywordtype">void</emphasis>&#32;*)&amp;_M_data;
+277 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(_M_data.exchange(<link linkend="__classes_2lib_2include_2stdatomic_8h_1a15181bfd16829c92971879064b9d8dbb">__val</link>,&#32;__mo)&#32;&amp;&#32;_Waiter_bit)
+278 &#32;&#32;&#32;&#32;_M_futex_notify_all(__futex);
+279 &#32;&#32;&#32;&#32;}
+280 &#32;&#32;};
+281 
+282 <emphasis role="preprocessor">#else&#32;</emphasis><emphasis role="comment">//&#32;!&#32;(_GLIBCXX_HAVE_LINUX_FUTEX&#32;&amp;&amp;&#32;ATOMIC_INT_LOCK_FREE&#32;&gt;&#32;1)</emphasis>
+283 
+284 &#32;&#32;<emphasis role="comment">//&#32;If&#32;futexes&#32;are&#32;not&#32;available,&#32;use&#32;a&#32;mutex&#32;and&#32;a&#32;condvar&#32;to&#32;wait.</emphasis>
+285 &#32;&#32;<emphasis role="comment">//&#32;Because&#32;we&#32;access&#32;the&#32;data&#32;only&#32;within&#32;critical&#32;sections,&#32;all&#32;accesses</emphasis>
+286 &#32;&#32;<emphasis role="comment">//&#32;are&#32;sequentially&#32;consistent;&#32;thus,&#32;we&#32;satisfy&#32;any&#32;provided&#32;memory_order.</emphasis>
+287 &#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keywordtype">unsigned</emphasis>&#32;_Waiter_bit&#32;=&#32;0x80000000&gt;
+288 &#32;&#32;<emphasis role="keyword">class&#32;</emphasis>__atomic_futex_unsigned
+289 &#32;&#32;{
+290 &#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;chrono::system_clock&#32;__clock_t;
+291 
+292 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;_M_data;
+293 &#32;&#32;&#32;&#32;mutex&#32;_M_mutex;
+294 &#32;&#32;&#32;&#32;condition_variable&#32;_M_condvar;
+295 
+296 &#32;&#32;<emphasis role="keyword">public</emphasis>:
+297 &#32;&#32;&#32;&#32;<emphasis role="keyword">explicit</emphasis>
+298 &#32;&#32;&#32;&#32;__atomic_futex_unsigned(<emphasis role="keywordtype">unsigned</emphasis>&#32;__data)&#32;:&#32;_M_data(__data)
+299 &#32;&#32;&#32;&#32;{&#32;}
+300 
+301 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2bits_2atomic__base_8h_1a18755778007fe831d100a2355bd3a653">_GLIBCXX_ALWAYS_INLINE</link>&#32;<emphasis role="keywordtype">unsigned</emphasis>
+302 &#32;&#32;&#32;&#32;_M_load(<link linkend="__classes_2lib_2include_2stdatomic_8h_1a17c2de5ae768960284c047a320f17d1b">memory_order</link>&#32;__mo)
+303 &#32;&#32;&#32;&#32;{
+304 &#32;&#32;&#32;&#32;&#32;&#32;unique_lock&lt;mutex&gt;&#32;__lock(_M_mutex);
+305 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;_M_data;
+306 &#32;&#32;&#32;&#32;}
+307 
+308 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2bits_2atomic__base_8h_1a18755778007fe831d100a2355bd3a653">_GLIBCXX_ALWAYS_INLINE</link>&#32;<emphasis role="keywordtype">unsigned</emphasis>
+309 &#32;&#32;&#32;&#32;_M_load_when_not_equal(<emphasis role="keywordtype">unsigned</emphasis>&#32;<link linkend="__classes_2lib_2include_2stdatomic_8h_1a15181bfd16829c92971879064b9d8dbb">__val</link>,&#32;<link linkend="__classes_2lib_2include_2stdatomic_8h_1a17c2de5ae768960284c047a320f17d1b">memory_order</link>&#32;__mo)
+310 &#32;&#32;&#32;&#32;{
+311 &#32;&#32;&#32;&#32;&#32;&#32;unique_lock&lt;mutex&gt;&#32;__lock(_M_mutex);
+312 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">while</emphasis>&#32;(_M_data&#32;==&#32;<link linkend="__classes_2lib_2include_2stdatomic_8h_1a15181bfd16829c92971879064b9d8dbb">__val</link>)
+313 &#32;&#32;&#32;&#32;_M_condvar.wait(__lock);
+314 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;_M_data;
+315 &#32;&#32;&#32;&#32;}
+316 
+317 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2bits_2atomic__base_8h_1a18755778007fe831d100a2355bd3a653">_GLIBCXX_ALWAYS_INLINE</link>&#32;<emphasis role="keywordtype">void</emphasis>
+318 &#32;&#32;&#32;&#32;_M_load_when_equal(<emphasis role="keywordtype">unsigned</emphasis>&#32;<link linkend="__classes_2lib_2include_2stdatomic_8h_1a15181bfd16829c92971879064b9d8dbb">__val</link>,&#32;<link linkend="__classes_2lib_2include_2stdatomic_8h_1a17c2de5ae768960284c047a320f17d1b">memory_order</link>&#32;__mo)
+319 &#32;&#32;&#32;&#32;{
+320 &#32;&#32;&#32;&#32;&#32;&#32;unique_lock&lt;mutex&gt;&#32;__lock(_M_mutex);
+321 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">while</emphasis>&#32;(_M_data&#32;!=&#32;<link linkend="__classes_2lib_2include_2stdatomic_8h_1a15181bfd16829c92971879064b9d8dbb">__val</link>)
+322 &#32;&#32;&#32;&#32;_M_condvar.wait(__lock);
+323 &#32;&#32;&#32;&#32;}
+324 
+325 &#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Rep,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Period&gt;
+326 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2bits_2atomic__base_8h_1a18755778007fe831d100a2355bd3a653">_GLIBCXX_ALWAYS_INLINE</link>&#32;<emphasis role="keywordtype">bool</emphasis>
+327 &#32;&#32;&#32;&#32;&#32;&#32;_M_load_when_equal_for(<emphasis role="keywordtype">unsigned</emphasis>&#32;<link linkend="__classes_2lib_2include_2stdatomic_8h_1a15181bfd16829c92971879064b9d8dbb">__val</link>,&#32;<link linkend="__classes_2lib_2include_2stdatomic_8h_1a17c2de5ae768960284c047a320f17d1b">memory_order</link>&#32;__mo,
+328 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;chrono::duration&lt;_Rep,&#32;_Period&gt;&amp;&#32;__rtime)
+329 &#32;&#32;&#32;&#32;&#32;&#32;{
+330 &#32;&#32;&#32;&#32;unique_lock&lt;mutex&gt;&#32;__lock(_M_mutex);
+331 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;_M_condvar.wait_for(__lock,&#32;__rtime,
+332 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;[&amp;]&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;_M_data&#32;==&#32;<link linkend="__classes_2lib_2include_2stdatomic_8h_1a15181bfd16829c92971879064b9d8dbb">__val</link>;});
+333 &#32;&#32;&#32;&#32;&#32;&#32;}
+334 
+335 &#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Clock,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Duration&gt;
+336 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2bits_2atomic__base_8h_1a18755778007fe831d100a2355bd3a653">_GLIBCXX_ALWAYS_INLINE</link>&#32;<emphasis role="keywordtype">bool</emphasis>
+337 &#32;&#32;&#32;&#32;&#32;&#32;_M_load_when_equal_until(<emphasis role="keywordtype">unsigned</emphasis>&#32;<link linkend="__classes_2lib_2include_2stdatomic_8h_1a15181bfd16829c92971879064b9d8dbb">__val</link>,&#32;<link linkend="__classes_2lib_2include_2stdatomic_8h_1a17c2de5ae768960284c047a320f17d1b">memory_order</link>&#32;__mo,
+338 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;chrono::time_point&lt;_Clock,&#32;_Duration&gt;&amp;&#32;__atime)
+339 &#32;&#32;&#32;&#32;&#32;&#32;{
+340 &#32;&#32;&#32;&#32;unique_lock&lt;mutex&gt;&#32;__lock(_M_mutex);
+341 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;_M_condvar.wait_until(__lock,&#32;__atime,
+342 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;[&amp;]&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;_M_data&#32;==&#32;<link linkend="__classes_2lib_2include_2stdatomic_8h_1a15181bfd16829c92971879064b9d8dbb">__val</link>;});
+343 &#32;&#32;&#32;&#32;&#32;&#32;}
+344 
+345 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2bits_2atomic__base_8h_1a18755778007fe831d100a2355bd3a653">_GLIBCXX_ALWAYS_INLINE</link>&#32;<emphasis role="keywordtype">void</emphasis>
+346 &#32;&#32;&#32;&#32;_M_store_notify_all(<emphasis role="keywordtype">unsigned</emphasis>&#32;<link linkend="__classes_2lib_2include_2stdatomic_8h_1a15181bfd16829c92971879064b9d8dbb">__val</link>,&#32;<link linkend="__classes_2lib_2include_2stdatomic_8h_1a17c2de5ae768960284c047a320f17d1b">memory_order</link>&#32;__mo)
+347 &#32;&#32;&#32;&#32;{
+348 &#32;&#32;&#32;&#32;&#32;&#32;unique_lock&lt;mutex&gt;&#32;__lock(_M_mutex);
+349 &#32;&#32;&#32;&#32;&#32;&#32;_M_data&#32;=&#32;<link linkend="__classes_2lib_2include_2stdatomic_8h_1a15181bfd16829c92971879064b9d8dbb">__val</link>;
+350 &#32;&#32;&#32;&#32;&#32;&#32;_M_condvar.notify_all();
+351 &#32;&#32;&#32;&#32;}
+352 &#32;&#32;};
+353 
+354 <emphasis role="preprocessor">#endif&#32;</emphasis><emphasis role="comment">//&#32;_GLIBCXX_HAVE_LINUX_FUTEX&#32;&amp;&amp;&#32;ATOMIC_INT_LOCK_FREE&#32;&gt;&#32;1</emphasis>
+355 <emphasis role="preprocessor">#endif&#32;</emphasis><emphasis role="comment">//&#32;_GLIBCXX_HAS_GTHREADS</emphasis>
+356 
+357 _GLIBCXX_END_NAMESPACE_VERSION
+358 }&#32;<emphasis role="comment">//&#32;namespace&#32;std</emphasis>
+359 
+360 <emphasis role="preprocessor">#endif</emphasis>
+</programlisting></section>

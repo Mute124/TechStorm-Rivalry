@@ -1,0 +1,531 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<section xmlns="http://docbook.org/ns/docbook" version="5.0" xmlns:xlink="http://www.w3.org/1999/xlink" xml:id="__classes_2lib_2include_2c_09_09_2ext_2pb__ds_2hash__policy_8hpp_source" xml:lang="en-US">
+<title>hash_policy.hpp</title>
+<indexterm><primary>C:/Users/HP/Documents/GitHub/Minero-Game/Classes/lib/include/c++/ext/pb_ds/hash_policy.hpp</primary></indexterm>
+Go to the documentation of this file.<programlisting linenumbering="unnumbered">1 <emphasis role="comment">//&#32;-*-&#32;C++&#32;-*-</emphasis>
+2 
+3 <emphasis role="comment">//&#32;Copyright&#32;(C)&#32;2005-2022&#32;Free&#32;Software&#32;Foundation,&#32;Inc.</emphasis>
+4 <emphasis role="comment">//</emphasis>
+5 <emphasis role="comment">//&#32;This&#32;file&#32;is&#32;part&#32;of&#32;the&#32;GNU&#32;ISO&#32;C++&#32;Library.&#32;&#32;This&#32;library&#32;is&#32;free</emphasis>
+6 <emphasis role="comment">//&#32;software;&#32;you&#32;can&#32;redistribute&#32;it&#32;and/or&#32;modify&#32;it&#32;under&#32;the&#32;terms</emphasis>
+7 <emphasis role="comment">//&#32;of&#32;the&#32;GNU&#32;General&#32;Public&#32;License&#32;as&#32;published&#32;by&#32;the&#32;Free&#32;Software</emphasis>
+8 <emphasis role="comment">//&#32;Foundation;&#32;either&#32;version&#32;3,&#32;or&#32;(at&#32;your&#32;option)&#32;any&#32;later</emphasis>
+9 <emphasis role="comment">//&#32;version.</emphasis>
+10 
+11 <emphasis role="comment">//&#32;This&#32;library&#32;is&#32;distributed&#32;in&#32;the&#32;hope&#32;that&#32;it&#32;will&#32;be&#32;useful,&#32;but</emphasis>
+12 <emphasis role="comment">//&#32;WITHOUT&#32;ANY&#32;WARRANTY;&#32;without&#32;even&#32;the&#32;implied&#32;warranty&#32;of</emphasis>
+13 <emphasis role="comment">//&#32;MERCHANTABILITY&#32;or&#32;FITNESS&#32;FOR&#32;A&#32;PARTICULAR&#32;PURPOSE.&#32;&#32;See&#32;the&#32;GNU</emphasis>
+14 <emphasis role="comment">//&#32;General&#32;Public&#32;License&#32;for&#32;more&#32;details.</emphasis>
+15 
+16 <emphasis role="comment">//&#32;Under&#32;Section&#32;7&#32;of&#32;GPL&#32;version&#32;3,&#32;you&#32;are&#32;granted&#32;additional</emphasis>
+17 <emphasis role="comment">//&#32;permissions&#32;described&#32;in&#32;the&#32;GCC&#32;Runtime&#32;Library&#32;Exception,&#32;version</emphasis>
+18 <emphasis role="comment">//&#32;3.1,&#32;as&#32;published&#32;by&#32;the&#32;Free&#32;Software&#32;Foundation.</emphasis>
+19 
+20 <emphasis role="comment">//&#32;You&#32;should&#32;have&#32;received&#32;a&#32;copy&#32;of&#32;the&#32;GNU&#32;General&#32;Public&#32;License&#32;and</emphasis>
+21 <emphasis role="comment">//&#32;a&#32;copy&#32;of&#32;the&#32;GCC&#32;Runtime&#32;Library&#32;Exception&#32;along&#32;with&#32;this&#32;program;</emphasis>
+22 <emphasis role="comment">//&#32;see&#32;the&#32;files&#32;COPYING3&#32;and&#32;COPYING.RUNTIME&#32;respectively.&#32;&#32;If&#32;not,&#32;see</emphasis>
+23 <emphasis role="comment">//&#32;&lt;http://www.gnu.org/licenses/&gt;.</emphasis>
+24 
+25 <emphasis role="comment">//&#32;Copyright&#32;(C)&#32;2004&#32;Ami&#32;Tavory&#32;and&#32;Vladimir&#32;Dreizin,&#32;IBM-HRL.</emphasis>
+26 
+27 <emphasis role="comment">//&#32;Permission&#32;to&#32;use,&#32;copy,&#32;modify,&#32;sell,&#32;and&#32;distribute&#32;this&#32;software</emphasis>
+28 <emphasis role="comment">//&#32;is&#32;hereby&#32;granted&#32;without&#32;fee,&#32;provided&#32;that&#32;the&#32;above&#32;copyright</emphasis>
+29 <emphasis role="comment">//&#32;notice&#32;appears&#32;in&#32;all&#32;copies,&#32;and&#32;that&#32;both&#32;that&#32;copyright&#32;notice</emphasis>
+30 <emphasis role="comment">//&#32;and&#32;this&#32;permission&#32;notice&#32;appear&#32;in&#32;supporting&#32;documentation.&#32;None</emphasis>
+31 <emphasis role="comment">//&#32;of&#32;the&#32;above&#32;authors,&#32;nor&#32;IBM&#32;Haifa&#32;Research&#32;Laboratories,&#32;make&#32;any</emphasis>
+32 <emphasis role="comment">//&#32;representation&#32;about&#32;the&#32;suitability&#32;of&#32;this&#32;software&#32;for&#32;any</emphasis>
+33 <emphasis role="comment">//&#32;purpose.&#32;It&#32;is&#32;provided&#32;&quot;as&#32;is&quot;&#32;without&#32;express&#32;or&#32;implied</emphasis>
+34 <emphasis role="comment">//&#32;warranty.</emphasis>
+35 
+41 <emphasis role="preprocessor">#ifndef&#32;PB_DS_HASH_POLICY_HPP</emphasis>
+42 <emphasis role="preprocessor">#define&#32;PB_DS_HASH_POLICY_HPP</emphasis>
+43 
+44 <emphasis role="preprocessor">#include&#32;&lt;bits/c++config.h&gt;</emphasis>
+45 <emphasis role="preprocessor">#include&#32;&lt;algorithm&gt;</emphasis>
+46 <emphasis role="preprocessor">#include&#32;&lt;vector&gt;</emphasis>
+47 <emphasis role="preprocessor">#include&#32;&lt;cmath&gt;</emphasis>
+48 <emphasis role="preprocessor">#include&#32;&lt;ext/pb_ds/exception.hpp&gt;</emphasis>
+49 <emphasis role="preprocessor">#include&#32;&lt;ext/pb_ds/detail/type_utils.hpp&gt;</emphasis>
+50 <emphasis role="preprocessor">#include&#32;&lt;ext/pb_ds/detail/hash_fn/mask_based_range_hashing.hpp&gt;</emphasis>
+51 <emphasis role="preprocessor">#include&#32;&lt;ext/pb_ds/detail/hash_fn/mod_based_range_hashing.hpp&gt;</emphasis>
+52 <emphasis role="preprocessor">#include&#32;&lt;ext/pb_ds/detail/resize_policy/hash_load_check_resize_trigger_size_base.hpp&gt;</emphasis>
+53 
+54 <emphasis role="keyword">namespace&#32;</emphasis><link linkend="_namespace____gnu__pbds">__gnu_pbds</link>
+55 {
+56 <emphasis role="preprocessor">#define&#32;PB_DS_CLASS_T_DEC&#32;template&lt;typename&#32;Size_Type&gt;</emphasis>
+57 <emphasis role="preprocessor">#define&#32;PB_DS_CLASS_C_DEC&#32;linear_probe_fn&lt;Size_Type&gt;</emphasis>
+58 
+60 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;Size_Type&#32;=&#32;std::<emphasis role="keywordtype">size_t</emphasis>&gt;
+61 &#32;&#32;<emphasis role="keyword">class&#32;</emphasis><link linkend="_class____gnu__pbds_1_1linear__probe__fn">linear_probe_fn</link>
+62 &#32;&#32;{
+63 &#32;&#32;<emphasis role="keyword">public</emphasis>:
+64 &#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;Size_Type&#32;<link linkend="_class____gnu__pbds_1_1linear__probe__fn_1aaf0b1d54dda6d85d8f1025ef40125b54">size_type</link>;
+65 
+66 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+67 &#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1linear__probe__fn_1aba1130faf76b9b2acda7ef5f76b47127">swap</link>(<link linkend="__classes_2lib_2include_2c_09_09_2ext_2pb__ds_2detail_2bin__search__tree___2bin__search__tree___8hpp_1a304b8b73a11afe64bfca54576b91263b">PB_DS_CLASS_C_DEC</link>&amp;&#32;other);
+68 
+69 &#32;&#32;<emphasis role="keyword">protected</emphasis>:
+71 &#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<link linkend="_class____gnu__pbds_1_1linear__probe__fn_1aaf0b1d54dda6d85d8f1025ef40125b54">size_type</link>
+72 &#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1linear__probe__fn_1a2157046a86e4bdfeb4ae33ef885e9167">operator()</link>(<link linkend="_class____gnu__pbds_1_1linear__probe__fn_1aaf0b1d54dda6d85d8f1025ef40125b54">size_type</link>&#32;i)&#32;<emphasis role="keyword">const</emphasis>;
+73 &#32;&#32;};
+74 
+75 <emphasis role="preprocessor">#include&#32;&lt;ext/pb_ds/detail/hash_fn/linear_probe_fn_imp.hpp&gt;</emphasis>
+76 
+77 <emphasis role="preprocessor">#undef&#32;PB_DS_CLASS_T_DEC</emphasis>
+78 <emphasis role="preprocessor">#undef&#32;PB_DS_CLASS_C_DEC</emphasis>
+79 
+80 <emphasis role="preprocessor">#define&#32;PB_DS_CLASS_T_DEC&#32;template&lt;typename&#32;Size_Type&gt;</emphasis>
+81 <emphasis role="preprocessor">#define&#32;PB_DS_CLASS_C_DEC&#32;quadratic_probe_fn&lt;Size_Type&gt;</emphasis>
+82 
+84 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;Size_Type&#32;=&#32;std::<emphasis role="keywordtype">size_t</emphasis>&gt;
+85 &#32;&#32;<emphasis role="keyword">class&#32;</emphasis><link linkend="_class____gnu__pbds_1_1quadratic__probe__fn">quadratic_probe_fn</link>
+86 &#32;&#32;{
+87 &#32;&#32;<emphasis role="keyword">public</emphasis>:
+88 &#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;Size_Type&#32;<link linkend="_class____gnu__pbds_1_1quadratic__probe__fn_1a80677b80fba8e537a76cefc11ca771a8">size_type</link>;
+89 
+90 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+91 &#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1quadratic__probe__fn_1a0d6e12ced4799487ff36d5b859a669b5">swap</link>(<link linkend="__classes_2lib_2include_2c_09_09_2ext_2pb__ds_2detail_2bin__search__tree___2bin__search__tree___8hpp_1a304b8b73a11afe64bfca54576b91263b">PB_DS_CLASS_C_DEC</link>&amp;&#32;other);
+92 
+93 &#32;&#32;<emphasis role="keyword">protected</emphasis>:
+95 &#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<link linkend="_class____gnu__pbds_1_1quadratic__probe__fn_1a80677b80fba8e537a76cefc11ca771a8">size_type</link>
+96 &#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1quadratic__probe__fn_1a1af48a13b9400a49e8b50c866e4737aa">operator()</link>(<link linkend="_class____gnu__pbds_1_1quadratic__probe__fn_1a80677b80fba8e537a76cefc11ca771a8">size_type</link>&#32;i)&#32;<emphasis role="keyword">const</emphasis>;
+97 &#32;&#32;};
+98 
+99 <emphasis role="preprocessor">#include&#32;&lt;ext/pb_ds/detail/hash_fn/quadratic_probe_fn_imp.hpp&gt;</emphasis>
+100 
+101 <emphasis role="preprocessor">#undef&#32;PB_DS_CLASS_T_DEC</emphasis>
+102 <emphasis role="preprocessor">#undef&#32;PB_DS_CLASS_C_DEC</emphasis>
+103 
+104 <emphasis role="preprocessor">#define&#32;PB_DS_CLASS_T_DEC&#32;template&lt;typename&#32;Size_Type&gt;</emphasis>
+105 <emphasis role="preprocessor">#define&#32;PB_DS_CLASS_C_DEC&#32;direct_mask_range_hashing&lt;Size_Type&gt;</emphasis>
+106 
+108 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;Size_Type&#32;=&#32;std::<emphasis role="keywordtype">size_t</emphasis>&gt;
+109 &#32;&#32;<emphasis role="keyword">class&#32;</emphasis><link linkend="_class____gnu__pbds_1_1direct__mask__range__hashing">direct_mask_range_hashing</link>
+110 &#32;&#32;:&#32;<emphasis role="keyword">public</emphasis>&#32;<link linkend="_class____gnu__pbds_1_1detail_1_1mask__based__range__hashing">detail::mask_based_range_hashing</link>&lt;Size_Type&gt;
+111 &#32;&#32;{
+112 &#32;&#32;<emphasis role="keyword">private</emphasis>:
+113 &#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<link linkend="_class____gnu__pbds_1_1detail_1_1mask__based__range__hashing">detail::mask_based_range_hashing&lt;Size_Type&gt;</link>&#32;<link linkend="_class____gnu__pbds_1_1detail_1_1mask__based__range__hashing">mask_based_base</link>;
+114 
+115 &#32;&#32;<emphasis role="keyword">public</emphasis>:
+116 &#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;Size_Type&#32;<link linkend="_class____gnu__pbds_1_1direct__mask__range__hashing_1a02078ecc00e2e5e0dbfa57808341ac7f">size_type</link>;
+117 
+118 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+119 &#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1direct__mask__range__hashing_1a199bc79740bd6fd5fc7ff6f156a7e8cc">swap</link>(<link linkend="__classes_2lib_2include_2c_09_09_2ext_2pb__ds_2detail_2bin__search__tree___2bin__search__tree___8hpp_1a304b8b73a11afe64bfca54576b91263b">PB_DS_CLASS_C_DEC</link>&amp;&#32;other);
+120 
+121 &#32;&#32;<emphasis role="keyword">protected</emphasis>:
+122 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+123 &#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1direct__mask__range__hashing_1a1d6ffb60812e450b4396fcbfd1c2e1d2">notify_resized</link>(<link linkend="_class____gnu__pbds_1_1direct__mask__range__hashing_1a02078ecc00e2e5e0dbfa57808341ac7f">size_type</link>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a3d1e3edfcf61ca2d831883e1afbad89e">size</link>);
+124 
+127 &#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<link linkend="_class____gnu__pbds_1_1direct__mask__range__hashing_1a02078ecc00e2e5e0dbfa57808341ac7f">size_type</link>
+128 &#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1direct__mask__range__hashing_1a0c4e753aaa7d9e0763bb509cde1920d6">operator()</link>(<link linkend="_class____gnu__pbds_1_1direct__mask__range__hashing_1a02078ecc00e2e5e0dbfa57808341ac7f">size_type</link>&#32;hash)&#32;<emphasis role="keyword">const</emphasis>;
+129 &#32;&#32;};
+130 
+131 <emphasis role="preprocessor">#include&#32;&lt;ext/pb_ds/detail/hash_fn/direct_mask_range_hashing_imp.hpp&gt;</emphasis>
+132 
+133 <emphasis role="preprocessor">#undef&#32;PB_DS_CLASS_T_DEC</emphasis>
+134 <emphasis role="preprocessor">#undef&#32;PB_DS_CLASS_C_DEC</emphasis>
+135 
+136 <emphasis role="preprocessor">#define&#32;PB_DS_CLASS_T_DEC&#32;template&lt;typename&#32;Size_Type&gt;</emphasis>
+137 <emphasis role="preprocessor">#define&#32;PB_DS_CLASS_C_DEC&#32;direct_mod_range_hashing&lt;Size_Type&gt;</emphasis>
+138 
+140 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;Size_Type&#32;=&#32;std::<emphasis role="keywordtype">size_t</emphasis>&gt;
+141 &#32;&#32;<emphasis role="keyword">class&#32;</emphasis><link linkend="_class____gnu__pbds_1_1direct__mod__range__hashing">direct_mod_range_hashing</link>
+142 &#32;&#32;:&#32;<emphasis role="keyword">public</emphasis>&#32;<link linkend="_class____gnu__pbds_1_1detail_1_1mod__based__range__hashing">detail::mod_based_range_hashing</link>&lt;Size_Type&gt;
+143 &#32;&#32;{
+144 &#32;&#32;<emphasis role="keyword">public</emphasis>:
+145 &#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;Size_Type&#32;<link linkend="_class____gnu__pbds_1_1direct__mod__range__hashing_1a69026bda29bec3e64ca260edc31fa9f8">size_type</link>;
+146 
+147 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+148 &#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1direct__mod__range__hashing_1ae33e0f416ca38247514e151b1e3f6054">swap</link>(<link linkend="__classes_2lib_2include_2c_09_09_2ext_2pb__ds_2detail_2bin__search__tree___2bin__search__tree___8hpp_1a304b8b73a11afe64bfca54576b91263b">PB_DS_CLASS_C_DEC</link>&amp;&#32;other);
+149 
+150 &#32;&#32;<emphasis role="keyword">protected</emphasis>:
+151 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+152 &#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1direct__mod__range__hashing_1a69622a3a60b6575a92988949ba63c67a">notify_resized</link>(<link linkend="_class____gnu__pbds_1_1direct__mod__range__hashing_1a69026bda29bec3e64ca260edc31fa9f8">size_type</link>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a3d1e3edfcf61ca2d831883e1afbad89e">size</link>);
+153 
+156 &#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<link linkend="_class____gnu__pbds_1_1direct__mod__range__hashing_1a69026bda29bec3e64ca260edc31fa9f8">size_type</link>
+157 &#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1direct__mod__range__hashing_1a7e5f3882e94e2faee2a5d8d781f0284d">operator()</link>(<link linkend="_class____gnu__pbds_1_1direct__mod__range__hashing_1a69026bda29bec3e64ca260edc31fa9f8">size_type</link>&#32;hash)&#32;<emphasis role="keyword">const</emphasis>;
+158 
+159 &#32;&#32;<emphasis role="keyword">private</emphasis>:
+160 &#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<link linkend="_class____gnu__pbds_1_1detail_1_1mod__based__range__hashing">detail::mod_based_range_hashing&lt;size_type&gt;</link>&#32;<link linkend="_class____gnu__pbds_1_1detail_1_1mod__based__range__hashing">mod_based_base</link>;
+161 &#32;&#32;};
+162 
+163 <emphasis role="preprocessor">#include&#32;&lt;ext/pb_ds/detail/hash_fn/direct_mod_range_hashing_imp.hpp&gt;</emphasis>
+164 
+165 <emphasis role="preprocessor">#undef&#32;PB_DS_CLASS_T_DEC</emphasis>
+166 <emphasis role="preprocessor">#undef&#32;PB_DS_CLASS_C_DEC</emphasis>
+167 
+168 <emphasis role="preprocessor">#define&#32;PB_DS_CLASS_T_DEC&#32;template&lt;bool&#32;External_Load_Access,&#32;typename&#32;Size_Type&gt;</emphasis>
+169 <emphasis role="preprocessor">#define&#32;PB_DS_CLASS_C_DEC&#32;hash_load_check_resize_trigger&lt;External_Load_Access,&#32;Size_Type&gt;</emphasis>
+170 <emphasis role="preprocessor">#define&#32;PB_DS_SIZE_BASE_C_DEC&#32;detail::hash_load_check_resize_trigger_size_base&lt;Size_Type,&#32;External_Load_Access&gt;</emphasis>
+171 
+174 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keywordtype">bool</emphasis>&#32;External_Load_Access&#32;=&#32;false,&#32;<emphasis role="keyword">typename</emphasis>&#32;Size_Type&#32;=&#32;std::<emphasis role="keywordtype">size_t</emphasis>&gt;
+175 &#32;&#32;<emphasis role="keyword">class&#32;</emphasis><link linkend="_class____gnu__pbds_1_1hash__load__check__resize__trigger">hash_load_check_resize_trigger</link>&#32;:&#32;<emphasis role="keyword">private</emphasis>&#32;<link linkend="__classes_2lib_2include_2c_09_09_2ext_2pb__ds_2hash__policy_8hpp_1a642e8b6faf09630d3e8fc49bdb0f8e1a">PB_DS_SIZE_BASE_C_DEC</link>
+176 &#32;&#32;{
+177 &#32;&#32;<emphasis role="keyword">public</emphasis>:
+178 &#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;Size_Type&#32;<link linkend="_class____gnu__pbds_1_1hash__load__check__resize__trigger_1ab91fcad03de831e32d2ceba42ab9893c">size_type</link>;
+179 
+180 &#32;&#32;&#32;&#32;<emphasis role="keyword">enum</emphasis>
+181 &#32;&#32;&#32;&#32;&#32;&#32;{
+185 &#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1hash__load__check__resize__trigger_1ae3b4c8cc019ac476199f0f66b80afdb6aa019cba1dcaba30ba1049fc462adab77">external_load_access</link>&#32;=&#32;External_Load_Access
+186 &#32;&#32;&#32;&#32;&#32;&#32;};
+187 
+191 &#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1hash__load__check__resize__trigger_1af5404477bbd9dca79da25daf6bd77592">hash_load_check_resize_trigger</link>(<emphasis role="keywordtype">float</emphasis>&#32;load_min&#32;=&#32;0.125,
+192 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">float</emphasis>&#32;load_max&#32;=&#32;0.5);
+193 
+194 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+195 &#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1hash__load__check__resize__trigger_1adad5100ba76ddd2d553e8eaf3997e8a5">swap</link>(<link linkend="_class____gnu__pbds_1_1hash__load__check__resize__trigger">hash_load_check_resize_trigger</link>&amp;&#32;other);
+196 
+197 &#32;&#32;&#32;&#32;<emphasis role="keyword">virtual</emphasis>
+198 &#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1hash__load__check__resize__trigger_1a8e323998793759f3216713e01ee8c28f">~hash_load_check_resize_trigger</link>();
+199 
+201 &#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;std::pair&lt;float,&#32;float&gt;
+202 &#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1hash__load__check__resize__trigger_1a81fa82cbe3d7c6eab0febcba7f31a4d2">get_loads</link>()&#32;<emphasis role="keyword">const</emphasis>;
+203 
+206 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+207 &#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1hash__load__check__resize__trigger_1a5dba0dabb39ff7313a02f51b1bfefe24">set_loads</link>(std::pair&lt;float,&#32;float&gt;&#32;load_pair);
+208 
+209 &#32;&#32;<emphasis role="keyword">protected</emphasis>:
+210 &#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>
+211 &#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1hash__load__check__resize__trigger_1ac4fa09c9f734c2288de0a0b8d661a8e7">notify_insert_search_start</link>();
+212 
+213 &#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>
+214 &#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1hash__load__check__resize__trigger_1aba2f80b07071cf80a4f4e7615d3495c6">notify_insert_search_collision</link>();
+215 
+216 &#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>
+217 &#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1hash__load__check__resize__trigger_1a3fdda9fd32513c3fc94b5cdfac26e3bf">notify_insert_search_end</link>();
+218 
+219 &#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>
+220 &#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1hash__load__check__resize__trigger_1a21335464e6c3f49e00ee120f56572367">notify_find_search_start</link>();
+221 
+222 &#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>
+223 &#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1hash__load__check__resize__trigger_1a13dbf0fc725d4f73cbd5fd577cc709b4">notify_find_search_collision</link>();
+224 
+225 &#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>
+226 &#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1hash__load__check__resize__trigger_1a9aa3036fe447f1292c48327abbe87f5b">notify_find_search_end</link>();
+227 
+228 &#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>
+229 &#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1hash__load__check__resize__trigger_1a16f4b501109711ceedee29f6ff5e04a4">notify_erase_search_start</link>();
+230 
+231 &#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>
+232 &#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1hash__load__check__resize__trigger_1a031bbb804dd718c127cb8a54577613fb">notify_erase_search_collision</link>();
+233 
+234 &#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>
+235 &#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1hash__load__check__resize__trigger_1ad0283006cc8b358f9ee79b5b4a87c1e1">notify_erase_search_end</link>();
+236 
+239 &#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>
+240 &#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1hash__load__check__resize__trigger_1a6389dcb57ad2dc82804a7dbf32d96fc8">notify_inserted</link>(<link linkend="_class____gnu__pbds_1_1hash__load__check__resize__trigger_1ab91fcad03de831e32d2ceba42ab9893c">size_type</link>&#32;num_entries);
+241 
+242 &#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>
+243 &#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1hash__load__check__resize__trigger_1a56848ffd07edfea8452fb7b199dcae42">notify_erased</link>(<link linkend="_class____gnu__pbds_1_1hash__load__check__resize__trigger_1ab91fcad03de831e32d2ceba42ab9893c">size_type</link>&#32;num_entries);
+244 
+246 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+247 &#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1hash__load__check__resize__trigger_1a4c92b235ca2dcda57fe3d4cee1afb48b">notify_cleared</link>();
+248 
+251 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+252 &#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1hash__load__check__resize__trigger_1a027d59f653ccc3272bb94540164bfd77">notify_resized</link>(<link linkend="_class____gnu__pbds_1_1hash__load__check__resize__trigger_1ab91fcad03de831e32d2ceba42ab9893c">size_type</link>&#32;new_size);
+253 
+254 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+255 &#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1hash__load__check__resize__trigger_1a71b06de31989feead687b088884abe41">notify_externally_resized</link>(<link linkend="_class____gnu__pbds_1_1hash__load__check__resize__trigger_1ab91fcad03de831e32d2ceba42ab9893c">size_type</link>&#32;new_size);
+256 
+257 &#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>
+258 &#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1hash__load__check__resize__trigger_1a211d714166aa4a6b12dd530f20c8c8b4">is_resize_needed</link>()&#32;<emphasis role="keyword">const</emphasis>;
+259 
+260 &#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>
+261 &#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1hash__load__check__resize__trigger_1a95b166b26a761188b7ba90da8341f4c3">is_grow_needed</link>(<link linkend="_class____gnu__pbds_1_1hash__load__check__resize__trigger_1ab91fcad03de831e32d2ceba42ab9893c">size_type</link>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a3d1e3edfcf61ca2d831883e1afbad89e">size</link>,&#32;<link linkend="_class____gnu__pbds_1_1hash__load__check__resize__trigger_1ab91fcad03de831e32d2ceba42ab9893c">size_type</link>&#32;num_entries)&#32;<emphasis role="keyword">const</emphasis>;
+262 
+263 &#32;&#32;<emphasis role="keyword">private</emphasis>:
+264 &#32;&#32;&#32;&#32;<emphasis role="keyword">virtual</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>
+265 &#32;&#32;&#32;&#32;do_resize(<link linkend="_class____gnu__pbds_1_1hash__load__check__resize__trigger_1ab91fcad03de831e32d2ceba42ab9893c">size_type</link>&#32;new_size);
+266 
+267 &#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<link linkend="__classes_2lib_2include_2c_09_09_2ext_2pb__ds_2hash__policy_8hpp_1a642e8b6faf09630d3e8fc49bdb0f8e1a">PB_DS_SIZE_BASE_C_DEC</link>&#32;size_base;
+268 
+269 <emphasis role="preprocessor">#ifdef&#32;_GLIBCXX_DEBUG</emphasis>
+270 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+271 &#32;&#32;&#32;&#32;assert_valid(<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>*&#32;file,&#32;<emphasis role="keywordtype">int</emphasis>&#32;line)&#32;<emphasis role="keyword">const</emphasis>;
+272 <emphasis role="preprocessor">#endif</emphasis>
+273 
+274 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">float</emphasis>&#32;&#32;&#32;m_load_min;
+275 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">float</emphasis>&#32;&#32;&#32;m_load_max;
+276 &#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1hash__load__check__resize__trigger_1ab91fcad03de831e32d2ceba42ab9893c">size_type</link>&#32;&#32;&#32;m_next_shrink_size;
+277 &#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1hash__load__check__resize__trigger_1ab91fcad03de831e32d2ceba42ab9893c">size_type</link>&#32;&#32;&#32;m_next_grow_size;
+278 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">bool</emphasis>&#32;&#32;&#32;&#32;m_resize_needed;
+279 &#32;&#32;};
+280 
+281 <emphasis role="preprocessor">#include&#32;&lt;ext/pb_ds/detail/resize_policy/hash_load_check_resize_trigger_imp.hpp&gt;</emphasis>
+282 
+283 <emphasis role="preprocessor">#undef&#32;PB_DS_CLASS_T_DEC</emphasis>
+284 <emphasis role="preprocessor">#undef&#32;PB_DS_CLASS_C_DEC</emphasis>
+285 <emphasis role="preprocessor">#undef&#32;PB_DS_SIZE_BASE_C_DEC</emphasis>
+286 
+287 <emphasis role="preprocessor">#define&#32;PB_DS_CLASS_T_DEC&#32;template&lt;bool&#32;External_Load_Access,&#32;typename&#32;Size_Type&gt;</emphasis>
+288 <emphasis role="preprocessor">#define&#32;PB_DS_CLASS_C_DEC&#32;cc_hash_max_collision_check_resize_trigger&lt;External_Load_Access,&#32;Size_Type&gt;</emphasis>
+289 
+292 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keywordtype">bool</emphasis>&#32;External_Load_Access&#32;=&#32;false,&#32;<emphasis role="keyword">typename</emphasis>&#32;Size_Type&#32;=&#32;std::<emphasis role="keywordtype">size_t</emphasis>&gt;
+293 &#32;&#32;<emphasis role="keyword">class&#32;</emphasis><link linkend="_class____gnu__pbds_1_1cc__hash__max__collision__check__resize__trigger">cc_hash_max_collision_check_resize_trigger</link>
+294 &#32;&#32;{
+295 &#32;&#32;<emphasis role="keyword">public</emphasis>:
+296 &#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;Size_Type&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1cc__hash__max__collision__check__resize__trigger_1ac8286a480601224bc2ec1a9875f8f63d">size_type</link>;
+297 
+298 &#32;&#32;&#32;&#32;<emphasis role="keyword">enum</emphasis>
+299 &#32;&#32;&#32;&#32;&#32;&#32;{
+303 &#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1cc__hash__max__collision__check__resize__trigger_1a08765168d7ab84bffd6c3362b04151c5a2779d767bb166eca87095a720b516b6a">external_load_access</link>&#32;=&#32;External_Load_Access
+304 &#32;&#32;&#32;&#32;&#32;&#32;};
+305 
+308 &#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1cc__hash__max__collision__check__resize__trigger_1a3570f81e8bebfa7c217839b679c1692c">cc_hash_max_collision_check_resize_trigger</link>(<emphasis role="keywordtype">float</emphasis>&#32;load&#32;=&#32;0.5);
+309 
+310 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+311 &#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1cc__hash__max__collision__check__resize__trigger_1ada26842de72ecc2704446d8696ccef7e">swap</link>(<link linkend="__classes_2lib_2include_2c_09_09_2ext_2pb__ds_2detail_2bin__search__tree___2bin__search__tree___8hpp_1a304b8b73a11afe64bfca54576b91263b">PB_DS_CLASS_C_DEC</link>&amp;&#32;other);
+312 
+314 &#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keywordtype">float</emphasis>
+315 &#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1cc__hash__max__collision__check__resize__trigger_1a65eddf9416d51fc632010a8667fe58c2">get_load</link>()&#32;<emphasis role="keyword">const</emphasis>;
+316 
+318 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+319 &#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1cc__hash__max__collision__check__resize__trigger_1acbe6814913bb7c30a34f4fc4d99d4e01">set_load</link>(<emphasis role="keywordtype">float</emphasis>&#32;load);
+320 
+321 &#32;&#32;<emphasis role="keyword">protected</emphasis>:
+323 &#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>
+324 &#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1cc__hash__max__collision__check__resize__trigger_1ac180a1382d59cb873053ef1a00aeaf7a">notify_insert_search_start</link>();
+325 
+327 &#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>
+328 &#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1cc__hash__max__collision__check__resize__trigger_1a0ada2bfdc28eb5b321d4e40ae1d383f1">notify_insert_search_collision</link>();
+329 
+331 &#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>
+332 &#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1cc__hash__max__collision__check__resize__trigger_1a64694cff7ecc080077cf5a1d77cfb91f">notify_insert_search_end</link>();
+333 
+335 &#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>
+336 &#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1cc__hash__max__collision__check__resize__trigger_1aecfd626845c5f41b5996a98ce41abe5d">notify_find_search_start</link>();
+337 
+339 &#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>
+340 &#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1cc__hash__max__collision__check__resize__trigger_1aa657361a797637c5894f887b2f68b08d">notify_find_search_collision</link>();
+341 
+343 &#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>
+344 &#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1cc__hash__max__collision__check__resize__trigger_1a495e2209b7f02d5006404aaaa1087768">notify_find_search_end</link>();
+345 
+347 &#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>
+348 &#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1cc__hash__max__collision__check__resize__trigger_1a240b4b28ea1cdc784d5e95c62db3c15f">notify_erase_search_start</link>();
+349 
+351 &#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>
+352 &#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1cc__hash__max__collision__check__resize__trigger_1a751447ee7cf5a38825c91c46156f1553">notify_erase_search_collision</link>();
+353 
+355 &#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>
+356 &#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1cc__hash__max__collision__check__resize__trigger_1ad2553af559204a400e889dfce3793555">notify_erase_search_end</link>();
+357 
+359 &#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>
+360 &#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1cc__hash__max__collision__check__resize__trigger_1a3873f31f2d3d3ff8118f48fa2bead1a8">notify_inserted</link>(<link linkend="_class____gnu__pbds_1_1cc__hash__max__collision__check__resize__trigger_1ac8286a480601224bc2ec1a9875f8f63d">size_type</link>&#32;num_entries);
+361 
+363 &#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>
+364 &#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1cc__hash__max__collision__check__resize__trigger_1a1f46c2c9b293370318f1e2abb64cfcc1">notify_erased</link>(<link linkend="_class____gnu__pbds_1_1cc__hash__max__collision__check__resize__trigger_1ac8286a480601224bc2ec1a9875f8f63d">size_type</link>&#32;num_entries);
+365 
+367 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+368 &#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1cc__hash__max__collision__check__resize__trigger_1afe7436bbd2219b3bb023834046574805">notify_cleared</link>();
+369 
+372 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+373 &#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1cc__hash__max__collision__check__resize__trigger_1a21c9dcb73448b7a0e82857a272ad43a8">notify_resized</link>(<link linkend="_class____gnu__pbds_1_1cc__hash__max__collision__check__resize__trigger_1ac8286a480601224bc2ec1a9875f8f63d">size_type</link>&#32;new_size);
+374 
+376 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+377 &#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1cc__hash__max__collision__check__resize__trigger_1a548dc80e54ce98dfb63b6197b0a5367f">notify_externally_resized</link>(<link linkend="_class____gnu__pbds_1_1cc__hash__max__collision__check__resize__trigger_1ac8286a480601224bc2ec1a9875f8f63d">size_type</link>&#32;new_size);
+378 
+380 &#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>
+381 &#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1cc__hash__max__collision__check__resize__trigger_1a7c5123f36dfca1b53699730fd2d184e8">is_resize_needed</link>()&#32;<emphasis role="keyword">const</emphasis>;
+382 
+385 &#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>
+386 &#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1cc__hash__max__collision__check__resize__trigger_1ad50aebe50070ae305b6c17a522bf6d0b">is_grow_needed</link>(<link linkend="_class____gnu__pbds_1_1cc__hash__max__collision__check__resize__trigger_1ac8286a480601224bc2ec1a9875f8f63d">size_type</link>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a3d1e3edfcf61ca2d831883e1afbad89e">size</link>,&#32;<link linkend="_class____gnu__pbds_1_1cc__hash__max__collision__check__resize__trigger_1ac8286a480601224bc2ec1a9875f8f63d">size_type</link>&#32;num_entries)&#32;<emphasis role="keyword">const</emphasis>;
+387 
+388 &#32;&#32;<emphasis role="keyword">private</emphasis>:
+389 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+390 &#32;&#32;&#32;&#32;calc_max_num_coll();
+391 
+392 &#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>
+393 &#32;&#32;&#32;&#32;calc_resize_needed();
+394 
+395 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">float</emphasis>&#32;&#32;&#32;m_load;
+396 &#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1cc__hash__max__collision__check__resize__trigger_1ac8286a480601224bc2ec1a9875f8f63d">size_type</link>&#32;&#32;&#32;m_size;
+397 &#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1cc__hash__max__collision__check__resize__trigger_1ac8286a480601224bc2ec1a9875f8f63d">size_type</link>&#32;&#32;&#32;m_num_col;
+398 &#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1cc__hash__max__collision__check__resize__trigger_1ac8286a480601224bc2ec1a9875f8f63d">size_type</link>&#32;&#32;&#32;m_max_col;
+399 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">bool</emphasis>&#32;&#32;&#32;&#32;m_resize_needed;
+400 &#32;&#32;};
+401 
+402 <emphasis role="preprocessor">#include&#32;&lt;ext/pb_ds/detail/resize_policy/cc_hash_max_collision_check_resize_trigger_imp.hpp&gt;</emphasis>
+403 
+404 <emphasis role="preprocessor">#undef&#32;PB_DS_CLASS_T_DEC</emphasis>
+405 <emphasis role="preprocessor">#undef&#32;PB_DS_CLASS_C_DEC</emphasis>
+406 
+407 <emphasis role="preprocessor">#define&#32;PB_DS_CLASS_T_DEC&#32;template&lt;typename&#32;Size_Type&gt;</emphasis>
+408 <emphasis role="preprocessor">#define&#32;PB_DS_CLASS_C_DEC&#32;hash_exponential_size_policy&lt;Size_Type&gt;</emphasis>
+409 
+412 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;Size_Type&#32;=&#32;std::<emphasis role="keywordtype">size_t</emphasis>&gt;
+413 &#32;&#32;<emphasis role="keyword">class&#32;</emphasis><link linkend="_class____gnu__pbds_1_1hash__exponential__size__policy">hash_exponential_size_policy</link>
+414 &#32;&#32;{
+415 &#32;&#32;<emphasis role="keyword">public</emphasis>:
+416 &#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;Size_Type&#32;<link linkend="_class____gnu__pbds_1_1hash__exponential__size__policy_1a5eb89dd5b3edf1987accc5787b43b4d6">size_type</link>;
+417 
+422 &#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1hash__exponential__size__policy_1afaa82af641851bf662b2cf2f60ea1eb9">hash_exponential_size_policy</link>(<link linkend="_class____gnu__pbds_1_1hash__exponential__size__policy_1a5eb89dd5b3edf1987accc5787b43b4d6">size_type</link>&#32;start_size&#32;=&#32;8,
+423 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1hash__exponential__size__policy_1a5eb89dd5b3edf1987accc5787b43b4d6">size_type</link>&#32;grow_factor&#32;=&#32;2);
+424 
+425 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+426 &#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1hash__exponential__size__policy_1a00509d52c8d945020d11e1dcca03a1b9">swap</link>(<link linkend="__classes_2lib_2include_2c_09_09_2ext_2pb__ds_2detail_2bin__search__tree___2bin__search__tree___8hpp_1a304b8b73a11afe64bfca54576b91263b">PB_DS_CLASS_C_DEC</link>&amp;&#32;other);
+427 
+428 &#32;&#32;<emphasis role="keyword">protected</emphasis>:
+429 &#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1hash__exponential__size__policy_1a5eb89dd5b3edf1987accc5787b43b4d6">size_type</link>
+430 &#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1hash__exponential__size__policy_1a014d7a181ee23dce2e7e080dfc719e60">get_nearest_larger_size</link>(<link linkend="_class____gnu__pbds_1_1hash__exponential__size__policy_1a5eb89dd5b3edf1987accc5787b43b4d6">size_type</link>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a3d1e3edfcf61ca2d831883e1afbad89e">size</link>)&#32;<emphasis role="keyword">const</emphasis>;
+431 
+432 &#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1hash__exponential__size__policy_1a5eb89dd5b3edf1987accc5787b43b4d6">size_type</link>
+433 &#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1hash__exponential__size__policy_1a5af7570651220b1902f50cd9a0e31216">get_nearest_smaller_size</link>(<link linkend="_class____gnu__pbds_1_1hash__exponential__size__policy_1a5eb89dd5b3edf1987accc5787b43b4d6">size_type</link>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a3d1e3edfcf61ca2d831883e1afbad89e">size</link>)&#32;<emphasis role="keyword">const</emphasis>;
+434 
+435 &#32;&#32;<emphasis role="keyword">private</emphasis>:
+436 &#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1hash__exponential__size__policy_1a5eb89dd5b3edf1987accc5787b43b4d6">size_type</link>&#32;m_start_size;
+437 &#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1hash__exponential__size__policy_1a5eb89dd5b3edf1987accc5787b43b4d6">size_type</link>&#32;m_grow_factor;
+438 &#32;&#32;};
+439 
+440 <emphasis role="preprocessor">#include&#32;&lt;ext/pb_ds/detail/resize_policy/hash_exponential_size_policy_imp.hpp&gt;</emphasis>
+441 
+442 <emphasis role="preprocessor">#undef&#32;PB_DS_CLASS_T_DEC</emphasis>
+443 <emphasis role="preprocessor">#undef&#32;PB_DS_CLASS_C_DEC</emphasis>
+444 
+445 <emphasis role="preprocessor">#define&#32;PB_DS_CLASS_T_DEC</emphasis>
+446 <emphasis role="preprocessor">#define&#32;PB_DS_CLASS_C_DEC&#32;hash_prime_size_policy</emphasis>
+447 
+450 &#32;&#32;<emphasis role="keyword">class&#32;</emphasis><link linkend="_class____gnu__pbds_1_1hash__prime__size__policy">hash_prime_size_policy</link>
+451 &#32;&#32;{
+452 &#32;&#32;<emphasis role="keyword">public</emphasis>:
+454 &#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;std::size_t&#32;<link linkend="_class____gnu__pbds_1_1hash__prime__size__policy_1a74744bfab3764b78a3cf339de9479a80">size_type</link>;
+455 
+459 &#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1hash__prime__size__policy_1ad18b7b7fe2840b81542376ddb4e0bcfa">hash_prime_size_policy</link>(<link linkend="_class____gnu__pbds_1_1hash__prime__size__policy_1a74744bfab3764b78a3cf339de9479a80">size_type</link>&#32;start_size&#32;=&#32;8);
+460 
+461 &#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>
+462 &#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1hash__prime__size__policy_1a16a9a53d0fc391811a0681d5c1e099c6">swap</link>(<link linkend="__classes_2lib_2include_2c_09_09_2ext_2pb__ds_2detail_2bin__search__tree___2bin__search__tree___8hpp_1a304b8b73a11afe64bfca54576b91263b">PB_DS_CLASS_C_DEC</link>&amp;&#32;other);
+463 
+464 &#32;&#32;<emphasis role="keyword">protected</emphasis>:
+465 &#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1hash__prime__size__policy_1a74744bfab3764b78a3cf339de9479a80">size_type</link>
+466 &#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1hash__prime__size__policy_1a604be1d1993de3bb62d3da51c59de72f">get_nearest_larger_size</link>(<link linkend="_class____gnu__pbds_1_1hash__prime__size__policy_1a74744bfab3764b78a3cf339de9479a80">size_type</link>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a3d1e3edfcf61ca2d831883e1afbad89e">size</link>)&#32;<emphasis role="keyword">const</emphasis>;
+467 
+468 &#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1hash__prime__size__policy_1a74744bfab3764b78a3cf339de9479a80">size_type</link>
+469 &#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1hash__prime__size__policy_1a5f88cf9271d0f334553f6ffd4107ab32">get_nearest_smaller_size</link>(<link linkend="_class____gnu__pbds_1_1hash__prime__size__policy_1a74744bfab3764b78a3cf339de9479a80">size_type</link>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a3d1e3edfcf61ca2d831883e1afbad89e">size</link>)&#32;<emphasis role="keyword">const</emphasis>;
+470 
+471 &#32;&#32;<emphasis role="keyword">private</emphasis>:
+472 &#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1hash__prime__size__policy_1a74744bfab3764b78a3cf339de9479a80">size_type</link>&#32;m_start_size;
+473 &#32;&#32;};
+474 
+475 <emphasis role="preprocessor">#include&#32;&lt;ext/pb_ds/detail/resize_policy/hash_prime_size_policy_imp.hpp&gt;</emphasis>
+476 
+477 <emphasis role="preprocessor">#undef&#32;PB_DS_CLASS_T_DEC</emphasis>
+478 <emphasis role="preprocessor">#undef&#32;PB_DS_CLASS_C_DEC</emphasis>
+479 
+480 <emphasis role="preprocessor">#define&#32;PB_DS_CLASS_T_DEC&#32;template&lt;typename&#32;Size_Policy,&#32;typename&#32;Trigger_Policy,&#32;bool&#32;External_Size_Access,&#32;typename&#32;Size_Type&gt;</emphasis>
+481 
+482 <emphasis role="preprocessor">#define&#32;PB_DS_CLASS_C_DEC&#32;hash_standard_resize_policy&lt;Size_Policy,&#32;Trigger_Policy,&#32;External_Size_Access,&#32;Size_Type&gt;</emphasis>
+483 
+485 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;Size_Policy&#32;=&#32;hash_exponential_size_policy&lt;&gt;,
+486 &#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;Trigger_Policy&#32;=&#32;hash_load_check_re<emphasis role="keywordtype">size_t</emphasis>rigger&lt;&gt;,
+487 &#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">bool</emphasis>&#32;External_Size_Access&#32;=&#32;false,
+488 &#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;Size_Type&#32;=&#32;std::<emphasis role="keywordtype">size_t</emphasis>&gt;
+489 &#32;&#32;<emphasis role="keyword">class&#32;</emphasis><link linkend="_class____gnu__pbds_1_1hash__standard__resize__policy">hash_standard_resize_policy</link>
+490 &#32;&#32;:&#32;<emphasis role="keyword">public</emphasis>&#32;Size_Policy,&#32;<emphasis role="keyword">public</emphasis>&#32;Trigger_Policy
+491 &#32;&#32;{
+492 &#32;&#32;<emphasis role="keyword">public</emphasis>:
+493 &#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;Size_Type&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1hash__standard__resize__policy_1ae716ba9c592311481b68746a4e10a154">size_type</link>;
+494 &#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;Trigger_Policy&#32;&#32;<link linkend="_class____gnu__pbds_1_1hash__standard__resize__policy_1a467bae98cccab9d55d45eed0a4a847aa">trigger_policy</link>;
+495 &#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;Size_Policy&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1hash__standard__resize__policy_1a005b9db248419f0e050380f701c270d4">size_policy</link>;
+496 
+497 &#32;&#32;&#32;&#32;<emphasis role="keyword">enum</emphasis>
+498 &#32;&#32;&#32;&#32;&#32;&#32;{
+499 &#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1hash__standard__resize__policy_1a2164ac85b7410fa687ba5f80273e1c81ab93f8d14283fe7f77f5a46dd7f82d009">external_size_access</link>&#32;=&#32;External_Size_Access
+500 &#32;&#32;&#32;&#32;&#32;&#32;};
+501 
+503 &#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1hash__standard__resize__policy_1adecad428987dfd07cf4df9aa49a25dc3">hash_standard_resize_policy</link>();
+504 
+507 &#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1hash__standard__resize__policy_1aba05ccfca9dd3a44f331377bd7cc2c42">hash_standard_resize_policy</link>(<emphasis role="keyword">const</emphasis>&#32;Size_Policy&amp;&#32;r_size_policy);
+508 
+513 &#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1hash__standard__resize__policy_1a8f0e49859d29501c85eacf73af545119">hash_standard_resize_policy</link>(<emphasis role="keyword">const</emphasis>&#32;Size_Policy&amp;&#32;r_size_policy,
+514 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;Trigger_Policy&amp;&#32;r_trigger_policy);
+515 
+516 &#32;&#32;&#32;&#32;<emphasis role="keyword">virtual</emphasis>
+517 &#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1hash__standard__resize__policy_1aa725e20173328d8dd5d9a5f714c36152">~hash_standard_resize_policy</link>();
+518 
+519 &#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>
+520 &#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1hash__standard__resize__policy_1a4e287e1cf616b0fc055661b7d997cad6">swap</link>(<link linkend="__classes_2lib_2include_2c_09_09_2ext_2pb__ds_2detail_2bin__search__tree___2bin__search__tree___8hpp_1a304b8b73a11afe64bfca54576b91263b">PB_DS_CLASS_C_DEC</link>&amp;&#32;other);
+521 
+523 &#32;&#32;&#32;&#32;Size_Policy&amp;
+524 &#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1hash__standard__resize__policy_1a85ef6c33782f4a5e1e7fd2921d010e1a">get_size_policy</link>();
+525 
+527 &#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;Size_Policy&amp;
+528 &#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1hash__standard__resize__policy_1acbf933ac9a8d4356949207fa762ad9e9">get_size_policy</link>()&#32;<emphasis role="keyword">const</emphasis>;
+529 
+531 &#32;&#32;&#32;&#32;Trigger_Policy&amp;
+532 &#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1hash__standard__resize__policy_1ab897e097208419985aaba8fa685f7af1">get_trigger_policy</link>();
+533 
+535 &#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;Trigger_Policy&amp;
+536 &#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1hash__standard__resize__policy_1ab98dda215945468c1fae60ccd9253f8b">get_trigger_policy</link>()&#32;<emphasis role="keyword">const</emphasis>;
+537 
+539 &#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<link linkend="_class____gnu__pbds_1_1hash__standard__resize__policy_1ae716ba9c592311481b68746a4e10a154">size_type</link>
+540 &#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1hash__standard__resize__policy_1ab1e873de0a82024f07b44a0854a17ddf">get_actual_size</link>()&#32;<emphasis role="keyword">const</emphasis>;
+541 
+545 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+546 &#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1hash__standard__resize__policy_1aa602ba7bfa4925ea84591734c68d49e2">resize</link>(<link linkend="_class____gnu__pbds_1_1hash__standard__resize__policy_1ae716ba9c592311481b68746a4e10a154">size_type</link>&#32;suggested_new_size);
+547 
+548 &#32;&#32;<emphasis role="keyword">protected</emphasis>:
+549 &#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>
+550 &#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1hash__standard__resize__policy_1a4795705e1b9a658e88e18fc448b52d29">notify_insert_search_start</link>();
+551 
+552 &#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>
+553 &#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1hash__standard__resize__policy_1a856e5cbd1d5aa9666a3359756d143c0c">notify_insert_search_collision</link>();
+554 
+555 &#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>
+556 &#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1hash__standard__resize__policy_1a23b854ff97f1e0800a44b2b41adb49e2">notify_insert_search_end</link>();
+557 
+558 &#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>
+559 &#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1hash__standard__resize__policy_1a136ce5ea0d4cb4528b5d8ead912b09ff">notify_find_search_start</link>();
+560 
+561 &#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>
+562 &#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1hash__standard__resize__policy_1a676f441c75f8316e37af747ea476bdb3">notify_find_search_collision</link>();
+563 
+564 &#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>
+565 &#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1hash__standard__resize__policy_1aa9a83d25b41399b9a7e165ce2d2ebdf1">notify_find_search_end</link>();
+566 
+567 &#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>
+568 &#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1hash__standard__resize__policy_1a1ad6075bf4a2aed7b5ac8b37cb17ea96">notify_erase_search_start</link>();
+569 
+570 &#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>
+571 &#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1hash__standard__resize__policy_1a8024fc3e3c963f20b21ca7b144a48b2a">notify_erase_search_collision</link>();
+572 
+573 &#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>
+574 &#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1hash__standard__resize__policy_1a43fa1ca48a330409b56ef66a7f728d5a">notify_erase_search_end</link>();
+575 
+576 &#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>
+577 &#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1hash__standard__resize__policy_1a0053be28e62bdbdbc3b25126c3b3da8d">notify_inserted</link>(<link linkend="_class____gnu__pbds_1_1hash__standard__resize__policy_1ae716ba9c592311481b68746a4e10a154">size_type</link>&#32;num_e);
+578 
+579 &#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>
+580 &#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1hash__standard__resize__policy_1a85a1743d67b2c1e62a6f4662004d00b0">notify_erased</link>(<link linkend="_class____gnu__pbds_1_1hash__standard__resize__policy_1ae716ba9c592311481b68746a4e10a154">size_type</link>&#32;num_e);
+581 
+582 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+583 &#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1hash__standard__resize__policy_1a0d68c8522bd65aa20aaaa0caef387cb5">notify_cleared</link>();
+584 
+585 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+586 &#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1hash__standard__resize__policy_1a195c2ee31a20e3a09fbf40cc6bb93e65">notify_resized</link>(<link linkend="_class____gnu__pbds_1_1hash__standard__resize__policy_1ae716ba9c592311481b68746a4e10a154">size_type</link>&#32;new_size);
+587 
+588 &#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>
+589 &#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1hash__standard__resize__policy_1a249a7b8b985cdbe402fdd7de9e15fa65">is_resize_needed</link>()&#32;<emphasis role="keyword">const</emphasis>;
+590 
+595 &#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1hash__standard__resize__policy_1ae716ba9c592311481b68746a4e10a154">size_type</link>
+596 &#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1hash__standard__resize__policy_1a59607830af324861fac594baff5bfdcd">get_new_size</link>(<link linkend="_class____gnu__pbds_1_1hash__standard__resize__policy_1ae716ba9c592311481b68746a4e10a154">size_type</link>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a3d1e3edfcf61ca2d831883e1afbad89e">size</link>,&#32;<link linkend="_class____gnu__pbds_1_1hash__standard__resize__policy_1ae716ba9c592311481b68746a4e10a154">size_type</link>&#32;num_used_e)&#32;<emphasis role="keyword">const</emphasis>;
+597 
+598 &#32;&#32;<emphasis role="keyword">private</emphasis>:
+600 &#32;&#32;&#32;&#32;<emphasis role="keyword">virtual</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>
+601 &#32;&#32;&#32;&#32;do_resize(<link linkend="_class____gnu__pbds_1_1hash__standard__resize__policy_1ae716ba9c592311481b68746a4e10a154">size_type</link>&#32;new_size);
+602 
+603 &#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;Trigger_Policy&#32;trigger_policy_base;
+604 
+605 &#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;Size_Policy&#32;size_policy_base;
+606 
+607 &#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1hash__standard__resize__policy_1ae716ba9c592311481b68746a4e10a154">size_type</link>&#32;m_size;
+608 &#32;&#32;};
+609 
+610 <emphasis role="preprocessor">#include&#32;&lt;ext/pb_ds/detail/resize_policy/hash_standard_resize_policy_imp.hpp&gt;</emphasis>
+611 
+612 <emphasis role="preprocessor">#undef&#32;PB_DS_CLASS_T_DEC</emphasis>
+613 <emphasis role="preprocessor">#undef&#32;PB_DS_CLASS_C_DEC</emphasis>
+614 
+615 }&#32;<emphasis role="comment">//&#32;namespace&#32;__gnu_pbds</emphasis>
+616 
+617 <emphasis role="preprocessor">#endif</emphasis>
+</programlisting></section>

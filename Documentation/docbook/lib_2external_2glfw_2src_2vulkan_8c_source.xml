@@ -1,0 +1,329 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<section xmlns="http://docbook.org/ns/docbook" version="5.0" xmlns:xlink="http://www.w3.org/1999/xlink" xml:id="_lib_2external_2glfw_2src_2vulkan_8c_source" xml:lang="en-US">
+<title>vulkan.c</title>
+<indexterm><primary>C:/Users/HP/Documents/GitHub/Minero-Game/lib/external/glfw/src/vulkan.c</primary></indexterm>
+Go to the documentation of this file.<programlisting linenumbering="unnumbered">1 <emphasis role="comment">//========================================================================</emphasis>
+2 <emphasis role="comment">//&#32;GLFW&#32;3.4&#32;-&#32;www.glfw.org</emphasis>
+3 <emphasis role="comment">//------------------------------------------------------------------------</emphasis>
+4 <emphasis role="comment">//&#32;Copyright&#32;(c)&#32;2002-2006&#32;Marcus&#32;Geelnard</emphasis>
+5 <emphasis role="comment">//&#32;Copyright&#32;(c)&#32;2006-2018&#32;Camilla&#32;Löwy&#32;&lt;elmindreda@glfw.org&gt;</emphasis>
+6 <emphasis role="comment">//</emphasis>
+7 <emphasis role="comment">//&#32;This&#32;software&#32;is&#32;provided&#32;&apos;as-is&apos;,&#32;without&#32;any&#32;express&#32;or&#32;implied</emphasis>
+8 <emphasis role="comment">//&#32;warranty.&#32;In&#32;no&#32;event&#32;will&#32;the&#32;authors&#32;be&#32;held&#32;liable&#32;for&#32;any&#32;damages</emphasis>
+9 <emphasis role="comment">//&#32;arising&#32;from&#32;the&#32;use&#32;of&#32;this&#32;software.</emphasis>
+10 <emphasis role="comment">//</emphasis>
+11 <emphasis role="comment">//&#32;Permission&#32;is&#32;granted&#32;to&#32;anyone&#32;to&#32;use&#32;this&#32;software&#32;for&#32;any&#32;purpose,</emphasis>
+12 <emphasis role="comment">//&#32;including&#32;commercial&#32;applications,&#32;and&#32;to&#32;alter&#32;it&#32;and&#32;redistribute&#32;it</emphasis>
+13 <emphasis role="comment">//&#32;freely,&#32;subject&#32;to&#32;the&#32;following&#32;restrictions:</emphasis>
+14 <emphasis role="comment">//</emphasis>
+15 <emphasis role="comment">//&#32;1.&#32;The&#32;origin&#32;of&#32;this&#32;software&#32;must&#32;not&#32;be&#32;misrepresented;&#32;you&#32;must&#32;not</emphasis>
+16 <emphasis role="comment">//&#32;&#32;&#32;&#32;claim&#32;that&#32;you&#32;wrote&#32;the&#32;original&#32;software.&#32;If&#32;you&#32;use&#32;this&#32;software</emphasis>
+17 <emphasis role="comment">//&#32;&#32;&#32;&#32;in&#32;a&#32;product,&#32;an&#32;acknowledgment&#32;in&#32;the&#32;product&#32;documentation&#32;would</emphasis>
+18 <emphasis role="comment">//&#32;&#32;&#32;&#32;be&#32;appreciated&#32;but&#32;is&#32;not&#32;required.</emphasis>
+19 <emphasis role="comment">//</emphasis>
+20 <emphasis role="comment">//&#32;2.&#32;Altered&#32;source&#32;versions&#32;must&#32;be&#32;plainly&#32;marked&#32;as&#32;such,&#32;and&#32;must&#32;not</emphasis>
+21 <emphasis role="comment">//&#32;&#32;&#32;&#32;be&#32;misrepresented&#32;as&#32;being&#32;the&#32;original&#32;software.</emphasis>
+22 <emphasis role="comment">//</emphasis>
+23 <emphasis role="comment">//&#32;3.&#32;This&#32;notice&#32;may&#32;not&#32;be&#32;removed&#32;or&#32;altered&#32;from&#32;any&#32;source</emphasis>
+24 <emphasis role="comment">//&#32;&#32;&#32;&#32;distribution.</emphasis>
+25 <emphasis role="comment">//</emphasis>
+26 <emphasis role="comment">//========================================================================</emphasis>
+27 <emphasis role="comment">//&#32;Please&#32;use&#32;C89&#32;style&#32;variable&#32;declarations&#32;in&#32;this&#32;file&#32;because&#32;VS&#32;2010</emphasis>
+28 <emphasis role="comment">//========================================================================</emphasis>
+29 
+30 <emphasis role="preprocessor">#include&#32;&quot;<link linkend="__old_2_classes_2lib_2raylib_2src_2external_2glfw_2src_2internal_8h">internal.h</link>&quot;</emphasis>
+31 
+32 <emphasis role="preprocessor">#include&#32;&lt;assert.h&gt;</emphasis>
+33 <emphasis role="preprocessor">#include&#32;&lt;string.h&gt;</emphasis>
+34 <emphasis role="preprocessor">#include&#32;&lt;stdlib.h&gt;</emphasis>
+35 
+36 <emphasis role="preprocessor">#define&#32;_GLFW_FIND_LOADER&#32;&#32;&#32;&#32;1</emphasis>
+37 <emphasis role="preprocessor">#define&#32;_GLFW_REQUIRE_LOADER&#32;2</emphasis>
+38 
+39 
+43 
+44 <link linkend="__classes_2lib_2external_2glfw_2src_2internal_8h_1ac5743c31bece872e24528b5a45e354c5">GLFWbool</link>&#32;<link linkend="__classes_2lib_2external_2glfw_2src_2vulkan_8c_1a3e82e6d9f82e3052943978e803bccef5">_glfwInitVulkan</link>(<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a1e71d9c196e4683cc06c4b54d53f7ef5">mode</link>)
+45 {
+46 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2external_2glfw_2deps_2glad_2vulkan_8h_1abe3614d1bd40772bc2398a4a86ea4a45">VkResult</link>&#32;err;
+47 &#32;&#32;&#32;&#32;<link linkend="_struct_vk_extension_properties">VkExtensionProperties</link>*&#32;ep;
+48 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2external_2glfw_2deps_2glad_2vulkan_8h_1a8fc4c665a4d6b01fe4c7209a534dd33d">PFN_vkEnumerateInstanceExtensionProperties</link>&#32;<link linkend="__classes_2lib_2external_2glfw_2deps_2glad_2vulkan_8h_1affb2ffa015274c182b0c5df3e8bfbec4">vkEnumerateInstanceExtensionProperties</link>;
+49 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2external_2glfw_2deps_2vs2008_2stdint_8h_1a435d1572bf3f880d55459d9805097f62">uint32_t</link>&#32;i,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a22486c0c8d9f7d79a07bf22ecffeeb2f">count</link>;
+50 
+51 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(<link linkend="__classes_2lib_2external_2glfw_2src_2init_8c_1a3007bc654ca6468ee69759007f70ba1e">_glfw</link>.<link linkend="_struct___g_l_f_wlibrary_1acd614684de7f5835810e30bf73dcbe8b">vk</link>.<link linkend="_struct___g_l_f_wlibrary_1a7978c47e7cee32b9d3b89bf787cfebc5">available</link>)
+52 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="_group__init_1ga2744fbb29b5631bb28802dbe0cf36eba">GLFW_TRUE</link>;
+53 
+54 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(<link linkend="__classes_2lib_2external_2glfw_2src_2init_8c_1a3007bc654ca6468ee69759007f70ba1e">_glfw</link>.<link linkend="_struct___g_l_f_wlibrary_1a99728b89534b94ccddccc724067ea5b5">hints</link>.<link linkend="_struct___g_l_f_wlibrary_1a86550c51bab958a99de2e243e48dd8e8">init</link>.<link linkend="_struct___g_l_f_winitconfig_1a2f2e06428712bd200e781849a6281e6d">vulkanLoader</link>)
+55 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2external_2glfw_2src_2init_8c_1a3007bc654ca6468ee69759007f70ba1e">_glfw</link>.<link linkend="_struct___g_l_f_wlibrary_1acd614684de7f5835810e30bf73dcbe8b">vk</link>.<link linkend="_struct___g_l_f_wlibrary_1a3596213ea7d65e1f299849c04facfe06">GetInstanceProcAddr</link>&#32;=&#32;<link linkend="__classes_2lib_2external_2glfw_2src_2init_8c_1a3007bc654ca6468ee69759007f70ba1e">_glfw</link>.<link linkend="_struct___g_l_f_wlibrary_1a99728b89534b94ccddccc724067ea5b5">hints</link>.<link linkend="_struct___g_l_f_wlibrary_1a86550c51bab958a99de2e243e48dd8e8">init</link>.<link linkend="_struct___g_l_f_winitconfig_1a2f2e06428712bd200e781849a6281e6d">vulkanLoader</link>;
+56 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>
+57 &#32;&#32;&#32;&#32;{
+58 <emphasis role="preprocessor">#if&#32;defined(_GLFW_VULKAN_LIBRARY)</emphasis>
+59 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2external_2glfw_2src_2init_8c_1a3007bc654ca6468ee69759007f70ba1e">_glfw</link>.<link linkend="_struct___g_l_f_wlibrary_1acd614684de7f5835810e30bf73dcbe8b">vk</link>.<link linkend="_struct___g_l_f_wlibrary_1a5a67e92b012563943f1e1b26b0bf2645">handle</link>&#32;=&#32;<link linkend="__classes_2lib_2external_2glfw_2src_2internal_8h_1a9bbfdfd02a8c3e4c4ce540bf277ebbb7">_glfwPlatformLoadModule</link>(_GLFW_VULKAN_LIBRARY);
+60 <emphasis role="preprocessor">#elif&#32;defined(_GLFW_WIN32)</emphasis>
+61 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2external_2glfw_2src_2init_8c_1a3007bc654ca6468ee69759007f70ba1e">_glfw</link>.<link linkend="_struct___g_l_f_wlibrary_1acd614684de7f5835810e30bf73dcbe8b">vk</link>.<link linkend="_struct___g_l_f_wlibrary_1a5a67e92b012563943f1e1b26b0bf2645">handle</link>&#32;=&#32;<link linkend="__classes_2lib_2external_2glfw_2src_2internal_8h_1a9bbfdfd02a8c3e4c4ce540bf277ebbb7">_glfwPlatformLoadModule</link>(<emphasis role="stringliteral">&quot;vulkan-1.dll&quot;</emphasis>);
+62 <emphasis role="preprocessor">#elif&#32;defined(_GLFW_COCOA)</emphasis>
+63 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2external_2glfw_2src_2init_8c_1a3007bc654ca6468ee69759007f70ba1e">_glfw</link>.<link linkend="_struct___g_l_f_wlibrary_1acd614684de7f5835810e30bf73dcbe8b">vk</link>.<link linkend="_struct___g_l_f_wlibrary_1a5a67e92b012563943f1e1b26b0bf2645">handle</link>&#32;=&#32;<link linkend="__classes_2lib_2external_2glfw_2src_2internal_8h_1a9bbfdfd02a8c3e4c4ce540bf277ebbb7">_glfwPlatformLoadModule</link>(<emphasis role="stringliteral">&quot;libvulkan.1.dylib&quot;</emphasis>);
+64 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(!<link linkend="__classes_2lib_2external_2glfw_2src_2init_8c_1a3007bc654ca6468ee69759007f70ba1e">_glfw</link>.<link linkend="_struct___g_l_f_wlibrary_1acd614684de7f5835810e30bf73dcbe8b">vk</link>.<link linkend="_struct___g_l_f_wlibrary_1a5a67e92b012563943f1e1b26b0bf2645">handle</link>)
+65 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2external_2glfw_2src_2init_8c_1a3007bc654ca6468ee69759007f70ba1e">_glfw</link>.<link linkend="_struct___g_l_f_wlibrary_1acd614684de7f5835810e30bf73dcbe8b">vk</link>.<link linkend="_struct___g_l_f_wlibrary_1a5a67e92b012563943f1e1b26b0bf2645">handle</link>&#32;=&#32;<link linkend="__classes_2lib_2external_2glfw_2src_2cocoa__init_8m_1aae27db5787ba23731142b93e075aee37">_glfwLoadLocalVulkanLoaderCocoa</link>();
+66 <emphasis role="preprocessor">#elif&#32;defined(__OpenBSD__)&#32;||&#32;defined(__NetBSD__)</emphasis>
+67 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2external_2glfw_2src_2init_8c_1a3007bc654ca6468ee69759007f70ba1e">_glfw</link>.<link linkend="_struct___g_l_f_wlibrary_1acd614684de7f5835810e30bf73dcbe8b">vk</link>.<link linkend="_struct___g_l_f_wlibrary_1a5a67e92b012563943f1e1b26b0bf2645">handle</link>&#32;=&#32;<link linkend="__classes_2lib_2external_2glfw_2src_2internal_8h_1a9bbfdfd02a8c3e4c4ce540bf277ebbb7">_glfwPlatformLoadModule</link>(<emphasis role="stringliteral">&quot;libvulkan.so&quot;</emphasis>);
+68 <emphasis role="preprocessor">#else</emphasis>
+69 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2external_2glfw_2src_2init_8c_1a3007bc654ca6468ee69759007f70ba1e">_glfw</link>.<link linkend="_struct___g_l_f_wlibrary_1acd614684de7f5835810e30bf73dcbe8b">vk</link>.<link linkend="_struct___g_l_f_wlibrary_1a5a67e92b012563943f1e1b26b0bf2645">handle</link>&#32;=&#32;<link linkend="__classes_2lib_2external_2glfw_2src_2internal_8h_1a9bbfdfd02a8c3e4c4ce540bf277ebbb7">_glfwPlatformLoadModule</link>(<emphasis role="stringliteral">&quot;libvulkan.so.1&quot;</emphasis>);
+70 <emphasis role="preprocessor">#endif</emphasis>
+71 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(!<link linkend="__classes_2lib_2external_2glfw_2src_2init_8c_1a3007bc654ca6468ee69759007f70ba1e">_glfw</link>.<link linkend="_struct___g_l_f_wlibrary_1acd614684de7f5835810e30bf73dcbe8b">vk</link>.<link linkend="_struct___g_l_f_wlibrary_1a5a67e92b012563943f1e1b26b0bf2645">handle</link>)
+72 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+73 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a1e71d9c196e4683cc06c4b54d53f7ef5">mode</link>&#32;==&#32;<link linkend="__classes_2lib_2external_2glfw_2src_2vulkan_8c_1ab21616814a41512460caa5b301776c77">_GLFW_REQUIRE_LOADER</link>)
+74 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2external_2glfw_2src_2init_8c_1a3287b282ec57a4a89127ae51f49f10f5">_glfwInputError</link>(<link linkend="_group__errors_1ga56882b290db23261cc6c053c40c2d08e">GLFW_API_UNAVAILABLE</link>,&#32;<emphasis role="stringliteral">&quot;Vulkan:&#32;Loader&#32;not&#32;found&quot;</emphasis>);
+75 
+76 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="_group__init_1gac877fe3b627d21ef3a0a23e0a73ba8c5">GLFW_FALSE</link>;
+77 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+78 
+79 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2external_2glfw_2src_2init_8c_1a3007bc654ca6468ee69759007f70ba1e">_glfw</link>.<link linkend="_struct___g_l_f_wlibrary_1acd614684de7f5835810e30bf73dcbe8b">vk</link>.<link linkend="_struct___g_l_f_wlibrary_1a3596213ea7d65e1f299849c04facfe06">GetInstanceProcAddr</link>&#32;=&#32;(<link linkend="__classes_2lib_2external_2glfw_2deps_2glad_2vulkan_8h_1a646be9b04ac763b5d4b7263756237906">PFN_vkGetInstanceProcAddr</link>)
+80 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2external_2glfw_2src_2internal_8h_1a370840ea8f3f1016d07030f7a06bf36e">_glfwPlatformGetModuleSymbol</link>(<link linkend="__classes_2lib_2external_2glfw_2src_2init_8c_1a3007bc654ca6468ee69759007f70ba1e">_glfw</link>.<link linkend="_struct___g_l_f_wlibrary_1acd614684de7f5835810e30bf73dcbe8b">vk</link>.<link linkend="_struct___g_l_f_wlibrary_1a5a67e92b012563943f1e1b26b0bf2645">handle</link>,&#32;<emphasis role="stringliteral">&quot;vkGetInstanceProcAddr&quot;</emphasis>);
+81 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(!<link linkend="__classes_2lib_2external_2glfw_2src_2init_8c_1a3007bc654ca6468ee69759007f70ba1e">_glfw</link>.<link linkend="_struct___g_l_f_wlibrary_1acd614684de7f5835810e30bf73dcbe8b">vk</link>.<link linkend="_struct___g_l_f_wlibrary_1a3596213ea7d65e1f299849c04facfe06">GetInstanceProcAddr</link>)
+82 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+83 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2external_2glfw_2src_2init_8c_1a3287b282ec57a4a89127ae51f49f10f5">_glfwInputError</link>(<link linkend="_group__errors_1ga56882b290db23261cc6c053c40c2d08e">GLFW_API_UNAVAILABLE</link>,
+84 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="stringliteral">&quot;Vulkan:&#32;Loader&#32;does&#32;not&#32;export&#32;vkGetInstanceProcAddr&quot;</emphasis>);
+85 
+86 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2external_2glfw_2src_2vulkan_8c_1a7e9f009f4edffd3f2c938045981f13f1">_glfwTerminateVulkan</link>();
+87 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="_group__init_1gac877fe3b627d21ef3a0a23e0a73ba8c5">GLFW_FALSE</link>;
+88 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+89 &#32;&#32;&#32;&#32;}
+90 
+91 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2external_2glfw_2deps_2glad_2vulkan_8h_1affb2ffa015274c182b0c5df3e8bfbec4">vkEnumerateInstanceExtensionProperties</link>&#32;=&#32;(<link linkend="__classes_2lib_2external_2glfw_2deps_2glad_2vulkan_8h_1a8fc4c665a4d6b01fe4c7209a534dd33d">PFN_vkEnumerateInstanceExtensionProperties</link>)
+92 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2external_2glfw_2deps_2glad_2vulkan_8h_1ae698fe946e5b75ed4a173e95133cf4f3">vkGetInstanceProcAddr</link>(<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>,&#32;<emphasis role="stringliteral">&quot;vkEnumerateInstanceExtensionProperties&quot;</emphasis>);
+93 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(!<link linkend="__classes_2lib_2external_2glfw_2deps_2glad_2vulkan_8h_1affb2ffa015274c182b0c5df3e8bfbec4">vkEnumerateInstanceExtensionProperties</link>)
+94 &#32;&#32;&#32;&#32;{
+95 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2external_2glfw_2src_2init_8c_1a3287b282ec57a4a89127ae51f49f10f5">_glfwInputError</link>(<link linkend="_group__errors_1ga56882b290db23261cc6c053c40c2d08e">GLFW_API_UNAVAILABLE</link>,
+96 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="stringliteral">&quot;Vulkan:&#32;Failed&#32;to&#32;retrieve&#32;vkEnumerateInstanceExtensionProperties&quot;</emphasis>);
+97 
+98 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2external_2glfw_2src_2vulkan_8c_1a7e9f009f4edffd3f2c938045981f13f1">_glfwTerminateVulkan</link>();
+99 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="_group__init_1gac877fe3b627d21ef3a0a23e0a73ba8c5">GLFW_FALSE</link>;
+100 &#32;&#32;&#32;&#32;}
+101 
+102 &#32;&#32;&#32;&#32;err&#32;=&#32;<link linkend="__classes_2lib_2external_2glfw_2deps_2glad_2vulkan_8h_1affb2ffa015274c182b0c5df3e8bfbec4">vkEnumerateInstanceExtensionProperties</link>(<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>,&#32;&amp;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a22486c0c8d9f7d79a07bf22ecffeeb2f">count</link>,&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>);
+103 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(err)
+104 &#32;&#32;&#32;&#32;{
+105 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;NOTE:&#32;This&#32;happens&#32;on&#32;systems&#32;with&#32;a&#32;loader&#32;but&#32;without&#32;any&#32;Vulkan&#32;ICD</emphasis>
+106 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a1e71d9c196e4683cc06c4b54d53f7ef5">mode</link>&#32;==&#32;<link linkend="__classes_2lib_2external_2glfw_2src_2vulkan_8c_1ab21616814a41512460caa5b301776c77">_GLFW_REQUIRE_LOADER</link>)
+107 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+108 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2external_2glfw_2src_2init_8c_1a3287b282ec57a4a89127ae51f49f10f5">_glfwInputError</link>(<link linkend="_group__errors_1ga56882b290db23261cc6c053c40c2d08e">GLFW_API_UNAVAILABLE</link>,
+109 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="stringliteral">&quot;Vulkan:&#32;Failed&#32;to&#32;query&#32;instance&#32;extension&#32;count:&#32;%s&quot;</emphasis>,
+110 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2external_2glfw_2src_2vulkan_8c_1ab14639f4be2f5aff158fe8a0b8e76bd1">_glfwGetVulkanResultString</link>(err));
+111 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+112 
+113 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2external_2glfw_2src_2vulkan_8c_1a7e9f009f4edffd3f2c938045981f13f1">_glfwTerminateVulkan</link>();
+114 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="_group__init_1gac877fe3b627d21ef3a0a23e0a73ba8c5">GLFW_FALSE</link>;
+115 &#32;&#32;&#32;&#32;}
+116 
+117 &#32;&#32;&#32;&#32;ep&#32;=&#32;<link linkend="__classes_2lib_2external_2glfw_2src_2init_8c_1a88a6e01ef5c1245a6d2a5e62b02e5678">_glfw_calloc</link>(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a22486c0c8d9f7d79a07bf22ecffeeb2f">count</link>,&#32;<emphasis role="keyword">sizeof</emphasis>(<link linkend="_struct_vk_extension_properties">VkExtensionProperties</link>));
+118 
+119 &#32;&#32;&#32;&#32;err&#32;=&#32;<link linkend="__classes_2lib_2external_2glfw_2deps_2glad_2vulkan_8h_1affb2ffa015274c182b0c5df3e8bfbec4">vkEnumerateInstanceExtensionProperties</link>(<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>,&#32;&amp;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a22486c0c8d9f7d79a07bf22ecffeeb2f">count</link>,&#32;ep);
+120 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(err)
+121 &#32;&#32;&#32;&#32;{
+122 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2external_2glfw_2src_2init_8c_1a3287b282ec57a4a89127ae51f49f10f5">_glfwInputError</link>(<link linkend="_group__errors_1ga56882b290db23261cc6c053c40c2d08e">GLFW_API_UNAVAILABLE</link>,
+123 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="stringliteral">&quot;Vulkan:&#32;Failed&#32;to&#32;query&#32;instance&#32;extensions:&#32;%s&quot;</emphasis>,
+124 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2external_2glfw_2src_2vulkan_8c_1ab14639f4be2f5aff158fe8a0b8e76bd1">_glfwGetVulkanResultString</link>(err));
+125 
+126 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2external_2glfw_2src_2init_8c_1abcf72962b101a8a5c539da1a278b0e9e">_glfw_free</link>(ep);
+127 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2external_2glfw_2src_2vulkan_8c_1a7e9f009f4edffd3f2c938045981f13f1">_glfwTerminateVulkan</link>();
+128 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="_group__init_1gac877fe3b627d21ef3a0a23e0a73ba8c5">GLFW_FALSE</link>;
+129 &#32;&#32;&#32;&#32;}
+130 
+131 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(i&#32;=&#32;0;&#32;&#32;i&#32;&lt;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a22486c0c8d9f7d79a07bf22ecffeeb2f">count</link>;&#32;&#32;i++)
+132 &#32;&#32;&#32;&#32;{
+133 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(strcmp(ep[i].extensionName,&#32;<emphasis role="stringliteral">&quot;VK_KHR_surface&quot;</emphasis>)&#32;==&#32;0)
+134 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2external_2glfw_2src_2init_8c_1a3007bc654ca6468ee69759007f70ba1e">_glfw</link>.<link linkend="_struct___g_l_f_wlibrary_1acd614684de7f5835810e30bf73dcbe8b">vk</link>.<link linkend="_struct___g_l_f_wlibrary_1a5169664f24499b5b82dec093165ca166">KHR_surface</link>&#32;=&#32;<link linkend="_group__init_1ga2744fbb29b5631bb28802dbe0cf36eba">GLFW_TRUE</link>;
+135 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>&#32;<emphasis role="keywordflow">if</emphasis>&#32;(strcmp(ep[i].extensionName,&#32;<emphasis role="stringliteral">&quot;VK_KHR_win32_surface&quot;</emphasis>)&#32;==&#32;0)
+136 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2external_2glfw_2src_2init_8c_1a3007bc654ca6468ee69759007f70ba1e">_glfw</link>.<link linkend="_struct___g_l_f_wlibrary_1acd614684de7f5835810e30bf73dcbe8b">vk</link>.<link linkend="_struct___g_l_f_wlibrary_1afdbf06087f8a6bc40f7fb687ee16b04c">KHR_win32_surface</link>&#32;=&#32;<link linkend="_group__init_1ga2744fbb29b5631bb28802dbe0cf36eba">GLFW_TRUE</link>;
+137 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>&#32;<emphasis role="keywordflow">if</emphasis>&#32;(strcmp(ep[i].extensionName,&#32;<emphasis role="stringliteral">&quot;VK_MVK_macos_surface&quot;</emphasis>)&#32;==&#32;0)
+138 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2external_2glfw_2src_2init_8c_1a3007bc654ca6468ee69759007f70ba1e">_glfw</link>.<link linkend="_struct___g_l_f_wlibrary_1acd614684de7f5835810e30bf73dcbe8b">vk</link>.<link linkend="_struct___g_l_f_wlibrary_1a2d3580e46f2aec1ed725d27ff85255bf">MVK_macos_surface</link>&#32;=&#32;<link linkend="_group__init_1ga2744fbb29b5631bb28802dbe0cf36eba">GLFW_TRUE</link>;
+139 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>&#32;<emphasis role="keywordflow">if</emphasis>&#32;(strcmp(ep[i].extensionName,&#32;<emphasis role="stringliteral">&quot;VK_EXT_metal_surface&quot;</emphasis>)&#32;==&#32;0)
+140 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2external_2glfw_2src_2init_8c_1a3007bc654ca6468ee69759007f70ba1e">_glfw</link>.<link linkend="_struct___g_l_f_wlibrary_1acd614684de7f5835810e30bf73dcbe8b">vk</link>.<link linkend="_struct___g_l_f_wlibrary_1ae21c18d6fc708ba5779e7da6c2c3b8ba">EXT_metal_surface</link>&#32;=&#32;<link linkend="_group__init_1ga2744fbb29b5631bb28802dbe0cf36eba">GLFW_TRUE</link>;
+141 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>&#32;<emphasis role="keywordflow">if</emphasis>&#32;(strcmp(ep[i].extensionName,&#32;<emphasis role="stringliteral">&quot;VK_KHR_xlib_surface&quot;</emphasis>)&#32;==&#32;0)
+142 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2external_2glfw_2src_2init_8c_1a3007bc654ca6468ee69759007f70ba1e">_glfw</link>.<link linkend="_struct___g_l_f_wlibrary_1acd614684de7f5835810e30bf73dcbe8b">vk</link>.<link linkend="_struct___g_l_f_wlibrary_1aaca4cdf17bdebc1ccea4b34fda2e40d7">KHR_xlib_surface</link>&#32;=&#32;<link linkend="_group__init_1ga2744fbb29b5631bb28802dbe0cf36eba">GLFW_TRUE</link>;
+143 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>&#32;<emphasis role="keywordflow">if</emphasis>&#32;(strcmp(ep[i].extensionName,&#32;<emphasis role="stringliteral">&quot;VK_KHR_xcb_surface&quot;</emphasis>)&#32;==&#32;0)
+144 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2external_2glfw_2src_2init_8c_1a3007bc654ca6468ee69759007f70ba1e">_glfw</link>.<link linkend="_struct___g_l_f_wlibrary_1acd614684de7f5835810e30bf73dcbe8b">vk</link>.<link linkend="_struct___g_l_f_wlibrary_1a00ca91ba261300d506226ffb7db40762">KHR_xcb_surface</link>&#32;=&#32;<link linkend="_group__init_1ga2744fbb29b5631bb28802dbe0cf36eba">GLFW_TRUE</link>;
+145 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>&#32;<emphasis role="keywordflow">if</emphasis>&#32;(strcmp(ep[i].extensionName,&#32;<emphasis role="stringliteral">&quot;VK_KHR_wayland_surface&quot;</emphasis>)&#32;==&#32;0)
+146 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2external_2glfw_2src_2init_8c_1a3007bc654ca6468ee69759007f70ba1e">_glfw</link>.<link linkend="_struct___g_l_f_wlibrary_1acd614684de7f5835810e30bf73dcbe8b">vk</link>.<link linkend="_struct___g_l_f_wlibrary_1a669e44878dc6d35acc1dd9ba7d51548c">KHR_wayland_surface</link>&#32;=&#32;<link linkend="_group__init_1ga2744fbb29b5631bb28802dbe0cf36eba">GLFW_TRUE</link>;
+147 &#32;&#32;&#32;&#32;}
+148 
+149 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2external_2glfw_2src_2init_8c_1abcf72962b101a8a5c539da1a278b0e9e">_glfw_free</link>(ep);
+150 
+151 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2external_2glfw_2src_2init_8c_1a3007bc654ca6468ee69759007f70ba1e">_glfw</link>.<link linkend="_struct___g_l_f_wlibrary_1acd614684de7f5835810e30bf73dcbe8b">vk</link>.<link linkend="_struct___g_l_f_wlibrary_1a7978c47e7cee32b9d3b89bf787cfebc5">available</link>&#32;=&#32;<link linkend="_group__init_1ga2744fbb29b5631bb28802dbe0cf36eba">GLFW_TRUE</link>;
+152 
+153 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2external_2glfw_2src_2init_8c_1a3007bc654ca6468ee69759007f70ba1e">_glfw</link>.<link linkend="_struct___g_l_f_wlibrary_1a93b1c9522ac532d94b32072cf4bf1421">platform</link>.<link linkend="_struct___g_l_f_wplatform_1a07ecabfce62b729d991bf471ee70f4ec">getRequiredInstanceExtensions</link>(<link linkend="__classes_2lib_2external_2glfw_2src_2init_8c_1a3007bc654ca6468ee69759007f70ba1e">_glfw</link>.<link linkend="_struct___g_l_f_wlibrary_1acd614684de7f5835810e30bf73dcbe8b">vk</link>.<link linkend="_struct___g_l_f_wlibrary_1a88851909f399ada9dc2777469bdb3397">extensions</link>);
+154 
+155 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="_group__init_1ga2744fbb29b5631bb28802dbe0cf36eba">GLFW_TRUE</link>;
+156 }
+157 
+158 <emphasis role="keywordtype">void</emphasis>&#32;<link linkend="__classes_2lib_2external_2glfw_2src_2vulkan_8c_1a7e9f009f4edffd3f2c938045981f13f1">_glfwTerminateVulkan</link>(<emphasis role="keywordtype">void</emphasis>)
+159 {
+160 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(<link linkend="__classes_2lib_2external_2glfw_2src_2init_8c_1a3007bc654ca6468ee69759007f70ba1e">_glfw</link>.<link linkend="_struct___g_l_f_wlibrary_1acd614684de7f5835810e30bf73dcbe8b">vk</link>.<link linkend="_struct___g_l_f_wlibrary_1a5a67e92b012563943f1e1b26b0bf2645">handle</link>)
+161 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2external_2glfw_2src_2internal_8h_1ad4b9e48b150850f6ee00874f85036715">_glfwPlatformFreeModule</link>(<link linkend="__classes_2lib_2external_2glfw_2src_2init_8c_1a3007bc654ca6468ee69759007f70ba1e">_glfw</link>.<link linkend="_struct___g_l_f_wlibrary_1acd614684de7f5835810e30bf73dcbe8b">vk</link>.<link linkend="_struct___g_l_f_wlibrary_1a5a67e92b012563943f1e1b26b0bf2645">handle</link>);
+162 }
+163 
+164 <emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>*&#32;<link linkend="__classes_2lib_2external_2glfw_2src_2vulkan_8c_1ab14639f4be2f5aff158fe8a0b8e76bd1">_glfwGetVulkanResultString</link>(<link linkend="__classes_2lib_2external_2glfw_2deps_2glad_2vulkan_8h_1abe3614d1bd40772bc2398a4a86ea4a45">VkResult</link>&#32;<link linkend="__classes_2lib_2glm_2test_2core_2core__func__integer_8cpp_1a937d4dd628a8858b443a399410d2600b">result</link>)
+165 {
+166 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">switch</emphasis>&#32;(<link linkend="__classes_2lib_2glm_2test_2core_2core__func__integer_8cpp_1a937d4dd628a8858b443a399410d2600b">result</link>)
+167 &#32;&#32;&#32;&#32;{
+168 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">case</emphasis>&#32;<link linkend="__classes_2lib_2external_2glfw_2deps_2glad_2vulkan_8h_1abe3614d1bd40772bc2398a4a86ea4a45a3671aecac45b2f102cbe941e2ed4d32a">VK_SUCCESS</link>:
+169 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<emphasis role="stringliteral">&quot;Success&quot;</emphasis>;
+170 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">case</emphasis>&#32;<link linkend="__classes_2lib_2external_2glfw_2deps_2glad_2vulkan_8h_1abe3614d1bd40772bc2398a4a86ea4a45ac6fe18c07a607602ecfe048230dd2488">VK_NOT_READY</link>:
+171 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<emphasis role="stringliteral">&quot;A&#32;fence&#32;or&#32;query&#32;has&#32;not&#32;yet&#32;completed&quot;</emphasis>;
+172 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">case</emphasis>&#32;<link linkend="__classes_2lib_2external_2glfw_2deps_2glad_2vulkan_8h_1abe3614d1bd40772bc2398a4a86ea4a45a97dc52aaaf56c631b9aed906a3d962d1">VK_TIMEOUT</link>:
+173 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<emphasis role="stringliteral">&quot;A&#32;wait&#32;operation&#32;has&#32;not&#32;completed&#32;in&#32;the&#32;specified&#32;time&quot;</emphasis>;
+174 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">case</emphasis>&#32;<link linkend="__classes_2lib_2external_2glfw_2deps_2glad_2vulkan_8h_1abe3614d1bd40772bc2398a4a86ea4a45a61b5815d5afa599a1e7addd6a7d52458">VK_EVENT_SET</link>:
+175 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<emphasis role="stringliteral">&quot;An&#32;event&#32;is&#32;signaled&quot;</emphasis>;
+176 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">case</emphasis>&#32;<link linkend="__classes_2lib_2external_2glfw_2deps_2glad_2vulkan_8h_1abe3614d1bd40772bc2398a4a86ea4a45a67af3da25874500e1ae884be57dc42e3">VK_EVENT_RESET</link>:
+177 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<emphasis role="stringliteral">&quot;An&#32;event&#32;is&#32;unsignaled&quot;</emphasis>;
+178 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">case</emphasis>&#32;<link linkend="__classes_2lib_2external_2glfw_2deps_2glad_2vulkan_8h_1abe3614d1bd40772bc2398a4a86ea4a45a3003ce38eb816816fdcdafed429fea31">VK_INCOMPLETE</link>:
+179 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<emphasis role="stringliteral">&quot;A&#32;return&#32;array&#32;was&#32;too&#32;small&#32;for&#32;the&#32;result&quot;</emphasis>;
+180 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">case</emphasis>&#32;<link linkend="__classes_2lib_2external_2glfw_2deps_2glad_2vulkan_8h_1abe3614d1bd40772bc2398a4a86ea4a45a7833ac0ff0fb386ed36b58b8969c26d5">VK_ERROR_OUT_OF_HOST_MEMORY</link>:
+181 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<emphasis role="stringliteral">&quot;A&#32;host&#32;memory&#32;allocation&#32;has&#32;failed&quot;</emphasis>;
+182 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">case</emphasis>&#32;<link linkend="__classes_2lib_2external_2glfw_2deps_2glad_2vulkan_8h_1abe3614d1bd40772bc2398a4a86ea4a45a8b32d29cbe221cff1ba0c74c5a1ee0eb">VK_ERROR_OUT_OF_DEVICE_MEMORY</link>:
+183 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<emphasis role="stringliteral">&quot;A&#32;device&#32;memory&#32;allocation&#32;has&#32;failed&quot;</emphasis>;
+184 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">case</emphasis>&#32;<link linkend="__classes_2lib_2external_2glfw_2deps_2glad_2vulkan_8h_1abe3614d1bd40772bc2398a4a86ea4a45a7ca2b3dc9ec94382a880d0a549b4abad">VK_ERROR_INITIALIZATION_FAILED</link>:
+185 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<emphasis role="stringliteral">&quot;Initialization&#32;of&#32;an&#32;object&#32;could&#32;not&#32;be&#32;completed&#32;for&#32;implementation-specific&#32;reasons&quot;</emphasis>;
+186 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">case</emphasis>&#32;<link linkend="__classes_2lib_2external_2glfw_2deps_2glad_2vulkan_8h_1abe3614d1bd40772bc2398a4a86ea4a45a34d01808c205dc0d3282d9aa8bcfafa3">VK_ERROR_DEVICE_LOST</link>:
+187 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<emphasis role="stringliteral">&quot;The&#32;logical&#32;or&#32;physical&#32;device&#32;has&#32;been&#32;lost&quot;</emphasis>;
+188 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">case</emphasis>&#32;<link linkend="__classes_2lib_2external_2glfw_2deps_2glad_2vulkan_8h_1abe3614d1bd40772bc2398a4a86ea4a45adf5c4fe19a1af35c6f5b3a32399cc13a">VK_ERROR_MEMORY_MAP_FAILED</link>:
+189 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<emphasis role="stringliteral">&quot;Mapping&#32;of&#32;a&#32;memory&#32;object&#32;has&#32;failed&quot;</emphasis>;
+190 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">case</emphasis>&#32;<link linkend="__classes_2lib_2external_2glfw_2deps_2glad_2vulkan_8h_1abe3614d1bd40772bc2398a4a86ea4a45af3674bab24bf2df3705e096c28bd6466">VK_ERROR_LAYER_NOT_PRESENT</link>:
+191 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<emphasis role="stringliteral">&quot;A&#32;requested&#32;layer&#32;is&#32;not&#32;present&#32;or&#32;could&#32;not&#32;be&#32;loaded&quot;</emphasis>;
+192 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">case</emphasis>&#32;<link linkend="__classes_2lib_2external_2glfw_2deps_2glad_2vulkan_8h_1abe3614d1bd40772bc2398a4a86ea4a45a20b80caadaa3175652a04f2658f84b3e">VK_ERROR_EXTENSION_NOT_PRESENT</link>:
+193 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<emphasis role="stringliteral">&quot;A&#32;requested&#32;extension&#32;is&#32;not&#32;supported&quot;</emphasis>;
+194 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">case</emphasis>&#32;<link linkend="__classes_2lib_2external_2glfw_2deps_2glad_2vulkan_8h_1abe3614d1bd40772bc2398a4a86ea4a45acd9a7716a2e832798890c0bdee245408">VK_ERROR_FEATURE_NOT_PRESENT</link>:
+195 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<emphasis role="stringliteral">&quot;A&#32;requested&#32;feature&#32;is&#32;not&#32;supported&quot;</emphasis>;
+196 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">case</emphasis>&#32;<link linkend="__classes_2lib_2external_2glfw_2deps_2glad_2vulkan_8h_1abe3614d1bd40772bc2398a4a86ea4a45af998c6acb49bed0e5d7878b7adfc222e">VK_ERROR_INCOMPATIBLE_DRIVER</link>:
+197 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<emphasis role="stringliteral">&quot;The&#32;requested&#32;version&#32;of&#32;Vulkan&#32;is&#32;not&#32;supported&#32;by&#32;the&#32;driver&#32;or&#32;is&#32;otherwise&#32;incompatible&quot;</emphasis>;
+198 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">case</emphasis>&#32;<link linkend="__classes_2lib_2external_2glfw_2deps_2glad_2vulkan_8h_1abe3614d1bd40772bc2398a4a86ea4a45ad04976b8e05b8b1ef656d0a859d674cb">VK_ERROR_TOO_MANY_OBJECTS</link>:
+199 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<emphasis role="stringliteral">&quot;Too&#32;many&#32;objects&#32;of&#32;the&#32;type&#32;have&#32;already&#32;been&#32;created&quot;</emphasis>;
+200 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">case</emphasis>&#32;<link linkend="__classes_2lib_2external_2glfw_2deps_2glad_2vulkan_8h_1abe3614d1bd40772bc2398a4a86ea4a45a986ab4abfc09fc0cc679a4c1e07fc90e">VK_ERROR_FORMAT_NOT_SUPPORTED</link>:
+201 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<emphasis role="stringliteral">&quot;A&#32;requested&#32;format&#32;is&#32;not&#32;supported&#32;on&#32;this&#32;device&quot;</emphasis>;
+202 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">case</emphasis>&#32;<link linkend="__classes_2lib_2external_2glfw_2deps_2glad_2vulkan_8h_1abe3614d1bd40772bc2398a4a86ea4a45ab4106d84bf57d5cb0f58cc3552bad2fa">VK_ERROR_SURFACE_LOST_KHR</link>:
+203 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<emphasis role="stringliteral">&quot;A&#32;surface&#32;is&#32;no&#32;longer&#32;available&quot;</emphasis>;
+204 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">case</emphasis>&#32;<link linkend="__classes_2lib_2external_2glfw_2deps_2glad_2vulkan_8h_1abe3614d1bd40772bc2398a4a86ea4a45a171e863ef89a590d4b4f099b944d16d3">VK_SUBOPTIMAL_KHR</link>:
+205 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<emphasis role="stringliteral">&quot;A&#32;swapchain&#32;no&#32;longer&#32;matches&#32;the&#32;surface&#32;properties&#32;exactly,&#32;but&#32;can&#32;still&#32;be&#32;used&quot;</emphasis>;
+206 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">case</emphasis>&#32;<link linkend="__classes_2lib_2external_2glfw_2deps_2glad_2vulkan_8h_1abe3614d1bd40772bc2398a4a86ea4a45a9370bba3bf68e019346c30dac42ddfb4">VK_ERROR_OUT_OF_DATE_KHR</link>:
+207 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<emphasis role="stringliteral">&quot;A&#32;surface&#32;has&#32;changed&#32;in&#32;such&#32;a&#32;way&#32;that&#32;it&#32;is&#32;no&#32;longer&#32;compatible&#32;with&#32;the&#32;swapchain&quot;</emphasis>;
+208 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">case</emphasis>&#32;<link linkend="__classes_2lib_2external_2glfw_2src_2internal_8h_1abe3614d1bd40772bc2398a4a86ea4a45a899413b085521f2fbad7e925b177c36c">VK_ERROR_INCOMPATIBLE_DISPLAY_KHR</link>:
+209 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<emphasis role="stringliteral">&quot;The&#32;display&#32;used&#32;by&#32;a&#32;swapchain&#32;does&#32;not&#32;use&#32;the&#32;same&#32;presentable&#32;image&#32;layout&quot;</emphasis>;
+210 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">case</emphasis>&#32;<link linkend="__classes_2lib_2external_2glfw_2deps_2glad_2vulkan_8h_1abe3614d1bd40772bc2398a4a86ea4a45a8cf8b0e3ff03da8b5f93ceb9fe533d52">VK_ERROR_NATIVE_WINDOW_IN_USE_KHR</link>:
+211 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<emphasis role="stringliteral">&quot;The&#32;requested&#32;window&#32;is&#32;already&#32;connected&#32;to&#32;a&#32;VkSurfaceKHR,&#32;or&#32;to&#32;some&#32;other&#32;non-Vulkan&#32;API&quot;</emphasis>;
+212 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">case</emphasis>&#32;<link linkend="__classes_2lib_2external_2glfw_2deps_2glad_2vulkan_8h_1abe3614d1bd40772bc2398a4a86ea4a45a0309b09af6947fdc62b3cb8e54a01661">VK_ERROR_VALIDATION_FAILED_EXT</link>:
+213 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<emphasis role="stringliteral">&quot;A&#32;validation&#32;layer&#32;found&#32;an&#32;error&quot;</emphasis>;
+214 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">default</emphasis>:
+215 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<emphasis role="stringliteral">&quot;ERROR:&#32;UNKNOWN&#32;VULKAN&#32;ERROR&quot;</emphasis>;
+216 &#32;&#32;&#32;&#32;}
+217 }
+218 
+219 
+223 
+224 <link linkend="__classes_2lib_2external_2glfw_2include_2_g_l_f_w_2glfw3_8h_1a56da5036b2cc259351ae22fd6439bb47">GLFWAPI</link>&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="_group__vulkan_1ga72e7c3757d9ff2333181a5569bb7c403">glfwVulkanSupported</link>(<emphasis role="keywordtype">void</emphasis>)
+225 {
+226 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2external_2glfw_2src_2internal_8h_1a69563c87fe776d416636a4d1b0e9e599">_GLFW_REQUIRE_INIT_OR_RETURN</link>(<link linkend="_group__init_1gac877fe3b627d21ef3a0a23e0a73ba8c5">GLFW_FALSE</link>);
+227 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="__classes_2lib_2external_2glfw_2src_2vulkan_8c_1a3e82e6d9f82e3052943978e803bccef5">_glfwInitVulkan</link>(<link linkend="__classes_2lib_2external_2glfw_2src_2vulkan_8c_1a1957ac3a217eea28a55ae80431d5a41f">_GLFW_FIND_LOADER</link>);
+228 }
+229 
+230 <link linkend="__classes_2lib_2external_2glfw_2include_2_g_l_f_w_2glfw3_8h_1a56da5036b2cc259351ae22fd6439bb47">GLFWAPI</link>&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>**&#32;<link linkend="_group__vulkan_1gada152edc5bbbd0c2138728878632fd9c">glfwGetRequiredInstanceExtensions</link>(<link linkend="__classes_2lib_2external_2glfw_2deps_2vs2008_2stdint_8h_1a435d1572bf3f880d55459d9805097f62">uint32_t</link>*&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a22486c0c8d9f7d79a07bf22ecffeeb2f">count</link>)
+231 {
+232 &#32;&#32;&#32;&#32;assert(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a22486c0c8d9f7d79a07bf22ecffeeb2f">count</link>&#32;!=&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>);
+233 
+234 &#32;&#32;&#32;&#32;*<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a22486c0c8d9f7d79a07bf22ecffeeb2f">count</link>&#32;=&#32;0;
+235 
+236 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2external_2glfw_2src_2internal_8h_1a69563c87fe776d416636a4d1b0e9e599">_GLFW_REQUIRE_INIT_OR_RETURN</link>(<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>);
+237 
+238 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(!<link linkend="__classes_2lib_2external_2glfw_2src_2vulkan_8c_1a3e82e6d9f82e3052943978e803bccef5">_glfwInitVulkan</link>(<link linkend="__classes_2lib_2external_2glfw_2src_2vulkan_8c_1ab21616814a41512460caa5b301776c77">_GLFW_REQUIRE_LOADER</link>))
+239 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>;
+240 
+241 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(!<link linkend="__classes_2lib_2external_2glfw_2src_2init_8c_1a3007bc654ca6468ee69759007f70ba1e">_glfw</link>.<link linkend="_struct___g_l_f_wlibrary_1acd614684de7f5835810e30bf73dcbe8b">vk</link>.<link linkend="_struct___g_l_f_wlibrary_1a88851909f399ada9dc2777469bdb3397">extensions</link>[0])
+242 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>;
+243 
+244 &#32;&#32;&#32;&#32;*<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a22486c0c8d9f7d79a07bf22ecffeeb2f">count</link>&#32;=&#32;2;
+245 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;(<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>**)&#32;<link linkend="__classes_2lib_2external_2glfw_2src_2init_8c_1a3007bc654ca6468ee69759007f70ba1e">_glfw</link>.<link linkend="_struct___g_l_f_wlibrary_1acd614684de7f5835810e30bf73dcbe8b">vk</link>.<link linkend="_struct___g_l_f_wlibrary_1a88851909f399ada9dc2777469bdb3397">extensions</link>;
+246 }
+247 
+248 <link linkend="__classes_2lib_2external_2glfw_2include_2_g_l_f_w_2glfw3_8h_1a56da5036b2cc259351ae22fd6439bb47">GLFWAPI</link>&#32;<link linkend="_group__vulkan_1ga70c01918dc9d233a4fbe0681a43018af">GLFWvkproc</link>&#32;<link linkend="__classes_2lib_2external_2glfw_2src_2vulkan_8c_1ab1fbd7c0ba5c40c91c6b85b897364039">glfwGetInstanceProcAddress</link>(<link linkend="__classes_2lib_2external_2glfw_2src_2internal_8h_1a25ae5082a7c01af345570ed09d724881">VkInstance</link>&#32;instance,
+249 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>*&#32;procname)
+250 {
+251 &#32;&#32;&#32;&#32;<link linkend="_group__vulkan_1ga70c01918dc9d233a4fbe0681a43018af">GLFWvkproc</link>&#32;proc;
+252 &#32;&#32;&#32;&#32;assert(procname&#32;!=&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>);
+253 
+254 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2external_2glfw_2src_2internal_8h_1a69563c87fe776d416636a4d1b0e9e599">_GLFW_REQUIRE_INIT_OR_RETURN</link>(<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>);
+255 
+256 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(!<link linkend="__classes_2lib_2external_2glfw_2src_2vulkan_8c_1a3e82e6d9f82e3052943978e803bccef5">_glfwInitVulkan</link>(<link linkend="__classes_2lib_2external_2glfw_2src_2vulkan_8c_1ab21616814a41512460caa5b301776c77">_GLFW_REQUIRE_LOADER</link>))
+257 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>;
+258 
+259 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;NOTE:&#32;Vulkan&#32;1.0&#32;and&#32;1.1&#32;vkGetInstanceProcAddr&#32;cannot&#32;return&#32;itself</emphasis>
+260 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(strcmp(procname,&#32;<emphasis role="stringliteral">&quot;vkGetInstanceProcAddr&quot;</emphasis>)&#32;==&#32;0)
+261 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;(<link linkend="_group__vulkan_1ga70c01918dc9d233a4fbe0681a43018af">GLFWvkproc</link>)&#32;<link linkend="__classes_2lib_2external_2glfw_2deps_2glad_2vulkan_8h_1ae698fe946e5b75ed4a173e95133cf4f3">vkGetInstanceProcAddr</link>;
+262 
+263 &#32;&#32;&#32;&#32;proc&#32;=&#32;(<link linkend="_group__vulkan_1ga70c01918dc9d233a4fbe0681a43018af">GLFWvkproc</link>)&#32;<link linkend="__classes_2lib_2external_2glfw_2deps_2glad_2vulkan_8h_1ae698fe946e5b75ed4a173e95133cf4f3">vkGetInstanceProcAddr</link>(instance,&#32;procname);
+264 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(!proc)
+265 &#32;&#32;&#32;&#32;{
+266 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(<link linkend="__classes_2lib_2external_2glfw_2src_2init_8c_1a3007bc654ca6468ee69759007f70ba1e">_glfw</link>.<link linkend="_struct___g_l_f_wlibrary_1acd614684de7f5835810e30bf73dcbe8b">vk</link>.<link linkend="_struct___g_l_f_wlibrary_1a5a67e92b012563943f1e1b26b0bf2645">handle</link>)
+267 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;proc&#32;=&#32;(<link linkend="_group__vulkan_1ga70c01918dc9d233a4fbe0681a43018af">GLFWvkproc</link>)&#32;<link linkend="__classes_2lib_2external_2glfw_2src_2internal_8h_1a370840ea8f3f1016d07030f7a06bf36e">_glfwPlatformGetModuleSymbol</link>(<link linkend="__classes_2lib_2external_2glfw_2src_2init_8c_1a3007bc654ca6468ee69759007f70ba1e">_glfw</link>.<link linkend="_struct___g_l_f_wlibrary_1acd614684de7f5835810e30bf73dcbe8b">vk</link>.<link linkend="_struct___g_l_f_wlibrary_1a5a67e92b012563943f1e1b26b0bf2645">handle</link>,&#32;procname);
+268 &#32;&#32;&#32;&#32;}
+269 
+270 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;proc;
+271 }
+272 
+273 <link linkend="__classes_2lib_2external_2glfw_2include_2_g_l_f_w_2glfw3_8h_1a56da5036b2cc259351ae22fd6439bb47">GLFWAPI</link>&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2external_2glfw_2src_2vulkan_8c_1a6a7033429666ac6b31d4250aeb5b37d1">glfwGetPhysicalDevicePresentationSupport</link>(<link linkend="__classes_2lib_2external_2glfw_2src_2internal_8h_1a25ae5082a7c01af345570ed09d724881">VkInstance</link>&#32;instance,
+274 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2external_2glfw_2src_2internal_8h_1aa9acbee1e762fde021511a1b47678a38">VkPhysicalDevice</link>&#32;device,
+275 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2external_2glfw_2deps_2vs2008_2stdint_8h_1a435d1572bf3f880d55459d9805097f62">uint32_t</link>&#32;queuefamily)
+276 {
+277 &#32;&#32;&#32;&#32;assert(instance&#32;!=&#32;<link linkend="__classes_2lib_2external_2glfw_2deps_2glad_2vulkan_8h_1ad1021f65d668acdf1644d94e0828bff0">VK_NULL_HANDLE</link>);
+278 &#32;&#32;&#32;&#32;assert(device&#32;!=&#32;<link linkend="__classes_2lib_2external_2glfw_2deps_2glad_2vulkan_8h_1ad1021f65d668acdf1644d94e0828bff0">VK_NULL_HANDLE</link>);
+279 
+280 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2external_2glfw_2src_2internal_8h_1a69563c87fe776d416636a4d1b0e9e599">_GLFW_REQUIRE_INIT_OR_RETURN</link>(<link linkend="_group__init_1gac877fe3b627d21ef3a0a23e0a73ba8c5">GLFW_FALSE</link>);
+281 
+282 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(!<link linkend="__classes_2lib_2external_2glfw_2src_2vulkan_8c_1a3e82e6d9f82e3052943978e803bccef5">_glfwInitVulkan</link>(<link linkend="__classes_2lib_2external_2glfw_2src_2vulkan_8c_1ab21616814a41512460caa5b301776c77">_GLFW_REQUIRE_LOADER</link>))
+283 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="_group__init_1gac877fe3b627d21ef3a0a23e0a73ba8c5">GLFW_FALSE</link>;
+284 
+285 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(!<link linkend="__classes_2lib_2external_2glfw_2src_2init_8c_1a3007bc654ca6468ee69759007f70ba1e">_glfw</link>.<link linkend="_struct___g_l_f_wlibrary_1acd614684de7f5835810e30bf73dcbe8b">vk</link>.<link linkend="_struct___g_l_f_wlibrary_1a88851909f399ada9dc2777469bdb3397">extensions</link>[0])
+286 &#32;&#32;&#32;&#32;{
+287 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2external_2glfw_2src_2init_8c_1a3287b282ec57a4a89127ae51f49f10f5">_glfwInputError</link>(<link linkend="_group__errors_1ga56882b290db23261cc6c053c40c2d08e">GLFW_API_UNAVAILABLE</link>,
+288 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="stringliteral">&quot;Vulkan:&#32;Window&#32;surface&#32;creation&#32;extensions&#32;not&#32;found&quot;</emphasis>);
+289 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="_group__init_1gac877fe3b627d21ef3a0a23e0a73ba8c5">GLFW_FALSE</link>;
+290 &#32;&#32;&#32;&#32;}
+291 
+292 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="__classes_2lib_2external_2glfw_2src_2init_8c_1a3007bc654ca6468ee69759007f70ba1e">_glfw</link>.<link linkend="_struct___g_l_f_wlibrary_1a93b1c9522ac532d94b32072cf4bf1421">platform</link>.<link linkend="_struct___g_l_f_wplatform_1a944aaf69b354262315b819dddb4c84fe">getPhysicalDevicePresentationSupport</link>(instance,
+293 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;device,
+294 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;queuefamily);
+295 }
+296 
+297 <link linkend="__classes_2lib_2external_2glfw_2include_2_g_l_f_w_2glfw3_8h_1a56da5036b2cc259351ae22fd6439bb47">GLFWAPI</link>&#32;<link linkend="__classes_2lib_2external_2glfw_2deps_2glad_2vulkan_8h_1abe3614d1bd40772bc2398a4a86ea4a45">VkResult</link>&#32;<link linkend="__classes_2lib_2external_2glfw_2src_2vulkan_8c_1a5a47c783767442b8b8e9ab3cf2e4959b">glfwCreateWindowSurface</link>(<link linkend="__classes_2lib_2external_2glfw_2src_2internal_8h_1a25ae5082a7c01af345570ed09d724881">VkInstance</link>&#32;instance,
+298 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_group__window_1ga3c96d80d363e67d13a41b5d1821f3242">GLFWwindow</link>*&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a48fc485a2a8834589d1f1afeec65193c">handle</link>,
+299 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;<link linkend="_struct_vk_allocation_callbacks">VkAllocationCallbacks</link>*&#32;allocator,
+300 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2external_2glfw_2src_2internal_8h_1a09787d7da5f3146095ed80ceccc2d794">VkSurfaceKHR</link>*&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a0720952aa1caded45b5bcdce589663a9">surface</link>)
+301 {
+302 &#32;&#32;&#32;&#32;<link linkend="_struct___g_l_f_wwindow">_GLFWwindow</link>*&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a92dbce8e3247f6a78126c99877caacb6">window</link>&#32;=&#32;(<link linkend="_struct___g_l_f_wwindow">_GLFWwindow</link>*)&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a48fc485a2a8834589d1f1afeec65193c">handle</link>;
+303 &#32;&#32;&#32;&#32;assert(instance&#32;!=&#32;<link linkend="__classes_2lib_2external_2glfw_2deps_2glad_2vulkan_8h_1ad1021f65d668acdf1644d94e0828bff0">VK_NULL_HANDLE</link>);
+304 &#32;&#32;&#32;&#32;assert(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a92dbce8e3247f6a78126c99877caacb6">window</link>&#32;!=&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>);
+305 &#32;&#32;&#32;&#32;assert(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a0720952aa1caded45b5bcdce589663a9">surface</link>&#32;!=&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>);
+306 
+307 &#32;&#32;&#32;&#32;*<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a0720952aa1caded45b5bcdce589663a9">surface</link>&#32;=&#32;<link linkend="__classes_2lib_2external_2glfw_2deps_2glad_2vulkan_8h_1ad1021f65d668acdf1644d94e0828bff0">VK_NULL_HANDLE</link>;
+308 
+309 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2external_2glfw_2src_2internal_8h_1a69563c87fe776d416636a4d1b0e9e599">_GLFW_REQUIRE_INIT_OR_RETURN</link>(<link linkend="__classes_2lib_2external_2glfw_2deps_2glad_2vulkan_8h_1abe3614d1bd40772bc2398a4a86ea4a45a7ca2b3dc9ec94382a880d0a549b4abad">VK_ERROR_INITIALIZATION_FAILED</link>);
+310 
+311 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(!<link linkend="__classes_2lib_2external_2glfw_2src_2vulkan_8c_1a3e82e6d9f82e3052943978e803bccef5">_glfwInitVulkan</link>(<link linkend="__classes_2lib_2external_2glfw_2src_2vulkan_8c_1ab21616814a41512460caa5b301776c77">_GLFW_REQUIRE_LOADER</link>))
+312 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="__classes_2lib_2external_2glfw_2deps_2glad_2vulkan_8h_1abe3614d1bd40772bc2398a4a86ea4a45a7ca2b3dc9ec94382a880d0a549b4abad">VK_ERROR_INITIALIZATION_FAILED</link>;
+313 
+314 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(!<link linkend="__classes_2lib_2external_2glfw_2src_2init_8c_1a3007bc654ca6468ee69759007f70ba1e">_glfw</link>.<link linkend="_struct___g_l_f_wlibrary_1acd614684de7f5835810e30bf73dcbe8b">vk</link>.<link linkend="_struct___g_l_f_wlibrary_1a88851909f399ada9dc2777469bdb3397">extensions</link>[0])
+315 &#32;&#32;&#32;&#32;{
+316 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2external_2glfw_2src_2init_8c_1a3287b282ec57a4a89127ae51f49f10f5">_glfwInputError</link>(<link linkend="_group__errors_1ga56882b290db23261cc6c053c40c2d08e">GLFW_API_UNAVAILABLE</link>,
+317 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="stringliteral">&quot;Vulkan:&#32;Window&#32;surface&#32;creation&#32;extensions&#32;not&#32;found&quot;</emphasis>);
+318 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="__classes_2lib_2external_2glfw_2deps_2glad_2vulkan_8h_1abe3614d1bd40772bc2398a4a86ea4a45a20b80caadaa3175652a04f2658f84b3e">VK_ERROR_EXTENSION_NOT_PRESENT</link>;
+319 &#32;&#32;&#32;&#32;}
+320 
+321 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a92dbce8e3247f6a78126c99877caacb6">window</link>-&gt;context.client&#32;!=&#32;<link linkend="__classes_2lib_2external_2glfw_2include_2_g_l_f_w_2glfw3_8h_1a8f6dcdc968d214ff14779564f1389264">GLFW_NO_API</link>)
+322 &#32;&#32;&#32;&#32;{
+323 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2external_2glfw_2src_2init_8c_1a3287b282ec57a4a89127ae51f49f10f5">_glfwInputError</link>(<link linkend="_group__errors_1gaaf2ef9aa8202c2b82ac2d921e554c687">GLFW_INVALID_VALUE</link>,
+324 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="stringliteral">&quot;Vulkan:&#32;Window&#32;surface&#32;creation&#32;requires&#32;the&#32;window&#32;to&#32;have&#32;the&#32;client&#32;API&#32;set&#32;to&#32;GLFW_NO_API&quot;</emphasis>);
+325 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="__classes_2lib_2external_2glfw_2deps_2glad_2vulkan_8h_1abe3614d1bd40772bc2398a4a86ea4a45a8cf8b0e3ff03da8b5f93ceb9fe533d52">VK_ERROR_NATIVE_WINDOW_IN_USE_KHR</link>;
+326 &#32;&#32;&#32;&#32;}
+327 
+328 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="__classes_2lib_2external_2glfw_2src_2init_8c_1a3007bc654ca6468ee69759007f70ba1e">_glfw</link>.<link linkend="_struct___g_l_f_wlibrary_1a93b1c9522ac532d94b32072cf4bf1421">platform</link>.<link linkend="_struct___g_l_f_wplatform_1a9c2e4ba22dd4643eeb514efe4b4a2a8e">createWindowSurface</link>(instance,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a92dbce8e3247f6a78126c99877caacb6">window</link>,&#32;allocator,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a0720952aa1caded45b5bcdce589663a9">surface</link>);
+329 }
+330 
+</programlisting></section>

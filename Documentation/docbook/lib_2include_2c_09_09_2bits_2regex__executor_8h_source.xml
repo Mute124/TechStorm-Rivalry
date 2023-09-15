@@ -1,0 +1,298 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<section xmlns="http://docbook.org/ns/docbook" version="5.0" xmlns:xlink="http://www.w3.org/1999/xlink" xml:id="_lib_2include_2c_09_09_2bits_2regex__executor_8h_source" xml:lang="en-US">
+<title>regex_executor.h</title>
+<indexterm><primary>C:/Users/HP/Documents/GitHub/Minero-Game/lib/include/c++/bits/regex_executor.h</primary></indexterm>
+Go to the documentation of this file.<programlisting linenumbering="unnumbered">1 <emphasis role="comment">//&#32;class&#32;template&#32;regex&#32;-*-&#32;C++&#32;-*-</emphasis>
+2 
+3 <emphasis role="comment">//&#32;Copyright&#32;(C)&#32;2013-2022&#32;Free&#32;Software&#32;Foundation,&#32;Inc.</emphasis>
+4 <emphasis role="comment">//</emphasis>
+5 <emphasis role="comment">//&#32;This&#32;file&#32;is&#32;part&#32;of&#32;the&#32;GNU&#32;ISO&#32;C++&#32;Library.&#32;&#32;This&#32;library&#32;is&#32;free</emphasis>
+6 <emphasis role="comment">//&#32;software;&#32;you&#32;can&#32;redistribute&#32;it&#32;and/or&#32;modify&#32;it&#32;under&#32;the</emphasis>
+7 <emphasis role="comment">//&#32;terms&#32;of&#32;the&#32;GNU&#32;General&#32;Public&#32;License&#32;as&#32;published&#32;by&#32;the</emphasis>
+8 <emphasis role="comment">//&#32;Free&#32;Software&#32;Foundation;&#32;either&#32;version&#32;3,&#32;or&#32;(at&#32;your&#32;option)</emphasis>
+9 <emphasis role="comment">//&#32;any&#32;later&#32;version.</emphasis>
+10 
+11 <emphasis role="comment">//&#32;This&#32;library&#32;is&#32;distributed&#32;in&#32;the&#32;hope&#32;that&#32;it&#32;will&#32;be&#32;useful,</emphasis>
+12 <emphasis role="comment">//&#32;but&#32;WITHOUT&#32;ANY&#32;WARRANTY;&#32;without&#32;even&#32;the&#32;implied&#32;warranty&#32;of</emphasis>
+13 <emphasis role="comment">//&#32;MERCHANTABILITY&#32;or&#32;FITNESS&#32;FOR&#32;A&#32;PARTICULAR&#32;PURPOSE.&#32;&#32;See&#32;the</emphasis>
+14 <emphasis role="comment">//&#32;GNU&#32;General&#32;Public&#32;License&#32;for&#32;more&#32;details.</emphasis>
+15 
+16 <emphasis role="comment">//&#32;Under&#32;Section&#32;7&#32;of&#32;GPL&#32;version&#32;3,&#32;you&#32;are&#32;granted&#32;additional</emphasis>
+17 <emphasis role="comment">//&#32;permissions&#32;described&#32;in&#32;the&#32;GCC&#32;Runtime&#32;Library&#32;Exception,&#32;version</emphasis>
+18 <emphasis role="comment">//&#32;3.1,&#32;as&#32;published&#32;by&#32;the&#32;Free&#32;Software&#32;Foundation.</emphasis>
+19 
+20 <emphasis role="comment">//&#32;You&#32;should&#32;have&#32;received&#32;a&#32;copy&#32;of&#32;the&#32;GNU&#32;General&#32;Public&#32;License&#32;and</emphasis>
+21 <emphasis role="comment">//&#32;a&#32;copy&#32;of&#32;the&#32;GCC&#32;Runtime&#32;Library&#32;Exception&#32;along&#32;with&#32;this&#32;program;</emphasis>
+22 <emphasis role="comment">//&#32;see&#32;the&#32;files&#32;COPYING3&#32;and&#32;COPYING.RUNTIME&#32;respectively.&#32;&#32;If&#32;not,&#32;see</emphasis>
+23 <emphasis role="comment">//&#32;&lt;http://www.gnu.org/licenses/&gt;.</emphasis>
+24 
+31 <emphasis role="comment">//&#32;FIXME&#32;convert&#32;comments&#32;to&#32;doxygen&#32;format.</emphasis>
+32 
+33 <emphasis role="keyword">namespace&#32;</emphasis><link linkend="_namespacestd">std</link>&#32;<link linkend="__classes_2lib_2include_2c_09_09_2x86__64-w64-mingw32_2bits_2c_09_09config_8h_1a44377df0d3503f0b3d9ab316dd8ddf8b">_GLIBCXX_VISIBILITY</link>(default)
+34 {
+35 _GLIBCXX_BEGIN_NAMESPACE_VERSION
+36 
+37 <emphasis role="keyword">namespace&#32;</emphasis>__detail
+38 {
+50 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_BiIter,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Alloc,&#32;<emphasis role="keyword">typename</emphasis>&#32;_TraitsT,
+51 &#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">bool</emphasis>&#32;__dfs_mode&gt;
+52 &#32;&#32;&#32;&#32;<emphasis role="keyword">class&#32;</emphasis>_Executor
+53 &#32;&#32;&#32;&#32;{
+54 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">using&#32;</emphasis>__search_mode&#32;=&#32;integral_constant&lt;bool,&#32;__dfs_mode&gt;;
+55 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">using&#32;</emphasis>__dfs&#32;=&#32;<link linkend="_namespace____gnu__pbds_1_1detail_1a6bd7131856cf31c3caa443a674400ab1">true_type</link>;
+56 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">using&#32;</emphasis>__bfs&#32;=&#32;<link linkend="_namespace____gnu__pbds_1_1detail_1a05db727ae5396f8d8518969cd59fff55">false_type</link>;
+57 
+58 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">enum&#32;class</emphasis>&#32;_Match_mode&#32;:&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>&#32;{&#32;_Exact,&#32;_Prefix&#32;};
+59 
+60 &#32;&#32;&#32;&#32;<emphasis role="keyword">public</emphasis>:
+61 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">typename</emphasis>&#32;iterator_traits&lt;_BiIter&gt;::value_type&#32;_CharT;
+62 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;basic_regex&lt;_CharT,&#32;_TraitsT&gt;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_RegexT;
+63 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;_GLIBCXX_STD_C::vector&lt;sub_match&lt;_BiIter&gt;,&#32;_Alloc&gt;&#32;_ResultsVec;
+64 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;regex_constants::match_flag_type&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_FlagT;
+65 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">typename</emphasis>&#32;_TraitsT::char_class_type&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_ClassT;
+66 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;_NFA&lt;_TraitsT&gt;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_NFAT;
+67 
+68 &#32;&#32;&#32;&#32;<emphasis role="keyword">public</emphasis>:
+69 &#32;&#32;&#32;&#32;&#32;&#32;_Executor(_BiIter&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__begin,
+70 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_BiIter&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__end,
+71 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_ResultsVec&amp;&#32;&#32;&#32;&#32;__results,
+72 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;_RegexT&amp;&#32;&#32;__re,
+73 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_FlagT&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__flags)
+74 &#32;&#32;&#32;&#32;&#32;&#32;:&#32;_M_begin(__begin),
+75 &#32;&#32;&#32;&#32;&#32;&#32;_M_end(__end),
+76 &#32;&#32;&#32;&#32;&#32;&#32;_M_re(__re),
+77 &#32;&#32;&#32;&#32;&#32;&#32;_M_nfa(*__re._M_automaton),
+78 &#32;&#32;&#32;&#32;&#32;&#32;_M_results(__results),
+79 &#32;&#32;&#32;&#32;&#32;&#32;_M_rep_count(_M_nfa.<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a3d1e3edfcf61ca2d831883e1afbad89e">size</link>()),
+80 &#32;&#32;&#32;&#32;&#32;&#32;_M_states(_M_nfa._M_start(),&#32;_M_nfa.<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a3d1e3edfcf61ca2d831883e1afbad89e">size</link>()),
+81 &#32;&#32;&#32;&#32;&#32;&#32;_M_flags(__flags)
+82 &#32;&#32;&#32;&#32;&#32;&#32;{
+83 &#32;&#32;&#32;&#32;<emphasis role="keyword">using&#32;namespace&#32;</emphasis>regex_constants;
+84 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__flags&#32;&amp;&#32;match_prev_avail)&#32;<emphasis role="comment">//&#32;ignore&#32;not_bol&#32;and&#32;not_bow</emphasis>
+85 &#32;&#32;&#32;&#32;&#32;&#32;_M_flags&#32;&amp;=&#32;~(match_not_bol&#32;|&#32;match_not_bow);
+86 &#32;&#32;&#32;&#32;&#32;&#32;}
+87 
+88 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Set&#32;matched&#32;when&#32;string&#32;exactly&#32;matches&#32;the&#32;pattern.</emphasis>
+89 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">bool</emphasis>
+90 &#32;&#32;&#32;&#32;&#32;&#32;_M_match()
+91 &#32;&#32;&#32;&#32;&#32;&#32;{
+92 &#32;&#32;&#32;&#32;_M_current&#32;=&#32;_M_begin;
+93 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;_M_main(_Match_mode::_Exact);
+94 &#32;&#32;&#32;&#32;&#32;&#32;}
+95 
+96 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Set&#32;matched&#32;when&#32;some&#32;prefix&#32;of&#32;the&#32;string&#32;matches&#32;the&#32;pattern.</emphasis>
+97 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">bool</emphasis>
+98 &#32;&#32;&#32;&#32;&#32;&#32;_M_search_from_first()
+99 &#32;&#32;&#32;&#32;&#32;&#32;{
+100 &#32;&#32;&#32;&#32;_M_current&#32;=&#32;_M_begin;
+101 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;_M_main(_Match_mode::_Prefix);
+102 &#32;&#32;&#32;&#32;&#32;&#32;}
+103 
+104 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">bool</emphasis>
+105 &#32;&#32;&#32;&#32;&#32;&#32;_M_search();
+106 
+107 &#32;&#32;&#32;&#32;<emphasis role="keyword">private</emphasis>:
+108 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+109 &#32;&#32;&#32;&#32;&#32;&#32;_M_rep_once_more(_Match_mode&#32;__match_mode,&#32;_StateIdT);
+110 
+111 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+112 &#32;&#32;&#32;&#32;&#32;&#32;_M_handle_repeat(_Match_mode,&#32;_StateIdT);
+113 
+114 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+115 &#32;&#32;&#32;&#32;&#32;&#32;_M_handle_subexpr_begin(_Match_mode,&#32;_StateIdT);
+116 
+117 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+118 &#32;&#32;&#32;&#32;&#32;&#32;_M_handle_subexpr_end(_Match_mode,&#32;_StateIdT);
+119 
+120 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+121 &#32;&#32;&#32;&#32;&#32;&#32;_M_handle_line_begin_assertion(_Match_mode,&#32;_StateIdT);
+122 
+123 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+124 &#32;&#32;&#32;&#32;&#32;&#32;_M_handle_line_end_assertion(_Match_mode,&#32;_StateIdT);
+125 
+126 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+127 &#32;&#32;&#32;&#32;&#32;&#32;_M_handle_word_boundary(_Match_mode,&#32;_StateIdT);
+128 
+129 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+130 &#32;&#32;&#32;&#32;&#32;&#32;_M_handle_subexpr_lookahead(_Match_mode,&#32;_StateIdT);
+131 
+132 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+133 &#32;&#32;&#32;&#32;&#32;&#32;_M_handle_match(_Match_mode,&#32;_StateIdT);
+134 
+135 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+136 &#32;&#32;&#32;&#32;&#32;&#32;_M_handle_backref(_Match_mode,&#32;_StateIdT);
+137 
+138 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+139 &#32;&#32;&#32;&#32;&#32;&#32;_M_handle_accept(_Match_mode,&#32;_StateIdT);
+140 
+141 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+142 &#32;&#32;&#32;&#32;&#32;&#32;_M_handle_alternative(_Match_mode,&#32;_StateIdT);
+143 
+144 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+145 &#32;&#32;&#32;&#32;&#32;&#32;_M_dfs(_Match_mode&#32;__match_mode,&#32;_StateIdT&#32;__start);
+146 
+147 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">bool</emphasis>
+148 &#32;&#32;&#32;&#32;&#32;&#32;_M_main(_Match_mode&#32;__match_mode)
+149 &#32;&#32;&#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;_M_main_dispatch(__match_mode,&#32;__search_mode{});&#32;}
+150 
+151 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">bool</emphasis>
+152 &#32;&#32;&#32;&#32;&#32;&#32;_M_main_dispatch(_Match_mode&#32;__match_mode,&#32;__dfs);
+153 
+154 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">bool</emphasis>
+155 &#32;&#32;&#32;&#32;&#32;&#32;_M_main_dispatch(_Match_mode&#32;__match_mode,&#32;__bfs);
+156 
+157 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">bool</emphasis>
+158 &#32;&#32;&#32;&#32;&#32;&#32;_M_is_word(_CharT&#32;__ch)<emphasis role="keyword">&#32;const</emphasis>
+159 <emphasis role="keyword">&#32;&#32;&#32;&#32;&#32;&#32;</emphasis>{
+160 &#32;&#32;&#32;&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keyword">const</emphasis>&#32;_CharT&#32;__s[2]&#32;=&#32;{&#32;<emphasis role="charliteral">&apos;w&apos;</emphasis>&#32;};
+161 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;_M_re._M_automaton-&gt;_M_traits.isctype
+162 &#32;&#32;&#32;&#32;&#32;&#32;(__ch,&#32;_M_re._M_automaton-&gt;_M_traits.lookup_classname(__s,&#32;__s+1));
+163 &#32;&#32;&#32;&#32;&#32;&#32;}
+164 
+165 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">bool</emphasis>
+166 &#32;&#32;&#32;&#32;&#32;&#32;_M_at_begin()<emphasis role="keyword">&#32;const</emphasis>
+167 <emphasis role="keyword">&#32;&#32;&#32;&#32;&#32;&#32;</emphasis>{
+168 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(_M_current&#32;==&#32;_M_begin)
+169 &#32;&#32;&#32;&#32;&#32;&#32;{
+170 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;match_not_bol&#32;means&#32;^&#32;does&#32;not&#32;match&#32;[_M_begin,_M_begin)</emphasis>
+171 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(_M_flags&#32;&amp;&#32;regex_constants::match_not_bol)
+172 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<emphasis role="keyword">false</emphasis>;
+173 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;match_prev_avail&#32;means&#32;_M_begin&#32;is&#32;not&#32;the&#32;start&#32;of&#32;the&#32;input.</emphasis>
+174 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(_M_flags&#32;&amp;&#32;regex_constants::match_prev_avail)
+175 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+176 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;For&#32;ECMAScript&#32;multiline&#32;matches,&#32;check&#32;if&#32;the&#32;previous</emphasis>
+177 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;character&#32;is&#32;a&#32;line&#32;terminator.</emphasis>
+178 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(_M_match_multiline())
+179 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;_M_is_line_terminator(*std::prev(_M_current));
+180 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>
+181 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<emphasis role="keyword">false</emphasis>;
+182 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+183 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>&#32;<emphasis role="comment">//&#32;^&#32;matches&#32;at&#32;_M_begin</emphasis>
+184 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<emphasis role="keyword">true</emphasis>;
+185 &#32;&#32;&#32;&#32;&#32;&#32;}
+186 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>&#32;<emphasis role="keywordflow">if</emphasis>&#32;(_M_match_multiline())
+187 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;_M_is_line_terminator(*std::prev(_M_current));
+188 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>
+189 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<emphasis role="keyword">false</emphasis>;
+190 &#32;&#32;&#32;&#32;&#32;&#32;}
+191 
+192 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">bool</emphasis>
+193 &#32;&#32;&#32;&#32;&#32;&#32;_M_at_end()<emphasis role="keyword">&#32;const</emphasis>
+194 <emphasis role="keyword">&#32;&#32;&#32;&#32;&#32;&#32;</emphasis>{
+195 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(_M_current&#32;==&#32;_M_end)
+196 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;!(_M_flags&#32;&amp;&#32;regex_constants::match_not_eol);
+197 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>&#32;<emphasis role="keywordflow">if</emphasis>&#32;(_M_match_multiline())
+198 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;_M_is_line_terminator(*_M_current);
+199 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>
+200 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<emphasis role="keyword">false</emphasis>;
+201 &#32;&#32;&#32;&#32;&#32;&#32;}
+202 
+203 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">bool</emphasis>
+204 &#32;&#32;&#32;&#32;&#32;&#32;_M_word_boundary()&#32;<emphasis role="keyword">const</emphasis>;
+205 
+206 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">bool</emphasis>
+207 &#32;&#32;&#32;&#32;&#32;&#32;_M_lookahead(_StateIdT&#32;__next);
+208 
+209 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">bool</emphasis>
+210 &#32;&#32;&#32;&#32;&#32;&#32;_M_is_line_terminator(_CharT&#32;__c)<emphasis role="keyword">&#32;const</emphasis>
+211 <emphasis role="keyword">&#32;&#32;&#32;&#32;&#32;&#32;</emphasis>{
+212 &#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keyword">auto</emphasis>&amp;&#32;__traits&#32;=&#32;_M_re._M_automaton-&gt;_M_traits;
+213 &#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keyword">auto</emphasis>&amp;&#32;__ct&#32;=&#32;use_facet&lt;ctype&lt;_CharT&gt;&gt;(__traits.getloc());
+214 &#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>&#32;__n{&#32;__ct.narrow(__c,&#32;<emphasis role="charliteral">&apos;&#32;&apos;</emphasis>)&#32;};
+215 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__n&#32;==&#32;<emphasis role="charliteral">&apos;\n&apos;</emphasis>)
+216 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<emphasis role="keyword">true</emphasis>;
+217 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(_M_re._M_automaton-&gt;_M_options()&#32;&amp;&#32;regex_constants::ECMAScript)
+218 &#32;&#32;&#32;&#32;&#32;&#32;{
+219 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__n&#32;==&#32;<emphasis role="charliteral">&apos;\r&apos;</emphasis>)
+220 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<emphasis role="keyword">true</emphasis>;
+221 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;FIXME:&#32;U+2028&#32;(line&#32;separator)&#32;and&#32;U+2029&#32;(paragraph&#32;separator)</emphasis>
+222 &#32;&#32;&#32;&#32;&#32;&#32;}
+223 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<emphasis role="keyword">false</emphasis>;
+224 &#32;&#32;&#32;&#32;&#32;&#32;}
+225 
+226 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">bool</emphasis>
+227 &#32;&#32;&#32;&#32;&#32;&#32;_M_match_multiline()&#32;const&#32;noexcept
+228 &#32;&#32;&#32;&#32;&#32;&#32;{
+229 &#32;&#32;&#32;&#32;<emphasis role="keyword">constexpr</emphasis>&#32;<emphasis role="keyword">auto</emphasis>&#32;__m
+230 &#32;&#32;&#32;&#32;&#32;&#32;=&#32;regex_constants::ECMAScript&#32;|&#32;regex_constants::__multiline;
+231 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;(_M_re._M_automaton-&gt;_M_options()&#32;&amp;&#32;__m)&#32;==&#32;__m;
+232 &#32;&#32;&#32;&#32;&#32;&#32;}
+233 
+234 &#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Holds&#32;additional&#32;information&#32;used&#32;in&#32;BFS-mode.</emphasis>
+235 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_SearchMode,&#32;<emphasis role="keyword">typename</emphasis>&#32;_ResultsVec&gt;
+236 &#32;&#32;&#32;&#32;<emphasis role="keyword">struct&#32;</emphasis>_State_info;
+237 
+238 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_ResultsVec&gt;
+239 &#32;&#32;&#32;&#32;<emphasis role="keyword">struct&#32;</emphasis>_State_info&lt;__bfs,&#32;_ResultsVec&gt;
+240 &#32;&#32;&#32;&#32;{
+241 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">explicit</emphasis>
+242 &#32;&#32;&#32;&#32;&#32;&#32;_State_info(_StateIdT&#32;__start,&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;__n)
+243 &#32;&#32;&#32;&#32;&#32;&#32;:&#32;_M_visited_states(new&#32;<link linkend="__classes_2lib_2raylib_8h_1af6a258d8f3ee5206d682d799316314b1">bool</link>[__n]()),&#32;_M_start(__start)
+244 &#32;&#32;&#32;&#32;&#32;&#32;{&#32;}
+245 
+246 &#32;&#32;&#32;&#32;&#32;&#32;~_State_info()&#32;{&#32;<emphasis role="keyword">delete</emphasis>[]&#32;_M_visited_states;&#32;}
+247 
+248 &#32;&#32;&#32;&#32;&#32;&#32;_State_info(<emphasis role="keyword">const</emphasis>&#32;_State_info&amp;)&#32;=&#32;<emphasis role="keyword">delete</emphasis>;
+249 &#32;&#32;&#32;&#32;&#32;&#32;_State_info&amp;&#32;operator=(<emphasis role="keyword">const</emphasis>&#32;_State_info&amp;)&#32;=&#32;<emphasis role="keyword">delete</emphasis>;
+250 
+251 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">bool</emphasis>&#32;_M_visited(_StateIdT&#32;__i)
+252 &#32;&#32;&#32;&#32;&#32;&#32;{
+253 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(_M_visited_states[__i])
+254 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<emphasis role="keyword">true</emphasis>;
+255 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_M_visited_states[__i]&#32;=&#32;<emphasis role="keyword">true</emphasis>;
+256 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<emphasis role="keyword">false</emphasis>;
+257 &#32;&#32;&#32;&#32;&#32;&#32;}
+258 
+259 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>&#32;_M_queue(_StateIdT&#32;__i,&#32;<emphasis role="keyword">const</emphasis>&#32;_ResultsVec&amp;&#32;__res)
+260 &#32;&#32;&#32;&#32;&#32;&#32;{&#32;_M_match_queue.emplace_back(__i,&#32;__res);&#32;}
+261 
+262 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Dummy&#32;implementations&#32;for&#32;BFS&#32;mode.</emphasis>
+263 &#32;&#32;&#32;&#32;&#32;&#32;_BiIter*&#32;_M_get_sol_pos()&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;<emphasis role="keyword">nullptr</emphasis>;&#32;}
+264 
+265 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Saves&#32;states&#32;that&#32;need&#32;to&#32;be&#32;considered&#32;for&#32;the&#32;next&#32;character.</emphasis>
+266 &#32;&#32;&#32;&#32;&#32;&#32;_GLIBCXX_STD_C::vector&lt;pair&lt;_StateIdT,&#32;_ResultsVec&gt;&gt;&#32;_M_match_queue;
+267 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Indicates&#32;which&#32;states&#32;are&#32;already&#32;visited.</emphasis>
+268 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">bool</emphasis>*&#32;&#32;&#32;&#32;&#32;_M_visited_states;
+269 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;To&#32;record&#32;current&#32;solution.</emphasis>
+270 &#32;&#32;&#32;&#32;&#32;&#32;_StateIdT&#32;_M_start;
+271 &#32;&#32;&#32;&#32;};
+272 
+273 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_ResultsVec&gt;
+274 &#32;&#32;&#32;&#32;<emphasis role="keyword">struct&#32;</emphasis>_State_info&lt;__dfs,&#32;_ResultsVec&gt;
+275 &#32;&#32;&#32;&#32;{
+276 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">explicit</emphasis>
+277 &#32;&#32;&#32;&#32;&#32;&#32;_State_info(_StateIdT&#32;__start,&#32;<emphasis role="keywordtype">size_t</emphasis>)&#32;:&#32;_M_start(__start)
+278 &#32;&#32;&#32;&#32;&#32;&#32;{&#32;}
+279 
+280 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Dummy&#32;implementations&#32;for&#32;DFS&#32;mode.</emphasis>
+281 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">bool</emphasis>&#32;_M_visited(_StateIdT)<emphasis role="keyword">&#32;const&#32;</emphasis>{&#32;<emphasis role="keywordflow">return</emphasis>&#32;<emphasis role="keyword">false</emphasis>;&#32;}
+282 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>&#32;_M_queue(_StateIdT,&#32;<emphasis role="keyword">const</emphasis>&#32;_ResultsVec&amp;)&#32;{&#32;}
+283 
+284 &#32;&#32;&#32;&#32;&#32;&#32;_BiIter*&#32;_M_get_sol_pos()&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;&amp;_M_sol_pos;&#32;}
+285 
+286 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;To&#32;record&#32;current&#32;solution.</emphasis>
+287 &#32;&#32;&#32;&#32;&#32;&#32;_StateIdT&#32;_M_start;
+288 &#32;&#32;&#32;&#32;&#32;&#32;_BiIter&#32;&#32;&#32;_M_sol_pos;
+289 &#32;&#32;&#32;&#32;};
+290 
+291 &#32;&#32;&#32;&#32;<emphasis role="keyword">public</emphasis>:
+292 &#32;&#32;&#32;&#32;&#32;&#32;_ResultsVec&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_M_cur_results;
+293 &#32;&#32;&#32;&#32;&#32;&#32;_BiIter&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_M_current;
+294 &#32;&#32;&#32;&#32;&#32;&#32;_BiIter&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_M_begin;
+295 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;_BiIter&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_M_end;
+296 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;_RegexT&amp;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_M_re;
+297 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;_NFAT&amp;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_M_nfa;
+298 &#32;&#32;&#32;&#32;&#32;&#32;_ResultsVec&amp;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_M_results;
+299 &#32;&#32;&#32;&#32;&#32;&#32;_GLIBCXX_STD_C::vector&lt;pair&lt;_BiIter,&#32;int&gt;&gt;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_M_rep_count;
+300 &#32;&#32;&#32;&#32;&#32;&#32;_State_info&lt;__search_mode,&#32;_ResultsVec&gt;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_M_states;
+301 &#32;&#32;&#32;&#32;&#32;&#32;_FlagT&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_M_flags;
+302 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Do&#32;we&#32;have&#32;a&#32;solution&#32;so&#32;far?</emphasis>
+303 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">bool</emphasis>&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_M_has_sol;
+304 &#32;&#32;&#32;&#32;};
+305 
+307 }&#32;<emphasis role="comment">//&#32;namespace&#32;__detail</emphasis>
+308 _GLIBCXX_END_NAMESPACE_VERSION
+309 }&#32;<emphasis role="comment">//&#32;namespace&#32;std</emphasis>
+310 
+311 <emphasis role="preprocessor">#include&#32;&lt;bits/regex_executor.tcc&gt;</emphasis>
+</programlisting></section>

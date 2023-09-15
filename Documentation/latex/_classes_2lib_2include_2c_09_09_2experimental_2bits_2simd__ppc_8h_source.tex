@@ -1,0 +1,162 @@
+\doxysection{simd\+\_\+ppc.\+h}
+\hypertarget{_classes_2lib_2include_2c_09_09_2experimental_2bits_2simd__ppc_8h_source}{}\label{_classes_2lib_2include_2c_09_09_2experimental_2bits_2simd__ppc_8h_source}\index{C:/Users/HP/Documents/GitHub/Minero-\/Game/Classes/lib/include/c++/experimental/bits/simd\_ppc.h@{C:/Users/HP/Documents/GitHub/Minero-\/Game/Classes/lib/include/c++/experimental/bits/simd\_ppc.h}}
+\mbox{\hyperlink{_classes_2lib_2include_2c_09_09_2experimental_2bits_2simd__ppc_8h}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{comment}{//\ Simd\ PowerPC\ specific\ implementations\ -\/*-\/\ C++\ -\/*-\/}}
+\DoxyCodeLine{00002\ }
+\DoxyCodeLine{00003\ \textcolor{comment}{//\ Copyright\ (C)\ 2020-\/2022\ Free\ Software\ Foundation,\ Inc.}}
+\DoxyCodeLine{00004\ \textcolor{comment}{//}}
+\DoxyCodeLine{00005\ \textcolor{comment}{//\ This\ file\ is\ part\ of\ the\ GNU\ ISO\ C++\ Library.\ \ This\ library\ is\ free}}
+\DoxyCodeLine{00006\ \textcolor{comment}{//\ software;\ you\ can\ redistribute\ it\ and/or\ modify\ it\ under\ the}}
+\DoxyCodeLine{00007\ \textcolor{comment}{//\ terms\ of\ the\ GNU\ General\ Public\ License\ as\ published\ by\ the}}
+\DoxyCodeLine{00008\ \textcolor{comment}{//\ Free\ Software\ Foundation;\ either\ version\ 3,\ or\ (at\ your\ option)}}
+\DoxyCodeLine{00009\ \textcolor{comment}{//\ any\ later\ version.}}
+\DoxyCodeLine{00010\ }
+\DoxyCodeLine{00011\ \textcolor{comment}{//\ This\ library\ is\ distributed\ in\ the\ hope\ that\ it\ will\ be\ useful,}}
+\DoxyCodeLine{00012\ \textcolor{comment}{//\ but\ WITHOUT\ ANY\ WARRANTY;\ without\ even\ the\ implied\ warranty\ of}}
+\DoxyCodeLine{00013\ \textcolor{comment}{//\ MERCHANTABILITY\ or\ FITNESS\ FOR\ A\ PARTICULAR\ PURPOSE.\ \ See\ the}}
+\DoxyCodeLine{00014\ \textcolor{comment}{//\ GNU\ General\ Public\ License\ for\ more\ details.}}
+\DoxyCodeLine{00015\ }
+\DoxyCodeLine{00016\ \textcolor{comment}{//\ Under\ Section\ 7\ of\ GPL\ version\ 3,\ you\ are\ granted\ additional}}
+\DoxyCodeLine{00017\ \textcolor{comment}{//\ permissions\ described\ in\ the\ GCC\ Runtime\ Library\ Exception,\ version}}
+\DoxyCodeLine{00018\ \textcolor{comment}{//\ 3.1,\ as\ published\ by\ the\ Free\ Software\ Foundation.}}
+\DoxyCodeLine{00019\ }
+\DoxyCodeLine{00020\ \textcolor{comment}{//\ You\ should\ have\ received\ a\ copy\ of\ the\ GNU\ General\ Public\ License\ and}}
+\DoxyCodeLine{00021\ \textcolor{comment}{//\ a\ copy\ of\ the\ GCC\ Runtime\ Library\ Exception\ along\ with\ this\ program;}}
+\DoxyCodeLine{00022\ \textcolor{comment}{//\ see\ the\ files\ COPYING3\ and\ COPYING.RUNTIME\ respectively.\ \ If\ not,\ see}}
+\DoxyCodeLine{00023\ \textcolor{comment}{//\ <http://www.gnu.org/licenses/>.}}
+\DoxyCodeLine{00024\ }
+\DoxyCodeLine{00025\ \textcolor{preprocessor}{\#ifndef\ \_GLIBCXX\_EXPERIMENTAL\_SIMD\_PPC\_H\_}}
+\DoxyCodeLine{00026\ \textcolor{preprocessor}{\#define\ \_GLIBCXX\_EXPERIMENTAL\_SIMD\_PPC\_H\_}}
+\DoxyCodeLine{00027\ }
+\DoxyCodeLine{00028\ \textcolor{preprocessor}{\#if\ \_\_cplusplus\ >=\ 201703L}}
+\DoxyCodeLine{00029\ }
+\DoxyCodeLine{00030\ \textcolor{preprocessor}{\#ifndef\ \_\_ALTIVEC\_\_}}
+\DoxyCodeLine{00031\ \textcolor{preprocessor}{\#error\ "{}simd\_ppc.h\ may\ only\ be\ included\ when\ AltiVec/VMX\ is\ available"{}}}
+\DoxyCodeLine{00032\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00033\ \textcolor{preprocessor}{\#include\ <altivec.h>}}
+\DoxyCodeLine{00034\ }
+\DoxyCodeLine{00035\ \_GLIBCXX\_SIMD\_BEGIN\_NAMESPACE}
+\DoxyCodeLine{00036\ }
+\DoxyCodeLine{00037\ \textcolor{comment}{//\ \_SimdImplPpc\ \{\{\{}}
+\DoxyCodeLine{00038\ \textcolor{keyword}{template}\ <\textcolor{keyword}{typename}\ \_Abi,\ \textcolor{keyword}{typename}>}
+\DoxyCodeLine{00039\ \ \ \textcolor{keyword}{struct\ }\_SimdImplPpc\ :\ \_SimdImplBuiltin<\_Abi>}
+\DoxyCodeLine{00040\ \ \ \{}
+\DoxyCodeLine{00041\ \ \ \ \ \textcolor{keyword}{using\ }\_Base\ =\ \_SimdImplBuiltin<\_Abi>;}
+\DoxyCodeLine{00042\ }
+\DoxyCodeLine{00043\ \ \ \ \ \textcolor{comment}{//\ Byte\ and\ halfword\ shift\ instructions\ on\ PPC\ only\ consider\ the\ low\ 3\ or\ 4}}
+\DoxyCodeLine{00044\ \ \ \ \ \textcolor{comment}{//\ bits\ of\ the\ RHS.\ Consequently,\ shifting\ by\ sizeof(\_Tp)*CHAR\_BIT\ (or\ more)}}
+\DoxyCodeLine{00045\ \ \ \ \ \textcolor{comment}{//\ is\ UB\ without\ extra\ measures.\ To\ match\ scalar\ behavior,\ byte\ and\ halfword}}
+\DoxyCodeLine{00046\ \ \ \ \ \textcolor{comment}{//\ shifts\ need\ an\ extra\ fixup\ step.}}
+\DoxyCodeLine{00047\ }
+\DoxyCodeLine{00048\ \ \ \ \ \textcolor{comment}{//\ \_S\_bit\_shift\_left\ \{\{\{}}
+\DoxyCodeLine{00049\ \ \ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{typename}\ \_Tp,\ \textcolor{keywordtype}{size\_t}\ \_Np>}
+\DoxyCodeLine{00050\ \ \ \ \ \ \ \_GLIBCXX\_SIMD\_INTRINSIC\ \textcolor{keyword}{static}\ \textcolor{keyword}{constexpr}\ \_SimdWrapper<\_Tp,\ \_Np>}
+\DoxyCodeLine{00051\ \ \ \ \ \ \ \_S\_bit\_shift\_left(\_SimdWrapper<\_Tp,\ \_Np>\ \_\_x,\ \_SimdWrapper<\_Tp,\ \_Np>\ \_\_y)}
+\DoxyCodeLine{00052\ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00053\ \ \ \ \ \_\_x\ =\ \_Base::\_S\_bit\_shift\_left(\_\_x,\ \_\_y);}
+\DoxyCodeLine{00054\ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keyword}{constexpr}\ (\textcolor{keyword}{sizeof}(\_Tp)\ <\ \textcolor{keyword}{sizeof}(\textcolor{keywordtype}{int}))}
+\DoxyCodeLine{00055\ \ \ \ \ \ \ \_\_x.\_M\_data}
+\DoxyCodeLine{00056\ \ \ \ \ \ \ \ \ =\ (\_\_y.\_M\_data\ <\ \textcolor{keyword}{sizeof}(\_Tp)\ *\ \_\_CHAR\_BIT\_\_)\ \&\ \_\_x.\_M\_data;}
+\DoxyCodeLine{00057\ \ \ \ \ \textcolor{keywordflow}{return}\ \_\_x;}
+\DoxyCodeLine{00058\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00059\ }
+\DoxyCodeLine{00060\ \ \ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{typename}\ \_Tp,\ \textcolor{keywordtype}{size\_t}\ \_Np>}
+\DoxyCodeLine{00061\ \ \ \ \ \ \ \_GLIBCXX\_SIMD\_INTRINSIC\ \textcolor{keyword}{static}\ \textcolor{keyword}{constexpr}\ \_SimdWrapper<\_Tp,\ \_Np>}
+\DoxyCodeLine{00062\ \ \ \ \ \ \ \_S\_bit\_shift\_left(\_SimdWrapper<\_Tp,\ \_Np>\ \_\_x,\ \textcolor{keywordtype}{int}\ \_\_y)}
+\DoxyCodeLine{00063\ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00064\ \ \ \ \ \_\_x\ =\ \_Base::\_S\_bit\_shift\_left(\_\_x,\ \_\_y);}
+\DoxyCodeLine{00065\ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keyword}{constexpr}\ (\textcolor{keyword}{sizeof}(\_Tp)\ <\ \textcolor{keyword}{sizeof}(\textcolor{keywordtype}{int}))}
+\DoxyCodeLine{00066\ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00067\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\_\_y\ >=\ \textcolor{keyword}{sizeof}(\_Tp)\ *\ \_\_CHAR\_BIT\_\_)}
+\DoxyCodeLine{00068\ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \{\};}
+\DoxyCodeLine{00069\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00070\ \ \ \ \ \textcolor{keywordflow}{return}\ \_\_x;}
+\DoxyCodeLine{00071\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00072\ }
+\DoxyCodeLine{00073\ \ \ \ \ \textcolor{comment}{//\ \}\}\}}}
+\DoxyCodeLine{00074\ \ \ \ \ \textcolor{comment}{//\ \_S\_bit\_shift\_right\ \{\{\{}}
+\DoxyCodeLine{00075\ \ \ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{typename}\ \_Tp,\ \textcolor{keywordtype}{size\_t}\ \_Np>}
+\DoxyCodeLine{00076\ \ \ \ \ \ \ \_GLIBCXX\_SIMD\_INTRINSIC\ \textcolor{keyword}{static}\ \textcolor{keyword}{constexpr}\ \_SimdWrapper<\_Tp,\ \_Np>}
+\DoxyCodeLine{00077\ \ \ \ \ \ \ \_S\_bit\_shift\_right(\_SimdWrapper<\_Tp,\ \_Np>\ \_\_x,\ \_SimdWrapper<\_Tp,\ \_Np>\ \_\_y)}
+\DoxyCodeLine{00078\ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00079\ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keyword}{constexpr}\ (\textcolor{keyword}{sizeof}(\_Tp)\ <\ \textcolor{keyword}{sizeof}(\textcolor{keywordtype}{int}))}
+\DoxyCodeLine{00080\ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00081\ \ \ \ \ \ \ \ \ \textcolor{keyword}{constexpr}\ \textcolor{keywordtype}{int}\ \_\_nbits\ =\ \textcolor{keyword}{sizeof}(\_Tp)\ *\ \_\_CHAR\_BIT\_\_;}
+\DoxyCodeLine{00082\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keyword}{constexpr}\ (is\_unsigned\_v<\_Tp>)}
+\DoxyCodeLine{00083\ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ (\_\_y.\_M\_data\ <\ \_\_nbits)}
+\DoxyCodeLine{00084\ \ \ \ \ \ \ \ \ \ \ \ \ \ \&\ \_Base::\_S\_bit\_shift\_right(\_\_x,\ \_\_y).\_M\_data;}
+\DoxyCodeLine{00085\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{00086\ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00087\ \ \ \ \ \ \ \ \ \_Base::\_S\_masked\_assign(\_SimdWrapper<\_Tp,\ \_Np>(\_\_y.\_M\_data}
+\DoxyCodeLine{00088\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ >=\ \_\_nbits),}
+\DoxyCodeLine{00089\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_\_y,\ \_\_nbits\ -\/\ 1);}
+\DoxyCodeLine{00090\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \_Base::\_S\_bit\_shift\_right(\_\_x,\ \_\_y);}
+\DoxyCodeLine{00091\ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00092\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00093\ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{00094\ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \_Base::\_S\_bit\_shift\_right(\_\_x,\ \_\_y);}
+\DoxyCodeLine{00095\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00096\ }
+\DoxyCodeLine{00097\ \ \ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{typename}\ \_Tp,\ \textcolor{keywordtype}{size\_t}\ \_Np>}
+\DoxyCodeLine{00098\ \ \ \ \ \ \ \_GLIBCXX\_SIMD\_INTRINSIC\ \textcolor{keyword}{static}\ \textcolor{keyword}{constexpr}\ \_SimdWrapper<\_Tp,\ \_Np>}
+\DoxyCodeLine{00099\ \ \ \ \ \ \ \_S\_bit\_shift\_right(\_SimdWrapper<\_Tp,\ \_Np>\ \_\_x,\ \textcolor{keywordtype}{int}\ \_\_y)}
+\DoxyCodeLine{00100\ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00101\ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keyword}{constexpr}\ (\textcolor{keyword}{sizeof}(\_Tp)\ <\ \textcolor{keyword}{sizeof}(\textcolor{keywordtype}{int}))}
+\DoxyCodeLine{00102\ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00103\ \ \ \ \ \ \ \ \ \textcolor{keyword}{constexpr}\ \textcolor{keywordtype}{int}\ \_\_nbits\ =\ \textcolor{keyword}{sizeof}(\_Tp)\ *\ \_\_CHAR\_BIT\_\_;}
+\DoxyCodeLine{00104\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\_\_y\ >=\ \_\_nbits)}
+\DoxyCodeLine{00105\ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00106\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keyword}{constexpr}\ (is\_unsigned\_v<\_Tp>)}
+\DoxyCodeLine{00107\ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \{\};}
+\DoxyCodeLine{00108\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{00109\ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \_Base::\_S\_bit\_shift\_right(\_\_x,\ \_\_nbits\ -\/\ 1);}
+\DoxyCodeLine{00110\ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00111\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00112\ \ \ \ \ \textcolor{keywordflow}{return}\ \_Base::\_S\_bit\_shift\_right(\_\_x,\ \_\_y);}
+\DoxyCodeLine{00113\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00114\ }
+\DoxyCodeLine{00115\ \ \ \ \ \textcolor{comment}{//\ \}\}\}}}
+\DoxyCodeLine{00116\ \ \ \};}
+\DoxyCodeLine{00117\ }
+\DoxyCodeLine{00118\ \textcolor{comment}{//\ \}\}\}}}
+\DoxyCodeLine{00119\ \textcolor{comment}{//\ \_MaskImplPpc\ \{\{\{}}
+\DoxyCodeLine{00120\ \textcolor{keyword}{template}\ <\textcolor{keyword}{typename}\ \_Abi,\ \textcolor{keyword}{typename}>}
+\DoxyCodeLine{00121\ \ \ \textcolor{keyword}{struct\ }\_MaskImplPpc\ :\ \_MaskImplBuiltin<\_Abi>}
+\DoxyCodeLine{00122\ \ \ \{}
+\DoxyCodeLine{00123\ \ \ \ \ \textcolor{keyword}{using\ }\_Base\ =\ \_MaskImplBuiltin<\_Abi>;}
+\DoxyCodeLine{00124\ }
+\DoxyCodeLine{00125\ \ \ \ \ \textcolor{comment}{//\ \_S\_popcount\ \{\{\{}}
+\DoxyCodeLine{00126\ \ \ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{typename}\ \_Tp>}
+\DoxyCodeLine{00127\ \ \ \ \ \ \ \_GLIBCXX\_SIMD\_INTRINSIC\ \textcolor{keyword}{static}\ \textcolor{keywordtype}{int}\ \_S\_popcount(simd\_mask<\_Tp,\ \_Abi>\ \_\_k)}
+\DoxyCodeLine{00128\ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00129\ \ \ \ \ \textcolor{keyword}{const}\ \textcolor{keyword}{auto}\ \_\_kv\ =\ \_\_as\_vector(\_\_k);}
+\DoxyCodeLine{00130\ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keyword}{constexpr}\ (\_\_have\_power10vec)}
+\DoxyCodeLine{00131\ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00132\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ vec\_cntm(\_\_to\_intrin(\_\_kv),\ 1);}
+\DoxyCodeLine{00133\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00134\ \ \ \ \ \textcolor{keywordflow}{else}\ \textcolor{keywordflow}{if}\ \textcolor{keyword}{constexpr}\ (\textcolor{keyword}{sizeof}(\_Tp)\ >=\ \textcolor{keyword}{sizeof}(\textcolor{keywordtype}{int}))}
+\DoxyCodeLine{00135\ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00136\ \ \ \ \ \ \ \ \ \textcolor{keyword}{using\ }\_Intrin\ =\ \_\_intrinsic\_type16\_t<int>;}
+\DoxyCodeLine{00137\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \textcolor{keywordtype}{int}\ \_\_sum\ =\ -\/vec\_sums(\_\_intrin\_bitcast<\_Intrin>(\_\_kv),\ \_Intrin())[3];}
+\DoxyCodeLine{00138\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \_\_sum\ /\ (\textcolor{keyword}{sizeof}(\_Tp)\ /\ \textcolor{keyword}{sizeof}(\textcolor{keywordtype}{int}));}
+\DoxyCodeLine{00139\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00140\ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{00141\ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00142\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \textcolor{keyword}{auto}\ \_\_summed\_to\_int\ =\ vec\_sum4s(\_\_to\_intrin(\_\_kv),\ \_\_intrinsic\_type16\_t<int>());}
+\DoxyCodeLine{00143\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ -\/vec\_sums(\_\_summed\_to\_int,\ \_\_intrinsic\_type16\_t<int>())[3];}
+\DoxyCodeLine{00144\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00145\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00146\ }
+\DoxyCodeLine{00147\ \ \ \ \ \textcolor{comment}{//\ \}\}\}}}
+\DoxyCodeLine{00148\ \ \ \};}
+\DoxyCodeLine{00149\ }
+\DoxyCodeLine{00150\ \textcolor{comment}{//\ \}\}\}}}
+\DoxyCodeLine{00151\ }
+\DoxyCodeLine{00152\ \_GLIBCXX\_SIMD\_END\_NAMESPACE}
+\DoxyCodeLine{00153\ \textcolor{preprocessor}{\#endif\ }\textcolor{comment}{//\ \_\_cplusplus\ >=\ 201703L}}
+\DoxyCodeLine{00154\ \textcolor{preprocessor}{\#endif\ }\textcolor{comment}{//\ \_GLIBCXX\_EXPERIMENTAL\_SIMD\_PPC\_H\_}}
+\DoxyCodeLine{00155\ }
+\DoxyCodeLine{00156\ \textcolor{comment}{//\ vim:\ foldmethod=marker\ foldmarker=\{\{\{,\}\}\}\ sw=2\ noet\ ts=8\ sts=2\ tw=100}}
+
+\end{DoxyCode}

@@ -1,0 +1,1089 @@
+\doxysection{value.\+h}
+\hypertarget{value_8h_source}{}\label{value_8h_source}\index{C:/Users/HP/Documents/GitHub/Minero-\/Game/Classes/ConfigMan/lib/tomlplusplus-\/3.3.0/tomlplusplus-\/3.3.0/include/toml++/impl/value.h@{C:/Users/HP/Documents/GitHub/Minero-\/Game/Classes/ConfigMan/lib/tomlplusplus-\/3.3.0/tomlplusplus-\/3.3.0/include/toml++/impl/value.h}}
+\mbox{\hyperlink{value_8h}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{comment}{//\#\ This\ file\ is\ a\ part\ of\ toml++\ and\ is\ subject\ to\ the\ the\ terms\ of\ the\ MIT\ license.}}
+\DoxyCodeLine{00002\ \textcolor{comment}{//\#\ Copyright\ (c)\ Mark\ Gillard\ <mark.gillard@outlook.com.au>}}
+\DoxyCodeLine{00003\ \textcolor{comment}{//\#\ See\ https://github.com/marzer/tomlplusplus/blob/master/LICENSE\ for\ the\ full\ license\ text.}}
+\DoxyCodeLine{00004\ \textcolor{comment}{//\ SPDX-\/License-\/Identifier:\ MIT}}
+\DoxyCodeLine{00005\ \textcolor{preprocessor}{\#pragma\ once}}
+\DoxyCodeLine{00006\ }
+\DoxyCodeLine{00007\ \textcolor{preprocessor}{\#include\ "{}\mbox{\hyperlink{date__time_8h}{date\_time.h}}"{}}}
+\DoxyCodeLine{00008\ \textcolor{preprocessor}{\#include\ "{}\mbox{\hyperlink{node_8h}{node.h}}"{}}}
+\DoxyCodeLine{00009\ \textcolor{preprocessor}{\#include\ "{}\mbox{\hyperlink{print__to__stream_8h}{print\_to\_stream.h}}"{}}}
+\DoxyCodeLine{00010\ \textcolor{preprocessor}{\#include\ "{}\mbox{\hyperlink{header__start_8h}{header\_start.h}}"{}}}
+\DoxyCodeLine{00011\ \mbox{\hyperlink{value_8h_a56df52d1a29373a87698fdc09a1c1c7a}{TOML\_DISABLE\_ARITHMETIC\_WARNINGS}};}
+\DoxyCodeLine{00012\ }
+\DoxyCodeLine{00014\ \textcolor{comment}{//\ clang-\/format\ off}}
+\DoxyCodeLine{00015\ }
+\DoxyCodeLine{00016\ \textcolor{preprocessor}{\#if\ TOML\_ENABLE\_WINDOWS\_COMPAT}}
+\DoxyCodeLine{00017\ \textcolor{preprocessor}{\ \ \ \ \#define\ TOML\_SA\_VALUE\_MESSAGE\_WSTRING\ \ \ \ \ \ \ \ \ \ \ TOML\_SA\_LIST\_SEP\ "{}std::wstring"{}}}
+\DoxyCodeLine{00018\ \textcolor{preprocessor}{\#else}}
+\DoxyCodeLine{00019\ \textcolor{preprocessor}{\ \ \ \ \#define\ TOML\_SA\_VALUE\_MESSAGE\_WSTRING}}
+\DoxyCodeLine{00020\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00021\ \textcolor{preprocessor}{\#if\ TOML\_HAS\_CHAR8}}
+\DoxyCodeLine{00022\ \textcolor{preprocessor}{\ \ \ \ \#define\ TOML\_SA\_VALUE\_MESSAGE\_U8STRING\_VIEW\ \ \ \ \ TOML\_SA\_LIST\_SEP\ "{}std::u8string\_view"{}}}
+\DoxyCodeLine{00023\ \textcolor{preprocessor}{\ \ \ \ \#define\ TOML\_SA\_VALUE\_MESSAGE\_CONST\_CHAR8\ \ \ \ \ \ \ TOML\_SA\_LIST\_SEP\ "{}const\ char8\_t*"{}}}
+\DoxyCodeLine{00024\ \textcolor{preprocessor}{\#else}}
+\DoxyCodeLine{00025\ \textcolor{preprocessor}{\ \ \ \ \#define\ TOML\_SA\_VALUE\_MESSAGE\_U8STRING\_VIEW}}
+\DoxyCodeLine{00026\ \textcolor{preprocessor}{\ \ \ \ \#define\ TOML\_SA\_VALUE\_MESSAGE\_CONST\_CHAR8}}
+\DoxyCodeLine{00027\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00028\ }
+\DoxyCodeLine{00029\ \textcolor{preprocessor}{\#define\ TOML\_SA\_VALUE\_EXACT\_FUNC\_MESSAGE(type\_arg)\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \(\backslash\)}}
+\DoxyCodeLine{00030\ \textcolor{preprocessor}{\ \ \ \ "{}The\ "{}\ type\_arg\ "{}\ must\ be\ one\ of:"{}\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \(\backslash\)}}
+\DoxyCodeLine{00031\ \textcolor{preprocessor}{\ \ \ \ TOML\_SA\_LIST\_NEW\ "{}A\ native\ TOML\ value\ type"{}\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \(\backslash\)}}
+\DoxyCodeLine{00032\ \textcolor{preprocessor}{\ \ \ \ TOML\_SA\_NATIVE\_VALUE\_TYPE\_LIST\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \(\backslash\)}}
+\DoxyCodeLine{00033\ \textcolor{preprocessor}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \(\backslash\)}}
+\DoxyCodeLine{00034\ \textcolor{preprocessor}{\ \ \ \ TOML\_SA\_LIST\_NXT\ "{}A\ non-\/view\ type\ capable\ of\ losslessly\ representing\ a\ native\ TOML\ value\ type"{}\ \ \ \ \ \ \ \ \ \ \(\backslash\)}}
+\DoxyCodeLine{00035\ \textcolor{preprocessor}{\ \ \ \ TOML\_SA\_LIST\_BEG\ "{}std::string"{}\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \(\backslash\)}}
+\DoxyCodeLine{00036\ \textcolor{preprocessor}{\ \ \ \ TOML\_SA\_VALUE\_MESSAGE\_WSTRING\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \(\backslash\)}}
+\DoxyCodeLine{00037\ \textcolor{preprocessor}{\ \ \ \ TOML\_SA\_LIST\_SEP\ "{}any\ signed\ integer\ type\ >=\ 64\ bits"{}\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \(\backslash\)}}
+\DoxyCodeLine{00038\ \textcolor{preprocessor}{\ \ \ \ TOML\_SA\_LIST\_SEP\ "{}any\ floating-\/point\ type\ >=\ 64\ bits"{}\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \(\backslash\)}}
+\DoxyCodeLine{00039\ \textcolor{preprocessor}{\ \ \ \ TOML\_SA\_LIST\_END\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \(\backslash\)}}
+\DoxyCodeLine{00040\ \textcolor{preprocessor}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \(\backslash\)}}
+\DoxyCodeLine{00041\ \textcolor{preprocessor}{\ \ \ \ TOML\_SA\_LIST\_NXT\ "{}An\ immutable\ view\ type\ not\ requiring\ additional\ temporary\ storage"{}\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \(\backslash\)}}
+\DoxyCodeLine{00042\ \textcolor{preprocessor}{\ \ \ \ TOML\_SA\_LIST\_BEG\ "{}std::string\_view"{}\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \(\backslash\)}}
+\DoxyCodeLine{00043\ \textcolor{preprocessor}{\ \ \ \ TOML\_SA\_VALUE\_MESSAGE\_U8STRING\_VIEW\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \(\backslash\)}}
+\DoxyCodeLine{00044\ \textcolor{preprocessor}{\ \ \ \ TOML\_SA\_LIST\_SEP\ "{}const\ char*"{}\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \(\backslash\)}}
+\DoxyCodeLine{00045\ \textcolor{preprocessor}{\ \ \ \ TOML\_SA\_VALUE\_MESSAGE\_CONST\_CHAR8\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \(\backslash\)}}
+\DoxyCodeLine{00046\ \textcolor{preprocessor}{\ \ \ \ \ \ \ \ TOML\_SA\_LIST\_END}}
+\DoxyCodeLine{00047\ }
+\DoxyCodeLine{00048\ \textcolor{preprocessor}{\#define\ TOML\_SA\_VALUE\_FUNC\_MESSAGE(type\_arg)\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \(\backslash\)}}
+\DoxyCodeLine{00049\ \textcolor{preprocessor}{\ \ \ \ "{}The\ "{}\ type\_arg\ "{}\ must\ be\ one\ of:"{}\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \(\backslash\)}}
+\DoxyCodeLine{00050\ \textcolor{preprocessor}{\ \ \ \ TOML\_SA\_LIST\_NEW\ "{}A\ native\ TOML\ value\ type"{}\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \(\backslash\)}}
+\DoxyCodeLine{00051\ \textcolor{preprocessor}{\ \ \ \ TOML\_SA\_NATIVE\_VALUE\_TYPE\_LIST\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \(\backslash\)}}
+\DoxyCodeLine{00052\ \textcolor{preprocessor}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \(\backslash\)}}
+\DoxyCodeLine{00053\ \textcolor{preprocessor}{\ \ \ \ TOML\_SA\_LIST\_NXT\ "{}A\ non-\/view\ type\ capable\ of\ losslessly\ representing\ a\ native\ TOML\ value\ type"{}\ \ \ \ \ \ \ \ \ \ \(\backslash\)}}
+\DoxyCodeLine{00054\ \textcolor{preprocessor}{\ \ \ \ TOML\_SA\_LIST\_BEG\ "{}std::string"{}\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \(\backslash\)}}
+\DoxyCodeLine{00055\ \textcolor{preprocessor}{\ \ \ \ TOML\_SA\_VALUE\_MESSAGE\_WSTRING\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \(\backslash\)}}
+\DoxyCodeLine{00056\ \textcolor{preprocessor}{\ \ \ \ TOML\_SA\_LIST\_SEP\ "{}any\ signed\ integer\ type\ >=\ 64\ bits"{}\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \(\backslash\)}}
+\DoxyCodeLine{00057\ \textcolor{preprocessor}{\ \ \ \ TOML\_SA\_LIST\_SEP\ "{}any\ floating-\/point\ type\ >=\ 64\ bits"{}\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \(\backslash\)}}
+\DoxyCodeLine{00058\ \textcolor{preprocessor}{\ \ \ \ TOML\_SA\_LIST\_END\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \(\backslash\)}}
+\DoxyCodeLine{00059\ \textcolor{preprocessor}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \(\backslash\)}}
+\DoxyCodeLine{00060\ \textcolor{preprocessor}{\ \ \ \ TOML\_SA\_LIST\_NXT\ "{}A\ non-\/view\ type\ capable\ of\ (reasonably)\ representing\ a\ native\ TOML\ value\ type"{}\ \ \ \ \ \ \ \ \(\backslash\)}}
+\DoxyCodeLine{00061\ \textcolor{preprocessor}{\ \ \ \ TOML\_SA\_LIST\_BEG\ "{}any\ other\ integer\ type"{}\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \(\backslash\)}}
+\DoxyCodeLine{00062\ \textcolor{preprocessor}{\ \ \ \ TOML\_SA\_LIST\_SEP\ "{}any\ floating-\/point\ type"{}\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \(\backslash\)}}
+\DoxyCodeLine{00063\ \textcolor{preprocessor}{\ \ \ \ TOML\_SA\_LIST\_END\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \(\backslash\)}}
+\DoxyCodeLine{00064\ \textcolor{preprocessor}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \(\backslash\)}}
+\DoxyCodeLine{00065\ \textcolor{preprocessor}{\ \ \ \ TOML\_SA\_LIST\_NXT\ "{}An\ immutable\ view\ type\ not\ requiring\ additional\ temporary\ storage"{}\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \(\backslash\)}}
+\DoxyCodeLine{00066\ \textcolor{preprocessor}{\ \ \ \ TOML\_SA\_LIST\_BEG\ "{}std::string\_view"{}\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \(\backslash\)}}
+\DoxyCodeLine{00067\ \textcolor{preprocessor}{\ \ \ \ TOML\_SA\_VALUE\_MESSAGE\_U8STRING\_VIEW\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \(\backslash\)}}
+\DoxyCodeLine{00068\ \textcolor{preprocessor}{\ \ \ \ TOML\_SA\_LIST\_SEP\ "{}const\ char*"{}\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \(\backslash\)}}
+\DoxyCodeLine{00069\ \textcolor{preprocessor}{\ \ \ \ TOML\_SA\_VALUE\_MESSAGE\_CONST\_CHAR8\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \(\backslash\)}}
+\DoxyCodeLine{00070\ \textcolor{preprocessor}{\ \ \ \ TOML\_SA\_LIST\_END}}
+\DoxyCodeLine{00071\ }
+\DoxyCodeLine{00072\ \textcolor{comment}{//\ clang-\/format\ on}}
+\DoxyCodeLine{00074\ }
+\DoxyCodeLine{00076\ \mbox{\hyperlink{preprocessor_8h_ac9e12bb017879603274ac1765b85b872}{TOML\_IMPL\_NAMESPACE\_START}}}
+\DoxyCodeLine{00077\ \{}
+\DoxyCodeLine{00078\ \ \ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{typename}\ T,\ \textcolor{keyword}{typename}...>}
+\DoxyCodeLine{00079\ \ \ \ \ \textcolor{keyword}{struct\ }native\_value\_maker}
+\DoxyCodeLine{00080\ \ \ \ \ \{}
+\DoxyCodeLine{00081\ \ \ \ \ \ \ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{typename}...\ Args>}
+\DoxyCodeLine{00082\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{preprocessor_8h_a471c97e396823de3fcca2272e3ef1bba}{TOML\_NODISCARD}}}
+\DoxyCodeLine{00083\ \ \ \ \ \ \ \ \ \textcolor{keyword}{static}\ T\ make(Args\&\&...\ args)\ \textcolor{keyword}{noexcept}(std::is\_nothrow\_constructible\_v<T,\ Args\&\&...>)}
+\DoxyCodeLine{00084\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00085\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keyword}{constexpr}\ (std::is\_aggregate\_v<T>)}
+\DoxyCodeLine{00086\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ T\{\ \textcolor{keyword}{static\_cast<}Args\&\&\textcolor{keyword}{>}(args)...\ \};}
+\DoxyCodeLine{00087\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{00088\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ T(\textcolor{keyword}{static\_cast<}Args\&\&\textcolor{keyword}{>}(args)...);}
+\DoxyCodeLine{00089\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00090\ \ \ \ \ \};}
+\DoxyCodeLine{00091\ }
+\DoxyCodeLine{00092\ \ \ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{typename}\ T>}
+\DoxyCodeLine{00093\ \ \ \ \ \textcolor{keyword}{struct\ }native\_value\_maker<T,\ T>}
+\DoxyCodeLine{00094\ \ \ \ \ \{}
+\DoxyCodeLine{00095\ \ \ \ \ \ \ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{typename}\ U>}
+\DoxyCodeLine{00096\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{preprocessor_8h_a471c97e396823de3fcca2272e3ef1bba}{TOML\_NODISCARD}}}
+\DoxyCodeLine{00097\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{preprocessor_8h_abcede63e94136f5cb19404c0a811a51d}{TOML\_ALWAYS\_INLINE}}}
+\DoxyCodeLine{00098\ \ \ \ \ \ \ \ \ \textcolor{keyword}{static}\ U\&\&\ make(U\&\&\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2glad_8h_aa857b95cc76669c2a9109239ef40a47c}{val}})\ \textcolor{keyword}{noexcept}}
+\DoxyCodeLine{00099\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00100\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{static\_cast<}U\&\&\textcolor{keyword}{>}(\mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2glad_8h_aa857b95cc76669c2a9109239ef40a47c}{val}});}
+\DoxyCodeLine{00101\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00102\ \ \ \ \ \};}
+\DoxyCodeLine{00103\ }
+\DoxyCodeLine{00104\ \textcolor{preprocessor}{\#if\ TOML\_HAS\_CHAR8\ ||\ TOML\_ENABLE\_WINDOWS\_COMPAT}}
+\DoxyCodeLine{00105\ }
+\DoxyCodeLine{00106\ \ \ \ \ \textcolor{keyword}{struct\ }string\_maker}
+\DoxyCodeLine{00107\ \ \ \ \ \{}
+\DoxyCodeLine{00108\ \ \ \ \ \ \ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{typename}\ T>}
+\DoxyCodeLine{00109\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{preprocessor_8h_a471c97e396823de3fcca2272e3ef1bba}{TOML\_NODISCARD}}}
+\DoxyCodeLine{00110\ \ \ \ \ \ \ \ \ \textcolor{keyword}{static}\ std::string\ make(T\&\&\ arg)\ \textcolor{keyword}{noexcept}}
+\DoxyCodeLine{00111\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00112\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{using\ }arg\_type\ =\ std::decay\_t<T>;}
+\DoxyCodeLine{00113\ \textcolor{preprocessor}{\#if\ TOML\_HAS\_CHAR8}}
+\DoxyCodeLine{00114\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keyword}{constexpr}\ (is\_one\_of<arg\_type,\ char8\_t*,\ const\ char8\_t*>)}
+\DoxyCodeLine{00115\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00116\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ std::string(\textcolor{keyword}{reinterpret\_cast<}\textcolor{keyword}{const\ }\textcolor{keywordtype}{char}*\textcolor{keyword}{>}(\textcolor{keyword}{static\_cast<}\textcolor{keyword}{const\ }\textcolor{keywordtype}{char8\_t}*\textcolor{keyword}{>}(arg)));}
+\DoxyCodeLine{00117\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00118\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keyword}{constexpr}\ (is\_one\_of<arg\_type,\ std::u8string,\ std::u8string\_view>)}
+\DoxyCodeLine{00119\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00120\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ std::string(\textcolor{keyword}{reinterpret\_cast<}\textcolor{keyword}{const\ }\textcolor{keywordtype}{char}*\textcolor{keyword}{>}(\textcolor{keyword}{static\_cast<}\textcolor{keyword}{const\ }\textcolor{keywordtype}{char8\_t}*\textcolor{keyword}{>}(arg.data())),}
+\DoxyCodeLine{00121\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ arg.length());}
+\DoxyCodeLine{00122\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00123\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00124\ }
+\DoxyCodeLine{00125\ \textcolor{preprocessor}{\#if\ TOML\_ENABLE\_WINDOWS\_COMPAT}}
+\DoxyCodeLine{00126\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keyword}{constexpr}\ (is\_wide\_string<arg\_type>)}
+\DoxyCodeLine{00127\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00128\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ narrow(\textcolor{keyword}{static\_cast<}T\&\&\textcolor{keyword}{>}(arg));}
+\DoxyCodeLine{00129\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00130\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00131\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00132\ \ \ \ \ \};}
+\DoxyCodeLine{00133\ }
+\DoxyCodeLine{00134\ \textcolor{preprocessor}{\#if\ TOML\_HAS\_CHAR8}}
+\DoxyCodeLine{00135\ \ \ \ \ \textcolor{keyword}{template}\ <>}
+\DoxyCodeLine{00136\ \ \ \ \ \textcolor{keyword}{struct\ }native\_value\_maker<\mbox{\hyperlink{namespacestd}{std}}::\mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2glad_8h_a5ef8ce60531c971745798ebb9f61a5d8}{string}},\ char8\_t*>\ :\ string\_maker}
+\DoxyCodeLine{00137\ \ \ \ \ \{\};}
+\DoxyCodeLine{00138\ \ \ \ \ \textcolor{keyword}{template}\ <>}
+\DoxyCodeLine{00139\ \ \ \ \ \textcolor{keyword}{struct\ }native\_value\_maker<\mbox{\hyperlink{namespacestd}{std}}::\mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2glad_8h_a5ef8ce60531c971745798ebb9f61a5d8}{string}},\ const\ char8\_t*>\ :\ string\_maker}
+\DoxyCodeLine{00140\ \ \ \ \ \{\};}
+\DoxyCodeLine{00141\ \ \ \ \ \textcolor{keyword}{template}\ <>}
+\DoxyCodeLine{00142\ \ \ \ \ \textcolor{keyword}{struct\ }native\_value\_maker<\mbox{\hyperlink{namespacestd}{std}}::\mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2glad_8h_a5ef8ce60531c971745798ebb9f61a5d8}{string}},\ std::u8string>\ :\ string\_maker}
+\DoxyCodeLine{00143\ \ \ \ \ \{\};}
+\DoxyCodeLine{00144\ \ \ \ \ \textcolor{keyword}{template}\ <>}
+\DoxyCodeLine{00145\ \ \ \ \ \textcolor{keyword}{struct\ }native\_value\_maker<\mbox{\hyperlink{namespacestd}{std}}::\mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2glad_8h_a5ef8ce60531c971745798ebb9f61a5d8}{string}},\ std::u8string\_view>\ :\ string\_maker}
+\DoxyCodeLine{00146\ \ \ \ \ \{\};}
+\DoxyCodeLine{00147\ \textcolor{preprocessor}{\#endif\ }\textcolor{comment}{//\ TOML\_HAS\_CHAR8}}
+\DoxyCodeLine{00148\ }
+\DoxyCodeLine{00149\ \textcolor{preprocessor}{\#if\ TOML\_ENABLE\_WINDOWS\_COMPAT}}
+\DoxyCodeLine{00150\ \ \ \ \ \textcolor{keyword}{template}\ <>}
+\DoxyCodeLine{00151\ \ \ \ \ \textcolor{keyword}{struct\ }native\_value\_maker<\mbox{\hyperlink{namespacestd}{std}}::\mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2glad_8h_a5ef8ce60531c971745798ebb9f61a5d8}{string}},\ \mbox{\hyperlink{_classes_2lib_2include_2stddef_8h_a5f245e933e58ed4d268146a5b1f116ca}{wchar\_t}}*>\ :\ string\_maker}
+\DoxyCodeLine{00152\ \ \ \ \ \{\};}
+\DoxyCodeLine{00153\ \ \ \ \ \textcolor{keyword}{template}\ <>}
+\DoxyCodeLine{00154\ \ \ \ \ \textcolor{keyword}{struct\ }native\_value\_maker<\mbox{\hyperlink{namespacestd}{std}}::\mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2glad_8h_a5ef8ce60531c971745798ebb9f61a5d8}{string}},\ const\ \mbox{\hyperlink{_classes_2lib_2include_2stddef_8h_a5f245e933e58ed4d268146a5b1f116ca}{wchar\_t}}*>\ :\ string\_maker}
+\DoxyCodeLine{00155\ \ \ \ \ \{\};}
+\DoxyCodeLine{00156\ \ \ \ \ \textcolor{keyword}{template}\ <>}
+\DoxyCodeLine{00157\ \ \ \ \ \textcolor{keyword}{struct\ }native\_value\_maker<\mbox{\hyperlink{namespacestd}{std}}::\mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2glad_8h_a5ef8ce60531c971745798ebb9f61a5d8}{string}},\ std::wstring>\ :\ string\_maker}
+\DoxyCodeLine{00158\ \ \ \ \ \{\};}
+\DoxyCodeLine{00159\ \ \ \ \ \textcolor{keyword}{template}\ <>}
+\DoxyCodeLine{00160\ \ \ \ \ \textcolor{keyword}{struct\ }native\_value\_maker<\mbox{\hyperlink{namespacestd}{std}}::\mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2glad_8h_a5ef8ce60531c971745798ebb9f61a5d8}{string}},\ std::wstring\_view>\ :\ string\_maker}
+\DoxyCodeLine{00161\ \ \ \ \ \{\};}
+\DoxyCodeLine{00162\ \textcolor{preprocessor}{\#endif\ }\textcolor{comment}{//\ TOML\_ENABLE\_WINDOWS\_COMPAT}}
+\DoxyCodeLine{00163\ }
+\DoxyCodeLine{00164\ \textcolor{preprocessor}{\#endif\ }\textcolor{comment}{//\ TOML\_HAS\_CHAR8\ ||\ TOML\_ENABLE\_WINDOWS\_COMPAT}}
+\DoxyCodeLine{00165\ }
+\DoxyCodeLine{00166\ \ \ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{typename}\ T>}
+\DoxyCodeLine{00167\ \ \ \ \ \mbox{\hyperlink{preprocessor_8h_a635df435bd9048d34bd5824a31d79d1e}{TOML\_CONST\_GETTER}}}
+\DoxyCodeLine{00168\ \ \ \ \ \textcolor{keyword}{inline}\ optional<T>\ \mbox{\hyperlink{toml_8hpp_a8d0bda020a3bbeeb0ea155928f94b8da}{node\_integer\_cast}}(\mbox{\hyperlink{_classes_2lib_2external_2glfw_2deps_2vs2008_2stdint_8h_a414156feea104f8f75b4ed9e3121b2f6}{int64\_t}}\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2glad_8h_aa857b95cc76669c2a9109239ef40a47c}{val}})\ \textcolor{keyword}{noexcept}}
+\DoxyCodeLine{00169\ \ \ \ \ \{}
+\DoxyCodeLine{00170\ \ \ \ \ \ \ \ \ \textcolor{keyword}{static\_assert}(node\_type\_of<T>\ ==\ node\_type::integer);}
+\DoxyCodeLine{00171\ \ \ \ \ \ \ \ \ \textcolor{keyword}{static\_assert}(!is\_cvref<T>);}
+\DoxyCodeLine{00172\ }
+\DoxyCodeLine{00173\ \ \ \ \ \ \ \ \ \textcolor{keyword}{using\ }traits\ =\ \mbox{\hyperlink{structvalue__traits}{value\_traits<T>}};}
+\DoxyCodeLine{00174\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keyword}{constexpr}\ (!traits::is\_signed)}
+\DoxyCodeLine{00175\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00176\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keyword}{constexpr}\ ((\textcolor{keyword}{sizeof}(T)\ *\ CHAR\_BIT)\ <\ 63)\ \textcolor{comment}{//\ 63\ bits\ ==\ int64\_max}}
+\DoxyCodeLine{00177\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00178\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{using\ }common\_t\ =\ \textcolor{keyword}{decltype}(\mbox{\hyperlink{_classes_2lib_2external_2glfw_2deps_2vs2008_2stdint_8h_a414156feea104f8f75b4ed9e3121b2f6}{int64\_t}}\{\}\ +\ T\{\});}
+\DoxyCodeLine{00179\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2glad_8h_aa857b95cc76669c2a9109239ef40a47c}{val}}\ <\ \mbox{\hyperlink{_classes_2lib_2external_2glfw_2deps_2vs2008_2stdint_8h_a414156feea104f8f75b4ed9e3121b2f6}{int64\_t}}\{\}\ ||\ \textcolor{keyword}{static\_cast<}common\_t\textcolor{keyword}{>}(\mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2glad_8h_aa857b95cc76669c2a9109239ef40a47c}{val}})\ >\ \textcolor{keyword}{static\_cast<}common\_t\textcolor{keyword}{>}(traits::max))}
+\DoxyCodeLine{00180\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \{\};}
+\DoxyCodeLine{00181\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00182\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{00183\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00184\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2glad_8h_aa857b95cc76669c2a9109239ef40a47c}{val}}\ <\ \mbox{\hyperlink{_classes_2lib_2external_2glfw_2deps_2vs2008_2stdint_8h_a414156feea104f8f75b4ed9e3121b2f6}{int64\_t}}\{\})}
+\DoxyCodeLine{00185\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \{\};}
+\DoxyCodeLine{00186\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00187\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00188\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{00189\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00190\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (val\ <\ traits::min\ ||\ val\ >\ traits::max)}
+\DoxyCodeLine{00191\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \{\};}
+\DoxyCodeLine{00192\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00193\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \{\ \textcolor{keyword}{static\_cast<}T\textcolor{keyword}{>}(\mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2glad_8h_aa857b95cc76669c2a9109239ef40a47c}{val}})\ \};}
+\DoxyCodeLine{00194\ \ \ \ \ \}}
+\DoxyCodeLine{00195\ \}}
+\DoxyCodeLine{00196\ \mbox{\hyperlink{preprocessor_8h_abec69dd25f1e4c1dfbdd288441864939}{TOML\_IMPL\_NAMESPACE\_END}};}
+\DoxyCodeLine{00198\ }
+\DoxyCodeLine{00199\ \mbox{\hyperlink{value_8h_a24e5c42f7e94b0b0f3212744874731e6}{TOML\_NAMESPACE\_START}}}
+\DoxyCodeLine{00200\ \{}
+\DoxyCodeLine{00211\ \ \ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{typename}\ ValueType>}
+\DoxyCodeLine{00212\ \ \ \ \ \textcolor{keyword}{class\ }\mbox{\hyperlink{classvalue}{value}}\ :\ \textcolor{keyword}{public}\ node}
+\DoxyCodeLine{00213\ \ \ \ \ \{}
+\DoxyCodeLine{00214\ \ \ \ \ \ \ \ \ \textcolor{keyword}{static\_assert}(impl::is\_native<ValueType>\ \&\&\ !impl::is\_cvref<ValueType>,}
+\DoxyCodeLine{00215\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}A\ toml::value<>\ must\ model\ one\ of\ the\ native\ TOML\ value\ types:"{}}\ \mbox{\hyperlink{toml_8hpp_ae6ef2cd7e6c604e456b4b1bdf6bee613}{TOML\_SA\_NATIVE\_VALUE\_TYPE\_LIST}});}
+\DoxyCodeLine{00216\ }
+\DoxyCodeLine{00217\ \ \ \ \ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00219\ }
+\DoxyCodeLine{00220\ \ \ \ \ \ \ \ \ \textcolor{keyword}{friend}\ \textcolor{keyword}{class\ }\mbox{\hyperlink{toml_8hpp_a05278d773b91496857f3113bdfc748d8}{TOML\_PARSER\_TYPENAME}};}
+\DoxyCodeLine{00221\ }
+\DoxyCodeLine{00222\ \ \ \ \ \ \ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{typename}\ T,\ \textcolor{keyword}{typename}\ U>}
+\DoxyCodeLine{00223\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{preprocessor_8h_ad26b309f170b9504c99f7dd7b1a912f0}{TOML\_CONST\_INLINE\_GETTER}}}
+\DoxyCodeLine{00224\ \ \ \ \ \ \ \ \ \textcolor{keyword}{static}\ \textcolor{keyword}{auto}\ as\_value([[maybe\_unused]]\ U*\ ptr)\ \textcolor{keyword}{noexcept}}
+\DoxyCodeLine{00225\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00226\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keyword}{constexpr}\ (std::is\_same\_v<value\_type,\ T>)}
+\DoxyCodeLine{00227\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ ptr;}
+\DoxyCodeLine{00228\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{00229\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{nullptr};}
+\DoxyCodeLine{00230\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00231\ }
+\DoxyCodeLine{00232\ \ \ \ \ \ \ \ \ ValueType\ val\_;}
+\DoxyCodeLine{00233\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{forward__declarations_8h_a0c7177c8470bcc9d80d5b97c482f4a86}{value\_flags}}\ flags\_\ =\ value\_flags::none;}
+\DoxyCodeLine{00234\ }
+\DoxyCodeLine{00236\ }
+\DoxyCodeLine{00237\ \ \ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00239\ \ \ \ \ \ \ \ \ \textcolor{keyword}{using\ }value\_type\ =\ ValueType;}
+\DoxyCodeLine{00240\ }
+\DoxyCodeLine{00246\ \ \ \ \ \ \ \ \ \textcolor{keyword}{using\ }value\_arg\ =\ \mbox{\hyperlink{preprocessor_8h_a1234ac91a810b3bd926ed6721ad1e44a}{POXY\_IMPLEMENTATION\_DETAIL}}(}
+\DoxyCodeLine{00247\ \ \ \ \ \ \ \ \ \ \ \ \ std::conditional\_t<}
+\DoxyCodeLine{00248\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::is\_same\_v<value\_type,\ std::string>,}
+\DoxyCodeLine{00249\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::string\_view,}
+\DoxyCodeLine{00250\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::conditional\_t<impl::is\_one\_of<value\_type,\ double,\ int64\_t,\ bool>,\ value\_type,\ \textcolor{keyword}{const}\ value\_type\&>>);}
+\DoxyCodeLine{00251\ }
+\DoxyCodeLine{00256\ \ \ \ \ \ \ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{typename}...\ Args>}
+\DoxyCodeLine{00257\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{preprocessor_8h_a05c221a7e51165b50670f63540ab218a}{TOML\_NODISCARD\_CTOR}}}
+\DoxyCodeLine{00258\ \ \ \ \ \ \ \ \ \textcolor{keyword}{explicit}\ \mbox{\hyperlink{classvalue}{value}}(Args\&\&...\ args)\ \textcolor{keyword}{noexcept}(\textcolor{keyword}{noexcept}(value\_type(}
+\DoxyCodeLine{00259\ \ \ \ \ \ \ \ \ \ \ \ \ impl::native\_value\_maker<value\_type,\ std::decay\_t<Args>...>::make(\textcolor{keyword}{static\_cast<}Args\&\&\textcolor{keyword}{>}(args)...))))}
+\DoxyCodeLine{00260\ \ \ \ \ \ \ \ \ \ \ \ \ :\ val\_(impl::native\_value\_maker<value\_type,\ std::decay\_t<Args>...>::make(\textcolor{keyword}{static\_cast<}Args\&\&\textcolor{keyword}{>}(args)...))}
+\DoxyCodeLine{00261\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00262\ \textcolor{preprocessor}{\#if\ TOML\_LIFETIME\_HOOKS}}
+\DoxyCodeLine{00263\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{leakproof_8h_a606a80db4a0cb366751f3592d8b21076}{TOML\_VALUE\_CREATED}};}
+\DoxyCodeLine{00264\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00265\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00266\ }
+\DoxyCodeLine{00268\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{preprocessor_8h_a05c221a7e51165b50670f63540ab218a}{TOML\_NODISCARD\_CTOR}}}
+\DoxyCodeLine{00269\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classvalue}{value}}(\textcolor{keyword}{const}\ \mbox{\hyperlink{classvalue}{value}}\&\ other)\ \textcolor{keyword}{noexcept}\ \textcolor{comment}{//}}
+\DoxyCodeLine{00270\ \ \ \ \ \ \ \ \ \ \ \ \ :\ node(other),}
+\DoxyCodeLine{00271\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ val\_\{\ other.val\_\ \},}
+\DoxyCodeLine{00272\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ flags\_\{\ other.flags\_\ \}}
+\DoxyCodeLine{00273\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00274\ \textcolor{preprocessor}{\#if\ TOML\_LIFETIME\_HOOKS}}
+\DoxyCodeLine{00275\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{leakproof_8h_a606a80db4a0cb366751f3592d8b21076}{TOML\_VALUE\_CREATED}};}
+\DoxyCodeLine{00276\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00277\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00278\ }
+\DoxyCodeLine{00280\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{preprocessor_8h_a05c221a7e51165b50670f63540ab218a}{TOML\_NODISCARD\_CTOR}}}
+\DoxyCodeLine{00281\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classvalue}{value}}(\textcolor{keyword}{const}\ \mbox{\hyperlink{classvalue}{value}}\&\ other,\ \mbox{\hyperlink{forward__declarations_8h_a0c7177c8470bcc9d80d5b97c482f4a86}{value\_flags}}\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_a3d4f56e54693280c6d9b1177c12c867d}{flags}})\ \textcolor{keyword}{noexcept}\ \textcolor{comment}{//}}
+\DoxyCodeLine{00282\ \ \ \ \ \ \ \ \ \ \ \ \ :\ node(other),}
+\DoxyCodeLine{00283\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ val\_\{\ other.val\_\ \},}
+\DoxyCodeLine{00284\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ flags\_\{\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_a3d4f56e54693280c6d9b1177c12c867d}{flags}}\ ==\ \mbox{\hyperlink{forward__declarations_8h_ab28140ef75c3f18305fb795d6a7917c5}{preserve\_source\_value\_flags}}\ ?\ other.flags\_\ :\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_a3d4f56e54693280c6d9b1177c12c867d}{flags}}\ \}}
+\DoxyCodeLine{00285\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00286\ \textcolor{preprocessor}{\#if\ TOML\_LIFETIME\_HOOKS}}
+\DoxyCodeLine{00287\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{leakproof_8h_a606a80db4a0cb366751f3592d8b21076}{TOML\_VALUE\_CREATED}};}
+\DoxyCodeLine{00288\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00289\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00290\ }
+\DoxyCodeLine{00292\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{preprocessor_8h_a05c221a7e51165b50670f63540ab218a}{TOML\_NODISCARD\_CTOR}}}
+\DoxyCodeLine{00293\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classvalue}{value}}(\mbox{\hyperlink{classvalue}{value}}\&\&\ other)\ \textcolor{keyword}{noexcept}\ \textcolor{comment}{//}}
+\DoxyCodeLine{00294\ \ \ \ \ \ \ \ \ \ \ \ \ :\ node(\mbox{\hyperlink{namespacestd_ac7095819f6a8da64d69b1ee3029c52be}{std::move}}(other)),}
+\DoxyCodeLine{00295\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ val\_\{\ \mbox{\hyperlink{namespacestd_ac7095819f6a8da64d69b1ee3029c52be}{std::move}}(other.val\_)\ \},}
+\DoxyCodeLine{00296\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ flags\_\{\ other.flags\_\ \}}
+\DoxyCodeLine{00297\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00298\ \textcolor{preprocessor}{\#if\ TOML\_LIFETIME\_HOOKS}}
+\DoxyCodeLine{00299\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{leakproof_8h_a606a80db4a0cb366751f3592d8b21076}{TOML\_VALUE\_CREATED}};}
+\DoxyCodeLine{00300\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00301\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00302\ }
+\DoxyCodeLine{00304\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{preprocessor_8h_a05c221a7e51165b50670f63540ab218a}{TOML\_NODISCARD\_CTOR}}}
+\DoxyCodeLine{00305\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classvalue}{value}}(\mbox{\hyperlink{classvalue}{value}}\&\&\ other,\ \mbox{\hyperlink{forward__declarations_8h_a0c7177c8470bcc9d80d5b97c482f4a86}{value\_flags}}\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_a3d4f56e54693280c6d9b1177c12c867d}{flags}})\ \textcolor{keyword}{noexcept}\ \textcolor{comment}{//}}
+\DoxyCodeLine{00306\ \ \ \ \ \ \ \ \ \ \ \ \ :\ node(\mbox{\hyperlink{namespacestd_ac7095819f6a8da64d69b1ee3029c52be}{std::move}}(other)),}
+\DoxyCodeLine{00307\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ val\_\{\ \mbox{\hyperlink{namespacestd_ac7095819f6a8da64d69b1ee3029c52be}{std::move}}(other.val\_)\ \},}
+\DoxyCodeLine{00308\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ flags\_\{\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_a3d4f56e54693280c6d9b1177c12c867d}{flags}}\ ==\ \mbox{\hyperlink{forward__declarations_8h_ab28140ef75c3f18305fb795d6a7917c5}{preserve\_source\_value\_flags}}\ ?\ other.flags\_\ :\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_a3d4f56e54693280c6d9b1177c12c867d}{flags}}\ \}}
+\DoxyCodeLine{00309\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00310\ \textcolor{preprocessor}{\#if\ TOML\_LIFETIME\_HOOKS}}
+\DoxyCodeLine{00311\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{leakproof_8h_a606a80db4a0cb366751f3592d8b21076}{TOML\_VALUE\_CREATED}};}
+\DoxyCodeLine{00312\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00313\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00314\ }
+\DoxyCodeLine{00316\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classvalue}{value}}\&\ operator=(\textcolor{keyword}{const}\ \mbox{\hyperlink{classvalue}{value}}\&\ rhs)\ \textcolor{keyword}{noexcept}}
+\DoxyCodeLine{00317\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00318\ \ \ \ \ \ \ \ \ \ \ \ \ node::operator=(rhs);}
+\DoxyCodeLine{00319\ \ \ \ \ \ \ \ \ \ \ \ \ val\_\ \ \ =\ rhs.val\_;}
+\DoxyCodeLine{00320\ \ \ \ \ \ \ \ \ \ \ \ \ flags\_\ =\ rhs.flags\_;}
+\DoxyCodeLine{00321\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ *\textcolor{keyword}{this};}
+\DoxyCodeLine{00322\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00323\ }
+\DoxyCodeLine{00325\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classvalue}{value}}\&\ operator=(\mbox{\hyperlink{classvalue}{value}}\&\&\ rhs)\ \textcolor{keyword}{noexcept}}
+\DoxyCodeLine{00326\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00327\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\&rhs\ !=\ \textcolor{keyword}{this})}
+\DoxyCodeLine{00328\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00329\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ node::operator=(\mbox{\hyperlink{namespacestd_ac7095819f6a8da64d69b1ee3029c52be}{std::move}}(rhs));}
+\DoxyCodeLine{00330\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ val\_\ \ \ =\ \mbox{\hyperlink{namespacestd_ac7095819f6a8da64d69b1ee3029c52be}{std::move}}(rhs.val\_);}
+\DoxyCodeLine{00331\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ flags\_\ =\ rhs.flags\_;}
+\DoxyCodeLine{00332\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00333\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ *\textcolor{keyword}{this};}
+\DoxyCodeLine{00334\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00335\ }
+\DoxyCodeLine{00336\ \textcolor{preprocessor}{\#if\ TOML\_LIFETIME\_HOOKS}}
+\DoxyCodeLine{00337\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classvalue}{\string~value}}()\ \textcolor{keyword}{noexcept}}
+\DoxyCodeLine{00338\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00339\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{leakproof_8h_a10f10fe8cf37059ff8a39528c39f9063}{TOML\_VALUE\_DESTROYED}};}
+\DoxyCodeLine{00340\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00341\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00342\ }
+\DoxyCodeLine{00345\ }
+\DoxyCodeLine{00356\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{preprocessor_8h_ad26b309f170b9504c99f7dd7b1a912f0}{TOML\_CONST\_INLINE\_GETTER}}}
+\DoxyCodeLine{00357\ \ \ \ \ \ \ \ \ node\_type\ \mbox{\hyperlink{_classes_2_gameobj_8h_a890efa53b3d7deeeced6f3a0d6653ed3}{type}}()\ \textcolor{keyword}{const}\ \textcolor{keyword}{noexcept}\ \textcolor{keyword}{final}}
+\DoxyCodeLine{00358\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00359\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ impl::node\_type\_of<value\_type>;}
+\DoxyCodeLine{00360\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00361\ }
+\DoxyCodeLine{00362\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{preprocessor_8h_a930d63cd08b8db4f5d7be9f8ef861c17}{TOML\_PURE\_GETTER}}}
+\DoxyCodeLine{00363\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ is\_homogeneous(node\_type\ ntype)\ \textcolor{keyword}{const}\ \textcolor{keyword}{noexcept}\ \textcolor{keyword}{final}}
+\DoxyCodeLine{00364\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00365\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ ntype\ ==\ node\_type::none\ ||\ ntype\ ==\ impl::node\_type\_of<value\_type>;}
+\DoxyCodeLine{00366\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00367\ }
+\DoxyCodeLine{00368\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{preprocessor_8h_a930d63cd08b8db4f5d7be9f8ef861c17}{TOML\_PURE\_GETTER}}}
+\DoxyCodeLine{00369\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ is\_homogeneous(node\_type\ ntype,\ node*\&\ first\_nonmatch)\ \textcolor{keyword}{noexcept}\ \textcolor{keyword}{final}}
+\DoxyCodeLine{00370\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00371\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (ntype\ !=\ node\_type::none\ \&\&\ ntype\ !=\ impl::node\_type\_of<value\_type>)}
+\DoxyCodeLine{00372\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00373\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ first\_nonmatch\ =\ \textcolor{keyword}{this};}
+\DoxyCodeLine{00374\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{00375\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00376\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{00377\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00378\ }
+\DoxyCodeLine{00379\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{preprocessor_8h_a930d63cd08b8db4f5d7be9f8ef861c17}{TOML\_PURE\_GETTER}}}
+\DoxyCodeLine{00380\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ is\_homogeneous(node\_type\ ntype,\ \textcolor{keyword}{const}\ node*\&\ first\_nonmatch)\ \textcolor{keyword}{const}\ \textcolor{keyword}{noexcept}\ \textcolor{keyword}{final}}
+\DoxyCodeLine{00381\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00382\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (ntype\ !=\ node\_type::none\ \&\&\ ntype\ !=\ impl::node\_type\_of<value\_type>)}
+\DoxyCodeLine{00383\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00384\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ first\_nonmatch\ =\ \textcolor{keyword}{this};}
+\DoxyCodeLine{00385\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{00386\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00387\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{00388\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00389\ }
+\DoxyCodeLine{00391\ \ \ \ \ \ \ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{typename}\ ElemType\ =\ \textcolor{keywordtype}{void}>}
+\DoxyCodeLine{00392\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{preprocessor_8h_a930d63cd08b8db4f5d7be9f8ef861c17}{TOML\_PURE\_GETTER}}}
+\DoxyCodeLine{00393\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ is\_homogeneous()\ \textcolor{keyword}{const}\ \textcolor{keyword}{noexcept}}
+\DoxyCodeLine{00394\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00395\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{using\ }\mbox{\hyperlink{_classes_2_gameobj_8h_a890efa53b3d7deeeced6f3a0d6653ed3}{type}}\ =\ impl::remove\_cvref<impl::unwrap\_node<ElemType>>;}
+\DoxyCodeLine{00396\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{static\_assert}(std::is\_void\_v<type>\ ||\ toml::is\_value<type>\ ||\ toml::is\_container<type>,}
+\DoxyCodeLine{00397\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}The\ template\ type\ argument\ of\ value::is\_homogeneous()\ must\ be\ void\ or\ one\ "{}}}
+\DoxyCodeLine{00398\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}of:"{}}\ \mbox{\hyperlink{toml_8hpp_a1de380e050f331193398fe626294c548}{TOML\_SA\_UNWRAPPED\_NODE\_TYPE\_LIST}});}
+\DoxyCodeLine{00399\ }
+\DoxyCodeLine{00400\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keyword}{constexpr}\ (std::is\_void\_v<type>)}
+\DoxyCodeLine{00401\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{00402\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{00403\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ impl::node\_type\_of<type>\ ==\ impl::node\_type\_of<value\_type>;}
+\DoxyCodeLine{00404\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00406\ }
+\DoxyCodeLine{00408\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{preprocessor_8h_ad26b309f170b9504c99f7dd7b1a912f0}{TOML\_CONST\_INLINE\_GETTER}}}
+\DoxyCodeLine{00409\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ is\_table()\ \textcolor{keyword}{const}\ \textcolor{keyword}{noexcept}\ \textcolor{keyword}{final}}
+\DoxyCodeLine{00410\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00411\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{00412\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00413\ }
+\DoxyCodeLine{00415\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{preprocessor_8h_ad26b309f170b9504c99f7dd7b1a912f0}{TOML\_CONST\_INLINE\_GETTER}}}
+\DoxyCodeLine{00416\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{forward__declarations_8h_a70231801eb17e45cd17c7eb332b4d36f}{is\_array}}()\ \textcolor{keyword}{const}\ \textcolor{keyword}{noexcept}\ \textcolor{keyword}{final}}
+\DoxyCodeLine{00417\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00418\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{00419\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00420\ }
+\DoxyCodeLine{00422\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{preprocessor_8h_ad26b309f170b9504c99f7dd7b1a912f0}{TOML\_CONST\_INLINE\_GETTER}}}
+\DoxyCodeLine{00423\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ is\_array\_of\_tables()\ \textcolor{keyword}{const}\ \textcolor{keyword}{noexcept}\ \textcolor{keyword}{final}}
+\DoxyCodeLine{00424\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00425\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{00426\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00427\ }
+\DoxyCodeLine{00429\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{preprocessor_8h_ad26b309f170b9504c99f7dd7b1a912f0}{TOML\_CONST\_INLINE\_GETTER}}}
+\DoxyCodeLine{00430\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{forward__declarations_8h_afced5bc5ef559606e3d75268ca601709}{is\_value}}()\ \textcolor{keyword}{const}\ \textcolor{keyword}{noexcept}\ \textcolor{keyword}{final}}
+\DoxyCodeLine{00431\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00432\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{00433\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00434\ }
+\DoxyCodeLine{00436\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{preprocessor_8h_ad26b309f170b9504c99f7dd7b1a912f0}{TOML\_CONST\_INLINE\_GETTER}}}
+\DoxyCodeLine{00437\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{forward__declarations_8h_a5d9214f3694adcc143822884ec06aac6}{is\_string}}()\ \textcolor{keyword}{const}\ \textcolor{keyword}{noexcept}\ \textcolor{keyword}{final}}
+\DoxyCodeLine{00438\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00439\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ std::is\_same\_v<value\_type,\ std::string>;}
+\DoxyCodeLine{00440\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00441\ }
+\DoxyCodeLine{00443\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{preprocessor_8h_ad26b309f170b9504c99f7dd7b1a912f0}{TOML\_CONST\_INLINE\_GETTER}}}
+\DoxyCodeLine{00444\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{forward__declarations_8h_a8b617e5248756c383118df7cf633176c}{is\_integer}}()\ \textcolor{keyword}{const}\ \textcolor{keyword}{noexcept}\ \textcolor{keyword}{final}}
+\DoxyCodeLine{00445\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00446\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ std::is\_same\_v<value\_type,\ int64\_t>;}
+\DoxyCodeLine{00447\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00448\ }
+\DoxyCodeLine{00450\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{preprocessor_8h_ad26b309f170b9504c99f7dd7b1a912f0}{TOML\_CONST\_INLINE\_GETTER}}}
+\DoxyCodeLine{00451\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{forward__declarations_8h_a400919fd056905f7b68893873e1f96de}{is\_floating\_point}}()\ \textcolor{keyword}{const}\ \textcolor{keyword}{noexcept}\ \textcolor{keyword}{final}}
+\DoxyCodeLine{00452\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00453\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ std::is\_same\_v<value\_type,\ double>;}
+\DoxyCodeLine{00454\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00455\ }
+\DoxyCodeLine{00457\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{preprocessor_8h_ad26b309f170b9504c99f7dd7b1a912f0}{TOML\_CONST\_INLINE\_GETTER}}}
+\DoxyCodeLine{00458\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{forward__declarations_8h_a1e443b4df05673f810658b66cb1f628d}{is\_number}}()\ \textcolor{keyword}{const}\ \textcolor{keyword}{noexcept}\ \textcolor{keyword}{final}}
+\DoxyCodeLine{00459\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00460\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ impl::is\_one\_of<value\_type,\ int64\_t,\ double>;}
+\DoxyCodeLine{00461\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00462\ }
+\DoxyCodeLine{00464\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{preprocessor_8h_ad26b309f170b9504c99f7dd7b1a912f0}{TOML\_CONST\_INLINE\_GETTER}}}
+\DoxyCodeLine{00465\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{forward__declarations_8h_a3dc64661a1bb4eb998b3b28a1893ee6b}{is\_boolean}}()\ \textcolor{keyword}{const}\ \textcolor{keyword}{noexcept}\ \textcolor{keyword}{final}}
+\DoxyCodeLine{00466\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00467\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ std::is\_same\_v<value\_type,\ bool>;}
+\DoxyCodeLine{00468\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00469\ }
+\DoxyCodeLine{00471\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{preprocessor_8h_ad26b309f170b9504c99f7dd7b1a912f0}{TOML\_CONST\_INLINE\_GETTER}}}
+\DoxyCodeLine{00472\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{forward__declarations_8h_a40c5fb13e28fdf655d3a6c7127bcb2b4}{is\_date}}()\ \textcolor{keyword}{const}\ \textcolor{keyword}{noexcept}\ \textcolor{keyword}{final}}
+\DoxyCodeLine{00473\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00474\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ std::is\_same\_v<value\_type,\ date>;}
+\DoxyCodeLine{00475\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00476\ }
+\DoxyCodeLine{00478\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{preprocessor_8h_ad26b309f170b9504c99f7dd7b1a912f0}{TOML\_CONST\_INLINE\_GETTER}}}
+\DoxyCodeLine{00479\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{forward__declarations_8h_ae8325165bb42cc419d4b55c888a0d69f}{is\_time}}()\ \textcolor{keyword}{const}\ \textcolor{keyword}{noexcept}\ \textcolor{keyword}{final}}
+\DoxyCodeLine{00480\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00481\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ std::is\_same\_v<value\_type,\ time>;}
+\DoxyCodeLine{00482\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00483\ }
+\DoxyCodeLine{00485\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{preprocessor_8h_ad26b309f170b9504c99f7dd7b1a912f0}{TOML\_CONST\_INLINE\_GETTER}}}
+\DoxyCodeLine{00486\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{forward__declarations_8h_a7fb2820864834a9cfcc07aab9ee4566b}{is\_date\_time}}()\ \textcolor{keyword}{const}\ \textcolor{keyword}{noexcept}\ \textcolor{keyword}{final}}
+\DoxyCodeLine{00487\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00488\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ std::is\_same\_v<value\_type,\ date\_time>;}
+\DoxyCodeLine{00489\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00490\ }
+\DoxyCodeLine{00492\ }
+\DoxyCodeLine{00495\ }
+\DoxyCodeLine{00497\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{preprocessor_8h_ad26b309f170b9504c99f7dd7b1a912f0}{TOML\_CONST\_INLINE\_GETTER}}}
+\DoxyCodeLine{00498\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classtable}{table}}*\ as\_table()\ \textcolor{keyword}{noexcept}\ \textcolor{keyword}{final}}
+\DoxyCodeLine{00499\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00500\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{nullptr};}
+\DoxyCodeLine{00501\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00502\ }
+\DoxyCodeLine{00504\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{preprocessor_8h_ad26b309f170b9504c99f7dd7b1a912f0}{TOML\_CONST\_INLINE\_GETTER}}}
+\DoxyCodeLine{00505\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classarray}{array}}*\ as\_array()\ \textcolor{keyword}{noexcept}\ \textcolor{keyword}{final}}
+\DoxyCodeLine{00506\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00507\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{nullptr};}
+\DoxyCodeLine{00508\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00509\ }
+\DoxyCodeLine{00511\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{preprocessor_8h_ad26b309f170b9504c99f7dd7b1a912f0}{TOML\_CONST\_INLINE\_GETTER}}}
+\DoxyCodeLine{00512\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classvalue}{value<std::string>}}*\ as\_string()\ \textcolor{keyword}{noexcept}\ \textcolor{keyword}{final}}
+\DoxyCodeLine{00513\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00514\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ as\_value<std::string>(\textcolor{keyword}{this});}
+\DoxyCodeLine{00515\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00516\ }
+\DoxyCodeLine{00518\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{preprocessor_8h_ad26b309f170b9504c99f7dd7b1a912f0}{TOML\_CONST\_INLINE\_GETTER}}}
+\DoxyCodeLine{00519\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classvalue}{value<int64\_t>}}*\ as\_integer()\ \textcolor{keyword}{noexcept}\ \textcolor{keyword}{final}}
+\DoxyCodeLine{00520\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00521\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ as\_value<int64\_t>(\textcolor{keyword}{this});}
+\DoxyCodeLine{00522\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00523\ }
+\DoxyCodeLine{00525\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{preprocessor_8h_ad26b309f170b9504c99f7dd7b1a912f0}{TOML\_CONST\_INLINE\_GETTER}}}
+\DoxyCodeLine{00526\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classvalue}{value<double>}}*\ as\_floating\_point()\ \textcolor{keyword}{noexcept}\ \textcolor{keyword}{final}}
+\DoxyCodeLine{00527\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00528\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ as\_value<double>(\textcolor{keyword}{this});}
+\DoxyCodeLine{00529\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00530\ }
+\DoxyCodeLine{00532\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{preprocessor_8h_ad26b309f170b9504c99f7dd7b1a912f0}{TOML\_CONST\_INLINE\_GETTER}}}
+\DoxyCodeLine{00533\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classvalue}{value<bool>}}*\ as\_boolean()\ \textcolor{keyword}{noexcept}\ \textcolor{keyword}{final}}
+\DoxyCodeLine{00534\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00535\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ as\_value<bool>(\textcolor{keyword}{this});}
+\DoxyCodeLine{00536\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00537\ }
+\DoxyCodeLine{00539\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{preprocessor_8h_ad26b309f170b9504c99f7dd7b1a912f0}{TOML\_CONST\_INLINE\_GETTER}}}
+\DoxyCodeLine{00540\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classvalue}{value<date>}}*\ as\_date()\ \textcolor{keyword}{noexcept}\ \textcolor{keyword}{final}}
+\DoxyCodeLine{00541\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00542\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ as\_value<date>(\textcolor{keyword}{this});}
+\DoxyCodeLine{00543\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00544\ }
+\DoxyCodeLine{00546\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{preprocessor_8h_ad26b309f170b9504c99f7dd7b1a912f0}{TOML\_CONST\_INLINE\_GETTER}}}
+\DoxyCodeLine{00547\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classvalue}{value<time>}}*\ as\_time()\ \textcolor{keyword}{noexcept}\ \textcolor{keyword}{final}}
+\DoxyCodeLine{00548\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00549\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ as\_value<time>(\textcolor{keyword}{this});}
+\DoxyCodeLine{00550\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00551\ }
+\DoxyCodeLine{00553\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{preprocessor_8h_ad26b309f170b9504c99f7dd7b1a912f0}{TOML\_CONST\_INLINE\_GETTER}}}
+\DoxyCodeLine{00554\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classvalue}{value<date\_time>}}*\ as\_date\_time()\ \textcolor{keyword}{noexcept}\ \textcolor{keyword}{final}}
+\DoxyCodeLine{00555\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00556\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ as\_value<date\_time>(\textcolor{keyword}{this});}
+\DoxyCodeLine{00557\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00558\ }
+\DoxyCodeLine{00560\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{preprocessor_8h_ad26b309f170b9504c99f7dd7b1a912f0}{TOML\_CONST\_INLINE\_GETTER}}}
+\DoxyCodeLine{00561\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{classtable}{table}}*\ as\_table()\ \textcolor{keyword}{const}\ \textcolor{keyword}{noexcept}\ \textcolor{keyword}{final}}
+\DoxyCodeLine{00562\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00563\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{nullptr};}
+\DoxyCodeLine{00564\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00565\ }
+\DoxyCodeLine{00567\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{preprocessor_8h_ad26b309f170b9504c99f7dd7b1a912f0}{TOML\_CONST\_INLINE\_GETTER}}}
+\DoxyCodeLine{00568\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{classarray}{array}}*\ as\_array()\ \textcolor{keyword}{const}\ \textcolor{keyword}{noexcept}\ \textcolor{keyword}{final}}
+\DoxyCodeLine{00569\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00570\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{nullptr};}
+\DoxyCodeLine{00571\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00572\ }
+\DoxyCodeLine{00574\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{preprocessor_8h_ad26b309f170b9504c99f7dd7b1a912f0}{TOML\_CONST\_INLINE\_GETTER}}}
+\DoxyCodeLine{00575\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{classvalue}{value<std::string>}}*\ as\_string()\ \textcolor{keyword}{const}\ \textcolor{keyword}{noexcept}\ \textcolor{keyword}{final}}
+\DoxyCodeLine{00576\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00577\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ as\_value<std::string>(\textcolor{keyword}{this});}
+\DoxyCodeLine{00578\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00579\ }
+\DoxyCodeLine{00581\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{preprocessor_8h_ad26b309f170b9504c99f7dd7b1a912f0}{TOML\_CONST\_INLINE\_GETTER}}}
+\DoxyCodeLine{00582\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{classvalue}{value<int64\_t>}}*\ as\_integer()\ \textcolor{keyword}{const}\ \textcolor{keyword}{noexcept}\ \textcolor{keyword}{final}}
+\DoxyCodeLine{00583\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00584\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ as\_value<int64\_t>(\textcolor{keyword}{this});}
+\DoxyCodeLine{00585\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00586\ }
+\DoxyCodeLine{00588\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{preprocessor_8h_ad26b309f170b9504c99f7dd7b1a912f0}{TOML\_CONST\_INLINE\_GETTER}}}
+\DoxyCodeLine{00589\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{classvalue}{value<double>}}*\ as\_floating\_point()\ \textcolor{keyword}{const}\ \textcolor{keyword}{noexcept}\ \textcolor{keyword}{final}}
+\DoxyCodeLine{00590\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00591\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ as\_value<double>(\textcolor{keyword}{this});}
+\DoxyCodeLine{00592\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00593\ }
+\DoxyCodeLine{00595\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{preprocessor_8h_ad26b309f170b9504c99f7dd7b1a912f0}{TOML\_CONST\_INLINE\_GETTER}}}
+\DoxyCodeLine{00596\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{classvalue}{value<bool>}}*\ as\_boolean()\ \textcolor{keyword}{const}\ \textcolor{keyword}{noexcept}\ \textcolor{keyword}{final}}
+\DoxyCodeLine{00597\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00598\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ as\_value<bool>(\textcolor{keyword}{this});}
+\DoxyCodeLine{00599\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00600\ }
+\DoxyCodeLine{00602\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{preprocessor_8h_ad26b309f170b9504c99f7dd7b1a912f0}{TOML\_CONST\_INLINE\_GETTER}}}
+\DoxyCodeLine{00603\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{classvalue}{value<date>}}*\ as\_date()\ \textcolor{keyword}{const}\ \textcolor{keyword}{noexcept}\ \textcolor{keyword}{final}}
+\DoxyCodeLine{00604\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00605\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ as\_value<date>(\textcolor{keyword}{this});}
+\DoxyCodeLine{00606\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00607\ }
+\DoxyCodeLine{00609\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{preprocessor_8h_ad26b309f170b9504c99f7dd7b1a912f0}{TOML\_CONST\_INLINE\_GETTER}}}
+\DoxyCodeLine{00610\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{classvalue}{value<time>}}*\ as\_time()\ \textcolor{keyword}{const}\ \textcolor{keyword}{noexcept}\ \textcolor{keyword}{final}}
+\DoxyCodeLine{00611\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00612\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ as\_value<time>(\textcolor{keyword}{this});}
+\DoxyCodeLine{00613\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00614\ }
+\DoxyCodeLine{00616\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{preprocessor_8h_ad26b309f170b9504c99f7dd7b1a912f0}{TOML\_CONST\_INLINE\_GETTER}}}
+\DoxyCodeLine{00617\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{classvalue}{value<date\_time>}}*\ as\_date\_time()\ \textcolor{keyword}{const}\ \textcolor{keyword}{noexcept}\ \textcolor{keyword}{final}}
+\DoxyCodeLine{00618\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00619\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ as\_value<date\_time>(\textcolor{keyword}{this});}
+\DoxyCodeLine{00620\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00621\ }
+\DoxyCodeLine{00623\ }
+\DoxyCodeLine{00626\ }
+\DoxyCodeLine{00628\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{preprocessor_8h_ab8168e9569e1eb2294b344fbb81983b5}{TOML\_PURE\_INLINE\_GETTER}}}
+\DoxyCodeLine{00629\ \ \ \ \ \ \ \ \ value\_type\&\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_afc5e04fa58feb228bb06199ff10caa22}{get}}()\ \&\ \textcolor{keyword}{noexcept}}
+\DoxyCodeLine{00630\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00631\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ val\_;}
+\DoxyCodeLine{00632\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00633\ }
+\DoxyCodeLine{00635\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{preprocessor_8h_ab8168e9569e1eb2294b344fbb81983b5}{TOML\_PURE\_INLINE\_GETTER}}}
+\DoxyCodeLine{00636\ \ \ \ \ \ \ \ \ value\_type\&\&\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_afc5e04fa58feb228bb06199ff10caa22}{get}}()\ \&\&\ \textcolor{keyword}{noexcept}}
+\DoxyCodeLine{00637\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00638\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{static\_cast<}value\_type\&\&\textcolor{keyword}{>}(val\_);}
+\DoxyCodeLine{00639\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00640\ }
+\DoxyCodeLine{00642\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{preprocessor_8h_ab8168e9569e1eb2294b344fbb81983b5}{TOML\_PURE\_INLINE\_GETTER}}}
+\DoxyCodeLine{00643\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ value\_type\&\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_afc5e04fa58feb228bb06199ff10caa22}{get}}()\ \textcolor{keyword}{const}\&\ \textcolor{keyword}{noexcept}}
+\DoxyCodeLine{00644\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00645\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ val\_;}
+\DoxyCodeLine{00646\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00647\ }
+\DoxyCodeLine{00649\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{preprocessor_8h_ab8168e9569e1eb2294b344fbb81983b5}{TOML\_PURE\_INLINE\_GETTER}}}
+\DoxyCodeLine{00650\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ value\_type\&\&\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_afc5e04fa58feb228bb06199ff10caa22}{get}}()\ \textcolor{keyword}{const}\&\&\ \textcolor{keyword}{noexcept}}
+\DoxyCodeLine{00651\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00652\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{static\_cast<}\textcolor{keyword}{const\ }value\_type\&\&\textcolor{keyword}{>}(val\_);}
+\DoxyCodeLine{00653\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00654\ }
+\DoxyCodeLine{00656\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{preprocessor_8h_ab8168e9569e1eb2294b344fbb81983b5}{TOML\_PURE\_INLINE\_GETTER}}}
+\DoxyCodeLine{00657\ \ \ \ \ \ \ \ \ value\_type\&\ operator*()\ \&\ \textcolor{keyword}{noexcept}}
+\DoxyCodeLine{00658\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00659\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ val\_;}
+\DoxyCodeLine{00660\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00661\ }
+\DoxyCodeLine{00663\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{preprocessor_8h_ab8168e9569e1eb2294b344fbb81983b5}{TOML\_PURE\_INLINE\_GETTER}}}
+\DoxyCodeLine{00664\ \ \ \ \ \ \ \ \ value\_type\&\&\ operator*()\ \&\&\ \textcolor{keyword}{noexcept}}
+\DoxyCodeLine{00665\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00666\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{static\_cast<}value\_type\&\&\textcolor{keyword}{>}(val\_);}
+\DoxyCodeLine{00667\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00668\ }
+\DoxyCodeLine{00670\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{preprocessor_8h_ab8168e9569e1eb2294b344fbb81983b5}{TOML\_PURE\_INLINE\_GETTER}}}
+\DoxyCodeLine{00671\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ value\_type\&\ operator*()\ \textcolor{keyword}{const}\&\ \textcolor{keyword}{noexcept}}
+\DoxyCodeLine{00672\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00673\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ val\_;}
+\DoxyCodeLine{00674\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00675\ }
+\DoxyCodeLine{00677\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{preprocessor_8h_ab8168e9569e1eb2294b344fbb81983b5}{TOML\_PURE\_INLINE\_GETTER}}}
+\DoxyCodeLine{00678\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ value\_type\&\&\ operator*()\ \textcolor{keyword}{const}\&\&\ \textcolor{keyword}{noexcept}}
+\DoxyCodeLine{00679\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00680\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{static\_cast<}\textcolor{keyword}{const\ }value\_type\&\&\textcolor{keyword}{>}(val\_);}
+\DoxyCodeLine{00681\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00682\ }
+\DoxyCodeLine{00684\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{preprocessor_8h_ab8168e9569e1eb2294b344fbb81983b5}{TOML\_PURE\_INLINE\_GETTER}}}
+\DoxyCodeLine{00685\ \ \ \ \ \ \ \ \ \textcolor{keyword}{explicit}\ \textcolor{keyword}{operator}\ value\_type\&()\ \&\ \textcolor{keyword}{noexcept}}
+\DoxyCodeLine{00686\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00687\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ val\_;}
+\DoxyCodeLine{00688\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00689\ }
+\DoxyCodeLine{00691\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{preprocessor_8h_ab8168e9569e1eb2294b344fbb81983b5}{TOML\_PURE\_INLINE\_GETTER}}}
+\DoxyCodeLine{00692\ \ \ \ \ \ \ \ \ \textcolor{keyword}{explicit}\ \textcolor{keyword}{operator}\ value\_type\&\&()\ \&\&\ \textcolor{keyword}{noexcept}}
+\DoxyCodeLine{00693\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00694\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{static\_cast<}value\_type\&\&\textcolor{keyword}{>}(val\_);}
+\DoxyCodeLine{00695\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00696\ }
+\DoxyCodeLine{00698\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{preprocessor_8h_ab8168e9569e1eb2294b344fbb81983b5}{TOML\_PURE\_INLINE\_GETTER}}}
+\DoxyCodeLine{00699\ \ \ \ \ \ \ \ \ \textcolor{keyword}{explicit}\ \textcolor{keyword}{operator}\ \textcolor{keyword}{const}\ value\_type\&()\ \textcolor{keyword}{const}\&\ \textcolor{keyword}{noexcept}}
+\DoxyCodeLine{00700\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00701\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ val\_;}
+\DoxyCodeLine{00702\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00703\ }
+\DoxyCodeLine{00705\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{preprocessor_8h_ab8168e9569e1eb2294b344fbb81983b5}{TOML\_PURE\_INLINE\_GETTER}}}
+\DoxyCodeLine{00706\ \ \ \ \ \ \ \ \ \textcolor{keyword}{explicit}\ \textcolor{keyword}{operator}\ \textcolor{keyword}{const}\ value\_type\&\&()\ \&\&\ \textcolor{keyword}{noexcept}}
+\DoxyCodeLine{00707\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00708\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{static\_cast<}\textcolor{keyword}{const\ }value\_type\&\&\textcolor{keyword}{>}(val\_);}
+\DoxyCodeLine{00709\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00710\ }
+\DoxyCodeLine{00714\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{preprocessor_8h_ab3272d559df83418b043791473ef1016}{TOML\_HIDDEN\_CONSTRAINT}}(std::is\_class\_v<T>,\ \textcolor{keyword}{typename}\ T\ =\ value\_type)}
+\DoxyCodeLine{00715\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{preprocessor_8h_ab8168e9569e1eb2294b344fbb81983b5}{TOML\_PURE\_INLINE\_GETTER}}}
+\DoxyCodeLine{00716\ \ \ \ \ \ \ \ \ value\_type*\ operator-\/>()\ \textcolor{keyword}{noexcept}}
+\DoxyCodeLine{00717\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00718\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \&val\_;}
+\DoxyCodeLine{00719\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00720\ }
+\DoxyCodeLine{00724\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{preprocessor_8h_ab3272d559df83418b043791473ef1016}{TOML\_HIDDEN\_CONSTRAINT}}(std::is\_class\_v<T>,\ \textcolor{keyword}{typename}\ T\ =\ value\_type)}
+\DoxyCodeLine{00725\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{preprocessor_8h_ab8168e9569e1eb2294b344fbb81983b5}{TOML\_PURE\_INLINE\_GETTER}}}
+\DoxyCodeLine{00726\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ value\_type*\ operator-\/>()\ \textcolor{keyword}{const}\ \textcolor{keyword}{noexcept}}
+\DoxyCodeLine{00727\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00728\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \&val\_;}
+\DoxyCodeLine{00729\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00730\ }
+\DoxyCodeLine{00732\ }
+\DoxyCodeLine{00735\ }
+\DoxyCodeLine{00737\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{preprocessor_8h_a471c97e396823de3fcca2272e3ef1bba}{TOML\_NODISCARD}}}
+\DoxyCodeLine{00738\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{forward__declarations_8h_a0c7177c8470bcc9d80d5b97c482f4a86}{value\_flags}}\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_a3d4f56e54693280c6d9b1177c12c867d}{flags}}()\ \textcolor{keyword}{const}\ \textcolor{keyword}{noexcept}}
+\DoxyCodeLine{00739\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00740\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ flags\_;}
+\DoxyCodeLine{00741\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00742\ }
+\DoxyCodeLine{00745\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classvalue}{value}}\&\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_a3d4f56e54693280c6d9b1177c12c867d}{flags}}(\mbox{\hyperlink{forward__declarations_8h_a0c7177c8470bcc9d80d5b97c482f4a86}{value\_flags}}\ new\_flags)\ \textcolor{keyword}{noexcept}}
+\DoxyCodeLine{00746\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00747\ \ \ \ \ \ \ \ \ \ \ \ \ flags\_\ =\ new\_flags;}
+\DoxyCodeLine{00748\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ *\textcolor{keyword}{this};}
+\DoxyCodeLine{00749\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00750\ }
+\DoxyCodeLine{00752\ }
+\DoxyCodeLine{00754\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classvalue}{value}}\&\ operator=(value\_arg\ rhs)\ \textcolor{keyword}{noexcept}}
+\DoxyCodeLine{00755\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00756\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keyword}{constexpr}\ (std::is\_same\_v<value\_type,\ std::string>)}
+\DoxyCodeLine{00757\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ val\_.assign(rhs);}
+\DoxyCodeLine{00758\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{00759\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ val\_\ =\ rhs;}
+\DoxyCodeLine{00760\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ *\textcolor{keyword}{this};}
+\DoxyCodeLine{00761\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00762\ }
+\DoxyCodeLine{00763\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{preprocessor_8h_a28441f3c429403e368267788c2e8a279}{TOML\_CONSTRAINED\_TEMPLATE}}((std::is\_same\_v<T,\ std::string>),\ \textcolor{keyword}{typename}\ T\ =\ value\_type)}
+\DoxyCodeLine{00764\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classvalue}{value}}\&\ operator=(std::string\&\&\ rhs)\ \textcolor{keyword}{noexcept}}
+\DoxyCodeLine{00765\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00766\ \ \ \ \ \ \ \ \ \ \ \ \ val\_\ =\ \mbox{\hyperlink{namespacestd_ac7095819f6a8da64d69b1ee3029c52be}{std::move}}(rhs);}
+\DoxyCodeLine{00767\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ *\textcolor{keyword}{this};}
+\DoxyCodeLine{00768\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00769\ }
+\DoxyCodeLine{00772\ }
+\DoxyCodeLine{00774\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{preprocessor_8h_a930d63cd08b8db4f5d7be9f8ef861c17}{TOML\_PURE\_GETTER}}}
+\DoxyCodeLine{00775\ \ \ \ \ \ \ \ \ \textcolor{keyword}{friend}\ \textcolor{keywordtype}{bool}\ operator==(\textcolor{keyword}{const}\ \mbox{\hyperlink{classvalue}{value}}\&\ lhs,\ value\_arg\ rhs)\ \textcolor{keyword}{noexcept}}
+\DoxyCodeLine{00776\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00777\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keyword}{constexpr}\ (std::is\_same\_v<value\_type,\ double>)}
+\DoxyCodeLine{00778\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00779\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \textcolor{keyword}{auto}\ lhs\_nan\ =\ impl::fpclassify(lhs.val\_)\ ==\ impl::fp\_class::nan;}
+\DoxyCodeLine{00780\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \textcolor{keyword}{auto}\ rhs\_nan\ =\ impl::fpclassify(rhs)\ ==\ impl::fp\_class::nan;}
+\DoxyCodeLine{00781\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (lhs\_nan\ !=\ rhs\_nan)}
+\DoxyCodeLine{00782\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{00783\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (lhs\_nan)}
+\DoxyCodeLine{00784\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{00785\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00786\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ lhs.val\_\ ==\ rhs;}
+\DoxyCodeLine{00787\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00788\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{preprocessor_8h_acb44e833882d0c4824af69311c8505f5}{TOML\_ASYMMETRICAL\_EQUALITY\_OPS}}(\textcolor{keyword}{const}\ \mbox{\hyperlink{classvalue}{value}}\&,\ value\_arg,\ );}
+\DoxyCodeLine{00789\ }
+\DoxyCodeLine{00791\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{preprocessor_8h_a930d63cd08b8db4f5d7be9f8ef861c17}{TOML\_PURE\_GETTER}}}
+\DoxyCodeLine{00792\ \ \ \ \ \ \ \ \ \textcolor{keyword}{friend}\ \textcolor{keywordtype}{bool}\ operator<(\textcolor{keyword}{const}\ \mbox{\hyperlink{classvalue}{value}}\&\ lhs,\ value\_arg\ rhs)\ \textcolor{keyword}{noexcept}}
+\DoxyCodeLine{00793\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00794\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ lhs.val\_\ <\ rhs;}
+\DoxyCodeLine{00795\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00796\ }
+\DoxyCodeLine{00798\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{preprocessor_8h_a930d63cd08b8db4f5d7be9f8ef861c17}{TOML\_PURE\_GETTER}}}
+\DoxyCodeLine{00799\ \ \ \ \ \ \ \ \ \textcolor{keyword}{friend}\ \textcolor{keywordtype}{bool}\ operator<(value\_arg\ lhs,\ \textcolor{keyword}{const}\ \mbox{\hyperlink{classvalue}{value}}\&\ rhs)\ \textcolor{keyword}{noexcept}}
+\DoxyCodeLine{00800\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00801\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ lhs\ <\ rhs.val\_;}
+\DoxyCodeLine{00802\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00803\ }
+\DoxyCodeLine{00805\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{preprocessor_8h_a930d63cd08b8db4f5d7be9f8ef861c17}{TOML\_PURE\_GETTER}}}
+\DoxyCodeLine{00806\ \ \ \ \ \ \ \ \ \textcolor{keyword}{friend}\ \textcolor{keywordtype}{bool}\ operator<=(\textcolor{keyword}{const}\ \mbox{\hyperlink{classvalue}{value}}\&\ lhs,\ value\_arg\ rhs)\ \textcolor{keyword}{noexcept}}
+\DoxyCodeLine{00807\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00808\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ lhs.val\_\ <=\ rhs;}
+\DoxyCodeLine{00809\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00810\ }
+\DoxyCodeLine{00812\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{preprocessor_8h_a930d63cd08b8db4f5d7be9f8ef861c17}{TOML\_PURE\_GETTER}}}
+\DoxyCodeLine{00813\ \ \ \ \ \ \ \ \ \textcolor{keyword}{friend}\ \textcolor{keywordtype}{bool}\ operator<=(value\_arg\ lhs,\ \textcolor{keyword}{const}\ \mbox{\hyperlink{classvalue}{value}}\&\ rhs)\ \textcolor{keyword}{noexcept}}
+\DoxyCodeLine{00814\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00815\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ lhs\ <=\ rhs.val\_;}
+\DoxyCodeLine{00816\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00817\ }
+\DoxyCodeLine{00819\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{preprocessor_8h_a930d63cd08b8db4f5d7be9f8ef861c17}{TOML\_PURE\_GETTER}}}
+\DoxyCodeLine{00820\ \ \ \ \ \ \ \ \ \textcolor{keyword}{friend}\ \textcolor{keywordtype}{bool}\ operator>(\textcolor{keyword}{const}\ \mbox{\hyperlink{classvalue}{value}}\&\ lhs,\ value\_arg\ rhs)\ \textcolor{keyword}{noexcept}}
+\DoxyCodeLine{00821\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00822\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ lhs.val\_\ >\ rhs;}
+\DoxyCodeLine{00823\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00824\ }
+\DoxyCodeLine{00826\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{preprocessor_8h_a930d63cd08b8db4f5d7be9f8ef861c17}{TOML\_PURE\_GETTER}}}
+\DoxyCodeLine{00827\ \ \ \ \ \ \ \ \ \textcolor{keyword}{friend}\ \textcolor{keywordtype}{bool}\ operator>(value\_arg\ lhs,\ \textcolor{keyword}{const}\ \mbox{\hyperlink{classvalue}{value}}\&\ rhs)\ \textcolor{keyword}{noexcept}}
+\DoxyCodeLine{00828\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00829\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ lhs\ >\ rhs.val\_;}
+\DoxyCodeLine{00830\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00831\ }
+\DoxyCodeLine{00833\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{preprocessor_8h_a930d63cd08b8db4f5d7be9f8ef861c17}{TOML\_PURE\_GETTER}}}
+\DoxyCodeLine{00834\ \ \ \ \ \ \ \ \ \textcolor{keyword}{friend}\ \textcolor{keywordtype}{bool}\ operator>=(\textcolor{keyword}{const}\ \mbox{\hyperlink{classvalue}{value}}\&\ lhs,\ value\_arg\ rhs)\ \textcolor{keyword}{noexcept}}
+\DoxyCodeLine{00835\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00836\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ lhs.val\_\ >=\ rhs;}
+\DoxyCodeLine{00837\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00838\ }
+\DoxyCodeLine{00840\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{preprocessor_8h_a930d63cd08b8db4f5d7be9f8ef861c17}{TOML\_PURE\_GETTER}}}
+\DoxyCodeLine{00841\ \ \ \ \ \ \ \ \ \textcolor{keyword}{friend}\ \textcolor{keywordtype}{bool}\ operator>=(value\_arg\ lhs,\ \textcolor{keyword}{const}\ \mbox{\hyperlink{classvalue}{value}}\&\ rhs)\ \textcolor{keyword}{noexcept}}
+\DoxyCodeLine{00842\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00843\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ lhs\ >=\ rhs.val\_;}
+\DoxyCodeLine{00844\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00845\ }
+\DoxyCodeLine{00852\ \ \ \ \ \ \ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{typename}\ T>}
+\DoxyCodeLine{00853\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{preprocessor_8h_a930d63cd08b8db4f5d7be9f8ef861c17}{TOML\_PURE\_GETTER}}}
+\DoxyCodeLine{00854\ \ \ \ \ \ \ \ \ \textcolor{keyword}{friend}\ \textcolor{keywordtype}{bool}\ operator==(\textcolor{keyword}{const}\ \mbox{\hyperlink{classvalue}{value}}\&\ lhs,\ \textcolor{keyword}{const}\ \mbox{\hyperlink{classvalue}{value<T>}}\&\ rhs)\ \textcolor{keyword}{noexcept}}
+\DoxyCodeLine{00855\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00856\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keyword}{constexpr}\ (std::is\_same\_v<value\_type,\ T>)}
+\DoxyCodeLine{00857\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ lhs\ ==\ rhs.val\_;\ \textcolor{comment}{//\ calls\ asymmetrical\ value-\/equality\ operator\ defined\ above}}
+\DoxyCodeLine{00858\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{00859\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{00860\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00861\ }
+\DoxyCodeLine{00868\ \ \ \ \ \ \ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{typename}\ T>}
+\DoxyCodeLine{00869\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{preprocessor_8h_ab8168e9569e1eb2294b344fbb81983b5}{TOML\_PURE\_INLINE\_GETTER}}}
+\DoxyCodeLine{00870\ \ \ \ \ \ \ \ \ \textcolor{keyword}{friend}\ \textcolor{keywordtype}{bool}\ operator!=(\textcolor{keyword}{const}\ \mbox{\hyperlink{classvalue}{value}}\&\ lhs,\ \textcolor{keyword}{const}\ \mbox{\hyperlink{classvalue}{value<T>}}\&\ rhs)\ \textcolor{keyword}{noexcept}}
+\DoxyCodeLine{00871\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00872\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ !(lhs\ ==\ rhs);}
+\DoxyCodeLine{00873\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00874\ }
+\DoxyCodeLine{00884\ \ \ \ \ \ \ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{typename}\ T>}
+\DoxyCodeLine{00885\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{preprocessor_8h_a930d63cd08b8db4f5d7be9f8ef861c17}{TOML\_PURE\_GETTER}}}
+\DoxyCodeLine{00886\ \ \ \ \ \ \ \ \ \textcolor{keyword}{friend}\ \textcolor{keywordtype}{bool}\ operator<(\textcolor{keyword}{const}\ \mbox{\hyperlink{classvalue}{value}}\&\ lhs,\ \textcolor{keyword}{const}\ \mbox{\hyperlink{classvalue}{value<T>}}\&\ rhs)\ \textcolor{keyword}{noexcept}}
+\DoxyCodeLine{00887\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00888\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keyword}{constexpr}\ (std::is\_same\_v<value\_type,\ T>)}
+\DoxyCodeLine{00889\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ lhs.val\_\ <\ rhs.val\_;}
+\DoxyCodeLine{00890\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{00891\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ impl::node\_type\_of<value\_type>\ <\ impl::node\_type\_of<T>;}
+\DoxyCodeLine{00892\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00893\ }
+\DoxyCodeLine{00903\ \ \ \ \ \ \ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{typename}\ T>}
+\DoxyCodeLine{00904\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{preprocessor_8h_a930d63cd08b8db4f5d7be9f8ef861c17}{TOML\_PURE\_GETTER}}}
+\DoxyCodeLine{00905\ \ \ \ \ \ \ \ \ \textcolor{keyword}{friend}\ \textcolor{keywordtype}{bool}\ operator<=(\textcolor{keyword}{const}\ \mbox{\hyperlink{classvalue}{value}}\&\ lhs,\ \textcolor{keyword}{const}\ \mbox{\hyperlink{classvalue}{value<T>}}\&\ rhs)\ \textcolor{keyword}{noexcept}}
+\DoxyCodeLine{00906\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00907\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keyword}{constexpr}\ (std::is\_same\_v<value\_type,\ T>)}
+\DoxyCodeLine{00908\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ lhs.val\_\ <=\ rhs.val\_;}
+\DoxyCodeLine{00909\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{00910\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ impl::node\_type\_of<value\_type>\ <=\ impl::node\_type\_of<T>;}
+\DoxyCodeLine{00911\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00912\ }
+\DoxyCodeLine{00922\ \ \ \ \ \ \ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{typename}\ T>}
+\DoxyCodeLine{00923\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{preprocessor_8h_a930d63cd08b8db4f5d7be9f8ef861c17}{TOML\_PURE\_GETTER}}}
+\DoxyCodeLine{00924\ \ \ \ \ \ \ \ \ \textcolor{keyword}{friend}\ \textcolor{keywordtype}{bool}\ operator>(\textcolor{keyword}{const}\ \mbox{\hyperlink{classvalue}{value}}\&\ lhs,\ \textcolor{keyword}{const}\ \mbox{\hyperlink{classvalue}{value<T>}}\&\ rhs)\ \textcolor{keyword}{noexcept}}
+\DoxyCodeLine{00925\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00926\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keyword}{constexpr}\ (std::is\_same\_v<value\_type,\ T>)}
+\DoxyCodeLine{00927\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ lhs.val\_\ >\ rhs.val\_;}
+\DoxyCodeLine{00928\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{00929\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ impl::node\_type\_of<value\_type>\ >\ impl::node\_type\_of<T>;}
+\DoxyCodeLine{00930\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00931\ }
+\DoxyCodeLine{00941\ \ \ \ \ \ \ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{typename}\ T>}
+\DoxyCodeLine{00942\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{preprocessor_8h_a930d63cd08b8db4f5d7be9f8ef861c17}{TOML\_PURE\_GETTER}}}
+\DoxyCodeLine{00943\ \ \ \ \ \ \ \ \ \textcolor{keyword}{friend}\ \textcolor{keywordtype}{bool}\ operator>=(\textcolor{keyword}{const}\ \mbox{\hyperlink{classvalue}{value}}\&\ lhs,\ \textcolor{keyword}{const}\ \mbox{\hyperlink{classvalue}{value<T>}}\&\ rhs)\ \textcolor{keyword}{noexcept}}
+\DoxyCodeLine{00944\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00945\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keyword}{constexpr}\ (std::is\_same\_v<value\_type,\ T>)}
+\DoxyCodeLine{00946\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ lhs.val\_\ >=\ rhs.val\_;}
+\DoxyCodeLine{00947\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{00948\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ impl::node\_type\_of<value\_type>\ >=\ impl::node\_type\_of<T>;}
+\DoxyCodeLine{00949\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00950\ }
+\DoxyCodeLine{00952\ }
+\DoxyCodeLine{00953\ \textcolor{preprocessor}{\#if\ TOML\_ENABLE\_FORMATTERS}}
+\DoxyCodeLine{00954\ }
+\DoxyCodeLine{00958\ \ \ \ \ \ \ \ \ \textcolor{keyword}{friend}\ std::ostream\&\ \mbox{\hyperlink{forward__declarations_8h_ade7e3bc03b39cb3b5684a4c302832e3c}{operator<<}}(std::ostream\&\ lhs,\ \textcolor{keyword}{const}\ \mbox{\hyperlink{classvalue}{value}}\&\ rhs)}
+\DoxyCodeLine{00959\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00960\ \ \ \ \ \ \ \ \ \ \ \ \ impl::print\_to\_stream(lhs,\ rhs);}
+\DoxyCodeLine{00961\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ lhs;}
+\DoxyCodeLine{00962\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00963\ }
+\DoxyCodeLine{00964\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00965\ \ \ \ \ \};}
+\DoxyCodeLine{00966\ }
+\DoxyCodeLine{00968\ }
+\DoxyCodeLine{00969\ \ \ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{typename}\ T>}
+\DoxyCodeLine{00970\ \ \ \ \ \mbox{\hyperlink{classvalue}{value}}(T)\ -\/>\ \mbox{\hyperlink{classvalue}{value<impl::native\_type\_of<impl::remove\_cvref<T>}}>>;}
+\DoxyCodeLine{00971\ }
+\DoxyCodeLine{00972\ \ \ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{typename}\ T>}
+\DoxyCodeLine{00973\ \ \ \ \ \mbox{\hyperlink{preprocessor_8h_a471c97e396823de3fcca2272e3ef1bba}{TOML\_NODISCARD}}}
+\DoxyCodeLine{00974\ \ \ \ \ \textcolor{keyword}{inline}\ \textcolor{keyword}{decltype}(\textcolor{keyword}{auto})\ node::get\_value\_exact()\ \textcolor{keyword}{const}\ \textcolor{keyword}{noexcept}(impl::value\_retrieval\_is\_nothrow<T>)}
+\DoxyCodeLine{00975\ \ \ \ \ \{}
+\DoxyCodeLine{00976\ \ \ \ \ \ \ \ \ \textcolor{keyword}{using\ namespace\ }impl;}
+\DoxyCodeLine{00977\ }
+\DoxyCodeLine{00978\ \ \ \ \ \ \ \ \ \textcolor{keyword}{static\_assert}(node\_type\_of<T>\ !=\ node\_type::none);}
+\DoxyCodeLine{00979\ \ \ \ \ \ \ \ \ \textcolor{keyword}{static\_assert}(node\_type\_of<T>\ !=\ node\_type::table);}
+\DoxyCodeLine{00980\ \ \ \ \ \ \ \ \ \textcolor{keyword}{static\_assert}(node\_type\_of<T>\ !=\ node\_type::array);}
+\DoxyCodeLine{00981\ \ \ \ \ \ \ \ \ \textcolor{keyword}{static\_assert}(is\_native<T>\ ||\ can\_represent\_native<T>);}
+\DoxyCodeLine{00982\ \ \ \ \ \ \ \ \ \textcolor{keyword}{static\_assert}(!is\_cvref<T>);}
+\DoxyCodeLine{00983\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{group__configuration_ga8c407a8f6fe52a795db35be3f00393f8}{TOML\_ASSERT}}(this-\/>\mbox{\hyperlink{_classes_2_gameobj_8h_a890efa53b3d7deeeced6f3a0d6653ed3}{type}}()\ ==\ node\_type\_of<T>);}
+\DoxyCodeLine{00984\ }
+\DoxyCodeLine{00985\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keyword}{constexpr}\ (node\_type\_of<T>\ ==\ node\_type::string)}
+\DoxyCodeLine{00986\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00987\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \textcolor{keyword}{auto}\&\ str\ =\ *ref\_cast<std::string>();}
+\DoxyCodeLine{00988\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keyword}{constexpr}\ (std::is\_same\_v<T,\ std::string>)}
+\DoxyCodeLine{00989\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ str;}
+\DoxyCodeLine{00990\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}\ \textcolor{keywordflow}{if}\ \textcolor{keyword}{constexpr}\ (std::is\_same\_v<T,\ std::string\_view>)}
+\DoxyCodeLine{00991\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ T\{\ str\ \};}
+\DoxyCodeLine{00992\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}\ \textcolor{keywordflow}{if}\ \textcolor{keyword}{constexpr}\ (std::is\_same\_v<T,\ const\ char*>)}
+\DoxyCodeLine{00993\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ str.c\_str();}
+\DoxyCodeLine{00994\ }
+\DoxyCodeLine{00995\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}\ \textcolor{keywordflow}{if}\ \textcolor{keyword}{constexpr}\ (std::is\_same\_v<T,\ std::wstring>)}
+\DoxyCodeLine{00996\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00997\ \textcolor{preprocessor}{\#if\ TOML\_ENABLE\_WINDOWS\_COMPAT}}
+\DoxyCodeLine{00998\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ widen(str);}
+\DoxyCodeLine{00999\ \textcolor{preprocessor}{\#else}}
+\DoxyCodeLine{01000\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{static\_assert}(dependent\_false<T>,\ \textcolor{stringliteral}{"{}Evaluated\ unreachable\ branch!"{}});}
+\DoxyCodeLine{01001\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{01002\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{01003\ }
+\DoxyCodeLine{01004\ \textcolor{preprocessor}{\#if\ TOML\_HAS\_CHAR8}}
+\DoxyCodeLine{01005\ }
+\DoxyCodeLine{01006\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ char\ -\/>\ char8\_t\ (potentially\ unsafe\ -\/\ the\ feature\ is\ 'experimental'!)}}
+\DoxyCodeLine{01007\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}\ \textcolor{keywordflow}{if}\ \textcolor{keyword}{constexpr}\ (is\_one\_of<T,\ std::u8string,\ std::u8string\_view>)}
+\DoxyCodeLine{01008\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ T(\textcolor{keyword}{reinterpret\_cast<}\textcolor{keyword}{const\ }\textcolor{keywordtype}{char8\_t}*\textcolor{keyword}{>}(str.c\_str()),\ str.length());}
+\DoxyCodeLine{01009\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}\ \textcolor{keywordflow}{if}\ \textcolor{keyword}{constexpr}\ (std::is\_same\_v<T,\ const\ char8\_t*>)}
+\DoxyCodeLine{01010\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{reinterpret\_cast<}\textcolor{keyword}{const\ }\textcolor{keywordtype}{char8\_t}*\textcolor{keyword}{>}(str.c\_str());}
+\DoxyCodeLine{01011\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{01012\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{static\_assert}(dependent\_false<T>,\ \textcolor{stringliteral}{"{}Evaluated\ unreachable\ branch!"{}});}
+\DoxyCodeLine{01013\ }
+\DoxyCodeLine{01014\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{01015\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{01016\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{01017\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{static\_cast<}T\textcolor{keyword}{>}(*ref\_cast<native\_type\_of<T>>());}
+\DoxyCodeLine{01018\ \ \ \ \ \}}
+\DoxyCodeLine{01019\ }
+\DoxyCodeLine{01020\ \ \ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{typename}\ T>}
+\DoxyCodeLine{01021\ \ \ \ \ \mbox{\hyperlink{preprocessor_8h_a471c97e396823de3fcca2272e3ef1bba}{TOML\_NODISCARD}}}
+\DoxyCodeLine{01022\ \ \ \ \ \textcolor{keyword}{inline}\ optional<T>\ node::value\_exact()\ \textcolor{keyword}{const}\ \textcolor{keyword}{noexcept}(impl::value\_retrieval\_is\_nothrow<T>)}
+\DoxyCodeLine{01023\ \ \ \ \ \{}
+\DoxyCodeLine{01024\ \ \ \ \ \ \ \ \ \textcolor{keyword}{using\ namespace\ }impl;}
+\DoxyCodeLine{01025\ }
+\DoxyCodeLine{01026\ \ \ \ \ \ \ \ \ \textcolor{keyword}{static\_assert}(!is\_wide\_string<T>\ ||\ \mbox{\hyperlink{group__configuration_ga94867db67c98e0e9d4fbb70690951fbf}{TOML\_ENABLE\_WINDOWS\_COMPAT}},}
+\DoxyCodeLine{01027\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}Retrieving\ values\ as\ wide-\/character\ strings\ with\ node::value\_exact()\ is\ only\ "{}}}
+\DoxyCodeLine{01028\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}supported\ on\ Windows\ with\ TOML\_ENABLE\_WINDOWS\_COMPAT\ enabled."{}});}
+\DoxyCodeLine{01029\ }
+\DoxyCodeLine{01030\ \ \ \ \ \ \ \ \ \textcolor{keyword}{static\_assert}((is\_native<T>\ ||\ can\_represent\_native<T>)\&\&!is\_cvref<T>,}
+\DoxyCodeLine{01031\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{toml_8hpp_af388261a024b7ff38a50bb329d7df32c}{TOML\_SA\_VALUE\_EXACT\_FUNC\_MESSAGE}}(\textcolor{stringliteral}{"{}return\ type\ of\ node::value\_exact()"{}}));}
+\DoxyCodeLine{01032\ }
+\DoxyCodeLine{01033\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ prevent\ additional\ compiler\ error\ spam\ when\ the\ static\_assert\ fails\ by\ gating\ behind\ if\ constexpr}}
+\DoxyCodeLine{01034\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keyword}{constexpr}\ ((is\_native<T>\ ||\ can\_represent\_native<T>)\&\&!is\_cvref<T>)}
+\DoxyCodeLine{01035\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{01036\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{_classes_2_gameobj_8h_a890efa53b3d7deeeced6f3a0d6653ed3}{type}}()\ ==\ node\_type\_of<T>)}
+\DoxyCodeLine{01037\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \{\ this-\/>get\_value\_exact<T>()\ \};}
+\DoxyCodeLine{01038\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{01039\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \{\};}
+\DoxyCodeLine{01040\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{01041\ \ \ \ \ \}}
+\DoxyCodeLine{01042\ }
+\DoxyCodeLine{01043\ \ \ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{typename}\ T>}
+\DoxyCodeLine{01044\ \ \ \ \ \mbox{\hyperlink{preprocessor_8h_a471c97e396823de3fcca2272e3ef1bba}{TOML\_NODISCARD}}}
+\DoxyCodeLine{01045\ \ \ \ \ \textcolor{keyword}{inline}\ optional<T>\ node::value()\ \textcolor{keyword}{const}\ \textcolor{keyword}{noexcept}(impl::value\_retrieval\_is\_nothrow<T>)}
+\DoxyCodeLine{01046\ \ \ \ \ \{}
+\DoxyCodeLine{01047\ \ \ \ \ \ \ \ \ \textcolor{keyword}{using\ namespace\ }impl;}
+\DoxyCodeLine{01048\ }
+\DoxyCodeLine{01049\ \ \ \ \ \ \ \ \ \textcolor{keyword}{static\_assert}(!is\_wide\_string<T>\ ||\ \mbox{\hyperlink{group__configuration_ga94867db67c98e0e9d4fbb70690951fbf}{TOML\_ENABLE\_WINDOWS\_COMPAT}},}
+\DoxyCodeLine{01050\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}Retrieving\ values\ as\ wide-\/character\ strings\ with\ node::value()\ is\ only\ "{}}}
+\DoxyCodeLine{01051\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}supported\ on\ Windows\ with\ TOML\_ENABLE\_WINDOWS\_COMPAT\ enabled."{}});}
+\DoxyCodeLine{01052\ \ \ \ \ \ \ \ \ \textcolor{keyword}{static\_assert}((is\_native<T>\ ||\ can\_represent\_native<T>\ ||\ can\_partially\_represent\_native<T>)\&\&!is\_cvref<T>,}
+\DoxyCodeLine{01053\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{toml_8hpp_acf0e577c1a22db8f0fb3f8120fa3babf}{TOML\_SA\_VALUE\_FUNC\_MESSAGE}}(\textcolor{stringliteral}{"{}return\ type\ of\ node::value()"{}}));}
+\DoxyCodeLine{01054\ }
+\DoxyCodeLine{01055\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ when\ asking\ for\ strings,\ dates,\ times\ and\ date\_times\ there's\ no\ 'fuzzy'\ conversion}}
+\DoxyCodeLine{01056\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ semantics\ to\ be\ mindful\ of\ so\ the\ exact\ retrieval\ is\ enough.}}
+\DoxyCodeLine{01057\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keyword}{constexpr}\ (is\_natively\_one\_of<T,\ std::string,\ time,\ date,\ date\_time>)}
+\DoxyCodeLine{01058\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{01059\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{_classes_2_gameobj_8h_a890efa53b3d7deeeced6f3a0d6653ed3}{type}}()\ ==\ node\_type\_of<T>)}
+\DoxyCodeLine{01060\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \{\ this-\/>get\_value\_exact<T>()\ \};}
+\DoxyCodeLine{01061\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{01062\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \{\};}
+\DoxyCodeLine{01063\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{01064\ }
+\DoxyCodeLine{01065\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ everything\ else\ requires\ a\ bit\ of\ logicking.}}
+\DoxyCodeLine{01066\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{01067\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{01068\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{switch}\ (\mbox{\hyperlink{_classes_2_gameobj_8h_a890efa53b3d7deeeced6f3a0d6653ed3}{type}}())}
+\DoxyCodeLine{01069\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{01070\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ int\ -\/>\ *}}
+\DoxyCodeLine{01071\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ node\_type::integer:}
+\DoxyCodeLine{01072\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{01073\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ int\ -\/>\ int}}
+\DoxyCodeLine{01074\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keyword}{constexpr}\ (is\_natively\_one\_of<T,\ int64\_t>)}
+\DoxyCodeLine{01075\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{01076\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keyword}{constexpr}\ (is\_native<T>\ ||\ can\_represent\_native<T>)}
+\DoxyCodeLine{01077\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{static\_cast<}T\textcolor{keyword}{>}(*ref\_cast<int64\_t>());}
+\DoxyCodeLine{01078\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{01079\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ node\_integer\_cast<T>(*ref\_cast<int64\_t>());}
+\DoxyCodeLine{01080\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{01081\ }
+\DoxyCodeLine{01082\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ int\ -\/>\ float}}
+\DoxyCodeLine{01083\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}\ \textcolor{keywordflow}{if}\ \textcolor{keyword}{constexpr}\ (is\_natively\_one\_of<T,\ double>)}
+\DoxyCodeLine{01084\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{01085\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{_classes_2lib_2external_2glfw_2deps_2vs2008_2stdint_8h_a414156feea104f8f75b4ed9e3121b2f6}{int64\_t}}\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2glad_8h_aa857b95cc76669c2a9109239ef40a47c}{val}}\ =\ *ref\_cast<int64\_t>();}
+\DoxyCodeLine{01086\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keyword}{constexpr}\ (std::numeric\_limits<T>::digits\ <\ 64)}
+\DoxyCodeLine{01087\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{01088\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{constexpr}\ \textcolor{keyword}{auto}\ largest\_whole\_float\ =\ (\mbox{\hyperlink{_classes_2lib_2external_2glfw_2deps_2vs2008_2stdint_8h_a414156feea104f8f75b4ed9e3121b2f6}{int64\_t}}\{\ 1\ \}\ <<\ std::numeric\_limits<T>::digits);}
+\DoxyCodeLine{01089\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (val\ <\ -\/largest\_whole\_float\ ||\ val\ >\ largest\_whole\_float)}
+\DoxyCodeLine{01090\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \{\};}
+\DoxyCodeLine{01091\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{01092\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{static\_cast<}T\textcolor{keyword}{>}(\mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2glad_8h_aa857b95cc76669c2a9109239ef40a47c}{val}});}
+\DoxyCodeLine{01093\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{01094\ }
+\DoxyCodeLine{01095\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ int\ -\/>\ bool}}
+\DoxyCodeLine{01096\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}\ \textcolor{keywordflow}{if}\ \textcolor{keyword}{constexpr}\ (is\_natively\_one\_of<T,\ bool>)}
+\DoxyCodeLine{01097\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{static\_cast<}\textcolor{keywordtype}{bool}\textcolor{keyword}{>}(*ref\_cast<int64\_t>());}
+\DoxyCodeLine{01098\ }
+\DoxyCodeLine{01099\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ int\ -\/>\ anything\ else}}
+\DoxyCodeLine{01100\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{01101\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \{\};}
+\DoxyCodeLine{01102\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{01103\ }
+\DoxyCodeLine{01104\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ float\ -\/>\ *}}
+\DoxyCodeLine{01105\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ node\_type::floating\_point:}
+\DoxyCodeLine{01106\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{01107\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ float\ -\/>\ float}}
+\DoxyCodeLine{01108\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keyword}{constexpr}\ (is\_natively\_one\_of<T,\ double>)}
+\DoxyCodeLine{01109\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{01110\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keyword}{constexpr}\ (is\_native<T>\ ||\ can\_represent\_native<T>)}
+\DoxyCodeLine{01111\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \{\ \textcolor{keyword}{static\_cast<}T\textcolor{keyword}{>}(*ref\_cast<double>())\ \};}
+\DoxyCodeLine{01112\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{01113\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{01114\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \textcolor{keywordtype}{double}\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2glad_8h_aa857b95cc76669c2a9109239ef40a47c}{val}}\ =\ *ref\_cast<double>();}
+\DoxyCodeLine{01115\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (impl::fpclassify(\mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2glad_8h_aa857b95cc76669c2a9109239ef40a47c}{val}})\ ==\ fp\_class::ok}
+\DoxyCodeLine{01116\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \&\&\ (\mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2glad_8h_aa857b95cc76669c2a9109239ef40a47c}{val}}\ <\ (std::numeric\_limits<T>::lowest)()\ ||\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2glad_8h_aa857b95cc76669c2a9109239ef40a47c}{val}}\ >\ (std::numeric\_limits<T>::max)()))}
+\DoxyCodeLine{01117\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \{\};}
+\DoxyCodeLine{01118\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \{\ \textcolor{keyword}{static\_cast<}T\textcolor{keyword}{>}(\mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2glad_8h_aa857b95cc76669c2a9109239ef40a47c}{val}})\ \};}
+\DoxyCodeLine{01119\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{01120\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{01121\ }
+\DoxyCodeLine{01122\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ float\ -\/>\ int}}
+\DoxyCodeLine{01123\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}\ \textcolor{keywordflow}{if}\ \textcolor{keyword}{constexpr}\ (is\_natively\_one\_of<T,\ int64\_t>)}
+\DoxyCodeLine{01124\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{01125\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \textcolor{keywordtype}{double}\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2glad_8h_aa857b95cc76669c2a9109239ef40a47c}{val}}\ =\ *ref\_cast<double>();}
+\DoxyCodeLine{01126\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (impl::fpclassify(\mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2glad_8h_aa857b95cc76669c2a9109239ef40a47c}{val}})\ ==\ fp\_class::ok}
+\DoxyCodeLine{01127\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \&\&\ \textcolor{keyword}{static\_cast<}\textcolor{keywordtype}{double}\textcolor{keyword}{>}(\textcolor{keyword}{static\_cast<}\mbox{\hyperlink{_classes_2lib_2external_2glfw_2deps_2vs2008_2stdint_8h_a414156feea104f8f75b4ed9e3121b2f6}{int64\_t}}\textcolor{keyword}{>}(\mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2glad_8h_aa857b95cc76669c2a9109239ef40a47c}{val}}))\ ==\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2glad_8h_aa857b95cc76669c2a9109239ef40a47c}{val}})}
+\DoxyCodeLine{01128\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ node\_integer\_cast<T>(\textcolor{keyword}{static\_cast<}\mbox{\hyperlink{_classes_2lib_2external_2glfw_2deps_2vs2008_2stdint_8h_a414156feea104f8f75b4ed9e3121b2f6}{int64\_t}}\textcolor{keyword}{>}(\mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2glad_8h_aa857b95cc76669c2a9109239ef40a47c}{val}}));}
+\DoxyCodeLine{01129\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{01130\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \{\};}
+\DoxyCodeLine{01131\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{01132\ }
+\DoxyCodeLine{01133\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ float\ -\/>\ anything\ else}}
+\DoxyCodeLine{01134\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{01135\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \{\};}
+\DoxyCodeLine{01136\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{01137\ }
+\DoxyCodeLine{01138\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ bool\ -\/>\ *}}
+\DoxyCodeLine{01139\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ node\_type::boolean:}
+\DoxyCodeLine{01140\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{01141\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ bool\ -\/>\ bool}}
+\DoxyCodeLine{01142\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keyword}{constexpr}\ (is\_natively\_one\_of<T,\ bool>)}
+\DoxyCodeLine{01143\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \{\ *ref\_cast<bool>()\ \};}
+\DoxyCodeLine{01144\ }
+\DoxyCodeLine{01145\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ bool\ -\/>\ int}}
+\DoxyCodeLine{01146\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}\ \textcolor{keywordflow}{if}\ \textcolor{keyword}{constexpr}\ (is\_natively\_one\_of<T,\ int64\_t>)}
+\DoxyCodeLine{01147\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \{\ \textcolor{keyword}{static\_cast<}T\textcolor{keyword}{>}(*ref\_cast<bool>())\ \};}
+\DoxyCodeLine{01148\ }
+\DoxyCodeLine{01149\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ bool\ -\/>\ anything\ else}}
+\DoxyCodeLine{01150\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{01151\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \{\};}
+\DoxyCodeLine{01152\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{01153\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{01154\ }
+\DoxyCodeLine{01155\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ non-\/values,\ or\ 'exact'\ types\ covered\ above}}
+\DoxyCodeLine{01156\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \{\};}
+\DoxyCodeLine{01157\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{01158\ \ \ \ \ \}}
+\DoxyCodeLine{01159\ }
+\DoxyCodeLine{01160\ \ \ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{typename}\ T>}
+\DoxyCodeLine{01161\ \ \ \ \ \mbox{\hyperlink{preprocessor_8h_a471c97e396823de3fcca2272e3ef1bba}{TOML\_NODISCARD}}}
+\DoxyCodeLine{01162\ \ \ \ \ \textcolor{keyword}{inline}\ \textcolor{keyword}{auto}\ node::value\_or(T\ \&\&\ default\_value)\ \textcolor{keyword}{const}\ \textcolor{keyword}{noexcept}(impl::value\_retrieval\_is\_nothrow<T>)}
+\DoxyCodeLine{01163\ \ \ \ \ \{}
+\DoxyCodeLine{01164\ \ \ \ \ \ \ \ \ \textcolor{keyword}{using\ namespace\ }impl;}
+\DoxyCodeLine{01165\ }
+\DoxyCodeLine{01166\ \ \ \ \ \ \ \ \ \textcolor{keyword}{static\_assert}(!is\_wide\_string<T>\ ||\ \mbox{\hyperlink{group__configuration_ga94867db67c98e0e9d4fbb70690951fbf}{TOML\_ENABLE\_WINDOWS\_COMPAT}},}
+\DoxyCodeLine{01167\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}Retrieving\ values\ as\ wide-\/character\ strings\ with\ node::value\_or()\ is\ only\ "{}}}
+\DoxyCodeLine{01168\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}supported\ on\ Windows\ with\ TOML\_ENABLE\_WINDOWS\_COMPAT\ enabled."{}});}
+\DoxyCodeLine{01169\ }
+\DoxyCodeLine{01170\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keyword}{constexpr}\ (is\_wide\_string<T>)}
+\DoxyCodeLine{01171\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{01172\ \textcolor{preprocessor}{\#if\ TOML\_ENABLE\_WINDOWS\_COMPAT}}
+\DoxyCodeLine{01173\ }
+\DoxyCodeLine{01174\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{_classes_2_gameobj_8h_a890efa53b3d7deeeced6f3a0d6653ed3}{type}}()\ ==\ node\_type::string)}
+\DoxyCodeLine{01175\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ widen(*ref\_cast<std::string>());}
+\DoxyCodeLine{01176\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ std::wstring\{\ \textcolor{keyword}{static\_cast<}T\&\&\textcolor{keyword}{>}(default\_value)\ \};}
+\DoxyCodeLine{01177\ }
+\DoxyCodeLine{01178\ \textcolor{preprocessor}{\#else}}
+\DoxyCodeLine{01179\ }
+\DoxyCodeLine{01180\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{static\_assert}(dependent\_false<T>,\ \textcolor{stringliteral}{"{}Evaluated\ unreachable\ branch!"{}});}
+\DoxyCodeLine{01181\ }
+\DoxyCodeLine{01182\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{01183\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{01184\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{01185\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{01186\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{using\ }value\_type\ =}
+\DoxyCodeLine{01187\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::conditional\_t<std::is\_pointer\_v<std::decay\_t<T>>,}
+\DoxyCodeLine{01188\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::add\_pointer\_t<std::add\_const\_t<std::remove\_pointer\_t<std::decay\_t<T>>>>,}
+\DoxyCodeLine{01189\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::decay\_t<T>>;}
+\DoxyCodeLine{01190\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{using\ }traits\ =\ \mbox{\hyperlink{structvalue__traits}{value\_traits<value\_type>}};}
+\DoxyCodeLine{01191\ }
+\DoxyCodeLine{01192\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ clang-\/format\ off}}
+\DoxyCodeLine{01193\ }
+\DoxyCodeLine{01194\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{static\_assert}(}
+\DoxyCodeLine{01195\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ traits::is\_native\ ||\ traits::can\_represent\_native\ ||\ traits::can\_partially\_represent\_native,}
+\DoxyCodeLine{01196\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}The\ default\ value\ type\ of\ node::value\_or()\ must\ be\ one\ of:"{}}}
+\DoxyCodeLine{01197\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{toml_8hpp_ab05d15b88d3ba47185125777d141c8ec}{TOML\_SA\_LIST\_NEW}}\ \textcolor{stringliteral}{"{}A\ native\ TOML\ value\ type"{}}}
+\DoxyCodeLine{01198\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{toml_8hpp_ae6ef2cd7e6c604e456b4b1bdf6bee613}{TOML\_SA\_NATIVE\_VALUE\_TYPE\_LIST}}}
+\DoxyCodeLine{01199\ }
+\DoxyCodeLine{01200\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{toml_8hpp_ab07dc1dbfccd0160587c260d261092b4}{TOML\_SA\_LIST\_NXT}}\ \textcolor{stringliteral}{"{}A\ non-\/view\ type\ capable\ of\ losslessly\ representing\ a\ native\ TOML\ value\ type"{}}}
+\DoxyCodeLine{01201\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{toml_8hpp_a1b2e4bd27dcda3c068fc0426c754f0b3}{TOML\_SA\_LIST\_BEG}}\ \textcolor{stringliteral}{"{}std::string"{}}}
+\DoxyCodeLine{01202\ \textcolor{preprocessor}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \#if\ TOML\_ENABLE\_WINDOWS\_COMPAT}}
+\DoxyCodeLine{01203\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{toml_8hpp_af44d9f3540fcda73dd543e9146633c31}{TOML\_SA\_LIST\_SEP}}\ \textcolor{stringliteral}{"{}std::wstring"{}}}
+\DoxyCodeLine{01204\ \textcolor{preprocessor}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \#endif}}
+\DoxyCodeLine{01205\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{toml_8hpp_af44d9f3540fcda73dd543e9146633c31}{TOML\_SA\_LIST\_SEP}}\ \textcolor{stringliteral}{"{}any\ signed\ integer\ type\ >=\ 64\ bits"{}}}
+\DoxyCodeLine{01206\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{toml_8hpp_af44d9f3540fcda73dd543e9146633c31}{TOML\_SA\_LIST\_SEP}}\ \textcolor{stringliteral}{"{}any\ floating-\/point\ type\ >=\ 64\ bits"{}}}
+\DoxyCodeLine{01207\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{toml_8hpp_a64f020cb6143b9513bb7aecabcd43b39}{TOML\_SA\_LIST\_END}}}
+\DoxyCodeLine{01208\ }
+\DoxyCodeLine{01209\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{toml_8hpp_ab07dc1dbfccd0160587c260d261092b4}{TOML\_SA\_LIST\_NXT}}\ \textcolor{stringliteral}{"{}A\ non-\/view\ type\ capable\ of\ (reasonably)\ representing\ a\ native\ TOML\ value\ type"{}}}
+\DoxyCodeLine{01210\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{toml_8hpp_a1b2e4bd27dcda3c068fc0426c754f0b3}{TOML\_SA\_LIST\_BEG}}\ \textcolor{stringliteral}{"{}any\ other\ integer\ type"{}}}
+\DoxyCodeLine{01211\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{toml_8hpp_af44d9f3540fcda73dd543e9146633c31}{TOML\_SA\_LIST\_SEP}}\ \textcolor{stringliteral}{"{}any\ floating-\/point\ type"{}}}
+\DoxyCodeLine{01212\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{toml_8hpp_a64f020cb6143b9513bb7aecabcd43b39}{TOML\_SA\_LIST\_END}}}
+\DoxyCodeLine{01213\ }
+\DoxyCodeLine{01214\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{toml_8hpp_ab07dc1dbfccd0160587c260d261092b4}{TOML\_SA\_LIST\_NXT}}\ \textcolor{stringliteral}{"{}A\ compatible\ view\ type"{}}}
+\DoxyCodeLine{01215\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{toml_8hpp_a1b2e4bd27dcda3c068fc0426c754f0b3}{TOML\_SA\_LIST\_BEG}}\ \textcolor{stringliteral}{"{}std::string\_view"{}}}
+\DoxyCodeLine{01216\ \textcolor{preprocessor}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \#if\ TOML\_HAS\_CHAR8}}
+\DoxyCodeLine{01217\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{toml_8hpp_af44d9f3540fcda73dd543e9146633c31}{TOML\_SA\_LIST\_SEP}}\ \textcolor{stringliteral}{"{}std::u8string\_view"{}}}
+\DoxyCodeLine{01218\ \textcolor{preprocessor}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \#endif}}
+\DoxyCodeLine{01219\ \textcolor{preprocessor}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \#if\ TOML\_ENABLE\_WINDOWS\_COMPAT}}
+\DoxyCodeLine{01220\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{toml_8hpp_af44d9f3540fcda73dd543e9146633c31}{TOML\_SA\_LIST\_SEP}}\ \textcolor{stringliteral}{"{}std::wstring\_view"{}}}
+\DoxyCodeLine{01221\ \textcolor{preprocessor}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \#endif}}
+\DoxyCodeLine{01222\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{toml_8hpp_af44d9f3540fcda73dd543e9146633c31}{TOML\_SA\_LIST\_SEP}}\ \textcolor{stringliteral}{"{}const\ char*"{}}}
+\DoxyCodeLine{01223\ \textcolor{preprocessor}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \#if\ TOML\_HAS\_CHAR8}}
+\DoxyCodeLine{01224\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{toml_8hpp_af44d9f3540fcda73dd543e9146633c31}{TOML\_SA\_LIST\_SEP}}\ \textcolor{stringliteral}{"{}const\ char8\_t*"{}}}
+\DoxyCodeLine{01225\ \textcolor{preprocessor}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \#endif}}
+\DoxyCodeLine{01226\ \textcolor{preprocessor}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \#if\ TOML\_ENABLE\_WINDOWS\_COMPAT}}
+\DoxyCodeLine{01227\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{toml_8hpp_af44d9f3540fcda73dd543e9146633c31}{TOML\_SA\_LIST\_SEP}}\ \textcolor{stringliteral}{"{}const\ wchar\_t*"{}}}
+\DoxyCodeLine{01228\ \textcolor{preprocessor}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \#endif}}
+\DoxyCodeLine{01229\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{toml_8hpp_a64f020cb6143b9513bb7aecabcd43b39}{TOML\_SA\_LIST\_END}}}
+\DoxyCodeLine{01230\ \ \ \ \ \ \ \ \ \ \ \ \ );}
+\DoxyCodeLine{01231\ }
+\DoxyCodeLine{01232\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ clang-\/format\ on}}
+\DoxyCodeLine{01233\ }
+\DoxyCodeLine{01234\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ prevent\ additional\ compiler\ error\ spam\ when\ the\ static\_assert\ fails\ by\ gating\ behind\ if\ constexpr}}
+\DoxyCodeLine{01235\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keyword}{constexpr}\ (traits::is\_native\ ||\ traits::can\_represent\_native\ ||\ traits::can\_partially\_represent\_native)}
+\DoxyCodeLine{01236\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{01237\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keyword}{constexpr}\ (traits::is\_native)}
+\DoxyCodeLine{01238\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{01239\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{_classes_2_gameobj_8h_a890efa53b3d7deeeced6f3a0d6653ed3}{type}}()\ ==\ node\_type\_of<value\_type>)}
+\DoxyCodeLine{01240\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ *ref\_cast<typename\ traits::native\_type>();}
+\DoxyCodeLine{01241\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{01242\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\textcolor{keyword}{auto}\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2glad_8h_aa857b95cc76669c2a9109239ef40a47c}{val}}\ =\ this-\/>\mbox{\hyperlink{classvalue}{value<value\_type>}}())}
+\DoxyCodeLine{01243\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ *\mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2glad_8h_aa857b95cc76669c2a9109239ef40a47c}{val}};}
+\DoxyCodeLine{01244\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keyword}{constexpr}\ (std::is\_pointer\_v<value\_type>)}
+\DoxyCodeLine{01245\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ value\_type\{\ default\_value\ \};}
+\DoxyCodeLine{01246\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{01247\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{static\_cast<}T\&\&\textcolor{keyword}{>}(default\_value);}
+\DoxyCodeLine{01248\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{01249\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{01250\ \ \ \ \ \}}
+\DoxyCodeLine{01251\ }
+\DoxyCodeLine{01253\ \}}
+\DoxyCodeLine{01254\ \mbox{\hyperlink{value_8h_afa65688cac47ce86021fef8d739f9fd8}{TOML\_NAMESPACE\_END}};}
+\DoxyCodeLine{01255\ }
+\DoxyCodeLine{01256\ \textcolor{preprocessor}{\#include\ "{}\mbox{\hyperlink{header__end_8h}{header\_end.h}}"{}}}
+
+\end{DoxyCode}

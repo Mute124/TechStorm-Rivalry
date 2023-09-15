@@ -1,0 +1,4 @@
+var structnlohmann_1_1detail_1_1container__input__adapter__factory__impl_1_1container__input__adaptec6d36799bbab06a12576748f72ebcf00 =
+[
+    [ "adapter_type", "structnlohmann_1_1detail_1_1container__input__adapter__factory__impl_1_1container__input__adaptec6d36799bbab06a12576748f72ebcf00.html#aa801458464e2dc726530463d35310abf", null ]
+];

@@ -1,0 +1,26 @@
+var structcgltf__node =
+[
+    [ "camera", "structcgltf__node.html#a622e4ca42152156784a692f420c7c2dc", null ],
+    [ "children", "structcgltf__node.html#a3d1f285bec98ed248a38f782f1085212", null ],
+    [ "children_count", "structcgltf__node.html#a2fe81d1306b66656eec5a16d101cfd01", null ],
+    [ "extensions", "structcgltf__node.html#a679d562334621a357950620cd2c1af5a", null ],
+    [ "extensions_count", "structcgltf__node.html#a9359772c288a079118d84de519ff5706", null ],
+    [ "extras", "structcgltf__node.html#a222a45bd164ae771ed2d632502a5e089", null ],
+    [ "has_matrix", "structcgltf__node.html#aac6335aaa6c7d1b65d4abb2936437fc1", null ],
+    [ "has_mesh_gpu_instancing", "structcgltf__node.html#ad49c3a71ca2d817cf9c90238e71ed082", null ],
+    [ "has_rotation", "structcgltf__node.html#a9c3f6a961f09598647fb7c960a527e0d", null ],
+    [ "has_scale", "structcgltf__node.html#acb9f6c1c00eb14186536cc9989971fa9", null ],
+    [ "has_translation", "structcgltf__node.html#a7ddd2d665a23ea50ec9dae934f4b935d", null ],
+    [ "light", "structcgltf__node.html#ad6c3b2b0ef4643e64900f3947dc86f06", null ],
+    [ "matrix", "structcgltf__node.html#a849881cceaf4f114a8b7cf16237a5b7b", null ],
+    [ "mesh", "structcgltf__node.html#a398398d67304b05ba78b24f427eb3634", null ],
+    [ "mesh_gpu_instancing", "structcgltf__node.html#a03d2fbab6ed14854de31c05af7b409ad", null ],
+    [ "name", "structcgltf__node.html#a6b5b91681d7a18ee032783493ee02ae8", null ],
+    [ "parent", "structcgltf__node.html#a9cc7a2b288d3b50401ef629caf677ac4", null ],
+    [ "rotation", "structcgltf__node.html#a02f2d3e6a7098c49ed7f0e529a6dbf9a", null ],
+    [ "scale", "structcgltf__node.html#a58c122d058c55da58dd9e4bdf8f58cab", null ],
+    [ "skin", "structcgltf__node.html#a041c2a686ab8ec6fa0dea6eefdc100a1", null ],
+    [ "translation", "structcgltf__node.html#ac6c52af86364cf6bba5675ca33028fbd", null ],
+    [ "weights", "structcgltf__node.html#a8cb204906c0a93d2b5c9cb5ecd3c0257", null ],
+    [ "weights_count", "structcgltf__node.html#a360d86a9aa15c74ea3170af2bbffc0a4", null ]
+];

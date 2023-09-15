@@ -1,0 +1,330 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<section xmlns="http://docbook.org/ns/docbook" version="5.0" xmlns:xlink="http://www.w3.org/1999/xlink" xml:id="_md__c_1_2_users_2_h_p_2_documents_2_git_hub_2_minero-_game_2_classes_2lib_2m_i_n_i-master_2_r_e_a_d_m_e" xml:lang="en-US">
+<title>mINI</title>
+<indexterm><primary>mINI</primary></indexterm>
+
+<para><anchor xml:id="_md__c_1_2_users_2_h_p_2_documents_2_git_hub_2_minero-_game_2_classes_2lib_2m_i_n_i-master_2_r_e_a_d_m_e_1autotoc_md676"/> v0.9.14</para>
+<section xml:id="_md__c_1_2_users_2_h_p_2_documents_2_git_hub_2_minero-_game_2_classes_2lib_2m_i_n_i-master_2_r_e_a_d_m_e_1autotoc_md677">
+<title>Info</title>
+
+<para>This is a tiny, header only C++ library for manipulating INI files.</para>
+
+<para>It conforms to the following format:<itemizedlist>
+<listitem>
+<para>section and key names are case insensitive</para>
+</listitem><listitem>
+<para>whitespace around sections, keys and values is ignored</para>
+</listitem><listitem>
+<para>empty section and key names are allowed</para>
+</listitem><listitem>
+<para>keys that do not belong to a section are ignored</para>
+</listitem><listitem>
+<para>comments are lines where the first non-whitespace character is a semicolon (<computeroutput>;</computeroutput>)</para>
+</listitem><listitem>
+<para>trailing comments are allowed on section lines, but not key/value lines</para>
+</listitem><listitem>
+<para>every entry exists on a single line and multiline is not supported</para>
+</listitem></itemizedlist>
+</para>
+
+<para><literallayout><computeroutput>[section]
+key&#32;=&#32;value
+</computeroutput></literallayout></para>
+
+<para>Files are read on demand in one go, after which the data is kept in memory and is ready to be manipulated. Files are closed after read or write operations. This utility supports lazy writing, which only writes changes and updates and preserves custom formatting and comments. A lazy write invoked by a <computeroutput>write()</computeroutput> call will read the output file, find which changes have been made, and update the file accordingly. If you only need to generate files, use <computeroutput>generate()</computeroutput> instead.</para>
+
+<para>Section and key order is preserved on read and write operations. Iterating through data will take the same order as the original file or the order in which keys were added to the structure.</para>
+
+<para>This library operates with the <computeroutput>std::string</computeroutput> type to hold values and relies on your host environment for encoding. It should play nicely with UTF-8 but your mileage may vary.</para>
+</section>
+<section xml:id="_md__c_1_2_users_2_h_p_2_documents_2_git_hub_2_minero-_game_2_classes_2lib_2m_i_n_i-master_2_r_e_a_d_m_e_1autotoc_md678">
+<title>Installation</title>
+
+<para>This is a header-only library. To install it, just copy everything in <computeroutput>/src/</computeroutput> into your own project&apos;s source code folder, or use a custom location and just make sure your compiler sees the additional include directory. Then include the file somewhere in your code:</para>
+
+<para><literallayout><computeroutput>&#32;++
+#include&#32;&quot;mini/ini.h&quot;
+</computeroutput></literallayout></para>
+
+<para>You&apos;re good to go!</para>
+</section>
+<section xml:id="_md__c_1_2_users_2_h_p_2_documents_2_git_hub_2_minero-_game_2_classes_2lib_2m_i_n_i-master_2_r_e_a_d_m_e_1autotoc_md679">
+<title>Basic examples</title>
+<section xml:id="_md__c_1_2_users_2_h_p_2_documents_2_git_hub_2_minero-_game_2_classes_2lib_2m_i_n_i-master_2_r_e_a_d_m_e_1autotoc_md680">
+<title>Reading / writing</title>
+
+<para>Start with an INI file named <computeroutput>myfile.ini</computeroutput>: <literallayout><computeroutput>;&#32;amounts&#32;of&#32;fruits
+[fruits]
+apples=20
+oranges=30
+</computeroutput></literallayout></para>
+
+<para>Our code: <literallayout><computeroutput>&#32;++
+//&#32;first,&#32;create&#32;a&#32;file&#32;instance
+mINI::INIFile&#32;file(&quot;myfile.ini&quot;);
+
+//&#32;next,&#32;create&#32;a&#32;structure&#32;that&#32;will&#32;hold&#32;data
+mINI::INIStructure&#32;ini;
+
+//&#32;now&#32;we&#32;can&#32;read&#32;the&#32;file
+file.read(ini);
+
+//&#32;read&#32;a&#32;value
+std::string&amp;&#32;amountOfApples&#32;=&#32;ini[&quot;fruits&quot;][&quot;apples&quot;];
+
+//&#32;update&#32;a&#32;value
+ini[&quot;fruits&quot;][&quot;oranges&quot;]&#32;=&#32;&quot;50&quot;;
+
+//&#32;add&#32;a&#32;new&#32;entry
+ini[&quot;fruits&quot;][&quot;bananas&quot;]&#32;=&#32;&quot;100&quot;;
+
+//&#32;write&#32;updates&#32;to&#32;file
+file.write(ini);
+</computeroutput></literallayout></para>
+
+<para>After running the code, our INI file now looks like this: <literallayout><computeroutput>;&#32;amounts&#32;of&#32;fruits
+[fruits]
+apples=20
+oranges=50
+bananas=100
+</computeroutput></literallayout></para>
+</section>
+<section xml:id="_md__c_1_2_users_2_h_p_2_documents_2_git_hub_2_minero-_game_2_classes_2lib_2m_i_n_i-master_2_r_e_a_d_m_e_1autotoc_md681">
+<title>Generating a file</title>
+
+<para><literallayout><computeroutput>&#32;++
+//&#32;create&#32;a&#32;file&#32;instance
+mINI::INIFile&#32;file(&quot;myfile.ini&quot;);
+
+//&#32;create&#32;a&#32;data&#32;structure
+mINI::INIStructure&#32;ini;
+
+//&#32;populate&#32;the&#32;structure
+ini[&quot;things&quot;][&quot;chairs&quot;]&#32;=&#32;&quot;20&quot;;
+ini[&quot;things&quot;][&quot;balloons&quot;]&#32;=&#32;&quot;100&quot;;
+
+//&#32;generate&#32;an&#32;INI&#32;file&#32;(overwrites&#32;any&#32;previous&#32;file)
+file.generate(ini);
+</computeroutput></literallayout></para>
+</section>
+</section>
+<section xml:id="_md__c_1_2_users_2_h_p_2_documents_2_git_hub_2_minero-_game_2_classes_2lib_2m_i_n_i-master_2_r_e_a_d_m_e_1autotoc_md682">
+<title>Manipulating files</title>
+
+<para>The <computeroutput>INIFile</computeroutput> class holds the filename and exposes functions for reading, writing and generating INI files. It does not keep the file open but merely provides an abstraction you can use to access physical files.</para>
+
+<para>To create a file instance: <literallayout><computeroutput>&#32;++
+mINI::INIFile&#32;file(&quot;myfile.ini&quot;);
+</computeroutput></literallayout></para>
+
+<para>You will also need a structure you can operate on: <literallayout><computeroutput>&#32;++
+mINI::INIStructure&#32;ini;
+</computeroutput></literallayout></para>
+
+<para>To read from a file: <literallayout><computeroutput>&#32;++
+bool&#32;readSuccess&#32;=&#32;file.read(ini);
+</computeroutput></literallayout></para>
+
+<para>To write back to a file while preserving comments and custom formatting: <literallayout><computeroutput>&#32;++
+bool&#32;writeSuccess&#32;=&#32;file.write(ini);
+</computeroutput></literallayout></para>
+
+<para>You can set the second parameter to <computeroutput>write()</computeroutput> to <computeroutput>true</computeroutput> if you want the file to be written with pretty-print. Pretty-print adds spaces between key-value pairs and blank lines between sections in the output file: <literallayout><computeroutput>&#32;++
+bool&#32;writeSuccess&#32;=&#32;file.write(ini,&#32;true);
+</computeroutput></literallayout></para>
+
+<para>A <computeroutput>write()</computeroutput> call will attempt to preserve any custom formatting the original INI file uses and will only use pretty-print for creation of new keys and sections.</para>
+
+<para>To generate a file: <literallayout><computeroutput>&#32;++
+file.generate(ini);
+</computeroutput></literallayout></para>
+
+<para>Note that <computeroutput>generate()</computeroutput> will overwrite any custom formatting and comments from the original file!</para>
+
+<para>You can use pretty-print with <computeroutput>generate()</computeroutput> as well: <literallayout><computeroutput>&#32;++
+file.generate(ini,&#32;true);
+</computeroutput></literallayout></para>
+
+<para>Example output for a generated INI file <emphasis>without</emphasis> pretty-print: <literallayout><computeroutput>[section1]
+key1=value1
+key2=value2
+[section2]
+key1=value1
+</computeroutput></literallayout></para>
+
+<para>Example output for a generated INI file <emphasis>with</emphasis> pretty-print: <literallayout><computeroutput>[section1]
+key1&#32;=&#32;value1
+key2&#32;=&#32;value2
+
+[section2]
+key1&#32;=&#32;value1
+</computeroutput></literallayout></para>
+</section>
+<section xml:id="_md__c_1_2_users_2_h_p_2_documents_2_git_hub_2_minero-_game_2_classes_2lib_2m_i_n_i-master_2_r_e_a_d_m_e_1autotoc_md683">
+<title>Manipulating data</title>
+<section xml:id="_md__c_1_2_users_2_h_p_2_documents_2_git_hub_2_minero-_game_2_classes_2lib_2m_i_n_i-master_2_r_e_a_d_m_e_1autotoc_md684">
+<title>Reading data</title>
+
+<para>There are two ways to read data from the INI structure. You can either use the <computeroutput>[]</computeroutput> operator or the <computeroutput><link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1afc5e04fa58feb228bb06199ff10caa22">get()</link></computeroutput> function:</para>
+
+<para><literallayout><computeroutput>&#32;++
+//&#32;read&#32;value&#32;-&#32;if&#32;key&#32;or&#32;section&#32;don&apos;t&#32;exist,&#32;they&#32;will&#32;be&#32;created
+//&#32;returns&#32;reference&#32;to&#32;real&#32;value
+std::string&amp;&#32;value&#32;=&#32;ini[&quot;section&quot;][&quot;key&quot;];
+
+//&#32;read&#32;value&#32;safely&#32;-&#32;if&#32;key&#32;or&#32;section&#32;don&apos;t&#32;exist&#32;they&#32;will&#32;NOT&#32;be&#32;created
+//&#32;returns&#32;a&#32;copy
+std::string&#32;value&#32;=&#32;ini.get(&quot;section&quot;).get(&quot;key&quot;);
+</computeroutput></literallayout></para>
+
+<para>The difference between <computeroutput>[]</computeroutput> and <computeroutput><link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1afc5e04fa58feb228bb06199ff10caa22">get()</link></computeroutput> operations is that <computeroutput>[]</computeroutput> returns a reference to <emphasis role="bold">real</emphasis> data (that you may modify) and creates a new item automatically if it does not yet exist, whereas <computeroutput><link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1afc5e04fa58feb228bb06199ff10caa22">get()</link></computeroutput> returns a <emphasis role="bold">copy</emphasis> of the data and does not create new items in the structure. Use <computeroutput>has()</computeroutput> before doing any operations with <computeroutput>[]</computeroutput> if you wish to avoid altering the structure.</para>
+
+<para>You may combine usage of <computeroutput>[]</computeroutput> and <computeroutput><link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1afc5e04fa58feb228bb06199ff10caa22">get()</link></computeroutput>.</para>
+
+<para>Section and key names are case insensitive and are stripped of leading and trailing whitespace. <computeroutput>ini[&quot;section&quot;]</computeroutput> is the same as <computeroutput>ini[&quot;SECTION&quot;]</computeroutput> is the same as <computeroutput>ini[&quot;   sEcTiOn   &quot;]</computeroutput> and so on, and same for keys. Generated files always use lower case for section and key names. Writing to an existing file will preserve letter cases of the original file whenever those keys or sections already exists.</para>
+</section>
+<section xml:id="_md__c_1_2_users_2_h_p_2_documents_2_git_hub_2_minero-_game_2_classes_2lib_2m_i_n_i-master_2_r_e_a_d_m_e_1autotoc_md685">
+<title>Updating data</title>
+
+<para>To set or update a value: <literallayout><computeroutput>&#32;++
+ini[&quot;section&quot;][&quot;key&quot;]&#32;=&#32;&quot;value&quot;;
+</computeroutput></literallayout></para>
+
+<para>Note that when writing to a file, values will be stripped of leading and trailing whitespace . For example, the following value will be converted to just <computeroutput>&quot;c&quot;</computeroutput> when reading back from a file: <computeroutput>ini[&quot;a&quot;][&quot;b&quot;] = &quot;   c   &quot;;</computeroutput></para>
+
+<para>You can set multiple values at once by using <computeroutput><link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1aeff0e04220766bdd67e3a38ffa302e1c">set()</link></computeroutput>: <literallayout><computeroutput>&#32;++
+ini[&quot;section&quot;].set({
+&#32;&#32;&#32;&#32;{&quot;key1&quot;,&#32;&quot;value1&quot;},
+&#32;&#32;&#32;&#32;{&quot;key2&quot;,&#32;&quot;value2&quot;}
+});
+</computeroutput></literallayout></para>
+
+<para>To create an empty section, simply do: <literallayout><computeroutput>&#32;++
+ini[&quot;section&quot;];
+</computeroutput></literallayout></para>
+
+<para>Similarly, to create an empty key: <literallayout><computeroutput>&#32;++
+ini[&quot;section&quot;][&quot;key&quot;];
+</computeroutput></literallayout></para>
+
+<para>To remove a single key from a section: <literallayout><computeroutput>&#32;++
+bool&#32;removeSuccess&#32;=&#32;ini[&quot;section&quot;].remove(&quot;key&quot;);
+</computeroutput></literallayout></para>
+
+<para>To remove a section: <literallayout><computeroutput>&#32;++
+bool&#32;removeSuccess&#32;=&#32;ini.remove(&quot;section&quot;);
+</computeroutput></literallayout></para>
+
+<para>To remove all keys from a section: <literallayout><computeroutput>&#32;++
+ini[&quot;section&quot;].clear();
+</computeroutput></literallayout></para>
+
+<para>To remove all data in structure: <literallayout><computeroutput>&#32;++
+ini.clear();
+</computeroutput></literallayout></para>
+</section>
+<section xml:id="_md__c_1_2_users_2_h_p_2_documents_2_git_hub_2_minero-_game_2_classes_2lib_2m_i_n_i-master_2_r_e_a_d_m_e_1autotoc_md686">
+<title>Other functions</title>
+
+<para>To check if a section is present: <literallayout><computeroutput>&#32;++
+bool&#32;hasSection&#32;=&#32;ini.has(&quot;section&quot;);
+</computeroutput></literallayout></para>
+
+<para>To check if a key within a section is present: <literallayout><computeroutput>&#32;++
+bool&#32;hasKey&#32;=&#32;ini[&quot;section&quot;].has(&quot;key&quot;);
+</computeroutput></literallayout></para>
+
+<para>To get the number of keys in a section: <literallayout><computeroutput>&#32;++
+size_t&#32;n_keys&#32;=&#32;ini[&quot;section&quot;].size();
+</computeroutput></literallayout></para>
+
+<para>To get the number of sections in the structure: <literallayout><computeroutput>&#32;++
+size_t&#32;n_sections&#32;=&#32;ini.size();
+</computeroutput></literallayout></para>
+</section>
+<section xml:id="_md__c_1_2_users_2_h_p_2_documents_2_git_hub_2_minero-_game_2_classes_2lib_2m_i_n_i-master_2_r_e_a_d_m_e_1autotoc_md687">
+<title>Nitty-gritty</title>
+
+<para>Keep in mind that <computeroutput>[]</computeroutput> will always create a new item if the item does not already exist! You can use <computeroutput>has()</computeroutput> to check if an item exists before performing further operations. Remember that <computeroutput><link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1afc5e04fa58feb228bb06199ff10caa22">get()</link></computeroutput> will return a copy of data, so you should <emphasis role="bold">not</emphasis> be doing removes or updates to data with it!</para>
+
+<para>Usage of the <computeroutput>[]</computeroutput> operator shouldn&apos;t be a problem in most real-world cases where you&apos;re doing lookups on known keys and you may not care if empty keys or sections get created. However - if you have a situation where you do not want new items to be added to the structure, either use <computeroutput><link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1afc5e04fa58feb228bb06199ff10caa22">get()</link></computeroutput> to retreive items, or if you don&apos;t want to be working with copies of data, use <computeroutput>has()</computeroutput> before using the <computeroutput>[]</computeroutput> operator if you want to be on the safe side.</para>
+
+<para>Short example that demonstrates safe manipulation of data: <literallayout><computeroutput>&#32;++
+if&#32;(ini.has(&quot;section&quot;))
+{
+&#32;&#32;&#32;&#32;//&#32;we&#32;have&#32;section,&#32;we&#32;can&#32;access&#32;it&#32;safely&#32;without&#32;creating&#32;a&#32;new&#32;one
+&#32;&#32;&#32;&#32;auto&amp;&#32;collection&#32;=&#32;ini[&quot;section&quot;];
+&#32;&#32;&#32;&#32;if&#32;(collection.has(&quot;key&quot;))
+&#32;&#32;&#32;&#32;{
+&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;//&#32;we&#32;have&#32;key,&#32;we&#32;can&#32;access&#32;it&#32;safely&#32;without&#32;creating&#32;a&#32;new&#32;one
+&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;auto&amp;&#32;value&#32;=&#32;collection[&quot;key&quot;];
+&#32;&#32;&#32;&#32;}
+}
+</computeroutput></literallayout></para>
+</section>
+</section>
+<section xml:id="_md__c_1_2_users_2_h_p_2_documents_2_git_hub_2_minero-_game_2_classes_2lib_2m_i_n_i-master_2_r_e_a_d_m_e_1autotoc_md688">
+<title>Iteration</title>
+
+<para>You can traverse the structure in order of insertion. The following example loops through the structure and displays results in a familiar format: <literallayout><computeroutput>&#32;++
+for&#32;(auto&#32;const&amp;&#32;it&#32;:&#32;ini)
+{
+&#32;&#32;&#32;&#32;auto&#32;const&amp;&#32;section&#32;=&#32;it.first;
+&#32;&#32;&#32;&#32;auto&#32;const&amp;&#32;collection&#32;=&#32;it.second;
+&#32;&#32;&#32;&#32;std::cout&#32;&lt;&lt;&#32;&quot;[&quot;&#32;&lt;&lt;&#32;section&#32;&lt;&lt;&#32;&quot;]&quot;&#32;&lt;&lt;&#32;std::endl;
+&#32;&#32;&#32;&#32;for&#32;(auto&#32;const&amp;&#32;it2&#32;:&#32;collection)
+&#32;&#32;&#32;&#32;{
+&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;auto&#32;const&amp;&#32;key&#32;=&#32;it2.first;
+&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;auto&#32;const&amp;&#32;value&#32;=&#32;it2.second;
+&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;std::cout&#32;&lt;&lt;&#32;key&#32;&lt;&lt;&#32;&quot;=&quot;&#32;&lt;&lt;&#32;value&#32;&lt;&lt;&#32;std::endl;
+&#32;&#32;&#32;&#32;}
+}
+</computeroutput></literallayout></para>
+
+<para><computeroutput>it.first</computeroutput> is always <computeroutput>std::string</computeroutput> type.</para>
+
+<para><computeroutput>it.second</computeroutput> is an object which is either a <computeroutput><link linkend="_classm_i_n_i_1_1_i_n_i_map">mINI::INIMap</link></computeroutput> type on the first level or <computeroutput>std::string</computeroutput> type on the second level.</para>
+
+<para>The API only exposes a <computeroutput>const_iterator</computeroutput>, so you can&apos;t use iterators to manipulate data directly. You can however access the structure as normal while iterating:</para>
+
+<para><literallayout><computeroutput>&#32;++
+//&#32;change&#32;all&#32;values&#32;in&#32;the&#32;structure&#32;to&#32;&quot;banana&quot;
+for&#32;(auto&#32;const&amp;&#32;it&#32;:&#32;ini)
+{
+&#32;&#32;&#32;&#32;auto&#32;const&amp;&#32;section&#32;=&#32;it.first;
+&#32;&#32;&#32;&#32;auto&#32;const&amp;&#32;collection&#32;=&#32;it.second;
+&#32;&#32;&#32;&#32;for&#32;(auto&#32;const&amp;&#32;it2&#32;:&#32;collection)
+&#32;&#32;&#32;&#32;{
+&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;auto&#32;const&amp;&#32;key&#32;=&#32;it2.first;
+&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;ini[section][key]&#32;=&#32;&quot;banana&quot;;
+&#32;&#32;&#32;&#32;}
+}
+</computeroutput></literallayout></para>
+</section>
+<section xml:id="_md__c_1_2_users_2_h_p_2_documents_2_git_hub_2_minero-_game_2_classes_2lib_2m_i_n_i-master_2_r_e_a_d_m_e_1autotoc_md689">
+<title>Case sensitivity</title>
+
+<para>If you wish to make the library not ignore letter case, add the directive <computeroutput>#define MINI_CASE_SENSITIVE</computeroutput> <emphasis role="bold">before</emphasis> including the library: <literallayout><computeroutput>&#32;++
+#define&#32;MINI_CASE_SENSITIVE
+#include&#32;&quot;mini/ini.h&quot;
+</computeroutput></literallayout></para>
+
+<para>This will affect reading and writing from files and access to the structure.</para>
+</section>
+<section xml:id="_md__c_1_2_users_2_h_p_2_documents_2_git_hub_2_minero-_game_2_classes_2lib_2m_i_n_i-master_2_r_e_a_d_m_e_1autotoc_md690">
+<title>Thanks</title>
+
+<para><itemizedlist>
+<listitem>
+<para><link xlink:href="https://github.com/martinmoene/lest">lest</link> - testing framework</para>
+</listitem></itemizedlist>
+</para>
+</section>
+<section xml:id="_md__c_1_2_users_2_h_p_2_documents_2_git_hub_2_minero-_game_2_classes_2lib_2m_i_n_i-master_2_r_e_a_d_m_e_1autotoc_md691">
+<title>License</title>
+
+<para>Copyright (c) 2018 Danijel Durakovic</para>
+
+<para>MIT License </para>
+</section>
+</section>

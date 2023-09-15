@@ -1,0 +1,1484 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<section xmlns="http://docbook.org/ns/docbook" version="5.0" xmlns:xlink="http://www.w3.org/1999/xlink" xml:id="_lib_2include_2c_09_09_2tr1_2random_8h_source" xml:lang="en-US">
+<title>random.h</title>
+<indexterm><primary>C:/Users/HP/Documents/GitHub/Minero-Game/lib/include/c++/tr1/random.h</primary></indexterm>
+Go to the documentation of this file.<programlisting linenumbering="unnumbered">1 <emphasis role="comment">//&#32;random&#32;number&#32;generation&#32;-*-&#32;C++&#32;-*-</emphasis>
+2 
+3 <emphasis role="comment">//&#32;Copyright&#32;(C)&#32;2009-2022&#32;Free&#32;Software&#32;Foundation,&#32;Inc.</emphasis>
+4 <emphasis role="comment">//</emphasis>
+5 <emphasis role="comment">//&#32;This&#32;file&#32;is&#32;part&#32;of&#32;the&#32;GNU&#32;ISO&#32;C++&#32;Library.&#32;&#32;This&#32;library&#32;is&#32;free</emphasis>
+6 <emphasis role="comment">//&#32;software;&#32;you&#32;can&#32;redistribute&#32;it&#32;and/or&#32;modify&#32;it&#32;under&#32;the</emphasis>
+7 <emphasis role="comment">//&#32;terms&#32;of&#32;the&#32;GNU&#32;General&#32;Public&#32;License&#32;as&#32;published&#32;by&#32;the</emphasis>
+8 <emphasis role="comment">//&#32;Free&#32;Software&#32;Foundation;&#32;either&#32;version&#32;3,&#32;or&#32;(at&#32;your&#32;option)</emphasis>
+9 <emphasis role="comment">//&#32;any&#32;later&#32;version.</emphasis>
+10 
+11 <emphasis role="comment">//&#32;This&#32;library&#32;is&#32;distributed&#32;in&#32;the&#32;hope&#32;that&#32;it&#32;will&#32;be&#32;useful,</emphasis>
+12 <emphasis role="comment">//&#32;but&#32;WITHOUT&#32;ANY&#32;WARRANTY;&#32;without&#32;even&#32;the&#32;implied&#32;warranty&#32;of</emphasis>
+13 <emphasis role="comment">//&#32;MERCHANTABILITY&#32;or&#32;FITNESS&#32;FOR&#32;A&#32;PARTICULAR&#32;PURPOSE.&#32;&#32;See&#32;the</emphasis>
+14 <emphasis role="comment">//&#32;GNU&#32;General&#32;Public&#32;License&#32;for&#32;more&#32;details.</emphasis>
+15 
+16 <emphasis role="comment">//&#32;Under&#32;Section&#32;7&#32;of&#32;GPL&#32;version&#32;3,&#32;you&#32;are&#32;granted&#32;additional</emphasis>
+17 <emphasis role="comment">//&#32;permissions&#32;described&#32;in&#32;the&#32;GCC&#32;Runtime&#32;Library&#32;Exception,&#32;version</emphasis>
+18 <emphasis role="comment">//&#32;3.1,&#32;as&#32;published&#32;by&#32;the&#32;Free&#32;Software&#32;Foundation.</emphasis>
+19 
+20 <emphasis role="comment">//&#32;You&#32;should&#32;have&#32;received&#32;a&#32;copy&#32;of&#32;the&#32;GNU&#32;General&#32;Public&#32;License&#32;and</emphasis>
+21 <emphasis role="comment">//&#32;a&#32;copy&#32;of&#32;the&#32;GCC&#32;Runtime&#32;Library&#32;Exception&#32;along&#32;with&#32;this&#32;program;</emphasis>
+22 <emphasis role="comment">//&#32;see&#32;the&#32;files&#32;COPYING3&#32;and&#32;COPYING.RUNTIME&#32;respectively.&#32;&#32;If&#32;not,&#32;see</emphasis>
+23 <emphasis role="comment">//&#32;&lt;http://www.gnu.org/licenses/&gt;.</emphasis>
+24 
+31 <emphasis role="preprocessor">#ifndef&#32;_GLIBCXX_TR1_RANDOM_H</emphasis>
+32 <emphasis role="preprocessor">#define&#32;_GLIBCXX_TR1_RANDOM_H&#32;1</emphasis>
+33 
+34 <emphasis role="preprocessor">#pragma&#32;GCC&#32;system_header</emphasis>
+35 
+36 <emphasis role="keyword">namespace&#32;</emphasis><link linkend="_namespacestd">std</link>&#32;<link linkend="__classes_2lib_2include_2c_09_09_2x86__64-w64-mingw32_2bits_2c_09_09config_8h_1a44377df0d3503f0b3d9ab316dd8ddf8b">_GLIBCXX_VISIBILITY</link>(default)
+37 {
+38 _GLIBCXX_BEGIN_NAMESPACE_VERSION
+39 
+40 <emphasis role="keyword">namespace&#32;</emphasis>tr1
+41 {
+42 &#32;&#32;<emphasis role="comment">//&#32;[5.1]&#32;Random&#32;number&#32;generation</emphasis>
+43 
+50 &#32;&#32;<emphasis role="comment">/*</emphasis>
+51 <emphasis role="comment">&#32;&#32;&#32;*&#32;Implementation-space&#32;details.</emphasis>
+52 <emphasis role="comment">&#32;&#32;&#32;*/</emphasis>
+53 &#32;&#32;<emphasis role="keyword">namespace&#32;</emphasis>__detail
+54 &#32;&#32;{
+55 &#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_UIntType,&#32;<emphasis role="keywordtype">int</emphasis>&#32;__w,&#32;
+56 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">bool</emphasis>&#32;=&#32;__w&#32;&lt;&#32;std::numeric_limits&lt;_UIntType&gt;::digits&gt;
+57 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">struct&#32;</emphasis>_Shift
+58 &#32;&#32;&#32;&#32;&#32;&#32;{&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keyword">const</emphasis>&#32;_UIntType&#32;__value&#32;=&#32;0;&#32;};
+59 
+60 &#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_UIntType,&#32;<emphasis role="keywordtype">int</emphasis>&#32;__w&gt;
+61 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">struct&#32;</emphasis>_Shift&lt;_UIntType,&#32;__w,&#32;<link linkend="__classes_2lib_2include_2stdbool_8h_1a41f9c5fb8b08eb5dc3edce4dcb37fee7">true</link>&gt;
+62 &#32;&#32;&#32;&#32;&#32;&#32;{&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keyword">const</emphasis>&#32;_UIntType&#32;__value&#32;=&#32;_UIntType(1)&#32;&lt;&lt;&#32;__w;&#32;};
+63 
+64 &#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp,&#32;_Tp&#32;__a,&#32;_Tp&#32;__c,&#32;_Tp&#32;__m,&#32;<emphasis role="keywordtype">bool</emphasis>&gt;
+65 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">struct&#32;</emphasis>_Mod;
+66 
+67 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Dispatch&#32;based&#32;on&#32;modulus&#32;value&#32;to&#32;prevent&#32;divide-by-zero&#32;compile-time</emphasis>
+68 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;errors&#32;when&#32;m&#32;==&#32;0.</emphasis>
+69 &#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp,&#32;_Tp&#32;__a,&#32;_Tp&#32;__c,&#32;_Tp&#32;__m&gt;
+70 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;_Tp
+71 &#32;&#32;&#32;&#32;&#32;&#32;__mod(_Tp&#32;__x)
+72 &#32;&#32;&#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;_Mod&lt;_Tp,&#32;__a,&#32;__c,&#32;__m,&#32;__m&#32;==&#32;0&gt;::__calc(__x);&#32;}
+73 
+74 &#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;__gnu_cxx::__conditional_type&lt;(<emphasis role="keyword">sizeof</emphasis>(unsigned)&#32;==&#32;4),
+75 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;unsigned,&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">long</emphasis>&gt;::__type&#32;_UInt32Type;
+76 
+77 &#32;&#32;&#32;&#32;<emphasis role="comment">/*</emphasis>
+78 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;*&#32;An&#32;adaptor&#32;class&#32;for&#32;converting&#32;the&#32;output&#32;of&#32;any&#32;Generator&#32;into</emphasis>
+79 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;*&#32;the&#32;input&#32;for&#32;a&#32;specific&#32;Distribution.</emphasis>
+80 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;*/</emphasis>
+81 &#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Engine,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Distribution&gt;
+82 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">struct&#32;</emphasis>_Adaptor
+83 &#32;&#32;&#32;&#32;&#32;&#32;{&#32;
+84 &#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">typename</emphasis>&#32;remove_reference&lt;_Engine&gt;::type&#32;_BEngine;
+85 &#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">typename</emphasis>&#32;_BEngine::result_type&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_Engine_result_type;
+86 &#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">typename</emphasis>&#32;_Distribution::input_type&#32;&#32;&#32;&#32;&#32;&#32;&#32;result_type;
+87 
+88 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">public</emphasis>:
+89 &#32;&#32;&#32;&#32;_Adaptor(<emphasis role="keyword">const</emphasis>&#32;_Engine&amp;&#32;__g)
+90 &#32;&#32;&#32;&#32;:&#32;_M_g(__g)&#32;{&#32;}
+91 
+92 &#32;&#32;&#32;&#32;result_type
+93 &#32;&#32;&#32;&#32;<link linkend="_toml_8hpp_1aef6fbc596e7e69a80f14c34a2b786a14">min</link>()<emphasis role="keyword">&#32;const</emphasis>
+94 <emphasis role="keyword">&#32;&#32;&#32;&#32;</emphasis>{
+95 &#32;&#32;&#32;&#32;&#32;&#32;result_type&#32;__return_value;
+96 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(is_integral&lt;_Engine_result_type&gt;::value
+97 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&amp;&amp;&#32;is_integral&lt;result_type&gt;::value)
+98 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__return_value&#32;=&#32;_M_g.min();
+99 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>
+100 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__return_value&#32;=&#32;result_type(0);
+101 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__return_value;
+102 &#32;&#32;&#32;&#32;}
+103 
+104 &#32;&#32;&#32;&#32;result_type
+105 &#32;&#32;&#32;&#32;<link linkend="_group__core__func__common_1gae02d42887fc5570451f880e3c624b9ac">max</link>()<emphasis role="keyword">&#32;const</emphasis>
+106 <emphasis role="keyword">&#32;&#32;&#32;&#32;</emphasis>{
+107 &#32;&#32;&#32;&#32;&#32;&#32;result_type&#32;__return_value;
+108 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(is_integral&lt;_Engine_result_type&gt;::value
+109 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&amp;&amp;&#32;is_integral&lt;result_type&gt;::value)
+110 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__return_value&#32;=&#32;_M_g.max();
+111 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>&#32;<emphasis role="keywordflow">if</emphasis>&#32;(!is_integral&lt;result_type&gt;::value)
+112 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__return_value&#32;=&#32;result_type(1);
+113 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>
+114 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__return_value&#32;=&#32;std::numeric_limits&lt;result_type&gt;::max()&#32;-&#32;1;
+115 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__return_value;
+116 &#32;&#32;&#32;&#32;}
+117 
+118 &#32;&#32;&#32;&#32;<emphasis role="comment">/*</emphasis>
+119 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;*&#32;Converts&#32;a&#32;value&#32;generated&#32;by&#32;the&#32;adapted&#32;random&#32;number&#32;generator</emphasis>
+120 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;*&#32;into&#32;a&#32;value&#32;in&#32;the&#32;input&#32;domain&#32;for&#32;the&#32;dependent&#32;random&#32;number</emphasis>
+121 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;*&#32;distribution.</emphasis>
+122 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;*</emphasis>
+123 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;*&#32;Because&#32;the&#32;type&#32;traits&#32;are&#32;compile&#32;time&#32;constants&#32;only&#32;the</emphasis>
+124 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;*&#32;appropriate&#32;clause&#32;of&#32;the&#32;if&#32;statements&#32;will&#32;actually&#32;be&#32;emitted</emphasis>
+125 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;*&#32;by&#32;the&#32;compiler.</emphasis>
+126 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;*/</emphasis>
+127 &#32;&#32;&#32;&#32;result_type
+128 &#32;&#32;&#32;&#32;operator()()
+129 &#32;&#32;&#32;&#32;{
+130 &#32;&#32;&#32;&#32;&#32;&#32;result_type&#32;__return_value;
+131 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(is_integral&lt;_Engine_result_type&gt;::value
+132 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&amp;&amp;&#32;is_integral&lt;result_type&gt;::value)
+133 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__return_value&#32;=&#32;_M_g();
+134 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>&#32;<emphasis role="keywordflow">if</emphasis>&#32;(!is_integral&lt;_Engine_result_type&gt;::value
+135 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&amp;&amp;&#32;!is_integral&lt;result_type&gt;::value)
+136 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__return_value&#32;=&#32;result_type(_M_g()&#32;-&#32;_M_g.min())
+137 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;/&#32;result_type(_M_g.max()&#32;-&#32;_M_g.min());
+138 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>&#32;<emphasis role="keywordflow">if</emphasis>&#32;(is_integral&lt;_Engine_result_type&gt;::value
+139 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&amp;&amp;&#32;!is_integral&lt;result_type&gt;::value)
+140 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__return_value&#32;=&#32;result_type(_M_g()&#32;-&#32;_M_g.min())
+141 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;/&#32;result_type(_M_g.max()&#32;-&#32;_M_g.min()&#32;+&#32;result_type(1));
+142 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>
+143 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__return_value&#32;=&#32;(((_M_g()&#32;-&#32;_M_g.min())&#32;
+144 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;/&#32;(_M_g.max()&#32;-&#32;_M_g.min()))
+145 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;*&#32;std::numeric_limits&lt;result_type&gt;::max());
+146 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__return_value;
+147 &#32;&#32;&#32;&#32;}
+148 
+149 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">private</emphasis>:
+150 &#32;&#32;&#32;&#32;_Engine&#32;_M_g;
+151 &#32;&#32;&#32;&#32;&#32;&#32;};
+152 
+153 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Specialization&#32;for&#32;_Engine*.</emphasis>
+154 &#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Engine,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Distribution&gt;
+155 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">struct&#32;</emphasis>_Adaptor&lt;_Engine*,&#32;_Distribution&gt;
+156 &#32;&#32;&#32;&#32;&#32;&#32;{
+157 &#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">typename</emphasis>&#32;_Engine::result_type&#32;&#32;&#32;&#32;&#32;&#32;_Engine_result_type;
+158 &#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">typename</emphasis>&#32;_Distribution::input_type&#32;result_type;
+159 
+160 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">public</emphasis>:
+161 &#32;&#32;&#32;&#32;_Adaptor(_Engine*&#32;__g)
+162 &#32;&#32;&#32;&#32;:&#32;_M_g(__g)&#32;{&#32;}
+163 
+164 &#32;&#32;&#32;&#32;result_type
+165 &#32;&#32;&#32;&#32;<link linkend="_toml_8hpp_1aef6fbc596e7e69a80f14c34a2b786a14">min</link>()<emphasis role="keyword">&#32;const</emphasis>
+166 <emphasis role="keyword">&#32;&#32;&#32;&#32;</emphasis>{
+167 &#32;&#32;&#32;&#32;&#32;&#32;result_type&#32;__return_value;
+168 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(is_integral&lt;_Engine_result_type&gt;::value
+169 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&amp;&amp;&#32;is_integral&lt;result_type&gt;::value)
+170 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__return_value&#32;=&#32;_M_g-&gt;min();
+171 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>
+172 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__return_value&#32;=&#32;result_type(0);
+173 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__return_value;
+174 &#32;&#32;&#32;&#32;}
+175 
+176 &#32;&#32;&#32;&#32;result_type
+177 &#32;&#32;&#32;&#32;<link linkend="_group__core__func__common_1gae02d42887fc5570451f880e3c624b9ac">max</link>()<emphasis role="keyword">&#32;const</emphasis>
+178 <emphasis role="keyword">&#32;&#32;&#32;&#32;</emphasis>{
+179 &#32;&#32;&#32;&#32;&#32;&#32;result_type&#32;__return_value;
+180 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(is_integral&lt;_Engine_result_type&gt;::value
+181 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&amp;&amp;&#32;is_integral&lt;result_type&gt;::value)
+182 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__return_value&#32;=&#32;_M_g-&gt;max();
+183 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>&#32;<emphasis role="keywordflow">if</emphasis>&#32;(!is_integral&lt;result_type&gt;::value)
+184 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__return_value&#32;=&#32;result_type(1);
+185 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>
+186 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__return_value&#32;=&#32;std::numeric_limits&lt;result_type&gt;::max()&#32;-&#32;1;
+187 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__return_value;
+188 &#32;&#32;&#32;&#32;}
+189 
+190 &#32;&#32;&#32;&#32;result_type
+191 &#32;&#32;&#32;&#32;operator()()
+192 &#32;&#32;&#32;&#32;{
+193 &#32;&#32;&#32;&#32;&#32;&#32;result_type&#32;__return_value;
+194 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(is_integral&lt;_Engine_result_type&gt;::value
+195 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&amp;&amp;&#32;is_integral&lt;result_type&gt;::value)
+196 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__return_value&#32;=&#32;(*_M_g)();
+197 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>&#32;<emphasis role="keywordflow">if</emphasis>&#32;(!is_integral&lt;_Engine_result_type&gt;::value
+198 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&amp;&amp;&#32;!is_integral&lt;result_type&gt;::value)
+199 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__return_value&#32;=&#32;result_type((*_M_g)()&#32;-&#32;_M_g-&gt;min())
+200 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;/&#32;result_type(_M_g-&gt;max()&#32;-&#32;_M_g-&gt;min());
+201 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>&#32;<emphasis role="keywordflow">if</emphasis>&#32;(is_integral&lt;_Engine_result_type&gt;::value
+202 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&amp;&amp;&#32;!is_integral&lt;result_type&gt;::value)
+203 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__return_value&#32;=&#32;result_type((*_M_g)()&#32;-&#32;_M_g-&gt;min())
+204 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;/&#32;result_type(_M_g-&gt;max()&#32;-&#32;_M_g-&gt;min()&#32;+&#32;result_type(1));
+205 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>
+206 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__return_value&#32;=&#32;((((*_M_g)()&#32;-&#32;_M_g-&gt;min())&#32;
+207 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;/&#32;(_M_g-&gt;max()&#32;-&#32;_M_g-&gt;min()))
+208 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;*&#32;std::numeric_limits&lt;result_type&gt;::max());
+209 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__return_value;
+210 &#32;&#32;&#32;&#32;}
+211 
+212 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">private</emphasis>:
+213 &#32;&#32;&#32;&#32;_Engine*&#32;_M_g;
+214 &#32;&#32;&#32;&#32;&#32;&#32;};
+215 &#32;&#32;}&#32;<emphasis role="comment">//&#32;namespace&#32;__detail</emphasis>
+216 
+223 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Engine,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Dist&gt;
+224 &#32;&#32;&#32;&#32;<emphasis role="keyword">class&#32;</emphasis>variate_generator
+225 &#32;&#32;&#32;&#32;{
+226 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Concept&#32;requirements.</emphasis>
+227 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2bits_2concept__check_8h_1ae4dc1beb74b88e6b1215e05c397fc7a2">__glibcxx_class_requires</link>(_Engine,&#32;_CopyConstructibleConcept)
+228 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;&#32;__glibcxx_class_requires(_Engine,&#32;_EngineConcept)</emphasis>
+229 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;&#32;__glibcxx_class_requires(_Dist,&#32;_EngineConcept)</emphasis>
+230 
+231 &#32;&#32;&#32;&#32;<emphasis role="keyword">public</emphasis>:
+232 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;_Engine&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;engine_type;
+233 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;__detail::_Adaptor&lt;_Engine,&#32;_Dist&gt;&#32;&#32;&#32;&#32;&#32;engine_value_type;
+234 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;_Dist&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;distribution_type;
+235 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">typename</emphasis>&#32;_Dist::result_type&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;result_type;
+236 
+237 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;tr1:5.1.1&#32;table&#32;5.1&#32;requirement</emphasis>
+238 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">typename</emphasis>&#32;__gnu_cxx::__enable_if&lt;
+239 &#32;&#32;&#32;&#32;is_arithmetic&lt;result_type&gt;::value,&#32;result_type&gt;::__type&#32;_IsValidType;
+240 
+248 &#32;&#32;&#32;&#32;&#32;&#32;variate_generator(engine_type&#32;__eng,&#32;distribution_type&#32;__dist)
+249 &#32;&#32;&#32;&#32;&#32;&#32;:&#32;_M_engine(__eng),&#32;_M_dist(__dist)&#32;{&#32;}
+250 
+254 &#32;&#32;&#32;&#32;&#32;&#32;result_type
+255 &#32;&#32;&#32;&#32;&#32;&#32;operator()()
+256 &#32;&#32;&#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;_M_dist(_M_engine);&#32;}
+257 
+261 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+262 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;result_type
+263 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;operator()(_Tp&#32;__value)
+264 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;_M_dist(_M_engine,&#32;__value);&#32;}
+265 
+270 &#32;&#32;&#32;&#32;&#32;&#32;engine_value_type&amp;
+271 &#32;&#32;&#32;&#32;&#32;&#32;engine()
+272 &#32;&#32;&#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;_M_engine;&#32;}
+273 
+278 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;engine_value_type&amp;
+279 &#32;&#32;&#32;&#32;&#32;&#32;engine()<emphasis role="keyword">&#32;const</emphasis>
+280 <emphasis role="keyword">&#32;&#32;&#32;&#32;&#32;&#32;</emphasis>{&#32;<emphasis role="keywordflow">return</emphasis>&#32;_M_engine;&#32;}
+281 
+285 &#32;&#32;&#32;&#32;&#32;&#32;distribution_type&amp;
+286 &#32;&#32;&#32;&#32;&#32;&#32;distribution()
+287 &#32;&#32;&#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;_M_dist;&#32;}
+288 
+292 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;distribution_type&amp;
+293 &#32;&#32;&#32;&#32;&#32;&#32;distribution()<emphasis role="keyword">&#32;const</emphasis>
+294 <emphasis role="keyword">&#32;&#32;&#32;&#32;&#32;&#32;</emphasis>{&#32;<emphasis role="keywordflow">return</emphasis>&#32;_M_dist;&#32;}
+295 
+299 &#32;&#32;&#32;&#32;&#32;&#32;result_type
+300 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_toml_8hpp_1aef6fbc596e7e69a80f14c34a2b786a14">min</link>()<emphasis role="keyword">&#32;const</emphasis>
+301 <emphasis role="keyword">&#32;&#32;&#32;&#32;&#32;&#32;</emphasis>{&#32;<emphasis role="keywordflow">return</emphasis>&#32;this-&gt;distribution().min();&#32;}
+302 
+306 &#32;&#32;&#32;&#32;&#32;&#32;result_type
+307 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_group__core__func__common_1gae02d42887fc5570451f880e3c624b9ac">max</link>()<emphasis role="keyword">&#32;const</emphasis>
+308 <emphasis role="keyword">&#32;&#32;&#32;&#32;&#32;&#32;</emphasis>{&#32;<emphasis role="keywordflow">return</emphasis>&#32;this-&gt;distribution().max();&#32;}
+309 
+310 &#32;&#32;&#32;&#32;<emphasis role="keyword">private</emphasis>:
+311 &#32;&#32;&#32;&#32;&#32;&#32;engine_value_type&#32;_M_engine;
+312 &#32;&#32;&#32;&#32;&#32;&#32;distribution_type&#32;_M_dist;
+313 &#32;&#32;&#32;&#32;};
+314 
+315 
+351 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">class</emphasis>&#32;_UIntType,&#32;_UIntType&#32;__a,&#32;_UIntType&#32;__c,&#32;_UIntType&#32;__m&gt;
+352 &#32;&#32;&#32;&#32;<emphasis role="keyword">class&#32;</emphasis>linear_congruential
+353 &#32;&#32;&#32;&#32;{
+354 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2bits_2concept__check_8h_1ae4dc1beb74b88e6b1215e05c397fc7a2">__glibcxx_class_requires</link>(_UIntType,&#32;_UnsignedIntegerConcept)
+355 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;&#32;__glibcpp_class_requires(__a&#32;&lt;&#32;__m&#32;&amp;&amp;&#32;__c&#32;&lt;&#32;__m)</emphasis>
+356 
+357 &#32;&#32;&#32;&#32;<emphasis role="keyword">public</emphasis>:
+359 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;_UIntType&#32;result_type;
+360 
+362 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keyword">const</emphasis>&#32;_UIntType&#32;multiplier&#32;=&#32;__a;
+364 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keyword">const</emphasis>&#32;_UIntType&#32;increment&#32;=&#32;__c;
+366 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keyword">const</emphasis>&#32;_UIntType&#32;modulus&#32;=&#32;__m;
+367 
+374 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">explicit</emphasis>
+375 &#32;&#32;&#32;&#32;&#32;&#32;linear_congruential(<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">long</emphasis>&#32;__x0&#32;=&#32;1)
+376 &#32;&#32;&#32;&#32;&#32;&#32;{&#32;this-&gt;<link linkend="_namespacelest_1a9e3785d770073a52c90f475365f49542">seed</link>(__x0);&#32;}
+377 
+384 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">class</emphasis>&#32;_Gen&gt;
+385 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;linear_congruential(_Gen&amp;&#32;__g)
+386 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{&#32;this-&gt;<link linkend="_namespacelest_1a9e3785d770073a52c90f475365f49542">seed</link>(__g);&#32;}
+387 
+394 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+395 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_namespacelest_1a9e3785d770073a52c90f475365f49542">seed</link>(<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">long</emphasis>&#32;__s&#32;=&#32;1);
+396 
+403 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">class</emphasis>&#32;_Gen&gt;
+404 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+405 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_namespacelest_1a9e3785d770073a52c90f475365f49542">seed</link>(_Gen&amp;&#32;__g)
+406 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{&#32;<link linkend="_namespacelest_1a9e3785d770073a52c90f475365f49542">seed</link>(__g,&#32;<emphasis role="keyword">typename</emphasis>&#32;is_fundamental&lt;_Gen&gt;::type());&#32;}
+407 
+414 &#32;&#32;&#32;&#32;&#32;&#32;result_type
+415 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_toml_8hpp_1aef6fbc596e7e69a80f14c34a2b786a14">min</link>()<emphasis role="keyword">&#32;const</emphasis>
+416 <emphasis role="keyword">&#32;&#32;&#32;&#32;&#32;&#32;</emphasis>{&#32;<emphasis role="keywordflow">return</emphasis>&#32;(__detail::__mod&lt;_UIntType,&#32;1,&#32;0,&#32;__m&gt;(__c)&#32;==&#32;0)&#32;?&#32;1&#32;:&#32;0;&#32;}
+417 
+421 &#32;&#32;&#32;&#32;&#32;&#32;result_type
+422 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_group__core__func__common_1gae02d42887fc5570451f880e3c624b9ac">max</link>()<emphasis role="keyword">&#32;const</emphasis>
+423 <emphasis role="keyword">&#32;&#32;&#32;&#32;&#32;&#32;</emphasis>{&#32;<emphasis role="keywordflow">return</emphasis>&#32;__m&#32;-&#32;1;&#32;}
+424 
+428 &#32;&#32;&#32;&#32;&#32;&#32;result_type
+429 &#32;&#32;&#32;&#32;&#32;&#32;operator()();
+430 
+440 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">friend</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>
+441 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_namespacenlohmann_1aaf11d1e42c5a671e7cd362ab0a182de1">operator==</link>(<emphasis role="keyword">const</emphasis>&#32;linear_congruential&amp;&#32;__lhs,
+442 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;linear_congruential&amp;&#32;__rhs)
+443 &#32;&#32;&#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;__lhs._M_x&#32;==&#32;__rhs._M_x;&#32;}
+444 
+454 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">friend</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>
+455 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_namespacenlohmann_1aa9fe6e8e15f1b1b242d291e7703f1b8d">operator!=</link>(<emphasis role="keyword">const</emphasis>&#32;linear_congruential&amp;&#32;__lhs,
+456 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;linear_congruential&amp;&#32;__rhs)
+457 &#32;&#32;&#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;!(__lhs&#32;==&#32;__rhs);&#32;}
+458 
+466 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">class&#32;</emphasis>_UIntType1,&#32;_UIntType1&#32;__a1,&#32;_UIntType1&#32;__c1,
+467 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_UIntType1&#32;__m1,
+468 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;_CharT,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Traits&gt;
+469 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">friend</emphasis>&#32;std::basic_ostream&lt;_CharT,&#32;_Traits&gt;&amp;
+470 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_forward__declarations_8h_1ade7e3bc03b39cb3b5684a4c302832e3c">operator&lt;&lt;</link>(std::basic_ostream&lt;_CharT,&#32;_Traits&gt;&amp;&#32;__os,
+471 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;linear_congruential&lt;_UIntType1,&#32;__a1,&#32;__c1,
+472 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__m1&gt;&amp;&#32;__lcr);
+473 
+487 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">class&#32;</emphasis>_UIntType1,&#32;_UIntType1&#32;__a1,&#32;_UIntType1&#32;__c1,
+488 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_UIntType1&#32;__m1,
+489 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;_CharT,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Traits&gt;
+490 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">friend</emphasis>&#32;std::basic_istream&lt;_CharT,&#32;_Traits&gt;&amp;
+491 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_namespaceglm_1a4560e59cc4f5ddaf0ec23d1a7050b611">operator&gt;&gt;</link>(std::basic_istream&lt;_CharT,&#32;_Traits&gt;&amp;&#32;__is,
+492 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;linear_congruential&lt;_UIntType1,&#32;__a1,&#32;__c1,&#32;__m1&gt;&amp;&#32;__lcr);
+493 
+494 &#32;&#32;&#32;&#32;<emphasis role="keyword">private</emphasis>:
+495 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">class</emphasis>&#32;_Gen&gt;
+496 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+497 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_namespacelest_1a9e3785d770073a52c90f475365f49542">seed</link>(_Gen&amp;&#32;__g,&#32;true_type)
+498 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="_namespacelest_1a9e3785d770073a52c90f475365f49542">seed</link>(<emphasis role="keyword">static_cast&lt;</emphasis><emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">long</emphasis><emphasis role="keyword">&gt;</emphasis>(__g));&#32;}
+499 
+500 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">class</emphasis>&#32;_Gen&gt;
+501 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+502 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_namespacelest_1a9e3785d770073a52c90f475365f49542">seed</link>(_Gen&amp;&#32;__g,&#32;false_type);
+503 
+504 &#32;&#32;&#32;&#32;&#32;&#32;_UIntType&#32;_M_x;
+505 &#32;&#32;&#32;&#32;};
+506 
+510 &#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;linear_congruential&lt;unsigned&#32;long,&#32;16807,&#32;0,&#32;2147483647&gt;&#32;minstd_rand0;
+511 
+515 &#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;linear_congruential&lt;unsigned&#32;long,&#32;48271,&#32;0,&#32;2147483647&gt;&#32;minstd_rand;
+516 
+517 
+543 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">class&#32;</emphasis>_UIntType,&#32;<emphasis role="keywordtype">int</emphasis>&#32;__w,&#32;<emphasis role="keywordtype">int</emphasis>&#32;__n,&#32;<emphasis role="keywordtype">int</emphasis>&#32;__m,&#32;<emphasis role="keywordtype">int</emphasis>&#32;__r,
+544 &#32;&#32;&#32;&#32;&#32;&#32;&#32;_UIntType&#32;__a,&#32;<emphasis role="keywordtype">int</emphasis>&#32;__u,&#32;<emphasis role="keywordtype">int</emphasis>&#32;__s,&#32;_UIntType&#32;__b,&#32;<emphasis role="keywordtype">int</emphasis>&#32;__t,
+545 &#32;&#32;&#32;&#32;&#32;&#32;&#32;_UIntType&#32;__c,&#32;<emphasis role="keywordtype">int</emphasis>&#32;__l&gt;
+546 &#32;&#32;&#32;&#32;<emphasis role="keyword">class&#32;</emphasis>mersenne_twister
+547 &#32;&#32;&#32;&#32;{
+548 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2bits_2concept__check_8h_1ae4dc1beb74b88e6b1215e05c397fc7a2">__glibcxx_class_requires</link>(_UIntType,&#32;_UnsignedIntegerConcept)
+549 
+550 &#32;&#32;&#32;&#32;<emphasis role="keyword">public</emphasis>:
+551 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;types</emphasis>
+552 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;_UIntType&#32;result_type;
+553 
+554 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;parameter&#32;values</emphasis>
+555 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;&#32;&#32;&#32;&#32;&#32;&#32;word_size&#32;&#32;&#32;=&#32;__w;
+556 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;&#32;&#32;&#32;&#32;&#32;&#32;state_size&#32;&#32;=&#32;__n;
+557 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;&#32;&#32;&#32;&#32;&#32;&#32;shift_size&#32;&#32;=&#32;__m;
+558 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;&#32;&#32;&#32;&#32;&#32;&#32;mask_bits&#32;&#32;&#32;=&#32;__r;
+559 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keyword">const</emphasis>&#32;_UIntType&#32;parameter_a&#32;=&#32;__a;
+560 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;&#32;&#32;&#32;&#32;&#32;&#32;output_u&#32;&#32;&#32;&#32;=&#32;__u;
+561 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;&#32;&#32;&#32;&#32;&#32;&#32;output_s&#32;&#32;&#32;&#32;=&#32;__s;
+562 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keyword">const</emphasis>&#32;_UIntType&#32;output_b&#32;&#32;&#32;&#32;=&#32;__b;
+563 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;&#32;&#32;&#32;&#32;&#32;&#32;output_t&#32;&#32;&#32;&#32;=&#32;__t;
+564 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keyword">const</emphasis>&#32;_UIntType&#32;output_c&#32;&#32;&#32;&#32;=&#32;__c;
+565 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;&#32;&#32;&#32;&#32;&#32;&#32;output_l&#32;&#32;&#32;&#32;=&#32;__l;
+566 
+567 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;constructors&#32;and&#32;member&#32;function</emphasis>
+568 &#32;&#32;&#32;&#32;&#32;&#32;mersenne_twister()
+569 &#32;&#32;&#32;&#32;&#32;&#32;{&#32;<link linkend="_namespacelest_1a9e3785d770073a52c90f475365f49542">seed</link>();&#32;}
+570 
+571 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">explicit</emphasis>
+572 &#32;&#32;&#32;&#32;&#32;&#32;mersenne_twister(<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">long</emphasis>&#32;__value)
+573 &#32;&#32;&#32;&#32;&#32;&#32;{&#32;<link linkend="_namespacelest_1a9e3785d770073a52c90f475365f49542">seed</link>(__value);&#32;}
+574 
+575 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">class</emphasis>&#32;_Gen&gt;
+576 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;mersenne_twister(_Gen&amp;&#32;__g)
+577 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{&#32;<link linkend="_namespacelest_1a9e3785d770073a52c90f475365f49542">seed</link>(__g);&#32;}
+578 
+579 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+580 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_namespacelest_1a9e3785d770073a52c90f475365f49542">seed</link>()
+581 &#32;&#32;&#32;&#32;&#32;&#32;{&#32;<link linkend="_namespacelest_1a9e3785d770073a52c90f475365f49542">seed</link>(5489UL);&#32;}
+582 
+583 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+584 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_namespacelest_1a9e3785d770073a52c90f475365f49542">seed</link>(<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">long</emphasis>&#32;__value);
+585 
+586 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">class</emphasis>&#32;_Gen&gt;
+587 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+588 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_namespacelest_1a9e3785d770073a52c90f475365f49542">seed</link>(_Gen&amp;&#32;__g)
+589 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{&#32;<link linkend="_namespacelest_1a9e3785d770073a52c90f475365f49542">seed</link>(__g,&#32;<emphasis role="keyword">typename</emphasis>&#32;is_fundamental&lt;_Gen&gt;::type());&#32;}
+590 
+591 &#32;&#32;&#32;&#32;&#32;&#32;result_type
+592 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_toml_8hpp_1aef6fbc596e7e69a80f14c34a2b786a14">min</link>()<emphasis role="keyword">&#32;const</emphasis>
+593 <emphasis role="keyword">&#32;&#32;&#32;&#32;&#32;&#32;</emphasis>{&#32;<emphasis role="keywordflow">return</emphasis>&#32;0;&#32;}
+594 
+595 &#32;&#32;&#32;&#32;&#32;&#32;result_type
+596 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_group__core__func__common_1gae02d42887fc5570451f880e3c624b9ac">max</link>()<emphasis role="keyword">&#32;const</emphasis>
+597 <emphasis role="keyword">&#32;&#32;&#32;&#32;&#32;&#32;</emphasis>{&#32;<emphasis role="keywordflow">return</emphasis>&#32;__detail::_Shift&lt;_UIntType,&#32;__w&gt;::__value&#32;-&#32;1;&#32;}
+598 
+599 &#32;&#32;&#32;&#32;&#32;&#32;result_type
+600 &#32;&#32;&#32;&#32;&#32;&#32;operator()();
+601 
+612 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">friend</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>
+613 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_namespacenlohmann_1aaf11d1e42c5a671e7cd362ab0a182de1">operator==</link>(<emphasis role="keyword">const</emphasis>&#32;mersenne_twister&amp;&#32;__lhs,
+614 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;mersenne_twister&amp;&#32;__rhs)
+615 &#32;&#32;&#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="_namespacestd_1a94ada91841cca21a2327b0235f9a82cd">std::equal</link>(__lhs._M_x,&#32;__lhs._M_x&#32;+&#32;state_size,&#32;__rhs._M_x);&#32;}
+616 
+627 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">friend</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>
+628 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_namespacenlohmann_1aa9fe6e8e15f1b1b242d291e7703f1b8d">operator!=</link>(<emphasis role="keyword">const</emphasis>&#32;mersenne_twister&amp;&#32;__lhs,
+629 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;mersenne_twister&amp;&#32;__rhs)
+630 &#32;&#32;&#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;!(__lhs&#32;==&#32;__rhs);&#32;}
+631 
+642 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">class&#32;</emphasis>_UIntType1,&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2include_2mmintrin_8h_1ae699a9d1d9f4fd4bc4a4b4b7127a5510">__w1</link>,&#32;<emphasis role="keywordtype">int</emphasis>&#32;__n1,&#32;<emphasis role="keywordtype">int</emphasis>&#32;__m1,&#32;<emphasis role="keywordtype">int</emphasis>&#32;__r1,
+643 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_UIntType1&#32;__a1,&#32;<emphasis role="keywordtype">int</emphasis>&#32;__u1,&#32;<emphasis role="keywordtype">int</emphasis>&#32;__s1,&#32;_UIntType1&#32;<link linkend="__classes_2lib_2include_2mmintrin_8h_1a0fb905920e6321601ec1c0650ce4944d">__b1</link>,&#32;<emphasis role="keywordtype">int</emphasis>&#32;__t1,
+644 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_UIntType1&#32;__c1,&#32;<emphasis role="keywordtype">int</emphasis>&#32;__l1,
+645 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;_CharT,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Traits&gt;
+646 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">friend</emphasis>&#32;std::basic_ostream&lt;_CharT,&#32;_Traits&gt;&amp;
+647 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_forward__declarations_8h_1ade7e3bc03b39cb3b5684a4c302832e3c">operator&lt;&lt;</link>(std::basic_ostream&lt;_CharT,&#32;_Traits&gt;&amp;&#32;__os,
+648 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;mersenne_twister&lt;_UIntType1,&#32;<link linkend="__classes_2lib_2include_2mmintrin_8h_1ae699a9d1d9f4fd4bc4a4b4b7127a5510">__w1</link>,&#32;__n1,&#32;__m1,&#32;__r1,
+649 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__a1,&#32;__u1,&#32;__s1,&#32;<link linkend="__classes_2lib_2include_2mmintrin_8h_1a0fb905920e6321601ec1c0650ce4944d">__b1</link>,&#32;__t1,&#32;__c1,&#32;__l1&gt;&amp;&#32;__x);
+650 
+661 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">class&#32;</emphasis>_UIntType1,&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2include_2mmintrin_8h_1ae699a9d1d9f4fd4bc4a4b4b7127a5510">__w1</link>,&#32;<emphasis role="keywordtype">int</emphasis>&#32;__n1,&#32;<emphasis role="keywordtype">int</emphasis>&#32;__m1,&#32;<emphasis role="keywordtype">int</emphasis>&#32;__r1,
+662 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_UIntType1&#32;__a1,&#32;<emphasis role="keywordtype">int</emphasis>&#32;__u1,&#32;<emphasis role="keywordtype">int</emphasis>&#32;__s1,&#32;_UIntType1&#32;<link linkend="__classes_2lib_2include_2mmintrin_8h_1a0fb905920e6321601ec1c0650ce4944d">__b1</link>,&#32;<emphasis role="keywordtype">int</emphasis>&#32;__t1,
+663 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_UIntType1&#32;__c1,&#32;<emphasis role="keywordtype">int</emphasis>&#32;__l1,
+664 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;_CharT,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Traits&gt;
+665 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">friend</emphasis>&#32;std::basic_istream&lt;_CharT,&#32;_Traits&gt;&amp;
+666 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_namespaceglm_1a4560e59cc4f5ddaf0ec23d1a7050b611">operator&gt;&gt;</link>(std::basic_istream&lt;_CharT,&#32;_Traits&gt;&amp;&#32;__is,
+667 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;mersenne_twister&lt;_UIntType1,&#32;<link linkend="__classes_2lib_2include_2mmintrin_8h_1ae699a9d1d9f4fd4bc4a4b4b7127a5510">__w1</link>,&#32;__n1,&#32;__m1,&#32;__r1,
+668 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__a1,&#32;__u1,&#32;__s1,&#32;<link linkend="__classes_2lib_2include_2mmintrin_8h_1a0fb905920e6321601ec1c0650ce4944d">__b1</link>,&#32;__t1,&#32;__c1,&#32;__l1&gt;&amp;&#32;__x);
+669 
+670 &#32;&#32;&#32;&#32;<emphasis role="keyword">private</emphasis>:
+671 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">class</emphasis>&#32;_Gen&gt;
+672 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+673 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_namespacelest_1a9e3785d770073a52c90f475365f49542">seed</link>(_Gen&amp;&#32;__g,&#32;true_type)
+674 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="_namespacelest_1a9e3785d770073a52c90f475365f49542">seed</link>(<emphasis role="keyword">static_cast&lt;</emphasis><emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">long</emphasis><emphasis role="keyword">&gt;</emphasis>(__g));&#32;}
+675 
+676 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">class</emphasis>&#32;_Gen&gt;
+677 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+678 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_namespacelest_1a9e3785d770073a52c90f475365f49542">seed</link>(_Gen&amp;&#32;__g,&#32;false_type);
+679 
+680 &#32;&#32;&#32;&#32;&#32;&#32;_UIntType&#32;_M_x[state_size];
+681 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;&#32;&#32;&#32;&#32;&#32;&#32;_M_p;
+682 &#32;&#32;&#32;&#32;};
+683 
+692 &#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;mersenne_twister&lt;
+693 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;long,&#32;32,&#32;624,&#32;397,&#32;31,
+694 &#32;&#32;&#32;&#32;0x9908b0dful,&#32;11,&#32;7,
+695 &#32;&#32;&#32;&#32;0x9d2c5680ul,&#32;15,
+696 &#32;&#32;&#32;&#32;0xefc60000ul,&#32;18
+697 &#32;&#32;&#32;&#32;&gt;&#32;mt19937;
+698 
+699 
+720 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_IntType,&#32;_IntType&#32;__m,&#32;<emphasis role="keywordtype">int</emphasis>&#32;__s,&#32;<emphasis role="keywordtype">int</emphasis>&#32;__r&gt;
+721 &#32;&#32;&#32;&#32;<emphasis role="keyword">class&#32;</emphasis>subtract_with_carry
+722 &#32;&#32;&#32;&#32;{
+723 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2bits_2concept__check_8h_1ae4dc1beb74b88e6b1215e05c397fc7a2">__glibcxx_class_requires</link>(_IntType,&#32;_IntegerConcept)
+724 
+725 &#32;&#32;&#32;&#32;<emphasis role="keyword">public</emphasis>:
+727 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;_IntType&#32;result_type;
+728 &#32;&#32;&#32;&#32;&#32;&#32;
+729 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;parameter&#32;values</emphasis>
+730 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keyword">const</emphasis>&#32;_IntType&#32;modulus&#32;&#32;&#32;=&#32;__m;
+731 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;&#32;&#32;&#32;&#32;&#32;long_lag&#32;&#32;=&#32;__r;
+732 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;&#32;&#32;&#32;&#32;&#32;short_lag&#32;=&#32;__s;
+733 
+738 &#32;&#32;&#32;&#32;&#32;&#32;subtract_with_carry()
+739 &#32;&#32;&#32;&#32;&#32;&#32;{&#32;this-&gt;<link linkend="_namespacelest_1a9e3785d770073a52c90f475365f49542">seed</link>();&#32;}
+740 
+745 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">explicit</emphasis>
+746 &#32;&#32;&#32;&#32;&#32;&#32;subtract_with_carry(<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">long</emphasis>&#32;__value)
+747 &#32;&#32;&#32;&#32;&#32;&#32;{&#32;this-&gt;<link linkend="_namespacelest_1a9e3785d770073a52c90f475365f49542">seed</link>(__value);&#32;}
+748 
+755 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">class</emphasis>&#32;_Gen&gt;
+756 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;subtract_with_carry(_Gen&amp;&#32;__g)
+757 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{&#32;this-&gt;<link linkend="_namespacelest_1a9e3785d770073a52c90f475365f49542">seed</link>(__g);&#32;}
+758 
+770 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+771 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_namespacelest_1a9e3785d770073a52c90f475365f49542">seed</link>(<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">long</emphasis>&#32;__value&#32;=&#32;19780503);
+772 
+777 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">class</emphasis>&#32;_Gen&gt;
+778 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+779 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_namespacelest_1a9e3785d770073a52c90f475365f49542">seed</link>(_Gen&amp;&#32;__g)
+780 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{&#32;<link linkend="_namespacelest_1a9e3785d770073a52c90f475365f49542">seed</link>(__g,&#32;<emphasis role="keyword">typename</emphasis>&#32;is_fundamental&lt;_Gen&gt;::type());&#32;}
+781 
+786 &#32;&#32;&#32;&#32;&#32;&#32;result_type
+787 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_toml_8hpp_1aef6fbc596e7e69a80f14c34a2b786a14">min</link>()<emphasis role="keyword">&#32;const</emphasis>
+788 <emphasis role="keyword">&#32;&#32;&#32;&#32;&#32;&#32;</emphasis>{&#32;<emphasis role="keywordflow">return</emphasis>&#32;0;&#32;}
+789 
+794 &#32;&#32;&#32;&#32;&#32;&#32;result_type
+795 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_group__core__func__common_1gae02d42887fc5570451f880e3c624b9ac">max</link>()<emphasis role="keyword">&#32;const</emphasis>
+796 <emphasis role="keyword">&#32;&#32;&#32;&#32;&#32;&#32;</emphasis>{&#32;<emphasis role="keywordflow">return</emphasis>&#32;this-&gt;modulus&#32;-&#32;1;&#32;}
+797 
+801 &#32;&#32;&#32;&#32;&#32;&#32;result_type
+802 &#32;&#32;&#32;&#32;&#32;&#32;operator()();
+803 
+814 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">friend</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>
+815 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_namespacenlohmann_1aaf11d1e42c5a671e7cd362ab0a182de1">operator==</link>(<emphasis role="keyword">const</emphasis>&#32;subtract_with_carry&amp;&#32;__lhs,
+816 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;subtract_with_carry&amp;&#32;__rhs)
+817 &#32;&#32;&#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="_namespacestd_1a94ada91841cca21a2327b0235f9a82cd">std::equal</link>(__lhs._M_x,&#32;__lhs._M_x&#32;+&#32;long_lag,&#32;__rhs._M_x);&#32;}
+818 
+829 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">friend</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>
+830 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_namespacenlohmann_1aa9fe6e8e15f1b1b242d291e7703f1b8d">operator!=</link>(<emphasis role="keyword">const</emphasis>&#32;subtract_with_carry&amp;&#32;__lhs,
+831 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;subtract_with_carry&amp;&#32;__rhs)
+832 &#32;&#32;&#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;!(__lhs&#32;==&#32;__rhs);&#32;}
+833 
+844 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_IntType1,&#32;_IntType1&#32;__m1,&#32;<emphasis role="keywordtype">int</emphasis>&#32;__s1,&#32;<emphasis role="keywordtype">int</emphasis>&#32;__r1,
+845 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;_CharT,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Traits&gt;
+846 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">friend</emphasis>&#32;std::basic_ostream&lt;_CharT,&#32;_Traits&gt;&amp;
+847 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_forward__declarations_8h_1ade7e3bc03b39cb3b5684a4c302832e3c">operator&lt;&lt;</link>(std::basic_ostream&lt;_CharT,&#32;_Traits&gt;&amp;&#32;__os,
+848 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;subtract_with_carry&lt;_IntType1,&#32;__m1,&#32;__s1,
+849 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__r1&gt;&amp;&#32;__x);
+850 
+861 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_IntType1,&#32;_IntType1&#32;__m1,&#32;<emphasis role="keywordtype">int</emphasis>&#32;__s1,&#32;<emphasis role="keywordtype">int</emphasis>&#32;__r1,
+862 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;_CharT,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Traits&gt;
+863 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">friend</emphasis>&#32;std::basic_istream&lt;_CharT,&#32;_Traits&gt;&amp;
+864 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_namespaceglm_1a4560e59cc4f5ddaf0ec23d1a7050b611">operator&gt;&gt;</link>(std::basic_istream&lt;_CharT,&#32;_Traits&gt;&amp;&#32;__is,
+865 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;subtract_with_carry&lt;_IntType1,&#32;__m1,&#32;__s1,&#32;__r1&gt;&amp;&#32;__x);
+866 
+867 &#32;&#32;&#32;&#32;<emphasis role="keyword">private</emphasis>:
+868 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">class</emphasis>&#32;_Gen&gt;
+869 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+870 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_namespacelest_1a9e3785d770073a52c90f475365f49542">seed</link>(_Gen&amp;&#32;__g,&#32;true_type)
+871 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="_namespacelest_1a9e3785d770073a52c90f475365f49542">seed</link>(<emphasis role="keyword">static_cast&lt;</emphasis><emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">long</emphasis><emphasis role="keyword">&gt;</emphasis>(__g));&#32;}
+872 
+873 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">class</emphasis>&#32;_Gen&gt;
+874 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+875 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_namespacelest_1a9e3785d770073a52c90f475365f49542">seed</link>(_Gen&amp;&#32;__g,&#32;false_type);
+876 
+877 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">typename</emphasis>&#32;__gnu_cxx::__add_unsigned&lt;_IntType&gt;::__type&#32;_UIntType;
+878 
+879 &#32;&#32;&#32;&#32;&#32;&#32;_UIntType&#32;&#32;_M_x[long_lag];
+880 &#32;&#32;&#32;&#32;&#32;&#32;_UIntType&#32;&#32;_M_carry;
+881 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_M_p;
+882 &#32;&#32;&#32;&#32;};
+883 
+884 
+893 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_RealType,&#32;<emphasis role="keywordtype">int</emphasis>&#32;__w,&#32;<emphasis role="keywordtype">int</emphasis>&#32;__s,&#32;<emphasis role="keywordtype">int</emphasis>&#32;__r&gt;
+894 &#32;&#32;&#32;&#32;<emphasis role="keyword">class&#32;</emphasis>subtract_with_carry_01
+895 &#32;&#32;&#32;&#32;{
+896 &#32;&#32;&#32;&#32;<emphasis role="keyword">public</emphasis>:
+898 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;_RealType&#32;result_type;
+899 &#32;&#32;&#32;&#32;&#32;&#32;
+900 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;parameter&#32;values</emphasis>
+901 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;&#32;&#32;&#32;&#32;&#32;word_size&#32;=&#32;__w;
+902 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;&#32;&#32;&#32;&#32;&#32;long_lag&#32;&#32;=&#32;__r;
+903 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;&#32;&#32;&#32;&#32;&#32;short_lag&#32;=&#32;__s;
+904 
+909 &#32;&#32;&#32;&#32;&#32;&#32;subtract_with_carry_01()
+910 &#32;&#32;&#32;&#32;&#32;&#32;{
+911 &#32;&#32;&#32;&#32;this-&gt;<link linkend="_namespacelest_1a9e3785d770073a52c90f475365f49542">seed</link>();
+912 &#32;&#32;&#32;&#32;_M_initialize_npows();
+913 &#32;&#32;&#32;&#32;&#32;&#32;}
+914 
+919 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">explicit</emphasis>
+920 &#32;&#32;&#32;&#32;&#32;&#32;subtract_with_carry_01(<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">long</emphasis>&#32;__value)
+921 &#32;&#32;&#32;&#32;&#32;&#32;{
+922 &#32;&#32;&#32;&#32;this-&gt;<link linkend="_namespacelest_1a9e3785d770073a52c90f475365f49542">seed</link>(__value);
+923 &#32;&#32;&#32;&#32;_M_initialize_npows();
+924 &#32;&#32;&#32;&#32;&#32;&#32;}
+925 
+932 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">class</emphasis>&#32;_Gen&gt;
+933 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;subtract_with_carry_01(_Gen&amp;&#32;__g)
+934 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+935 &#32;&#32;&#32;&#32;&#32;&#32;this-&gt;<link linkend="_namespacelest_1a9e3785d770073a52c90f475365f49542">seed</link>(__g);
+936 &#32;&#32;&#32;&#32;&#32;&#32;_M_initialize_npows();&#32;&#32;&#32;&#32;&#32;&#32;
+937 &#32;&#32;&#32;&#32;}
+938 
+942 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+943 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_namespacelest_1a9e3785d770073a52c90f475365f49542">seed</link>(<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">long</emphasis>&#32;__value&#32;=&#32;19780503);
+944 
+949 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">class</emphasis>&#32;_Gen&gt;
+950 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+951 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_namespacelest_1a9e3785d770073a52c90f475365f49542">seed</link>(_Gen&amp;&#32;__g)
+952 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{&#32;<link linkend="_namespacelest_1a9e3785d770073a52c90f475365f49542">seed</link>(__g,&#32;<emphasis role="keyword">typename</emphasis>&#32;is_fundamental&lt;_Gen&gt;::type());&#32;}
+953 
+958 &#32;&#32;&#32;&#32;&#32;&#32;result_type
+959 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_toml_8hpp_1aef6fbc596e7e69a80f14c34a2b786a14">min</link>()<emphasis role="keyword">&#32;const</emphasis>
+960 <emphasis role="keyword">&#32;&#32;&#32;&#32;&#32;&#32;</emphasis>{&#32;<emphasis role="keywordflow">return</emphasis>&#32;0.0;&#32;}
+961 
+966 &#32;&#32;&#32;&#32;&#32;&#32;result_type
+967 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_group__core__func__common_1gae02d42887fc5570451f880e3c624b9ac">max</link>()<emphasis role="keyword">&#32;const</emphasis>
+968 <emphasis role="keyword">&#32;&#32;&#32;&#32;&#32;&#32;</emphasis>{&#32;<emphasis role="keywordflow">return</emphasis>&#32;1.0;&#32;}
+969 
+973 &#32;&#32;&#32;&#32;&#32;&#32;result_type
+974 &#32;&#32;&#32;&#32;&#32;&#32;operator()();
+975 
+987 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">friend</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>
+988 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_namespacenlohmann_1aaf11d1e42c5a671e7cd362ab0a182de1">operator==</link>(<emphasis role="keyword">const</emphasis>&#32;subtract_with_carry_01&amp;&#32;__lhs,
+989 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;subtract_with_carry_01&amp;&#32;__rhs)
+990 &#32;&#32;&#32;&#32;&#32;&#32;{
+991 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(<emphasis role="keywordtype">int</emphasis>&#32;__i&#32;=&#32;0;&#32;__i&#32;&lt;&#32;long_lag;&#32;++__i)
+992 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(!<link linkend="_namespacestd_1a94ada91841cca21a2327b0235f9a82cd">std::equal</link>(__lhs._M_x[__i],&#32;__lhs._M_x[__i]&#32;+&#32;__n,
+993 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__rhs._M_x[__i]))
+994 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<emphasis role="keyword">false</emphasis>;
+995 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<emphasis role="keyword">true</emphasis>;
+996 &#32;&#32;&#32;&#32;&#32;&#32;}
+997 
+1010 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">friend</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>
+1011 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_namespacenlohmann_1aa9fe6e8e15f1b1b242d291e7703f1b8d">operator!=</link>(<emphasis role="keyword">const</emphasis>&#32;subtract_with_carry_01&amp;&#32;__lhs,
+1012 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;subtract_with_carry_01&amp;&#32;__rhs)
+1013 &#32;&#32;&#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;!(__lhs&#32;==&#32;__rhs);&#32;}
+1014 
+1025 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_RealType1,&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2include_2mmintrin_8h_1ae699a9d1d9f4fd4bc4a4b4b7127a5510">__w1</link>,&#32;<emphasis role="keywordtype">int</emphasis>&#32;__s1,&#32;<emphasis role="keywordtype">int</emphasis>&#32;__r1,
+1026 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;_CharT,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Traits&gt;
+1027 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">friend</emphasis>&#32;std::basic_ostream&lt;_CharT,&#32;_Traits&gt;&amp;
+1028 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_forward__declarations_8h_1ade7e3bc03b39cb3b5684a4c302832e3c">operator&lt;&lt;</link>(std::basic_ostream&lt;_CharT,&#32;_Traits&gt;&amp;&#32;__os,
+1029 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;subtract_with_carry_01&lt;_RealType1,&#32;<link linkend="__classes_2lib_2include_2mmintrin_8h_1ae699a9d1d9f4fd4bc4a4b4b7127a5510">__w1</link>,&#32;__s1,
+1030 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__r1&gt;&amp;&#32;__x);
+1031 
+1042 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_RealType1,&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2include_2mmintrin_8h_1ae699a9d1d9f4fd4bc4a4b4b7127a5510">__w1</link>,&#32;<emphasis role="keywordtype">int</emphasis>&#32;__s1,&#32;<emphasis role="keywordtype">int</emphasis>&#32;__r1,
+1043 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;_CharT,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Traits&gt;
+1044 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">friend</emphasis>&#32;std::basic_istream&lt;_CharT,&#32;_Traits&gt;&amp;
+1045 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_namespaceglm_1a4560e59cc4f5ddaf0ec23d1a7050b611">operator&gt;&gt;</link>(std::basic_istream&lt;_CharT,&#32;_Traits&gt;&amp;&#32;__is,
+1046 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;subtract_with_carry_01&lt;_RealType1,&#32;__w1,&#32;__s1,&#32;__r1&gt;&amp;&#32;__x);
+1047 
+1048 &#32;&#32;&#32;&#32;<emphasis role="keyword">private</emphasis>:
+1049 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">class</emphasis>&#32;_Gen&gt;
+1050 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+1051 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_namespacelest_1a9e3785d770073a52c90f475365f49542">seed</link>(_Gen&amp;&#32;__g,&#32;true_type)
+1052 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="_namespacelest_1a9e3785d770073a52c90f475365f49542">seed</link>(<emphasis role="keyword">static_cast&lt;</emphasis><emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">long</emphasis><emphasis role="keyword">&gt;</emphasis>(__g));&#32;}
+1053 
+1054 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">class</emphasis>&#32;_Gen&gt;
+1055 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+1056 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_namespacelest_1a9e3785d770073a52c90f475365f49542">seed</link>(_Gen&amp;&#32;__g,&#32;false_type);
+1057 
+1058 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+1059 &#32;&#32;&#32;&#32;&#32;&#32;_M_initialize_npows();
+1060 
+1061 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;__n&#32;=&#32;(__w&#32;+&#32;31)&#32;/&#32;32;
+1062 
+1063 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;__detail::_UInt32Type&#32;_UInt32Type;
+1064 &#32;&#32;&#32;&#32;&#32;&#32;_UInt32Type&#32;&#32;_M_x[long_lag][__n];
+1065 &#32;&#32;&#32;&#32;&#32;&#32;_RealType&#32;&#32;&#32;&#32;_M_npows[__n];
+1066 &#32;&#32;&#32;&#32;&#32;&#32;_UInt32Type&#32;&#32;_M_carry;
+1067 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_M_p;
+1068 &#32;&#32;&#32;&#32;};
+1069 
+1070 &#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;subtract_with_carry_01&lt;float,&#32;24,&#32;10,&#32;24&gt;&#32;&#32;&#32;ranlux_base_01;
+1071 
+1072 &#32;&#32;<emphasis role="comment">//&#32;_GLIBCXX_RESOLVE_LIB_DEFECTS</emphasis>
+1073 &#32;&#32;<emphasis role="comment">//&#32;508.&#32;Bad&#32;parameters&#32;for&#32;ranlux64_base_01.</emphasis>
+1074 &#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;subtract_with_carry_01&lt;double,&#32;48,&#32;5,&#32;12&gt;&#32;ranlux64_base_01;&#32;&#32;
+1075 
+1076 
+1083 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">class</emphasis>&#32;_UniformRandomNumberGenerator,&#32;<emphasis role="keywordtype">int</emphasis>&#32;__p,&#32;<emphasis role="keywordtype">int</emphasis>&#32;__r&gt;
+1084 &#32;&#32;&#32;&#32;<emphasis role="keyword">class&#32;</emphasis>discard_block
+1085 &#32;&#32;&#32;&#32;{
+1086 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;__glibcxx_class_requires(typename&#32;base_type::result_type,</emphasis>
+1087 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;ArithmeticTypeConcept)</emphasis>
+1088 
+1089 &#32;&#32;&#32;&#32;<emphasis role="keyword">public</emphasis>:
+1091 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;_UniformRandomNumberGenerator&#32;&#32;&#32;base_type;
+1093 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">typename</emphasis>&#32;base_type::result_type&#32;result_type;
+1094 
+1095 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;parameter&#32;values</emphasis>
+1096 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;block_size&#32;=&#32;__p;
+1097 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;used_block&#32;=&#32;__r;
+1098 
+1104 &#32;&#32;&#32;&#32;&#32;&#32;discard_block()
+1105 &#32;&#32;&#32;&#32;&#32;&#32;:&#32;_M_n(0)&#32;{&#32;}
+1106 
+1113 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">explicit</emphasis>
+1114 &#32;&#32;&#32;&#32;&#32;&#32;discard_block(<emphasis role="keyword">const</emphasis>&#32;base_type&amp;&#32;__rng)
+1115 &#32;&#32;&#32;&#32;&#32;&#32;:&#32;_M_b(__rng),&#32;_M_n(0)&#32;{&#32;}
+1116 
+1123 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">explicit</emphasis>
+1124 &#32;&#32;&#32;&#32;&#32;&#32;discard_block(<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">long</emphasis>&#32;__s)
+1125 &#32;&#32;&#32;&#32;&#32;&#32;:&#32;_M_b(__s),&#32;_M_n(0)&#32;{&#32;}
+1126 
+1132 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">class</emphasis>&#32;_Gen&gt;
+1133 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;discard_block(_Gen&amp;&#32;__g)
+1134 &#32;&#32;&#32;&#32;:&#32;_M_b(__g),&#32;_M_n(0)&#32;{&#32;}
+1135 
+1140 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>&#32;<link linkend="_namespacelest_1a9e3785d770073a52c90f475365f49542">seed</link>()
+1141 &#32;&#32;&#32;&#32;&#32;&#32;{
+1142 &#32;&#32;&#32;&#32;_M_b.seed();
+1143 &#32;&#32;&#32;&#32;_M_n&#32;=&#32;0;
+1144 &#32;&#32;&#32;&#32;&#32;&#32;}
+1145 
+1151 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">class</emphasis>&#32;_Gen&gt;
+1152 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>&#32;<link linkend="_namespacelest_1a9e3785d770073a52c90f475365f49542">seed</link>(_Gen&amp;&#32;__g)
+1153 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+1154 &#32;&#32;&#32;&#32;&#32;&#32;_M_b.seed(__g);
+1155 &#32;&#32;&#32;&#32;&#32;&#32;_M_n&#32;=&#32;0;
+1156 &#32;&#32;&#32;&#32;}
+1157 
+1161 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;base_type&amp;
+1162 &#32;&#32;&#32;&#32;&#32;&#32;base()<emphasis role="keyword">&#32;const</emphasis>
+1163 <emphasis role="keyword">&#32;&#32;&#32;&#32;&#32;&#32;</emphasis>{&#32;<emphasis role="keywordflow">return</emphasis>&#32;_M_b;&#32;}
+1164 
+1168 &#32;&#32;&#32;&#32;&#32;&#32;result_type
+1169 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_toml_8hpp_1aef6fbc596e7e69a80f14c34a2b786a14">min</link>()<emphasis role="keyword">&#32;const</emphasis>
+1170 <emphasis role="keyword">&#32;&#32;&#32;&#32;&#32;&#32;</emphasis>{&#32;<emphasis role="keywordflow">return</emphasis>&#32;_M_b.min();&#32;}
+1171 
+1175 &#32;&#32;&#32;&#32;&#32;&#32;result_type
+1176 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_group__core__func__common_1gae02d42887fc5570451f880e3c624b9ac">max</link>()<emphasis role="keyword">&#32;const</emphasis>
+1177 <emphasis role="keyword">&#32;&#32;&#32;&#32;&#32;&#32;</emphasis>{&#32;<emphasis role="keywordflow">return</emphasis>&#32;_M_b.max();&#32;}
+1178 
+1182 &#32;&#32;&#32;&#32;&#32;&#32;result_type
+1183 &#32;&#32;&#32;&#32;&#32;&#32;operator()();
+1184 
+1195 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">friend</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>
+1196 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_namespacenlohmann_1aaf11d1e42c5a671e7cd362ab0a182de1">operator==</link>(<emphasis role="keyword">const</emphasis>&#32;discard_block&amp;&#32;__lhs,&#32;<emphasis role="keyword">const</emphasis>&#32;discard_block&amp;&#32;__rhs)
+1197 &#32;&#32;&#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;(__lhs._M_b&#32;==&#32;__rhs._M_b)&#32;&amp;&amp;&#32;(__lhs._M_n&#32;==&#32;__rhs._M_n);&#32;}
+1198 
+1209 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">friend</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>
+1210 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_namespacenlohmann_1aa9fe6e8e15f1b1b242d291e7703f1b8d">operator!=</link>(<emphasis role="keyword">const</emphasis>&#32;discard_block&amp;&#32;__lhs,&#32;<emphasis role="keyword">const</emphasis>&#32;discard_block&amp;&#32;__rhs)
+1211 &#32;&#32;&#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;!(__lhs&#32;==&#32;__rhs);&#32;}
+1212 
+1223 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">class&#32;</emphasis>_UniformRandomNumberGenerator1,&#32;<emphasis role="keywordtype">int</emphasis>&#32;__p1,&#32;<emphasis role="keywordtype">int</emphasis>&#32;__r1,
+1224 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;_CharT,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Traits&gt;
+1225 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">friend</emphasis>&#32;std::basic_ostream&lt;_CharT,&#32;_Traits&gt;&amp;
+1226 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_forward__declarations_8h_1ade7e3bc03b39cb3b5684a4c302832e3c">operator&lt;&lt;</link>(std::basic_ostream&lt;_CharT,&#32;_Traits&gt;&amp;&#32;__os,
+1227 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;discard_block&lt;_UniformRandomNumberGenerator1,
+1228 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__p1,&#32;__r1&gt;&amp;&#32;__x);
+1229 
+1240 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">class&#32;</emphasis>_UniformRandomNumberGenerator1,&#32;<emphasis role="keywordtype">int</emphasis>&#32;__p1,&#32;<emphasis role="keywordtype">int</emphasis>&#32;__r1,
+1241 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;_CharT,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Traits&gt;
+1242 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">friend</emphasis>&#32;std::basic_istream&lt;_CharT,&#32;_Traits&gt;&amp;
+1243 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_namespaceglm_1a4560e59cc4f5ddaf0ec23d1a7050b611">operator&gt;&gt;</link>(std::basic_istream&lt;_CharT,&#32;_Traits&gt;&amp;&#32;__is,
+1244 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;discard_block&lt;_UniformRandomNumberGenerator1,
+1245 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__p1,&#32;__r1&gt;&amp;&#32;__x);
+1246 
+1247 &#32;&#32;&#32;&#32;<emphasis role="keyword">private</emphasis>:
+1248 &#32;&#32;&#32;&#32;&#32;&#32;base_type&#32;_M_b;
+1249 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;&#32;&#32;&#32;&#32;&#32;&#32;_M_n;
+1250 &#32;&#32;&#32;&#32;};
+1251 
+1252 
+1256 &#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;discard_block&lt;
+1257 &#32;&#32;&#32;&#32;subtract_with_carry&lt;<emphasis role="keywordtype">unsigned</emphasis>&#32;long,&#32;(1UL&#32;&lt;&lt;&#32;24),&#32;10,&#32;24&gt;,
+1258 &#32;&#32;&#32;&#32;&#32;&#32;223,
+1259 &#32;&#32;&#32;&#32;&#32;&#32;24
+1260 &#32;&#32;&#32;&#32;&#32;&#32;&gt;&#32;ranlux3;
+1261 
+1265 &#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;discard_block&lt;
+1266 &#32;&#32;&#32;&#32;subtract_with_carry&lt;<emphasis role="keywordtype">unsigned</emphasis>&#32;long,&#32;(1UL&#32;&lt;&lt;&#32;24),&#32;10,&#32;24&gt;,
+1267 &#32;&#32;&#32;&#32;&#32;&#32;389,
+1268 &#32;&#32;&#32;&#32;&#32;&#32;24
+1269 &#32;&#32;&#32;&#32;&#32;&#32;&gt;&#32;ranlux4;
+1270 
+1271 &#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;discard_block&lt;
+1272 &#32;&#32;&#32;&#32;subtract_with_carry_01&lt;float,&#32;24,&#32;10,&#32;24&gt;,
+1273 &#32;&#32;&#32;&#32;&#32;&#32;223,
+1274 &#32;&#32;&#32;&#32;&#32;&#32;24
+1275 &#32;&#32;&#32;&#32;&#32;&#32;&gt;&#32;ranlux3_01;
+1276 
+1277 &#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;discard_block&lt;
+1278 &#32;&#32;&#32;&#32;subtract_with_carry_01&lt;float,&#32;24,&#32;10,&#32;24&gt;,
+1279 &#32;&#32;&#32;&#32;&#32;&#32;389,
+1280 &#32;&#32;&#32;&#32;&#32;&#32;24
+1281 &#32;&#32;&#32;&#32;&#32;&#32;&gt;&#32;ranlux4_01;
+1282 
+1283 
+1288 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">class&#32;</emphasis>_UniformRandomNumberGenerator1,&#32;<emphasis role="keywordtype">int</emphasis>&#32;__s1,
+1289 &#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">class&#32;</emphasis>_UniformRandomNumberGenerator2,&#32;<emphasis role="keywordtype">int</emphasis>&#32;__s2&gt;
+1290 &#32;&#32;&#32;&#32;<emphasis role="keyword">class&#32;</emphasis>xor_combine
+1291 &#32;&#32;&#32;&#32;{
+1292 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;__glibcxx_class_requires(typename&#32;_UniformRandomNumberGenerator1::</emphasis>
+1293 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;result_type,&#32;ArithmeticTypeConcept)</emphasis>
+1294 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;__glibcxx_class_requires(typename&#32;_UniformRandomNumberGenerator2::</emphasis>
+1295 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;result_type,&#32;ArithmeticTypeConcept)</emphasis>
+1296 
+1297 &#32;&#32;&#32;&#32;<emphasis role="keyword">public</emphasis>:
+1299 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;_UniformRandomNumberGenerator1&#32;&#32;&#32;base1_type;
+1301 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;_UniformRandomNumberGenerator2&#32;&#32;&#32;base2_type;
+1302 
+1303 &#32;&#32;&#32;&#32;<emphasis role="keyword">private</emphasis>:
+1304 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">typename</emphasis>&#32;base1_type::result_type&#32;_Result_type1;
+1305 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">typename</emphasis>&#32;base2_type::result_type&#32;_Result_type2;
+1306 
+1307 &#32;&#32;&#32;&#32;<emphasis role="keyword">public</emphasis>:
+1309 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">typename</emphasis>&#32;__gnu_cxx::__conditional_type&lt;(<emphasis role="keyword">sizeof</emphasis>(_Result_type1)
+1310 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&gt;&#32;<emphasis role="keyword">sizeof</emphasis>(_Result_type2)),
+1311 &#32;&#32;&#32;&#32;_Result_type1,&#32;_Result_type2&gt;::__type&#32;result_type;
+1312 
+1313 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;parameter&#32;values</emphasis>
+1314 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;shift1&#32;=&#32;__s1;
+1315 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;shift2&#32;=&#32;__s2;
+1316 
+1317 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;constructors&#32;and&#32;member&#32;function</emphasis>
+1318 &#32;&#32;&#32;&#32;&#32;&#32;xor_combine()
+1319 &#32;&#32;&#32;&#32;&#32;&#32;:&#32;_M_b1(),&#32;_M_b2()&#32;&#32;&#32;&#32;
+1320 &#32;&#32;&#32;&#32;&#32;&#32;{&#32;_M_initialize_max();&#32;}
+1321 
+1322 &#32;&#32;&#32;&#32;&#32;&#32;xor_combine(<emphasis role="keyword">const</emphasis>&#32;base1_type&amp;&#32;__rng1,&#32;<emphasis role="keyword">const</emphasis>&#32;base2_type&amp;&#32;__rng2)
+1323 &#32;&#32;&#32;&#32;&#32;&#32;:&#32;_M_b1(__rng1),&#32;_M_b2(__rng2)
+1324 &#32;&#32;&#32;&#32;&#32;&#32;{&#32;_M_initialize_max();&#32;}
+1325 
+1326 &#32;&#32;&#32;&#32;&#32;&#32;xor_combine(<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">long</emphasis>&#32;__s)
+1327 &#32;&#32;&#32;&#32;&#32;&#32;:&#32;_M_b1(__s),&#32;_M_b2(__s&#32;+&#32;1)
+1328 &#32;&#32;&#32;&#32;&#32;&#32;{&#32;_M_initialize_max();&#32;}
+1329 
+1330 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">class</emphasis>&#32;_Gen&gt;
+1331 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;xor_combine(_Gen&amp;&#32;__g)
+1332 &#32;&#32;&#32;&#32;:&#32;_M_b1(__g),&#32;_M_b2(__g)
+1333 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{&#32;_M_initialize_max();&#32;}
+1334 
+1335 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+1336 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_namespacelest_1a9e3785d770073a52c90f475365f49542">seed</link>()
+1337 &#32;&#32;&#32;&#32;&#32;&#32;{
+1338 &#32;&#32;&#32;&#32;_M_b1.seed();
+1339 &#32;&#32;&#32;&#32;_M_b2.seed();
+1340 &#32;&#32;&#32;&#32;&#32;&#32;}
+1341 
+1342 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">class</emphasis>&#32;_Gen&gt;
+1343 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+1344 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_namespacelest_1a9e3785d770073a52c90f475365f49542">seed</link>(_Gen&amp;&#32;__g)
+1345 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+1346 &#32;&#32;&#32;&#32;&#32;&#32;_M_b1.seed(__g);
+1347 &#32;&#32;&#32;&#32;&#32;&#32;_M_b2.seed(__g);
+1348 &#32;&#32;&#32;&#32;}
+1349 
+1350 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;base1_type&amp;
+1351 &#32;&#32;&#32;&#32;&#32;&#32;base1()<emphasis role="keyword">&#32;const</emphasis>
+1352 <emphasis role="keyword">&#32;&#32;&#32;&#32;&#32;&#32;</emphasis>{&#32;<emphasis role="keywordflow">return</emphasis>&#32;_M_b1;&#32;}
+1353 
+1354 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;base2_type&amp;
+1355 &#32;&#32;&#32;&#32;&#32;&#32;base2()<emphasis role="keyword">&#32;const</emphasis>
+1356 <emphasis role="keyword">&#32;&#32;&#32;&#32;&#32;&#32;</emphasis>{&#32;<emphasis role="keywordflow">return</emphasis>&#32;_M_b2;&#32;}
+1357 
+1358 &#32;&#32;&#32;&#32;&#32;&#32;result_type
+1359 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_toml_8hpp_1aef6fbc596e7e69a80f14c34a2b786a14">min</link>()<emphasis role="keyword">&#32;const</emphasis>
+1360 <emphasis role="keyword">&#32;&#32;&#32;&#32;&#32;&#32;</emphasis>{&#32;<emphasis role="keywordflow">return</emphasis>&#32;0;&#32;}
+1361 
+1362 &#32;&#32;&#32;&#32;&#32;&#32;result_type
+1363 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_group__core__func__common_1gae02d42887fc5570451f880e3c624b9ac">max</link>()<emphasis role="keyword">&#32;const</emphasis>
+1364 <emphasis role="keyword">&#32;&#32;&#32;&#32;&#32;&#32;</emphasis>{&#32;<emphasis role="keywordflow">return</emphasis>&#32;_M_max;&#32;}
+1365 
+1369 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;NB:&#32;Not&#32;exactly&#32;the&#32;TR1&#32;formula,&#32;per&#32;N2079&#32;instead.</emphasis>
+1370 &#32;&#32;&#32;&#32;&#32;&#32;result_type
+1371 &#32;&#32;&#32;&#32;&#32;&#32;operator()()
+1372 &#32;&#32;&#32;&#32;&#32;&#32;{
+1373 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;((result_type(_M_b1()&#32;-&#32;_M_b1.min())&#32;&lt;&lt;&#32;shift1)
+1374 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;^&#32;(result_type(_M_b2()&#32;-&#32;_M_b2.min())&#32;&lt;&lt;&#32;shift2));
+1375 &#32;&#32;&#32;&#32;&#32;&#32;}
+1376 
+1387 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">friend</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>
+1388 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_namespacenlohmann_1aaf11d1e42c5a671e7cd362ab0a182de1">operator==</link>(<emphasis role="keyword">const</emphasis>&#32;xor_combine&amp;&#32;__lhs,&#32;<emphasis role="keyword">const</emphasis>&#32;xor_combine&amp;&#32;__rhs)
+1389 &#32;&#32;&#32;&#32;&#32;&#32;{
+1390 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;(__lhs.base1()&#32;==&#32;__rhs.base1())
+1391 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&amp;&amp;&#32;(__lhs.base2()&#32;==&#32;__rhs.base2());
+1392 &#32;&#32;&#32;&#32;&#32;&#32;}
+1393 
+1404 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">friend</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>
+1405 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_namespacenlohmann_1aa9fe6e8e15f1b1b242d291e7703f1b8d">operator!=</link>(<emphasis role="keyword">const</emphasis>&#32;xor_combine&amp;&#32;__lhs,&#32;<emphasis role="keyword">const</emphasis>&#32;xor_combine&amp;&#32;__rhs)
+1406 &#32;&#32;&#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;!(__lhs&#32;==&#32;__rhs);&#32;}
+1407 
+1418 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">class&#32;</emphasis>_UniformRandomNumberGenerator11,&#32;<emphasis role="keywordtype">int</emphasis>&#32;__s11,
+1419 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">class&#32;</emphasis>_UniformRandomNumberGenerator21,&#32;<emphasis role="keywordtype">int</emphasis>&#32;__s21,
+1420 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;_CharT,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Traits&gt;
+1421 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">friend</emphasis>&#32;std::basic_ostream&lt;_CharT,&#32;_Traits&gt;&amp;
+1422 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_forward__declarations_8h_1ade7e3bc03b39cb3b5684a4c302832e3c">operator&lt;&lt;</link>(std::basic_ostream&lt;_CharT,&#32;_Traits&gt;&amp;&#32;__os,
+1423 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;xor_combine&lt;_UniformRandomNumberGenerator11,&#32;__s11,
+1424 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_UniformRandomNumberGenerator21,&#32;__s21&gt;&amp;&#32;__x);
+1425 
+1436 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">class&#32;</emphasis>_UniformRandomNumberGenerator11,&#32;<emphasis role="keywordtype">int</emphasis>&#32;__s11,
+1437 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">class&#32;</emphasis>_UniformRandomNumberGenerator21,&#32;<emphasis role="keywordtype">int</emphasis>&#32;__s21,
+1438 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;_CharT,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Traits&gt;
+1439 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">friend</emphasis>&#32;std::basic_istream&lt;_CharT,&#32;_Traits&gt;&amp;
+1440 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_namespaceglm_1a4560e59cc4f5ddaf0ec23d1a7050b611">operator&gt;&gt;</link>(std::basic_istream&lt;_CharT,&#32;_Traits&gt;&amp;&#32;__is,
+1441 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;xor_combine&lt;_UniformRandomNumberGenerator11,&#32;__s11,
+1442 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_UniformRandomNumberGenerator21,&#32;__s21&gt;&amp;&#32;__x);
+1443 
+1444 &#32;&#32;&#32;&#32;<emphasis role="keyword">private</emphasis>:
+1445 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+1446 &#32;&#32;&#32;&#32;&#32;&#32;_M_initialize_max();
+1447 
+1448 &#32;&#32;&#32;&#32;&#32;&#32;result_type
+1449 &#32;&#32;&#32;&#32;&#32;&#32;_M_initialize_max_aux(result_type,&#32;result_type,&#32;<emphasis role="keywordtype">int</emphasis>);
+1450 
+1451 &#32;&#32;&#32;&#32;&#32;&#32;base1_type&#32;&#32;_M_b1;
+1452 &#32;&#32;&#32;&#32;&#32;&#32;base2_type&#32;&#32;_M_b2;
+1453 &#32;&#32;&#32;&#32;&#32;&#32;result_type&#32;_M_max;
+1454 &#32;&#32;&#32;&#32;};
+1455 
+1456 
+1461 &#32;&#32;<emphasis role="keyword">class&#32;</emphasis>random_device
+1462 &#32;&#32;{
+1463 &#32;&#32;<emphasis role="keyword">public</emphasis>:
+1464 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;types</emphasis>
+1465 &#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;result_type;
+1466 
+1467 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;constructors,&#32;destructors&#32;and&#32;member&#32;functions</emphasis>
+1468 
+1469 <emphasis role="preprocessor">#ifdef&#32;_GLIBCXX_USE_RANDOM_TR1</emphasis>
+1470 
+1471 &#32;&#32;&#32;&#32;<emphasis role="keyword">explicit</emphasis>
+1472 &#32;&#32;&#32;&#32;random_device(<emphasis role="keyword">const</emphasis>&#32;std::string&amp;&#32;__token&#32;=&#32;<emphasis role="stringliteral">&quot;/dev/urandom&quot;</emphasis>)
+1473 &#32;&#32;&#32;&#32;{
+1474 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;((__token&#32;!=&#32;<emphasis role="stringliteral">&quot;/dev/urandom&quot;</emphasis>&#32;&amp;&amp;&#32;__token&#32;!=&#32;<emphasis role="stringliteral">&quot;/dev/random&quot;</emphasis>)
+1475 &#32;&#32;&#32;&#32;&#32;&#32;||&#32;!(_M_file&#32;=&#32;std::fopen(__token.c_str(),&#32;<emphasis role="stringliteral">&quot;rb&quot;</emphasis>)))
+1476 &#32;&#32;&#32;&#32;std::__throw_runtime_error(<link linkend="__classes_2lib_2include_2c_09_09_2x86__64-w64-mingw32_2bits_2c_09_09config_8h_1ad90b1fa000da1666f104c4dd9c0d7f9b">__N</link>(<emphasis role="stringliteral">&quot;random_device::&quot;</emphasis>
+1477 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="stringliteral">&quot;random_device(const&#32;std::string&amp;)&quot;</emphasis>));
+1478 &#32;&#32;&#32;&#32;}
+1479 
+1480 &#32;&#32;&#32;&#32;~random_device()
+1481 &#32;&#32;&#32;&#32;{&#32;std::fclose(_M_file);&#32;}
+1482 
+1483 <emphasis role="preprocessor">#else</emphasis>
+1484 
+1485 &#32;&#32;&#32;&#32;<emphasis role="keyword">explicit</emphasis>
+1486 &#32;&#32;&#32;&#32;random_device(<emphasis role="keyword">const</emphasis>&#32;std::string&amp;&#32;__token&#32;=&#32;<emphasis role="stringliteral">&quot;mt19937&quot;</emphasis>)
+1487 &#32;&#32;&#32;&#32;:&#32;_M_mt(_M_strtoul(__token))&#32;{&#32;}
+1488 
+1489 &#32;&#32;<emphasis role="keyword">private</emphasis>:
+1490 &#32;&#32;&#32;&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">long</emphasis>
+1491 &#32;&#32;&#32;&#32;_M_strtoul(<emphasis role="keyword">const</emphasis>&#32;std::string&amp;&#32;__str)
+1492 &#32;&#32;&#32;&#32;{
+1493 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">long</emphasis>&#32;__ret&#32;=&#32;5489UL;
+1494 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__str&#32;!=&#32;<emphasis role="stringliteral">&quot;mt19937&quot;</emphasis>)
+1495 &#32;&#32;&#32;&#32;{
+1496 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>*&#32;__nptr&#32;=&#32;__str.c_str();
+1497 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">char</emphasis>*&#32;__endptr;
+1498 &#32;&#32;&#32;&#32;&#32;&#32;__ret&#32;=&#32;std::strtoul(__nptr,&#32;&amp;__endptr,&#32;0);
+1499 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(*__nptr&#32;==&#32;<emphasis role="charliteral">&apos;\0&apos;</emphasis>&#32;||&#32;*__endptr&#32;!=&#32;<emphasis role="charliteral">&apos;\0&apos;</emphasis>)
+1500 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;std::__throw_runtime_error(<link linkend="__classes_2lib_2include_2c_09_09_2x86__64-w64-mingw32_2bits_2c_09_09config_8h_1ad90b1fa000da1666f104c4dd9c0d7f9b">__N</link>(<emphasis role="stringliteral">&quot;random_device::_M_strtoul&quot;</emphasis>
+1501 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="stringliteral">&quot;(const&#32;std::string&amp;)&quot;</emphasis>));
+1502 &#32;&#32;&#32;&#32;}
+1503 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__ret;
+1504 &#32;&#32;&#32;&#32;}
+1505 
+1506 &#32;&#32;<emphasis role="keyword">public</emphasis>:
+1507 
+1508 <emphasis role="preprocessor">#endif</emphasis>
+1509 
+1510 &#32;&#32;&#32;&#32;result_type
+1511 &#32;&#32;&#32;&#32;<link linkend="_toml_8hpp_1aef6fbc596e7e69a80f14c34a2b786a14">min</link>()<emphasis role="keyword">&#32;const</emphasis>
+1512 <emphasis role="keyword">&#32;&#32;&#32;&#32;</emphasis>{&#32;<emphasis role="keywordflow">return</emphasis>&#32;std::numeric_limits&lt;result_type&gt;::min();&#32;}
+1513 
+1514 &#32;&#32;&#32;&#32;result_type
+1515 &#32;&#32;&#32;&#32;<link linkend="_group__core__func__common_1gae02d42887fc5570451f880e3c624b9ac">max</link>()<emphasis role="keyword">&#32;const</emphasis>
+1516 <emphasis role="keyword">&#32;&#32;&#32;&#32;</emphasis>{&#32;<emphasis role="keywordflow">return</emphasis>&#32;std::numeric_limits&lt;result_type&gt;::max();&#32;}
+1517 
+1518 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">double</emphasis>
+1519 &#32;&#32;&#32;&#32;entropy()<emphasis role="keyword">&#32;const</emphasis>
+1520 <emphasis role="keyword">&#32;&#32;&#32;&#32;</emphasis>{&#32;<emphasis role="keywordflow">return</emphasis>&#32;0.0;&#32;}
+1521 
+1522 &#32;&#32;&#32;&#32;result_type
+1523 &#32;&#32;&#32;&#32;operator()()
+1524 &#32;&#32;&#32;&#32;{
+1525 <emphasis role="preprocessor">#ifdef&#32;_GLIBCXX_USE_RANDOM_TR1</emphasis>
+1526 &#32;&#32;&#32;&#32;&#32;&#32;result_type&#32;__ret;
+1527 &#32;&#32;&#32;&#32;&#32;&#32;std::fread(<emphasis role="keyword">reinterpret_cast&lt;</emphasis><emphasis role="keywordtype">void</emphasis>*<emphasis role="keyword">&gt;</emphasis>(&amp;__ret),&#32;<emphasis role="keyword">sizeof</emphasis>(result_type),
+1528 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;1,&#32;_M_file);
+1529 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__ret;
+1530 <emphasis role="preprocessor">#else</emphasis>
+1531 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;_M_mt();
+1532 <emphasis role="preprocessor">#endif</emphasis>
+1533 &#32;&#32;&#32;&#32;}
+1534 
+1535 &#32;&#32;<emphasis role="keyword">private</emphasis>:
+1536 &#32;&#32;&#32;&#32;random_device(<emphasis role="keyword">const</emphasis>&#32;random_device&amp;);
+1537 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>&#32;operator=(<emphasis role="keyword">const</emphasis>&#32;random_device&amp;);
+1538 
+1539 <emphasis role="preprocessor">#ifdef&#32;_GLIBCXX_USE_RANDOM_TR1</emphasis>
+1540 &#32;&#32;&#32;&#32;FILE*&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_M_file;
+1541 <emphasis role="preprocessor">#else</emphasis>
+1542 &#32;&#32;&#32;&#32;mt19937&#32;&#32;&#32;&#32;&#32;&#32;_M_mt;
+1543 <emphasis role="preprocessor">#endif</emphasis>
+1544 &#32;&#32;};
+1545 
+1547 
+1565 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_IntType&#32;=&#32;<emphasis role="keywordtype">int</emphasis>&gt;
+1566 &#32;&#32;&#32;&#32;<emphasis role="keyword">class&#32;</emphasis>uniform_int
+1567 &#32;&#32;&#32;&#32;{
+1568 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2bits_2concept__check_8h_1ae4dc1beb74b88e6b1215e05c397fc7a2">__glibcxx_class_requires</link>(_IntType,&#32;_IntegerConcept)
+1569 &#32;
+1570 &#32;&#32;&#32;&#32;<emphasis role="keyword">public</emphasis>:
+1572 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;_IntType&#32;input_type;
+1574 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;_IntType&#32;result_type;
+1575 
+1576 &#32;&#32;&#32;&#32;<emphasis role="keyword">public</emphasis>:
+1580 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">explicit</emphasis>
+1581 &#32;&#32;&#32;&#32;&#32;&#32;uniform_int(_IntType&#32;__min&#32;=&#32;0,&#32;_IntType&#32;__max&#32;=&#32;9)
+1582 &#32;&#32;&#32;&#32;&#32;&#32;:&#32;_M_min(__min),&#32;_M_max(__max)
+1583 &#32;&#32;&#32;&#32;&#32;&#32;{
+1584 &#32;&#32;&#32;&#32;<link linkend="_lib_2include_2c_09_09_2debug_2assertions_8h_1aa2bfb4e74c7be93673913edf15f85504">_GLIBCXX_DEBUG_ASSERT</link>(_M_min&#32;&lt;=&#32;_M_max);
+1585 &#32;&#32;&#32;&#32;&#32;&#32;}
+1586 
+1590 &#32;&#32;&#32;&#32;&#32;&#32;result_type
+1591 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_toml_8hpp_1aef6fbc596e7e69a80f14c34a2b786a14">min</link>()<emphasis role="keyword">&#32;const</emphasis>
+1592 <emphasis role="keyword">&#32;&#32;&#32;&#32;&#32;&#32;</emphasis>{&#32;<emphasis role="keywordflow">return</emphasis>&#32;_M_min;&#32;}
+1593 
+1597 &#32;&#32;&#32;&#32;&#32;&#32;result_type
+1598 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_group__core__func__common_1gae02d42887fc5570451f880e3c624b9ac">max</link>()<emphasis role="keyword">&#32;const</emphasis>
+1599 <emphasis role="keyword">&#32;&#32;&#32;&#32;&#32;&#32;</emphasis>{&#32;<emphasis role="keywordflow">return</emphasis>&#32;_M_max;&#32;}
+1600 
+1606 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+1607 &#32;&#32;&#32;&#32;&#32;&#32;reset()&#32;{&#32;}
+1608 
+1613 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_UniformRandomNumberGenerator&gt;
+1614 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;result_type
+1615 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;operator()(_UniformRandomNumberGenerator&amp;&#32;__urng)
+1616 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+1617 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">typename</emphasis>&#32;_UniformRandomNumberGenerator::result_type
+1618 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_UResult_type;
+1619 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;_M_call(__urng,&#32;_M_min,&#32;_M_max,
+1620 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;is_integral&lt;_UResult_type&gt;::type());
+1621 &#32;&#32;&#32;&#32;}
+1622 
+1628 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_UniformRandomNumberGenerator&gt;
+1629 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;result_type
+1630 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;operator()(_UniformRandomNumberGenerator&amp;&#32;__urng,&#32;result_type&#32;__n)
+1631 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+1632 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">typename</emphasis>&#32;_UniformRandomNumberGenerator::result_type
+1633 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_UResult_type;
+1634 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;_M_call(__urng,&#32;0,&#32;__n&#32;-&#32;1,
+1635 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;is_integral&lt;_UResult_type&gt;::type());
+1636 &#32;&#32;&#32;&#32;}
+1637 
+1648 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_IntType1,&#32;<emphasis role="keyword">typename</emphasis>&#32;_CharT,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Traits&gt;
+1649 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">friend</emphasis>&#32;std::basic_ostream&lt;_CharT,&#32;_Traits&gt;&amp;
+1650 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_forward__declarations_8h_1ade7e3bc03b39cb3b5684a4c302832e3c">operator&lt;&lt;</link>(std::basic_ostream&lt;_CharT,&#32;_Traits&gt;&amp;&#32;__os,
+1651 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;uniform_int&lt;_IntType1&gt;&amp;&#32;__x);
+1652 
+1662 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_IntType1,&#32;<emphasis role="keyword">typename</emphasis>&#32;_CharT,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Traits&gt;
+1663 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">friend</emphasis>&#32;std::basic_istream&lt;_CharT,&#32;_Traits&gt;&amp;
+1664 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_namespaceglm_1a4560e59cc4f5ddaf0ec23d1a7050b611">operator&gt;&gt;</link>(std::basic_istream&lt;_CharT,&#32;_Traits&gt;&amp;&#32;__is,
+1665 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;uniform_int&lt;_IntType1&gt;&amp;&#32;__x);
+1666 
+1667 &#32;&#32;&#32;&#32;<emphasis role="keyword">private</emphasis>:
+1668 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_UniformRandomNumberGenerator&gt;
+1669 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;result_type
+1670 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_M_call(_UniformRandomNumberGenerator&amp;&#32;__urng,
+1671 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;result_type&#32;__min,&#32;result_type&#32;__max,&#32;true_type);
+1672 
+1673 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_UniformRandomNumberGenerator&gt;
+1674 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;result_type
+1675 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_M_call(_UniformRandomNumberGenerator&amp;&#32;__urng,
+1676 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;result_type&#32;__min,&#32;result_type&#32;__max,&#32;false_type)
+1677 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+1678 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;result_type((__urng()&#32;-&#32;__urng.min())
+1679 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;/&#32;(__urng.max()&#32;-&#32;__urng.min())
+1680 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;*&#32;(__max&#32;-&#32;__min&#32;+&#32;1))&#32;+&#32;__min;
+1681 &#32;&#32;&#32;&#32;}
+1682 
+1683 &#32;&#32;&#32;&#32;&#32;&#32;_IntType&#32;_M_min;
+1684 &#32;&#32;&#32;&#32;&#32;&#32;_IntType&#32;_M_max;
+1685 &#32;&#32;&#32;&#32;};
+1686 
+1687 
+1694 &#32;&#32;<emphasis role="keyword">class&#32;</emphasis>bernoulli_distribution
+1695 &#32;&#32;{
+1696 &#32;&#32;<emphasis role="keyword">public</emphasis>:
+1697 &#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;&#32;input_type;
+1698 &#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>&#32;result_type;
+1699 
+1700 &#32;&#32;<emphasis role="keyword">public</emphasis>:
+1707 &#32;&#32;&#32;&#32;<emphasis role="keyword">explicit</emphasis>
+1708 &#32;&#32;&#32;&#32;bernoulli_distribution(<emphasis role="keywordtype">double</emphasis>&#32;__p&#32;=&#32;0.5)
+1709 &#32;&#32;&#32;&#32;:&#32;_M_p(__p)
+1710 &#32;&#32;&#32;&#32;{&#32;
+1711 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_lib_2include_2c_09_09_2debug_2assertions_8h_1aa2bfb4e74c7be93673913edf15f85504">_GLIBCXX_DEBUG_ASSERT</link>((_M_p&#32;&gt;=&#32;0.0)&#32;&amp;&amp;&#32;(_M_p&#32;&lt;=&#32;1.0));
+1712 &#32;&#32;&#32;&#32;}
+1713 
+1717 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">double</emphasis>
+1718 &#32;&#32;&#32;&#32;p()<emphasis role="keyword">&#32;const</emphasis>
+1719 <emphasis role="keyword">&#32;&#32;&#32;&#32;</emphasis>{&#32;<emphasis role="keywordflow">return</emphasis>&#32;_M_p;&#32;}
+1720 
+1726 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+1727 &#32;&#32;&#32;&#32;reset()&#32;{&#32;}
+1728 
+1732 &#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">class</emphasis>&#32;_UniformRandomNumberGenerator&gt;
+1733 &#32;&#32;&#32;&#32;&#32;&#32;result_type
+1734 &#32;&#32;&#32;&#32;&#32;&#32;operator()(_UniformRandomNumberGenerator&amp;&#32;__urng)
+1735 &#32;&#32;&#32;&#32;&#32;&#32;{
+1736 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;((__urng()&#32;-&#32;__urng.min())&#32;&lt;&#32;_M_p&#32;*&#32;(__urng.max()&#32;-&#32;__urng.min()))
+1737 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<emphasis role="keyword">true</emphasis>;
+1738 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<emphasis role="keyword">false</emphasis>;
+1739 &#32;&#32;&#32;&#32;&#32;&#32;}
+1740 
+1751 &#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_CharT,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Traits&gt;
+1752 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">friend</emphasis>&#32;std::basic_ostream&lt;_CharT,&#32;_Traits&gt;&amp;
+1753 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_forward__declarations_8h_1ade7e3bc03b39cb3b5684a4c302832e3c">operator&lt;&lt;</link>(std::basic_ostream&lt;_CharT,&#32;_Traits&gt;&amp;&#32;__os,
+1754 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;bernoulli_distribution&amp;&#32;__x);
+1755 
+1765 &#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_CharT,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Traits&gt;
+1766 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">friend</emphasis>&#32;std::basic_istream&lt;_CharT,&#32;_Traits&gt;&amp;
+1767 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_namespaceglm_1a4560e59cc4f5ddaf0ec23d1a7050b611">operator&gt;&gt;</link>(std::basic_istream&lt;_CharT,&#32;_Traits&gt;&amp;&#32;__is,
+1768 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;bernoulli_distribution&amp;&#32;__x)
+1769 &#32;&#32;&#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;__is&#32;&gt;&gt;&#32;__x._M_p;&#32;}
+1770 
+1771 &#32;&#32;<emphasis role="keyword">private</emphasis>:
+1772 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">double</emphasis>&#32;_M_p;
+1773 &#32;&#32;};
+1774 
+1775 
+1783 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_IntType&#32;=&#32;<emphasis role="keywordtype">int</emphasis>,&#32;<emphasis role="keyword">typename</emphasis>&#32;_RealType&#32;=&#32;<emphasis role="keywordtype">double</emphasis>&gt;
+1784 &#32;&#32;&#32;&#32;<emphasis role="keyword">class&#32;</emphasis>geometric_distribution
+1785 &#32;&#32;&#32;&#32;{
+1786 &#32;&#32;&#32;&#32;<emphasis role="keyword">public</emphasis>:
+1787 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;types</emphasis>
+1788 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;_RealType&#32;input_type;
+1789 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;_IntType&#32;&#32;result_type;
+1790 
+1791 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;constructors&#32;and&#32;member&#32;function</emphasis>
+1792 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">explicit</emphasis>
+1793 &#32;&#32;&#32;&#32;&#32;&#32;geometric_distribution(<emphasis role="keyword">const</emphasis>&#32;_RealType&amp;&#32;__p&#32;=&#32;_RealType(0.5))
+1794 &#32;&#32;&#32;&#32;&#32;&#32;:&#32;_M_p(__p)
+1795 &#32;&#32;&#32;&#32;&#32;&#32;{
+1796 &#32;&#32;&#32;&#32;<link linkend="_lib_2include_2c_09_09_2debug_2assertions_8h_1aa2bfb4e74c7be93673913edf15f85504">_GLIBCXX_DEBUG_ASSERT</link>((_M_p&#32;&gt;&#32;0.0)&#32;&amp;&amp;&#32;(_M_p&#32;&lt;&#32;1.0));
+1797 &#32;&#32;&#32;&#32;_M_initialize();
+1798 &#32;&#32;&#32;&#32;&#32;&#32;}
+1799 
+1803 &#32;&#32;&#32;&#32;&#32;&#32;_RealType
+1804 &#32;&#32;&#32;&#32;&#32;&#32;p()<emphasis role="keyword">&#32;const</emphasis>
+1805 <emphasis role="keyword">&#32;&#32;&#32;&#32;&#32;&#32;</emphasis>{&#32;<emphasis role="keywordflow">return</emphasis>&#32;_M_p;&#32;}
+1806 
+1807 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+1808 &#32;&#32;&#32;&#32;&#32;&#32;reset()&#32;{&#32;}
+1809 
+1810 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">class</emphasis>&#32;_UniformRandomNumberGenerator&gt;
+1811 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;result_type
+1812 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;operator()(_UniformRandomNumberGenerator&amp;&#32;__urng);
+1813 
+1824 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_IntType1,&#32;<emphasis role="keyword">typename</emphasis>&#32;_RealType1,
+1825 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;_CharT,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Traits&gt;
+1826 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">friend</emphasis>&#32;std::basic_ostream&lt;_CharT,&#32;_Traits&gt;&amp;
+1827 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_forward__declarations_8h_1ade7e3bc03b39cb3b5684a4c302832e3c">operator&lt;&lt;</link>(std::basic_ostream&lt;_CharT,&#32;_Traits&gt;&amp;&#32;__os,
+1828 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;geometric_distribution&lt;_IntType1,&#32;_RealType1&gt;&amp;&#32;__x);
+1829 
+1839 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_CharT,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Traits&gt;
+1840 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">friend</emphasis>&#32;std::basic_istream&lt;_CharT,&#32;_Traits&gt;&amp;
+1841 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_namespaceglm_1a4560e59cc4f5ddaf0ec23d1a7050b611">operator&gt;&gt;</link>(std::basic_istream&lt;_CharT,&#32;_Traits&gt;&amp;&#32;__is,
+1842 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;geometric_distribution&amp;&#32;__x)
+1843 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+1844 &#32;&#32;&#32;&#32;&#32;&#32;__is&#32;&gt;&gt;&#32;__x._M_p;
+1845 &#32;&#32;&#32;&#32;&#32;&#32;__x._M_initialize();
+1846 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__is;
+1847 &#32;&#32;&#32;&#32;}
+1848 
+1849 &#32;&#32;&#32;&#32;<emphasis role="keyword">private</emphasis>:
+1850 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+1851 &#32;&#32;&#32;&#32;&#32;&#32;_M_initialize()
+1852 &#32;&#32;&#32;&#32;&#32;&#32;{&#32;_M_log_p&#32;=&#32;std::log(_M_p);&#32;}
+1853 
+1854 &#32;&#32;&#32;&#32;&#32;&#32;_RealType&#32;_M_p;
+1855 &#32;&#32;&#32;&#32;&#32;&#32;_RealType&#32;_M_log_p;
+1856 &#32;&#32;&#32;&#32;};
+1857 
+1858 
+1859 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_RealType&gt;
+1860 &#32;&#32;&#32;&#32;<emphasis role="keyword">class&#32;</emphasis>normal_distribution;
+1861 
+1869 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_IntType&#32;=&#32;<emphasis role="keywordtype">int</emphasis>,&#32;<emphasis role="keyword">typename</emphasis>&#32;_RealType&#32;=&#32;<emphasis role="keywordtype">double</emphasis>&gt;
+1870 &#32;&#32;&#32;&#32;<emphasis role="keyword">class&#32;</emphasis>poisson_distribution
+1871 &#32;&#32;&#32;&#32;{
+1872 &#32;&#32;&#32;&#32;<emphasis role="keyword">public</emphasis>:
+1873 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;types</emphasis>
+1874 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;_RealType&#32;input_type;
+1875 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;_IntType&#32;&#32;result_type;
+1876 
+1877 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;constructors&#32;and&#32;member&#32;function</emphasis>
+1878 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">explicit</emphasis>
+1879 &#32;&#32;&#32;&#32;&#32;&#32;poisson_distribution(<emphasis role="keyword">const</emphasis>&#32;_RealType&amp;&#32;__mean&#32;=&#32;_RealType(1))
+1880 &#32;&#32;&#32;&#32;&#32;&#32;:&#32;_M_mean(__mean),&#32;_M_nd()
+1881 &#32;&#32;&#32;&#32;&#32;&#32;{
+1882 &#32;&#32;&#32;&#32;<link linkend="_lib_2include_2c_09_09_2debug_2assertions_8h_1aa2bfb4e74c7be93673913edf15f85504">_GLIBCXX_DEBUG_ASSERT</link>(_M_mean&#32;&gt;&#32;0.0);
+1883 &#32;&#32;&#32;&#32;_M_initialize();
+1884 &#32;&#32;&#32;&#32;&#32;&#32;}
+1885 
+1889 &#32;&#32;&#32;&#32;&#32;&#32;_RealType
+1890 &#32;&#32;&#32;&#32;&#32;&#32;mean()<emphasis role="keyword">&#32;const</emphasis>
+1891 <emphasis role="keyword">&#32;&#32;&#32;&#32;&#32;&#32;</emphasis>{&#32;<emphasis role="keywordflow">return</emphasis>&#32;_M_mean;&#32;}
+1892 
+1893 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+1894 &#32;&#32;&#32;&#32;&#32;&#32;reset()
+1895 &#32;&#32;&#32;&#32;&#32;&#32;{&#32;_M_nd.reset();&#32;}
+1896 
+1897 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">class</emphasis>&#32;_UniformRandomNumberGenerator&gt;
+1898 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;result_type
+1899 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;operator()(_UniformRandomNumberGenerator&amp;&#32;__urng);
+1900 
+1911 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_IntType1,&#32;<emphasis role="keyword">typename</emphasis>&#32;_RealType1,
+1912 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;_CharT,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Traits&gt;
+1913 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">friend</emphasis>&#32;std::basic_ostream&lt;_CharT,&#32;_Traits&gt;&amp;
+1914 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_forward__declarations_8h_1ade7e3bc03b39cb3b5684a4c302832e3c">operator&lt;&lt;</link>(std::basic_ostream&lt;_CharT,&#32;_Traits&gt;&amp;&#32;__os,
+1915 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;poisson_distribution&lt;_IntType1,&#32;_RealType1&gt;&amp;&#32;__x);
+1916 
+1926 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_IntType1,&#32;<emphasis role="keyword">typename</emphasis>&#32;_RealType1,
+1927 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;_CharT,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Traits&gt;
+1928 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">friend</emphasis>&#32;std::basic_istream&lt;_CharT,&#32;_Traits&gt;&amp;
+1929 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_namespaceglm_1a4560e59cc4f5ddaf0ec23d1a7050b611">operator&gt;&gt;</link>(std::basic_istream&lt;_CharT,&#32;_Traits&gt;&amp;&#32;__is,
+1930 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;poisson_distribution&lt;_IntType1,&#32;_RealType1&gt;&amp;&#32;__x);
+1931 
+1932 &#32;&#32;&#32;&#32;<emphasis role="keyword">private</emphasis>:
+1933 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+1934 &#32;&#32;&#32;&#32;&#32;&#32;_M_initialize();
+1935 
+1936 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;NB:&#32;Unused&#32;when&#32;_GLIBCXX_USE_C99_MATH_TR1&#32;is&#32;undefined.</emphasis>
+1937 &#32;&#32;&#32;&#32;&#32;&#32;normal_distribution&lt;_RealType&gt;&#32;_M_nd;
+1938 
+1939 &#32;&#32;&#32;&#32;&#32;&#32;_RealType&#32;_M_mean;
+1940 
+1941 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Hosts&#32;either&#32;log(mean)&#32;or&#32;the&#32;threshold&#32;of&#32;the&#32;simple&#32;method.</emphasis>
+1942 &#32;&#32;&#32;&#32;&#32;&#32;_RealType&#32;_M_lm_thr;
+1943 <emphasis role="preprocessor">#if&#32;_GLIBCXX_USE_C99_MATH_TR1</emphasis>
+1944 &#32;&#32;&#32;&#32;&#32;&#32;_RealType&#32;_M_lfm,&#32;_M_sm,&#32;_M_d,&#32;_M_scx,&#32;_M_1cx,&#32;_M_c2b,&#32;_M_cb;
+1945 <emphasis role="preprocessor">#endif</emphasis>
+1946 &#32;&#32;&#32;&#32;};
+1947 
+1948 
+1956 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_IntType&#32;=&#32;<emphasis role="keywordtype">int</emphasis>,&#32;<emphasis role="keyword">typename</emphasis>&#32;_RealType&#32;=&#32;<emphasis role="keywordtype">double</emphasis>&gt;
+1957 &#32;&#32;&#32;&#32;<emphasis role="keyword">class&#32;</emphasis>binomial_distribution
+1958 &#32;&#32;&#32;&#32;{
+1959 &#32;&#32;&#32;&#32;<emphasis role="keyword">public</emphasis>:
+1960 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;types</emphasis>
+1961 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;_RealType&#32;input_type;
+1962 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;_IntType&#32;&#32;result_type;
+1963 
+1964 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;constructors&#32;and&#32;member&#32;function</emphasis>
+1965 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">explicit</emphasis>
+1966 &#32;&#32;&#32;&#32;&#32;&#32;binomial_distribution(_IntType&#32;__t&#32;=&#32;1,
+1967 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;_RealType&amp;&#32;__p&#32;=&#32;_RealType(0.5))
+1968 &#32;&#32;&#32;&#32;&#32;&#32;:&#32;_M_t(__t),&#32;_M_p(__p),&#32;_M_nd()
+1969 &#32;&#32;&#32;&#32;&#32;&#32;{
+1970 &#32;&#32;&#32;&#32;<link linkend="_lib_2include_2c_09_09_2debug_2assertions_8h_1aa2bfb4e74c7be93673913edf15f85504">_GLIBCXX_DEBUG_ASSERT</link>((_M_t&#32;&gt;=&#32;0)&#32;&amp;&amp;&#32;(_M_p&#32;&gt;=&#32;0.0)&#32;&amp;&amp;&#32;(_M_p&#32;&lt;=&#32;1.0));
+1971 &#32;&#32;&#32;&#32;_M_initialize();
+1972 &#32;&#32;&#32;&#32;&#32;&#32;}
+1973 
+1977 &#32;&#32;&#32;&#32;&#32;&#32;_IntType
+1978 &#32;&#32;&#32;&#32;&#32;&#32;t()<emphasis role="keyword">&#32;const</emphasis>
+1979 <emphasis role="keyword">&#32;&#32;&#32;&#32;&#32;&#32;</emphasis>{&#32;<emphasis role="keywordflow">return</emphasis>&#32;_M_t;&#32;}
+1980 &#32;&#32;&#32;&#32;&#32;&#32;
+1984 &#32;&#32;&#32;&#32;&#32;&#32;_RealType
+1985 &#32;&#32;&#32;&#32;&#32;&#32;p()<emphasis role="keyword">&#32;const</emphasis>
+1986 <emphasis role="keyword">&#32;&#32;&#32;&#32;&#32;&#32;</emphasis>{&#32;<emphasis role="keywordflow">return</emphasis>&#32;_M_p;&#32;}
+1987 
+1988 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+1989 &#32;&#32;&#32;&#32;&#32;&#32;reset()
+1990 &#32;&#32;&#32;&#32;&#32;&#32;{&#32;_M_nd.reset();&#32;}
+1991 
+1992 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">class</emphasis>&#32;_UniformRandomNumberGenerator&gt;
+1993 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;result_type
+1994 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;operator()(_UniformRandomNumberGenerator&amp;&#32;__urng);
+1995 
+2006 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_IntType1,&#32;<emphasis role="keyword">typename</emphasis>&#32;_RealType1,
+2007 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;_CharT,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Traits&gt;
+2008 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">friend</emphasis>&#32;std::basic_ostream&lt;_CharT,&#32;_Traits&gt;&amp;
+2009 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_forward__declarations_8h_1ade7e3bc03b39cb3b5684a4c302832e3c">operator&lt;&lt;</link>(std::basic_ostream&lt;_CharT,&#32;_Traits&gt;&amp;&#32;__os,
+2010 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;binomial_distribution&lt;_IntType1,&#32;_RealType1&gt;&amp;&#32;__x);
+2011 
+2021 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_IntType1,&#32;<emphasis role="keyword">typename</emphasis>&#32;_RealType1,
+2022 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;_CharT,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Traits&gt;
+2023 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">friend</emphasis>&#32;std::basic_istream&lt;_CharT,&#32;_Traits&gt;&amp;
+2024 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_namespaceglm_1a4560e59cc4f5ddaf0ec23d1a7050b611">operator&gt;&gt;</link>(std::basic_istream&lt;_CharT,&#32;_Traits&gt;&amp;&#32;__is,
+2025 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;binomial_distribution&lt;_IntType1,&#32;_RealType1&gt;&amp;&#32;__x);
+2026 
+2027 &#32;&#32;&#32;&#32;<emphasis role="keyword">private</emphasis>:
+2028 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+2029 &#32;&#32;&#32;&#32;&#32;&#32;_M_initialize();
+2030 
+2031 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">class</emphasis>&#32;_UniformRandomNumberGenerator&gt;
+2032 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;result_type
+2033 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_M_waiting(_UniformRandomNumberGenerator&amp;&#32;__urng,&#32;_IntType&#32;__t);
+2034 
+2035 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;NB:&#32;Unused&#32;when&#32;_GLIBCXX_USE_C99_MATH_TR1&#32;is&#32;undefined.</emphasis>
+2036 &#32;&#32;&#32;&#32;&#32;&#32;normal_distribution&lt;_RealType&gt;&#32;_M_nd;
+2037 
+2038 &#32;&#32;&#32;&#32;&#32;&#32;_RealType&#32;_M_q;
+2039 <emphasis role="preprocessor">#if&#32;_GLIBCXX_USE_C99_MATH_TR1</emphasis>
+2040 &#32;&#32;&#32;&#32;&#32;&#32;_RealType&#32;_M_d1,&#32;_M_d2,&#32;_M_s1,&#32;_M_s2,&#32;_M_c,
+2041 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_M_a1,&#32;_M_a123,&#32;_M_s,&#32;_M_lf,&#32;_M_lp1p;
+2042 <emphasis role="preprocessor">#endif</emphasis>
+2043 &#32;&#32;&#32;&#32;&#32;&#32;_RealType&#32;_M_p;
+2044 &#32;&#32;&#32;&#32;&#32;&#32;_IntType&#32;&#32;_M_t;
+2045 
+2046 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">bool</emphasis>&#32;&#32;&#32;&#32;&#32;&#32;_M_easy;
+2047 &#32;&#32;&#32;&#32;};
+2048 
+2050 
+2064 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_RealType&#32;=&#32;<emphasis role="keywordtype">double</emphasis>&gt;
+2065 &#32;&#32;&#32;&#32;<emphasis role="keyword">class&#32;</emphasis>uniform_real
+2066 &#32;&#32;&#32;&#32;{
+2067 &#32;&#32;&#32;&#32;<emphasis role="keyword">public</emphasis>:
+2068 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;types</emphasis>
+2069 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;_RealType&#32;input_type;
+2070 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;_RealType&#32;result_type;
+2071 
+2072 &#32;&#32;&#32;&#32;<emphasis role="keyword">public</emphasis>:
+2079 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">explicit</emphasis>
+2080 &#32;&#32;&#32;&#32;&#32;&#32;uniform_real(_RealType&#32;__min&#32;=&#32;_RealType(0),
+2081 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_RealType&#32;__max&#32;=&#32;_RealType(1))
+2082 &#32;&#32;&#32;&#32;&#32;&#32;:&#32;_M_min(__min),&#32;_M_max(__max)
+2083 &#32;&#32;&#32;&#32;&#32;&#32;{
+2084 &#32;&#32;&#32;&#32;<link linkend="_lib_2include_2c_09_09_2debug_2assertions_8h_1aa2bfb4e74c7be93673913edf15f85504">_GLIBCXX_DEBUG_ASSERT</link>(_M_min&#32;&lt;=&#32;_M_max);
+2085 &#32;&#32;&#32;&#32;&#32;&#32;}
+2086 
+2087 &#32;&#32;&#32;&#32;&#32;&#32;result_type
+2088 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_toml_8hpp_1aef6fbc596e7e69a80f14c34a2b786a14">min</link>()<emphasis role="keyword">&#32;const</emphasis>
+2089 <emphasis role="keyword">&#32;&#32;&#32;&#32;&#32;&#32;</emphasis>{&#32;<emphasis role="keywordflow">return</emphasis>&#32;_M_min;&#32;}
+2090 
+2091 &#32;&#32;&#32;&#32;&#32;&#32;result_type
+2092 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_group__core__func__common_1gae02d42887fc5570451f880e3c624b9ac">max</link>()<emphasis role="keyword">&#32;const</emphasis>
+2093 <emphasis role="keyword">&#32;&#32;&#32;&#32;&#32;&#32;</emphasis>{&#32;<emphasis role="keywordflow">return</emphasis>&#32;_M_max;&#32;}
+2094 
+2095 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+2096 &#32;&#32;&#32;&#32;&#32;&#32;reset()&#32;{&#32;}
+2097 
+2098 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">class</emphasis>&#32;_UniformRandomNumberGenerator&gt;
+2099 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;result_type
+2100 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;operator()(_UniformRandomNumberGenerator&amp;&#32;__urng)
+2101 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;(__urng()&#32;*&#32;(_M_max&#32;-&#32;_M_min))&#32;+&#32;_M_min;&#32;}
+2102 
+2113 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_RealType1,&#32;<emphasis role="keyword">typename</emphasis>&#32;_CharT,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Traits&gt;
+2114 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">friend</emphasis>&#32;std::basic_ostream&lt;_CharT,&#32;_Traits&gt;&amp;
+2115 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_forward__declarations_8h_1ade7e3bc03b39cb3b5684a4c302832e3c">operator&lt;&lt;</link>(std::basic_ostream&lt;_CharT,&#32;_Traits&gt;&amp;&#32;__os,
+2116 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;uniform_real&lt;_RealType1&gt;&amp;&#32;__x);
+2117 
+2127 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_RealType1,&#32;<emphasis role="keyword">typename</emphasis>&#32;_CharT,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Traits&gt;
+2128 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">friend</emphasis>&#32;std::basic_istream&lt;_CharT,&#32;_Traits&gt;&amp;
+2129 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_namespaceglm_1a4560e59cc4f5ddaf0ec23d1a7050b611">operator&gt;&gt;</link>(std::basic_istream&lt;_CharT,&#32;_Traits&gt;&amp;&#32;__is,
+2130 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;uniform_real&lt;_RealType1&gt;&amp;&#32;__x);
+2131 
+2132 &#32;&#32;&#32;&#32;<emphasis role="keyword">private</emphasis>:
+2133 &#32;&#32;&#32;&#32;&#32;&#32;_RealType&#32;_M_min;
+2134 &#32;&#32;&#32;&#32;&#32;&#32;_RealType&#32;_M_max;
+2135 &#32;&#32;&#32;&#32;};
+2136 
+2137 
+2153 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_RealType&#32;=&#32;<emphasis role="keywordtype">double</emphasis>&gt;
+2154 &#32;&#32;&#32;&#32;<emphasis role="keyword">class&#32;</emphasis>exponential_distribution
+2155 &#32;&#32;&#32;&#32;{
+2156 &#32;&#32;&#32;&#32;<emphasis role="keyword">public</emphasis>:
+2157 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;types</emphasis>
+2158 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;_RealType&#32;input_type;
+2159 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;_RealType&#32;result_type;
+2160 
+2161 &#32;&#32;&#32;&#32;<emphasis role="keyword">public</emphasis>:
+2166 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">explicit</emphasis>
+2167 &#32;&#32;&#32;&#32;&#32;&#32;exponential_distribution(<emphasis role="keyword">const</emphasis>&#32;result_type&amp;&#32;__lambda&#32;=&#32;result_type(1))
+2168 &#32;&#32;&#32;&#32;&#32;&#32;:&#32;_M_lambda(__lambda)
+2169 &#32;&#32;&#32;&#32;&#32;&#32;{&#32;
+2170 &#32;&#32;&#32;&#32;<link linkend="_lib_2include_2c_09_09_2debug_2assertions_8h_1aa2bfb4e74c7be93673913edf15f85504">_GLIBCXX_DEBUG_ASSERT</link>(_M_lambda&#32;&gt;&#32;0);
+2171 &#32;&#32;&#32;&#32;&#32;&#32;}
+2172 
+2176 &#32;&#32;&#32;&#32;&#32;&#32;_RealType
+2177 &#32;&#32;&#32;&#32;&#32;&#32;lambda()<emphasis role="keyword">&#32;const</emphasis>
+2178 <emphasis role="keyword">&#32;&#32;&#32;&#32;&#32;&#32;</emphasis>{&#32;<emphasis role="keywordflow">return</emphasis>&#32;_M_lambda;&#32;}
+2179 
+2185 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+2186 &#32;&#32;&#32;&#32;&#32;&#32;reset()&#32;{&#32;}
+2187 
+2188 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">class</emphasis>&#32;_UniformRandomNumberGenerator&gt;
+2189 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;result_type
+2190 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;operator()(_UniformRandomNumberGenerator&amp;&#32;__urng)
+2191 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;-std::log(__urng())&#32;/&#32;_M_lambda;&#32;}
+2192 
+2203 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_RealType1,&#32;<emphasis role="keyword">typename</emphasis>&#32;_CharT,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Traits&gt;
+2204 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">friend</emphasis>&#32;std::basic_ostream&lt;_CharT,&#32;_Traits&gt;&amp;
+2205 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_forward__declarations_8h_1ade7e3bc03b39cb3b5684a4c302832e3c">operator&lt;&lt;</link>(std::basic_ostream&lt;_CharT,&#32;_Traits&gt;&amp;&#32;__os,
+2206 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;exponential_distribution&lt;_RealType1&gt;&amp;&#32;__x);
+2207 
+2218 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_CharT,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Traits&gt;
+2219 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">friend</emphasis>&#32;std::basic_istream&lt;_CharT,&#32;_Traits&gt;&amp;
+2220 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_namespaceglm_1a4560e59cc4f5ddaf0ec23d1a7050b611">operator&gt;&gt;</link>(std::basic_istream&lt;_CharT,&#32;_Traits&gt;&amp;&#32;__is,
+2221 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;exponential_distribution&amp;&#32;__x)
+2222 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;__is&#32;&gt;&gt;&#32;__x._M_lambda;&#32;}
+2223 
+2224 &#32;&#32;&#32;&#32;<emphasis role="keyword">private</emphasis>:
+2225 &#32;&#32;&#32;&#32;&#32;&#32;result_type&#32;_M_lambda;
+2226 &#32;&#32;&#32;&#32;};
+2227 
+2228 
+2236 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_RealType&#32;=&#32;<emphasis role="keywordtype">double</emphasis>&gt;
+2237 &#32;&#32;&#32;&#32;<emphasis role="keyword">class&#32;</emphasis>normal_distribution
+2238 &#32;&#32;&#32;&#32;{
+2239 &#32;&#32;&#32;&#32;<emphasis role="keyword">public</emphasis>:
+2240 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;types</emphasis>
+2241 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;_RealType&#32;input_type;
+2242 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;_RealType&#32;result_type;
+2243 
+2244 &#32;&#32;&#32;&#32;<emphasis role="keyword">public</emphasis>:
+2249 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">explicit</emphasis>
+2250 &#32;&#32;&#32;&#32;&#32;&#32;normal_distribution(<emphasis role="keyword">const</emphasis>&#32;result_type&amp;&#32;__mean&#32;=&#32;result_type(0),
+2251 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;result_type&amp;&#32;__sigma&#32;=&#32;result_type(1))
+2252 &#32;&#32;&#32;&#32;&#32;&#32;:&#32;_M_mean(__mean),&#32;_M_sigma(__sigma),&#32;_M_saved_available(<link linkend="__classes_2lib_2include_2stdbool_8h_1a65e9886d74aaee76545e83dd09011727">false</link>)
+2253 &#32;&#32;&#32;&#32;&#32;&#32;{&#32;
+2254 &#32;&#32;&#32;&#32;<link linkend="_lib_2include_2c_09_09_2debug_2assertions_8h_1aa2bfb4e74c7be93673913edf15f85504">_GLIBCXX_DEBUG_ASSERT</link>(_M_sigma&#32;&gt;&#32;0);
+2255 &#32;&#32;&#32;&#32;&#32;&#32;}
+2256 
+2260 &#32;&#32;&#32;&#32;&#32;&#32;_RealType
+2261 &#32;&#32;&#32;&#32;&#32;&#32;mean()<emphasis role="keyword">&#32;const</emphasis>
+2262 <emphasis role="keyword">&#32;&#32;&#32;&#32;&#32;&#32;</emphasis>{&#32;<emphasis role="keywordflow">return</emphasis>&#32;_M_mean;&#32;}
+2263 
+2267 &#32;&#32;&#32;&#32;&#32;&#32;_RealType
+2268 &#32;&#32;&#32;&#32;&#32;&#32;sigma()<emphasis role="keyword">&#32;const</emphasis>
+2269 <emphasis role="keyword">&#32;&#32;&#32;&#32;&#32;&#32;</emphasis>{&#32;<emphasis role="keywordflow">return</emphasis>&#32;_M_sigma;&#32;}
+2270 
+2274 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+2275 &#32;&#32;&#32;&#32;&#32;&#32;reset()
+2276 &#32;&#32;&#32;&#32;&#32;&#32;{&#32;_M_saved_available&#32;=&#32;<emphasis role="keyword">false</emphasis>;&#32;}
+2277 
+2278 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">class</emphasis>&#32;_UniformRandomNumberGenerator&gt;
+2279 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;result_type
+2280 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;operator()(_UniformRandomNumberGenerator&amp;&#32;__urng);
+2281 
+2292 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_RealType1,&#32;<emphasis role="keyword">typename</emphasis>&#32;_CharT,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Traits&gt;
+2293 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">friend</emphasis>&#32;std::basic_ostream&lt;_CharT,&#32;_Traits&gt;&amp;
+2294 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_forward__declarations_8h_1ade7e3bc03b39cb3b5684a4c302832e3c">operator&lt;&lt;</link>(std::basic_ostream&lt;_CharT,&#32;_Traits&gt;&amp;&#32;__os,
+2295 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;normal_distribution&lt;_RealType1&gt;&amp;&#32;__x);
+2296 
+2306 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_RealType1,&#32;<emphasis role="keyword">typename</emphasis>&#32;_CharT,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Traits&gt;
+2307 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">friend</emphasis>&#32;std::basic_istream&lt;_CharT,&#32;_Traits&gt;&amp;
+2308 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_namespaceglm_1a4560e59cc4f5ddaf0ec23d1a7050b611">operator&gt;&gt;</link>(std::basic_istream&lt;_CharT,&#32;_Traits&gt;&amp;&#32;__is,
+2309 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;normal_distribution&lt;_RealType1&gt;&amp;&#32;__x);
+2310 
+2311 &#32;&#32;&#32;&#32;<emphasis role="keyword">private</emphasis>:
+2312 &#32;&#32;&#32;&#32;&#32;&#32;result_type&#32;_M_mean;
+2313 &#32;&#32;&#32;&#32;&#32;&#32;result_type&#32;_M_sigma;
+2314 &#32;&#32;&#32;&#32;&#32;&#32;result_type&#32;_M_saved;
+2315 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">bool</emphasis>&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_M_saved_available;&#32;&#32;&#32;&#32;&#32;
+2316 &#32;&#32;&#32;&#32;};
+2317 
+2318 
+2325 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_RealType&#32;=&#32;<emphasis role="keywordtype">double</emphasis>&gt;
+2326 &#32;&#32;&#32;&#32;<emphasis role="keyword">class&#32;</emphasis>gamma_distribution
+2327 &#32;&#32;&#32;&#32;{
+2328 &#32;&#32;&#32;&#32;<emphasis role="keyword">public</emphasis>:
+2329 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;types</emphasis>
+2330 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;_RealType&#32;input_type;
+2331 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;_RealType&#32;result_type;
+2332 
+2333 &#32;&#32;&#32;&#32;<emphasis role="keyword">public</emphasis>:
+2337 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">explicit</emphasis>
+2338 &#32;&#32;&#32;&#32;&#32;&#32;gamma_distribution(<emphasis role="keyword">const</emphasis>&#32;result_type&amp;&#32;__alpha_val&#32;=&#32;result_type(1))
+2339 &#32;&#32;&#32;&#32;&#32;&#32;:&#32;_M_alpha(__alpha_val)
+2340 &#32;&#32;&#32;&#32;&#32;&#32;{&#32;
+2341 &#32;&#32;&#32;&#32;<link linkend="_lib_2include_2c_09_09_2debug_2assertions_8h_1aa2bfb4e74c7be93673913edf15f85504">_GLIBCXX_DEBUG_ASSERT</link>(_M_alpha&#32;&gt;&#32;0);
+2342 &#32;&#32;&#32;&#32;_M_initialize();
+2343 &#32;&#32;&#32;&#32;&#32;&#32;}
+2344 
+2348 &#32;&#32;&#32;&#32;&#32;&#32;_RealType
+2349 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a090ebe65994a3ee4bb60ae3472abffc5">alpha</link>()<emphasis role="keyword">&#32;const</emphasis>
+2350 <emphasis role="keyword">&#32;&#32;&#32;&#32;&#32;&#32;</emphasis>{&#32;<emphasis role="keywordflow">return</emphasis>&#32;_M_alpha;&#32;}
+2351 
+2355 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+2356 &#32;&#32;&#32;&#32;&#32;&#32;reset()&#32;{&#32;}
+2357 
+2358 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">class</emphasis>&#32;_UniformRandomNumberGenerator&gt;
+2359 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;result_type
+2360 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;operator()(_UniformRandomNumberGenerator&amp;&#32;__urng);
+2361 
+2372 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_RealType1,&#32;<emphasis role="keyword">typename</emphasis>&#32;_CharT,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Traits&gt;
+2373 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">friend</emphasis>&#32;std::basic_ostream&lt;_CharT,&#32;_Traits&gt;&amp;
+2374 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_forward__declarations_8h_1ade7e3bc03b39cb3b5684a4c302832e3c">operator&lt;&lt;</link>(std::basic_ostream&lt;_CharT,&#32;_Traits&gt;&amp;&#32;__os,
+2375 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;gamma_distribution&lt;_RealType1&gt;&amp;&#32;__x);
+2376 
+2386 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_CharT,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Traits&gt;
+2387 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">friend</emphasis>&#32;std::basic_istream&lt;_CharT,&#32;_Traits&gt;&amp;
+2388 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_namespaceglm_1a4560e59cc4f5ddaf0ec23d1a7050b611">operator&gt;&gt;</link>(std::basic_istream&lt;_CharT,&#32;_Traits&gt;&amp;&#32;__is,
+2389 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;gamma_distribution&amp;&#32;__x)
+2390 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+2391 &#32;&#32;&#32;&#32;&#32;&#32;__is&#32;&gt;&gt;&#32;__x._M_alpha;
+2392 &#32;&#32;&#32;&#32;&#32;&#32;__x._M_initialize();
+2393 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__is;
+2394 &#32;&#32;&#32;&#32;}
+2395 
+2396 &#32;&#32;&#32;&#32;<emphasis role="keyword">private</emphasis>:
+2397 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+2398 &#32;&#32;&#32;&#32;&#32;&#32;_M_initialize();
+2399 
+2400 &#32;&#32;&#32;&#32;&#32;&#32;result_type&#32;_M_alpha;
+2401 
+2402 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Hosts&#32;either&#32;lambda&#32;of&#32;GB&#32;or&#32;d&#32;of&#32;modified&#32;Vaduva&apos;s.</emphasis>
+2403 &#32;&#32;&#32;&#32;&#32;&#32;result_type&#32;_M_l_d;
+2404 &#32;&#32;&#32;&#32;};
+2405 
+2409 }
+2410 
+2411 _GLIBCXX_END_NAMESPACE_VERSION
+2412 }
+2413 
+2414 <emphasis role="preprocessor">#endif&#32;</emphasis><emphasis role="comment">//&#32;_GLIBCXX_TR1_RANDOM_H</emphasis>
+</programlisting></section>

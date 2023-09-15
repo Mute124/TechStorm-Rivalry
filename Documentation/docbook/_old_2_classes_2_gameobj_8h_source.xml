@@ -1,0 +1,263 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<section xmlns="http://docbook.org/ns/docbook" version="5.0" xmlns:xlink="http://www.w3.org/1999/xlink" xml:id="__old_2_classes_2_gameobj_8h_source" xml:lang="en-US">
+<title>Gameobj.h</title>
+<indexterm><primary>C:/Users/HP/Documents/GitHub/Minero-Game/Old/Classes/Gameobj.h</primary></indexterm>
+Go to the documentation of this file.<programlisting linenumbering="unnumbered">1 <emphasis role="preprocessor">#pragma&#32;once</emphasis>
+2 <emphasis role="preprocessor">#include&#32;&quot;lib/raylib.h&quot;</emphasis>
+3 <emphasis role="preprocessor">#include&#32;&quot;<link linkend="__monobehavior_8h">Monobehavior.h</link>&quot;</emphasis>
+4 <emphasis role="preprocessor">#include&#32;&quot;Logging/Logman.hpp&quot;</emphasis>
+5 <emphasis role="preprocessor">#include&#32;&lt;stdio.h&gt;</emphasis>
+6 <emphasis role="preprocessor">#include&#32;&lt;stdlib.h&gt;</emphasis>
+7 <emphasis role="preprocessor">#include&#32;&lt;vector&gt;</emphasis>
+8 <emphasis role="preprocessor">#include&#32;&lt;thread&gt;</emphasis>
+9 <emphasis role="preprocessor">#include&#32;&lt;mutex&gt;</emphasis>
+10 <emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">enum</emphasis>&#32;<link linkend="__classes_2_gameobj_8h_1a890efa53b3d7deeeced6f3a0d6653ed3">type</link>
+11 {
+12 &#32;&#32;<link linkend="__classes_2_gameobj_8h_1a890efa53b3d7deeeced6f3a0d6653ed3a02fc27068fe9a3c151ffcc08ec5bb65d">BLOCK</link>&#32;=&#32;0,&#32;&#32;<emphasis role="comment">//&#32;Game&#32;object&#32;is&#32;a&#32;block</emphasis>
+13 &#32;&#32;<link linkend="__classes_2_gameobj_8h_1a890efa53b3d7deeeced6f3a0d6653ed3ade5dc3e0dbd007d995ed3e37bde5ce7e">PLAYER</link>&#32;=&#32;1,&#32;<emphasis role="comment">//&#32;Player&#32;object.</emphasis>
+14 &#32;&#32;<link linkend="__classes_2_gameobj_8h_1a890efa53b3d7deeeced6f3a0d6653ed3a285623350f16722e151484dbaf074867">SKYBOX</link>,
+15 &#32;&#32;<link linkend="__classes_2_gameobj_8h_1a890efa53b3d7deeeced6f3a0d6653ed3ada30f0dfe7c99ccb74e83ba77c5c118d">VEHICLE</link>,
+16 &#32;&#32;<link linkend="__classes_2_gameobj_8h_1a890efa53b3d7deeeced6f3a0d6653ed3a8663ded0bae71400432b14b886709912">WORLDFLOOR</link>,
+17 &#32;&#32;<link linkend="__old_2_classes_2_gameobj_8h_1a7aead736a07eaf25623ad7bfa1f0ee2da43eb770d6776603d67df2fa76efdad29">GIZMO</link>
+18 
+19 }&#32;<link linkend="__classes_2_gameobj_8h_1a38c67087b34d505db04e831a25a627a8">objtype</link>;
+20 
+21 <emphasis role="comment">//&#32;used&#32;for&#32;organization&#32;reasons&#32;and&#32;makes&#32;C++&#32;less&#32;torture.</emphasis>
+22 <emphasis role="comment">//&#32;TODO&#32;:&#32;Refactor&#32;workspace&#32;to&#32;account&#32;for&#32;changes</emphasis>
+23 <emphasis role="keyword">class&#32;</emphasis><link linkend="_class_game_object">GameObject</link>
+24 {
+25 <emphasis role="keyword">public</emphasis>:
+26 &#32;&#32;<link linkend="_struct_render_texture2_d">RenderTexture2D</link>&#32;<link linkend="_class_game_object_1ac8f3b7994884f47fd6cb16b9218d5dc5">LoadRenderTextureDepthTex</link>(<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a3ce386e55bbeb900c1b23e064b89bd04">width</link>,&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1aedd0ea77029b98ce91e47c19addcb68f">height</link>)
+27 &#32;&#32;{
+28 &#32;&#32;&#32;&#32;<link linkend="_struct_render_texture2_d">RenderTexture2D</link>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1af9d0cbbbeb7414e786c41899e5a856d7">target</link>&#32;=&#32;{0};
+29 
+30 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1af9d0cbbbeb7414e786c41899e5a856d7">target</link>.<link linkend="_struct_render_texture2_d_1acc629dedbfef2f2336d62fdfb11a53d4">id</link>&#32;=&#32;<link linkend="__classes_2lib_2rlgl_8h_1abaadeb5c180a72f743cdd45a4ad0f8d4">rlLoadFramebuffer</link>(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a3ce386e55bbeb900c1b23e064b89bd04">width</link>,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1aedd0ea77029b98ce91e47c19addcb68f">height</link>);&#32;<emphasis role="comment">//&#32;Load&#32;an&#32;empty&#32;framebuffer</emphasis>
+31 
+32 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1af9d0cbbbeb7414e786c41899e5a856d7">target</link>.id&#32;&gt;&#32;0)
+33 &#32;&#32;&#32;&#32;{
+34 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2rlgl_8h_1a93c5ef00ad99e88a63ac888f95cf0af7">rlEnableFramebuffer</link>(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1af9d0cbbbeb7414e786c41899e5a856d7">target</link>.id);
+35 
+36 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Create&#32;color&#32;texture&#32;(default&#32;to&#32;RGBA)</emphasis>
+37 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1af9d0cbbbeb7414e786c41899e5a856d7">target</link>.texture.id&#32;=&#32;<link linkend="__classes_2lib_2raylib_2src_2rlgl_8h_1a525a0cf6f039f2c3f2a082171f19dfa6">rlLoadTexture</link>(0,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a3ce386e55bbeb900c1b23e064b89bd04">width</link>,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1aedd0ea77029b98ce91e47c19addcb68f">height</link>,&#32;<link linkend="__classes_2lib_2raylib_8h_1a60883d4958a60b91661e97027a85072aac4b38b1d326ca4e5137df5b8bca7ab16">PIXELFORMAT_UNCOMPRESSED_R8G8B8A8</link>,&#32;1);
+38 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1af9d0cbbbeb7414e786c41899e5a856d7">target</link>.texture.width&#32;=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a3ce386e55bbeb900c1b23e064b89bd04">width</link>;
+39 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1af9d0cbbbeb7414e786c41899e5a856d7">target</link>.texture.height&#32;=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1aedd0ea77029b98ce91e47c19addcb68f">height</link>;
+40 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1af9d0cbbbeb7414e786c41899e5a856d7">target</link>.texture.format&#32;=&#32;<link linkend="__classes_2lib_2raylib_8h_1a60883d4958a60b91661e97027a85072aac4b38b1d326ca4e5137df5b8bca7ab16">PIXELFORMAT_UNCOMPRESSED_R8G8B8A8</link>;
+41 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1af9d0cbbbeb7414e786c41899e5a856d7">target</link>.texture.mipmaps&#32;=&#32;1;
+42 
+43 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Create&#32;depth&#32;texture&#32;buffer&#32;(instead&#32;of&#32;raylib&#32;default&#32;renderbuffer)</emphasis>
+44 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1af9d0cbbbeb7414e786c41899e5a856d7">target</link>.depth.id&#32;=&#32;<link linkend="__classes_2lib_2raylib_2src_2rlgl_8h_1a942582b89384966719a9d37ea4f0ef46">rlLoadTextureDepth</link>(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a3ce386e55bbeb900c1b23e064b89bd04">width</link>,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1aedd0ea77029b98ce91e47c19addcb68f">height</link>,&#32;<emphasis role="keyword">false</emphasis>);
+45 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1af9d0cbbbeb7414e786c41899e5a856d7">target</link>.depth.width&#32;=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a3ce386e55bbeb900c1b23e064b89bd04">width</link>;
+46 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1af9d0cbbbeb7414e786c41899e5a856d7">target</link>.depth.height&#32;=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1aedd0ea77029b98ce91e47c19addcb68f">height</link>;
+47 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1af9d0cbbbeb7414e786c41899e5a856d7">target</link>.depth.format&#32;=&#32;19;&#32;<emphasis role="comment">//&#32;DEPTH_COMPONENT_24BIT?</emphasis>
+48 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1af9d0cbbbeb7414e786c41899e5a856d7">target</link>.depth.mipmaps&#32;=&#32;1;
+49 
+50 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Attach&#32;color&#32;texture&#32;and&#32;depth&#32;texture&#32;to&#32;FBO</emphasis>
+51 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2rlgl_8h_1aa51dbc3edd8f3552e3adda648a4f9802">rlFramebufferAttach</link>(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1af9d0cbbbeb7414e786c41899e5a856d7">target</link>.id,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1af9d0cbbbeb7414e786c41899e5a856d7">target</link>.texture.id,&#32;<link linkend="__classes_2lib_2rlgl_8h_1a0d627ec546512590b921bb3f71f8e1e2a134a6bf82ce53b2b1a8e33af71e988fc">RL_ATTACHMENT_COLOR_CHANNEL0</link>,&#32;<link linkend="__classes_2lib_2rlgl_8h_1ae8a5439a3a1eeb4f4c64af2ff45fb94da1c23f3ce8dbe75cd1a949fc73d04d89b">RL_ATTACHMENT_TEXTURE2D</link>,&#32;0);
+52 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2rlgl_8h_1aa51dbc3edd8f3552e3adda648a4f9802">rlFramebufferAttach</link>(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1af9d0cbbbeb7414e786c41899e5a856d7">target</link>.id,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1af9d0cbbbeb7414e786c41899e5a856d7">target</link>.depth.id,&#32;<link linkend="__classes_2lib_2rlgl_8h_1a0d627ec546512590b921bb3f71f8e1e2abc0611e7ea3591035492fa47e2f45228">RL_ATTACHMENT_DEPTH</link>,&#32;<link linkend="__classes_2lib_2rlgl_8h_1ae8a5439a3a1eeb4f4c64af2ff45fb94da1c23f3ce8dbe75cd1a949fc73d04d89b">RL_ATTACHMENT_TEXTURE2D</link>,&#32;0);
+53 
+54 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Check&#32;if&#32;fbo&#32;is&#32;complete&#32;with&#32;attachments&#32;(valid)</emphasis>
+55 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(<link linkend="__classes_2lib_2rlgl_8h_1ad6ce16b9fa28fc560b8a0da1c715eed5">rlFramebufferComplete</link>(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1af9d0cbbbeb7414e786c41899e5a856d7">target</link>.id))
+56 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2utils_8h_1a212a8b81c98d325e306bbccb0c0ab02a">TRACELOG</link>(<link linkend="__classes_2lib_2raylib_8h_1a53d4e0542e6c07e7792510e986785285a6e98ff471e3ce6c4ef2d75c37ee51837">LOG_INFO</link>,&#32;<emphasis role="stringliteral">&quot;FBO:&#32;[ID&#32;%i]&#32;Framebuffer&#32;object&#32;created&#32;successfully&quot;</emphasis>,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1af9d0cbbbeb7414e786c41899e5a856d7">target</link>.id);
+57 
+58 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2rlgl_8h_1a9bf55d35c503911fbb96130e910c0d1f">rlDisableFramebuffer</link>();
+59 &#32;&#32;&#32;&#32;}
+60 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>
+61 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2utils_8h_1a212a8b81c98d325e306bbccb0c0ab02a">TRACELOG</link>(<link linkend="__classes_2lib_2raylib_8h_1a53d4e0542e6c07e7792510e986785285a8f6fe15bfe15104da6d1b360194a5400">LOG_WARNING</link>,&#32;<emphasis role="stringliteral">&quot;FBO:&#32;Framebuffer&#32;object&#32;can&#32;not&#32;be&#32;created&quot;</emphasis>);
+62 
+63 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1af9d0cbbbeb7414e786c41899e5a856d7">target</link>;
+64 &#32;&#32;}
+65 
+66 &#32;&#32;<emphasis role="comment">//&#32;Unload&#32;render&#32;texture&#32;from&#32;GPU&#32;memory&#32;(VRAM)</emphasis>
+67 &#32;&#32;<emphasis role="keywordtype">void</emphasis>&#32;<link linkend="_class_game_object_1a33b3c8f5bc05c01d391e807bd676e55f">UnloadRenderTextureDepthTex</link>(<link linkend="_struct_render_texture2_d">RenderTexture2D</link>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1af9d0cbbbeb7414e786c41899e5a856d7">target</link>)
+68 &#32;&#32;{
+69 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1af9d0cbbbeb7414e786c41899e5a856d7">target</link>.id&#32;&gt;&#32;0)
+70 &#32;&#32;&#32;&#32;{
+71 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Color&#32;texture&#32;attached&#32;to&#32;FBO&#32;is&#32;deleted</emphasis>
+72 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2rlgl_8h_1ac2f6b4ee05af80cb617fc4c1f6bb9e69">rlUnloadTexture</link>(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1af9d0cbbbeb7414e786c41899e5a856d7">target</link>.texture.id);
+73 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2rlgl_8h_1ac2f6b4ee05af80cb617fc4c1f6bb9e69">rlUnloadTexture</link>(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1af9d0cbbbeb7414e786c41899e5a856d7">target</link>.depth.id);
+74 
+75 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;NOTE:&#32;Depth&#32;texture&#32;is&#32;automatically</emphasis>
+76 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;queried&#32;and&#32;deleted&#32;before&#32;deleting&#32;framebuffer</emphasis>
+77 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2rlgl_8h_1a20cc90bb27ff762c975739394fc99591">rlUnloadFramebuffer</link>(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1af9d0cbbbeb7414e786c41899e5a856d7">target</link>.id);
+78 &#32;&#32;&#32;&#32;}
+79 &#32;&#32;}
+80 &#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">struct</emphasis>
+81 
+82 &#32;&#32;{
+83 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">float</emphasis>&#32;*l&#32;=&#32;<emphasis role="keyword">new</emphasis>&#32;float();
+84 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">float</emphasis>&#32;*<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a1ad83f255afd4038129297b57ef91603">w</link>&#32;=&#32;<emphasis role="keyword">new</emphasis>&#32;float();
+85 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">float</emphasis>&#32;*h&#32;=&#32;<emphasis role="keyword">new</emphasis>&#32;float();
+86 &#32;&#32;}&#32;ObjDim;&#32;<emphasis role="comment">//&#32;TODO&#32;:&#32;is&#32;this&#32;needed?</emphasis>
+87 
+88 &#32;&#32;<emphasis role="keyword">virtual</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>&#32;<link linkend="_class_game_object_1a54f25ff4076e03a40309085bcf826e53">Draw</link>(){};
+89 
+90 &#32;&#32;<emphasis role="keyword">virtual</emphasis>&#32;<link linkend="_class_game_object_1a224d4f6d9dd75c8a6f9d022eaf586fd9">~GameObject</link>()
+91 &#32;&#32;{
+92 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(<emphasis role="keyword">auto</emphasis>&#32;&amp;<link linkend="_class_game_object">GameObject</link>&#32;:&#32;<link linkend="_class_game_object_1abc09e80f39b34394c720bf929d2683c8">GameObjects</link>)
+93 &#32;&#32;&#32;&#32;{
+94 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class_game_object">GameObject</link>-&gt;<link linkend="_class_game_object_1a198e13390ddc3243db29d5c3aea25f5f">onDestroy</link>();
+95 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">delete</emphasis>&#32;<link linkend="_class_game_object">GameObject</link>;
+96 &#32;&#32;&#32;&#32;}
+97 &#32;&#32;}
+98 
+99 &#32;&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keyword">inline</emphasis>&#32;<link linkend="_class_game_object">GameObject</link>&#32;*<link linkend="_class_game_object_1a33c7f8c00faad0ccd29c16f7f78a93f9">SearchById</link>(<emphasis role="keywordtype">int</emphasis>&#32;<emphasis role="keywordtype">id</emphasis>)
+100 &#32;&#32;{
+101 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="_class_game_object_1abc09e80f39b34394c720bf929d2683c8">GameObjects</link>[<link linkend="_class_game_object_1a98291c60da12d9036e1ad24cfebcf6b3">id</link>];
+102 &#32;&#32;}
+103 
+104 &#32;&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keyword">auto</emphasis>&#32;*<link linkend="_class_game_object_1a465651ced35d506345ce00012ab34a80">SearchByType</link>(<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__old_2_classes_2_gameobj_8h_1a7aead736a07eaf25623ad7bfa1f0ee2d">type</link>)
+105 &#32;&#32;{
+106 
+107 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(<emphasis role="keyword">auto</emphasis>&#32;&amp;<link linkend="_class_game_object">GameObject</link>&#32;:&#32;<link linkend="_class_game_object_1abc09e80f39b34394c720bf929d2683c8">GameObjects</link>)
+108 &#32;&#32;&#32;&#32;{
+109 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(<link linkend="_class_game_object">GameObject</link>-&gt;<link linkend="_class_game_object_1ada0d8b5677f7130c828b9a283fd6f79c">GetType</link>()&#32;==&#32;<link linkend="__old_2_classes_2_gameobj_8h_1a7aead736a07eaf25623ad7bfa1f0ee2d">type</link>)
+110 &#32;&#32;&#32;&#32;&#32;&#32;{
+111 
+112 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="_class_game_object">GameObject</link>;
+113 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">break</emphasis>;
+114 &#32;&#32;&#32;&#32;&#32;&#32;}
+115 &#32;&#32;&#32;&#32;}
+116 &#32;&#32;}
+117 
+118 &#32;&#32;<emphasis role="keyword">virtual</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="_class_game_object_1a22ccf00f131577f78430079098ae8dd6">GetType</link>()&#32;<emphasis role="keyword">const</emphasis>&#32;=&#32;0;
+119 
+128 &#32;&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="_class_game_object_1a4cc6227274e96445bfd5626a1a966e02">RegisterObj</link>(<link linkend="_class_game_object">GameObject</link>&#32;*<emphasis role="keywordtype">object</emphasis>)
+129 &#32;&#32;{
+130 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a43d7824acc27a497365ad4b5bc9e67fd">ids</link>.size()&#32;==&#32;0)
+131 &#32;&#32;&#32;&#32;{
+132 
+133 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a43d7824acc27a497365ad4b5bc9e67fd">ids</link>.resize(<link linkend="__monobehavior_8h_1ad71fdd6e64912b84771dda0b80389ad9">MAX_INSTANCES</link>);
+134 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class_logman_1a2d9051169431912e6f95d150172590c0">Logman::CustomLog</link>(<link linkend="__classes_2lib_2raylib_8h_1a53d4e0542e6c07e7792510e986785285a8f6fe15bfe15104da6d1b360194a5400">LOG_WARNING</link>,&#32;<link linkend="__classes_2lib_2raylib_8h_1a04f6dce52328f8287caab282ad4235ee">TextFormat</link>(<emphasis role="stringliteral">&quot;Id&#32;Vector&#32;size&#32;is&#32;0!&#32;setting&#32;it&#32;to&#32;%i&quot;</emphasis>,&#32;<link linkend="__monobehavior_8h_1ad71fdd6e64912b84771dda0b80389ad9">MAX_INSTANCES</link>),&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>);
+135 &#32;&#32;&#32;&#32;}
+136 
+137 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">long</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="_namespacelength">length</link>&#32;=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a43d7824acc27a497365ad4b5bc9e67fd">ids</link>.size();
+138 &#32;&#32;&#32;&#32;<link linkend="_namespacelength">length</link>++;
+139 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a43d7824acc27a497365ad4b5bc9e67fd">ids</link>.push_back(<link linkend="_namespacelength">length</link>);
+140 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="_namespacelength">length</link>;
+141 
+142 &#32;&#32;&#32;&#32;<link linkend="_class_game_object_1abc09e80f39b34394c720bf929d2683c8">GameObjects</link>.push_back(<emphasis role="keywordtype">object</emphasis>);
+143 &#32;&#32;}
+144 
+145 &#32;&#32;<emphasis role="keyword">virtual</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>&#32;<link linkend="_class_game_object_1af5a6e39a7a6fa89992a6aa0b5659a913">UnRegisterObj</link>(<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;<emphasis role="keywordtype">id</emphasis>)
+146 &#32;&#32;{
+147 &#32;&#32;&#32;&#32;<link linkend="_class_game_object_1abc09e80f39b34394c720bf929d2683c8">GameObjects</link>[<link linkend="_class_game_object_1a98291c60da12d9036e1ad24cfebcf6b3">id</link>]-&gt;onDestroy();
+148 &#32;&#32;}
+149 
+150 &#32;&#32;<emphasis role="keyword">virtual</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>&#32;<link linkend="_class_game_object_1a703d50b945a74bfc8b15de6f3419a9da">Test</link>(){};
+151 
+152 &#32;&#32;<emphasis role="keyword">virtual</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>&#32;<link linkend="_class_game_object_1a33900eb7617c5bf3664418c97ca936c5">onUpdate</link>(){};&#32;<emphasis role="comment">//&#32;Called&#32;every&#32;frame</emphasis>
+153 
+154 &#32;&#32;<emphasis role="keyword">virtual</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>&#32;<link linkend="_class_game_object_1ac60cc97a664318ac811a48f4ac6c849c">onCollision</link>(){};
+155 
+156 &#32;&#32;<emphasis role="keyword">virtual</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>&#32;<link linkend="_class_game_object_1a198e13390ddc3243db29d5c3aea25f5f">onDestroy</link>()&#32;<emphasis role="keyword">const</emphasis>&#32;=&#32;0;&#32;<emphasis role="comment">//&#32;NOTE&#32;:&#32;This&#32;deletes&#32;the&#32;object&#32;and&#32;shall&#32;be&#32;overridden&#32;for&#32;custom&#32;behaviors</emphasis>
+157 
+158 &#32;&#32;<emphasis role="keyword">virtual</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="_class_game_object_1a807f23f850beb8b21729c0aa68271613">GetId</link>()&#32;<emphasis role="keyword">const</emphasis>&#32;=&#32;0;
+159 
+160 &#32;&#32;<emphasis role="keyword">virtual</emphasis>&#32;<link linkend="_struct_bounding_box">BoundingBox</link>&#32;<link linkend="_class_game_object_1a05bd0f2115c09016806c8ffecbc0318c">GetBoundingBox</link>(){};
+161 
+162 &#32;&#32;<emphasis role="keyword">virtual</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>&#32;<link linkend="_class_game_object_1adbaa490b3e9313ea0fec2c4ffa101a71">CheckCollision</link>(<link linkend="_class_game_object">GameObject</link>&#32;*Orgin,&#32;<emphasis role="keywordtype">int</emphasis>&#32;<emphasis role="keywordtype">id</emphasis>)
+163 &#32;&#32;{
+164 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(<emphasis role="keyword">auto</emphasis>&#32;&amp;<link linkend="_class_game_object">GameObject</link>&#32;:&#32;<link linkend="_class_game_object_1abc09e80f39b34394c720bf929d2683c8">GameObjects</link>)
+165 &#32;&#32;&#32;&#32;{
+166 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(<link linkend="__classes_2lib_2raylib_8h_1aff6c13ebba260d7ac3d9f8699529214d">CheckCollisionBoxes</link>(Orgin-&gt;<link linkend="_class_game_object_1a05bd0f2115c09016806c8ffecbc0318c">GetBoundingBox</link>(),&#32;<link linkend="_class_game_object">GameObject</link>-&gt;<link linkend="_class_game_object_1a05bd0f2115c09016806c8ffecbc0318c">GetBoundingBox</link>()))
+167 &#32;&#32;&#32;&#32;&#32;&#32;{
+168 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(<emphasis role="keywordtype">id</emphasis>&#32;==&#32;<link linkend="_class_game_object">GameObject</link>-&gt;<link linkend="_class_game_object_1a807f23f850beb8b21729c0aa68271613">GetId</link>())
+169 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+170 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">continue</emphasis>;
+171 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+172 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>
+173 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+174 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<emphasis role="keyword">true</emphasis>;
+175 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">break</emphasis>;
+176 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+177 &#32;&#32;&#32;&#32;&#32;&#32;}
+178 &#32;&#32;&#32;&#32;}
+179 &#32;&#32;};
+180 
+181 &#32;&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>&#32;<link linkend="_class_game_object_1a9f3e8939801ee16e2705eb87f097cd45">UpdateRegistry</link>(std::vector&lt;GameObject&#32;*&gt;&#32;objects)
+182 &#32;&#32;{
+183 &#32;&#32;&#32;&#32;<link linkend="_class_game_object_1abc09e80f39b34394c720bf929d2683c8">GameObjects</link>&#32;=&#32;objects;
+184 &#32;&#32;}
+185 
+195 &#32;&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>&#32;<link linkend="_class_game_object_1af1ed60f2f4796ce9d0d0a74cd7885344">Update</link>()
+196 &#32;&#32;{
+197 
+198 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(<emphasis role="keyword">auto</emphasis>&#32;&amp;<link linkend="_class_game_object">GameObject</link>&#32;:&#32;<link linkend="_class_game_object_1abc09e80f39b34394c720bf929d2683c8">GameObjects</link>)
+199 &#32;&#32;&#32;&#32;{
+200 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class_game_object_1a8633fa36d2103069100249a7959787a6">Render</link>();
+201 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;do&#32;all&#32;lambda&#32;stuff</emphasis>
+202 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class_game_object">GameObject</link>-&gt;<link linkend="_class_game_object_1a33900eb7617c5bf3664418c97ca936c5">onUpdate</link>();
+203 &#32;&#32;&#32;&#32;}
+204 &#32;&#32;}
+205 &#32;&#32;<emphasis role="keyword">virtual</emphasis>&#32;<link linkend="_struct_vector3">Vector3</link>&#32;<link linkend="_class_game_object_1ace0fe21455aa863b191af16fe990adec">GetPosition</link>(){};
+206 
+207 &#32;&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keyword">inline</emphasis>&#32;std::vector&lt;int&gt;&#32;<link linkend="_class_game_object_1a92fbcb80abf09406753f91aa7a199a5b">ids</link>;&#32;<emphasis role="comment">//&#32;is&#32;this&#32;needed?</emphasis>
+208 
+209 &#32;&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>&#32;<link linkend="_class_game_object_1abdb82c281a6bdde3642051499ee0471a">Sync</link>(std::vector&lt;GameObject&#32;*&gt;&#32;objs)
+210 &#32;&#32;{
+211 
+212 &#32;&#32;&#32;&#32;<link linkend="_class_game_object_1abc09e80f39b34394c720bf929d2683c8">GameObjects</link>&#32;=&#32;objs;
+213 &#32;&#32;}
+214 
+215 &#32;&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keyword">inline</emphasis>&#32;std::vector&lt;GameObject&#32;*&gt;&#32;<link linkend="_class_game_object_1a27c2968870d23732a75b36ccdc7a983f">RequestObjectList</link>()
+216 &#32;&#32;{
+217 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="_class_game_object_1abc09e80f39b34394c720bf929d2683c8">GameObjects</link>;
+218 &#32;&#32;}
+219 
+220 &#32;&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keyword">inline</emphasis>&#32;<link linkend="_class_game_object">GameObject</link>&#32;*<link linkend="_class_game_object_1abebfc2e3b852b7e5e7751e061f0d972f">RequestObject</link>(<emphasis role="keywordtype">int</emphasis>&#32;<emphasis role="keywordtype">id</emphasis>)
+221 &#32;&#32;{
+222 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="_class_game_object_1a33c7f8c00faad0ccd29c16f7f78a93f9">SearchById</link>(<emphasis role="keywordtype">id</emphasis>);
+223 &#32;&#32;}
+224 
+225 &#32;&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keyword">auto</emphasis>&#32;<link linkend="_class_game_object_1a376889eafa53e15d5a2bc3fc8fa7ce87">PushObject</link>(<link linkend="_class_game_object">GameObject</link>&#32;*&amp;&amp;_obj)
+226 &#32;&#32;{
+227 &#32;&#32;&#32;&#32;<link linkend="_class_game_object_1abc09e80f39b34394c720bf929d2683c8">GameObjects</link>.push_back(_obj);
+228 &#32;&#32;}
+229 
+230 &#32;&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>&#32;<link linkend="_class_game_object_1a645ac2e1343aafe044d30c96f0914383">FlushBuffer</link>()
+231 &#32;&#32;{
+232 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(<emphasis role="keyword">auto</emphasis>&#32;&amp;obj&#32;:&#32;<link linkend="_class_game_object_1abc09e80f39b34394c720bf929d2683c8">GameObjects</link>)
+233 &#32;&#32;&#32;&#32;{
+234 &#32;&#32;&#32;&#32;&#32;&#32;obj-&gt;onDestroy();
+235 &#32;&#32;&#32;&#32;}
+236 &#32;&#32;}
+237 &#32;&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>&#32;<link linkend="_class_game_object_1a8633fa36d2103069100249a7959787a6">Render</link>()
+238 &#32;&#32;{
+239 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(<emphasis role="keyword">auto</emphasis>&#32;&amp;<link linkend="_class_game_object">GameObject</link>&#32;:&#32;<link linkend="_class_game_object_1abc09e80f39b34394c720bf929d2683c8">GameObjects</link>)
+240 &#32;&#32;&#32;&#32;{
+241 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class_game_object">GameObject</link>-&gt;<link linkend="_class_game_object_1a54f25ff4076e03a40309085bcf826e53">Draw</link>();
+242 &#32;&#32;&#32;&#32;}
+243 &#32;&#32;}
+244 
+245 &#32;&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keyword">inline</emphasis>&#32;std::vector&lt;GameObject&#32;*&gt;&#32;<link linkend="_class_game_object_1abc09e80f39b34394c720bf929d2683c8">GameObjects</link>;&#32;<emphasis role="comment">//&#32;game&#32;objects</emphasis>
+246 
+247 &#32;&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keyword">inline</emphasis>&#32;<link linkend="_struct_render_texture2_d">RenderTexture2D</link>&#32;<link linkend="_class_game_object_1a507639ca797a5e00ca58c1d29b5255a7">GetRenderTexture</link>()
+248 &#32;&#32;{
+249 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="_class_game_object_1aaf73c1c800ad16328d5cbbbd25016a3e">Target</link>;
+250 &#32;&#32;}
+251 
+252 &#32;&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>&#32;<link linkend="_class_game_object_1a3d2307eb0a9c9e08b8966ebe4bb00e55">StartTextureMode</link>()
+253 &#32;&#32;{
+254 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_8h_1a51ab6514d6399491b82116f3965414c2">BeginTextureMode</link>(<link linkend="_class_game_object_1aaf73c1c800ad16328d5cbbbd25016a3e">Target</link>);
+255 &#32;&#32;}
+256 
+257 <emphasis role="keyword">protected</emphasis>:
+258 &#32;&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keyword">inline</emphasis>&#32;<link linkend="_struct_render_texture2_d">RenderTexture2D</link>&#32;<link linkend="_class_game_object_1aaf73c1c800ad16328d5cbbbd25016a3e">Target</link>&#32;=&#32;<link linkend="__classes_2lib_2raylib_8h_1ae19cb5c8e10b7fe5a37095f43c6db9e2">LoadRenderTexture</link>(<link linkend="__classes_2lib_2raylib_8h_1a9eafc763049750ce847ac9b1fb41dfcd">GetScreenWidth</link>(),&#32;<link linkend="__classes_2lib_2raylib_8h_1ac535bf92354455f81ff741dc13c704cf">GetScreenHeight</link>());
+259 
+260 &#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="_class_game_object_1a98291c60da12d9036e1ad24cfebcf6b3">id</link>;
+261 
+262 &#32;&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keyword">auto</emphasis>&#32;<link linkend="_class_game_object_1ac440ed7ec647eb31181d4c3ef2928aad">Search</link>()
+263 &#32;&#32;{
+264 &#32;&#32;}
+265 
+266 &#32;&#32;<emphasis role="comment">//&#32;what?</emphasis>
+267 &#32;&#32;<link linkend="_class_global_1_1_tag">Global::Tag</link>&#32;IgnoredTags[10]&#32;=&#32;{
+268 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="stringliteral">&quot;skybox&quot;</emphasis>,
+269 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="stringliteral">&quot;light&quot;</emphasis>,
+270 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="stringliteral">&quot;lighting&quot;</emphasis>,
+271 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="stringliteral">&quot;cubemap&quot;</emphasis>,
+272 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="stringliteral">&quot;sky&quot;</emphasis>};
+273 
+274 &#32;&#32;<link linkend="__classes_2_gameobj_8h_1a38c67087b34d505db04e831a25a627a8">objtype</link>&#32;<link linkend="__classes_2_gameobj_8h_1a890efa53b3d7deeeced6f3a0d6653ed3">type</link>;&#32;<emphasis role="comment">//&#32;TODO&#32;:&#32;is&#32;this&#32;needed?</emphasis>
+275 };
+</programlisting></section>

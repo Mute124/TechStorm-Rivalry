@@ -1,0 +1,973 @@
+\doxysection{throw\+\_\+allocator.\+h}
+\hypertarget{_classes_2lib_2include_2c_09_09_2ext_2throw__allocator_8h_source}{}\label{_classes_2lib_2include_2c_09_09_2ext_2throw__allocator_8h_source}\index{C:/Users/HP/Documents/GitHub/Minero-\/Game/Classes/lib/include/c++/ext/throw\_allocator.h@{C:/Users/HP/Documents/GitHub/Minero-\/Game/Classes/lib/include/c++/ext/throw\_allocator.h}}
+\mbox{\hyperlink{_classes_2lib_2include_2c_09_09_2ext_2throw__allocator_8h}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{comment}{//\ -\/*-\/\ C++\ -\/*-\/}}
+\DoxyCodeLine{00002\ }
+\DoxyCodeLine{00003\ \textcolor{comment}{//\ Copyright\ (C)\ 2005-\/2022\ Free\ Software\ Foundation,\ Inc.}}
+\DoxyCodeLine{00004\ \textcolor{comment}{//}}
+\DoxyCodeLine{00005\ \textcolor{comment}{//\ This\ file\ is\ part\ of\ the\ GNU\ ISO\ C++\ Library.\ \ This\ library\ is\ free}}
+\DoxyCodeLine{00006\ \textcolor{comment}{//\ software;\ you\ can\ redistribute\ it\ and/or\ modify\ it\ under\ the\ terms}}
+\DoxyCodeLine{00007\ \textcolor{comment}{//\ of\ the\ GNU\ General\ Public\ License\ as\ published\ by\ the\ Free\ Software}}
+\DoxyCodeLine{00008\ \textcolor{comment}{//\ Foundation;\ either\ version\ 3,\ or\ (at\ your\ option)\ any\ later}}
+\DoxyCodeLine{00009\ \textcolor{comment}{//\ version.}}
+\DoxyCodeLine{00010\ }
+\DoxyCodeLine{00011\ \textcolor{comment}{//\ This\ library\ is\ distributed\ in\ the\ hope\ that\ it\ will\ be\ useful,\ but}}
+\DoxyCodeLine{00012\ \textcolor{comment}{//\ WITHOUT\ ANY\ WARRANTY;\ without\ even\ the\ implied\ warranty\ of}}
+\DoxyCodeLine{00013\ \textcolor{comment}{//\ MERCHANTABILITY\ or\ FITNESS\ FOR\ A\ PARTICULAR\ PURPOSE.\ \ See\ the\ GNU}}
+\DoxyCodeLine{00014\ \textcolor{comment}{//\ General\ Public\ License\ for\ more\ details.}}
+\DoxyCodeLine{00015\ }
+\DoxyCodeLine{00016\ \textcolor{comment}{//\ Under\ Section\ 7\ of\ GPL\ version\ 3,\ you\ are\ granted\ additional}}
+\DoxyCodeLine{00017\ \textcolor{comment}{//\ permissions\ described\ in\ the\ GCC\ Runtime\ Library\ Exception,\ version}}
+\DoxyCodeLine{00018\ \textcolor{comment}{//\ 3.1,\ as\ published\ by\ the\ Free\ Software\ Foundation.}}
+\DoxyCodeLine{00019\ }
+\DoxyCodeLine{00020\ \textcolor{comment}{//\ You\ should\ have\ received\ a\ copy\ of\ the\ GNU\ General\ Public\ License\ and}}
+\DoxyCodeLine{00021\ \textcolor{comment}{//\ a\ copy\ of\ the\ GCC\ Runtime\ Library\ Exception\ along\ with\ this\ program;}}
+\DoxyCodeLine{00022\ \textcolor{comment}{//\ see\ the\ files\ COPYING3\ and\ COPYING.RUNTIME\ respectively.\ \ If\ not,\ see}}
+\DoxyCodeLine{00023\ \textcolor{comment}{//\ <http://www.gnu.org/licenses/>.}}
+\DoxyCodeLine{00024\ }
+\DoxyCodeLine{00025\ \textcolor{comment}{//\ Copyright\ (C)\ 2004\ Ami\ Tavory\ and\ Vladimir\ Dreizin,\ IBM-\/HRL.}}
+\DoxyCodeLine{00026\ }
+\DoxyCodeLine{00027\ \textcolor{comment}{//\ Permission\ to\ use,\ copy,\ modify,\ sell,\ and\ distribute\ this\ software}}
+\DoxyCodeLine{00028\ \textcolor{comment}{//\ is\ hereby\ granted\ without\ fee,\ provided\ that\ the\ above\ copyright}}
+\DoxyCodeLine{00029\ \textcolor{comment}{//\ notice\ appears\ in\ all\ copies,\ and\ that\ both\ that\ copyright\ notice}}
+\DoxyCodeLine{00030\ \textcolor{comment}{//\ and\ this\ permission\ notice\ appear\ in\ supporting\ documentation.\ None}}
+\DoxyCodeLine{00031\ \textcolor{comment}{//\ of\ the\ above\ authors,\ nor\ IBM\ Haifa\ Research\ Laboratories,\ make\ any}}
+\DoxyCodeLine{00032\ \textcolor{comment}{//\ representation\ about\ the\ suitability\ of\ this\ software\ for\ any}}
+\DoxyCodeLine{00033\ \textcolor{comment}{//\ purpose.\ It\ is\ provided\ "{}as\ is"{}\ without\ express\ or\ implied}}
+\DoxyCodeLine{00034\ \textcolor{comment}{//\ warranty.}}
+\DoxyCodeLine{00035\ }
+\DoxyCodeLine{00046\ \textcolor{preprocessor}{\#ifndef\ \_THROW\_ALLOCATOR\_H}}
+\DoxyCodeLine{00047\ \textcolor{preprocessor}{\#define\ \_THROW\_ALLOCATOR\_H\ 1}}
+\DoxyCodeLine{00048\ }
+\DoxyCodeLine{00049\ \textcolor{preprocessor}{\#include\ <cmath>}}
+\DoxyCodeLine{00050\ \textcolor{preprocessor}{\#include\ <ctime>}}
+\DoxyCodeLine{00051\ \textcolor{preprocessor}{\#include\ <map>}}
+\DoxyCodeLine{00052\ \textcolor{preprocessor}{\#include\ <string>}}
+\DoxyCodeLine{00053\ \textcolor{preprocessor}{\#include\ <ostream>}}
+\DoxyCodeLine{00054\ \textcolor{preprocessor}{\#include\ <stdexcept>}}
+\DoxyCodeLine{00055\ \textcolor{preprocessor}{\#include\ <utility>}}
+\DoxyCodeLine{00056\ \textcolor{preprocessor}{\#include\ <bits/functexcept.h>}}
+\DoxyCodeLine{00057\ \textcolor{preprocessor}{\#include\ <bits/move.h>}}
+\DoxyCodeLine{00058\ \textcolor{preprocessor}{\#if\ \_\_cplusplus\ >=\ 201103L}}
+\DoxyCodeLine{00059\ \textcolor{preprocessor}{\#\ include\ <functional>}}
+\DoxyCodeLine{00060\ \textcolor{preprocessor}{\#\ include\ <random>}}
+\DoxyCodeLine{00061\ \textcolor{preprocessor}{\#else}}
+\DoxyCodeLine{00062\ \textcolor{preprocessor}{\#\ include\ <tr1/functional>}}
+\DoxyCodeLine{00063\ \textcolor{preprocessor}{\#\ include\ <tr1/random>}}
+\DoxyCodeLine{00064\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00065\ \textcolor{preprocessor}{\#include\ <ext/alloc\_traits.h>}}
+\DoxyCodeLine{00066\ }
+\DoxyCodeLine{00067\ \textcolor{preprocessor}{\#if\ !\_\_has\_builtin(\_\_builtin\_sprintf)}}
+\DoxyCodeLine{00068\ \textcolor{preprocessor}{\#\ include\ <cstdio>}}
+\DoxyCodeLine{00069\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00070\ }
+\DoxyCodeLine{00071\ \textcolor{keyword}{namespace\ }\mbox{\hyperlink{namespace____gnu__cxx}{\_\_gnu\_cxx}}\ \mbox{\hyperlink{_classes_2lib_2include_2c_09_09_2x86__64-w64-mingw32_2bits_2c_09_09config_8h_a44377df0d3503f0b3d9ab316dd8ddf8b}{\_GLIBCXX\_VISIBILITY}}(default)}
+\DoxyCodeLine{00072\ \{}
+\DoxyCodeLine{00073\ \_GLIBCXX\_BEGIN\_NAMESPACE\_VERSION}
+\DoxyCodeLine{00074\ }
+\DoxyCodeLine{00079\ \ \ \textcolor{keyword}{struct\ }forced\_error\ :\ \textcolor{keyword}{public}\ \mbox{\hyperlink{classstd_1_1exception}{std::exception}}}
+\DoxyCodeLine{00080\ \ \ \{\ \};}
+\DoxyCodeLine{00081\ }
+\DoxyCodeLine{00082\ \ \ \textcolor{comment}{//\ Substitute\ for\ forced\_error\ object\ when\ -\/fno-\/exceptions.}}
+\DoxyCodeLine{00083\ \ \ \textcolor{keyword}{inline}\ \textcolor{keywordtype}{void}}
+\DoxyCodeLine{00084\ \ \ \_\_throw\_forced\_error()}
+\DoxyCodeLine{00085\ \ \ \{\ \_GLIBCXX\_THROW\_OR\_ABORT(forced\_error());\ \}}
+\DoxyCodeLine{00086\ }
+\DoxyCodeLine{00093\ \ \ \textcolor{keyword}{struct\ }annotate\_base}
+\DoxyCodeLine{00094\ \ \ \{}
+\DoxyCodeLine{00095\ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00096\ \ \ \ \ \textcolor{keyword}{typedef}\ std::pair<size\_t,\ size\_t>\ \ \ \ \ \ \ data\_type;}
+\DoxyCodeLine{00097\ \ \ \ \ \textcolor{keyword}{typedef}\ std::map<void*,\ data\_type>\ \ \ \ \ \ map\_alloc\_type;}
+\DoxyCodeLine{00098\ \ \ \ \ \textcolor{keyword}{typedef}\ map\_alloc\_type::value\_type\ \ \ \ \ \ entry\_type;}
+\DoxyCodeLine{00099\ \ \ \ \ \textcolor{keyword}{typedef}\ map\_alloc\_type::const\_iterator\ \ const\_iterator;}
+\DoxyCodeLine{00100\ \ \ \ \ \textcolor{keyword}{typedef}\ map\_alloc\_type::const\_reference\ const\_reference;}
+\DoxyCodeLine{00101\ \textcolor{preprocessor}{\#if\ \_\_cplusplus\ >=\ 201103L}}
+\DoxyCodeLine{00102\ \ \ \ \ \textcolor{keyword}{typedef}\ std::map<void*,\ size\_t>\ \ \ \ \ map\_construct\_type;}
+\DoxyCodeLine{00103\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00104\ }
+\DoxyCodeLine{00105\ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00106\ \ \ \ \ annotate\_base()}
+\DoxyCodeLine{00107\ \ \ \ \ \{}
+\DoxyCodeLine{00108\ \ \ \ \ \ \ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_a9371a1f53f8067997cd15aaf657c62d0}{label}}();}
+\DoxyCodeLine{00109\ \ \ \ \ \ \ map\_alloc();}
+\DoxyCodeLine{00110\ \ \ \ \ \}}
+\DoxyCodeLine{00111\ }
+\DoxyCodeLine{00112\ \ \ \ \ \textcolor{keyword}{static}\ \textcolor{keywordtype}{void}}
+\DoxyCodeLine{00113\ \ \ \ \ set\_label(\textcolor{keywordtype}{size\_t}\ l)}
+\DoxyCodeLine{00114\ \ \ \ \ \{\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_a9371a1f53f8067997cd15aaf657c62d0}{label}}()\ =\ l;\ \}}
+\DoxyCodeLine{00115\ }
+\DoxyCodeLine{00116\ \ \ \ \ \textcolor{keyword}{static}\ \textcolor{keywordtype}{size\_t}}
+\DoxyCodeLine{00117\ \ \ \ \ get\_label()}
+\DoxyCodeLine{00118\ \ \ \ \ \{\ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_a9371a1f53f8067997cd15aaf657c62d0}{label}}();\ \}}
+\DoxyCodeLine{00119\ }
+\DoxyCodeLine{00120\ \ \ \ \ \textcolor{keywordtype}{void}}
+\DoxyCodeLine{00121\ \ \ \ \ insert(\textcolor{keywordtype}{void}*\ p,\ \textcolor{keywordtype}{size\_t}\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_a3d1e3edfcf61ca2d831883e1afbad89e}{size}})}
+\DoxyCodeLine{00122\ \ \ \ \ \{}
+\DoxyCodeLine{00123\ \ \ \ \ \ \ entry\_type\ \mbox{\hyperlink{namespacefind_l_s_b_a9f3e2ce1c42e4e79e3976f44c44b77f9}{entry}}\ =\ make\_entry(p,\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_a3d1e3edfcf61ca2d831883e1afbad89e}{size}});}
+\DoxyCodeLine{00124\ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (!p)}
+\DoxyCodeLine{00125\ \ \ \ \ \{}
+\DoxyCodeLine{00126\ \ \ \ \ \ \ std::string\ \mbox{\hyperlink{_classes_2lib_2glm_2test_2core_2core__func__integer__bit__count_8cpp_ab34dedbf30a51859090cbab92fa60edb}{error}}(\textcolor{stringliteral}{"{}annotate\_base::insert\ null\ insert!\(\backslash\)n"{}});}
+\DoxyCodeLine{00127\ \ \ \ \ \ \ log\_to\_string(error,\ entry);}
+\DoxyCodeLine{00128\ \ \ \ \ \ \ std::\_\_throw\_logic\_error(\mbox{\hyperlink{_classes_2lib_2glm_2test_2core_2core__func__integer__bit__count_8cpp_ab34dedbf30a51859090cbab92fa60edb}{error}}.c\_str());}
+\DoxyCodeLine{00129\ \ \ \ \ \}}
+\DoxyCodeLine{00130\ }
+\DoxyCodeLine{00131\ \ \ \ \ \ \ std::pair<map\_alloc\_type::iterator,\ bool>\ inserted}
+\DoxyCodeLine{00132\ \ \ \ \ =\ map\_alloc().insert(entry);}
+\DoxyCodeLine{00133\ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (!inserted.second)}
+\DoxyCodeLine{00134\ \ \ \ \ \{}
+\DoxyCodeLine{00135\ \ \ \ \ \ \ std::string\ \mbox{\hyperlink{_classes_2lib_2glm_2test_2core_2core__func__integer__bit__count_8cpp_ab34dedbf30a51859090cbab92fa60edb}{error}}(\textcolor{stringliteral}{"{}annotate\_base::insert\ double\ insert!\(\backslash\)n"{}});}
+\DoxyCodeLine{00136\ \ \ \ \ \ \ log\_to\_string(error,\ entry);}
+\DoxyCodeLine{00137\ \ \ \ \ \ \ log\_to\_string(error,\ *inserted.first);}
+\DoxyCodeLine{00138\ \ \ \ \ \ \ std::\_\_throw\_logic\_error(\mbox{\hyperlink{_classes_2lib_2glm_2test_2core_2core__func__integer__bit__count_8cpp_ab34dedbf30a51859090cbab92fa60edb}{error}}.c\_str());}
+\DoxyCodeLine{00139\ \ \ \ \ \}}
+\DoxyCodeLine{00140\ \ \ \ \ \}}
+\DoxyCodeLine{00141\ }
+\DoxyCodeLine{00142\ \ \ \ \ \textcolor{keywordtype}{void}}
+\DoxyCodeLine{00143\ \ \ \ \ erase(\textcolor{keywordtype}{void}*\ p,\ \textcolor{keywordtype}{size\_t}\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_a3d1e3edfcf61ca2d831883e1afbad89e}{size}})}
+\DoxyCodeLine{00144\ \ \ \ \ \{\ map\_alloc().erase(check\_allocated(p,\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_a3d1e3edfcf61ca2d831883e1afbad89e}{size}}));\ \}}
+\DoxyCodeLine{00145\ }
+\DoxyCodeLine{00146\ \textcolor{preprocessor}{\#if\ \_\_cplusplus\ >=\ 201103L}}
+\DoxyCodeLine{00147\ \ \ \ \ \textcolor{keywordtype}{void}}
+\DoxyCodeLine{00148\ \ \ \ \ insert\_construct(\textcolor{keywordtype}{void}*\ p)}
+\DoxyCodeLine{00149\ \ \ \ \ \{}
+\DoxyCodeLine{00150\ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (!p)}
+\DoxyCodeLine{00151\ \ \ \ \ \{}
+\DoxyCodeLine{00152\ \ \ \ \ \ \ std::string\ \mbox{\hyperlink{_classes_2lib_2glm_2test_2core_2core__func__integer__bit__count_8cpp_ab34dedbf30a51859090cbab92fa60edb}{error}}(\textcolor{stringliteral}{"{}annotate\_base::insert\_construct\ null!\(\backslash\)n"{}});}
+\DoxyCodeLine{00153\ \ \ \ \ \ \ std::\_\_throw\_logic\_error(\mbox{\hyperlink{_classes_2lib_2glm_2test_2core_2core__func__integer__bit__count_8cpp_ab34dedbf30a51859090cbab92fa60edb}{error}}.c\_str());}
+\DoxyCodeLine{00154\ \ \ \ \ \}}
+\DoxyCodeLine{00155\ }
+\DoxyCodeLine{00156\ \ \ \ \ \ \ \textcolor{keyword}{auto}\ inserted\ =\ map\_construct().insert(std::make\_pair(p,\ get\_label()));}
+\DoxyCodeLine{00157\ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (!inserted.second)}
+\DoxyCodeLine{00158\ \ \ \ \ \{}
+\DoxyCodeLine{00159\ \ \ \ \ \ \ std::string\ \mbox{\hyperlink{_classes_2lib_2glm_2test_2core_2core__func__integer__bit__count_8cpp_ab34dedbf30a51859090cbab92fa60edb}{error}}(\textcolor{stringliteral}{"{}annotate\_base::insert\_construct\ double\ insert!\(\backslash\)n"{}});}
+\DoxyCodeLine{00160\ \ \ \ \ \ \ log\_to\_string(error,\ std::make\_pair(p,\ get\_label()));}
+\DoxyCodeLine{00161\ \ \ \ \ \ \ log\_to\_string(error,\ *inserted.first);}
+\DoxyCodeLine{00162\ \ \ \ \ \ \ std::\_\_throw\_logic\_error(\mbox{\hyperlink{_classes_2lib_2glm_2test_2core_2core__func__integer__bit__count_8cpp_ab34dedbf30a51859090cbab92fa60edb}{error}}.c\_str());}
+\DoxyCodeLine{00163\ \ \ \ \ \}}
+\DoxyCodeLine{00164\ \ \ \ \ \}}
+\DoxyCodeLine{00165\ }
+\DoxyCodeLine{00166\ \ \ \ \ \textcolor{keywordtype}{void}}
+\DoxyCodeLine{00167\ \ \ \ \ erase\_construct(\textcolor{keywordtype}{void}*\ p)}
+\DoxyCodeLine{00168\ \ \ \ \ \{\ map\_construct().erase(check\_constructed(p));\ \}}
+\DoxyCodeLine{00169\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00170\ }
+\DoxyCodeLine{00171\ \ \ \ \ \textcolor{comment}{//\ See\ if\ a\ particular\ address\ and\ allocation\ size\ has\ been\ saved.}}
+\DoxyCodeLine{00172\ \ \ \ \ \textcolor{keyword}{inline}\ map\_alloc\_type::iterator}
+\DoxyCodeLine{00173\ \ \ \ \ check\_allocated(\textcolor{keywordtype}{void}*\ p,\ \textcolor{keywordtype}{size\_t}\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_a3d1e3edfcf61ca2d831883e1afbad89e}{size}})}
+\DoxyCodeLine{00174\ \ \ \ \ \{}
+\DoxyCodeLine{00175\ \ \ \ \ \ \ map\_alloc\_type::iterator\ found\ =\ map\_alloc().find(p);}
+\DoxyCodeLine{00176\ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (found\ ==\ map\_alloc().\mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2glad_8h_a432111147038972f06e049e18a837002}{end}}())}
+\DoxyCodeLine{00177\ \ \ \ \ \{}
+\DoxyCodeLine{00178\ \ \ \ \ \ \ std::string\ \mbox{\hyperlink{_classes_2lib_2glm_2test_2core_2core__func__integer__bit__count_8cpp_ab34dedbf30a51859090cbab92fa60edb}{error}}(\textcolor{stringliteral}{"{}annotate\_base::check\_allocated\ by\ value\ "{}}}
+\DoxyCodeLine{00179\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}null\ erase!\(\backslash\)n"{}});}
+\DoxyCodeLine{00180\ \ \ \ \ \ \ log\_to\_string(error,\ make\_entry(p,\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_a3d1e3edfcf61ca2d831883e1afbad89e}{size}}));}
+\DoxyCodeLine{00181\ \ \ \ \ \ \ std::\_\_throw\_logic\_error(\mbox{\hyperlink{_classes_2lib_2glm_2test_2core_2core__func__integer__bit__count_8cpp_ab34dedbf30a51859090cbab92fa60edb}{error}}.c\_str());}
+\DoxyCodeLine{00182\ \ \ \ \ \}}
+\DoxyCodeLine{00183\ }
+\DoxyCodeLine{00184\ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (found-\/>second.second\ !=\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_a3d1e3edfcf61ca2d831883e1afbad89e}{size}})}
+\DoxyCodeLine{00185\ \ \ \ \ \{}
+\DoxyCodeLine{00186\ \ \ \ \ \ \ std::string\ \mbox{\hyperlink{_classes_2lib_2glm_2test_2core_2core__func__integer__bit__count_8cpp_ab34dedbf30a51859090cbab92fa60edb}{error}}(\textcolor{stringliteral}{"{}annotate\_base::check\_allocated\ by\ value\ "{}}}
+\DoxyCodeLine{00187\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}wrong-\/size\ erase!\(\backslash\)n"{}});}
+\DoxyCodeLine{00188\ \ \ \ \ \ \ log\_to\_string(error,\ make\_entry(p,\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_a3d1e3edfcf61ca2d831883e1afbad89e}{size}}));}
+\DoxyCodeLine{00189\ \ \ \ \ \ \ log\_to\_string(error,\ *found);}
+\DoxyCodeLine{00190\ \ \ \ \ \ \ std::\_\_throw\_logic\_error(\mbox{\hyperlink{_classes_2lib_2glm_2test_2core_2core__func__integer__bit__count_8cpp_ab34dedbf30a51859090cbab92fa60edb}{error}}.c\_str());}
+\DoxyCodeLine{00191\ \ \ \ \ \}}
+\DoxyCodeLine{00192\ }
+\DoxyCodeLine{00193\ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ found;}
+\DoxyCodeLine{00194\ \ \ \ \ \}}
+\DoxyCodeLine{00195\ }
+\DoxyCodeLine{00196\ \ \ \ \ \textcolor{comment}{//\ See\ if\ a\ given\ label\ has\ been\ allocated.}}
+\DoxyCodeLine{00197\ \ \ \ \ \textcolor{keyword}{inline}\ \textcolor{keywordtype}{void}}
+\DoxyCodeLine{00198\ \ \ \ \ check(\textcolor{keywordtype}{size\_t}\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_a9371a1f53f8067997cd15aaf657c62d0}{label}})}
+\DoxyCodeLine{00199\ \ \ \ \ \{}
+\DoxyCodeLine{00200\ \ \ \ \ \ \ std::string\ found;}
+\DoxyCodeLine{00201\ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00202\ \ \ \ \ const\_iterator\ beg\ =\ map\_alloc().begin();}
+\DoxyCodeLine{00203\ \ \ \ \ const\_iterator\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2glad_8h_a432111147038972f06e049e18a837002}{end}}\ =\ map\_alloc().end();}
+\DoxyCodeLine{00204\ \ \ \ \ \textcolor{keywordflow}{while}\ (beg\ !=\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2glad_8h_a432111147038972f06e049e18a837002}{end}})}
+\DoxyCodeLine{00205\ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00206\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (beg-\/>second.first\ ==\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_a9371a1f53f8067997cd15aaf657c62d0}{label}})}
+\DoxyCodeLine{00207\ \ \ \ \ \ \ \ \ \ \ log\_to\_string(found,\ *beg);}
+\DoxyCodeLine{00208\ \ \ \ \ \ \ \ \ ++beg;}
+\DoxyCodeLine{00209\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00210\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00211\ }
+\DoxyCodeLine{00212\ \textcolor{preprocessor}{\#if\ \_\_cplusplus\ >=\ 201103L}}
+\DoxyCodeLine{00213\ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00214\ \ \ \ \ \textcolor{keyword}{auto}\ beg\ =\ map\_construct().begin();}
+\DoxyCodeLine{00215\ \ \ \ \ \textcolor{keyword}{auto}\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2glad_8h_a432111147038972f06e049e18a837002}{end}}\ =\ map\_construct().end();}
+\DoxyCodeLine{00216\ \ \ \ \ \textcolor{keywordflow}{while}\ (beg\ !=\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2glad_8h_a432111147038972f06e049e18a837002}{end}})}
+\DoxyCodeLine{00217\ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00218\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (beg-\/>second\ ==\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_a9371a1f53f8067997cd15aaf657c62d0}{label}})}
+\DoxyCodeLine{00219\ \ \ \ \ \ \ \ \ \ \ log\_to\_string(found,\ *beg);}
+\DoxyCodeLine{00220\ \ \ \ \ \ \ \ \ ++beg;}
+\DoxyCodeLine{00221\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00222\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00223\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00224\ }
+\DoxyCodeLine{00225\ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (!found.empty())}
+\DoxyCodeLine{00226\ \ \ \ \ \{}
+\DoxyCodeLine{00227\ \ \ \ \ \ \ std::string\ \mbox{\hyperlink{_classes_2lib_2glm_2test_2core_2core__func__integer__bit__count_8cpp_ab34dedbf30a51859090cbab92fa60edb}{error}}(\textcolor{stringliteral}{"{}annotate\_base::check\ by\ label\(\backslash\)n"{}});}
+\DoxyCodeLine{00228\ \ \ \ \ \ \ \mbox{\hyperlink{_classes_2lib_2glm_2test_2core_2core__func__integer__bit__count_8cpp_ab34dedbf30a51859090cbab92fa60edb}{error}}\ +=\ found;}
+\DoxyCodeLine{00229\ \ \ \ \ \ \ std::\_\_throw\_logic\_error(\mbox{\hyperlink{_classes_2lib_2glm_2test_2core_2core__func__integer__bit__count_8cpp_ab34dedbf30a51859090cbab92fa60edb}{error}}.c\_str());}
+\DoxyCodeLine{00230\ \ \ \ \ \}}
+\DoxyCodeLine{00231\ \ \ \ \ \}}
+\DoxyCodeLine{00232\ }
+\DoxyCodeLine{00233\ \ \ \ \ \textcolor{comment}{//\ See\ if\ there\ is\ anything\ left\ allocated\ or\ constructed.}}
+\DoxyCodeLine{00234\ \ \ \ \ \textcolor{keyword}{inline}\ \textcolor{keyword}{static}\ \textcolor{keywordtype}{void}}
+\DoxyCodeLine{00235\ \ \ \ \ check()}
+\DoxyCodeLine{00236\ \ \ \ \ \{}
+\DoxyCodeLine{00237\ \ \ \ \ \ \ std::string\ found;}
+\DoxyCodeLine{00238\ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00239\ \ \ \ \ const\_iterator\ beg\ =\ map\_alloc().begin();}
+\DoxyCodeLine{00240\ \ \ \ \ const\_iterator\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2glad_8h_a432111147038972f06e049e18a837002}{end}}\ =\ map\_alloc().end();}
+\DoxyCodeLine{00241\ \ \ \ \ \textcolor{keywordflow}{while}\ (beg\ !=\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2glad_8h_a432111147038972f06e049e18a837002}{end}})}
+\DoxyCodeLine{00242\ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00243\ \ \ \ \ \ \ \ \ log\_to\_string(found,\ *beg);}
+\DoxyCodeLine{00244\ \ \ \ \ \ \ \ \ ++beg;}
+\DoxyCodeLine{00245\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00246\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00247\ }
+\DoxyCodeLine{00248\ \textcolor{preprocessor}{\#if\ \_\_cplusplus\ >=\ 201103L}}
+\DoxyCodeLine{00249\ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00250\ \ \ \ \ \textcolor{keyword}{auto}\ beg\ =\ map\_construct().begin();}
+\DoxyCodeLine{00251\ \ \ \ \ \textcolor{keyword}{auto}\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2glad_8h_a432111147038972f06e049e18a837002}{end}}\ =\ map\_construct().end();}
+\DoxyCodeLine{00252\ \ \ \ \ \textcolor{keywordflow}{while}\ (beg\ !=\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2glad_8h_a432111147038972f06e049e18a837002}{end}})}
+\DoxyCodeLine{00253\ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00254\ \ \ \ \ \ \ \ \ log\_to\_string(found,\ *beg);}
+\DoxyCodeLine{00255\ \ \ \ \ \ \ \ \ ++beg;}
+\DoxyCodeLine{00256\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00257\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00258\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00259\ }
+\DoxyCodeLine{00260\ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (!found.empty())}
+\DoxyCodeLine{00261\ \ \ \ \ \{}
+\DoxyCodeLine{00262\ \ \ \ \ \ \ std::string\ \mbox{\hyperlink{_classes_2lib_2glm_2test_2core_2core__func__integer__bit__count_8cpp_ab34dedbf30a51859090cbab92fa60edb}{error}}(\textcolor{stringliteral}{"{}annotate\_base::check\ \(\backslash\)n"{}});}
+\DoxyCodeLine{00263\ \ \ \ \ \ \ \mbox{\hyperlink{_classes_2lib_2glm_2test_2core_2core__func__integer__bit__count_8cpp_ab34dedbf30a51859090cbab92fa60edb}{error}}\ +=\ found;}
+\DoxyCodeLine{00264\ \ \ \ \ \ \ std::\_\_throw\_logic\_error(\mbox{\hyperlink{_classes_2lib_2glm_2test_2core_2core__func__integer__bit__count_8cpp_ab34dedbf30a51859090cbab92fa60edb}{error}}.c\_str());}
+\DoxyCodeLine{00265\ \ \ \ \ \}}
+\DoxyCodeLine{00266\ \ \ \ \ \}}
+\DoxyCodeLine{00267\ }
+\DoxyCodeLine{00268\ \textcolor{preprocessor}{\#if\ \_\_cplusplus\ >=\ 201103L}}
+\DoxyCodeLine{00269\ \ \ \ \ \textcolor{keyword}{inline}\ map\_construct\_type::iterator}
+\DoxyCodeLine{00270\ \ \ \ \ check\_constructed(\textcolor{keywordtype}{void}*\ p)}
+\DoxyCodeLine{00271\ \ \ \ \ \{}
+\DoxyCodeLine{00272\ \ \ \ \ \ \ \textcolor{keyword}{auto}\ found\ =\ map\_construct().find(p);}
+\DoxyCodeLine{00273\ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (found\ ==\ map\_construct().\mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2glad_8h_a432111147038972f06e049e18a837002}{end}}())}
+\DoxyCodeLine{00274\ \ \ \ \ \{}
+\DoxyCodeLine{00275\ \ \ \ \ \ \ std::string\ \mbox{\hyperlink{_classes_2lib_2glm_2test_2core_2core__func__integer__bit__count_8cpp_ab34dedbf30a51859090cbab92fa60edb}{error}}(\textcolor{stringliteral}{"{}annotate\_base::check\_constructed\ not\ "{}}}
+\DoxyCodeLine{00276\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}constructed!\(\backslash\)n"{}});}
+\DoxyCodeLine{00277\ \ \ \ \ \ \ log\_to\_string(error,\ std::make\_pair(p,\ get\_label()));}
+\DoxyCodeLine{00278\ \ \ \ \ \ \ std::\_\_throw\_logic\_error(\mbox{\hyperlink{_classes_2lib_2glm_2test_2core_2core__func__integer__bit__count_8cpp_ab34dedbf30a51859090cbab92fa60edb}{error}}.c\_str());}
+\DoxyCodeLine{00279\ \ \ \ \ \}}
+\DoxyCodeLine{00280\ }
+\DoxyCodeLine{00281\ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ found;}
+\DoxyCodeLine{00282\ \ \ \ \ \}}
+\DoxyCodeLine{00283\ }
+\DoxyCodeLine{00284\ \ \ \ \ \textcolor{keyword}{inline}\ \textcolor{keywordtype}{void}}
+\DoxyCodeLine{00285\ \ \ \ \ check\_constructed(\textcolor{keywordtype}{size\_t}\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_a9371a1f53f8067997cd15aaf657c62d0}{label}})}
+\DoxyCodeLine{00286\ \ \ \ \ \{}
+\DoxyCodeLine{00287\ \ \ \ \ \ \ \textcolor{keyword}{auto}\ beg\ =\ map\_construct().begin();}
+\DoxyCodeLine{00288\ \ \ \ \ \ \ \textcolor{keyword}{auto}\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2glad_8h_a432111147038972f06e049e18a837002}{end}}\ =\ map\_construct().end();}
+\DoxyCodeLine{00289\ \ \ \ \ \ \ std::string\ found;}
+\DoxyCodeLine{00290\ \ \ \ \ \ \ \textcolor{keywordflow}{while}\ (beg\ !=\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2glad_8h_a432111147038972f06e049e18a837002}{end}})}
+\DoxyCodeLine{00291\ \ \ \ \ \{}
+\DoxyCodeLine{00292\ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (beg-\/>second\ ==\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_a9371a1f53f8067997cd15aaf657c62d0}{label}})}
+\DoxyCodeLine{00293\ \ \ \ \ \ \ \ \ log\_to\_string(found,\ *beg);}
+\DoxyCodeLine{00294\ \ \ \ \ \ \ ++beg;}
+\DoxyCodeLine{00295\ \ \ \ \ \}}
+\DoxyCodeLine{00296\ }
+\DoxyCodeLine{00297\ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (!found.empty())}
+\DoxyCodeLine{00298\ \ \ \ \ \{}
+\DoxyCodeLine{00299\ \ \ \ \ \ \ std::string\ \mbox{\hyperlink{_classes_2lib_2glm_2test_2core_2core__func__integer__bit__count_8cpp_ab34dedbf30a51859090cbab92fa60edb}{error}}(\textcolor{stringliteral}{"{}annotate\_base::check\_constructed\ by\ label\(\backslash\)n"{}});}
+\DoxyCodeLine{00300\ \ \ \ \ \ \ \mbox{\hyperlink{_classes_2lib_2glm_2test_2core_2core__func__integer__bit__count_8cpp_ab34dedbf30a51859090cbab92fa60edb}{error}}\ +=\ found;}
+\DoxyCodeLine{00301\ \ \ \ \ \ \ std::\_\_throw\_logic\_error(\mbox{\hyperlink{_classes_2lib_2glm_2test_2core_2core__func__integer__bit__count_8cpp_ab34dedbf30a51859090cbab92fa60edb}{error}}.c\_str());}
+\DoxyCodeLine{00302\ \ \ \ \ \}}
+\DoxyCodeLine{00303\ \ \ \ \ \}}
+\DoxyCodeLine{00304\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00305\ }
+\DoxyCodeLine{00306\ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00307\ \ \ \ \ \textcolor{keyword}{friend}\ std::ostream\&}
+\DoxyCodeLine{00308\ \ \ \ \ \mbox{\hyperlink{forward__declarations_8h_ade7e3bc03b39cb3b5684a4c302832e3c}{operator<<}}(std::ostream\&,\ \textcolor{keyword}{const}\ annotate\_base\&);}
+\DoxyCodeLine{00309\ }
+\DoxyCodeLine{00310\ \ \ \ \ entry\_type}
+\DoxyCodeLine{00311\ \ \ \ \ make\_entry(\textcolor{keywordtype}{void}*\ p,\ \textcolor{keywordtype}{size\_t}\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_a3d1e3edfcf61ca2d831883e1afbad89e}{size}})}
+\DoxyCodeLine{00312\ \ \ \ \ \{\ \textcolor{keywordflow}{return}\ std::make\_pair(p,\ data\_type(get\_label(),\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_a3d1e3edfcf61ca2d831883e1afbad89e}{size}}));\ \}}
+\DoxyCodeLine{00313\ }
+\DoxyCodeLine{00314\ \ \ \ \ \textcolor{keyword}{static}\ \textcolor{keywordtype}{void}}
+\DoxyCodeLine{00315\ \ \ \ \ log\_to\_string(std::string\&\ s,\ const\_reference\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_a083de4c8e32ad3d9059245f26be721de}{ref}})}
+\DoxyCodeLine{00316\ \ \ \ \ \{}
+\DoxyCodeLine{00317\ \textcolor{preprocessor}{\#if\ !\ \_\_has\_builtin(\_\_builtin\_sprintf)}}
+\DoxyCodeLine{00318\ \ \ \ \ \ \ \_\_typeof\_\_(\&std::sprintf)\ \_\_builtin\_sprintf\ =\ \&std::sprintf;}
+\DoxyCodeLine{00319\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00320\ }
+\DoxyCodeLine{00321\ \ \ \ \ \ \ \textcolor{keywordtype}{char}\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_ad8a8baf08bc0399738960c9259571911}{buf}}[40];}
+\DoxyCodeLine{00322\ \ \ \ \ \ \ \textcolor{keyword}{const}\ \textcolor{keywordtype}{char}\ tab(\textcolor{charliteral}{'\(\backslash\)t'});}
+\DoxyCodeLine{00323\ \ \ \ \ \ \ s\ +=\ \textcolor{stringliteral}{"{}label:\ "{}};}
+\DoxyCodeLine{00324\ \ \ \ \ \ \ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{long}\ l\ =\ \textcolor{keyword}{static\_cast<}\textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{long}\textcolor{keyword}{>}(\mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_a083de4c8e32ad3d9059245f26be721de}{ref}}.second.first);}
+\DoxyCodeLine{00325\ \ \ \ \ \ \ \_\_builtin\_sprintf(\mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_ad8a8baf08bc0399738960c9259571911}{buf}},\ \textcolor{stringliteral}{"{}\%lu"{}},\ l);}
+\DoxyCodeLine{00326\ \ \ \ \ \ \ s\ +=\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_ad8a8baf08bc0399738960c9259571911}{buf}};}
+\DoxyCodeLine{00327\ \ \ \ \ \ \ s\ +=\ tab;}
+\DoxyCodeLine{00328\ \ \ \ \ \ \ s\ +=\ \textcolor{stringliteral}{"{}size:\ "{}};}
+\DoxyCodeLine{00329\ \ \ \ \ \ \ l\ =\ \textcolor{keyword}{static\_cast<}\textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{long}\textcolor{keyword}{>}(\mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_a083de4c8e32ad3d9059245f26be721de}{ref}}.second.second);}
+\DoxyCodeLine{00330\ \ \ \ \ \ \ \_\_builtin\_sprintf(\mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_ad8a8baf08bc0399738960c9259571911}{buf}},\ \textcolor{stringliteral}{"{}\%lu"{}},\ l);}
+\DoxyCodeLine{00331\ \ \ \ \ \ \ s\ +=\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_ad8a8baf08bc0399738960c9259571911}{buf}};}
+\DoxyCodeLine{00332\ \ \ \ \ \ \ s\ +=\ tab;}
+\DoxyCodeLine{00333\ \ \ \ \ \ \ s\ +=\ \textcolor{stringliteral}{"{}address:\ "{}};}
+\DoxyCodeLine{00334\ \ \ \ \ \ \ \_\_builtin\_sprintf(\mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_ad8a8baf08bc0399738960c9259571911}{buf}},\ \textcolor{stringliteral}{"{}\%p"{}},\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_a083de4c8e32ad3d9059245f26be721de}{ref}}.first);}
+\DoxyCodeLine{00335\ \ \ \ \ \ \ s\ +=\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_ad8a8baf08bc0399738960c9259571911}{buf}};}
+\DoxyCodeLine{00336\ \ \ \ \ \ \ s\ +=\ \textcolor{charliteral}{'\(\backslash\)n'};}
+\DoxyCodeLine{00337\ \ \ \ \ \}}
+\DoxyCodeLine{00338\ }
+\DoxyCodeLine{00339\ \textcolor{preprocessor}{\#if\ \_\_cplusplus\ >=\ 201103L}}
+\DoxyCodeLine{00340\ \ \ \ \ \textcolor{keyword}{static}\ \textcolor{keywordtype}{void}}
+\DoxyCodeLine{00341\ \ \ \ \ log\_to\_string(std::string\&\ s,\ \textcolor{keyword}{const}\ std::pair<const\ void*,\ size\_t>\&\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_a083de4c8e32ad3d9059245f26be721de}{ref}})}
+\DoxyCodeLine{00342\ \ \ \ \ \{}
+\DoxyCodeLine{00343\ \textcolor{preprocessor}{\#if\ !\ \_\_has\_builtin(\_\_builtin\_sprintf)}}
+\DoxyCodeLine{00344\ \ \ \ \ \ \ \textcolor{keyword}{auto}\ \_\_builtin\_sprintf\ =\ \&std::sprintf;}
+\DoxyCodeLine{00345\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00346\ }
+\DoxyCodeLine{00347\ \ \ \ \ \ \ \textcolor{keywordtype}{char}\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_ad8a8baf08bc0399738960c9259571911}{buf}}[40];}
+\DoxyCodeLine{00348\ \ \ \ \ \ \ \textcolor{keyword}{const}\ \textcolor{keywordtype}{char}\ tab(\textcolor{charliteral}{'\(\backslash\)t'});}
+\DoxyCodeLine{00349\ \ \ \ \ \ \ s\ +=\ \textcolor{stringliteral}{"{}label:\ "{}};}
+\DoxyCodeLine{00350\ \ \ \ \ \ \ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{long}\ l\ =\ \textcolor{keyword}{static\_cast<}\textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{long}\textcolor{keyword}{>}(\mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_a083de4c8e32ad3d9059245f26be721de}{ref}}.second);}
+\DoxyCodeLine{00351\ \ \ \ \ \ \ \_\_builtin\_sprintf(\mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_ad8a8baf08bc0399738960c9259571911}{buf}},\ \textcolor{stringliteral}{"{}\%lu"{}},\ l);}
+\DoxyCodeLine{00352\ \ \ \ \ \ \ s\ +=\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_ad8a8baf08bc0399738960c9259571911}{buf}};}
+\DoxyCodeLine{00353\ \ \ \ \ \ \ s\ +=\ tab;}
+\DoxyCodeLine{00354\ \ \ \ \ \ \ s\ +=\ \textcolor{stringliteral}{"{}address:\ "{}};}
+\DoxyCodeLine{00355\ \ \ \ \ \ \ \_\_builtin\_sprintf(\mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_ad8a8baf08bc0399738960c9259571911}{buf}},\ \textcolor{stringliteral}{"{}\%p"{}},\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_a083de4c8e32ad3d9059245f26be721de}{ref}}.first);}
+\DoxyCodeLine{00356\ \ \ \ \ \ \ s\ +=\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_ad8a8baf08bc0399738960c9259571911}{buf}};}
+\DoxyCodeLine{00357\ \ \ \ \ \ \ s\ +=\ \textcolor{charliteral}{'\(\backslash\)n'};}
+\DoxyCodeLine{00358\ \ \ \ \ \}}
+\DoxyCodeLine{00359\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00360\ }
+\DoxyCodeLine{00361\ \ \ \ \ \textcolor{keyword}{static}\ \textcolor{keywordtype}{size\_t}\&}
+\DoxyCodeLine{00362\ \ \ \ \ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_a9371a1f53f8067997cd15aaf657c62d0}{label}}()}
+\DoxyCodeLine{00363\ \ \ \ \ \{}
+\DoxyCodeLine{00364\ \ \ \ \ \ \ \textcolor{keyword}{static}\ \textcolor{keywordtype}{size\_t}\ \_S\_label(std::numeric\_limits<size\_t>::max());}
+\DoxyCodeLine{00365\ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \_S\_label;}
+\DoxyCodeLine{00366\ \ \ \ \ \}}
+\DoxyCodeLine{00367\ }
+\DoxyCodeLine{00368\ \ \ \ \ \textcolor{keyword}{static}\ map\_alloc\_type\&}
+\DoxyCodeLine{00369\ \ \ \ \ map\_alloc()}
+\DoxyCodeLine{00370\ \ \ \ \ \{}
+\DoxyCodeLine{00371\ \ \ \ \ \ \ \textcolor{keyword}{static}\ map\_alloc\_type\ \_S\_map;}
+\DoxyCodeLine{00372\ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \_S\_map;}
+\DoxyCodeLine{00373\ \ \ \ \ \}}
+\DoxyCodeLine{00374\ }
+\DoxyCodeLine{00375\ \textcolor{preprocessor}{\#if\ \_\_cplusplus\ >=\ 201103L}}
+\DoxyCodeLine{00376\ \ \ \ \ \textcolor{keyword}{static}\ map\_construct\_type\&}
+\DoxyCodeLine{00377\ \ \ \ \ map\_construct()}
+\DoxyCodeLine{00378\ \ \ \ \ \{}
+\DoxyCodeLine{00379\ \ \ \ \ \ \ \textcolor{keyword}{static}\ map\_construct\_type\ \_S\_map;}
+\DoxyCodeLine{00380\ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \_S\_map;}
+\DoxyCodeLine{00381\ \ \ \ \ \}}
+\DoxyCodeLine{00382\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00383\ \ \ \};}
+\DoxyCodeLine{00384\ }
+\DoxyCodeLine{00385\ \ \ \textcolor{keyword}{inline}\ std::ostream\&}
+\DoxyCodeLine{00386\ \ \ \mbox{\hyperlink{forward__declarations_8h_ade7e3bc03b39cb3b5684a4c302832e3c}{operator<<}}(std::ostream\&\ os,\ \textcolor{keyword}{const}\ annotate\_base\&\ \_\_b)}
+\DoxyCodeLine{00387\ \ \ \{}
+\DoxyCodeLine{00388\ \ \ \ \ std::string\ \mbox{\hyperlink{_classes_2lib_2glm_2test_2core_2core__func__integer__bit__count_8cpp_ab34dedbf30a51859090cbab92fa60edb}{error}};}
+\DoxyCodeLine{00389\ \ \ \ \ \textcolor{keyword}{typedef}\ annotate\_base\ base\_type;}
+\DoxyCodeLine{00390\ \ \ \ \ \{}
+\DoxyCodeLine{00391\ \ \ \ \ \ \ base\_type::const\_iterator\ beg\ =\ \_\_b.map\_alloc().begin();}
+\DoxyCodeLine{00392\ \ \ \ \ \ \ base\_type::const\_iterator\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2glad_8h_a432111147038972f06e049e18a837002}{end}}\ =\ \_\_b.map\_alloc().end();}
+\DoxyCodeLine{00393\ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (;\ beg\ !=\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2glad_8h_a432111147038972f06e049e18a837002}{end}};\ ++beg)}
+\DoxyCodeLine{00394\ \ \ \ \ \_\_b.log\_to\_string(error,\ *beg);}
+\DoxyCodeLine{00395\ \ \ \ \ \}}
+\DoxyCodeLine{00396\ \textcolor{preprocessor}{\#if\ \_\_cplusplus\ >=\ 201103L}}
+\DoxyCodeLine{00397\ \ \ \ \ \{}
+\DoxyCodeLine{00398\ \ \ \ \ \ \ \textcolor{keyword}{auto}\ beg\ =\ \_\_b.map\_construct().begin();}
+\DoxyCodeLine{00399\ \ \ \ \ \ \ \textcolor{keyword}{auto}\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2glad_8h_a432111147038972f06e049e18a837002}{end}}\ =\ \_\_b.map\_construct().end();}
+\DoxyCodeLine{00400\ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (;\ beg\ !=\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2glad_8h_a432111147038972f06e049e18a837002}{end}};\ ++beg)}
+\DoxyCodeLine{00401\ \ \ \ \ \_\_b.log\_to\_string(error,\ *beg);\ \ \ \ \ \ }
+\DoxyCodeLine{00402\ \ \ \ \ \}}
+\DoxyCodeLine{00403\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00404\ \ \ \ \ \textcolor{keywordflow}{return}\ os\ <<\ \mbox{\hyperlink{_classes_2lib_2glm_2test_2core_2core__func__integer__bit__count_8cpp_ab34dedbf30a51859090cbab92fa60edb}{error}};}
+\DoxyCodeLine{00405\ \ \ \}}
+\DoxyCodeLine{00406\ }
+\DoxyCodeLine{00407\ }
+\DoxyCodeLine{00414\ \ \ \textcolor{keyword}{struct\ }condition\_base}
+\DoxyCodeLine{00415\ \ \ \{}
+\DoxyCodeLine{00416\ \textcolor{preprocessor}{\#if\ \_\_cplusplus\ >=\ 201103L}}
+\DoxyCodeLine{00417\ \ \ \ \ condition\_base()\ =\ \textcolor{keywordflow}{default};}
+\DoxyCodeLine{00418\ \ \ \ \ condition\_base(\textcolor{keyword}{const}\ condition\_base\&)\ =\ \textcolor{keywordflow}{default};}
+\DoxyCodeLine{00419\ \ \ \ \ condition\_base\&\ operator=(\textcolor{keyword}{const}\ condition\_base\&)\ =\ \textcolor{keywordflow}{default};}
+\DoxyCodeLine{00420\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00421\ \ \ \ \ \textcolor{keyword}{virtual}\ \string~condition\_base()\ \{\ \};}
+\DoxyCodeLine{00422\ \ \ \};}
+\DoxyCodeLine{00423\ }
+\DoxyCodeLine{00424\ }
+\DoxyCodeLine{00428\ \ \ \textcolor{keyword}{struct\ }limit\_condition\ :\ \textcolor{keyword}{public}\ condition\_base}
+\DoxyCodeLine{00429\ \ \ \{}
+\DoxyCodeLine{00430\ \ \ \ \ \textcolor{comment}{//\ Scope-\/level\ adjustor\ objects:\ set\ limit\ for\ throw\ at\ the}}
+\DoxyCodeLine{00431\ \ \ \ \ \textcolor{comment}{//\ beginning\ of\ a\ scope\ block,\ and\ restores\ to\ previous\ limit\ when}}
+\DoxyCodeLine{00432\ \ \ \ \ \textcolor{comment}{//\ object\ is\ destroyed\ on\ exiting\ the\ block.}}
+\DoxyCodeLine{00433\ \ \ \ \ \textcolor{keyword}{struct\ }adjustor\_base}
+\DoxyCodeLine{00434\ \ \ \ \ \{}
+\DoxyCodeLine{00435\ \ \ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00436\ \ \ \ \ \ \ \textcolor{keyword}{const}\ \textcolor{keywordtype}{size\_t}\ \_M\_orig;}
+\DoxyCodeLine{00437\ }
+\DoxyCodeLine{00438\ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00439\ \ \ \ \ \ \ adjustor\_base()\ :\ \_M\_orig(limit())\ \{\ \}}
+\DoxyCodeLine{00440\ }
+\DoxyCodeLine{00441\ \ \ \ \ \ \ \textcolor{keyword}{virtual}}
+\DoxyCodeLine{00442\ \ \ \ \ \ \ \string~adjustor\_base()\ \{\ set\_limit(\_M\_orig);\ \}}
+\DoxyCodeLine{00443\ \ \ \ \ \};}
+\DoxyCodeLine{00444\ }
+\DoxyCodeLine{00446\ \ \ \ \ \textcolor{keyword}{struct\ }never\_adjustor\ :\ \textcolor{keyword}{public}\ adjustor\_base}
+\DoxyCodeLine{00447\ \ \ \ \ \{}
+\DoxyCodeLine{00448\ \ \ \ \ \ \ never\_adjustor()\ \{\ set\_limit(std::numeric\_limits<size\_t>::max());\ \}}
+\DoxyCodeLine{00449\ \ \ \ \ \};}
+\DoxyCodeLine{00450\ }
+\DoxyCodeLine{00452\ \ \ \ \ \textcolor{keyword}{struct\ }always\_adjustor\ :\ \textcolor{keyword}{public}\ adjustor\_base}
+\DoxyCodeLine{00453\ \ \ \ \ \{}
+\DoxyCodeLine{00454\ \ \ \ \ \ \ always\_adjustor()\ \{\ set\_limit(\mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_a22486c0c8d9f7d79a07bf22ecffeeb2f}{count}}());\ \}}
+\DoxyCodeLine{00455\ \ \ \ \ \};}
+\DoxyCodeLine{00456\ }
+\DoxyCodeLine{00458\ \ \ \ \ \textcolor{keyword}{struct\ }limit\_adjustor\ :\ \textcolor{keyword}{public}\ adjustor\_base}
+\DoxyCodeLine{00459\ \ \ \ \ \{}
+\DoxyCodeLine{00460\ \ \ \ \ \ \ limit\_adjustor(\textcolor{keyword}{const}\ \textcolor{keywordtype}{size\_t}\ \_\_l)\ \{\ set\_limit(\_\_l);\ \}}
+\DoxyCodeLine{00461\ \ \ \ \ \};}
+\DoxyCodeLine{00462\ }
+\DoxyCodeLine{00463\ \ \ \ \ \textcolor{comment}{//\ Increment\ \_S\_count\ every\ time\ called.}}
+\DoxyCodeLine{00464\ \ \ \ \ \textcolor{comment}{//\ If\ \_S\_count\ matches\ the\ limit\ count,\ throw.}}
+\DoxyCodeLine{00465\ \ \ \ \ \textcolor{keyword}{static}\ \textcolor{keywordtype}{void}}
+\DoxyCodeLine{00466\ \ \ \ \ throw\_conditionally()}
+\DoxyCodeLine{00467\ \ \ \ \ \{}
+\DoxyCodeLine{00468\ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_a22486c0c8d9f7d79a07bf22ecffeeb2f}{count}}()\ ==\ limit())}
+\DoxyCodeLine{00469\ \ \ \ \ \_\_throw\_forced\_error();}
+\DoxyCodeLine{00470\ \ \ \ \ \ \ ++\mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_a22486c0c8d9f7d79a07bf22ecffeeb2f}{count}}();}
+\DoxyCodeLine{00471\ \ \ \ \ \}}
+\DoxyCodeLine{00472\ }
+\DoxyCodeLine{00473\ \ \ \ \ \textcolor{keyword}{static}\ \textcolor{keywordtype}{size\_t}\&}
+\DoxyCodeLine{00474\ \ \ \ \ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_a22486c0c8d9f7d79a07bf22ecffeeb2f}{count}}()}
+\DoxyCodeLine{00475\ \ \ \ \ \{}
+\DoxyCodeLine{00476\ \ \ \ \ \ \ \textcolor{keyword}{static}\ \textcolor{keywordtype}{size\_t}\ \_S\_count(0);}
+\DoxyCodeLine{00477\ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \_S\_count;}
+\DoxyCodeLine{00478\ \ \ \ \ \}}
+\DoxyCodeLine{00479\ }
+\DoxyCodeLine{00480\ \ \ \ \ \textcolor{keyword}{static}\ \textcolor{keywordtype}{size\_t}\&}
+\DoxyCodeLine{00481\ \ \ \ \ limit()}
+\DoxyCodeLine{00482\ \ \ \ \ \{}
+\DoxyCodeLine{00483\ \ \ \ \ \ \ \textcolor{keyword}{static}\ \textcolor{keywordtype}{size\_t}\ \_S\_limit(std::numeric\_limits<size\_t>::max());}
+\DoxyCodeLine{00484\ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \_S\_limit;}
+\DoxyCodeLine{00485\ \ \ \ \ \}}
+\DoxyCodeLine{00486\ }
+\DoxyCodeLine{00487\ \ \ \ \ \textcolor{comment}{//\ Zero\ the\ throw\ counter,\ set\ limit\ to\ argument.}}
+\DoxyCodeLine{00488\ \ \ \ \ \textcolor{keyword}{static}\ \textcolor{keywordtype}{void}}
+\DoxyCodeLine{00489\ \ \ \ \ set\_limit(\textcolor{keyword}{const}\ \textcolor{keywordtype}{size\_t}\ \_\_l)}
+\DoxyCodeLine{00490\ \ \ \ \ \{}
+\DoxyCodeLine{00491\ \ \ \ \ \ \ limit()\ =\ \_\_l;}
+\DoxyCodeLine{00492\ \ \ \ \ \ \ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_a22486c0c8d9f7d79a07bf22ecffeeb2f}{count}}()\ =\ 0;}
+\DoxyCodeLine{00493\ \ \ \ \ \}}
+\DoxyCodeLine{00494\ \ \ \};}
+\DoxyCodeLine{00495\ }
+\DoxyCodeLine{00496\ \textcolor{preprocessor}{\#ifdef\ \_GLIBCXX\_USE\_C99\_STDINT\_TR1}}
+\DoxyCodeLine{00500\ \ \ \textcolor{keyword}{struct\ }random\_condition\ :\ \textcolor{keyword}{public}\ condition\_base}
+\DoxyCodeLine{00501\ \ \ \{}
+\DoxyCodeLine{00502\ \ \ \ \ \textcolor{comment}{//\ Scope-\/level\ adjustor\ objects:\ set\ probability\ for\ throw\ at\ the}}
+\DoxyCodeLine{00503\ \ \ \ \ \textcolor{comment}{//\ beginning\ of\ a\ scope\ block,\ and\ restores\ to\ previous}}
+\DoxyCodeLine{00504\ \ \ \ \ \textcolor{comment}{//\ probability\ when\ object\ is\ destroyed\ on\ exiting\ the\ block.}}
+\DoxyCodeLine{00505\ \ \ \ \ \textcolor{keyword}{struct\ }adjustor\_base}
+\DoxyCodeLine{00506\ \ \ \ \ \{}
+\DoxyCodeLine{00507\ \ \ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00508\ \ \ \ \ \ \ \textcolor{keyword}{const}\ \textcolor{keywordtype}{double}\ \_M\_orig;}
+\DoxyCodeLine{00509\ }
+\DoxyCodeLine{00510\ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00511\ \ \ \ \ \ \ adjustor\_base()\ :\ \_M\_orig(probability())\ \{\ \}}
+\DoxyCodeLine{00512\ }
+\DoxyCodeLine{00513\ \ \ \ \ \ \ \textcolor{keyword}{virtual}\ \string~adjustor\_base()}
+\DoxyCodeLine{00514\ \ \ \ \ \ \ \{\ set\_probability(\_M\_orig);\ \}}
+\DoxyCodeLine{00515\ \ \ \ \ \};}
+\DoxyCodeLine{00516\ }
+\DoxyCodeLine{00518\ \ \ \ \ \textcolor{keyword}{struct\ }group\_adjustor\ :\ \textcolor{keyword}{public}\ adjustor\_base}
+\DoxyCodeLine{00519\ \ \ \ \ \{}
+\DoxyCodeLine{00520\ \ \ \ \ \ \ group\_adjustor(\textcolor{keywordtype}{size\_t}\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_a3d1e3edfcf61ca2d831883e1afbad89e}{size}})}
+\DoxyCodeLine{00521\ \ \ \ \ \ \ \{\ set\_probability(1\ -\/\ std::pow(\textcolor{keywordtype}{double}(1\ -\/\ probability()),}
+\DoxyCodeLine{00522\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{double}(0.5\ /\ (\mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_a3d1e3edfcf61ca2d831883e1afbad89e}{size}}\ +\ 1))));}
+\DoxyCodeLine{00523\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00524\ \ \ \ \ \};}
+\DoxyCodeLine{00525\ }
+\DoxyCodeLine{00527\ \ \ \ \ \textcolor{keyword}{struct\ }never\_adjustor\ :\ \textcolor{keyword}{public}\ adjustor\_base}
+\DoxyCodeLine{00528\ \ \ \ \ \{}
+\DoxyCodeLine{00529\ \ \ \ \ \ \ never\_adjustor()\ \{\ set\_probability(0);\ \}}
+\DoxyCodeLine{00530\ \ \ \ \ \};}
+\DoxyCodeLine{00531\ }
+\DoxyCodeLine{00533\ \ \ \ \ \textcolor{keyword}{struct\ }always\_adjustor\ :\ \textcolor{keyword}{public}\ adjustor\_base}
+\DoxyCodeLine{00534\ \ \ \ \ \{}
+\DoxyCodeLine{00535\ \ \ \ \ \ \ always\_adjustor()\ \{\ set\_probability(1);\ \}}
+\DoxyCodeLine{00536\ \ \ \ \ \};}
+\DoxyCodeLine{00537\ }
+\DoxyCodeLine{00538\ \ \ \ \ random\_condition()}
+\DoxyCodeLine{00539\ \ \ \ \ \{}
+\DoxyCodeLine{00540\ \ \ \ \ \ \ probability();}
+\DoxyCodeLine{00541\ \ \ \ \ \ \ engine();}
+\DoxyCodeLine{00542\ \ \ \ \ \}}
+\DoxyCodeLine{00543\ }
+\DoxyCodeLine{00544\ \ \ \ \ \textcolor{keyword}{static}\ \textcolor{keywordtype}{void}}
+\DoxyCodeLine{00545\ \ \ \ \ set\_probability(\textcolor{keywordtype}{double}\ \_\_p)}
+\DoxyCodeLine{00546\ \ \ \ \ \{\ probability()\ =\ \_\_p;\ \}}
+\DoxyCodeLine{00547\ }
+\DoxyCodeLine{00548\ \ \ \ \ \textcolor{keyword}{static}\ \textcolor{keywordtype}{void}}
+\DoxyCodeLine{00549\ \ \ \ \ throw\_conditionally()}
+\DoxyCodeLine{00550\ \ \ \ \ \{}
+\DoxyCodeLine{00551\ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{namespace_catch_1_1_generators_a3b0ab1f589b1d1e0e92afcd12cf4ab12}{generate}}()\ <\ probability())}
+\DoxyCodeLine{00552\ \ \ \ \ \_\_throw\_forced\_error();}
+\DoxyCodeLine{00553\ \ \ \ \ \}}
+\DoxyCodeLine{00554\ }
+\DoxyCodeLine{00555\ \ \ \ \ \textcolor{keywordtype}{void}}
+\DoxyCodeLine{00556\ \ \ \ \ \mbox{\hyperlink{namespacelest_a9e3785d770073a52c90f475365f49542}{seed}}(\textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{long}\ \_\_s)}
+\DoxyCodeLine{00557\ \ \ \ \ \{\ engine().seed(\_\_s);\ \}}
+\DoxyCodeLine{00558\ }
+\DoxyCodeLine{00559\ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00560\ \textcolor{preprocessor}{\#if\ \_\_cplusplus\ >=\ 201103L}}
+\DoxyCodeLine{00561\ \ \ \ \ \textcolor{keyword}{typedef}\ std::uniform\_real\_distribution<double>\ \ distribution\_type;}
+\DoxyCodeLine{00562\ \ \ \ \ \textcolor{keyword}{typedef}\ std::mt19937\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ engine\_type;}
+\DoxyCodeLine{00563\ \textcolor{preprocessor}{\#else}}
+\DoxyCodeLine{00564\ \ \ \ \ \textcolor{keyword}{typedef}\ std::tr1::uniform\_real<double>\ \ \ \ \ \ distribution\_type;}
+\DoxyCodeLine{00565\ \ \ \ \ \textcolor{keyword}{typedef}\ std::tr1::mt19937\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ engine\_type;}
+\DoxyCodeLine{00566\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00567\ }
+\DoxyCodeLine{00568\ \ \ \ \ \textcolor{keyword}{static}\ \textcolor{keywordtype}{double}}
+\DoxyCodeLine{00569\ \ \ \ \ \mbox{\hyperlink{namespace_catch_1_1_generators_a3b0ab1f589b1d1e0e92afcd12cf4ab12}{generate}}()}
+\DoxyCodeLine{00570\ \ \ \ \ \{}
+\DoxyCodeLine{00571\ \textcolor{preprocessor}{\#if\ \_\_cplusplus\ >=\ 201103L}}
+\DoxyCodeLine{00572\ \ \ \ \ \ \ \textcolor{keyword}{const}\ distribution\_type\ distribution(0,\ 1);}
+\DoxyCodeLine{00573\ \ \ \ \ \ \ \textcolor{keyword}{static}\ \textcolor{keyword}{auto}\ generator\ =\ std::bind(distribution,\ engine());}
+\DoxyCodeLine{00574\ \textcolor{preprocessor}{\#else}}
+\DoxyCodeLine{00575\ \ \ \ \ \ \ \textcolor{comment}{//\ Use\ variate\_generator\ to\ get\ normalized\ results.}}
+\DoxyCodeLine{00576\ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ std::tr1::variate\_generator<engine\_type,\ distribution\_type>\ gen\_t;}
+\DoxyCodeLine{00577\ \ \ \ \ \ \ distribution\_type\ distribution(0,\ 1);}
+\DoxyCodeLine{00578\ \ \ \ \ \ \ \textcolor{keyword}{static}\ gen\_t\ generator(engine(),\ distribution);}
+\DoxyCodeLine{00579\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00580\ }
+\DoxyCodeLine{00581\ \textcolor{preprocessor}{\#if\ !\ \_\_has\_builtin(\_\_builtin\_sprintf)}}
+\DoxyCodeLine{00582\ \ \ \ \ \ \ \_\_typeof\_\_(\&std::sprintf)\ \_\_builtin\_sprintf\ =\ \&std::sprintf;}
+\DoxyCodeLine{00583\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00584\ }
+\DoxyCodeLine{00585\ \ \ \ \ \ \ \textcolor{keywordtype}{double}\ \mbox{\hyperlink{namespacerandom}{random}}\ =\ generator();}
+\DoxyCodeLine{00586\ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{namespacerandom}{random}}\ <\ distribution.min()\ ||\ \mbox{\hyperlink{namespacerandom}{random}}\ >\ distribution.max())}
+\DoxyCodeLine{00587\ \ \ \ \ \{}
+\DoxyCodeLine{00588\ \ \ \ \ \ \ std::string\ \_\_s(\textcolor{stringliteral}{"{}random\_condition::generate"{}});}
+\DoxyCodeLine{00589\ \ \ \ \ \ \ \_\_s\ +=\ \textcolor{stringliteral}{"{}\(\backslash\)n"{}};}
+\DoxyCodeLine{00590\ \ \ \ \ \ \ \_\_s\ +=\ \textcolor{stringliteral}{"{}random\ number\ generated\ is:\ "{}};}
+\DoxyCodeLine{00591\ \ \ \ \ \ \ \textcolor{keywordtype}{char}\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_ad8a8baf08bc0399738960c9259571911}{buf}}[40];}
+\DoxyCodeLine{00592\ \ \ \ \ \ \ \_\_builtin\_sprintf(\mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_ad8a8baf08bc0399738960c9259571911}{buf}},\ \textcolor{stringliteral}{"{}\%f"{}},\ \mbox{\hyperlink{namespacerandom}{random}});}
+\DoxyCodeLine{00593\ \ \ \ \ \ \ \_\_s\ +=\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_ad8a8baf08bc0399738960c9259571911}{buf}};}
+\DoxyCodeLine{00594\ \ \ \ \ \ \ std::\_\_throw\_out\_of\_range(\_\_s.c\_str());}
+\DoxyCodeLine{00595\ \ \ \ \ \}}
+\DoxyCodeLine{00596\ }
+\DoxyCodeLine{00597\ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{namespacerandom}{random}};}
+\DoxyCodeLine{00598\ \ \ \ \ \}}
+\DoxyCodeLine{00599\ }
+\DoxyCodeLine{00600\ \ \ \ \ \textcolor{keyword}{static}\ \textcolor{keywordtype}{double}\&}
+\DoxyCodeLine{00601\ \ \ \ \ probability()}
+\DoxyCodeLine{00602\ \ \ \ \ \{}
+\DoxyCodeLine{00603\ \ \ \ \ \ \ \textcolor{keyword}{static}\ \textcolor{keywordtype}{double}\ \_S\_p;}
+\DoxyCodeLine{00604\ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \_S\_p;}
+\DoxyCodeLine{00605\ \ \ \ \ \}}
+\DoxyCodeLine{00606\ }
+\DoxyCodeLine{00607\ \ \ \ \ \textcolor{keyword}{static}\ engine\_type\&}
+\DoxyCodeLine{00608\ \ \ \ \ engine()}
+\DoxyCodeLine{00609\ \ \ \ \ \{}
+\DoxyCodeLine{00610\ \ \ \ \ \ \ \textcolor{keyword}{static}\ engine\_type\ \_S\_e;}
+\DoxyCodeLine{00611\ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \_S\_e;}
+\DoxyCodeLine{00612\ \ \ \ \ \}}
+\DoxyCodeLine{00613\ \ \ \};}
+\DoxyCodeLine{00614\ \textcolor{preprocessor}{\#endif\ }\textcolor{comment}{//\ \_GLIBCXX\_USE\_C99\_STDINT\_TR1}}
+\DoxyCodeLine{00615\ }
+\DoxyCodeLine{00622\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Cond>}
+\DoxyCodeLine{00623\ \ \ \ \ \textcolor{keyword}{struct\ }throw\_value\_base\ :\ \textcolor{keyword}{public}\ \_Cond}
+\DoxyCodeLine{00624\ \ \ \ \ \{}
+\DoxyCodeLine{00625\ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ \_Cond\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ condition\_type;}
+\DoxyCodeLine{00626\ }
+\DoxyCodeLine{00627\ \ \ \ \ \ \ \textcolor{keyword}{using\ }condition\_type::throw\_conditionally;}
+\DoxyCodeLine{00628\ }
+\DoxyCodeLine{00629\ \ \ \ \ \ \ std::size\_t\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_M\_i;}
+\DoxyCodeLine{00630\ }
+\DoxyCodeLine{00631\ \textcolor{preprocessor}{\#ifndef\ \_GLIBCXX\_IS\_AGGREGATE}}
+\DoxyCodeLine{00632\ \ \ \ \ \ \ throw\_value\_base()\ :\ \_M\_i(0)}
+\DoxyCodeLine{00633\ \ \ \ \ \ \ \{\ throw\_conditionally();\ \}}
+\DoxyCodeLine{00634\ }
+\DoxyCodeLine{00635\ \ \ \ \ \ \ throw\_value\_base(\textcolor{keyword}{const}\ throw\_value\_base\&\ \_\_v)\ :\ \_M\_i(\_\_v.\_M\_i)}
+\DoxyCodeLine{00636\ \ \ \ \ \ \ \{\ throw\_conditionally();\ \}}
+\DoxyCodeLine{00637\ }
+\DoxyCodeLine{00638\ \textcolor{preprocessor}{\#if\ \_\_cplusplus\ >=\ 201103L}}
+\DoxyCodeLine{00639\ \ \ \ \ \ \ \textcolor{comment}{//\ Shall\ not\ throw.}}
+\DoxyCodeLine{00640\ \ \ \ \ \ \ throw\_value\_base(throw\_value\_base\&\&)\ =\ \textcolor{keywordflow}{default};}
+\DoxyCodeLine{00641\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00642\ }
+\DoxyCodeLine{00643\ \ \ \ \ \ \ \textcolor{keyword}{explicit}\ throw\_value\_base(\textcolor{keyword}{const}\ std::size\_t\ \_\_i)\ :\ \_M\_i(\_\_i)}
+\DoxyCodeLine{00644\ \ \ \ \ \ \ \{\ throw\_conditionally();\ \}}
+\DoxyCodeLine{00645\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00646\ }
+\DoxyCodeLine{00647\ \ \ \ \ \ \ throw\_value\_base\&}
+\DoxyCodeLine{00648\ \ \ \ \ \ \ operator=(\textcolor{keyword}{const}\ throw\_value\_base\&\ \_\_v)}
+\DoxyCodeLine{00649\ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00650\ \ \ \ \ throw\_conditionally();}
+\DoxyCodeLine{00651\ \ \ \ \ \_M\_i\ =\ \_\_v.\_M\_i;}
+\DoxyCodeLine{00652\ \ \ \ \ \textcolor{keywordflow}{return}\ *\textcolor{keyword}{this};}
+\DoxyCodeLine{00653\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00654\ }
+\DoxyCodeLine{00655\ \textcolor{preprocessor}{\#if\ \_\_cplusplus\ >=\ 201103L}}
+\DoxyCodeLine{00656\ \ \ \ \ \ \ \textcolor{comment}{//\ Shall\ not\ throw.}}
+\DoxyCodeLine{00657\ \ \ \ \ \ \ throw\_value\_base\&}
+\DoxyCodeLine{00658\ \ \ \ \ \ \ operator=(throw\_value\_base\&\&)\ =\ \textcolor{keywordflow}{default};}
+\DoxyCodeLine{00659\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00660\ }
+\DoxyCodeLine{00661\ \ \ \ \ \ \ throw\_value\_base\&}
+\DoxyCodeLine{00662\ \ \ \ \ \ \ operator++()}
+\DoxyCodeLine{00663\ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00664\ \ \ \ \ throw\_conditionally();}
+\DoxyCodeLine{00665\ \ \ \ \ ++\_M\_i;}
+\DoxyCodeLine{00666\ \ \ \ \ \textcolor{keywordflow}{return}\ *\textcolor{keyword}{this};}
+\DoxyCodeLine{00667\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00668\ \ \ \ \ \};}
+\DoxyCodeLine{00669\ }
+\DoxyCodeLine{00670\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Cond>}
+\DoxyCodeLine{00671\ \ \ \ \ \textcolor{keyword}{inline}\ \textcolor{keywordtype}{void}}
+\DoxyCodeLine{00672\ \ \ \ \ \mbox{\hyperlink{namespacestd_a3ece115a1c8ed9020a20f1d0b70efda8}{swap}}(throw\_value\_base<\_Cond>\&\ \_\_a,\ throw\_value\_base<\_Cond>\&\ \_\_b)}
+\DoxyCodeLine{00673\ \ \ \ \ \{}
+\DoxyCodeLine{00674\ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ throw\_value\_base<\_Cond>\ throw\_value;}
+\DoxyCodeLine{00675\ \ \ \ \ \ \ throw\_value::throw\_conditionally();}
+\DoxyCodeLine{00676\ \ \ \ \ \ \ throw\_value\ orig(\_\_a);}
+\DoxyCodeLine{00677\ \ \ \ \ \ \ \_\_a\ =\ \_\_b;}
+\DoxyCodeLine{00678\ \ \ \ \ \ \ \_\_b\ =\ orig;}
+\DoxyCodeLine{00679\ \ \ \ \ \}}
+\DoxyCodeLine{00680\ }
+\DoxyCodeLine{00681\ \ \ \textcolor{comment}{//\ General\ instantiable\ types\ requirements.}}
+\DoxyCodeLine{00682\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Cond>}
+\DoxyCodeLine{00683\ \ \ \ \ \textcolor{keyword}{inline}\ \textcolor{keywordtype}{bool}}
+\DoxyCodeLine{00684\ \ \ \ \ \mbox{\hyperlink{namespacenlohmann_aaf11d1e42c5a671e7cd362ab0a182de1}{operator==}}(\textcolor{keyword}{const}\ throw\_value\_base<\_Cond>\&\ \_\_a,}
+\DoxyCodeLine{00685\ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ throw\_value\_base<\_Cond>\&\ \_\_b)}
+\DoxyCodeLine{00686\ \ \ \ \ \{}
+\DoxyCodeLine{00687\ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ throw\_value\_base<\_Cond>\ throw\_value;}
+\DoxyCodeLine{00688\ \ \ \ \ \ \ throw\_value::throw\_conditionally();}
+\DoxyCodeLine{00689\ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ \_\_ret\ =\ \_\_a.\_M\_i\ ==\ \_\_b.\_M\_i;}
+\DoxyCodeLine{00690\ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \_\_ret;}
+\DoxyCodeLine{00691\ \ \ \ \ \}}
+\DoxyCodeLine{00692\ }
+\DoxyCodeLine{00693\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Cond>}
+\DoxyCodeLine{00694\ \ \ \ \ \textcolor{keyword}{inline}\ \textcolor{keywordtype}{bool}}
+\DoxyCodeLine{00695\ \ \ \ \ \mbox{\hyperlink{namespacenlohmann_1_1detail_a09169efff3bd1771fff29bd92cea19e0}{operator<}}(\textcolor{keyword}{const}\ throw\_value\_base<\_Cond>\&\ \_\_a,}
+\DoxyCodeLine{00696\ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ throw\_value\_base<\_Cond>\&\ \_\_b)}
+\DoxyCodeLine{00697\ \ \ \ \ \{}
+\DoxyCodeLine{00698\ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ throw\_value\_base<\_Cond>\ throw\_value;}
+\DoxyCodeLine{00699\ \ \ \ \ \ \ throw\_value::throw\_conditionally();}
+\DoxyCodeLine{00700\ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ \_\_ret\ =\ \_\_a.\_M\_i\ <\ \_\_b.\_M\_i;}
+\DoxyCodeLine{00701\ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \_\_ret;}
+\DoxyCodeLine{00702\ \ \ \ \ \}}
+\DoxyCodeLine{00703\ }
+\DoxyCodeLine{00704\ \ \ \textcolor{comment}{//\ Numeric\ algorithms\ instantiable\ types\ requirements.}}
+\DoxyCodeLine{00705\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Cond>}
+\DoxyCodeLine{00706\ \ \ \ \ \textcolor{keyword}{inline}\ throw\_value\_base<\_Cond>}
+\DoxyCodeLine{00707\ \ \ \ \ \mbox{\hyperlink{namespace_catch_a074287bb202b5f53de64b5b63c16b23c}{operator+}}(\textcolor{keyword}{const}\ throw\_value\_base<\_Cond>\&\ \_\_a,}
+\DoxyCodeLine{00708\ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ throw\_value\_base<\_Cond>\&\ \_\_b)}
+\DoxyCodeLine{00709\ \ \ \ \ \{}
+\DoxyCodeLine{00710\ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ throw\_value\_base<\_Cond>\ throw\_value;}
+\DoxyCodeLine{00711\ \ \ \ \ \ \ throw\_value::throw\_conditionally();}
+\DoxyCodeLine{00712\ \ \ \ \ \ \ throw\_value\ \_\_ret(\_\_a.\_M\_i\ +\ \_\_b.\_M\_i);}
+\DoxyCodeLine{00713\ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \_\_ret;}
+\DoxyCodeLine{00714\ \ \ \ \ \}}
+\DoxyCodeLine{00715\ }
+\DoxyCodeLine{00716\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Cond>}
+\DoxyCodeLine{00717\ \ \ \ \ \textcolor{keyword}{inline}\ throw\_value\_base<\_Cond>}
+\DoxyCodeLine{00718\ \ \ \ \ \mbox{\hyperlink{namespaceglm_a773876155d1503e9901e13f073e4947d}{operator-\/}}(\textcolor{keyword}{const}\ throw\_value\_base<\_Cond>\&\ \_\_a,}
+\DoxyCodeLine{00719\ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ throw\_value\_base<\_Cond>\&\ \_\_b)}
+\DoxyCodeLine{00720\ \ \ \ \ \{}
+\DoxyCodeLine{00721\ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ throw\_value\_base<\_Cond>\ throw\_value;}
+\DoxyCodeLine{00722\ \ \ \ \ \ \ throw\_value::throw\_conditionally();}
+\DoxyCodeLine{00723\ \ \ \ \ \ \ throw\_value\ \_\_ret(\_\_a.\_M\_i\ -\/\ \_\_b.\_M\_i);}
+\DoxyCodeLine{00724\ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \_\_ret;}
+\DoxyCodeLine{00725\ \ \ \ \ \}}
+\DoxyCodeLine{00726\ }
+\DoxyCodeLine{00727\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Cond>}
+\DoxyCodeLine{00728\ \ \ \ \ \textcolor{keyword}{inline}\ throw\_value\_base<\_Cond>}
+\DoxyCodeLine{00729\ \ \ \ \ \mbox{\hyperlink{namespaceglm_af22e465f8f6bc7d70648c93e05fb7247}{operator*}}(\textcolor{keyword}{const}\ throw\_value\_base<\_Cond>\&\ \_\_a,}
+\DoxyCodeLine{00730\ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ throw\_value\_base<\_Cond>\&\ \_\_b)}
+\DoxyCodeLine{00731\ \ \ \ \ \{}
+\DoxyCodeLine{00732\ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ throw\_value\_base<\_Cond>\ throw\_value;}
+\DoxyCodeLine{00733\ \ \ \ \ \ \ throw\_value::throw\_conditionally();}
+\DoxyCodeLine{00734\ \ \ \ \ \ \ throw\_value\ \_\_ret(\_\_a.\_M\_i\ *\ \_\_b.\_M\_i);}
+\DoxyCodeLine{00735\ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \_\_ret;}
+\DoxyCodeLine{00736\ \ \ \ \ \}}
+\DoxyCodeLine{00737\ }
+\DoxyCodeLine{00738\ }
+\DoxyCodeLine{00740\ \ \ \textcolor{keyword}{struct\ }throw\_value\_limit\ :\ \textcolor{keyword}{public}\ throw\_value\_base<limit\_condition>}
+\DoxyCodeLine{00741\ \ \ \{}
+\DoxyCodeLine{00742\ \ \ \ \ \textcolor{keyword}{typedef}\ throw\_value\_base<limit\_condition>\ base\_type;}
+\DoxyCodeLine{00743\ }
+\DoxyCodeLine{00744\ \textcolor{preprocessor}{\#ifndef\ \_GLIBCXX\_IS\_AGGREGATE}}
+\DoxyCodeLine{00745\ \ \ \ \ throw\_value\_limit()\ \{\ \}}
+\DoxyCodeLine{00746\ }
+\DoxyCodeLine{00747\ \ \ \ \ throw\_value\_limit(\textcolor{keyword}{const}\ throw\_value\_limit\&\ \_\_other)}
+\DoxyCodeLine{00748\ \ \ \ \ :\ base\_type(\_\_other.\_M\_i)\ \{\ \}}
+\DoxyCodeLine{00749\ }
+\DoxyCodeLine{00750\ \textcolor{preprocessor}{\#if\ \_\_cplusplus\ >=\ 201103L}}
+\DoxyCodeLine{00751\ \ \ \ \ throw\_value\_limit(throw\_value\_limit\&\&)\ =\ \textcolor{keywordflow}{default};}
+\DoxyCodeLine{00752\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00753\ }
+\DoxyCodeLine{00754\ \ \ \ \ \textcolor{keyword}{explicit}\ throw\_value\_limit(\textcolor{keyword}{const}\ std::size\_t\ \_\_i)\ :\ base\_type(\_\_i)\ \{\ \}}
+\DoxyCodeLine{00755\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00756\ }
+\DoxyCodeLine{00757\ \ \ \ \ throw\_value\_limit\&}
+\DoxyCodeLine{00758\ \ \ \ \ operator=(\textcolor{keyword}{const}\ throw\_value\_limit\&\ \_\_other)}
+\DoxyCodeLine{00759\ \ \ \ \ \{}
+\DoxyCodeLine{00760\ \ \ \ \ \ \ base\_type::operator=(\_\_other);}
+\DoxyCodeLine{00761\ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ *\textcolor{keyword}{this};}
+\DoxyCodeLine{00762\ \ \ \ \ \}}
+\DoxyCodeLine{00763\ }
+\DoxyCodeLine{00764\ \textcolor{preprocessor}{\#if\ \_\_cplusplus\ >=\ 201103L}}
+\DoxyCodeLine{00765\ \ \ \ \ throw\_value\_limit\&}
+\DoxyCodeLine{00766\ \ \ \ \ operator=(throw\_value\_limit\&\&)\ =\ \textcolor{keywordflow}{default};}
+\DoxyCodeLine{00767\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00768\ \ \ \};}
+\DoxyCodeLine{00769\ }
+\DoxyCodeLine{00770\ \textcolor{preprocessor}{\#ifdef\ \_GLIBCXX\_USE\_C99\_STDINT\_TR1}}
+\DoxyCodeLine{00772\ \ \ \textcolor{keyword}{struct\ }throw\_value\_random\ :\ \textcolor{keyword}{public}\ throw\_value\_base<random\_condition>}
+\DoxyCodeLine{00773\ \ \ \{}
+\DoxyCodeLine{00774\ \ \ \ \ \textcolor{keyword}{typedef}\ throw\_value\_base<random\_condition>\ base\_type;}
+\DoxyCodeLine{00775\ }
+\DoxyCodeLine{00776\ \textcolor{preprocessor}{\#ifndef\ \_GLIBCXX\_IS\_AGGREGATE}}
+\DoxyCodeLine{00777\ \ \ \ \ throw\_value\_random()\ \{\ \}}
+\DoxyCodeLine{00778\ }
+\DoxyCodeLine{00779\ \ \ \ \ throw\_value\_random(\textcolor{keyword}{const}\ throw\_value\_random\&\ \_\_other)}
+\DoxyCodeLine{00780\ \ \ \ \ :\ base\_type(\_\_other.\_M\_i)\ \{\ \}}
+\DoxyCodeLine{00781\ }
+\DoxyCodeLine{00782\ \textcolor{preprocessor}{\#if\ \_\_cplusplus\ >=\ 201103L}}
+\DoxyCodeLine{00783\ \ \ \ \ throw\_value\_random(throw\_value\_random\&\&)\ =\ \textcolor{keywordflow}{default};}
+\DoxyCodeLine{00784\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00785\ }
+\DoxyCodeLine{00786\ \ \ \ \ \textcolor{keyword}{explicit}\ throw\_value\_random(\textcolor{keyword}{const}\ std::size\_t\ \_\_i)\ :\ base\_type(\_\_i)\ \{\ \}}
+\DoxyCodeLine{00787\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00788\ }
+\DoxyCodeLine{00789\ \ \ \ \ throw\_value\_random\&}
+\DoxyCodeLine{00790\ \ \ \ \ operator=(\textcolor{keyword}{const}\ throw\_value\_random\&\ \_\_other)}
+\DoxyCodeLine{00791\ \ \ \ \ \{}
+\DoxyCodeLine{00792\ \ \ \ \ \ \ base\_type::operator=(\_\_other);}
+\DoxyCodeLine{00793\ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ *\textcolor{keyword}{this};}
+\DoxyCodeLine{00794\ \ \ \ \ \}}
+\DoxyCodeLine{00795\ }
+\DoxyCodeLine{00796\ \textcolor{preprocessor}{\#if\ \_\_cplusplus\ >=\ 201103L}}
+\DoxyCodeLine{00797\ \ \ \ \ throw\_value\_random\&}
+\DoxyCodeLine{00798\ \ \ \ \ operator=(throw\_value\_random\&\&)\ =\ \textcolor{keywordflow}{default};}
+\DoxyCodeLine{00799\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00800\ \ \ \};}
+\DoxyCodeLine{00801\ \textcolor{preprocessor}{\#endif\ }\textcolor{comment}{//\ \_GLIBCXX\_USE\_C99\_STDINT\_TR1}}
+\DoxyCodeLine{00802\ }
+\DoxyCodeLine{00810\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Tp,\ \textcolor{keyword}{typename}\ \_Cond>}
+\DoxyCodeLine{00811\ \ \ \ \ \textcolor{keyword}{class\ }throw\_allocator\_base}
+\DoxyCodeLine{00812\ \ \ \ \ :\ \textcolor{keyword}{public}\ annotate\_base,\ \textcolor{keyword}{public}\ \_Cond}
+\DoxyCodeLine{00813\ \ \ \ \ \{}
+\DoxyCodeLine{00814\ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00815\ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ std::size\_t\ \ \ \ \ \ \ \ \ \ \ size\_type;}
+\DoxyCodeLine{00816\ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ std::ptrdiff\_t\ \ \ \ \ \ \ \ \ \ \ \ difference\_type;}
+\DoxyCodeLine{00817\ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ \_Tp\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ value\_type;}
+\DoxyCodeLine{00818\ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ value\_type*\ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2glad_8h_aca2093d4756bde9a55b94e9ff8d9c623}{pointer}};}
+\DoxyCodeLine{00819\ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ \textcolor{keyword}{const}\ value\_type*\ \ \ \ \ \ \ \ \ const\_pointer;}
+\DoxyCodeLine{00820\ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ value\_type\&\ \ \ \ \ \ \ \ \ \ \ reference;}
+\DoxyCodeLine{00821\ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ \textcolor{keyword}{const}\ value\_type\&\ \ \ \ \ \ \ \ \ const\_reference;}
+\DoxyCodeLine{00822\ }
+\DoxyCodeLine{00823\ \textcolor{preprocessor}{\#if\ \_\_cplusplus\ >=\ 201103L}}
+\DoxyCodeLine{00824\ \ \ \ \ \ \ \textcolor{comment}{//\ \_GLIBCXX\_RESOLVE\_LIB\_DEFECTS}}
+\DoxyCodeLine{00825\ \ \ \ \ \ \ \textcolor{comment}{//\ 2103.\ std::allocator\ propagate\_on\_container\_move\_assignment}}
+\DoxyCodeLine{00826\ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ std::true\_type\ propagate\_on\_container\_move\_assignment;}
+\DoxyCodeLine{00827\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00828\ }
+\DoxyCodeLine{00829\ \ \ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00830\ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ \_Cond\ \ \ \ \ \ \ \ \ \ \ \ \ condition\_type;}
+\DoxyCodeLine{00831\ }
+\DoxyCodeLine{00832\ \ \ \ \ \ \ std::allocator<value\_type>\ \ \ \ \ \ \ \ \_M\_allocator;}
+\DoxyCodeLine{00833\ }
+\DoxyCodeLine{00834\ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ \_\_gnu\_cxx::\_\_alloc\_traits<std::allocator<value\_type>\ >\ traits;}
+\DoxyCodeLine{00835\ }
+\DoxyCodeLine{00836\ \ \ \ \ \ \ \textcolor{keyword}{using\ }condition\_type::throw\_conditionally;}
+\DoxyCodeLine{00837\ }
+\DoxyCodeLine{00838\ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00839\ \ \ \ \ \ \ size\_type}
+\DoxyCodeLine{00840\ \ \ \ \ \ \ max\_size()\ const\ \_GLIBCXX\_USE\_NOEXCEPT}
+\DoxyCodeLine{00841\ \ \ \ \ \ \ \{\ \textcolor{keywordflow}{return}\ traits::max\_size(\_M\_allocator);\ \}}
+\DoxyCodeLine{00842\ }
+\DoxyCodeLine{00843\ \ \ \ \ \ \ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2glad_8h_aca2093d4756bde9a55b94e9ff8d9c623}{pointer}}}
+\DoxyCodeLine{00844\ \ \ \ \ \ \ address(reference\ \_\_x)\ \textcolor{keyword}{const}\ \_GLIBCXX\_NOEXCEPT}
+\DoxyCodeLine{00845\ \ \ \ \ \ \ \{\ \textcolor{keywordflow}{return}\ std::\_\_addressof(\_\_x);\ \}}
+\DoxyCodeLine{00846\ }
+\DoxyCodeLine{00847\ \ \ \ \ \ \ const\_pointer}
+\DoxyCodeLine{00848\ \ \ \ \ \ \ address(const\_reference\ \_\_x)\ \textcolor{keyword}{const}\ \_GLIBCXX\_NOEXCEPT}
+\DoxyCodeLine{00849\ \ \ \ \ \ \ \{\ \textcolor{keywordflow}{return}\ std::\_\_addressof(\_\_x);\ \}}
+\DoxyCodeLine{00850\ }
+\DoxyCodeLine{00851\ \ \ \ \ \ \ \mbox{\hyperlink{_classes_2lib_2include_2c_09_09_2x86__64-w64-mingw32_2bits_2c_09_09config_8h_a56bc959ca1311889bcd1c5abb178ab59}{\_GLIBCXX\_NODISCARD}}\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2glad_8h_aca2093d4756bde9a55b94e9ff8d9c623}{pointer}}}
+\DoxyCodeLine{00852\ \ \ \ \ \ \ allocate(size\_type\ \_\_n,\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{void}*\ hint\ =\ 0)}
+\DoxyCodeLine{00853\ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00854\ \ \ \ \ \textcolor{keywordflow}{if}\ (\_\_n\ >\ this-\/>max\_size())}
+\DoxyCodeLine{00855\ \ \ \ \ \ \ std::\_\_throw\_bad\_alloc();}
+\DoxyCodeLine{00856\ }
+\DoxyCodeLine{00857\ \ \ \ \ throw\_conditionally();}
+\DoxyCodeLine{00858\ \ \ \ \ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2glad_8h_aca2093d4756bde9a55b94e9ff8d9c623}{pointer}}\ \textcolor{keyword}{const}\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2glad_8h_ac8729153468b5dcf13f971b21d84d4e5}{a}}\ =\ traits::allocate(\_M\_allocator,\ \_\_n,\ hint);}
+\DoxyCodeLine{00859\ \ \ \ \ insert(\mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2glad_8h_ac8729153468b5dcf13f971b21d84d4e5}{a}},\ \textcolor{keyword}{sizeof}(value\_type)\ *\ \_\_n);}
+\DoxyCodeLine{00860\ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2glad_8h_ac8729153468b5dcf13f971b21d84d4e5}{a}};}
+\DoxyCodeLine{00861\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00862\ }
+\DoxyCodeLine{00863\ \textcolor{preprocessor}{\#if\ \_\_cplusplus\ >=\ 201103L}}
+\DoxyCodeLine{00864\ \ \ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Up,\ \textcolor{keyword}{typename}...\ \_Args>}
+\DoxyCodeLine{00865\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}}
+\DoxyCodeLine{00866\ \ \ \ \ \ \ \ \ construct(\_Up*\ \_\_p,\ \_Args\&\&...\ \_\_args)}
+\DoxyCodeLine{00867\ \ \ \ \ \{}
+\DoxyCodeLine{00868\ \ \ \ \ \ \ traits::construct(\_M\_allocator,\ \_\_p,\ std::forward<\_Args>(\_\_args)...);}
+\DoxyCodeLine{00869\ \ \ \ \ \ \ insert\_construct(\_\_p);}
+\DoxyCodeLine{00870\ \ \ \ \ \}}
+\DoxyCodeLine{00871\ }
+\DoxyCodeLine{00872\ \ \ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Up>}
+\DoxyCodeLine{00873\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ }
+\DoxyCodeLine{00874\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespacestd_a9d87212966db1577458d10be75ce7131}{destroy}}(\_Up*\ \_\_p)}
+\DoxyCodeLine{00875\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00876\ \ \ \ \ \ \ erase\_construct(\_\_p);}
+\DoxyCodeLine{00877\ \ \ \ \ \ \ traits::destroy(\_M\_allocator,\ \_\_p);}
+\DoxyCodeLine{00878\ \ \ \ \ \}}
+\DoxyCodeLine{00879\ \textcolor{preprocessor}{\#else}}
+\DoxyCodeLine{00880\ \ \ \ \ \ \ \textcolor{keywordtype}{void}}
+\DoxyCodeLine{00881\ \ \ \ \ \ \ construct(\mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2glad_8h_aca2093d4756bde9a55b94e9ff8d9c623}{pointer}}\ \_\_p,\ \textcolor{keyword}{const}\ value\_type\&\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2glad_8h_aa857b95cc76669c2a9109239ef40a47c}{val}})}
+\DoxyCodeLine{00882\ \ \ \ \ \ \ \{\ \textcolor{keywordflow}{return}\ \_M\_allocator.construct(\_\_p,\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2glad_8h_aa857b95cc76669c2a9109239ef40a47c}{val}});\ \}}
+\DoxyCodeLine{00883\ }
+\DoxyCodeLine{00884\ \ \ \ \ \ \ \textcolor{keywordtype}{void}}
+\DoxyCodeLine{00885\ \ \ \ \ \ \ \mbox{\hyperlink{namespacestd_a9d87212966db1577458d10be75ce7131}{destroy}}(\mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2glad_8h_aca2093d4756bde9a55b94e9ff8d9c623}{pointer}}\ \_\_p)}
+\DoxyCodeLine{00886\ \ \ \ \ \ \ \{\ \_M\_allocator.destroy(\_\_p);\ \}}
+\DoxyCodeLine{00887\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00888\ }
+\DoxyCodeLine{00889\ \ \ \ \ \ \ \textcolor{keywordtype}{void}}
+\DoxyCodeLine{00890\ \ \ \ \ \ \ deallocate(\mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2glad_8h_aca2093d4756bde9a55b94e9ff8d9c623}{pointer}}\ \_\_p,\ size\_type\ \_\_n)}
+\DoxyCodeLine{00891\ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00892\ \ \ \ \ erase(\_\_p,\ \textcolor{keyword}{sizeof}(value\_type)\ *\ \_\_n);}
+\DoxyCodeLine{00893\ \ \ \ \ \_M\_allocator.deallocate(\_\_p,\ \_\_n);}
+\DoxyCodeLine{00894\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00895\ }
+\DoxyCodeLine{00896\ \ \ \ \ \ \ \textcolor{keywordtype}{void}}
+\DoxyCodeLine{00897\ \ \ \ \ \ \ check\_allocated(\mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2glad_8h_aca2093d4756bde9a55b94e9ff8d9c623}{pointer}}\ \_\_p,\ size\_type\ \_\_n)}
+\DoxyCodeLine{00898\ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00899\ \ \ \ \ size\_type\ \_\_t\ =\ \textcolor{keyword}{sizeof}(value\_type)\ *\ \_\_n;}
+\DoxyCodeLine{00900\ \ \ \ \ annotate\_base::check\_allocated(\_\_p,\ \_\_t);}
+\DoxyCodeLine{00901\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00902\ }
+\DoxyCodeLine{00903\ \ \ \ \ \ \ \textcolor{keywordtype}{void}}
+\DoxyCodeLine{00904\ \ \ \ \ \ \ check(size\_type\ \_\_n)}
+\DoxyCodeLine{00905\ \ \ \ \ \ \ \{\ annotate\_base::check(\_\_n);\ \}}
+\DoxyCodeLine{00906\ \ \ \};}
+\DoxyCodeLine{00907\ }
+\DoxyCodeLine{00908\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Tp,\ \textcolor{keyword}{typename}\ \_Cond>}
+\DoxyCodeLine{00909\ \ \ \ \ \textcolor{keyword}{inline}\ \textcolor{keywordtype}{bool}}
+\DoxyCodeLine{00910\ \ \ \ \ \mbox{\hyperlink{namespacenlohmann_aaf11d1e42c5a671e7cd362ab0a182de1}{operator==}}(\textcolor{keyword}{const}\ throw\_allocator\_base<\_Tp,\ \_Cond>\&,}
+\DoxyCodeLine{00911\ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ throw\_allocator\_base<\_Tp,\ \_Cond>\&)}
+\DoxyCodeLine{00912\ \ \ \ \ \{\ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};\ \}}
+\DoxyCodeLine{00913\ }
+\DoxyCodeLine{00914\ \textcolor{preprocessor}{\#if\ \_\_cpp\_impl\_three\_way\_comparison\ <\ 201907L}}
+\DoxyCodeLine{00915\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Tp,\ \textcolor{keyword}{typename}\ \_Cond>}
+\DoxyCodeLine{00916\ \ \ \ \ \textcolor{keyword}{inline}\ \textcolor{keywordtype}{bool}}
+\DoxyCodeLine{00917\ \ \ \ \ \mbox{\hyperlink{namespacenlohmann_aa9fe6e8e15f1b1b242d291e7703f1b8d}{operator!=}}(\textcolor{keyword}{const}\ throw\_allocator\_base<\_Tp,\ \_Cond>\&,}
+\DoxyCodeLine{00918\ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ throw\_allocator\_base<\_Tp,\ \_Cond>\&)}
+\DoxyCodeLine{00919\ \ \ \ \ \{\ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};\ \}}
+\DoxyCodeLine{00920\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00921\ }
+\DoxyCodeLine{00923\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Tp>}
+\DoxyCodeLine{00924\ \ \ \ \ \textcolor{keyword}{struct\ }throw\_allocator\_limit}
+\DoxyCodeLine{00925\ \ \ \ \ :\ \textcolor{keyword}{public}\ throw\_allocator\_base<\_Tp,\ limit\_condition>}
+\DoxyCodeLine{00926\ \ \ \ \ \{}
+\DoxyCodeLine{00927\ \ \ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Tp1>}
+\DoxyCodeLine{00928\ \ \ \ \ \textcolor{keyword}{struct\ }rebind}
+\DoxyCodeLine{00929\ \ \ \ \ \{\ \textcolor{keyword}{typedef}\ throw\_allocator\_limit<\_Tp1>\ other;\ \};}
+\DoxyCodeLine{00930\ }
+\DoxyCodeLine{00931\ \ \ \ \ \ \ throw\_allocator\_limit()\ \_GLIBCXX\_USE\_NOEXCEPT\ \{\ \}}
+\DoxyCodeLine{00932\ }
+\DoxyCodeLine{00933\ \ \ \ \ \ \ throw\_allocator\_limit(\textcolor{keyword}{const}\ throw\_allocator\_limit\&)}
+\DoxyCodeLine{00934\ \ \ \ \ \ \ \_GLIBCXX\_USE\_NOEXCEPT\ \{\ \}}
+\DoxyCodeLine{00935\ }
+\DoxyCodeLine{00936\ \ \ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Tp1>}
+\DoxyCodeLine{00937\ \ \ \ \ throw\_allocator\_limit(\textcolor{keyword}{const}\ throw\_allocator\_limit<\_Tp1>\&)}
+\DoxyCodeLine{00938\ \ \ \ \ \_GLIBCXX\_USE\_NOEXCEPT\ \{\ \}}
+\DoxyCodeLine{00939\ }
+\DoxyCodeLine{00940\ \ \ \ \ \ \ \string~throw\_allocator\_limit()\ \_GLIBCXX\_USE\_NOEXCEPT\ \{\ \}}
+\DoxyCodeLine{00941\ }
+\DoxyCodeLine{00942\ \textcolor{preprocessor}{\#if\ \_\_cplusplus\ >=\ 201103L}}
+\DoxyCodeLine{00943\ \ \ \ \ \ \ throw\_allocator\_limit\&}
+\DoxyCodeLine{00944\ \ \ \ \ \ \ operator=(\textcolor{keyword}{const}\ throw\_allocator\_limit\&)\ =\ \textcolor{keywordflow}{default};}
+\DoxyCodeLine{00945\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00946\ \ \ \ \ \};}
+\DoxyCodeLine{00947\ }
+\DoxyCodeLine{00948\ \textcolor{preprocessor}{\#ifdef\ \_GLIBCXX\_USE\_C99\_STDINT\_TR1}}
+\DoxyCodeLine{00950\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Tp>}
+\DoxyCodeLine{00951\ \ \ \ \ \textcolor{keyword}{struct\ }throw\_allocator\_random}
+\DoxyCodeLine{00952\ \ \ \ \ :\ \textcolor{keyword}{public}\ throw\_allocator\_base<\_Tp,\ random\_condition>}
+\DoxyCodeLine{00953\ \ \ \ \ \{}
+\DoxyCodeLine{00954\ \ \ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Tp1>}
+\DoxyCodeLine{00955\ \ \ \ \ \textcolor{keyword}{struct\ }rebind}
+\DoxyCodeLine{00956\ \ \ \ \ \{\ \textcolor{keyword}{typedef}\ throw\_allocator\_random<\_Tp1>\ other;\ \};}
+\DoxyCodeLine{00957\ }
+\DoxyCodeLine{00958\ \ \ \ \ \ \ throw\_allocator\_random()\ \_GLIBCXX\_USE\_NOEXCEPT\ \{\ \}}
+\DoxyCodeLine{00959\ }
+\DoxyCodeLine{00960\ \ \ \ \ \ \ throw\_allocator\_random(\textcolor{keyword}{const}\ throw\_allocator\_random\&)}
+\DoxyCodeLine{00961\ \ \ \ \ \ \ \_GLIBCXX\_USE\_NOEXCEPT\ \{\ \}}
+\DoxyCodeLine{00962\ }
+\DoxyCodeLine{00963\ \ \ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Tp1>}
+\DoxyCodeLine{00964\ \ \ \ \ throw\_allocator\_random(\textcolor{keyword}{const}\ throw\_allocator\_random<\_Tp1>\&)}
+\DoxyCodeLine{00965\ \ \ \ \ \_GLIBCXX\_USE\_NOEXCEPT\ \{\ \}}
+\DoxyCodeLine{00966\ }
+\DoxyCodeLine{00967\ \ \ \ \ \ \ \string~throw\_allocator\_random()\ \_GLIBCXX\_USE\_NOEXCEPT\ \{\ \}}
+\DoxyCodeLine{00968\ }
+\DoxyCodeLine{00969\ \textcolor{preprocessor}{\#if\ \_\_cplusplus\ >=\ 201103L}}
+\DoxyCodeLine{00970\ \ \ \ \ \ \ throw\_allocator\_random\&}
+\DoxyCodeLine{00971\ \ \ \ \ \ \ operator=(\textcolor{keyword}{const}\ throw\_allocator\_random\&)\ =\ \textcolor{keywordflow}{default};}
+\DoxyCodeLine{00972\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00973\ \ \ \ \ \};}
+\DoxyCodeLine{00974\ \textcolor{preprocessor}{\#endif\ }\textcolor{comment}{//\ \_GLIBCXX\_USE\_C99\_STDINT\_TR1}}
+\DoxyCodeLine{00975\ }
+\DoxyCodeLine{00976\ \_GLIBCXX\_END\_NAMESPACE\_VERSION}
+\DoxyCodeLine{00977\ \}\ \textcolor{comment}{//\ namespace}}
+\DoxyCodeLine{00978\ }
+\DoxyCodeLine{00979\ \textcolor{preprocessor}{\#if\ \_\_cplusplus\ >=\ 201103L}}
+\DoxyCodeLine{00980\ }
+\DoxyCodeLine{00981\ \textcolor{preprocessor}{\#\ include\ <bits/functional\_hash.h>}}
+\DoxyCodeLine{00982\ }
+\DoxyCodeLine{00983\ \textcolor{keyword}{namespace\ }\mbox{\hyperlink{namespacestd}{std}}\ \mbox{\hyperlink{_classes_2lib_2include_2c_09_09_2x86__64-w64-mingw32_2bits_2c_09_09config_8h_a44377df0d3503f0b3d9ab316dd8ddf8b}{\_GLIBCXX\_VISIBILITY}}(default)}
+\DoxyCodeLine{00984\ \{}
+\DoxyCodeLine{00985\ \textcolor{preprocessor}{\#pragma\ GCC\ diagnostic\ push}}
+\DoxyCodeLine{00986\ \textcolor{preprocessor}{\#pragma\ GCC\ diagnostic\ ignored\ "{}-\/Wdeprecated-\/declarations"{}}}
+\DoxyCodeLine{00987\ }
+\DoxyCodeLine{00989\ \ \ \textcolor{keyword}{template}<>}
+\DoxyCodeLine{00990\ \ \ \ \ \textcolor{keyword}{struct\ }hash<\mbox{\hyperlink{namespace____gnu__cxx}{\_\_gnu\_cxx}}::throw\_value\_limit>}
+\DoxyCodeLine{00991\ \ \ \ \ :\ \textcolor{keyword}{public}\ std::unary\_function<\_\_gnu\_cxx::throw\_value\_limit,\ size\_t>}
+\DoxyCodeLine{00992\ \ \ \ \ \{}
+\DoxyCodeLine{00993\ \ \ \ \ \ \ \textcolor{keywordtype}{size\_t}}
+\DoxyCodeLine{00994\ \ \ \ \ \ \ operator()(\textcolor{keyword}{const}\ \_\_gnu\_cxx::throw\_value\_limit\&\ \mbox{\hyperlink{_classes_2lib_2include_2stdatomic_8h_a15181bfd16829c92971879064b9d8dbb}{\_\_val}})\textcolor{keyword}{\ const}}
+\DoxyCodeLine{00995\ \textcolor{keyword}{\ \ \ \ \ \ }\{}
+\DoxyCodeLine{00996\ \ \ \ \ \_\_gnu\_cxx::throw\_value\_limit::throw\_conditionally();}
+\DoxyCodeLine{00997\ \ \ \ \ std::hash<std::size\_t>\ \_\_h;}
+\DoxyCodeLine{00998\ \ \ \ \ \textcolor{keywordtype}{size\_t}\ \_\_result\ =\ \_\_h(\mbox{\hyperlink{_classes_2lib_2include_2stdatomic_8h_a15181bfd16829c92971879064b9d8dbb}{\_\_val}}.\_M\_i);}
+\DoxyCodeLine{00999\ \ \ \ \ \textcolor{keywordflow}{return}\ \_\_result;}
+\DoxyCodeLine{01000\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{01001\ \ \ \ \ \};}
+\DoxyCodeLine{01002\ }
+\DoxyCodeLine{01003\ \textcolor{preprocessor}{\#ifdef\ \_GLIBCXX\_USE\_C99\_STDINT\_TR1}}
+\DoxyCodeLine{01005\ \ \ \textcolor{keyword}{template}<>}
+\DoxyCodeLine{01006\ \ \ \ \ \textcolor{keyword}{struct\ }hash<\mbox{\hyperlink{namespace____gnu__cxx}{\_\_gnu\_cxx}}::throw\_value\_random>}
+\DoxyCodeLine{01007\ \ \ \ \ :\ \textcolor{keyword}{public}\ std::unary\_function<\_\_gnu\_cxx::throw\_value\_random,\ size\_t>}
+\DoxyCodeLine{01008\ \ \ \ \ \{}
+\DoxyCodeLine{01009\ \ \ \ \ \ \ \textcolor{keywordtype}{size\_t}}
+\DoxyCodeLine{01010\ \ \ \ \ \ \ operator()(\textcolor{keyword}{const}\ \_\_gnu\_cxx::throw\_value\_random\&\ \mbox{\hyperlink{_classes_2lib_2include_2stdatomic_8h_a15181bfd16829c92971879064b9d8dbb}{\_\_val}})\textcolor{keyword}{\ const}}
+\DoxyCodeLine{01011\ \textcolor{keyword}{\ \ \ \ \ \ }\{}
+\DoxyCodeLine{01012\ \ \ \ \ \_\_gnu\_cxx::throw\_value\_random::throw\_conditionally();}
+\DoxyCodeLine{01013\ \ \ \ \ std::hash<std::size\_t>\ \_\_h;}
+\DoxyCodeLine{01014\ \ \ \ \ \textcolor{keywordtype}{size\_t}\ \_\_result\ =\ \_\_h(\mbox{\hyperlink{_classes_2lib_2include_2stdatomic_8h_a15181bfd16829c92971879064b9d8dbb}{\_\_val}}.\_M\_i);}
+\DoxyCodeLine{01015\ \ \ \ \ \textcolor{keywordflow}{return}\ \_\_result;}
+\DoxyCodeLine{01016\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{01017\ \ \ \ \ \};}
+\DoxyCodeLine{01018\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{01019\ }
+\DoxyCodeLine{01020\ \textcolor{preprocessor}{\#pragma\ GCC\ diagnostic\ pop}}
+\DoxyCodeLine{01021\ \}\ \textcolor{comment}{//\ end\ namespace\ std}}
+\DoxyCodeLine{01022\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{01023\ }
+\DoxyCodeLine{01024\ \textcolor{preprocessor}{\#endif}}
+
+\end{DoxyCode}

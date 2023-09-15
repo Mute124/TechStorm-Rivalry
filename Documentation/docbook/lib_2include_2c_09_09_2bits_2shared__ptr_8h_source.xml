@@ -1,0 +1,925 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<section xmlns="http://docbook.org/ns/docbook" version="5.0" xmlns:xlink="http://www.w3.org/1999/xlink" xml:id="_lib_2include_2c_09_09_2bits_2shared__ptr_8h_source" xml:lang="en-US">
+<title>shared_ptr.h</title>
+<indexterm><primary>C:/Users/HP/Documents/GitHub/Minero-Game/lib/include/c++/bits/shared_ptr.h</primary></indexterm>
+Go to the documentation of this file.<programlisting linenumbering="unnumbered">1 <emphasis role="comment">//&#32;shared_ptr&#32;and&#32;weak_ptr&#32;implementation&#32;-*-&#32;C++&#32;-*-</emphasis>
+2 
+3 <emphasis role="comment">//&#32;Copyright&#32;(C)&#32;2007-2022&#32;Free&#32;Software&#32;Foundation,&#32;Inc.</emphasis>
+4 <emphasis role="comment">//</emphasis>
+5 <emphasis role="comment">//&#32;This&#32;file&#32;is&#32;part&#32;of&#32;the&#32;GNU&#32;ISO&#32;C++&#32;Library.&#32;&#32;This&#32;library&#32;is&#32;free</emphasis>
+6 <emphasis role="comment">//&#32;software;&#32;you&#32;can&#32;redistribute&#32;it&#32;and/or&#32;modify&#32;it&#32;under&#32;the</emphasis>
+7 <emphasis role="comment">//&#32;terms&#32;of&#32;the&#32;GNU&#32;General&#32;Public&#32;License&#32;as&#32;published&#32;by&#32;the</emphasis>
+8 <emphasis role="comment">//&#32;Free&#32;Software&#32;Foundation;&#32;either&#32;version&#32;3,&#32;or&#32;(at&#32;your&#32;option)</emphasis>
+9 <emphasis role="comment">//&#32;any&#32;later&#32;version.</emphasis>
+10 
+11 <emphasis role="comment">//&#32;This&#32;library&#32;is&#32;distributed&#32;in&#32;the&#32;hope&#32;that&#32;it&#32;will&#32;be&#32;useful,</emphasis>
+12 <emphasis role="comment">//&#32;but&#32;WITHOUT&#32;ANY&#32;WARRANTY;&#32;without&#32;even&#32;the&#32;implied&#32;warranty&#32;of</emphasis>
+13 <emphasis role="comment">//&#32;MERCHANTABILITY&#32;or&#32;FITNESS&#32;FOR&#32;A&#32;PARTICULAR&#32;PURPOSE.&#32;&#32;See&#32;the</emphasis>
+14 <emphasis role="comment">//&#32;GNU&#32;General&#32;Public&#32;License&#32;for&#32;more&#32;details.</emphasis>
+15 
+16 <emphasis role="comment">//&#32;Under&#32;Section&#32;7&#32;of&#32;GPL&#32;version&#32;3,&#32;you&#32;are&#32;granted&#32;additional</emphasis>
+17 <emphasis role="comment">//&#32;permissions&#32;described&#32;in&#32;the&#32;GCC&#32;Runtime&#32;Library&#32;Exception,&#32;version</emphasis>
+18 <emphasis role="comment">//&#32;3.1,&#32;as&#32;published&#32;by&#32;the&#32;Free&#32;Software&#32;Foundation.</emphasis>
+19 
+20 <emphasis role="comment">//&#32;You&#32;should&#32;have&#32;received&#32;a&#32;copy&#32;of&#32;the&#32;GNU&#32;General&#32;Public&#32;License&#32;and</emphasis>
+21 <emphasis role="comment">//&#32;a&#32;copy&#32;of&#32;the&#32;GCC&#32;Runtime&#32;Library&#32;Exception&#32;along&#32;with&#32;this&#32;program;</emphasis>
+22 <emphasis role="comment">//&#32;see&#32;the&#32;files&#32;COPYING3&#32;and&#32;COPYING.RUNTIME&#32;respectively.&#32;&#32;If&#32;not,&#32;see</emphasis>
+23 <emphasis role="comment">//&#32;&lt;http://www.gnu.org/licenses/&gt;.</emphasis>
+24 
+25 <emphasis role="comment">//&#32;GCC&#32;Note:&#32;Based&#32;on&#32;files&#32;from&#32;version&#32;1.32.0&#32;of&#32;the&#32;Boost&#32;library.</emphasis>
+26 
+27 <emphasis role="comment">//&#32;&#32;shared_count.hpp</emphasis>
+28 <emphasis role="comment">//&#32;&#32;Copyright&#32;(c)&#32;2001,&#32;2002,&#32;2003&#32;Peter&#32;Dimov&#32;and&#32;Multi&#32;Media&#32;Ltd.</emphasis>
+29 
+30 <emphasis role="comment">//&#32;&#32;shared_ptr.hpp</emphasis>
+31 <emphasis role="comment">//&#32;&#32;Copyright&#32;(C)&#32;1998,&#32;1999&#32;Greg&#32;Colvin&#32;and&#32;Beman&#32;Dawes.</emphasis>
+32 <emphasis role="comment">//&#32;&#32;Copyright&#32;(C)&#32;2001,&#32;2002,&#32;2003&#32;Peter&#32;Dimov</emphasis>
+33 
+34 <emphasis role="comment">//&#32;&#32;weak_ptr.hpp</emphasis>
+35 <emphasis role="comment">//&#32;&#32;Copyright&#32;(C)&#32;2001,&#32;2002,&#32;2003&#32;Peter&#32;Dimov</emphasis>
+36 
+37 <emphasis role="comment">//&#32;&#32;enable_shared_from_this.hpp</emphasis>
+38 <emphasis role="comment">//&#32;&#32;Copyright&#32;(C)&#32;2002&#32;Peter&#32;Dimov</emphasis>
+39 
+40 <emphasis role="comment">//&#32;Distributed&#32;under&#32;the&#32;Boost&#32;Software&#32;License,&#32;Version&#32;1.0.&#32;(See</emphasis>
+41 <emphasis role="comment">//&#32;accompanying&#32;file&#32;LICENSE_1_0.txt&#32;or&#32;copy&#32;at</emphasis>
+42 <emphasis role="comment">//&#32;http://www.boost.org/LICENSE_1_0.txt)</emphasis>
+43 
+49 <emphasis role="preprocessor">#ifndef&#32;_SHARED_PTR_H</emphasis>
+50 <emphasis role="preprocessor">#define&#32;_SHARED_PTR_H&#32;1</emphasis>
+51 
+52 <emphasis role="preprocessor">#include&#32;&lt;iosfwd&gt;</emphasis>&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;std::basic_ostream</emphasis>
+53 <emphasis role="preprocessor">#include&#32;&lt;bits/shared_ptr_base.h&gt;</emphasis>
+54 
+55 <emphasis role="keyword">namespace&#32;</emphasis><link linkend="_namespacestd">std</link>&#32;<link linkend="__classes_2lib_2include_2c_09_09_2x86__64-w64-mingw32_2bits_2c_09_09config_8h_1a44377df0d3503f0b3d9ab316dd8ddf8b">_GLIBCXX_VISIBILITY</link>(default)
+56 {
+57 _GLIBCXX_BEGIN_NAMESPACE_VERSION
+58 
+64 &#32;&#32;<emphasis role="comment">//&#32;20.7.2.2.11&#32;shared_ptr&#32;I/O</emphasis>
+65 
+68 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Ch,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Tr,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Tp,&#32;_Lock_policy&#32;_Lp&gt;
+69 &#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;std::basic_ostream&lt;_Ch,&#32;_Tr&gt;&amp;
+70 &#32;&#32;&#32;&#32;<link linkend="_forward__declarations_8h_1ade7e3bc03b39cb3b5684a4c302832e3c">operator&lt;&lt;</link>(std::basic_ostream&lt;_Ch,&#32;_Tr&gt;&amp;&#32;__os,
+71 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;__shared_ptr&lt;_Tp,&#32;_Lp&gt;&amp;&#32;__p)
+72 &#32;&#32;&#32;&#32;{
+73 &#32;&#32;&#32;&#32;&#32;&#32;__os&#32;&lt;&lt;&#32;__p.get();
+74 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__os;
+75 &#32;&#32;&#32;&#32;}
+76 
+77 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Del,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Tp,&#32;_Lock_policy&#32;_Lp&gt;
+78 &#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;_Del*
+79 &#32;&#32;&#32;&#32;get_deleter(<emphasis role="keyword">const</emphasis>&#32;__shared_ptr&lt;_Tp,&#32;_Lp&gt;&amp;&#32;__p)&#32;<emphasis role="keyword">noexcept</emphasis>
+80 &#32;&#32;&#32;&#32;{
+81 <emphasis role="preprocessor">#if&#32;__cpp_rtti</emphasis>
+82 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<emphasis role="keyword">static_cast&lt;</emphasis>_Del*<emphasis role="keyword">&gt;</emphasis>(__p._M_get_deleter(<emphasis role="keyword">typeid</emphasis>(_Del)));
+83 <emphasis role="preprocessor">#else</emphasis>
+84 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;0;
+85 <emphasis role="preprocessor">#endif</emphasis>
+86 &#32;&#32;&#32;&#32;}
+87 
+89 
+92 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Del,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+93 &#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;_Del*
+94 &#32;&#32;&#32;&#32;get_deleter(<emphasis role="keyword">const</emphasis>&#32;shared_ptr&lt;_Tp&gt;&amp;&#32;__p)&#32;<emphasis role="keyword">noexcept</emphasis>
+95 &#32;&#32;&#32;&#32;{
+96 <emphasis role="preprocessor">#if&#32;__cpp_rtti</emphasis>
+97 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<emphasis role="keyword">static_cast&lt;</emphasis>_Del*<emphasis role="keyword">&gt;</emphasis>(__p._M_get_deleter(<emphasis role="keyword">typeid</emphasis>(_Del)));
+98 <emphasis role="preprocessor">#else</emphasis>
+99 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;0;
+100 <emphasis role="preprocessor">#endif</emphasis>
+101 &#32;&#32;&#32;&#32;}
+102 
+104 
+105 &#32;&#32;<emphasis role="comment">//&#32;Constraint&#32;for&#32;overloads&#32;taking&#32;non-array&#32;types.</emphasis>
+106 <emphasis role="preprocessor">#if&#32;__cpp_concepts&#32;&amp;&amp;&#32;__cpp_lib_type_trait_variable_templates</emphasis>
+107 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+108 &#32;&#32;&#32;&#32;<emphasis role="keyword">requires</emphasis>&#32;(!is_array_v&lt;_Tp&gt;)
+109 &#32;&#32;&#32;&#32;<emphasis role="keyword">using</emphasis>&#32;_NonArray&#32;=&#32;_Tp;
+110 <emphasis role="preprocessor">#else</emphasis>
+111 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+112 &#32;&#32;&#32;&#32;<emphasis role="keyword">using&#32;</emphasis>_NonArray&#32;=&#32;__enable_if_t&lt;!is_array&lt;_Tp&gt;::value,&#32;_Tp&gt;;
+113 <emphasis role="preprocessor">#endif</emphasis>
+114 
+115 <emphasis role="preprocessor">#if&#32;__cpp_lib_shared_ptr_arrays&#32;&gt;=&#32;201707L</emphasis>
+116 &#32;&#32;<emphasis role="comment">//&#32;Constraint&#32;for&#32;overloads&#32;taking&#32;array&#32;types&#32;with&#32;unknown&#32;bound,&#32;U[].</emphasis>
+117 <emphasis role="preprocessor">#if&#32;__cpp_concepts</emphasis>
+118 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+119 &#32;&#32;&#32;&#32;<emphasis role="keyword">requires</emphasis>&#32;is_array_v&lt;_Tp&gt;&#32;&amp;&amp;&#32;(extent_v&lt;_Tp&gt;&#32;==&#32;0)
+120 &#32;&#32;&#32;&#32;<emphasis role="keyword">using</emphasis>&#32;_UnboundedArray&#32;=&#32;_Tp;
+121 <emphasis role="preprocessor">#else</emphasis>
+122 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+123 &#32;&#32;&#32;&#32;<emphasis role="keyword">using&#32;</emphasis>_UnboundedArray
+124 &#32;&#32;&#32;&#32;&#32;&#32;=&#32;__enable_if_t&lt;__is_array_unknown_bounds&lt;_Tp&gt;::value,&#32;_Tp&gt;;
+125 <emphasis role="preprocessor">#endif</emphasis>
+126 
+127 &#32;&#32;<emphasis role="comment">//&#32;Constraint&#32;for&#32;overloads&#32;taking&#32;array&#32;types&#32;with&#32;known&#32;bound,&#32;U[N].</emphasis>
+128 <emphasis role="preprocessor">#if&#32;__cpp_concepts</emphasis>
+129 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+130 &#32;&#32;&#32;&#32;<emphasis role="keyword">requires</emphasis>&#32;(extent_v&lt;_Tp&gt;&#32;!=&#32;0)
+131 &#32;&#32;&#32;&#32;<emphasis role="keyword">using</emphasis>&#32;_BoundedArray&#32;=&#32;_Tp;
+132 <emphasis role="preprocessor">#else</emphasis>
+133 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+134 &#32;&#32;&#32;&#32;<emphasis role="keyword">using&#32;</emphasis>_BoundedArray
+135 &#32;&#32;&#32;&#32;&#32;&#32;=&#32;__enable_if_t&lt;__is_array_known_bounds&lt;_Tp&gt;::value,&#32;_Tp&gt;;
+136 <emphasis role="preprocessor">#endif</emphasis>
+137 
+138 <emphasis role="preprocessor">#if&#32;__cpp_lib_smart_ptr_for_overwrite</emphasis>
+139 &#32;&#32;<emphasis role="comment">//&#32;Constraint&#32;for&#32;overloads&#32;taking&#32;either&#32;non-array&#32;or&#32;bounded&#32;array,&#32;U[N].</emphasis>
+140 <emphasis role="preprocessor">#if&#32;__cpp_concepts</emphasis>
+141 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+142 &#32;&#32;&#32;&#32;<emphasis role="keyword">requires</emphasis>&#32;(!is_array_v&lt;_Tp&gt;)&#32;||&#32;(extent_v&lt;_Tp&gt;&#32;!=&#32;0)
+143 &#32;&#32;&#32;&#32;<emphasis role="keyword">using&#32;</emphasis>_NotUnboundedArray&#32;=&#32;_Tp;
+144 <emphasis role="preprocessor">#else</emphasis>
+145 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+146 &#32;&#32;&#32;&#32;<emphasis role="keyword">using&#32;</emphasis>_NotUnboundedArray
+147 &#32;&#32;&#32;&#32;&#32;&#32;=&#32;__enable_if_t&lt;!__is_array_unknown_bounds&lt;_Tp&gt;::value,&#32;_Tp&gt;;
+148 <emphasis role="preprocessor">#endif</emphasis>
+149 <emphasis role="preprocessor">#endif&#32;</emphasis><emphasis role="comment">//&#32;smart_ptr_for_overwrite</emphasis>
+150 <emphasis role="preprocessor">#endif&#32;</emphasis><emphasis role="comment">//&#32;shared_ptr_arrays</emphasis>
+151 
+153 
+174 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+175 &#32;&#32;&#32;&#32;<emphasis role="keyword">class&#32;</emphasis>shared_ptr&#32;:&#32;<emphasis role="keyword">public</emphasis>&#32;__shared_ptr&lt;_Tp&gt;
+176 &#32;&#32;&#32;&#32;{
+177 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>...&#32;_Args&gt;
+178 &#32;&#32;&#32;&#32;<emphasis role="keyword">using&#32;</emphasis>_Constructible&#32;=&#32;<emphasis role="keyword">typename</emphasis>&#32;enable_if&lt;
+179 &#32;&#32;&#32;&#32;&#32;&#32;is_constructible&lt;__shared_ptr&lt;_Tp&gt;,&#32;_Args...&gt;<link linkend="_classvalue">::value</link>
+180 &#32;&#32;&#32;&#32;&gt;<link linkend="__classes_2_gameobj_8h_1a890efa53b3d7deeeced6f3a0d6653ed3">::type</link>;
+181 
+182 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Arg&gt;
+183 &#32;&#32;&#32;&#32;<emphasis role="keyword">using&#32;</emphasis>_Assignable&#32;=&#32;<emphasis role="keyword">typename</emphasis>&#32;enable_if&lt;
+184 &#32;&#32;&#32;&#32;&#32;&#32;is_assignable&lt;__shared_ptr&lt;_Tp&gt;&amp;,&#32;_Arg&gt;<link linkend="_classvalue">::value</link>,&#32;shared_ptr&amp;
+185 &#32;&#32;&#32;&#32;&gt;<link linkend="__classes_2_gameobj_8h_1a890efa53b3d7deeeced6f3a0d6653ed3">::type</link>;
+186 
+187 &#32;&#32;&#32;&#32;<emphasis role="keyword">public</emphasis>:
+188 
+190 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">using&#32;</emphasis>element_type&#32;=&#32;<emphasis role="keyword">typename</emphasis>&#32;__shared_ptr&lt;_Tp&gt;::element_type;
+191 
+192 <emphasis role="preprocessor">#if&#32;__cplusplus&#32;&gt;=&#32;201703L</emphasis>
+193 <emphasis role="preprocessor">#&#32;define&#32;__cpp_lib_shared_ptr_weak_type&#32;201606L</emphasis>
+196 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">using&#32;</emphasis>weak_type&#32;=&#32;weak_ptr&lt;_Tp&gt;;
+197 <emphasis role="preprocessor">#endif</emphasis>
+202 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">constexpr</emphasis>&#32;shared_ptr()&#32;noexcept&#32;:&#32;__shared_ptr&lt;_Tp&gt;()&#32;{&#32;}
+203 
+204 &#32;&#32;&#32;&#32;&#32;&#32;shared_ptr(<emphasis role="keyword">const</emphasis>&#32;shared_ptr&amp;)&#32;<emphasis role="keyword">noexcept</emphasis>&#32;=&#32;<emphasis role="keywordflow">default</emphasis>;&#32;
+205 
+212 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Yp,&#32;<emphasis role="keyword">typename</emphasis>&#32;=&#32;_Constructible&lt;_Yp*&gt;&gt;
+213 &#32;&#32;&#32;&#32;<emphasis role="keyword">explicit</emphasis>
+214 &#32;&#32;&#32;&#32;shared_ptr(_Yp*&#32;__p)&#32;:&#32;__shared_ptr&lt;_Tp&gt;(__p)&#32;{&#32;}
+215 
+229 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Yp,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Deleter,
+230 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;=&#32;_Constructible&lt;_Yp*,&#32;_Deleter&gt;&gt;
+231 &#32;&#32;&#32;&#32;shared_ptr(_Yp*&#32;__p,&#32;_Deleter&#32;__d)
+232 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;:&#32;__shared_ptr&lt;_Tp&gt;(__p,&#32;<link linkend="_namespacestd">std</link>::<link linkend="_namespacestd_1ac7095819f6a8da64d69b1ee3029c52be">move</link>(__d))&#32;{&#32;}
+233 
+247 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Deleter&gt;
+248 &#32;&#32;&#32;&#32;shared_ptr(nullptr_t&#32;__p,&#32;_Deleter&#32;__d)
+249 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;:&#32;__shared_ptr&lt;_Tp&gt;(__p,&#32;<link linkend="_namespacestd">std</link>::<link linkend="_namespacestd_1ac7095819f6a8da64d69b1ee3029c52be">move</link>(__d))&#32;{&#32;}
+250 
+266 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Yp,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Deleter,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Alloc,
+267 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;=&#32;_Constructible&lt;_Yp*,&#32;_Deleter,&#32;_Alloc&gt;&gt;
+268 &#32;&#32;&#32;&#32;shared_ptr(_Yp*&#32;__p,&#32;_Deleter&#32;__d,&#32;_Alloc&#32;__a)
+269 &#32;&#32;&#32;&#32;:&#32;__shared_ptr&lt;_Tp&gt;(__p,&#32;<link linkend="_namespacestd">std</link>::<link linkend="_namespacestd_1ac7095819f6a8da64d69b1ee3029c52be">move</link>(__d),&#32;<link linkend="_namespacestd">std</link>::<link linkend="_namespacestd_1ac7095819f6a8da64d69b1ee3029c52be">move</link>(__a))&#32;{&#32;}
+270 
+286 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Deleter,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Alloc&gt;
+287 &#32;&#32;&#32;&#32;shared_ptr(nullptr_t&#32;__p,&#32;_Deleter&#32;__d,&#32;_Alloc&#32;__a)
+288 &#32;&#32;&#32;&#32;:&#32;__shared_ptr&lt;_Tp&gt;(__p,&#32;<link linkend="_namespacestd">std</link>::<link linkend="_namespacestd_1ac7095819f6a8da64d69b1ee3029c52be">move</link>(__d),&#32;<link linkend="_namespacestd">std</link>::<link linkend="_namespacestd_1ac7095819f6a8da64d69b1ee3029c52be">move</link>(__a))&#32;{&#32;}
+289 
+290 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Aliasing&#32;constructor</emphasis>
+291 
+310 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Yp&gt;
+311 &#32;&#32;&#32;&#32;shared_ptr(<emphasis role="keyword">const</emphasis>&#32;shared_ptr&lt;_Yp&gt;&amp;&#32;__r,&#32;element_type*&#32;__p)&#32;noexcept
+312 &#32;&#32;&#32;&#32;:&#32;__shared_ptr&lt;_Tp&gt;(__r,&#32;__p)&#32;{&#32;}
+313 
+314 <emphasis role="preprocessor">#if&#32;__cplusplus&#32;&gt;&#32;201703L</emphasis>
+315 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;_GLIBCXX_RESOLVE_LIB_DEFECTS</emphasis>
+316 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;2996.&#32;Missing&#32;rvalue&#32;overloads&#32;for&#32;shared_ptr&#32;operations</emphasis>
+338 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Yp&gt;
+339 &#32;&#32;&#32;&#32;shared_ptr(shared_ptr&lt;_Yp&gt;&amp;&amp;&#32;__r,&#32;element_type*&#32;__p)&#32;noexcept
+340 &#32;&#32;&#32;&#32;:&#32;__shared_ptr&lt;_Tp&gt;(<link linkend="_namespacestd_1ac7095819f6a8da64d69b1ee3029c52be">std::move</link>(__r),&#32;__p)&#32;{&#32;}
+341 <emphasis role="preprocessor">#endif</emphasis>
+349 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Yp,
+350 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;=&#32;_Constructible&lt;const&#32;shared_ptr&lt;_Yp&gt;&amp;&gt;&gt;
+351 &#32;&#32;&#32;&#32;shared_ptr(<emphasis role="keyword">const</emphasis>&#32;shared_ptr&lt;_Yp&gt;&amp;&#32;__r)&#32;noexcept
+352 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;:&#32;__shared_ptr&lt;_Tp&gt;(__r)&#32;{&#32;}
+353 
+359 &#32;&#32;&#32;&#32;&#32;&#32;shared_ptr(shared_ptr&amp;&amp;&#32;__r)&#32;noexcept
+360 &#32;&#32;&#32;&#32;&#32;&#32;:&#32;__shared_ptr&lt;_Tp&gt;(<link linkend="_namespacestd_1ac7095819f6a8da64d69b1ee3029c52be">std::move</link>(__r))&#32;{&#32;}
+361 
+367 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Yp,&#32;<emphasis role="keyword">typename</emphasis>&#32;=&#32;_Constructible&lt;shared_ptr&lt;_Yp&gt;&gt;&gt;
+368 &#32;&#32;&#32;&#32;shared_ptr(shared_ptr&lt;_Yp&gt;&amp;&amp;&#32;__r)&#32;noexcept
+369 &#32;&#32;&#32;&#32;:&#32;__shared_ptr&lt;_Tp&gt;(<link linkend="_namespacestd_1ac7095819f6a8da64d69b1ee3029c52be">std::move</link>(__r))&#32;{&#32;}
+370 
+379 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Yp,&#32;<emphasis role="keyword">typename</emphasis>&#32;=&#32;_Constructible&lt;const&#32;weak_ptr&lt;_Yp&gt;&amp;&gt;&gt;
+380 &#32;&#32;&#32;&#32;<emphasis role="keyword">explicit</emphasis>&#32;shared_ptr(<emphasis role="keyword">const</emphasis>&#32;weak_ptr&lt;_Yp&gt;&amp;&#32;__r)
+381 &#32;&#32;&#32;&#32;:&#32;__shared_ptr&lt;_Tp&gt;(__r)&#32;{&#32;}
+382 
+383 <emphasis role="preprocessor">#if&#32;_GLIBCXX_USE_DEPRECATED</emphasis>
+384 <emphasis role="preprocessor">#pragma&#32;GCC&#32;diagnostic&#32;push</emphasis>
+385 <emphasis role="preprocessor">#pragma&#32;GCC&#32;diagnostic&#32;ignored&#32;&quot;-Wdeprecated-declarations&quot;</emphasis>
+386 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Yp,&#32;<emphasis role="keyword">typename</emphasis>&#32;=&#32;_Constructible&lt;auto_ptr&lt;_Yp&gt;&gt;&gt;
+387 &#32;&#32;&#32;&#32;shared_ptr(auto_ptr&lt;_Yp&gt;&amp;&amp;&#32;__r);
+388 <emphasis role="preprocessor">#pragma&#32;GCC&#32;diagnostic&#32;pop</emphasis>
+389 <emphasis role="preprocessor">#endif</emphasis>
+390 
+391 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;_GLIBCXX_RESOLVE_LIB_DEFECTS</emphasis>
+392 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;2399.&#32;shared_ptr&apos;s&#32;constructor&#32;from&#32;unique_ptr&#32;should&#32;be&#32;constrained</emphasis>
+393 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Yp,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Del,
+394 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;=&#32;_Constructible&lt;unique_ptr&lt;_Yp,&#32;_Del&gt;&gt;&gt;
+395 &#32;&#32;&#32;&#32;shared_ptr(unique_ptr&lt;_Yp,&#32;_Del&gt;&amp;&amp;&#32;__r)
+396 &#32;&#32;&#32;&#32;:&#32;__shared_ptr&lt;_Tp&gt;(<link linkend="_namespacestd">std</link>::<link linkend="_namespacestd_1ac7095819f6a8da64d69b1ee3029c52be">move</link>(__r))&#32;{&#32;}
+397 
+398 <emphasis role="preprocessor">#if&#32;__cplusplus&#32;&lt;=&#32;201402L&#32;&amp;&amp;&#32;_GLIBCXX_USE_DEPRECATED</emphasis>
+399 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;This&#32;non-standard&#32;constructor&#32;exists&#32;to&#32;support&#32;conversions&#32;that</emphasis>
+400 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;were&#32;possible&#32;in&#32;C++11&#32;and&#32;C++14&#32;but&#32;are&#32;ill-formed&#32;in&#32;C++17.</emphasis>
+401 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;If&#32;an&#32;exception&#32;is&#32;thrown&#32;this&#32;constructor&#32;has&#32;no&#32;effect.</emphasis>
+402 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Yp,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Del,
+403 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_Constructible&lt;unique_ptr&lt;_Yp,&#32;_Del&gt;,&#32;__sp_array_delete&gt;*&#32;=&#32;0&gt;
+404 &#32;&#32;&#32;&#32;shared_ptr(unique_ptr&lt;_Yp,&#32;_Del&gt;&amp;&amp;&#32;__r)
+405 &#32;&#32;&#32;&#32;:&#32;__shared_ptr&lt;_Tp&gt;(<link linkend="_namespacestd">std</link>::<link linkend="_namespacestd_1ac7095819f6a8da64d69b1ee3029c52be">move</link>(__r),&#32;__sp_array_delete())&#32;{&#32;}
+406 <emphasis role="preprocessor">#endif</emphasis>
+407 
+412 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">constexpr</emphasis>&#32;shared_ptr(nullptr_t)&#32;noexcept&#32;:&#32;shared_ptr()&#32;{&#32;}
+413 
+414 &#32;&#32;&#32;&#32;&#32;&#32;shared_ptr&amp;&#32;operator=(<emphasis role="keyword">const</emphasis>&#32;shared_ptr&amp;)&#32;<emphasis role="keyword">noexcept</emphasis>&#32;=&#32;<emphasis role="keywordflow">default</emphasis>;
+415 
+416 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Yp&gt;
+417 &#32;&#32;&#32;&#32;_Assignable&lt;const&#32;shared_ptr&lt;_Yp&gt;&amp;&gt;
+418 &#32;&#32;&#32;&#32;operator=(<emphasis role="keyword">const</emphasis>&#32;shared_ptr&lt;_Yp&gt;&amp;&#32;__r)&#32;<emphasis role="keyword">noexcept</emphasis>
+419 &#32;&#32;&#32;&#32;{
+420 &#32;&#32;&#32;&#32;&#32;&#32;this-&gt;__shared_ptr&lt;_Tp&gt;::operator=(__r);
+421 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;*<emphasis role="keyword">this</emphasis>;
+422 &#32;&#32;&#32;&#32;}
+423 
+424 <emphasis role="preprocessor">#if&#32;_GLIBCXX_USE_DEPRECATED</emphasis>
+425 <emphasis role="preprocessor">#pragma&#32;GCC&#32;diagnostic&#32;push</emphasis>
+426 <emphasis role="preprocessor">#pragma&#32;GCC&#32;diagnostic&#32;ignored&#32;&quot;-Wdeprecated-declarations&quot;</emphasis>
+427 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Yp&gt;
+428 &#32;&#32;&#32;&#32;_Assignable&lt;auto_ptr&lt;_Yp&gt;&gt;
+429 &#32;&#32;&#32;&#32;operator=(auto_ptr&lt;_Yp&gt;&amp;&amp;&#32;__r)
+430 &#32;&#32;&#32;&#32;{
+431 &#32;&#32;&#32;&#32;&#32;&#32;this-&gt;__shared_ptr&lt;_Tp&gt;::operator=(<link linkend="_namespacestd_1ac7095819f6a8da64d69b1ee3029c52be">std::move</link>(__r));
+432 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;*<emphasis role="keyword">this</emphasis>;
+433 &#32;&#32;&#32;&#32;}
+434 <emphasis role="preprocessor">#pragma&#32;GCC&#32;diagnostic&#32;pop</emphasis>
+435 <emphasis role="preprocessor">#endif</emphasis>
+436 
+437 &#32;&#32;&#32;&#32;&#32;&#32;shared_ptr&amp;
+438 &#32;&#32;&#32;&#32;&#32;&#32;operator=(shared_ptr&amp;&amp;&#32;__r)&#32;<emphasis role="keyword">noexcept</emphasis>
+439 &#32;&#32;&#32;&#32;&#32;&#32;{
+440 &#32;&#32;&#32;&#32;this-&gt;__shared_ptr&lt;_Tp&gt;::operator=(<link linkend="_namespacestd_1ac7095819f6a8da64d69b1ee3029c52be">std::move</link>(__r));
+441 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;*<emphasis role="keyword">this</emphasis>;
+442 &#32;&#32;&#32;&#32;&#32;&#32;}
+443 
+444 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">class</emphasis>&#32;_Yp&gt;
+445 &#32;&#32;&#32;&#32;_Assignable&lt;shared_ptr&lt;_Yp&gt;&gt;
+446 &#32;&#32;&#32;&#32;operator=(shared_ptr&lt;_Yp&gt;&amp;&amp;&#32;__r)&#32;<emphasis role="keyword">noexcept</emphasis>
+447 &#32;&#32;&#32;&#32;{
+448 &#32;&#32;&#32;&#32;&#32;&#32;this-&gt;__shared_ptr&lt;_Tp&gt;::operator=(<link linkend="_namespacestd_1ac7095819f6a8da64d69b1ee3029c52be">std::move</link>(__r));
+449 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;*<emphasis role="keyword">this</emphasis>;
+450 &#32;&#32;&#32;&#32;}
+451 
+452 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Yp,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Del&gt;
+453 &#32;&#32;&#32;&#32;_Assignable&lt;unique_ptr&lt;_Yp,&#32;_Del&gt;&gt;
+454 &#32;&#32;&#32;&#32;operator=(unique_ptr&lt;_Yp,&#32;_Del&gt;&amp;&amp;&#32;__r)
+455 &#32;&#32;&#32;&#32;{
+456 &#32;&#32;&#32;&#32;&#32;&#32;this-&gt;__shared_ptr&lt;_Tp&gt;::operator=(<link linkend="_namespacestd_1ac7095819f6a8da64d69b1ee3029c52be">std::move</link>(__r));
+457 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;*<emphasis role="keyword">this</emphasis>;
+458 &#32;&#32;&#32;&#32;}
+459 
+460 &#32;&#32;&#32;&#32;<emphasis role="keyword">private</emphasis>:
+461 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;This&#32;constructor&#32;is&#32;non-standard,&#32;it&#32;is&#32;used&#32;by&#32;allocate_shared.</emphasis>
+462 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Alloc,&#32;<emphasis role="keyword">typename</emphasis>...&#32;_Args&gt;
+463 &#32;&#32;&#32;&#32;shared_ptr(_Sp_alloc_shared_tag&lt;_Alloc&gt;&#32;__tag,&#32;_Args&amp;&amp;...&#32;__args)
+464 &#32;&#32;&#32;&#32;:&#32;__shared_ptr&lt;_Tp&gt;(__tag,&#32;<link linkend="_namespacestd">std</link>::forward&lt;_Args&gt;(__args)...)
+465 &#32;&#32;&#32;&#32;{&#32;}
+466 
+467 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Yp,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Alloc,&#32;<emphasis role="keyword">typename</emphasis>...&#32;_Args&gt;
+468 &#32;&#32;&#32;&#32;<emphasis role="keyword">friend</emphasis>&#32;shared_ptr&lt;_NonArray&lt;_Yp&gt;&gt;
+469 &#32;&#32;&#32;&#32;allocate_shared(<emphasis role="keyword">const</emphasis>&#32;_Alloc&amp;,&#32;_Args&amp;&amp;...);
+470 
+471 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Yp,&#32;<emphasis role="keyword">typename</emphasis>...&#32;_Args&gt;
+472 &#32;&#32;&#32;&#32;<emphasis role="keyword">friend</emphasis>&#32;shared_ptr&lt;_NonArray&lt;_Yp&gt;&gt;
+473 &#32;&#32;&#32;&#32;make_shared(_Args&amp;&amp;...);
+474 
+475 <emphasis role="preprocessor">#if&#32;__cpp_lib_shared_ptr_arrays&#32;&gt;=&#32;201707L</emphasis>
+476 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;This&#32;constructor&#32;is&#32;non-standard,&#32;it&#32;is&#32;used&#32;by&#32;allocate_shared&lt;T[]&gt;.</emphasis>
+477 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Alloc,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Init&#32;=&#32;const&#32;remove_extent_t&lt;_Tp&gt;*&gt;
+478 &#32;&#32;&#32;&#32;shared_ptr(<emphasis role="keyword">const</emphasis>&#32;_Sp_counted_array_base&lt;_Alloc&gt;&amp;&#32;__a,
+479 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_Init&#32;__init&#32;=&#32;<emphasis role="keyword">nullptr</emphasis>)
+480 &#32;&#32;&#32;&#32;:&#32;__shared_ptr&lt;_Tp&gt;(__a,&#32;__init)
+481 &#32;&#32;&#32;&#32;{&#32;}
+482 
+483 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Yp,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Alloc&gt;
+484 &#32;&#32;&#32;&#32;<emphasis role="keyword">friend</emphasis>&#32;shared_ptr&lt;_UnboundedArray&lt;_Yp&gt;&gt;
+485 &#32;&#32;&#32;&#32;allocate_shared(<emphasis role="keyword">const</emphasis>&#32;_Alloc&amp;,&#32;<emphasis role="keywordtype">size_t</emphasis>);
+486 
+487 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Yp&gt;
+488 &#32;&#32;&#32;&#32;<emphasis role="keyword">friend</emphasis>&#32;shared_ptr&lt;_UnboundedArray&lt;_Yp&gt;&gt;
+489 &#32;&#32;&#32;&#32;make_shared(<emphasis role="keywordtype">size_t</emphasis>);
+490 
+491 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Yp,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Alloc&gt;
+492 &#32;&#32;&#32;&#32;<emphasis role="keyword">friend</emphasis>&#32;shared_ptr&lt;_UnboundedArray&lt;_Yp&gt;&gt;
+493 &#32;&#32;&#32;&#32;allocate_shared(<emphasis role="keyword">const</emphasis>&#32;_Alloc&amp;,&#32;<emphasis role="keywordtype">size_t</emphasis>,&#32;<emphasis role="keyword">const</emphasis>&#32;remove_extent_t&lt;_Yp&gt;&amp;);
+494 
+495 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Yp&gt;
+496 &#32;&#32;&#32;&#32;<emphasis role="keyword">friend</emphasis>&#32;shared_ptr&lt;_UnboundedArray&lt;_Yp&gt;&gt;
+497 &#32;&#32;&#32;&#32;make_shared(<emphasis role="keywordtype">size_t</emphasis>,&#32;<emphasis role="keyword">const</emphasis>&#32;remove_extent_t&lt;_Yp&gt;&amp;);
+498 
+499 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Yp,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Alloc&gt;
+500 &#32;&#32;&#32;&#32;<emphasis role="keyword">friend</emphasis>&#32;shared_ptr&lt;_BoundedArray&lt;_Yp&gt;&gt;
+501 &#32;&#32;&#32;&#32;allocate_shared(<emphasis role="keyword">const</emphasis>&#32;_Alloc&amp;);
+502 
+503 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Yp&gt;
+504 &#32;&#32;&#32;&#32;<emphasis role="keyword">friend</emphasis>&#32;shared_ptr&lt;_BoundedArray&lt;_Yp&gt;&gt;
+505 &#32;&#32;&#32;&#32;make_shared();
+506 
+507 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Yp,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Alloc&gt;
+508 &#32;&#32;&#32;&#32;<emphasis role="keyword">friend</emphasis>&#32;shared_ptr&lt;_BoundedArray&lt;_Yp&gt;&gt;
+509 &#32;&#32;&#32;&#32;allocate_shared(<emphasis role="keyword">const</emphasis>&#32;_Alloc&amp;,&#32;<emphasis role="keyword">const</emphasis>&#32;remove_extent_t&lt;_Yp&gt;&amp;);
+510 
+511 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Yp&gt;
+512 &#32;&#32;&#32;&#32;<emphasis role="keyword">friend</emphasis>&#32;shared_ptr&lt;_BoundedArray&lt;_Yp&gt;&gt;
+513 &#32;&#32;&#32;&#32;make_shared(<emphasis role="keyword">const</emphasis>&#32;remove_extent_t&lt;_Yp&gt;&amp;);
+514 
+515 <emphasis role="preprocessor">#if&#32;__cpp_lib_smart_ptr_for_overwrite</emphasis>
+516 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Yp,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Alloc&gt;
+517 &#32;&#32;&#32;&#32;<emphasis role="keyword">friend</emphasis>&#32;shared_ptr&lt;_NotUnboundedArray&lt;_Yp&gt;&gt;
+518 &#32;&#32;&#32;&#32;allocate_shared_for_overwrite(<emphasis role="keyword">const</emphasis>&#32;_Alloc&amp;);
+519 
+520 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Yp&gt;
+521 &#32;&#32;&#32;&#32;<emphasis role="keyword">friend</emphasis>&#32;shared_ptr&lt;_NotUnboundedArray&lt;_Yp&gt;&gt;
+522 &#32;&#32;&#32;&#32;make_shared_for_overwrite();
+523 
+524 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Yp,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Alloc&gt;
+525 &#32;&#32;&#32;&#32;<emphasis role="keyword">friend</emphasis>&#32;shared_ptr&lt;_UnboundedArray&lt;_Yp&gt;&gt;
+526 &#32;&#32;&#32;&#32;allocate_shared_for_overwrite(<emphasis role="keyword">const</emphasis>&#32;_Alloc&amp;,&#32;<emphasis role="keywordtype">size_t</emphasis>);
+527 
+528 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Yp&gt;
+529 &#32;&#32;&#32;&#32;<emphasis role="keyword">friend</emphasis>&#32;shared_ptr&lt;_UnboundedArray&lt;_Yp&gt;&gt;
+530 &#32;&#32;&#32;&#32;make_shared_for_overwrite(<emphasis role="keywordtype">size_t</emphasis>);
+531 <emphasis role="preprocessor">#endif</emphasis>
+532 <emphasis role="preprocessor">#endif</emphasis>
+533 
+534 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;This&#32;constructor&#32;is&#32;non-standard,&#32;it&#32;is&#32;used&#32;by&#32;weak_ptr::lock().</emphasis>
+535 &#32;&#32;&#32;&#32;&#32;&#32;shared_ptr(<emphasis role="keyword">const</emphasis>&#32;weak_ptr&lt;_Tp&gt;&amp;&#32;__r,&#32;std::nothrow_t)&#32;noexcept
+536 &#32;&#32;&#32;&#32;&#32;&#32;:&#32;__shared_ptr&lt;_Tp&gt;(__r,&#32;std::nothrow)&#32;{&#32;}
+537 
+538 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">friend</emphasis>&#32;<emphasis role="keyword">class&#32;</emphasis>weak_ptr&lt;_Tp&gt;;
+539 &#32;&#32;&#32;&#32;};
+540 
+541 <emphasis role="preprocessor">#if&#32;__cpp_deduction_guides&#32;&gt;=&#32;201606</emphasis>
+542 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+543 &#32;&#32;&#32;&#32;shared_ptr(weak_ptr&lt;_Tp&gt;)&#32;-&gt;&#32;&#32;shared_ptr&lt;_Tp&gt;;
+544 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Del&gt;
+545 &#32;&#32;&#32;&#32;shared_ptr(unique_ptr&lt;_Tp,&#32;_Del&gt;)&#32;-&gt;&#32;&#32;shared_ptr&lt;_Tp&gt;;
+546 <emphasis role="preprocessor">#endif</emphasis>
+547 
+548 &#32;&#32;<emphasis role="comment">//&#32;20.7.2.2.7&#32;shared_ptr&#32;comparisons</emphasis>
+549 
+551 
+553 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Up&gt;
+554 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2x86__64-w64-mingw32_2bits_2c_09_09config_8h_1a56bc959ca1311889bcd1c5abb178ab59">_GLIBCXX_NODISCARD</link>&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>
+555 &#32;&#32;&#32;&#32;<link linkend="_namespacenlohmann_1aaf11d1e42c5a671e7cd362ab0a182de1">operator==</link>(<emphasis role="keyword">const</emphasis>&#32;shared_ptr&lt;_Tp&gt;&amp;&#32;__a,&#32;<emphasis role="keyword">const</emphasis>&#32;shared_ptr&lt;_Up&gt;&amp;&#32;__b)&#32;<emphasis role="keyword">noexcept</emphasis>
+556 &#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;__a.get()&#32;==&#32;__b.get();&#32;}
+557 
+559 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+560 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2x86__64-w64-mingw32_2bits_2c_09_09config_8h_1a56bc959ca1311889bcd1c5abb178ab59">_GLIBCXX_NODISCARD</link>&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>
+561 &#32;&#32;&#32;&#32;<link linkend="_namespacenlohmann_1aaf11d1e42c5a671e7cd362ab0a182de1">operator==</link>(<emphasis role="keyword">const</emphasis>&#32;shared_ptr&lt;_Tp&gt;&amp;&#32;__a,&#32;nullptr_t)&#32;<emphasis role="keyword">noexcept</emphasis>
+562 &#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;!__a;&#32;}
+563 
+564 <emphasis role="preprocessor">#ifdef&#32;__cpp_lib_three_way_comparison</emphasis>
+565 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Up&gt;
+566 &#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;strong_ordering
+567 &#32;&#32;&#32;&#32;operator&lt;=&gt;(<emphasis role="keyword">const</emphasis>&#32;shared_ptr&lt;_Tp&gt;&amp;&#32;__a,
+568 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;shared_ptr&lt;_Up&gt;&amp;&#32;__b)&#32;<emphasis role="keyword">noexcept</emphasis>
+569 &#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;compare_three_way()(__a.get(),&#32;__b.get());&#32;}
+570 
+571 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+572 &#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;strong_ordering
+573 &#32;&#32;&#32;&#32;operator&lt;=&gt;(<emphasis role="keyword">const</emphasis>&#32;shared_ptr&lt;_Tp&gt;&amp;&#32;__a,&#32;nullptr_t)&#32;<emphasis role="keyword">noexcept</emphasis>
+574 &#32;&#32;&#32;&#32;{
+575 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">using&#32;</emphasis><link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1aca2093d4756bde9a55b94e9ff8d9c623">pointer</link>&#32;=&#32;<emphasis role="keyword">typename</emphasis>&#32;shared_ptr&lt;_Tp&gt;::element_type*;
+576 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;compare_three_way()(__a.get(),&#32;<emphasis role="keyword">static_cast&lt;</emphasis><link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1aca2093d4756bde9a55b94e9ff8d9c623">pointer</link><emphasis role="keyword">&gt;</emphasis>(<emphasis role="keyword">nullptr</emphasis>));
+577 &#32;&#32;&#32;&#32;}
+578 <emphasis role="preprocessor">#else</emphasis>
+580 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+581 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2x86__64-w64-mingw32_2bits_2c_09_09config_8h_1a56bc959ca1311889bcd1c5abb178ab59">_GLIBCXX_NODISCARD</link>&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>
+582 &#32;&#32;&#32;&#32;<link linkend="_namespacenlohmann_1aaf11d1e42c5a671e7cd362ab0a182de1">operator==</link>(nullptr_t,&#32;<emphasis role="keyword">const</emphasis>&#32;shared_ptr&lt;_Tp&gt;&amp;&#32;__a)&#32;<emphasis role="keyword">noexcept</emphasis>
+583 &#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;!__a;&#32;}
+584 
+586 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Up&gt;
+587 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2x86__64-w64-mingw32_2bits_2c_09_09config_8h_1a56bc959ca1311889bcd1c5abb178ab59">_GLIBCXX_NODISCARD</link>&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>
+588 &#32;&#32;&#32;&#32;<link linkend="_namespacenlohmann_1aa9fe6e8e15f1b1b242d291e7703f1b8d">operator!=</link>(<emphasis role="keyword">const</emphasis>&#32;shared_ptr&lt;_Tp&gt;&amp;&#32;__a,&#32;<emphasis role="keyword">const</emphasis>&#32;shared_ptr&lt;_Up&gt;&amp;&#32;__b)&#32;<emphasis role="keyword">noexcept</emphasis>
+589 &#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;__a.get()&#32;!=&#32;__b.get();&#32;}
+590 
+592 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+593 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2x86__64-w64-mingw32_2bits_2c_09_09config_8h_1a56bc959ca1311889bcd1c5abb178ab59">_GLIBCXX_NODISCARD</link>&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>
+594 &#32;&#32;&#32;&#32;<link linkend="_namespacenlohmann_1aa9fe6e8e15f1b1b242d291e7703f1b8d">operator!=</link>(<emphasis role="keyword">const</emphasis>&#32;shared_ptr&lt;_Tp&gt;&amp;&#32;__a,&#32;nullptr_t)&#32;<emphasis role="keyword">noexcept</emphasis>
+595 &#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;(<emphasis role="keywordtype">bool</emphasis>)__a;&#32;}
+596 
+598 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+599 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2x86__64-w64-mingw32_2bits_2c_09_09config_8h_1a56bc959ca1311889bcd1c5abb178ab59">_GLIBCXX_NODISCARD</link>&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>
+600 &#32;&#32;&#32;&#32;<link linkend="_namespacenlohmann_1aa9fe6e8e15f1b1b242d291e7703f1b8d">operator!=</link>(nullptr_t,&#32;<emphasis role="keyword">const</emphasis>&#32;shared_ptr&lt;_Tp&gt;&amp;&#32;__a)&#32;<emphasis role="keyword">noexcept</emphasis>
+601 &#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;(<emphasis role="keywordtype">bool</emphasis>)__a;&#32;}
+602 
+604 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Up&gt;
+605 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2x86__64-w64-mingw32_2bits_2c_09_09config_8h_1a56bc959ca1311889bcd1c5abb178ab59">_GLIBCXX_NODISCARD</link>&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>
+606 &#32;&#32;&#32;&#32;<link linkend="_namespacenlohmann_1_1detail_1a09169efff3bd1771fff29bd92cea19e0">operator&lt;</link>(<emphasis role="keyword">const</emphasis>&#32;shared_ptr&lt;_Tp&gt;&amp;&#32;__a,&#32;<emphasis role="keyword">const</emphasis>&#32;shared_ptr&lt;_Up&gt;&amp;&#32;__b)&#32;<emphasis role="keyword">noexcept</emphasis>
+607 &#32;&#32;&#32;&#32;{
+608 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">using&#32;</emphasis>_Tp_elt&#32;=&#32;<emphasis role="keyword">typename</emphasis>&#32;shared_ptr&lt;_Tp&gt;::element_type;
+609 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">using&#32;</emphasis>_Up_elt&#32;=&#32;<emphasis role="keyword">typename</emphasis>&#32;shared_ptr&lt;_Up&gt;::element_type;
+610 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">using&#32;</emphasis>_Vp&#32;=&#32;<emphasis role="keyword">typename</emphasis>&#32;common_type&lt;_Tp_elt*,&#32;_Up_elt*&gt;::type;
+611 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;less&lt;_Vp&gt;()(__a.get(),&#32;__b.get());
+612 &#32;&#32;&#32;&#32;}
+613 
+615 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+616 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2x86__64-w64-mingw32_2bits_2c_09_09config_8h_1a56bc959ca1311889bcd1c5abb178ab59">_GLIBCXX_NODISCARD</link>&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>
+617 &#32;&#32;&#32;&#32;<link linkend="_namespacenlohmann_1_1detail_1a09169efff3bd1771fff29bd92cea19e0">operator&lt;</link>(<emphasis role="keyword">const</emphasis>&#32;shared_ptr&lt;_Tp&gt;&amp;&#32;__a,&#32;nullptr_t)&#32;<emphasis role="keyword">noexcept</emphasis>
+618 &#32;&#32;&#32;&#32;{
+619 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">using&#32;</emphasis>_Tp_elt&#32;=&#32;<emphasis role="keyword">typename</emphasis>&#32;shared_ptr&lt;_Tp&gt;::element_type;
+620 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;less&lt;_Tp_elt*&gt;()(__a.get(),&#32;<emphasis role="keyword">nullptr</emphasis>);
+621 &#32;&#32;&#32;&#32;}
+622 
+624 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+625 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2x86__64-w64-mingw32_2bits_2c_09_09config_8h_1a56bc959ca1311889bcd1c5abb178ab59">_GLIBCXX_NODISCARD</link>&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>
+626 &#32;&#32;&#32;&#32;<link linkend="_namespacenlohmann_1_1detail_1a09169efff3bd1771fff29bd92cea19e0">operator&lt;</link>(nullptr_t,&#32;<emphasis role="keyword">const</emphasis>&#32;shared_ptr&lt;_Tp&gt;&amp;&#32;__a)&#32;<emphasis role="keyword">noexcept</emphasis>
+627 &#32;&#32;&#32;&#32;{
+628 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">using&#32;</emphasis>_Tp_elt&#32;=&#32;<emphasis role="keyword">typename</emphasis>&#32;shared_ptr&lt;_Tp&gt;::element_type;
+629 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;less&lt;_Tp_elt*&gt;()(<emphasis role="keyword">nullptr</emphasis>,&#32;__a.get());
+630 &#32;&#32;&#32;&#32;}
+631 
+633 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Up&gt;
+634 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2x86__64-w64-mingw32_2bits_2c_09_09config_8h_1a56bc959ca1311889bcd1c5abb178ab59">_GLIBCXX_NODISCARD</link>&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>
+635 &#32;&#32;&#32;&#32;operator&lt;=(<emphasis role="keyword">const</emphasis>&#32;shared_ptr&lt;_Tp&gt;&amp;&#32;__a,&#32;<emphasis role="keyword">const</emphasis>&#32;shared_ptr&lt;_Up&gt;&amp;&#32;__b)&#32;<emphasis role="keyword">noexcept</emphasis>
+636 &#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;!(__b&#32;&lt;&#32;__a);&#32;}
+637 
+639 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+640 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2x86__64-w64-mingw32_2bits_2c_09_09config_8h_1a56bc959ca1311889bcd1c5abb178ab59">_GLIBCXX_NODISCARD</link>&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>
+641 &#32;&#32;&#32;&#32;operator&lt;=(<emphasis role="keyword">const</emphasis>&#32;shared_ptr&lt;_Tp&gt;&amp;&#32;__a,&#32;nullptr_t)&#32;<emphasis role="keyword">noexcept</emphasis>
+642 &#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;!(<emphasis role="keyword">nullptr</emphasis>&#32;&lt;&#32;__a);&#32;}
+643 
+645 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+646 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2x86__64-w64-mingw32_2bits_2c_09_09config_8h_1a56bc959ca1311889bcd1c5abb178ab59">_GLIBCXX_NODISCARD</link>&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>
+647 &#32;&#32;&#32;&#32;operator&lt;=(nullptr_t,&#32;<emphasis role="keyword">const</emphasis>&#32;shared_ptr&lt;_Tp&gt;&amp;&#32;__a)&#32;<emphasis role="keyword">noexcept</emphasis>
+648 &#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;!(__a&#32;&lt;&#32;<emphasis role="keyword">nullptr</emphasis>);&#32;}
+649 
+651 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Up&gt;
+652 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2x86__64-w64-mingw32_2bits_2c_09_09config_8h_1a56bc959ca1311889bcd1c5abb178ab59">_GLIBCXX_NODISCARD</link>&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>
+653 &#32;&#32;&#32;&#32;operator&gt;(<emphasis role="keyword">const</emphasis>&#32;shared_ptr&lt;_Tp&gt;&amp;&#32;__a,&#32;<emphasis role="keyword">const</emphasis>&#32;shared_ptr&lt;_Up&gt;&amp;&#32;__b)&#32;<emphasis role="keyword">noexcept</emphasis>
+654 &#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;(__b&#32;&lt;&#32;__a);&#32;}
+655 
+657 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+658 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2x86__64-w64-mingw32_2bits_2c_09_09config_8h_1a56bc959ca1311889bcd1c5abb178ab59">_GLIBCXX_NODISCARD</link>&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>
+659 &#32;&#32;&#32;&#32;operator&gt;(<emphasis role="keyword">const</emphasis>&#32;shared_ptr&lt;_Tp&gt;&amp;&#32;__a,&#32;nullptr_t)&#32;<emphasis role="keyword">noexcept</emphasis>
+660 &#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;<emphasis role="keyword">nullptr</emphasis>&#32;&lt;&#32;__a;&#32;}
+661 
+663 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+664 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2x86__64-w64-mingw32_2bits_2c_09_09config_8h_1a56bc959ca1311889bcd1c5abb178ab59">_GLIBCXX_NODISCARD</link>&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>
+665 &#32;&#32;&#32;&#32;operator&gt;(nullptr_t,&#32;<emphasis role="keyword">const</emphasis>&#32;shared_ptr&lt;_Tp&gt;&amp;&#32;__a)&#32;<emphasis role="keyword">noexcept</emphasis>
+666 &#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;__a&#32;&lt;&#32;<emphasis role="keyword">nullptr</emphasis>;&#32;}
+667 
+669 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Up&gt;
+670 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2x86__64-w64-mingw32_2bits_2c_09_09config_8h_1a56bc959ca1311889bcd1c5abb178ab59">_GLIBCXX_NODISCARD</link>&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>
+671 &#32;&#32;&#32;&#32;operator&gt;=(<emphasis role="keyword">const</emphasis>&#32;shared_ptr&lt;_Tp&gt;&amp;&#32;__a,&#32;<emphasis role="keyword">const</emphasis>&#32;shared_ptr&lt;_Up&gt;&amp;&#32;__b)&#32;<emphasis role="keyword">noexcept</emphasis>
+672 &#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;!(__a&#32;&lt;&#32;__b);&#32;}
+673 
+675 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+676 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2x86__64-w64-mingw32_2bits_2c_09_09config_8h_1a56bc959ca1311889bcd1c5abb178ab59">_GLIBCXX_NODISCARD</link>&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>
+677 &#32;&#32;&#32;&#32;operator&gt;=(<emphasis role="keyword">const</emphasis>&#32;shared_ptr&lt;_Tp&gt;&amp;&#32;__a,&#32;nullptr_t)&#32;<emphasis role="keyword">noexcept</emphasis>
+678 &#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;!(__a&#32;&lt;&#32;<emphasis role="keyword">nullptr</emphasis>);&#32;}
+679 
+681 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+682 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2x86__64-w64-mingw32_2bits_2c_09_09config_8h_1a56bc959ca1311889bcd1c5abb178ab59">_GLIBCXX_NODISCARD</link>&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>
+683 &#32;&#32;&#32;&#32;operator&gt;=(nullptr_t,&#32;<emphasis role="keyword">const</emphasis>&#32;shared_ptr&lt;_Tp&gt;&amp;&#32;__a)&#32;<emphasis role="keyword">noexcept</emphasis>
+684 &#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;!(<emphasis role="keyword">nullptr</emphasis>&#32;&lt;&#32;__a);&#32;}
+685 <emphasis role="preprocessor">#endif</emphasis>
+686 
+687 &#32;&#32;<emphasis role="comment">//&#32;20.7.2.2.8&#32;shared_ptr&#32;specialized&#32;algorithms.</emphasis>
+688 
+690 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+691 &#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>
+692 &#32;&#32;&#32;&#32;<link linkend="_namespacestd_1a3ece115a1c8ed9020a20f1d0b70efda8">swap</link>(shared_ptr&lt;_Tp&gt;&amp;&#32;__a,&#32;shared_ptr&lt;_Tp&gt;&amp;&#32;__b)&#32;<emphasis role="keyword">noexcept</emphasis>
+693 &#32;&#32;&#32;&#32;{&#32;__a.swap(__b);&#32;}
+694 
+695 &#32;&#32;<emphasis role="comment">//&#32;20.7.2.2.9&#32;shared_ptr&#32;casts.</emphasis>
+696 
+698 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Up&gt;
+699 &#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;shared_ptr&lt;_Tp&gt;
+700 &#32;&#32;&#32;&#32;static_pointer_cast(<emphasis role="keyword">const</emphasis>&#32;shared_ptr&lt;_Up&gt;&amp;&#32;__r)&#32;<emphasis role="keyword">noexcept</emphasis>
+701 &#32;&#32;&#32;&#32;{
+702 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">using&#32;</emphasis>_Sp&#32;=&#32;shared_ptr&lt;_Tp&gt;;
+703 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;_Sp(__r,&#32;<emphasis role="keyword">static_cast&lt;</emphasis>typename&#32;_Sp::element_type*<emphasis role="keyword">&gt;</emphasis>(__r.get()));
+704 &#32;&#32;&#32;&#32;}
+705 
+707 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Up&gt;
+708 &#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;shared_ptr&lt;_Tp&gt;
+709 &#32;&#32;&#32;&#32;const_pointer_cast(<emphasis role="keyword">const</emphasis>&#32;shared_ptr&lt;_Up&gt;&amp;&#32;__r)&#32;<emphasis role="keyword">noexcept</emphasis>
+710 &#32;&#32;&#32;&#32;{
+711 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">using&#32;</emphasis>_Sp&#32;=&#32;shared_ptr&lt;_Tp&gt;;
+712 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;_Sp(__r,&#32;<emphasis role="keyword">const_cast&lt;</emphasis>typename&#32;_Sp::element_type*<emphasis role="keyword">&gt;</emphasis>(__r.get()));
+713 &#32;&#32;&#32;&#32;}
+714 
+716 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Up&gt;
+717 &#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;shared_ptr&lt;_Tp&gt;
+718 &#32;&#32;&#32;&#32;dynamic_pointer_cast(<emphasis role="keyword">const</emphasis>&#32;shared_ptr&lt;_Up&gt;&amp;&#32;__r)&#32;<emphasis role="keyword">noexcept</emphasis>
+719 &#32;&#32;&#32;&#32;{
+720 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">using&#32;</emphasis>_Sp&#32;=&#32;shared_ptr&lt;_Tp&gt;;
+721 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(<emphasis role="keyword">auto</emphasis>*&#32;__p&#32;=&#32;<emphasis role="keyword">dynamic_cast&lt;</emphasis>typename&#32;_Sp::element_type*<emphasis role="keyword">&gt;</emphasis>(__r.get()))
+722 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;_Sp(__r,&#32;__p);
+723 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;_Sp();
+724 &#32;&#32;&#32;&#32;}
+725 
+726 <emphasis role="preprocessor">#if&#32;__cplusplus&#32;&gt;=&#32;201703L</emphasis>
+729 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Up&gt;
+730 &#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;shared_ptr&lt;_Tp&gt;
+731 &#32;&#32;&#32;&#32;reinterpret_pointer_cast(<emphasis role="keyword">const</emphasis>&#32;shared_ptr&lt;_Up&gt;&amp;&#32;__r)&#32;<emphasis role="keyword">noexcept</emphasis>
+732 &#32;&#32;&#32;&#32;{
+733 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">using&#32;</emphasis>_Sp&#32;=&#32;shared_ptr&lt;_Tp&gt;;
+734 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;_Sp(__r,&#32;<emphasis role="keyword">reinterpret_cast&lt;</emphasis>typename&#32;_Sp::element_type*<emphasis role="keyword">&gt;</emphasis>(__r.get()));
+735 &#32;&#32;&#32;&#32;}
+736 
+737 <emphasis role="preprocessor">#if&#32;__cplusplus&#32;&gt;&#32;201703L</emphasis>
+738 &#32;&#32;<emphasis role="comment">//&#32;_GLIBCXX_RESOLVE_LIB_DEFECTS</emphasis>
+739 &#32;&#32;<emphasis role="comment">//&#32;2996.&#32;Missing&#32;rvalue&#32;overloads&#32;for&#32;shared_ptr&#32;operations</emphasis>
+740 
+743 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Up&gt;
+744 &#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;shared_ptr&lt;_Tp&gt;
+745 &#32;&#32;&#32;&#32;static_pointer_cast(shared_ptr&lt;_Up&gt;&amp;&amp;&#32;__r)&#32;<emphasis role="keyword">noexcept</emphasis>
+746 &#32;&#32;&#32;&#32;{
+747 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">using&#32;</emphasis>_Sp&#32;=&#32;shared_ptr&lt;_Tp&gt;;
+748 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;_Sp(<link linkend="_namespacestd_1ac7095819f6a8da64d69b1ee3029c52be">std::move</link>(__r),
+749 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">static_cast&lt;</emphasis>typename&#32;_Sp::element_type*<emphasis role="keyword">&gt;</emphasis>(__r.get()));
+750 &#32;&#32;&#32;&#32;}
+751 
+754 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Up&gt;
+755 &#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;shared_ptr&lt;_Tp&gt;
+756 &#32;&#32;&#32;&#32;const_pointer_cast(shared_ptr&lt;_Up&gt;&amp;&amp;&#32;__r)&#32;<emphasis role="keyword">noexcept</emphasis>
+757 &#32;&#32;&#32;&#32;{
+758 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">using&#32;</emphasis>_Sp&#32;=&#32;shared_ptr&lt;_Tp&gt;;
+759 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;_Sp(<link linkend="_namespacestd_1ac7095819f6a8da64d69b1ee3029c52be">std::move</link>(__r),
+760 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const_cast&lt;</emphasis>typename&#32;_Sp::element_type*<emphasis role="keyword">&gt;</emphasis>(__r.get()));
+761 &#32;&#32;&#32;&#32;}
+762 
+765 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Up&gt;
+766 &#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;shared_ptr&lt;_Tp&gt;
+767 &#32;&#32;&#32;&#32;dynamic_pointer_cast(shared_ptr&lt;_Up&gt;&amp;&amp;&#32;__r)&#32;<emphasis role="keyword">noexcept</emphasis>
+768 &#32;&#32;&#32;&#32;{
+769 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">using&#32;</emphasis>_Sp&#32;=&#32;shared_ptr&lt;_Tp&gt;;
+770 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(<emphasis role="keyword">auto</emphasis>*&#32;__p&#32;=&#32;<emphasis role="keyword">dynamic_cast&lt;</emphasis>typename&#32;_Sp::element_type*<emphasis role="keyword">&gt;</emphasis>(__r.get()))
+771 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;_Sp(<link linkend="_namespacestd_1ac7095819f6a8da64d69b1ee3029c52be">std::move</link>(__r),&#32;__p);
+772 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;_Sp();
+773 &#32;&#32;&#32;&#32;}
+774 
+777 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Up&gt;
+778 &#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;shared_ptr&lt;_Tp&gt;
+779 &#32;&#32;&#32;&#32;reinterpret_pointer_cast(shared_ptr&lt;_Up&gt;&amp;&amp;&#32;__r)&#32;<emphasis role="keyword">noexcept</emphasis>
+780 &#32;&#32;&#32;&#32;{
+781 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">using&#32;</emphasis>_Sp&#32;=&#32;shared_ptr&lt;_Tp&gt;;
+782 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;_Sp(<link linkend="_namespacestd_1ac7095819f6a8da64d69b1ee3029c52be">std::move</link>(__r),
+783 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">reinterpret_cast&lt;</emphasis>typename&#32;_Sp::element_type*<emphasis role="keyword">&gt;</emphasis>(__r.get()));
+784 &#32;&#32;&#32;&#32;}
+785 <emphasis role="preprocessor">#endif&#32;</emphasis><emphasis role="comment">//&#32;C++20</emphasis>
+786 <emphasis role="preprocessor">#endif&#32;</emphasis><emphasis role="comment">//&#32;C++17</emphasis>
+787 
+789 
+810 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+811 &#32;&#32;&#32;&#32;<emphasis role="keyword">class&#32;</emphasis>weak_ptr&#32;:&#32;<emphasis role="keyword">public</emphasis>&#32;__weak_ptr&lt;_Tp&gt;
+812 &#32;&#32;&#32;&#32;{
+813 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Arg&gt;
+814 &#32;&#32;&#32;&#32;<emphasis role="keyword">using&#32;</emphasis>_Constructible&#32;=&#32;<emphasis role="keyword">typename</emphasis>&#32;enable_if&lt;
+815 &#32;&#32;&#32;&#32;&#32;&#32;is_constructible&lt;__weak_ptr&lt;_Tp&gt;,&#32;_Arg&gt;<link linkend="_classvalue">::value</link>
+816 &#32;&#32;&#32;&#32;&gt;<link linkend="__classes_2_gameobj_8h_1a890efa53b3d7deeeced6f3a0d6653ed3">::type</link>;
+817 
+818 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Arg&gt;
+819 &#32;&#32;&#32;&#32;<emphasis role="keyword">using&#32;</emphasis>_Assignable&#32;=&#32;<emphasis role="keyword">typename</emphasis>&#32;enable_if&lt;
+820 &#32;&#32;&#32;&#32;&#32;&#32;is_assignable&lt;__weak_ptr&lt;_Tp&gt;&amp;,&#32;_Arg&gt;<link linkend="_classvalue">::value</link>,&#32;weak_ptr&amp;
+821 &#32;&#32;&#32;&#32;&gt;<link linkend="__classes_2_gameobj_8h_1a890efa53b3d7deeeced6f3a0d6653ed3">::type</link>;
+822 
+823 &#32;&#32;&#32;&#32;<emphasis role="keyword">public</emphasis>:
+824 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">constexpr</emphasis>&#32;weak_ptr()&#32;noexcept&#32;=&#32;default;
+825 
+826 &#32;&#32;&#32;&#32;&#32;&#32;template&lt;typename&#32;_Yp,
+827 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;typename&#32;=&#32;_Constructible&lt;const&#32;shared_ptr&lt;_Yp&gt;&amp;&gt;&gt;
+828 &#32;&#32;&#32;&#32;weak_ptr(const&#32;shared_ptr&lt;_Yp&gt;&amp;&#32;__r)&#32;noexcept
+829 &#32;&#32;&#32;&#32;:&#32;__weak_ptr&lt;_Tp&gt;(__r)&#32;{&#32;}
+830 
+831 &#32;&#32;&#32;&#32;&#32;&#32;weak_ptr(<emphasis role="keyword">const</emphasis>&#32;weak_ptr&amp;)&#32;<emphasis role="keyword">noexcept</emphasis>&#32;=&#32;<emphasis role="keywordflow">default</emphasis>;
+832 
+833 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Yp,&#32;<emphasis role="keyword">typename</emphasis>&#32;=&#32;_Constructible&lt;const&#32;weak_ptr&lt;_Yp&gt;&amp;&gt;&gt;
+834 &#32;&#32;&#32;&#32;weak_ptr(<emphasis role="keyword">const</emphasis>&#32;weak_ptr&lt;_Yp&gt;&amp;&#32;__r)&#32;noexcept
+835 &#32;&#32;&#32;&#32;:&#32;__weak_ptr&lt;_Tp&gt;(__r)&#32;{&#32;}
+836 
+837 &#32;&#32;&#32;&#32;&#32;&#32;weak_ptr(weak_ptr&amp;&amp;)&#32;noexcept&#32;=&#32;default;
+838 
+839 &#32;&#32;&#32;&#32;&#32;&#32;template&lt;typename&#32;_Yp,&#32;typename&#32;=&#32;_Constructible&lt;weak_ptr&lt;_Yp&gt;&gt;&gt;
+840 &#32;&#32;&#32;&#32;weak_ptr(weak_ptr&lt;_Yp&gt;&amp;&amp;&#32;__r)&#32;noexcept
+841 &#32;&#32;&#32;&#32;:&#32;__weak_ptr&lt;_Tp&gt;(<link linkend="_namespacestd">std</link>::move(__r))&#32;{&#32;}
+842 
+843 &#32;&#32;&#32;&#32;&#32;&#32;weak_ptr&amp;
+844 &#32;&#32;&#32;&#32;&#32;&#32;operator=(<emphasis role="keyword">const</emphasis>&#32;weak_ptr&amp;&#32;__r)&#32;<emphasis role="keyword">noexcept</emphasis>&#32;=&#32;<emphasis role="keywordflow">default</emphasis>;
+845 
+846 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Yp&gt;
+847 &#32;&#32;&#32;&#32;_Assignable&lt;const&#32;weak_ptr&lt;_Yp&gt;&amp;&gt;
+848 &#32;&#32;&#32;&#32;operator=(<emphasis role="keyword">const</emphasis>&#32;weak_ptr&lt;_Yp&gt;&amp;&#32;__r)&#32;<emphasis role="keyword">noexcept</emphasis>
+849 &#32;&#32;&#32;&#32;{
+850 &#32;&#32;&#32;&#32;&#32;&#32;this-&gt;__weak_ptr&lt;_Tp&gt;::operator=(__r);
+851 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;*<emphasis role="keyword">this</emphasis>;
+852 &#32;&#32;&#32;&#32;}
+853 
+854 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Yp&gt;
+855 &#32;&#32;&#32;&#32;_Assignable&lt;const&#32;shared_ptr&lt;_Yp&gt;&amp;&gt;
+856 &#32;&#32;&#32;&#32;operator=(<emphasis role="keyword">const</emphasis>&#32;shared_ptr&lt;_Yp&gt;&amp;&#32;__r)&#32;<emphasis role="keyword">noexcept</emphasis>
+857 &#32;&#32;&#32;&#32;{
+858 &#32;&#32;&#32;&#32;&#32;&#32;this-&gt;__weak_ptr&lt;_Tp&gt;::operator=(__r);
+859 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;*<emphasis role="keyword">this</emphasis>;
+860 &#32;&#32;&#32;&#32;}
+861 
+862 &#32;&#32;&#32;&#32;&#32;&#32;weak_ptr&amp;
+863 &#32;&#32;&#32;&#32;&#32;&#32;operator=(weak_ptr&amp;&amp;&#32;__r)&#32;<emphasis role="keyword">noexcept</emphasis>&#32;=&#32;<emphasis role="keywordflow">default</emphasis>;
+864 
+865 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Yp&gt;
+866 &#32;&#32;&#32;&#32;_Assignable&lt;weak_ptr&lt;_Yp&gt;&gt;
+867 &#32;&#32;&#32;&#32;operator=(weak_ptr&lt;_Yp&gt;&amp;&amp;&#32;__r)&#32;<emphasis role="keyword">noexcept</emphasis>
+868 &#32;&#32;&#32;&#32;{
+869 &#32;&#32;&#32;&#32;&#32;&#32;this-&gt;__weak_ptr&lt;_Tp&gt;::operator=(<link linkend="_namespacestd_1ac7095819f6a8da64d69b1ee3029c52be">std::move</link>(__r));
+870 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;*<emphasis role="keyword">this</emphasis>;
+871 &#32;&#32;&#32;&#32;}
+872 
+873 &#32;&#32;&#32;&#32;&#32;&#32;shared_ptr&lt;_Tp&gt;
+874 &#32;&#32;&#32;&#32;&#32;&#32;lock()&#32;const&#32;noexcept
+875 &#32;&#32;&#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;shared_ptr&lt;_Tp&gt;(*<emphasis role="keyword">this</emphasis>,&#32;std::nothrow);&#32;}
+876 &#32;&#32;&#32;&#32;};
+877 
+878 <emphasis role="preprocessor">#if&#32;__cpp_deduction_guides&#32;&gt;=&#32;201606</emphasis>
+879 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+880 &#32;&#32;&#32;&#32;weak_ptr(shared_ptr&lt;_Tp&gt;)&#32;-&gt;&#32;&#32;weak_ptr&lt;_Tp&gt;;
+881 <emphasis role="preprocessor">#endif</emphasis>
+882 
+883 &#32;&#32;<emphasis role="comment">//&#32;20.7.2.3.6&#32;weak_ptr&#32;specialized&#32;algorithms.</emphasis>
+886 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+887 &#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>
+888 &#32;&#32;&#32;&#32;<link linkend="_namespacestd_1a3ece115a1c8ed9020a20f1d0b70efda8">swap</link>(weak_ptr&lt;_Tp&gt;&amp;&#32;__a,&#32;weak_ptr&lt;_Tp&gt;&amp;&#32;__b)&#32;<emphasis role="keyword">noexcept</emphasis>
+889 &#32;&#32;&#32;&#32;{&#32;__a.swap(__b);&#32;}
+890 
+891 
+893 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&#32;=&#32;<emphasis role="keywordtype">void</emphasis>&gt;
+894 &#32;&#32;&#32;&#32;<emphasis role="keyword">struct&#32;</emphasis>owner_less;
+895 
+897 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;&gt;
+898 &#32;&#32;&#32;&#32;<emphasis role="keyword">struct&#32;</emphasis>owner_less&lt;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a0f7193911e632cd84da4082d5c628fe3">void</link>&gt;&#32;:&#32;_Sp_owner_less&lt;void,&#32;void&gt;
+899 &#32;&#32;&#32;&#32;{&#32;};
+900 
+902 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+903 &#32;&#32;&#32;&#32;<emphasis role="keyword">struct&#32;</emphasis>owner_less&lt;shared_ptr&lt;_Tp&gt;&gt;
+904 &#32;&#32;&#32;&#32;:&#32;<emphasis role="keyword">public</emphasis>&#32;_Sp_owner_less&lt;shared_ptr&lt;_Tp&gt;,&#32;weak_ptr&lt;_Tp&gt;&gt;
+905 &#32;&#32;&#32;&#32;{&#32;};
+906 
+908 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+909 &#32;&#32;&#32;&#32;<emphasis role="keyword">struct&#32;</emphasis>owner_less&lt;weak_ptr&lt;_Tp&gt;&gt;
+910 &#32;&#32;&#32;&#32;:&#32;<emphasis role="keyword">public</emphasis>&#32;_Sp_owner_less&lt;weak_ptr&lt;_Tp&gt;,&#32;shared_ptr&lt;_Tp&gt;&gt;
+911 &#32;&#32;&#32;&#32;{&#32;};
+912 
+918 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+919 &#32;&#32;&#32;&#32;<emphasis role="keyword">class&#32;</emphasis>enable_shared_from_this
+920 &#32;&#32;&#32;&#32;{
+921 &#32;&#32;&#32;&#32;<emphasis role="keyword">protected</emphasis>:
+922 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">constexpr</emphasis>&#32;enable_shared_from_this()&#32;noexcept&#32;{&#32;}
+923 
+924 &#32;&#32;&#32;&#32;&#32;&#32;enable_shared_from_this(<emphasis role="keyword">const</emphasis>&#32;enable_shared_from_this&amp;)&#32;<emphasis role="keyword">noexcept</emphasis>&#32;{&#32;}
+925 
+926 &#32;&#32;&#32;&#32;&#32;&#32;enable_shared_from_this&amp;
+927 &#32;&#32;&#32;&#32;&#32;&#32;operator=(<emphasis role="keyword">const</emphasis>&#32;enable_shared_from_this&amp;)&#32;<emphasis role="keyword">noexcept</emphasis>
+928 &#32;&#32;&#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;*<emphasis role="keyword">this</emphasis>;&#32;}
+929 
+930 &#32;&#32;&#32;&#32;&#32;&#32;~enable_shared_from_this()&#32;{&#32;}
+931 
+932 &#32;&#32;&#32;&#32;<emphasis role="keyword">public</emphasis>:
+933 &#32;&#32;&#32;&#32;&#32;&#32;shared_ptr&lt;_Tp&gt;
+934 &#32;&#32;&#32;&#32;&#32;&#32;shared_from_this()
+935 &#32;&#32;&#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;shared_ptr&lt;_Tp&gt;(this-&gt;_M_weak_this);&#32;}
+936 
+937 &#32;&#32;&#32;&#32;&#32;&#32;shared_ptr&lt;const&#32;_Tp&gt;
+938 &#32;&#32;&#32;&#32;&#32;&#32;shared_from_this()<emphasis role="keyword">&#32;const</emphasis>
+939 <emphasis role="keyword">&#32;&#32;&#32;&#32;&#32;&#32;</emphasis>{&#32;<emphasis role="keywordflow">return</emphasis>&#32;shared_ptr&lt;const&#32;_Tp&gt;(this-&gt;_M_weak_this);&#32;}
+940 
+941 <emphasis role="preprocessor">#if&#32;__cplusplus&#32;&gt;&#32;201402L&#32;||&#32;!defined(__STRICT_ANSI__)&#32;</emphasis><emphasis role="comment">//&#32;c++1z&#32;or&#32;gnu++11</emphasis>
+942 <emphasis role="preprocessor">#define&#32;__cpp_lib_enable_shared_from_this&#32;201603L</emphasis>
+947 &#32;&#32;&#32;&#32;&#32;&#32;weak_ptr&lt;_Tp&gt;
+948 &#32;&#32;&#32;&#32;&#32;&#32;weak_from_this()&#32;noexcept
+949 &#32;&#32;&#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;this-&gt;_M_weak_this;&#32;}
+950 
+951 &#32;&#32;&#32;&#32;&#32;&#32;weak_ptr&lt;const&#32;_Tp&gt;
+952 &#32;&#32;&#32;&#32;&#32;&#32;weak_from_this()&#32;const&#32;noexcept
+953 &#32;&#32;&#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;this-&gt;_M_weak_this;&#32;}
+955 <emphasis role="preprocessor">#endif</emphasis>
+956 
+957 &#32;&#32;&#32;&#32;<emphasis role="keyword">private</emphasis>:
+958 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp1&gt;
+959 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+960 &#32;&#32;&#32;&#32;_M_weak_assign(_Tp1*&#32;__p,&#32;<emphasis role="keyword">const</emphasis>&#32;__shared_count&lt;&gt;&amp;&#32;__n)&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keyword">noexcept</emphasis>
+961 &#32;&#32;&#32;&#32;{&#32;_M_weak_this._M_assign(__p,&#32;__n);&#32;}
+962 
+963 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Found&#32;by&#32;ADL&#32;when&#32;this&#32;is&#32;an&#32;associated&#32;class.</emphasis>
+964 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">friend</emphasis>&#32;<emphasis role="keyword">const</emphasis>&#32;enable_shared_from_this*
+965 &#32;&#32;&#32;&#32;&#32;&#32;__enable_shared_from_this_base(<emphasis role="keyword">const</emphasis>&#32;__shared_count&lt;&gt;&amp;,
+966 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;enable_shared_from_this*&#32;__p)
+967 &#32;&#32;&#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;__p;&#32;}
+968 
+969 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>,&#32;_Lock_policy&gt;
+970 &#32;&#32;&#32;&#32;<emphasis role="keyword">friend</emphasis>&#32;<emphasis role="keyword">class&#32;</emphasis>__shared_ptr;
+971 
+972 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">mutable</emphasis>&#32;weak_ptr&lt;_Tp&gt;&#32;&#32;_M_weak_this;
+973 &#32;&#32;&#32;&#32;};
+974 
+976 
+988 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Alloc,&#32;<emphasis role="keyword">typename</emphasis>...&#32;_Args&gt;
+989 &#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;shared_ptr&lt;_NonArray&lt;_Tp&gt;&gt;
+990 &#32;&#32;&#32;&#32;allocate_shared(<emphasis role="keyword">const</emphasis>&#32;_Alloc&amp;&#32;__a,&#32;_Args&amp;&amp;...&#32;__args)
+991 &#32;&#32;&#32;&#32;{
+992 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;shared_ptr&lt;_Tp&gt;(_Sp_alloc_shared_tag&lt;_Alloc&gt;{__a},
+993 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;std::forward&lt;_Args&gt;(__args)...);
+994 &#32;&#32;&#32;&#32;}
+995 
+1003 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp,&#32;<emphasis role="keyword">typename</emphasis>...&#32;_Args&gt;
+1004 &#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;shared_ptr&lt;_NonArray&lt;_Tp&gt;&gt;
+1005 &#32;&#32;&#32;&#32;make_shared(_Args&amp;&amp;...&#32;__args)
+1006 &#32;&#32;&#32;&#32;{
+1007 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">using&#32;</emphasis>_Alloc&#32;=&#32;allocator&lt;void&gt;;
+1008 &#32;&#32;&#32;&#32;&#32;&#32;_Alloc&#32;__a;
+1009 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;shared_ptr&lt;_Tp&gt;(_Sp_alloc_shared_tag&lt;_Alloc&gt;{__a},
+1010 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;std::forward&lt;_Args&gt;(__args)...);
+1011 &#32;&#32;&#32;&#32;}
+1012 
+1013 <emphasis role="preprocessor">#if&#32;__cpp_lib_shared_ptr_arrays&#32;&gt;=&#32;201707L</emphasis>
+1015 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Alloc&#32;=&#32;allocator&lt;<emphasis role="keywordtype">void</emphasis>&gt;&gt;
+1016 &#32;&#32;&#32;&#32;<emphasis role="keyword">auto</emphasis>
+1017 &#32;&#32;&#32;&#32;__make_shared_arr_tag(<emphasis role="keywordtype">size_t</emphasis>&#32;__n,&#32;<emphasis role="keyword">const</emphasis>&#32;_Alloc&amp;&#32;__a&#32;=&#32;_Alloc())&#32;noexcept
+1018 &#32;&#32;&#32;&#32;{
+1019 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">using&#32;</emphasis>_Up&#32;=&#32;remove_all_extents_t&lt;_Tp&gt;;
+1020 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">using&#32;</emphasis>_UpAlloc&#32;=&#32;__alloc_rebind&lt;_Alloc,&#32;_Up&gt;;
+1021 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;__s&#32;=&#32;<emphasis role="keyword">sizeof</emphasis>(remove_extent_t&lt;_Tp&gt;)&#32;/&#32;<emphasis role="keyword">sizeof</emphasis>(_Up);
+1022 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__builtin_mul_overflow(__s,&#32;__n,&#32;&amp;__n))
+1023 &#32;&#32;&#32;&#32;std::__throw_bad_array_new_length();
+1024 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;_Sp_counted_array_base&lt;_UpAlloc&gt;{_UpAlloc(__a),&#32;__n};
+1025 &#32;&#32;&#32;&#32;}
+1027 
+1028 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Alloc&gt;
+1029 &#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;shared_ptr&lt;_UnboundedArray&lt;_Tp&gt;&gt;
+1030 &#32;&#32;&#32;&#32;allocate_shared(<emphasis role="keyword">const</emphasis>&#32;_Alloc&amp;&#32;__a,&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;__n)
+1031 &#32;&#32;&#32;&#32;{
+1032 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;shared_ptr&lt;_Tp&gt;(std::__make_shared_arr_tag&lt;_Tp&gt;(__n,&#32;__a));
+1033 &#32;&#32;&#32;&#32;}
+1034 
+1035 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+1036 &#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;shared_ptr&lt;_UnboundedArray&lt;_Tp&gt;&gt;
+1037 &#32;&#32;&#32;&#32;make_shared(<emphasis role="keywordtype">size_t</emphasis>&#32;__n)
+1038 &#32;&#32;&#32;&#32;{
+1039 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;shared_ptr&lt;_Tp&gt;(std::__make_shared_arr_tag&lt;_Tp&gt;(__n));
+1040 &#32;&#32;&#32;&#32;}
+1041 
+1042 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Alloc&gt;
+1043 &#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;shared_ptr&lt;_UnboundedArray&lt;_Tp&gt;&gt;
+1044 &#32;&#32;&#32;&#32;allocate_shared(<emphasis role="keyword">const</emphasis>&#32;_Alloc&amp;&#32;__a,&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;__n,
+1045 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;remove_extent_t&lt;_Tp&gt;&amp;&#32;__u)
+1046 &#32;&#32;&#32;&#32;{
+1047 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;shared_ptr&lt;_Tp&gt;(std::__make_shared_arr_tag&lt;_Tp&gt;(__n,&#32;__a),
+1048 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;std::__addressof(__u));
+1049 &#32;&#32;&#32;&#32;}
+1050 
+1051 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+1052 &#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;shared_ptr&lt;_UnboundedArray&lt;_Tp&gt;&gt;
+1053 &#32;&#32;&#32;&#32;make_shared(<emphasis role="keywordtype">size_t</emphasis>&#32;__n,&#32;<emphasis role="keyword">const</emphasis>&#32;remove_extent_t&lt;_Tp&gt;&amp;&#32;__u)
+1054 &#32;&#32;&#32;&#32;{
+1055 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;shared_ptr&lt;_Tp&gt;(std::__make_shared_arr_tag&lt;_Tp&gt;(__n),
+1056 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;std::__addressof(__u));
+1057 &#32;&#32;&#32;&#32;}
+1058 
+1060 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Alloc&#32;=&#32;allocator&lt;<emphasis role="keywordtype">void</emphasis>&gt;&gt;
+1061 &#32;&#32;&#32;&#32;<emphasis role="keyword">auto</emphasis>
+1062 &#32;&#32;&#32;&#32;__make_shared_arrN_tag(<emphasis role="keyword">const</emphasis>&#32;_Alloc&amp;&#32;__a&#32;=&#32;_Alloc())&#32;noexcept
+1063 &#32;&#32;&#32;&#32;{
+1064 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">using&#32;</emphasis>_Up&#32;=&#32;remove_all_extents_t&lt;_Tp&gt;;
+1065 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">using&#32;</emphasis>_UpAlloc&#32;=&#32;__alloc_rebind&lt;_Alloc,&#32;_Up&gt;;
+1066 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;__n&#32;=&#32;<emphasis role="keyword">sizeof</emphasis>(_Tp)&#32;/&#32;<emphasis role="keyword">sizeof</emphasis>(_Up);
+1067 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;_Sp_counted_array_base&lt;_UpAlloc&gt;{_UpAlloc(__a),&#32;__n};
+1068 &#32;&#32;&#32;&#32;}
+1070 
+1071 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Alloc&gt;
+1072 &#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;shared_ptr&lt;_BoundedArray&lt;_Tp&gt;&gt;
+1073 &#32;&#32;&#32;&#32;allocate_shared(<emphasis role="keyword">const</emphasis>&#32;_Alloc&amp;&#32;__a)
+1074 &#32;&#32;&#32;&#32;{
+1075 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;shared_ptr&lt;_Tp&gt;(std::__make_shared_arrN_tag&lt;_Tp&gt;(__a));
+1076 &#32;&#32;&#32;&#32;}
+1077 
+1078 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+1079 &#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;shared_ptr&lt;_BoundedArray&lt;_Tp&gt;&gt;
+1080 &#32;&#32;&#32;&#32;make_shared()
+1081 &#32;&#32;&#32;&#32;{
+1082 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;shared_ptr&lt;_Tp&gt;(std::__make_shared_arrN_tag&lt;_Tp&gt;());
+1083 &#32;&#32;&#32;&#32;}
+1084 
+1085 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Alloc&gt;
+1086 &#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;shared_ptr&lt;_BoundedArray&lt;_Tp&gt;&gt;
+1087 &#32;&#32;&#32;&#32;allocate_shared(<emphasis role="keyword">const</emphasis>&#32;_Alloc&amp;&#32;__a,&#32;<emphasis role="keyword">const</emphasis>&#32;remove_extent_t&lt;_Tp&gt;&amp;&#32;__u)
+1088 &#32;&#32;&#32;&#32;{
+1089 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;shared_ptr&lt;_Tp&gt;(std::__make_shared_arrN_tag&lt;_Tp&gt;(__a),
+1090 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;std::__addressof(__u));
+1091 &#32;&#32;&#32;&#32;}
+1092 
+1093 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+1094 &#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;shared_ptr&lt;_BoundedArray&lt;_Tp&gt;&gt;
+1095 &#32;&#32;&#32;&#32;make_shared(<emphasis role="keyword">const</emphasis>&#32;remove_extent_t&lt;_Tp&gt;&amp;&#32;__u)
+1096 &#32;&#32;&#32;&#32;{
+1097 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;shared_ptr&lt;_Tp&gt;(std::__make_shared_arrN_tag&lt;_Tp&gt;(),
+1098 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;std::__addressof(__u));
+1099 &#32;&#32;&#32;&#32;}
+1100 
+1101 <emphasis role="preprocessor">#if&#32;__cpp_lib_smart_ptr_for_overwrite</emphasis>
+1102 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Alloc&gt;
+1103 &#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;shared_ptr&lt;_NotUnboundedArray&lt;_Tp&gt;&gt;
+1104 &#32;&#32;&#32;&#32;allocate_shared_for_overwrite(<emphasis role="keyword">const</emphasis>&#32;_Alloc&amp;&#32;__a)
+1105 &#32;&#32;&#32;&#32;{
+1106 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;<emphasis role="keyword">constexpr</emphasis>&#32;(is_array_v&lt;_Tp&gt;)
+1107 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;shared_ptr&lt;_Tp&gt;(std::__make_shared_arrN_tag&lt;_Tp&gt;(__a),
+1108 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_Sp_overwrite_tag{});
+1109 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>
+1110 &#32;&#32;&#32;&#32;{
+1111 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Rebind&#32;the&#32;allocator&#32;to&#32;_Sp_overwrite_tag,&#32;so&#32;that&#32;the</emphasis>
+1112 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;relevant&#32;_Sp_counted_ptr_inplace&#32;specialization&#32;is&#32;used.</emphasis>
+1113 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">using&#32;</emphasis>_Alloc2&#32;=&#32;__alloc_rebind&lt;_Alloc,&#32;_Sp_overwrite_tag&gt;;
+1114 &#32;&#32;&#32;&#32;&#32;&#32;_Alloc2&#32;__a2&#32;=&#32;__a;
+1115 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;shared_ptr&lt;_Tp&gt;(_Sp_alloc_shared_tag&lt;_Alloc2&gt;{__a2});
+1116 &#32;&#32;&#32;&#32;}
+1117 &#32;&#32;&#32;&#32;}
+1118 
+1119 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+1120 &#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;shared_ptr&lt;_NotUnboundedArray&lt;_Tp&gt;&gt;
+1121 &#32;&#32;&#32;&#32;make_shared_for_overwrite()
+1122 &#32;&#32;&#32;&#32;{
+1123 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;<emphasis role="keyword">constexpr</emphasis>&#32;(is_array_v&lt;_Tp&gt;)
+1124 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;shared_ptr&lt;_Tp&gt;(std::__make_shared_arrN_tag&lt;_Tp&gt;(),
+1125 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_Sp_overwrite_tag{});
+1126 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>
+1127 &#32;&#32;&#32;&#32;{
+1128 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">using&#32;</emphasis>_Alloc&#32;=&#32;allocator&lt;_Sp_overwrite_tag&gt;;
+1129 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;shared_ptr&lt;_Tp&gt;(_Sp_alloc_shared_tag&lt;_Alloc&gt;{{}});
+1130 &#32;&#32;&#32;&#32;}
+1131 &#32;&#32;&#32;&#32;}
+1132 
+1133 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Alloc&gt;
+1134 &#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;shared_ptr&lt;_UnboundedArray&lt;_Tp&gt;&gt;
+1135 &#32;&#32;&#32;&#32;allocate_shared_for_overwrite(<emphasis role="keyword">const</emphasis>&#32;_Alloc&amp;&#32;__a,&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;__n)
+1136 &#32;&#32;&#32;&#32;{
+1137 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;shared_ptr&lt;_Tp&gt;(std::__make_shared_arr_tag&lt;_Tp&gt;(__n,&#32;__a),
+1138 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_Sp_overwrite_tag{});
+1139 &#32;&#32;&#32;&#32;}
+1140 
+1141 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+1142 &#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;shared_ptr&lt;_UnboundedArray&lt;_Tp&gt;&gt;
+1143 &#32;&#32;&#32;&#32;make_shared_for_overwrite(<emphasis role="keywordtype">size_t</emphasis>&#32;__n)
+1144 &#32;&#32;&#32;&#32;{
+1145 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;shared_ptr&lt;_Tp&gt;(std::__make_shared_arr_tag&lt;_Tp&gt;(__n),
+1146 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_Sp_overwrite_tag{});
+1147 &#32;&#32;&#32;&#32;}
+1148 <emphasis role="preprocessor">#endif&#32;</emphasis><emphasis role="comment">//&#32;smart_ptr_for_overwrite</emphasis>
+1149 <emphasis role="preprocessor">#endif&#32;</emphasis><emphasis role="comment">//&#32;shared_ptr_arrays</emphasis>
+1150 
+1152 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+1153 &#32;&#32;&#32;&#32;<emphasis role="keyword">struct&#32;</emphasis>hash&lt;shared_ptr&lt;_Tp&gt;&gt;
+1154 &#32;&#32;&#32;&#32;:&#32;<emphasis role="keyword">public</emphasis>&#32;__hash_base&lt;size_t,&#32;shared_ptr&lt;_Tp&gt;&gt;
+1155 &#32;&#32;&#32;&#32;{
+1156 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">size_t</emphasis>
+1157 &#32;&#32;&#32;&#32;&#32;&#32;operator()(<emphasis role="keyword">const</emphasis>&#32;shared_ptr&lt;_Tp&gt;&amp;&#32;__s)&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keyword">noexcept</emphasis>
+1158 &#32;&#32;&#32;&#32;&#32;&#32;{
+1159 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;std::hash&lt;typename&#32;shared_ptr&lt;_Tp&gt;::element_type*&gt;()(__s.get());
+1160 &#32;&#32;&#32;&#32;&#32;&#32;}
+1161 &#32;&#32;&#32;&#32;};
+1162 
+1165 
+1166 <emphasis role="preprocessor">#if&#32;__cplusplus&#32;&gt;=&#32;201703L</emphasis>
+1167 &#32;&#32;<emphasis role="keyword">namespace&#32;</emphasis>__detail::__variant
+1168 &#32;&#32;{
+1169 &#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&gt;&#32;<emphasis role="keyword">struct&#32;</emphasis>_Never_valueless_alt;&#32;<emphasis role="comment">//&#32;see&#32;&lt;variant&gt;</emphasis>
+1170 
+1171 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Provide&#32;the&#32;strong&#32;exception-safety&#32;guarantee&#32;when&#32;emplacing&#32;a</emphasis>
+1172 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;shared_ptr&#32;into&#32;a&#32;variant.</emphasis>
+1173 &#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+1174 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">struct&#32;</emphasis>_Never_valueless_alt&lt;<link linkend="_namespacestd">std</link>::shared_ptr&lt;_Tp&gt;&gt;
+1175 &#32;&#32;&#32;&#32;&#32;&#32;:&#32;std::true_type
+1176 &#32;&#32;&#32;&#32;&#32;&#32;{&#32;};
+1177 
+1178 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Provide&#32;the&#32;strong&#32;exception-safety&#32;guarantee&#32;when&#32;emplacing&#32;a</emphasis>
+1179 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;weak_ptr&#32;into&#32;a&#32;variant.</emphasis>
+1180 &#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+1181 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">struct&#32;</emphasis>_Never_valueless_alt&lt;<link linkend="_namespacestd">std</link>::weak_ptr&lt;_Tp&gt;&gt;
+1182 &#32;&#32;&#32;&#32;&#32;&#32;:&#32;std::true_type
+1183 &#32;&#32;&#32;&#32;&#32;&#32;{&#32;};
+1184 &#32;&#32;}&#32;&#32;<emphasis role="comment">//&#32;namespace&#32;__detail::__variant</emphasis>
+1185 <emphasis role="preprocessor">#endif&#32;</emphasis><emphasis role="comment">//&#32;C++17</emphasis>
+1186 
+1187 _GLIBCXX_END_NAMESPACE_VERSION
+1188 }&#32;<emphasis role="comment">//&#32;namespace</emphasis>
+1189 
+1190 <emphasis role="preprocessor">#endif&#32;</emphasis><emphasis role="comment">//&#32;_SHARED_PTR_H</emphasis>
+</programlisting></section>

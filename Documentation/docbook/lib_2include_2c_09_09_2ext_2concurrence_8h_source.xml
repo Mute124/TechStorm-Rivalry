@@ -1,0 +1,315 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<section xmlns="http://docbook.org/ns/docbook" version="5.0" xmlns:xlink="http://www.w3.org/1999/xlink" xml:id="_lib_2include_2c_09_09_2ext_2concurrence_8h_source" xml:lang="en-US">
+<title>concurrence.h</title>
+<indexterm><primary>C:/Users/HP/Documents/GitHub/Minero-Game/lib/include/c++/ext/concurrence.h</primary></indexterm>
+Go to the documentation of this file.<programlisting linenumbering="unnumbered">1 <emphasis role="comment">//&#32;Support&#32;for&#32;concurrent&#32;programing&#32;-*-&#32;C++&#32;-*-</emphasis>
+2 
+3 <emphasis role="comment">//&#32;Copyright&#32;(C)&#32;2003-2022&#32;Free&#32;Software&#32;Foundation,&#32;Inc.</emphasis>
+4 <emphasis role="comment">//</emphasis>
+5 <emphasis role="comment">//&#32;This&#32;file&#32;is&#32;part&#32;of&#32;the&#32;GNU&#32;ISO&#32;C++&#32;Library.&#32;&#32;This&#32;library&#32;is&#32;free</emphasis>
+6 <emphasis role="comment">//&#32;software;&#32;you&#32;can&#32;redistribute&#32;it&#32;and/or&#32;modify&#32;it&#32;under&#32;the</emphasis>
+7 <emphasis role="comment">//&#32;terms&#32;of&#32;the&#32;GNU&#32;General&#32;Public&#32;License&#32;as&#32;published&#32;by&#32;the</emphasis>
+8 <emphasis role="comment">//&#32;Free&#32;Software&#32;Foundation;&#32;either&#32;version&#32;3,&#32;or&#32;(at&#32;your&#32;option)</emphasis>
+9 <emphasis role="comment">//&#32;any&#32;later&#32;version.</emphasis>
+10 
+11 <emphasis role="comment">//&#32;This&#32;library&#32;is&#32;distributed&#32;in&#32;the&#32;hope&#32;that&#32;it&#32;will&#32;be&#32;useful,</emphasis>
+12 <emphasis role="comment">//&#32;but&#32;WITHOUT&#32;ANY&#32;WARRANTY;&#32;without&#32;even&#32;the&#32;implied&#32;warranty&#32;of</emphasis>
+13 <emphasis role="comment">//&#32;MERCHANTABILITY&#32;or&#32;FITNESS&#32;FOR&#32;A&#32;PARTICULAR&#32;PURPOSE.&#32;&#32;See&#32;the</emphasis>
+14 <emphasis role="comment">//&#32;GNU&#32;General&#32;Public&#32;License&#32;for&#32;more&#32;details.</emphasis>
+15 
+16 <emphasis role="comment">//&#32;Under&#32;Section&#32;7&#32;of&#32;GPL&#32;version&#32;3,&#32;you&#32;are&#32;granted&#32;additional</emphasis>
+17 <emphasis role="comment">//&#32;permissions&#32;described&#32;in&#32;the&#32;GCC&#32;Runtime&#32;Library&#32;Exception,&#32;version</emphasis>
+18 <emphasis role="comment">//&#32;3.1,&#32;as&#32;published&#32;by&#32;the&#32;Free&#32;Software&#32;Foundation.</emphasis>
+19 
+20 <emphasis role="comment">//&#32;You&#32;should&#32;have&#32;received&#32;a&#32;copy&#32;of&#32;the&#32;GNU&#32;General&#32;Public&#32;License&#32;and</emphasis>
+21 <emphasis role="comment">//&#32;a&#32;copy&#32;of&#32;the&#32;GCC&#32;Runtime&#32;Library&#32;Exception&#32;along&#32;with&#32;this&#32;program;</emphasis>
+22 <emphasis role="comment">//&#32;see&#32;the&#32;files&#32;COPYING3&#32;and&#32;COPYING.RUNTIME&#32;respectively.&#32;&#32;If&#32;not,&#32;see</emphasis>
+23 <emphasis role="comment">//&#32;&lt;http://www.gnu.org/licenses/&gt;.</emphasis>
+24 
+29 <emphasis role="preprocessor">#ifndef&#32;_CONCURRENCE_H</emphasis>
+30 <emphasis role="preprocessor">#define&#32;_CONCURRENCE_H&#32;1</emphasis>
+31 
+32 <emphasis role="preprocessor">#pragma&#32;GCC&#32;system_header</emphasis>
+33 
+34 <emphasis role="preprocessor">#include&#32;&lt;exception&gt;</emphasis>
+35 <emphasis role="preprocessor">#include&#32;&lt;bits/gthr.h&gt;</emphasis>&#32;
+36 <emphasis role="preprocessor">#include&#32;&lt;bits/functexcept.h&gt;</emphasis>
+37 <emphasis role="preprocessor">#include&#32;&lt;bits/cpp_type_traits.h&gt;</emphasis>
+38 <emphasis role="preprocessor">#include&#32;&lt;ext/type_traits.h&gt;</emphasis>
+39 
+40 <emphasis role="keyword">namespace&#32;</emphasis><link linkend="_namespace____gnu__cxx">__gnu_cxx</link>&#32;<link linkend="__classes_2lib_2include_2c_09_09_2x86__64-w64-mingw32_2bits_2c_09_09config_8h_1a44377df0d3503f0b3d9ab316dd8ddf8b">_GLIBCXX_VISIBILITY</link>(default)
+41 {
+42 _GLIBCXX_BEGIN_NAMESPACE_VERSION
+43 
+44 &#32;&#32;<emphasis role="comment">//&#32;Available&#32;locking&#32;policies:</emphasis>
+45 &#32;&#32;<emphasis role="comment">//&#32;_S_single&#32;&#32;&#32;&#32;single-threaded&#32;code&#32;that&#32;doesn&apos;t&#32;need&#32;to&#32;be&#32;locked.</emphasis>
+46 &#32;&#32;<emphasis role="comment">//&#32;_S_mutex&#32;&#32;&#32;&#32;&#32;multi-threaded&#32;code&#32;that&#32;requires&#32;additional&#32;support</emphasis>
+47 &#32;&#32;<emphasis role="comment">//&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;from&#32;gthr.h&#32;or&#32;abstraction&#32;layers&#32;in&#32;concurrence.h.</emphasis>
+48 &#32;&#32;<emphasis role="comment">//&#32;_S_atomic&#32;&#32;&#32;&#32;multi-threaded&#32;code&#32;using&#32;atomic&#32;operations.</emphasis>
+49 &#32;&#32;<emphasis role="keyword">enum</emphasis>&#32;_Lock_policy&#32;{&#32;_S_single,&#32;_S_mutex,&#32;_S_atomic&#32;};&#32;
+50 
+51 &#32;&#32;<emphasis role="comment">//&#32;Compile&#32;time&#32;constant&#32;that&#32;indicates&#32;prefered&#32;locking&#32;policy&#32;in</emphasis>
+52 &#32;&#32;<emphasis role="comment">//&#32;the&#32;current&#32;configuration.</emphasis>
+53 &#32;&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keyword">const</emphasis>&#32;_Lock_policy&#32;__default_lock_policy&#32;=&#32;
+54 <emphasis role="preprocessor">#ifndef&#32;__GTHREADS</emphasis>
+55 &#32;&#32;_S_single;
+56 <emphasis role="preprocessor">#elif&#32;defined&#32;_GLIBCXX_HAVE_ATOMIC_LOCK_POLICY</emphasis>
+57 &#32;&#32;_S_atomic;
+58 <emphasis role="preprocessor">#else</emphasis>
+59 &#32;&#32;_S_mutex;
+60 <emphasis role="preprocessor">#endif</emphasis>
+61 
+62 &#32;&#32;<emphasis role="comment">//&#32;NB:&#32;As&#32;this&#32;is&#32;used&#32;in&#32;libsupc++,&#32;need&#32;to&#32;only&#32;depend&#32;on</emphasis>
+63 &#32;&#32;<emphasis role="comment">//&#32;exception.&#32;No&#32;stdexception&#32;classes,&#32;no&#32;use&#32;of&#32;std::string.</emphasis>
+64 &#32;&#32;<emphasis role="keyword">class&#32;</emphasis>__concurrence_lock_error&#32;:&#32;<emphasis role="keyword">public</emphasis>&#32;<link linkend="_classstd_1_1exception">std::exception</link>
+65 &#32;&#32;{
+66 &#32;&#32;<emphasis role="keyword">public</emphasis>:
+67 &#32;&#32;&#32;&#32;<emphasis role="keyword">virtual</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>&#32;<emphasis role="keyword">const</emphasis>*
+68 &#32;&#32;&#32;&#32;what()&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordflow">throw</emphasis>()
+69 &#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;<emphasis role="stringliteral">&quot;__gnu_cxx::__concurrence_lock_error&quot;</emphasis>;&#32;}
+70 &#32;&#32;};
+71 
+72 &#32;&#32;<emphasis role="keyword">class&#32;</emphasis>__concurrence_unlock_error&#32;:&#32;<emphasis role="keyword">public</emphasis>&#32;<link linkend="_classstd_1_1exception">std::exception</link>
+73 &#32;&#32;{
+74 &#32;&#32;<emphasis role="keyword">public</emphasis>:
+75 &#32;&#32;&#32;&#32;<emphasis role="keyword">virtual</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>&#32;<emphasis role="keyword">const</emphasis>*
+76 &#32;&#32;&#32;&#32;what()&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordflow">throw</emphasis>()
+77 &#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;<emphasis role="stringliteral">&quot;__gnu_cxx::__concurrence_unlock_error&quot;</emphasis>;&#32;}
+78 &#32;&#32;};
+79 
+80 &#32;&#32;<emphasis role="keyword">class&#32;</emphasis>__concurrence_broadcast_error&#32;:&#32;<emphasis role="keyword">public</emphasis>&#32;<link linkend="_classstd_1_1exception">std::exception</link>
+81 &#32;&#32;{
+82 &#32;&#32;<emphasis role="keyword">public</emphasis>:
+83 &#32;&#32;&#32;&#32;<emphasis role="keyword">virtual</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>&#32;<emphasis role="keyword">const</emphasis>*
+84 &#32;&#32;&#32;&#32;what()&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordflow">throw</emphasis>()
+85 &#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;<emphasis role="stringliteral">&quot;__gnu_cxx::__concurrence_broadcast_error&quot;</emphasis>;&#32;}
+86 &#32;&#32;};
+87 
+88 &#32;&#32;<emphasis role="keyword">class&#32;</emphasis>__concurrence_wait_error&#32;:&#32;<emphasis role="keyword">public</emphasis>&#32;<link linkend="_classstd_1_1exception">std::exception</link>
+89 &#32;&#32;{
+90 &#32;&#32;<emphasis role="keyword">public</emphasis>:
+91 &#32;&#32;&#32;&#32;<emphasis role="keyword">virtual</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>&#32;<emphasis role="keyword">const</emphasis>*
+92 &#32;&#32;&#32;&#32;what()&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordflow">throw</emphasis>()
+93 &#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;<emphasis role="stringliteral">&quot;__gnu_cxx::__concurrence_wait_error&quot;</emphasis>;&#32;}
+94 &#32;&#32;};
+95 
+96 &#32;&#32;<emphasis role="comment">//&#32;Substitute&#32;for&#32;concurrence_error&#32;object&#32;in&#32;the&#32;case&#32;of&#32;-fno-exceptions.</emphasis>
+97 &#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>
+98 &#32;&#32;__throw_concurrence_lock_error()
+99 &#32;&#32;{&#32;_GLIBCXX_THROW_OR_ABORT(__concurrence_lock_error());&#32;}
+100 
+101 &#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>
+102 &#32;&#32;__throw_concurrence_unlock_error()
+103 &#32;&#32;{&#32;_GLIBCXX_THROW_OR_ABORT(__concurrence_unlock_error());&#32;}
+104 
+105 <emphasis role="preprocessor">#ifdef&#32;__GTHREAD_HAS_COND</emphasis>
+106 &#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>
+107 &#32;&#32;__throw_concurrence_broadcast_error()
+108 &#32;&#32;{&#32;_GLIBCXX_THROW_OR_ABORT(__concurrence_broadcast_error());&#32;}
+109 
+110 &#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>
+111 &#32;&#32;__throw_concurrence_wait_error()
+112 &#32;&#32;{&#32;_GLIBCXX_THROW_OR_ABORT(__concurrence_wait_error());&#32;}
+113 <emphasis role="preprocessor">#endif</emphasis>
+114 &#32;
+115 &#32;&#32;<emphasis role="keyword">class&#32;</emphasis>__mutex&#32;
+116 &#32;&#32;{
+117 &#32;&#32;<emphasis role="keyword">private</emphasis>:
+118 <emphasis role="preprocessor">#if&#32;__GTHREADS&#32;&amp;&amp;&#32;defined&#32;__GTHREAD_MUTEX_INIT</emphasis>
+119 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2x86__64-w64-mingw32_2bits_2gthr-default_8h_1a97856e6b17fbc2936d96d8ea2962eda3">__gthread_mutex_t</link>&#32;_M_mutex&#32;=&#32;<link linkend="__classes_2lib_2include_2c_09_09_2x86__64-w64-mingw32_2bits_2gthr-default_8h_1abb270f4094b49eb30073f9b92a3bf8a2">__GTHREAD_MUTEX_INIT</link>;
+120 <emphasis role="preprocessor">#else</emphasis>
+121 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2x86__64-w64-mingw32_2bits_2gthr-default_8h_1a97856e6b17fbc2936d96d8ea2962eda3">__gthread_mutex_t</link>&#32;_M_mutex;
+122 <emphasis role="preprocessor">#endif</emphasis>
+123 
+124 &#32;&#32;&#32;&#32;__mutex(<emphasis role="keyword">const</emphasis>&#32;__mutex&amp;);
+125 &#32;&#32;&#32;&#32;__mutex&amp;&#32;operator=(<emphasis role="keyword">const</emphasis>&#32;__mutex&amp;);
+126 
+127 &#32;&#32;<emphasis role="keyword">public</emphasis>:
+128 &#32;&#32;&#32;&#32;__mutex()&#32;
+129 &#32;&#32;&#32;&#32;{&#32;
+130 <emphasis role="preprocessor">#if&#32;__GTHREADS&#32;&amp;&amp;&#32;!&#32;defined&#32;__GTHREAD_MUTEX_INIT</emphasis>
+131 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__gthread_active_p())
+132 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2x86__64-w64-mingw32_2bits_2gthr-default_8h_1ad44274417fe2cdb160bdb57fa9405e17">__GTHREAD_MUTEX_INIT_FUNCTION</link>(&amp;_M_mutex);
+133 <emphasis role="preprocessor">#endif</emphasis>
+134 &#32;&#32;&#32;&#32;}
+135 
+136 <emphasis role="preprocessor">#if&#32;__GTHREADS&#32;&amp;&amp;&#32;!&#32;defined&#32;__GTHREAD_MUTEX_INIT</emphasis>
+137 &#32;&#32;&#32;&#32;~__mutex()&#32;
+138 &#32;&#32;&#32;&#32;{&#32;
+139 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__gthread_active_p())
+140 &#32;&#32;&#32;&#32;__gthread_mutex_destroy(&amp;_M_mutex);&#32;
+141 &#32;&#32;&#32;&#32;}
+142 <emphasis role="preprocessor">#endif&#32;</emphasis>
+143 
+144 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>&#32;lock()
+145 &#32;&#32;&#32;&#32;{
+146 <emphasis role="preprocessor">#if&#32;__GTHREADS</emphasis>
+147 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__gthread_active_p())
+148 &#32;&#32;&#32;&#32;{
+149 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__gthread_mutex_lock(&amp;_M_mutex)&#32;!=&#32;0)
+150 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__throw_concurrence_lock_error();
+151 &#32;&#32;&#32;&#32;}
+152 <emphasis role="preprocessor">#endif</emphasis>
+153 &#32;&#32;&#32;&#32;}
+154 &#32;&#32;&#32;&#32;
+155 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>&#32;unlock()
+156 &#32;&#32;&#32;&#32;{
+157 <emphasis role="preprocessor">#if&#32;__GTHREADS</emphasis>
+158 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__gthread_active_p())
+159 &#32;&#32;&#32;&#32;{
+160 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__gthread_mutex_unlock(&amp;_M_mutex)&#32;!=&#32;0)
+161 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__throw_concurrence_unlock_error();
+162 &#32;&#32;&#32;&#32;}
+163 <emphasis role="preprocessor">#endif</emphasis>
+164 &#32;&#32;&#32;&#32;}
+165 
+166 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2x86__64-w64-mingw32_2bits_2gthr-default_8h_1a97856e6b17fbc2936d96d8ea2962eda3">__gthread_mutex_t</link>*&#32;gthread_mutex(<emphasis role="keywordtype">void</emphasis>)
+167 &#32;&#32;&#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;&amp;_M_mutex;&#32;}
+168 &#32;&#32;};
+169 
+170 &#32;&#32;<emphasis role="keyword">class&#32;</emphasis>__recursive_mutex&#32;
+171 &#32;&#32;{
+172 &#32;&#32;<emphasis role="keyword">private</emphasis>:
+173 <emphasis role="preprocessor">#if&#32;__GTHREADS&#32;&amp;&amp;&#32;defined&#32;__GTHREAD_RECURSIVE_MUTEX_INIT</emphasis>
+174 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2x86__64-w64-mingw32_2bits_2gthr-default_8h_1a3c90aae862e464058c70dcf114373851">__gthread_recursive_mutex_t</link>&#32;_M_mutex&#32;=&#32;<link linkend="__classes_2lib_2include_2c_09_09_2x86__64-w64-mingw32_2bits_2gthr-single_8h_1acb188e8871c9b082efa99a63afc9b24a">__GTHREAD_RECURSIVE_MUTEX_INIT</link>;
+175 <emphasis role="preprocessor">#else</emphasis>
+176 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2x86__64-w64-mingw32_2bits_2gthr-default_8h_1a3c90aae862e464058c70dcf114373851">__gthread_recursive_mutex_t</link>&#32;_M_mutex;
+177 <emphasis role="preprocessor">#endif</emphasis>
+178 
+179 &#32;&#32;&#32;&#32;__recursive_mutex(<emphasis role="keyword">const</emphasis>&#32;__recursive_mutex&amp;);
+180 &#32;&#32;&#32;&#32;__recursive_mutex&amp;&#32;operator=(<emphasis role="keyword">const</emphasis>&#32;__recursive_mutex&amp;);
+181 
+182 &#32;&#32;<emphasis role="keyword">public</emphasis>:
+183 &#32;&#32;&#32;&#32;__recursive_mutex()&#32;
+184 &#32;&#32;&#32;&#32;{&#32;
+185 <emphasis role="preprocessor">#if&#32;__GTHREADS&#32;&amp;&amp;&#32;!&#32;defined&#32;__GTHREAD_RECURSIVE_MUTEX_INIT</emphasis>
+186 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__gthread_active_p())
+187 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2x86__64-w64-mingw32_2bits_2gthr-default_8h_1a70b3a42bde7503c4f303115d20020aa2">__GTHREAD_RECURSIVE_MUTEX_INIT_FUNCTION</link>(&amp;_M_mutex);
+188 <emphasis role="preprocessor">#endif</emphasis>
+189 &#32;&#32;&#32;&#32;}
+190 
+191 <emphasis role="preprocessor">#if&#32;__GTHREADS&#32;&amp;&amp;&#32;!&#32;defined&#32;__GTHREAD_RECURSIVE_MUTEX_INIT</emphasis>
+192 &#32;&#32;&#32;&#32;~__recursive_mutex()
+193 &#32;&#32;&#32;&#32;{
+194 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__gthread_active_p())
+195 &#32;&#32;&#32;&#32;__gthread_recursive_mutex_destroy(&amp;_M_mutex);
+196 &#32;&#32;&#32;&#32;}
+197 <emphasis role="preprocessor">#endif</emphasis>
+198 
+199 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>&#32;lock()
+200 &#32;&#32;&#32;&#32;{&#32;
+201 <emphasis role="preprocessor">#if&#32;__GTHREADS</emphasis>
+202 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__gthread_active_p())
+203 &#32;&#32;&#32;&#32;{
+204 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__gthread_recursive_mutex_lock(&amp;_M_mutex)&#32;!=&#32;0)
+205 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__throw_concurrence_lock_error();
+206 &#32;&#32;&#32;&#32;}
+207 <emphasis role="preprocessor">#endif</emphasis>
+208 &#32;&#32;&#32;&#32;}
+209 &#32;&#32;&#32;&#32;
+210 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>&#32;unlock()
+211 &#32;&#32;&#32;&#32;{&#32;
+212 <emphasis role="preprocessor">#if&#32;__GTHREADS</emphasis>
+213 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__gthread_active_p())
+214 &#32;&#32;&#32;&#32;{
+215 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__gthread_recursive_mutex_unlock(&amp;_M_mutex)&#32;!=&#32;0)
+216 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__throw_concurrence_unlock_error();
+217 &#32;&#32;&#32;&#32;}
+218 <emphasis role="preprocessor">#endif</emphasis>
+219 &#32;&#32;&#32;&#32;}
+220 
+221 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2x86__64-w64-mingw32_2bits_2gthr-default_8h_1a3c90aae862e464058c70dcf114373851">__gthread_recursive_mutex_t</link>*&#32;gthread_recursive_mutex(<emphasis role="keywordtype">void</emphasis>)
+222 &#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;&amp;_M_mutex;&#32;}
+223 &#32;&#32;};
+224 
+226 &#32;&#32;<emphasis role="comment">//&#32;Acquire&#32;the&#32;mutex&#32;here&#32;with&#32;a&#32;constructor&#32;call,&#32;then&#32;release&#32;with</emphasis>
+227 &#32;&#32;<emphasis role="comment">//&#32;the&#32;destructor&#32;call&#32;in&#32;accordance&#32;with&#32;RAII&#32;style.</emphasis>
+228 &#32;&#32;<emphasis role="keyword">class&#32;</emphasis>__scoped_lock
+229 &#32;&#32;{
+230 &#32;&#32;<emphasis role="keyword">public</emphasis>:
+231 &#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;__mutex&#32;__mutex_type;
+232 
+233 &#32;&#32;<emphasis role="keyword">private</emphasis>:
+234 &#32;&#32;&#32;&#32;__mutex_type&amp;&#32;_M_device;
+235 
+236 &#32;&#32;&#32;&#32;__scoped_lock(<emphasis role="keyword">const</emphasis>&#32;__scoped_lock&amp;);
+237 &#32;&#32;&#32;&#32;__scoped_lock&amp;&#32;operator=(<emphasis role="keyword">const</emphasis>&#32;__scoped_lock&amp;);
+238 
+239 &#32;&#32;<emphasis role="keyword">public</emphasis>:
+240 &#32;&#32;&#32;&#32;<emphasis role="keyword">explicit</emphasis>&#32;__scoped_lock(__mutex_type&amp;&#32;__name)&#32;:&#32;_M_device(__name)
+241 &#32;&#32;&#32;&#32;{&#32;_M_device.lock();&#32;}
+242 
+243 &#32;&#32;&#32;&#32;~__scoped_lock()&#32;<emphasis role="keywordflow">throw</emphasis>()
+244 &#32;&#32;&#32;&#32;{&#32;_M_device.unlock();&#32;}
+245 &#32;&#32;};
+246 
+247 <emphasis role="preprocessor">#ifdef&#32;__GTHREAD_HAS_COND</emphasis>
+248 &#32;&#32;<emphasis role="keyword">class&#32;</emphasis>__cond
+249 &#32;&#32;{
+250 &#32;&#32;<emphasis role="keyword">private</emphasis>:
+251 <emphasis role="preprocessor">#if&#32;__GTHREADS&#32;&amp;&amp;&#32;defined&#32;__GTHREAD_COND_INIT</emphasis>
+252 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2x86__64-w64-mingw32_2bits_2gthr-default_8h_1ae8dd15b5bc8c82f0d61fa4063122fdc8">__gthread_cond_t</link>&#32;_M_cond&#32;=&#32;<link linkend="__classes_2lib_2include_2c_09_09_2x86__64-w64-mingw32_2bits_2gthr-default_8h_1ac8442c6588cdf543eb13d58d151ad7c0">__GTHREAD_COND_INIT</link>;
+253 <emphasis role="preprocessor">#else</emphasis>
+254 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2x86__64-w64-mingw32_2bits_2gthr-default_8h_1ae8dd15b5bc8c82f0d61fa4063122fdc8">__gthread_cond_t</link>&#32;_M_cond;
+255 <emphasis role="preprocessor">#endif</emphasis>
+256 
+257 &#32;&#32;&#32;&#32;__cond(<emphasis role="keyword">const</emphasis>&#32;__cond&amp;);
+258 &#32;&#32;&#32;&#32;__cond&amp;&#32;operator=(<emphasis role="keyword">const</emphasis>&#32;__cond&amp;);
+259 
+260 &#32;&#32;<emphasis role="keyword">public</emphasis>:
+261 &#32;&#32;&#32;&#32;__cond()&#32;
+262 &#32;&#32;&#32;&#32;{&#32;
+263 <emphasis role="preprocessor">#if&#32;__GTHREADS&#32;&amp;&amp;&#32;!&#32;defined&#32;__GTHREAD_COND_INIT</emphasis>
+264 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__gthread_active_p())
+265 &#32;&#32;&#32;&#32;__GTHREAD_COND_INIT_FUNCTION(&amp;_M_cond);
+266 <emphasis role="preprocessor">#endif</emphasis>
+267 &#32;&#32;&#32;&#32;}
+268 
+269 <emphasis role="preprocessor">#if&#32;__GTHREADS&#32;&amp;&amp;&#32;!&#32;defined&#32;__GTHREAD_COND_INIT</emphasis>
+270 &#32;&#32;&#32;&#32;~__cond()&#32;
+271 &#32;&#32;&#32;&#32;{&#32;
+272 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__gthread_active_p())
+273 &#32;&#32;&#32;&#32;__gthread_cond_destroy(&amp;_M_cond);&#32;
+274 &#32;&#32;&#32;&#32;}
+275 <emphasis role="preprocessor">#endif&#32;</emphasis>
+276 
+277 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>&#32;broadcast()
+278 &#32;&#32;&#32;&#32;{
+279 <emphasis role="preprocessor">#if&#32;__GTHREADS</emphasis>
+280 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__gthread_active_p())
+281 &#32;&#32;&#32;&#32;{
+282 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__gthread_cond_broadcast(&amp;_M_cond)&#32;!=&#32;0)
+283 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__throw_concurrence_broadcast_error();
+284 &#32;&#32;&#32;&#32;}
+285 <emphasis role="preprocessor">#endif</emphasis>
+286 &#32;&#32;&#32;&#32;}
+287 
+288 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>&#32;wait(__mutex&#32;*mutex)
+289 &#32;&#32;&#32;&#32;{
+290 <emphasis role="preprocessor">#if&#32;__GTHREADS</emphasis>
+291 &#32;&#32;&#32;&#32;&#32;&#32;{
+292 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__gthread_cond_wait(&amp;_M_cond,&#32;mutex-&gt;gthread_mutex())&#32;!=&#32;0)
+293 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__throw_concurrence_wait_error();
+294 &#32;&#32;&#32;&#32;&#32;&#32;}
+295 <emphasis role="preprocessor">#endif</emphasis>
+296 &#32;&#32;&#32;&#32;}
+297 
+298 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>&#32;wait_recursive(__recursive_mutex&#32;*mutex)
+299 &#32;&#32;&#32;&#32;{
+300 <emphasis role="preprocessor">#if&#32;__GTHREADS</emphasis>
+301 &#32;&#32;&#32;&#32;&#32;&#32;{
+302 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__gthread_cond_wait_recursive(&amp;_M_cond,
+303 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;mutex-&gt;gthread_recursive_mutex())
+304 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;!=&#32;0)
+305 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__throw_concurrence_wait_error();
+306 &#32;&#32;&#32;&#32;&#32;&#32;}
+307 <emphasis role="preprocessor">#endif</emphasis>
+308 &#32;&#32;&#32;&#32;}
+309 &#32;&#32;};
+310 <emphasis role="preprocessor">#endif</emphasis>
+311 
+312 _GLIBCXX_END_NAMESPACE_VERSION
+313 }&#32;<emphasis role="comment">//&#32;namespace</emphasis>
+314 
+315 <emphasis role="preprocessor">#endif</emphasis>
+</programlisting></section>

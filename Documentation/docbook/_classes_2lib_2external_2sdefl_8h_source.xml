@@ -1,0 +1,701 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<section xmlns="http://docbook.org/ns/docbook" version="5.0" xmlns:xlink="http://www.w3.org/1999/xlink" xml:id="__classes_2lib_2external_2sdefl_8h_source" xml:lang="en-US">
+<title>sdefl.h</title>
+<indexterm><primary>C:/Users/HP/Documents/GitHub/Minero-Game/Classes/lib/external/sdefl.h</primary></indexterm>
+Go to the documentation of this file.<programlisting linenumbering="unnumbered">1 <emphasis role="comment">/*#&#32;Small&#32;Deflate</emphasis>
+2 <emphasis role="comment">`sdefl`&#32;is&#32;a&#32;small&#32;bare&#32;bone&#32;lossless&#32;compression&#32;library&#32;in&#32;ANSI&#32;C&#32;(ISO&#32;C90)</emphasis>
+3 <emphasis role="comment">which&#32;implements&#32;the&#32;Deflate&#32;(RFC&#32;1951)&#32;compressed&#32;data&#32;format&#32;specification&#32;standard.</emphasis>
+4 <emphasis role="comment">It&#32;is&#32;mainly&#32;tuned&#32;to&#32;get&#32;as&#32;much&#32;speed&#32;and&#32;compression&#32;ratio&#32;from&#32;as&#32;little&#32;code</emphasis>
+5 <emphasis role="comment">as&#32;needed&#32;to&#32;keep&#32;the&#32;implementation&#32;as&#32;concise&#32;as&#32;possible.</emphasis>
+6 <emphasis role="comment"></emphasis>
+7 <emphasis role="comment">##&#32;Features</emphasis>
+8 <emphasis role="comment">-&#32;Portable&#32;single&#32;header&#32;and&#32;source&#32;file&#32;duo&#32;written&#32;in&#32;ANSI&#32;C&#32;(ISO&#32;C90)</emphasis>
+9 <emphasis role="comment">-&#32;Dual&#32;license&#32;with&#32;either&#32;MIT&#32;or&#32;public&#32;domain</emphasis>
+10 <emphasis role="comment">-&#32;Small&#32;implementation</emphasis>
+11 <emphasis role="comment">&#32;&#32;&#32;&#32;-&#32;Deflate:&#32;525&#32;LoC</emphasis>
+12 <emphasis role="comment">&#32;&#32;&#32;&#32;-&#32;Inflate:&#32;320&#32;LoC</emphasis>
+13 <emphasis role="comment">-&#32;Webassembly:</emphasis>
+14 <emphasis role="comment">&#32;&#32;&#32;&#32;-&#32;Deflate&#32;~3.7&#32;KB&#32;(~2.2KB&#32;compressed)</emphasis>
+15 <emphasis role="comment">&#32;&#32;&#32;&#32;-&#32;Inflate&#32;~3.6&#32;KB&#32;(~2.2KB&#32;compressed)</emphasis>
+16 <emphasis role="comment"></emphasis>
+17 <emphasis role="comment">##&#32;Usage:</emphasis>
+18 <emphasis role="comment">This&#32;file&#32;behaves&#32;differently&#32;depending&#32;on&#32;what&#32;symbols&#32;you&#32;define</emphasis>
+19 <emphasis role="comment">before&#32;including&#32;it.</emphasis>
+20 <emphasis role="comment"></emphasis>
+21 <emphasis role="comment">Header-File&#32;mode:</emphasis>
+22 <emphasis role="comment">If&#32;you&#32;do&#32;not&#32;define&#32;`SDEFL_IMPLEMENTATION`&#32;before&#32;including&#32;this&#32;file,&#32;it</emphasis>
+23 <emphasis role="comment">will&#32;operate&#32;in&#32;header&#32;only&#32;mode.&#32;In&#32;this&#32;mode&#32;it&#32;declares&#32;all&#32;used&#32;structs</emphasis>
+24 <emphasis role="comment">and&#32;the&#32;API&#32;of&#32;the&#32;library&#32;without&#32;including&#32;the&#32;implementation&#32;of&#32;the&#32;library.</emphasis>
+25 <emphasis role="comment"></emphasis>
+26 <emphasis role="comment">Implementation&#32;mode:</emphasis>
+27 <emphasis role="comment">If&#32;you&#32;define&#32;`SDEFL_IMPLEMENTATION`&#32;before&#32;including&#32;this&#32;file,&#32;it&#32;will</emphasis>
+28 <emphasis role="comment">compile&#32;the&#32;implementation&#32;.&#32;Make&#32;sure&#32;that&#32;you&#32;only&#32;include</emphasis>
+29 <emphasis role="comment">this&#32;file&#32;implementation&#32;in&#32;*one*&#32;C&#32;or&#32;C++&#32;file&#32;to&#32;prevent&#32;collisions.</emphasis>
+30 <emphasis role="comment"></emphasis>
+31 <emphasis role="comment">###&#32;Benchmark</emphasis>
+32 <emphasis role="comment"></emphasis>
+33 <emphasis role="comment">|&#32;Compressor&#32;name&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;|&#32;Compression|&#32;Decompress.|&#32;Compr.&#32;size&#32;|&#32;Ratio&#32;|</emphasis>
+34 <emphasis role="comment">|&#32;------------------------|&#32;-----------|&#32;-----------|&#32;-----------&#32;|&#32;-----&#32;|</emphasis>
+35 <emphasis role="comment">|&#32;miniz&#32;1.0&#32;-1&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;|&#32;&#32;&#32;122&#32;MB/s&#32;|&#32;&#32;&#32;208&#32;MB/s&#32;|&#32;&#32;&#32;&#32;48510028&#32;|&#32;48.51&#32;|</emphasis>
+36 <emphasis role="comment">|&#32;miniz&#32;1.0&#32;-6&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;|&#32;&#32;&#32;&#32;27&#32;MB/s&#32;|&#32;&#32;&#32;260&#32;MB/s&#32;|&#32;&#32;&#32;&#32;36513697&#32;|&#32;36.51&#32;|</emphasis>
+37 <emphasis role="comment">|&#32;miniz&#32;1.0&#32;-9&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;|&#32;&#32;&#32;&#32;23&#32;MB/s&#32;|&#32;&#32;&#32;261&#32;MB/s&#32;|&#32;&#32;&#32;&#32;36460101&#32;|&#32;36.46&#32;|</emphasis>
+38 <emphasis role="comment">|&#32;zlib&#32;1.2.11&#32;-1&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;|&#32;&#32;&#32;&#32;72&#32;MB/s&#32;|&#32;&#32;&#32;307&#32;MB/s&#32;|&#32;&#32;&#32;&#32;42298774&#32;|&#32;42.30&#32;|</emphasis>
+39 <emphasis role="comment">|&#32;zlib&#32;1.2.11&#32;-6&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;|&#32;&#32;&#32;&#32;24&#32;MB/s&#32;|&#32;&#32;&#32;313&#32;MB/s&#32;|&#32;&#32;&#32;&#32;36548921&#32;|&#32;36.55&#32;|</emphasis>
+40 <emphasis role="comment">|&#32;zlib&#32;1.2.11&#32;-9&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;|&#32;&#32;&#32;&#32;20&#32;MB/s&#32;|&#32;&#32;&#32;314&#32;MB/s&#32;|&#32;&#32;&#32;&#32;36475792&#32;|&#32;36.48&#32;|</emphasis>
+41 <emphasis role="comment">|&#32;sdefl&#32;1.0&#32;-0&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;|&#32;&#32;&#32;127&#32;MB/s&#32;|&#32;&#32;&#32;371&#32;MB/s&#32;|&#32;&#32;&#32;&#32;40004116&#32;|&#32;39.88&#32;|</emphasis>
+42 <emphasis role="comment">|&#32;sdefl&#32;1.0&#32;-1&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;|&#32;&#32;&#32;111&#32;MB/s&#32;|&#32;&#32;&#32;398&#32;MB/s&#32;|&#32;&#32;&#32;&#32;38940674&#32;|&#32;38.82&#32;|</emphasis>
+43 <emphasis role="comment">|&#32;sdefl&#32;1.0&#32;-5&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;|&#32;&#32;&#32;&#32;45&#32;MB/s&#32;|&#32;&#32;&#32;420&#32;MB/s&#32;|&#32;&#32;&#32;&#32;36577183&#32;|&#32;36.46&#32;|</emphasis>
+44 <emphasis role="comment">|&#32;sdefl&#32;1.0&#32;-7&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;|&#32;&#32;&#32;&#32;38&#32;MB/s&#32;|&#32;&#32;&#32;423&#32;MB/s&#32;|&#32;&#32;&#32;&#32;36523781&#32;|&#32;36.41&#32;|</emphasis>
+45 <emphasis role="comment">|&#32;libdeflate&#32;1.3&#32;-1&#32;&#32;&#32;&#32;&#32;&#32;&#32;|&#32;&#32;&#32;147&#32;MB/s&#32;|&#32;&#32;&#32;667&#32;MB/s&#32;|&#32;&#32;&#32;&#32;39597378&#32;|&#32;39.60&#32;|</emphasis>
+46 <emphasis role="comment">|&#32;libdeflate&#32;1.3&#32;-6&#32;&#32;&#32;&#32;&#32;&#32;&#32;|&#32;&#32;&#32;&#32;69&#32;MB/s&#32;|&#32;&#32;&#32;689&#32;MB/s&#32;|&#32;&#32;&#32;&#32;36648318&#32;|&#32;36.65&#32;|</emphasis>
+47 <emphasis role="comment">|&#32;libdeflate&#32;1.3&#32;-9&#32;&#32;&#32;&#32;&#32;&#32;&#32;|&#32;&#32;&#32;&#32;13&#32;MB/s&#32;|&#32;&#32;&#32;672&#32;MB/s&#32;|&#32;&#32;&#32;&#32;35197141&#32;|&#32;35.20&#32;|</emphasis>
+48 <emphasis role="comment">|&#32;libdeflate&#32;1.3&#32;-12&#32;&#32;&#32;&#32;&#32;&#32;|&#32;&#32;8.13&#32;MB/s&#32;|&#32;&#32;&#32;670&#32;MB/s&#32;|&#32;&#32;&#32;&#32;35100568&#32;|&#32;35.10&#32;|</emphasis>
+49 <emphasis role="comment"></emphasis>
+50 <emphasis role="comment">###&#32;Compression</emphasis>
+51 <emphasis role="comment">Results&#32;on&#32;the&#32;[Silesia&#32;compression&#32;corpus](http://sun.aei.polsl.pl/~sdeor/index.php?page=silesia):</emphasis>
+52 <emphasis role="comment"></emphasis>
+53 <emphasis role="comment">|&#32;File&#32;&#32;&#32;&#32;|&#32;&#32;&#32;Original&#32;|&#32;`sdefl&#32;0`&#32;&#32;&#32;&#32;&#32;&#32;|&#32;`sdefl&#32;5`&#32;&#32;&#32;&#32;&#32;|&#32;`sdefl&#32;7`&#32;|</emphasis>
+54 <emphasis role="comment">|&#32;:------&#32;|&#32;---------:&#32;|&#32;-----------------:&#32;|&#32;---------:&#32;|&#32;----------:&#32;|</emphasis>
+55 <emphasis role="comment">|&#32;dickens&#32;|&#32;10.192.446&#32;|&#32;&#32;4,260,187|&#32;&#32;3,845,261|&#32;&#32;&#32;3,833,657&#32;|</emphasis>
+56 <emphasis role="comment">|&#32;mozilla&#32;|&#32;51.220.480&#32;|&#32;20,774,706&#32;|&#32;19,607,009&#32;|&#32;&#32;19,565,867&#32;|</emphasis>
+57 <emphasis role="comment">|&#32;mr&#32;&#32;&#32;&#32;&#32;&#32;|&#32;&#32;9.970.564&#32;|&#32;3,860,531&#32;|&#32;&#32;3,673,460&#32;|&#32;&#32;&#32;3,665,627&#32;|</emphasis>
+58 <emphasis role="comment">|&#32;nci&#32;&#32;&#32;&#32;&#32;|&#32;33.553.445&#32;|&#32;4,030,283&#32;|&#32;&#32;3,094,526&#32;|&#32;&#32;&#32;3,006,075&#32;|</emphasis>
+59 <emphasis role="comment">|&#32;ooffice&#32;|&#32;&#32;6.152.192&#32;|&#32;3,320,063&#32;|&#32;&#32;3,186,373&#32;|&#32;&#32;&#32;3,183,815&#32;|</emphasis>
+60 <emphasis role="comment">|&#32;osdb&#32;&#32;&#32;&#32;|&#32;10.085.684&#32;|&#32;3,919,646&#32;|&#32;&#32;3,649,510&#32;|&#32;&#32;&#32;3,649,477&#32;|</emphasis>
+61 <emphasis role="comment">|&#32;reymont&#32;|&#32;&#32;6.627.202&#32;|&#32;2,263,378&#32;|&#32;&#32;1,857,588&#32;|&#32;&#32;&#32;1,827,237&#32;|</emphasis>
+62 <emphasis role="comment">|&#32;samba&#32;&#32;&#32;|&#32;21.606.400&#32;|&#32;6,121,797&#32;|&#32;&#32;5,462,670&#32;|&#32;&#32;&#32;5,450,762&#32;|</emphasis>
+63 <emphasis role="comment">|&#32;sao&#32;&#32;&#32;&#32;&#32;|&#32;&#32;7.251.944&#32;|&#32;5,612,421&#32;|&#32;&#32;5,485,380&#32;|&#32;&#32;&#32;5,481,765&#32;|</emphasis>
+64 <emphasis role="comment">|&#32;webster&#32;|&#32;41.458.703&#32;|&#32;13,972,648&#32;|&#32;12,059,432&#32;|&#32;&#32;11,991,421&#32;|</emphasis>
+65 <emphasis role="comment">|&#32;xml&#32;&#32;&#32;&#32;&#32;|&#32;&#32;5.345.280&#32;|&#32;886,620|&#32;&#32;&#32;&#32;674,009&#32;|&#32;&#32;&#32;&#32;&#32;662,141&#32;|</emphasis>
+66 <emphasis role="comment">|&#32;x-ray&#32;&#32;&#32;|&#32;&#32;8.474.240&#32;|&#32;6,304,655&#32;|&#32;&#32;6,244,779&#32;|&#32;&#32;&#32;6,244,779&#32;|</emphasis>
+67 <emphasis role="comment"></emphasis>
+68 <emphasis role="comment">##&#32;License</emphasis>
+69 <emphasis role="comment">```</emphasis>
+70 <emphasis role="comment">------------------------------------------------------------------------------</emphasis>
+71 <emphasis role="comment">This&#32;software&#32;is&#32;available&#32;under&#32;2&#32;licenses&#32;--&#32;choose&#32;whichever&#32;you&#32;prefer.</emphasis>
+72 <emphasis role="comment">------------------------------------------------------------------------------</emphasis>
+73 <emphasis role="comment">ALTERNATIVE&#32;A&#32;-&#32;MIT&#32;License</emphasis>
+74 <emphasis role="comment">Copyright&#32;(c)&#32;2020&#32;Micha&#32;Mettke</emphasis>
+75 <emphasis role="comment">Permission&#32;is&#32;hereby&#32;granted,&#32;free&#32;of&#32;charge,&#32;to&#32;any&#32;person&#32;obtaining&#32;a&#32;copy&#32;of</emphasis>
+76 <emphasis role="comment">this&#32;software&#32;and&#32;associated&#32;documentation&#32;files&#32;(the&#32;&quot;Software&quot;),&#32;to&#32;deal&#32;in</emphasis>
+77 <emphasis role="comment">the&#32;Software&#32;without&#32;restriction,&#32;including&#32;without&#32;limitation&#32;the&#32;rights&#32;to</emphasis>
+78 <emphasis role="comment">use,&#32;copy,&#32;modify,&#32;merge,&#32;publish,&#32;distribute,&#32;sublicense,&#32;and/or&#32;sell&#32;copies</emphasis>
+79 <emphasis role="comment">of&#32;the&#32;Software,&#32;and&#32;to&#32;permit&#32;persons&#32;to&#32;whom&#32;the&#32;Software&#32;is&#32;furnished&#32;to&#32;do</emphasis>
+80 <emphasis role="comment">so,&#32;subject&#32;to&#32;the&#32;following&#32;conditions:</emphasis>
+81 <emphasis role="comment">The&#32;above&#32;copyright&#32;notice&#32;and&#32;this&#32;permission&#32;notice&#32;shall&#32;be&#32;included&#32;in&#32;all</emphasis>
+82 <emphasis role="comment">copies&#32;or&#32;substantial&#32;portions&#32;of&#32;the&#32;Software.</emphasis>
+83 <emphasis role="comment">THE&#32;SOFTWARE&#32;IS&#32;PROVIDED&#32;&quot;AS&#32;IS&quot;,&#32;WITHOUT&#32;WARRANTY&#32;OF&#32;ANY&#32;KIND,&#32;EXPRESS&#32;OR</emphasis>
+84 <emphasis role="comment">IMPLIED,&#32;INCLUDING&#32;BUT&#32;NOT&#32;LIMITED&#32;TO&#32;THE&#32;WARRANTIES&#32;OF&#32;MERCHANTABILITY,</emphasis>
+85 <emphasis role="comment">FITNESS&#32;FOR&#32;A&#32;PARTICULAR&#32;PURPOSE&#32;AND&#32;NONINFRINGEMENT.&#32;IN&#32;NO&#32;EVENT&#32;SHALL&#32;THE</emphasis>
+86 <emphasis role="comment">AUTHORS&#32;OR&#32;COPYRIGHT&#32;HOLDERS&#32;BE&#32;LIABLE&#32;FOR&#32;ANY&#32;CLAIM,&#32;DAMAGES&#32;OR&#32;OTHER</emphasis>
+87 <emphasis role="comment">LIABILITY,&#32;WHETHER&#32;IN&#32;AN&#32;ACTION&#32;OF&#32;CONTRACT,&#32;TORT&#32;OR&#32;OTHERWISE,&#32;ARISING&#32;FROM,</emphasis>
+88 <emphasis role="comment">OUT&#32;OF&#32;OR&#32;IN&#32;CONNECTION&#32;WITH&#32;THE&#32;SOFTWARE&#32;OR&#32;THE&#32;USE&#32;OR&#32;OTHER&#32;DEALINGS&#32;IN&#32;THE</emphasis>
+89 <emphasis role="comment">SOFTWARE.</emphasis>
+90 <emphasis role="comment">------------------------------------------------------------------------------</emphasis>
+91 <emphasis role="comment">ALTERNATIVE&#32;B&#32;-&#32;Public&#32;Domain&#32;(www.unlicense.org)</emphasis>
+92 <emphasis role="comment">This&#32;is&#32;free&#32;and&#32;unencumbered&#32;software&#32;released&#32;into&#32;the&#32;public&#32;domain.</emphasis>
+93 <emphasis role="comment">Anyone&#32;is&#32;free&#32;to&#32;copy,&#32;modify,&#32;publish,&#32;use,&#32;compile,&#32;sell,&#32;or&#32;distribute&#32;this</emphasis>
+94 <emphasis role="comment">software,&#32;either&#32;in&#32;source&#32;code&#32;form&#32;or&#32;as&#32;a&#32;compiled&#32;binary,&#32;for&#32;any&#32;purpose,</emphasis>
+95 <emphasis role="comment">commercial&#32;or&#32;non-commercial,&#32;and&#32;by&#32;any&#32;means.</emphasis>
+96 <emphasis role="comment">In&#32;jurisdictions&#32;that&#32;recognize&#32;copyright&#32;laws,&#32;the&#32;author&#32;or&#32;authors&#32;of&#32;this</emphasis>
+97 <emphasis role="comment">software&#32;dedicate&#32;any&#32;and&#32;all&#32;copyright&#32;interest&#32;in&#32;the&#32;software&#32;to&#32;the&#32;public</emphasis>
+98 <emphasis role="comment">domain.&#32;We&#32;make&#32;this&#32;dedication&#32;for&#32;the&#32;benefit&#32;of&#32;the&#32;public&#32;at&#32;large&#32;and&#32;to</emphasis>
+99 <emphasis role="comment">the&#32;detriment&#32;of&#32;our&#32;heirs&#32;and&#32;successors.&#32;We&#32;intend&#32;this&#32;dedication&#32;to&#32;be&#32;an</emphasis>
+100 <emphasis role="comment">overt&#32;act&#32;of&#32;relinquishment&#32;in&#32;perpetuity&#32;of&#32;all&#32;present&#32;and&#32;future&#32;rights&#32;to</emphasis>
+101 <emphasis role="comment">this&#32;software&#32;under&#32;copyright&#32;law.</emphasis>
+102 <emphasis role="comment">THE&#32;SOFTWARE&#32;IS&#32;PROVIDED&#32;&quot;AS&#32;IS&quot;,&#32;WITHOUT&#32;WARRANTY&#32;OF&#32;ANY&#32;KIND,&#32;EXPRESS&#32;OR</emphasis>
+103 <emphasis role="comment">IMPLIED,&#32;INCLUDING&#32;BUT&#32;NOT&#32;LIMITED&#32;TO&#32;THE&#32;WARRANTIES&#32;OF&#32;MERCHANTABILITY,</emphasis>
+104 <emphasis role="comment">FITNESS&#32;FOR&#32;A&#32;PARTICULAR&#32;PURPOSE&#32;AND&#32;NONINFRINGEMENT.&#32;IN&#32;NO&#32;EVENT&#32;SHALL&#32;THE</emphasis>
+105 <emphasis role="comment">AUTHORS&#32;BE&#32;LIABLE&#32;FOR&#32;ANY&#32;CLAIM,&#32;DAMAGES&#32;OR&#32;OTHER&#32;LIABILITY,&#32;WHETHER&#32;IN&#32;AN</emphasis>
+106 <emphasis role="comment">ACTION&#32;OF&#32;CONTRACT,&#32;TORT&#32;OR&#32;OTHERWISE,&#32;ARISING&#32;FROM,&#32;OUT&#32;OF&#32;OR&#32;IN&#32;CONNECTION</emphasis>
+107 <emphasis role="comment">WITH&#32;THE&#32;SOFTWARE&#32;OR&#32;THE&#32;USE&#32;OR&#32;OTHER&#32;DEALINGS&#32;IN&#32;THE&#32;SOFTWARE.</emphasis>
+108 <emphasis role="comment">------------------------------------------------------------------------------</emphasis>
+109 <emphasis role="comment">```</emphasis>
+110 <emphasis role="comment">*/</emphasis>
+111 <emphasis role="preprocessor">#ifndef&#32;SDEFL_H_INCLUDED</emphasis>
+112 <emphasis role="preprocessor">#define&#32;SDEFL_H_INCLUDED</emphasis>
+113 
+114 <emphasis role="preprocessor">#ifdef&#32;__cplusplus</emphasis>
+115 <emphasis role="keyword">extern</emphasis>&#32;<emphasis role="stringliteral">&quot;C&quot;</emphasis>&#32;{
+116 <emphasis role="preprocessor">#endif</emphasis>
+117 
+118 <emphasis role="preprocessor">#define&#32;SDEFL_MAX_OFF&#32;&#32;&#32;(1&#32;&lt;&lt;&#32;15)</emphasis>
+119 <emphasis role="preprocessor">#define&#32;SDEFL_WIN_SIZ&#32;&#32;&#32;SDEFL_MAX_OFF</emphasis>
+120 <emphasis role="preprocessor">#define&#32;SDEFL_WIN_MSK&#32;&#32;&#32;(SDEFL_WIN_SIZ-1)</emphasis>
+121 
+122 <emphasis role="preprocessor">#define&#32;SDEFL_HASH_BITS&#32;15</emphasis>
+123 <emphasis role="preprocessor">#define&#32;SDEFL_HASH_SIZ&#32;&#32;(1&#32;&lt;&lt;&#32;SDEFL_HASH_BITS)</emphasis>
+124 <emphasis role="preprocessor">#define&#32;SDEFL_HASH_MSK&#32;&#32;(SDEFL_HASH_SIZ-1)</emphasis>
+125 
+126 <emphasis role="preprocessor">#define&#32;SDEFL_MIN_MATCH&#32;4</emphasis>
+127 <emphasis role="preprocessor">#define&#32;SDEFL_BLK_MAX&#32;&#32;&#32;(256*1024)</emphasis>
+128 <emphasis role="preprocessor">#define&#32;SDEFL_SEQ_SIZ&#32;&#32;&#32;((SDEFL_BLK_MAX&#32;+&#32;SDEFL_MIN_MATCH)/SDEFL_MIN_MATCH)</emphasis>
+129 
+130 <emphasis role="preprocessor">#define&#32;SDEFL_SYM_MAX&#32;&#32;&#32;(288)</emphasis>
+131 <emphasis role="preprocessor">#define&#32;SDEFL_OFF_MAX&#32;&#32;&#32;(32)</emphasis>
+132 <emphasis role="preprocessor">#define&#32;SDEFL_PRE_MAX&#32;&#32;&#32;(19)</emphasis>
+133 
+134 <emphasis role="preprocessor">#define&#32;SDEFL_LVL_MIN&#32;&#32;&#32;0</emphasis>
+135 <emphasis role="preprocessor">#define&#32;SDEFL_LVL_DEF&#32;&#32;&#32;5</emphasis>
+136 <emphasis role="preprocessor">#define&#32;SDEFL_LVL_MAX&#32;&#32;&#32;8</emphasis>
+137 
+138 <emphasis role="keyword">struct&#32;</emphasis><link linkend="_structsdefl__freq">sdefl_freq</link>&#32;{
+139 &#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<link linkend="_structsdefl__freq_1a9472074a95a85fa8ba57782c0d045045">lit</link>[<link linkend="_lib_2external_2sdefl_8h_1a4b26eac2741e83f40a1e022f77cef044">SDEFL_SYM_MAX</link>];
+140 &#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<link linkend="_structsdefl__freq_1a8588725aa747ceede4815566d51d91ba">off</link>[<link linkend="_lib_2external_2sdefl_8h_1abf32e22a7b24f901d39c0888a2248f16">SDEFL_OFF_MAX</link>];
+141 };
+142 <emphasis role="keyword">struct&#32;</emphasis><link linkend="_structsdefl__code__words">sdefl_code_words</link>&#32;{
+143 &#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<link linkend="_structsdefl__code__words_1af37139bf3c0799797394e0a49db34820">lit</link>[<link linkend="_lib_2external_2sdefl_8h_1a4b26eac2741e83f40a1e022f77cef044">SDEFL_SYM_MAX</link>];
+144 &#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<link linkend="_structsdefl__code__words_1ae48a67d477b35f4f2ff3550e04a88cfc">off</link>[<link linkend="_lib_2external_2sdefl_8h_1abf32e22a7b24f901d39c0888a2248f16">SDEFL_OFF_MAX</link>];
+145 };
+146 <emphasis role="keyword">struct&#32;</emphasis><link linkend="_structsdefl__lens">sdefl_lens</link>&#32;{
+147 &#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>&#32;<link linkend="_structsdefl__lens_1a52472e4d81726afb9ec8c936e0c3b94f">lit</link>[<link linkend="_lib_2external_2sdefl_8h_1a4b26eac2741e83f40a1e022f77cef044">SDEFL_SYM_MAX</link>];
+148 &#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>&#32;<link linkend="_structsdefl__lens_1a3cf81736fd8eaaf83f744cb5702c8484">off</link>[<link linkend="_lib_2external_2sdefl_8h_1abf32e22a7b24f901d39c0888a2248f16">SDEFL_OFF_MAX</link>];
+149 };
+150 <emphasis role="keyword">struct&#32;</emphasis><link linkend="_structsdefl__codes">sdefl_codes</link>&#32;{
+151 &#32;&#32;<emphasis role="keyword">struct&#32;</emphasis><link linkend="_structsdefl__code__words">sdefl_code_words</link>&#32;<link linkend="_structsdefl__codes_1ac960ee02384990c1f53eb45762634e36">word</link>;
+152 &#32;&#32;<emphasis role="keyword">struct&#32;</emphasis><link linkend="_structsdefl__lens">sdefl_lens</link>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a30ee67aa502329a88f4a203775adfa1a">len</link>;
+153 };
+154 <emphasis role="keyword">struct&#32;</emphasis><link linkend="_structsdefl__seqt">sdefl_seqt</link>&#32;{
+155 &#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="_structsdefl__seqt_1aa0c241a7c2b78b65edccae3d4568d3ee">off</link>,&#32;<link linkend="_structsdefl__seqt_1afdc37c8d44729781391d39ecf2b6a0df">len</link>;
+156 };
+157 <emphasis role="keyword">struct&#32;</emphasis><link linkend="_structsdefl">sdefl</link>&#32;{
+158 &#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="_structsdefl_1ab74d4949538a90a0d35a9e7ec584c9de">bits</link>,&#32;<link linkend="_structsdefl_1aae723579aadb3f30acd1871bfbd0a5f4">bitcnt</link>;
+159 &#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="_structsdefl_1a61ae3113ab08731d58373cb38524d010">tbl</link>[<link linkend="_lib_2external_2sdefl_8h_1a9dffc0efc9ded1929aca2db11a9421ac">SDEFL_HASH_SIZ</link>];
+160 &#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="_structsdefl_1a03ea5271b2e5e392db3ac1c867a31975">prv</link>[<link linkend="_lib_2external_2sdefl_8h_1add31972f8be06a95a5268eaebd97647a">SDEFL_WIN_SIZ</link>];
+161 
+162 &#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="_structsdefl_1a8fe956b4ca467c796c7b7173bd168396">seq_cnt</link>;
+163 &#32;&#32;<emphasis role="keyword">struct&#32;</emphasis><link linkend="_structsdefl__seqt">sdefl_seqt</link>&#32;<link linkend="_structsdefl_1a42c576ea5d5f181a1c99656212c687f6">seq</link>[<link linkend="_lib_2external_2sdefl_8h_1ae540fcf1901221108b570d1109521b9d">SDEFL_SEQ_SIZ</link>];
+164 &#32;&#32;<emphasis role="keyword">struct&#32;</emphasis><link linkend="_structsdefl__freq">sdefl_freq</link>&#32;<link linkend="_structsdefl_1a07628ee6182b1f4fe77010df27558d9c">freq</link>;
+165 &#32;&#32;<emphasis role="keyword">struct&#32;</emphasis><link linkend="_structsdefl__codes">sdefl_codes</link>&#32;<link linkend="_structsdefl_1a01c4cf15274a3ec9b4a215c60965afae">cod</link>;
+166 };
+167 <emphasis role="keyword">extern</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2external_2sdefl_8h_1a4bf29defead9cd3bc9fcd7323134b7d0">sdefl_bound</link>(<emphasis role="keywordtype">int</emphasis>&#32;in_len);
+168 <emphasis role="keyword">extern</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2external_2sdefl_8h_1a533998d27616589206cd346826ac2f59">sdeflate</link>(<emphasis role="keyword">struct</emphasis>&#32;<link linkend="_structsdefl">sdefl</link>&#32;*s,&#32;<emphasis role="keywordtype">void</emphasis>&#32;*o,&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>&#32;*i,&#32;<emphasis role="keywordtype">int</emphasis>&#32;n,&#32;<emphasis role="keywordtype">int</emphasis>&#32;lvl);
+169 <emphasis role="keyword">extern</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2external_2sdefl_8h_1afe38e2d89b24c67626baba855efd4b71">zsdeflate</link>(<emphasis role="keyword">struct</emphasis>&#32;<link linkend="_structsdefl">sdefl</link>&#32;*s,&#32;<emphasis role="keywordtype">void</emphasis>&#32;*o,&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>&#32;*i,&#32;<emphasis role="keywordtype">int</emphasis>&#32;n,&#32;<emphasis role="keywordtype">int</emphasis>&#32;lvl);
+170 
+171 <emphasis role="preprocessor">#ifdef&#32;__cplusplus</emphasis>
+172 }
+173 <emphasis role="preprocessor">#endif</emphasis>
+174 
+175 <emphasis role="preprocessor">#endif&#32;</emphasis><emphasis role="comment">/*&#32;SDEFL_H_INCLUDED&#32;*/</emphasis><emphasis role="preprocessor"></emphasis>
+176 
+177 <emphasis role="preprocessor">#ifdef&#32;SDEFL_IMPLEMENTATION</emphasis>
+178 
+179 <emphasis role="preprocessor">#include&#32;&lt;assert.h&gt;</emphasis>&#32;<emphasis role="comment">/*&#32;assert&#32;*/</emphasis>
+180 <emphasis role="preprocessor">#include&#32;&lt;string.h&gt;</emphasis>&#32;<emphasis role="comment">/*&#32;memcpy&#32;*/</emphasis>
+181 <emphasis role="preprocessor">#include&#32;&lt;limits.h&gt;</emphasis>&#32;<emphasis role="comment">/*&#32;CHAR_BIT&#32;*/</emphasis>
+182 
+183 <emphasis role="preprocessor">#define&#32;SDEFL_NIL&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;(-1)</emphasis>
+184 <emphasis role="preprocessor">#define&#32;SDEFL_MAX_MATCH&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;258</emphasis>
+185 <emphasis role="preprocessor">#define&#32;SDEFL_MAX_CODE_LEN&#32;&#32;&#32;&#32;&#32;&#32;(15)</emphasis>
+186 <emphasis role="preprocessor">#define&#32;SDEFL_SYM_BITS&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;(10u)</emphasis>
+187 <emphasis role="preprocessor">#define&#32;SDEFL_SYM_MSK&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;((1u&#32;&lt;&lt;&#32;SDEFL_SYM_BITS)-1u)</emphasis>
+188 <emphasis role="preprocessor">#define&#32;SDEFL_LIT_LEN_CODES&#32;&#32;&#32;&#32;&#32;(14)</emphasis>
+189 <emphasis role="preprocessor">#define&#32;SDEFL_OFF_CODES&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;(15)</emphasis>
+190 <emphasis role="preprocessor">#define&#32;SDEFL_PRE_CODES&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;(7)</emphasis>
+191 <emphasis role="preprocessor">#define&#32;SDEFL_CNT_NUM(n)&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;((((n)+3u/4u)+3u)&amp;~3u)</emphasis>
+192 <emphasis role="preprocessor">#define&#32;SDEFL_EOB&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;(256)</emphasis>
+193 
+194 <emphasis role="preprocessor">#define&#32;sdefl_npow2(n)&#32;(1&#32;&lt;&lt;&#32;(sdefl_ilog2((n)-1)&#32;+&#32;1))</emphasis>
+195 
+196 <emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>
+197 sdefl_ilog2(<emphasis role="keywordtype">int</emphasis>&#32;n)&#32;{
+198 &#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(!n)&#32;<emphasis role="keywordflow">return</emphasis>&#32;0;
+199 <emphasis role="preprocessor">#ifdef&#32;_MSC_VER</emphasis>
+200 &#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">long</emphasis>&#32;msbp&#32;=&#32;0;
+201 &#32;&#32;_BitScanReverse(&amp;msbp,&#32;(<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">long</emphasis>)n);
+202 &#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;(<emphasis role="keywordtype">int</emphasis>)msbp;
+203 <emphasis role="preprocessor">#elif&#32;defined(__GNUC__)&#32;||&#32;defined(__clang__)</emphasis>
+204 &#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;(<emphasis role="keywordtype">int</emphasis>)<emphasis role="keyword">sizeof</emphasis>(<emphasis role="keywordtype">unsigned</emphasis>&#32;long)&#32;*&#32;CHAR_BIT&#32;-&#32;1&#32;-&#32;__builtin_clzl((<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">long</emphasis>)n);
+205 <emphasis role="preprocessor">#else</emphasis>
+206 <emphasis role="preprocessor">&#32;&#32;#define&#32;lt(n)&#32;n,&#32;n,&#32;n,&#32;n,&#32;n,&#32;n,&#32;n,&#32;n,&#32;n,&#32;n,&#32;n,&#32;n,&#32;n,&#32;n,&#32;n,&#32;n</emphasis>
+207 &#32;&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>&#32;tbl[256]&#32;=&#32;{
+208 &#32;&#32;&#32;&#32;0,0,1,1,2,2,2,2,3,3,3,3,3,3,3,3,lt(4),&#32;lt(5),&#32;lt(5),&#32;lt(6),&#32;lt(6),&#32;lt(6),&#32;lt(6),
+209 &#32;&#32;&#32;&#32;lt(7),&#32;lt(7),&#32;lt(7),&#32;lt(7),&#32;lt(7),&#32;lt(7),&#32;lt(7),&#32;lt(7)};
+210 &#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;tt,&#32;t;
+211 &#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;((tt&#32;=&#32;(n&#32;&gt;&gt;&#32;16)))&#32;{
+212 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;(t&#32;=&#32;(tt&#32;&gt;&gt;&#32;8))&#32;?&#32;24&#32;+&#32;tbl[t]&#32;:&#32;16&#32;+&#32;tbl[tt];
+213 &#32;&#32;}&#32;<emphasis role="keywordflow">else</emphasis>&#32;{
+214 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;(t&#32;=&#32;(n&#32;&gt;&gt;&#32;8))&#32;?&#32;8&#32;+&#32;tbl[t]&#32;:&#32;tbl[n];
+215 &#32;&#32;}
+216 <emphasis role="preprocessor">&#32;&#32;#undef&#32;lt</emphasis>
+217 <emphasis role="preprocessor">#endif</emphasis>
+218 }
+219 <emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">unsigned</emphasis>
+220 sdefl_uload32(<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>&#32;*p)&#32;{
+221 &#32;&#32;<emphasis role="comment">/*&#32;hopefully&#32;will&#32;be&#32;optimized&#32;to&#32;an&#32;unaligned&#32;read&#32;*/</emphasis>
+222 &#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;n&#32;=&#32;0;
+223 &#32;&#32;memcpy(&amp;n,&#32;p,&#32;<emphasis role="keyword">sizeof</emphasis>(n));
+224 &#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;n;
+225 }
+226 <emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">unsigned</emphasis>
+227 sdefl_hash32(<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>&#32;*p)&#32;{
+228 &#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;n&#32;=&#32;sdefl_uload32(p);
+229 &#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;(n&#32;*&#32;0x9E377989)&#32;&gt;&gt;&#32;(32&#32;-&#32;<link linkend="__classes_2lib_2external_2sdefl_8h_1a7fa1bcd3926ce2c4aedcbc93925f7195">SDEFL_HASH_BITS</link>);
+230 }
+231 <emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>
+232 sdefl_put(<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>&#32;**<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a92034251bfd455d524a9b5610cddba00">dst</link>,&#32;<emphasis role="keyword">struct</emphasis>&#32;<link linkend="_structsdefl">sdefl</link>&#32;*s,&#32;<emphasis role="keywordtype">int</emphasis>&#32;code,&#32;<emphasis role="keywordtype">int</emphasis>&#32;bitcnt)&#32;{
+233 &#32;&#32;s-&gt;<link linkend="_structsdefl_1ab74d4949538a90a0d35a9e7ec584c9de">bits</link>&#32;|=&#32;(code&#32;&lt;&lt;&#32;s-&gt;<link linkend="_structsdefl_1aae723579aadb3f30acd1871bfbd0a5f4">bitcnt</link>);
+234 &#32;&#32;s-&gt;<link linkend="_structsdefl_1aae723579aadb3f30acd1871bfbd0a5f4">bitcnt</link>&#32;+=&#32;bitcnt;
+235 &#32;&#32;<emphasis role="keywordflow">while</emphasis>&#32;(s-&gt;<link linkend="_structsdefl_1aae723579aadb3f30acd1871bfbd0a5f4">bitcnt</link>&#32;&gt;=&#32;8)&#32;{
+236 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>&#32;*tar&#32;=&#32;*<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a92034251bfd455d524a9b5610cddba00">dst</link>;
+237 &#32;&#32;&#32;&#32;*tar&#32;=&#32;(<emphasis role="keywordtype">unsigned</emphasis>&#32;char)(s-&gt;<link linkend="_structsdefl_1ab74d4949538a90a0d35a9e7ec584c9de">bits</link>&#32;&amp;&#32;0xFF);
+238 &#32;&#32;&#32;&#32;s-&gt;<link linkend="_structsdefl_1ab74d4949538a90a0d35a9e7ec584c9de">bits</link>&#32;&gt;&gt;=&#32;8;
+239 &#32;&#32;&#32;&#32;s-&gt;<link linkend="_structsdefl_1aae723579aadb3f30acd1871bfbd0a5f4">bitcnt</link>&#32;-=&#32;8;
+240 &#32;&#32;&#32;&#32;*<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a92034251bfd455d524a9b5610cddba00">dst</link>&#32;=&#32;*<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a92034251bfd455d524a9b5610cddba00">dst</link>&#32;+&#32;1;
+241 &#32;&#32;}
+242 }
+243 <emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>
+244 sdefl_heap_sub(<emphasis role="keywordtype">unsigned</emphasis>&#32;A[],&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a30ee67aa502329a88f4a203775adfa1a">len</link>,&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;sub)&#32;{
+245 &#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;c,&#32;p&#32;=&#32;sub;
+246 &#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a14cfbe2fc2234f5504618905b69d1e06">v</link>&#32;=&#32;A[sub];
+247 &#32;&#32;<emphasis role="keywordflow">while</emphasis>&#32;((c&#32;=&#32;p&#32;&lt;&lt;&#32;1)&#32;&lt;=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a30ee67aa502329a88f4a203775adfa1a">len</link>)&#32;{
+248 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(c&#32;&lt;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a30ee67aa502329a88f4a203775adfa1a">len</link>&#32;&amp;&amp;&#32;A[c&#32;+&#32;1]&#32;&gt;&#32;A[c])&#32;c++;
+249 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a14cfbe2fc2234f5504618905b69d1e06">v</link>&#32;&gt;=&#32;A[c])&#32;<emphasis role="keywordflow">break</emphasis>;
+250 &#32;&#32;&#32;&#32;A[p]&#32;=&#32;A[c],&#32;p&#32;=&#32;c;
+251 &#32;&#32;}
+252 &#32;&#32;A[p]&#32;=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a14cfbe2fc2234f5504618905b69d1e06">v</link>;
+253 }
+254 <emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>
+255 sdefl_heap_array(<emphasis role="keywordtype">unsigned</emphasis>&#32;*A,&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a30ee67aa502329a88f4a203775adfa1a">len</link>)&#32;{
+256 &#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;sub;
+257 &#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(sub&#32;=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a30ee67aa502329a88f4a203775adfa1a">len</link>&#32;&gt;&gt;&#32;1;&#32;sub&#32;&gt;=&#32;1;&#32;sub--)
+258 &#32;&#32;&#32;&#32;sdefl_heap_sub(A,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a30ee67aa502329a88f4a203775adfa1a">len</link>,&#32;sub);
+259 }
+260 <emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>
+261 sdefl_heap_sort(<emphasis role="keywordtype">unsigned</emphasis>&#32;*A,&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;n)&#32;{
+262 &#32;&#32;A--;
+263 &#32;&#32;sdefl_heap_array(A,&#32;n);
+264 &#32;&#32;<emphasis role="keywordflow">while</emphasis>&#32;(n&#32;&gt;=&#32;2)&#32;{
+265 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;tmp&#32;=&#32;A[n];
+266 &#32;&#32;&#32;&#32;A[n--]&#32;=&#32;A[1];
+267 &#32;&#32;&#32;&#32;A[1]&#32;=&#32;tmp;
+268 &#32;&#32;&#32;&#32;sdefl_heap_sub(A,&#32;n,&#32;1);
+269 &#32;&#32;}
+270 }
+271 <emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">unsigned</emphasis>
+272 sdefl_sort_sym(<emphasis role="keywordtype">unsigned</emphasis>&#32;sym_cnt,&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;*freqs,
+273 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>&#32;*lens,&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;*sym_out)&#32;{
+274 &#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;cnts[SDEFL_CNT_NUM(<link linkend="__classes_2lib_2external_2sdefl_8h_1a4b26eac2741e83f40a1e022f77cef044">SDEFL_SYM_MAX</link>)]&#32;=&#32;{0};
+275 &#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;cnt_num&#32;=&#32;SDEFL_CNT_NUM(sym_cnt);
+276 &#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;used_sym&#32;=&#32;0;
+277 &#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;sym,&#32;i;
+278 &#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(sym&#32;=&#32;0;&#32;sym&#32;&lt;&#32;sym_cnt;&#32;sym++)
+279 &#32;&#32;&#32;&#32;cnts[freqs[sym]&#32;&lt;&#32;cnt_num-1&#32;?&#32;freqs[sym]:&#32;cnt_num-1]++;
+280 &#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(i&#32;=&#32;1;&#32;i&#32;&lt;&#32;cnt_num;&#32;i++)&#32;{
+281 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;cnt&#32;=&#32;cnts[i];
+282 &#32;&#32;&#32;&#32;cnts[i]&#32;=&#32;used_sym;
+283 &#32;&#32;&#32;&#32;used_sym&#32;+=&#32;cnt;
+284 &#32;&#32;}
+285 &#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(sym&#32;=&#32;0;&#32;sym&#32;&lt;&#32;sym_cnt;&#32;sym++)&#32;{
+286 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;freq&#32;=&#32;freqs[sym];
+287 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(freq)&#32;{
+288 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;idx&#32;=&#32;freq&#32;&lt;&#32;cnt_num-1&#32;?&#32;freq&#32;:&#32;cnt_num-1;
+289 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;sym_out[cnts[idx]++]&#32;=&#32;sym&#32;|&#32;(freq&#32;&lt;&lt;&#32;SDEFL_SYM_BITS);
+290 &#32;&#32;&#32;&#32;}&#32;<emphasis role="keywordflow">else</emphasis>&#32;lens[sym]&#32;=&#32;0;
+291 &#32;&#32;}
+292 &#32;&#32;sdefl_heap_sort(sym_out&#32;+&#32;cnts[cnt_num-2],&#32;cnts[cnt_num-1]&#32;-&#32;cnts[cnt_num-2]);
+293 &#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;used_sym;
+294 }
+295 <emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>
+296 sdefl_build_tree(<emphasis role="keywordtype">unsigned</emphasis>&#32;*A,&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;sym_cnt)&#32;{
+297 &#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;i&#32;=&#32;0,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a6eba317e3cf44d6d26c04a5a8f197dcb">b</link>&#32;=&#32;0,&#32;<link linkend="_group__gtc__constants_1ga4b7956eb6e2fbedfc7cf2e46e85c5139">e</link>&#32;=&#32;0;
+298 &#32;&#32;<emphasis role="keywordflow">do</emphasis>&#32;{
+299 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;m,&#32;n,&#32;freq_shift;
+300 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(i&#32;!=&#32;sym_cnt&#32;&amp;&amp;&#32;(<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a6eba317e3cf44d6d26c04a5a8f197dcb">b</link>&#32;==&#32;e&#32;||&#32;(A[i]&#32;&gt;&gt;&#32;SDEFL_SYM_BITS)&#32;&lt;=&#32;(A[<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a6eba317e3cf44d6d26c04a5a8f197dcb">b</link>]&#32;&gt;&gt;&#32;SDEFL_SYM_BITS)))
+301 &#32;&#32;&#32;&#32;&#32;&#32;m&#32;=&#32;i++;
+302 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>&#32;m&#32;=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a6eba317e3cf44d6d26c04a5a8f197dcb">b</link>++;
+303 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(i&#32;!=&#32;sym_cnt&#32;&amp;&amp;&#32;(<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a6eba317e3cf44d6d26c04a5a8f197dcb">b</link>&#32;==&#32;e&#32;||&#32;(A[i]&#32;&gt;&gt;&#32;SDEFL_SYM_BITS)&#32;&lt;=&#32;(A[<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a6eba317e3cf44d6d26c04a5a8f197dcb">b</link>]&#32;&gt;&gt;&#32;SDEFL_SYM_BITS)))
+304 &#32;&#32;&#32;&#32;&#32;&#32;n&#32;=&#32;i++;
+305 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>&#32;n&#32;=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a6eba317e3cf44d6d26c04a5a8f197dcb">b</link>++;
+306 
+307 &#32;&#32;&#32;&#32;freq_shift&#32;=&#32;(A[m]&#32;&amp;&#32;~SDEFL_SYM_MSK)&#32;+&#32;(A[n]&#32;&amp;&#32;~SDEFL_SYM_MSK);
+308 &#32;&#32;&#32;&#32;A[m]&#32;=&#32;(A[m]&#32;&amp;&#32;SDEFL_SYM_MSK)&#32;|&#32;(e&#32;&lt;&lt;&#32;SDEFL_SYM_BITS);
+309 &#32;&#32;&#32;&#32;A[n]&#32;=&#32;(A[n]&#32;&amp;&#32;SDEFL_SYM_MSK)&#32;|&#32;(e&#32;&lt;&lt;&#32;SDEFL_SYM_BITS);
+310 &#32;&#32;&#32;&#32;A[<link linkend="_group__gtc__constants_1ga4b7956eb6e2fbedfc7cf2e46e85c5139">e</link>]&#32;=&#32;(A[<link linkend="_group__gtc__constants_1ga4b7956eb6e2fbedfc7cf2e46e85c5139">e</link>]&#32;&amp;&#32;SDEFL_SYM_MSK)&#32;|&#32;freq_shift;
+311 &#32;&#32;}&#32;<emphasis role="keywordflow">while</emphasis>&#32;(sym_cnt&#32;-&#32;++e&#32;&gt;&#32;1);
+312 }
+313 <emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>
+314 sdefl_gen_len_cnt(<emphasis role="keywordtype">unsigned</emphasis>&#32;*A,&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;root,&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;*len_cnt,
+315 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;max_code_len)&#32;{
+316 &#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;n;
+317 &#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;i;
+318 &#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(i&#32;=&#32;0;&#32;i&#32;&lt;=&#32;max_code_len;&#32;i++)
+319 &#32;&#32;&#32;&#32;len_cnt[i]&#32;=&#32;0;
+320 &#32;&#32;len_cnt[1]&#32;=&#32;2;
+321 
+322 &#32;&#32;A[<link linkend="_namespaceversion_1ab64fdd4f88cc81edfc86738fbae8bb9a">root</link>]&#32;&amp;=&#32;SDEFL_SYM_MSK;
+323 &#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(n&#32;=&#32;(<emphasis role="keywordtype">int</emphasis>)root&#32;-&#32;1;&#32;n&#32;&gt;=&#32;0;&#32;n--)&#32;{
+324 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;p&#32;=&#32;A[n]&#32;&gt;&gt;&#32;SDEFL_SYM_BITS;
+325 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;pdepth&#32;=&#32;A[p]&#32;&gt;&gt;&#32;SDEFL_SYM_BITS;
+326 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1aa8bd8cf1eef34712fdb6ad58b540a2ee">depth</link>&#32;=&#32;pdepth&#32;+&#32;1;
+327 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a30ee67aa502329a88f4a203775adfa1a">len</link>&#32;=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1aa8bd8cf1eef34712fdb6ad58b540a2ee">depth</link>;
+328 
+329 &#32;&#32;&#32;&#32;A[n]&#32;=&#32;(A[n]&#32;&amp;&#32;SDEFL_SYM_MSK)&#32;|&#32;(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1aa8bd8cf1eef34712fdb6ad58b540a2ee">depth</link>&#32;&lt;&lt;&#32;SDEFL_SYM_BITS);
+330 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a30ee67aa502329a88f4a203775adfa1a">len</link>&#32;&gt;=&#32;max_code_len)&#32;{
+331 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a30ee67aa502329a88f4a203775adfa1a">len</link>&#32;=&#32;max_code_len;
+332 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">do</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a30ee67aa502329a88f4a203775adfa1a">len</link>--;&#32;<emphasis role="keywordflow">while</emphasis>&#32;(!len_cnt[<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a30ee67aa502329a88f4a203775adfa1a">len</link>]);
+333 &#32;&#32;&#32;&#32;}
+334 &#32;&#32;&#32;&#32;len_cnt[<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a30ee67aa502329a88f4a203775adfa1a">len</link>]--;
+335 &#32;&#32;&#32;&#32;len_cnt[<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a30ee67aa502329a88f4a203775adfa1a">len</link>+1]&#32;+=&#32;2;
+336 &#32;&#32;}
+337 }
+338 <emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>
+339 sdefl_gen_codes(<emphasis role="keywordtype">unsigned</emphasis>&#32;*A,&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>&#32;*lens,&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;*len_cnt,
+340 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;max_code_word_len,&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;sym_cnt)&#32;{
+341 &#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;i,&#32;sym,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a30ee67aa502329a88f4a203775adfa1a">len</link>,&#32;nxt[SDEFL_MAX_CODE_LEN&#32;+&#32;1];
+342 &#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(i&#32;=&#32;0,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a30ee67aa502329a88f4a203775adfa1a">len</link>&#32;=&#32;max_code_word_len;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a30ee67aa502329a88f4a203775adfa1a">len</link>&#32;&gt;=&#32;1;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a30ee67aa502329a88f4a203775adfa1a">len</link>--)&#32;{
+343 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;cnt&#32;=&#32;len_cnt[<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a30ee67aa502329a88f4a203775adfa1a">len</link>];
+344 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">while</emphasis>&#32;(cnt--)&#32;lens[A[i++]&#32;&amp;&#32;SDEFL_SYM_MSK]&#32;=&#32;(<emphasis role="keywordtype">unsigned</emphasis>&#32;char)<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a30ee67aa502329a88f4a203775adfa1a">len</link>;
+345 &#32;&#32;}
+346 &#32;&#32;nxt[0]&#32;=&#32;nxt[1]&#32;=&#32;0;
+347 &#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a30ee67aa502329a88f4a203775adfa1a">len</link>&#32;=&#32;2;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a30ee67aa502329a88f4a203775adfa1a">len</link>&#32;&lt;=&#32;max_code_word_len;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a30ee67aa502329a88f4a203775adfa1a">len</link>++)
+348 &#32;&#32;&#32;&#32;nxt[<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a30ee67aa502329a88f4a203775adfa1a">len</link>]&#32;=&#32;(nxt[<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a30ee67aa502329a88f4a203775adfa1a">len</link>-1]&#32;+&#32;len_cnt[<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a30ee67aa502329a88f4a203775adfa1a">len</link>-1])&#32;&lt;&lt;&#32;1;
+349 &#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(sym&#32;=&#32;0;&#32;sym&#32;&lt;&#32;sym_cnt;&#32;sym++)
+350 &#32;&#32;&#32;&#32;A[sym]&#32;=&#32;nxt[lens[sym]]++;
+351 }
+352 <emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">unsigned</emphasis>
+353 sdefl_rev(<emphasis role="keywordtype">unsigned</emphasis>&#32;c,&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>&#32;n)&#32;{
+354 &#32;&#32;c&#32;=&#32;((c&#32;&amp;&#32;0x5555)&#32;&lt;&lt;&#32;1)&#32;|&#32;((c&#32;&amp;&#32;0xAAAA)&#32;&gt;&gt;&#32;1);
+355 &#32;&#32;c&#32;=&#32;((c&#32;&amp;&#32;0x3333)&#32;&lt;&lt;&#32;2)&#32;|&#32;((c&#32;&amp;&#32;0xCCCC)&#32;&gt;&gt;&#32;2);
+356 &#32;&#32;c&#32;=&#32;((c&#32;&amp;&#32;0x0F0F)&#32;&lt;&lt;&#32;4)&#32;|&#32;((c&#32;&amp;&#32;0xF0F0)&#32;&gt;&gt;&#32;4);
+357 &#32;&#32;c&#32;=&#32;((c&#32;&amp;&#32;0x00FF)&#32;&lt;&lt;&#32;8)&#32;|&#32;((c&#32;&amp;&#32;0xFF00)&#32;&gt;&gt;&#32;8);
+358 &#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;c&#32;&gt;&gt;&#32;(16-n);
+359 }
+360 <emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>
+361 sdefl_huff(<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>&#32;*lens,&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;*codes,&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;*freqs,
+362 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;num_syms,&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;max_code_len)&#32;{
+363 &#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;c,&#32;*A&#32;=&#32;codes;
+364 &#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;len_cnt[SDEFL_MAX_CODE_LEN&#32;+&#32;1];
+365 &#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;used_syms&#32;=&#32;sdefl_sort_sym(num_syms,&#32;freqs,&#32;lens,&#32;A);
+366 &#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(!used_syms)&#32;<emphasis role="keywordflow">return</emphasis>;
+367 &#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(used_syms&#32;==&#32;1)&#32;{
+368 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;s&#32;=&#32;A[0]&#32;&amp;&#32;SDEFL_SYM_MSK;
+369 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;i&#32;=&#32;s&#32;?&#32;s&#32;:&#32;1;
+370 &#32;&#32;&#32;&#32;codes[0]&#32;=&#32;0,&#32;lens[0]&#32;=&#32;1;
+371 &#32;&#32;&#32;&#32;codes[i]&#32;=&#32;1,&#32;lens[i]&#32;=&#32;1;
+372 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>;
+373 &#32;&#32;}
+374 &#32;&#32;sdefl_build_tree(A,&#32;used_syms);
+375 &#32;&#32;sdefl_gen_len_cnt(A,&#32;used_syms-2,&#32;len_cnt,&#32;max_code_len);
+376 &#32;&#32;sdefl_gen_codes(A,&#32;lens,&#32;len_cnt,&#32;max_code_len,&#32;num_syms);
+377 &#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(c&#32;=&#32;0;&#32;c&#32;&lt;&#32;num_syms;&#32;c++)&#32;{
+378 &#32;&#32;&#32;&#32;codes[c]&#32;=&#32;sdefl_rev(codes[c],&#32;lens[c]);
+379 &#32;&#32;}
+380 }
+381 <emphasis role="keyword">struct&#32;</emphasis>sdefl_symcnt&#32;{
+382 &#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;items;
+383 &#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;lit;
+384 &#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;off;
+385 };
+386 <emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>
+387 sdefl_precode(<emphasis role="keyword">struct</emphasis>&#32;sdefl_symcnt&#32;*cnt,&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;*freqs,&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;*items,
+388 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>&#32;*litlen,&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>&#32;*offlen)&#32;{
+389 &#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;*at&#32;=&#32;items;
+390 &#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;run_start&#32;=&#32;0;
+391 
+392 &#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;total&#32;=&#32;0;
+393 &#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>&#32;lens[<link linkend="__classes_2lib_2external_2sdefl_8h_1a4b26eac2741e83f40a1e022f77cef044">SDEFL_SYM_MAX</link>&#32;+&#32;<link linkend="__classes_2lib_2external_2sdefl_8h_1abf32e22a7b24f901d39c0888a2248f16">SDEFL_OFF_MAX</link>];
+394 &#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(cnt-&gt;lit&#32;=&#32;<link linkend="__classes_2lib_2external_2sdefl_8h_1a4b26eac2741e83f40a1e022f77cef044">SDEFL_SYM_MAX</link>;&#32;cnt-&gt;lit&#32;&gt;&#32;257;&#32;cnt-&gt;lit--)
+395 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(litlen[cnt-&gt;lit&#32;-&#32;1])&#32;<emphasis role="keywordflow">break</emphasis>;
+396 &#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(cnt-&gt;off&#32;=&#32;<link linkend="__classes_2lib_2external_2sdefl_8h_1abf32e22a7b24f901d39c0888a2248f16">SDEFL_OFF_MAX</link>;&#32;cnt-&gt;off&#32;&gt;&#32;1;&#32;cnt-&gt;off--)
+397 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(offlen[cnt-&gt;off&#32;-&#32;1])&#32;<emphasis role="keywordflow">break</emphasis>;
+398 
+399 &#32;&#32;total&#32;=&#32;(unsigned)(cnt-&gt;lit&#32;+&#32;cnt-&gt;off);
+400 &#32;&#32;memcpy(lens,&#32;litlen,&#32;<emphasis role="keyword">sizeof</emphasis>(<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>)&#32;*&#32;(<emphasis role="keywordtype">size_t</emphasis>)cnt-&gt;lit);
+401 &#32;&#32;memcpy(lens&#32;+&#32;cnt-&gt;lit,&#32;offlen,&#32;<emphasis role="keyword">sizeof</emphasis>(<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>)&#32;*&#32;(<emphasis role="keywordtype">size_t</emphasis>)cnt-&gt;off);
+402 &#32;&#32;<emphasis role="keywordflow">do</emphasis>&#32;{
+403 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a30ee67aa502329a88f4a203775adfa1a">len</link>&#32;=&#32;lens[run_start];
+404 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;run_end&#32;=&#32;run_start;
+405 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">do</emphasis>&#32;run_end++;&#32;<emphasis role="keywordflow">while</emphasis>&#32;(run_end&#32;!=&#32;total&#32;&amp;&amp;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a30ee67aa502329a88f4a203775adfa1a">len</link>&#32;==&#32;lens[run_end]);
+406 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(!<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a30ee67aa502329a88f4a203775adfa1a">len</link>)&#32;{
+407 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">while</emphasis>&#32;((run_end&#32;-&#32;run_start)&#32;&gt;=&#32;11)&#32;{
+408 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;n&#32;=&#32;(run_end&#32;-&#32;run_start)&#32;-&#32;11;
+409 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;xbits&#32;=&#32;&#32;n&#32;&lt;&#32;0x7f&#32;?&#32;n&#32;:&#32;0x7f;
+410 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;freqs[18]++;
+411 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;*at++&#32;=&#32;18u&#32;|&#32;(xbits&#32;&lt;&lt;&#32;5u);
+412 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;run_start&#32;+=&#32;11&#32;+&#32;xbits;
+413 &#32;&#32;&#32;&#32;&#32;&#32;}
+414 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;((run_end&#32;-&#32;run_start)&#32;&gt;=&#32;3)&#32;{
+415 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;n&#32;=&#32;(run_end&#32;-&#32;run_start)&#32;-&#32;3;
+416 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;xbits&#32;=&#32;&#32;n&#32;&lt;&#32;0x7&#32;?&#32;n&#32;:&#32;0x7;
+417 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;freqs[17]++;
+418 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;*at++&#32;=&#32;17u&#32;|&#32;(xbits&#32;&lt;&lt;&#32;5u);
+419 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;run_start&#32;+=&#32;3&#32;+&#32;xbits;
+420 &#32;&#32;&#32;&#32;&#32;&#32;}
+421 &#32;&#32;&#32;&#32;}&#32;<emphasis role="keywordflow">else</emphasis>&#32;<emphasis role="keywordflow">if</emphasis>&#32;((run_end&#32;-&#32;run_start)&#32;&gt;=&#32;4)&#32;{
+422 &#32;&#32;&#32;&#32;&#32;&#32;freqs[<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a30ee67aa502329a88f4a203775adfa1a">len</link>]++;
+423 &#32;&#32;&#32;&#32;&#32;&#32;*at++&#32;=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a30ee67aa502329a88f4a203775adfa1a">len</link>;
+424 &#32;&#32;&#32;&#32;&#32;&#32;run_start++;
+425 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">do</emphasis>&#32;{
+426 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;xbits&#32;=&#32;(run_end&#32;-&#32;run_start)&#32;-&#32;3;
+427 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;xbits&#32;=&#32;xbits&#32;&lt;&#32;0x03&#32;?&#32;xbits&#32;:&#32;0x03;
+428 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;*at++&#32;=&#32;16&#32;|&#32;(xbits&#32;&lt;&lt;&#32;5);
+429 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;run_start&#32;+=&#32;3&#32;+&#32;xbits;
+430 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;freqs[16]++;
+431 &#32;&#32;&#32;&#32;&#32;&#32;}&#32;<emphasis role="keywordflow">while</emphasis>&#32;((run_end&#32;-&#32;run_start)&#32;&gt;=&#32;3);
+432 &#32;&#32;&#32;&#32;}
+433 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">while</emphasis>&#32;(run_start&#32;!=&#32;run_end)&#32;{
+434 &#32;&#32;&#32;&#32;&#32;&#32;freqs[<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a30ee67aa502329a88f4a203775adfa1a">len</link>]++;
+435 &#32;&#32;&#32;&#32;&#32;&#32;*at++&#32;=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a30ee67aa502329a88f4a203775adfa1a">len</link>;
+436 &#32;&#32;&#32;&#32;&#32;&#32;run_start++;
+437 &#32;&#32;&#32;&#32;}
+438 &#32;&#32;}&#32;<emphasis role="keywordflow">while</emphasis>&#32;(run_start&#32;!=&#32;total);
+439 &#32;&#32;cnt-&gt;items&#32;=&#32;(int)(at&#32;-&#32;items);
+440 }
+441 <emphasis role="keyword">struct&#32;</emphasis>sdefl_match_codes&#32;{
+442 &#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;ls,&#32;lc;
+443 &#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;dc,&#32;dx;
+444 };
+445 <emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>
+446 sdefl_match_codes(<emphasis role="keyword">struct</emphasis>&#32;sdefl_match_codes&#32;*cod,&#32;<emphasis role="keywordtype">int</emphasis>&#32;dist,&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a30ee67aa502329a88f4a203775adfa1a">len</link>)&#32;{
+447 &#32;&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">short</emphasis>&#32;dxmax[]&#32;=&#32;{0,6,12,24,48,96,192,384,768,1536,3072,6144,12288,24576};
+448 &#32;&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>&#32;lslot[258+1]&#32;=&#32;{
+449 &#32;&#32;&#32;&#32;0,&#32;0,&#32;0,&#32;0,&#32;1,&#32;2,&#32;3,&#32;4,&#32;5,&#32;6,&#32;7,&#32;8,&#32;8,&#32;9,&#32;9,&#32;10,&#32;10,&#32;11,&#32;11,&#32;12,&#32;12,&#32;12,
+450 &#32;&#32;&#32;&#32;12,&#32;13,&#32;13,&#32;13,&#32;13,&#32;14,&#32;14,&#32;14,&#32;14,&#32;15,&#32;15,&#32;15,&#32;15,&#32;16,&#32;16,&#32;16,&#32;16,&#32;16,
+451 &#32;&#32;&#32;&#32;16,&#32;16,&#32;16,&#32;17,&#32;17,&#32;17,&#32;17,&#32;17,&#32;17,&#32;17,&#32;17,&#32;18,&#32;18,&#32;18,&#32;18,&#32;18,&#32;18,&#32;18,
+452 &#32;&#32;&#32;&#32;18,&#32;19,&#32;19,&#32;19,&#32;19,&#32;19,&#32;19,&#32;19,&#32;19,&#32;20,&#32;20,&#32;20,&#32;20,&#32;20,&#32;20,&#32;20,&#32;20,&#32;20,
+453 &#32;&#32;&#32;&#32;20,&#32;20,&#32;20,&#32;20,&#32;20,&#32;20,&#32;20,&#32;21,&#32;21,&#32;21,&#32;21,&#32;21,&#32;21,&#32;21,&#32;21,&#32;21,&#32;21,&#32;21,
+454 &#32;&#32;&#32;&#32;21,&#32;21,&#32;21,&#32;21,&#32;21,&#32;22,&#32;22,&#32;22,&#32;22,&#32;22,&#32;22,&#32;22,&#32;22,&#32;22,&#32;22,&#32;22,&#32;22,&#32;22,
+455 &#32;&#32;&#32;&#32;22,&#32;22,&#32;22,&#32;23,&#32;23,&#32;23,&#32;23,&#32;23,&#32;23,&#32;23,&#32;23,&#32;23,&#32;23,&#32;23,&#32;23,&#32;23,&#32;23,&#32;23,
+456 &#32;&#32;&#32;&#32;23,&#32;24,&#32;24,&#32;24,&#32;24,&#32;24,&#32;24,&#32;24,&#32;24,&#32;24,&#32;24,&#32;24,&#32;24,&#32;24,&#32;24,&#32;24,&#32;24,&#32;24,
+457 &#32;&#32;&#32;&#32;24,&#32;24,&#32;24,&#32;24,&#32;24,&#32;24,&#32;24,&#32;24,&#32;24,&#32;24,&#32;24,&#32;24,&#32;24,&#32;24,&#32;24,&#32;25,&#32;25,&#32;25,
+458 &#32;&#32;&#32;&#32;25,&#32;25,&#32;25,&#32;25,&#32;25,&#32;25,&#32;25,&#32;25,&#32;25,&#32;25,&#32;25,&#32;25,&#32;25,&#32;25,&#32;25,&#32;25,&#32;25,&#32;25,
+459 &#32;&#32;&#32;&#32;25,&#32;25,&#32;25,&#32;25,&#32;25,&#32;25,&#32;25,&#32;25,&#32;25,&#32;25,&#32;25,&#32;26,&#32;26,&#32;26,&#32;26,&#32;26,&#32;26,&#32;26,
+460 &#32;&#32;&#32;&#32;26,&#32;26,&#32;26,&#32;26,&#32;26,&#32;26,&#32;26,&#32;26,&#32;26,&#32;26,&#32;26,&#32;26,&#32;26,&#32;26,&#32;26,&#32;26,&#32;26,&#32;26,
+461 &#32;&#32;&#32;&#32;26,&#32;26,&#32;26,&#32;26,&#32;26,&#32;26,&#32;26,&#32;27,&#32;27,&#32;27,&#32;27,&#32;27,&#32;27,&#32;27,&#32;27,&#32;27,&#32;27,&#32;27,
+462 &#32;&#32;&#32;&#32;27,&#32;27,&#32;27,&#32;27,&#32;27,&#32;27,&#32;27,&#32;27,&#32;27,&#32;27,&#32;27,&#32;27,&#32;27,&#32;27,&#32;27,&#32;27,&#32;27,&#32;27,
+463 &#32;&#32;&#32;&#32;27,&#32;27,&#32;28
+464 &#32;&#32;};
+465 &#32;&#32;cod-&gt;ls&#32;=&#32;lslot[<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a30ee67aa502329a88f4a203775adfa1a">len</link>];
+466 &#32;&#32;cod-&gt;lc&#32;=&#32;257&#32;+&#32;cod-&gt;ls;
+467 &#32;&#32;cod-&gt;dx&#32;=&#32;sdefl_ilog2(sdefl_npow2(dist)&#32;&gt;&gt;&#32;2);
+468 &#32;&#32;cod-&gt;dc&#32;=&#32;cod-&gt;dx&#32;?&#32;((cod-&gt;dx&#32;+&#32;1)&#32;&lt;&lt;&#32;1)&#32;+&#32;(dist&#32;&gt;&#32;dxmax[cod-&gt;dx])&#32;:&#32;dist-1;
+469 }
+470 <emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>
+471 sdefl_match(<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>&#32;**<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a92034251bfd455d524a9b5610cddba00">dst</link>,&#32;<emphasis role="keyword">struct</emphasis>&#32;<link linkend="_structsdefl">sdefl</link>&#32;*s,&#32;<emphasis role="keywordtype">int</emphasis>&#32;dist,&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a30ee67aa502329a88f4a203775adfa1a">len</link>)&#32;{
+472 &#32;&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>&#32;lxn[]&#32;=&#32;{0,0,0,0,0,0,0,0,1,1,1,1,2,2,2,2,3,3,3,3,4,4,4,4,5,5,5,5,0};
+473 &#32;&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">short</emphasis>&#32;lmin[]&#32;=&#32;{3,4,5,6,7,8,9,10,11,13,15,17,19,23,27,31,35,43,
+474 &#32;&#32;&#32;&#32;&#32;&#32;51,59,67,83,99,115,131,163,195,227,258};
+475 &#32;&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">short</emphasis>&#32;dmin[]&#32;=&#32;{1,2,3,4,5,7,9,13,17,25,33,49,65,97,129,193,257,
+476 &#32;&#32;&#32;&#32;&#32;&#32;385,513,769,1025,1537,2049,3073,4097,6145,8193,12289,16385,24577};
+477 
+478 &#32;&#32;<emphasis role="keyword">struct&#32;</emphasis>sdefl_match_codes&#32;cod;
+479 &#32;&#32;sdefl_match_codes(&amp;cod,&#32;dist,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a30ee67aa502329a88f4a203775adfa1a">len</link>);
+480 &#32;&#32;sdefl_put(<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a92034251bfd455d524a9b5610cddba00">dst</link>,&#32;s,&#32;(<emphasis role="keywordtype">int</emphasis>)s-&gt;<link linkend="_structsdefl_1a01c4cf15274a3ec9b4a215c60965afae">cod</link>.<link linkend="_structsdefl__codes_1ac960ee02384990c1f53eb45762634e36">word</link>.<link linkend="_structsdefl__code__words_1af37139bf3c0799797394e0a49db34820">lit</link>[cod.lc],&#32;s-&gt;<link linkend="_structsdefl_1a01c4cf15274a3ec9b4a215c60965afae">cod</link>.<link linkend="_structsdefl__codes_1a6c78391857841ba7999b62b44a9d3e73">len</link>.<link linkend="_structsdefl__lens_1a52472e4d81726afb9ec8c936e0c3b94f">lit</link>[cod.lc]);
+481 &#32;&#32;sdefl_put(<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a92034251bfd455d524a9b5610cddba00">dst</link>,&#32;s,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a30ee67aa502329a88f4a203775adfa1a">len</link>&#32;-&#32;lmin[cod.ls],&#32;lxn[cod.ls]);
+482 &#32;&#32;sdefl_put(<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a92034251bfd455d524a9b5610cddba00">dst</link>,&#32;s,&#32;(<emphasis role="keywordtype">int</emphasis>)s-&gt;<link linkend="_structsdefl_1a01c4cf15274a3ec9b4a215c60965afae">cod</link>.<link linkend="_structsdefl__codes_1ac960ee02384990c1f53eb45762634e36">word</link>.<link linkend="_structsdefl__code__words_1ae48a67d477b35f4f2ff3550e04a88cfc">off</link>[cod.dc],&#32;s-&gt;<link linkend="_structsdefl_1a01c4cf15274a3ec9b4a215c60965afae">cod</link>.<link linkend="_structsdefl__codes_1a6c78391857841ba7999b62b44a9d3e73">len</link>.<link linkend="_structsdefl__lens_1a3cf81736fd8eaaf83f744cb5702c8484">off</link>[cod.dc]);
+483 &#32;&#32;sdefl_put(<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a92034251bfd455d524a9b5610cddba00">dst</link>,&#32;s,&#32;dist&#32;-&#32;dmin[cod.dc],&#32;cod.dx);
+484 }
+485 <emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>
+486 sdefl_flush(<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>&#32;**<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a92034251bfd455d524a9b5610cddba00">dst</link>,&#32;<emphasis role="keyword">struct</emphasis>&#32;<link linkend="_structsdefl">sdefl</link>&#32;*s,&#32;<emphasis role="keywordtype">int</emphasis>&#32;is_last,
+487 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>&#32;*<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a83ad0ee7f1e06b59c90271716e689080">in</link>)&#32;{
+488 &#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;j,&#32;i&#32;=&#32;0,&#32;item_cnt&#32;=&#32;0;
+489 &#32;&#32;<emphasis role="keyword">struct&#32;</emphasis>sdefl_symcnt&#32;symcnt&#32;=&#32;{0};
+490 &#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;codes[<link linkend="__classes_2lib_2external_2sdefl_8h_1adba354c939a3e6bba614f36e6594fab1">SDEFL_PRE_MAX</link>];
+491 &#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>&#32;lens[<link linkend="__classes_2lib_2external_2sdefl_8h_1adba354c939a3e6bba614f36e6594fab1">SDEFL_PRE_MAX</link>];
+492 &#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;freqs[<link linkend="__classes_2lib_2external_2sdefl_8h_1adba354c939a3e6bba614f36e6594fab1">SDEFL_PRE_MAX</link>]&#32;=&#32;{0};
+493 &#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;items[<link linkend="__classes_2lib_2external_2sdefl_8h_1a4b26eac2741e83f40a1e022f77cef044">SDEFL_SYM_MAX</link>&#32;+&#32;<link linkend="__classes_2lib_2external_2sdefl_8h_1abf32e22a7b24f901d39c0888a2248f16">SDEFL_OFF_MAX</link>];
+494 &#32;&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>&#32;perm[<link linkend="__classes_2lib_2external_2sdefl_8h_1adba354c939a3e6bba614f36e6594fab1">SDEFL_PRE_MAX</link>]&#32;=&#32;{16,17,18,0,8,7,9,6,10,5,11,
+495 &#32;&#32;&#32;&#32;&#32;&#32;4,12,3,13,2,14,1,15};
+496 
+497 &#32;&#32;<emphasis role="comment">/*&#32;huffman&#32;codes&#32;*/</emphasis>
+498 &#32;&#32;s-&gt;<link linkend="_structsdefl_1a07628ee6182b1f4fe77010df27558d9c">freq</link>.<link linkend="_structsdefl__freq_1a9472074a95a85fa8ba57782c0d045045">lit</link>[SDEFL_EOB]++;
+499 &#32;&#32;sdefl_huff(s-&gt;<link linkend="_structsdefl_1a01c4cf15274a3ec9b4a215c60965afae">cod</link>.<link linkend="_structsdefl__codes_1a6c78391857841ba7999b62b44a9d3e73">len</link>.<link linkend="_structsdefl__lens_1a52472e4d81726afb9ec8c936e0c3b94f">lit</link>,&#32;s-&gt;<link linkend="_structsdefl_1a01c4cf15274a3ec9b4a215c60965afae">cod</link>.<link linkend="_structsdefl__codes_1ac960ee02384990c1f53eb45762634e36">word</link>.<link linkend="_structsdefl__code__words_1af37139bf3c0799797394e0a49db34820">lit</link>,&#32;s-&gt;<link linkend="_structsdefl_1a07628ee6182b1f4fe77010df27558d9c">freq</link>.<link linkend="_structsdefl__freq_1a9472074a95a85fa8ba57782c0d045045">lit</link>,&#32;<link linkend="__classes_2lib_2external_2sdefl_8h_1a4b26eac2741e83f40a1e022f77cef044">SDEFL_SYM_MAX</link>,&#32;SDEFL_LIT_LEN_CODES);
+500 &#32;&#32;sdefl_huff(s-&gt;<link linkend="_structsdefl_1a01c4cf15274a3ec9b4a215c60965afae">cod</link>.<link linkend="_structsdefl__codes_1a6c78391857841ba7999b62b44a9d3e73">len</link>.<link linkend="_structsdefl__lens_1a3cf81736fd8eaaf83f744cb5702c8484">off</link>,&#32;s-&gt;<link linkend="_structsdefl_1a01c4cf15274a3ec9b4a215c60965afae">cod</link>.<link linkend="_structsdefl__codes_1ac960ee02384990c1f53eb45762634e36">word</link>.<link linkend="_structsdefl__code__words_1ae48a67d477b35f4f2ff3550e04a88cfc">off</link>,&#32;s-&gt;<link linkend="_structsdefl_1a07628ee6182b1f4fe77010df27558d9c">freq</link>.<link linkend="_structsdefl__freq_1a8588725aa747ceede4815566d51d91ba">off</link>,&#32;<link linkend="__classes_2lib_2external_2sdefl_8h_1abf32e22a7b24f901d39c0888a2248f16">SDEFL_OFF_MAX</link>,&#32;SDEFL_OFF_CODES);
+501 &#32;&#32;sdefl_precode(&amp;symcnt,&#32;freqs,&#32;items,&#32;s-&gt;<link linkend="_structsdefl_1a01c4cf15274a3ec9b4a215c60965afae">cod</link>.<link linkend="_structsdefl__codes_1a6c78391857841ba7999b62b44a9d3e73">len</link>.<link linkend="_structsdefl__lens_1a52472e4d81726afb9ec8c936e0c3b94f">lit</link>,&#32;s-&gt;<link linkend="_structsdefl_1a01c4cf15274a3ec9b4a215c60965afae">cod</link>.<link linkend="_structsdefl__codes_1a6c78391857841ba7999b62b44a9d3e73">len</link>.<link linkend="_structsdefl__lens_1a3cf81736fd8eaaf83f744cb5702c8484">off</link>);
+502 &#32;&#32;sdefl_huff(lens,&#32;codes,&#32;freqs,&#32;<link linkend="__classes_2lib_2external_2sdefl_8h_1adba354c939a3e6bba614f36e6594fab1">SDEFL_PRE_MAX</link>,&#32;SDEFL_PRE_CODES);
+503 &#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(item_cnt&#32;=&#32;<link linkend="__classes_2lib_2external_2sdefl_8h_1adba354c939a3e6bba614f36e6594fab1">SDEFL_PRE_MAX</link>;&#32;item_cnt&#32;&gt;&#32;4;&#32;item_cnt--)&#32;{
+504 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(lens[perm[item_cnt&#32;-&#32;1]])&#32;<emphasis role="keywordflow">break</emphasis>;
+505 &#32;&#32;}
+506 &#32;&#32;<emphasis role="comment">/*&#32;block&#32;header&#32;*/</emphasis>
+507 &#32;&#32;sdefl_put(<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a92034251bfd455d524a9b5610cddba00">dst</link>,&#32;s,&#32;is_last&#32;?&#32;0x01&#32;:&#32;0x00,&#32;1);&#32;<emphasis role="comment">/*&#32;block&#32;*/</emphasis>
+508 &#32;&#32;sdefl_put(<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a92034251bfd455d524a9b5610cddba00">dst</link>,&#32;s,&#32;0x02,&#32;2);&#32;<emphasis role="comment">/*&#32;dynamic&#32;huffman&#32;*/</emphasis>
+509 &#32;&#32;sdefl_put(<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a92034251bfd455d524a9b5610cddba00">dst</link>,&#32;s,&#32;symcnt.lit&#32;-&#32;257,&#32;5);
+510 &#32;&#32;sdefl_put(<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a92034251bfd455d524a9b5610cddba00">dst</link>,&#32;s,&#32;symcnt.off&#32;-&#32;1,&#32;5);
+511 &#32;&#32;sdefl_put(<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a92034251bfd455d524a9b5610cddba00">dst</link>,&#32;s,&#32;item_cnt&#32;-&#32;4,&#32;4);
+512 &#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(i&#32;=&#32;0;&#32;i&#32;&lt;&#32;item_cnt;&#32;++i)
+513 &#32;&#32;&#32;&#32;sdefl_put(<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a92034251bfd455d524a9b5610cddba00">dst</link>,&#32;s,&#32;lens[perm[i]],&#32;3);
+514 &#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(i&#32;=&#32;0;&#32;i&#32;&lt;&#32;symcnt.items;&#32;++i)&#32;{
+515 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;sym&#32;=&#32;items[i]&#32;&amp;&#32;0x1F;
+516 &#32;&#32;&#32;&#32;sdefl_put(<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a92034251bfd455d524a9b5610cddba00">dst</link>,&#32;s,&#32;(<emphasis role="keywordtype">int</emphasis>)codes[sym],&#32;lens[sym]);
+517 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(sym&#32;&lt;&#32;16)&#32;<emphasis role="keywordflow">continue</emphasis>;
+518 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(sym&#32;==&#32;16)&#32;sdefl_put(<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a92034251bfd455d524a9b5610cddba00">dst</link>,&#32;s,&#32;items[i]&#32;&gt;&gt;&#32;5,&#32;2);
+519 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>&#32;<emphasis role="keywordflow">if</emphasis>(sym&#32;==&#32;17)&#32;sdefl_put(<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a92034251bfd455d524a9b5610cddba00">dst</link>,&#32;s,&#32;items[i]&#32;&gt;&gt;&#32;5,&#32;3);
+520 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>&#32;sdefl_put(<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a92034251bfd455d524a9b5610cddba00">dst</link>,&#32;s,&#32;items[i]&#32;&gt;&gt;&#32;5,&#32;7);
+521 &#32;&#32;}
+522 &#32;&#32;<emphasis role="comment">/*&#32;block&#32;sequences&#32;*/</emphasis>
+523 &#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(i&#32;=&#32;0;&#32;i&#32;&lt;&#32;s-&gt;<link linkend="_structsdefl_1a8fe956b4ca467c796c7b7173bd168396">seq_cnt</link>;&#32;++i)&#32;{
+524 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(s-&gt;<link linkend="_structsdefl_1a42c576ea5d5f181a1c99656212c687f6">seq</link>[i].<link linkend="_structsdefl__seqt_1aa0c241a7c2b78b65edccae3d4568d3ee">off</link>&#32;&gt;=&#32;0)
+525 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(j&#32;=&#32;0;&#32;j&#32;&lt;&#32;s-&gt;<link linkend="_structsdefl_1a42c576ea5d5f181a1c99656212c687f6">seq</link>[i].<link linkend="_structsdefl__seqt_1afdc37c8d44729781391d39ecf2b6a0df">len</link>;&#32;++j)&#32;{
+526 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;c&#32;=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a83ad0ee7f1e06b59c90271716e689080">in</link>[s-&gt;<link linkend="_structsdefl_1a42c576ea5d5f181a1c99656212c687f6">seq</link>[i].<link linkend="_structsdefl__seqt_1aa0c241a7c2b78b65edccae3d4568d3ee">off</link>&#32;+&#32;j];
+527 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;sdefl_put(<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a92034251bfd455d524a9b5610cddba00">dst</link>,&#32;s,&#32;(<emphasis role="keywordtype">int</emphasis>)s-&gt;<link linkend="_structsdefl_1a01c4cf15274a3ec9b4a215c60965afae">cod</link>.<link linkend="_structsdefl__codes_1ac960ee02384990c1f53eb45762634e36">word</link>.<link linkend="_structsdefl__code__words_1af37139bf3c0799797394e0a49db34820">lit</link>[c],&#32;s-&gt;<link linkend="_structsdefl_1a01c4cf15274a3ec9b4a215c60965afae">cod</link>.<link linkend="_structsdefl__codes_1a6c78391857841ba7999b62b44a9d3e73">len</link>.<link linkend="_structsdefl__lens_1a52472e4d81726afb9ec8c936e0c3b94f">lit</link>[c]);
+528 &#32;&#32;&#32;&#32;&#32;&#32;}
+529 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>&#32;sdefl_match(<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a92034251bfd455d524a9b5610cddba00">dst</link>,&#32;s,&#32;-s-&gt;<link linkend="_structsdefl_1a42c576ea5d5f181a1c99656212c687f6">seq</link>[i].<link linkend="_structsdefl__seqt_1aa0c241a7c2b78b65edccae3d4568d3ee">off</link>,&#32;s-&gt;<link linkend="_structsdefl_1a42c576ea5d5f181a1c99656212c687f6">seq</link>[i].<link linkend="_structsdefl__seqt_1afdc37c8d44729781391d39ecf2b6a0df">len</link>);
+530 &#32;&#32;}
+531 &#32;&#32;sdefl_put(<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a92034251bfd455d524a9b5610cddba00">dst</link>,&#32;s,&#32;(<emphasis role="keywordtype">int</emphasis>)(s)-&gt;cod.word.lit[SDEFL_EOB],&#32;(s)-&gt;cod.len.lit[SDEFL_EOB]);
+532 &#32;&#32;memset(&amp;s-&gt;<link linkend="_structsdefl_1a07628ee6182b1f4fe77010df27558d9c">freq</link>,&#32;0,&#32;<emphasis role="keyword">sizeof</emphasis>(s-&gt;<link linkend="_structsdefl_1a07628ee6182b1f4fe77010df27558d9c">freq</link>));
+533 &#32;&#32;s-&gt;<link linkend="_structsdefl_1a8fe956b4ca467c796c7b7173bd168396">seq_cnt</link>&#32;=&#32;0;
+534 }
+535 <emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>
+536 sdefl_seq(<emphasis role="keyword">struct</emphasis>&#32;<link linkend="_structsdefl">sdefl</link>&#32;*s,&#32;<emphasis role="keywordtype">int</emphasis>&#32;off,&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a30ee67aa502329a88f4a203775adfa1a">len</link>)&#32;{
+537 &#32;&#32;assert(s-&gt;<link linkend="_structsdefl_1a8fe956b4ca467c796c7b7173bd168396">seq_cnt</link>&#32;+&#32;2&#32;&lt;&#32;<link linkend="__classes_2lib_2external_2sdefl_8h_1ae540fcf1901221108b570d1109521b9d">SDEFL_SEQ_SIZ</link>);
+538 &#32;&#32;s-&gt;<link linkend="_structsdefl_1a42c576ea5d5f181a1c99656212c687f6">seq</link>[s-&gt;<link linkend="_structsdefl_1a8fe956b4ca467c796c7b7173bd168396">seq_cnt</link>].<link linkend="_structsdefl__seqt_1aa0c241a7c2b78b65edccae3d4568d3ee">off</link>&#32;=&#32;off;
+539 &#32;&#32;s-&gt;<link linkend="_structsdefl_1a42c576ea5d5f181a1c99656212c687f6">seq</link>[s-&gt;<link linkend="_structsdefl_1a8fe956b4ca467c796c7b7173bd168396">seq_cnt</link>].<link linkend="_structsdefl__seqt_1afdc37c8d44729781391d39ecf2b6a0df">len</link>&#32;=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a30ee67aa502329a88f4a203775adfa1a">len</link>;
+540 &#32;&#32;s-&gt;<link linkend="_structsdefl_1a8fe956b4ca467c796c7b7173bd168396">seq_cnt</link>++;
+541 }
+542 <emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>
+543 sdefl_reg_match(<emphasis role="keyword">struct</emphasis>&#32;<link linkend="_structsdefl">sdefl</link>&#32;*s,&#32;<emphasis role="keywordtype">int</emphasis>&#32;off,&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a30ee67aa502329a88f4a203775adfa1a">len</link>)&#32;{
+544 &#32;&#32;<emphasis role="keyword">struct&#32;</emphasis>sdefl_match_codes&#32;cod;
+545 &#32;&#32;sdefl_match_codes(&amp;cod,&#32;off,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a30ee67aa502329a88f4a203775adfa1a">len</link>);
+546 &#32;&#32;s-&gt;<link linkend="_structsdefl_1a07628ee6182b1f4fe77010df27558d9c">freq</link>.<link linkend="_structsdefl__freq_1a9472074a95a85fa8ba57782c0d045045">lit</link>[cod.lc]++;
+547 &#32;&#32;s-&gt;<link linkend="_structsdefl_1a07628ee6182b1f4fe77010df27558d9c">freq</link>.<link linkend="_structsdefl__freq_1a8588725aa747ceede4815566d51d91ba">off</link>[cod.dc]++;
+548 }
+549 <emphasis role="keyword">struct&#32;</emphasis>sdefl_match&#32;{
+550 &#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;off;
+551 &#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a30ee67aa502329a88f4a203775adfa1a">len</link>;
+552 };
+553 <emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>
+554 sdefl_fnd(<emphasis role="keyword">struct</emphasis>&#32;sdefl_match&#32;*m,&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keyword">struct</emphasis>&#32;<link linkend="_structsdefl">sdefl</link>&#32;*s,
+555 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;chain_len,&#32;<emphasis role="keywordtype">int</emphasis>&#32;max_match,&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>&#32;*<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a83ad0ee7f1e06b59c90271716e689080">in</link>,&#32;<emphasis role="keywordtype">int</emphasis>&#32;p)&#32;{
+556 &#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;i&#32;=&#32;s-&gt;<link linkend="_structsdefl_1a61ae3113ab08731d58373cb38524d010">tbl</link>[sdefl_hash32(&amp;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a83ad0ee7f1e06b59c90271716e689080">in</link>[p])];
+557 &#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;limit&#32;=&#32;((p-<link linkend="__classes_2lib_2external_2sdefl_8h_1add31972f8be06a95a5268eaebd97647a">SDEFL_WIN_SIZ</link>)&lt;SDEFL_NIL)?SDEFL_NIL:(p-<link linkend="__classes_2lib_2external_2sdefl_8h_1add31972f8be06a95a5268eaebd97647a">SDEFL_WIN_SIZ</link>);
+558 &#32;&#32;<emphasis role="keywordflow">while</emphasis>&#32;(i&#32;&gt;&#32;limit)&#32;{
+559 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a83ad0ee7f1e06b59c90271716e689080">in</link>[i+m-&gt;len]&#32;==&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a83ad0ee7f1e06b59c90271716e689080">in</link>[p+m-&gt;len]&#32;&amp;&amp;
+560 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;(sdefl_uload32(&amp;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a83ad0ee7f1e06b59c90271716e689080">in</link>[i])&#32;==&#32;sdefl_uload32(&amp;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a83ad0ee7f1e06b59c90271716e689080">in</link>[p]))){
+561 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;n&#32;=&#32;<link linkend="__classes_2lib_2external_2sdefl_8h_1a99ce03608b17edeefecf1335e99c1d15">SDEFL_MIN_MATCH</link>;
+562 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">while</emphasis>&#32;(n&#32;&lt;&#32;max_match&#32;&amp;&amp;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a83ad0ee7f1e06b59c90271716e689080">in</link>[i+n]&#32;==&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a83ad0ee7f1e06b59c90271716e689080">in</link>[p+n])&#32;n++;
+563 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(n&#32;&gt;&#32;m-&gt;len)&#32;{
+564 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;m-&gt;len&#32;=&#32;n,&#32;m-&gt;off&#32;=&#32;p&#32;-&#32;i;
+565 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(n&#32;==&#32;max_match)&#32;<emphasis role="keywordflow">break</emphasis>;
+566 &#32;&#32;&#32;&#32;&#32;&#32;}
+567 &#32;&#32;&#32;&#32;}
+568 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(!(--chain_len))&#32;<emphasis role="keywordflow">break</emphasis>;
+569 &#32;&#32;&#32;&#32;i&#32;=&#32;s-&gt;<link linkend="_structsdefl_1a03ea5271b2e5e392db3ac1c867a31975">prv</link>[i&amp;<link linkend="__classes_2lib_2external_2sdefl_8h_1a21caea1115bd66f0752e0b7994da86e3">SDEFL_WIN_MSK</link>];
+570 &#32;&#32;}
+571 }
+572 <emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>
+573 sdefl_compr(<emphasis role="keyword">struct</emphasis>&#32;<link linkend="_structsdefl">sdefl</link>&#32;*s,&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>&#32;*out,&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>&#32;*<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a83ad0ee7f1e06b59c90271716e689080">in</link>,
+574 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;in_len,&#32;<emphasis role="keywordtype">int</emphasis>&#32;lvl)&#32;{
+575 &#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>&#32;*q&#32;=&#32;out;
+576 &#32;&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>&#32;pref[]&#32;=&#32;{8,10,14,24,30,48,65,96,130};
+577 &#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;max_chain&#32;=&#32;(lvl&#32;&lt;&#32;8)&#32;?&#32;(1&#32;&lt;&lt;&#32;(lvl&#32;+&#32;1)):&#32;(1&#32;&lt;&lt;&#32;13);
+578 &#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;n,&#32;i&#32;=&#32;0,&#32;litlen&#32;=&#32;0;
+579 &#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(n&#32;=&#32;0;&#32;n&#32;&lt;&#32;<link linkend="__classes_2lib_2external_2sdefl_8h_1a9dffc0efc9ded1929aca2db11a9421ac">SDEFL_HASH_SIZ</link>;&#32;++n)&#32;{
+580 &#32;&#32;&#32;&#32;s-&gt;<link linkend="_structsdefl_1a61ae3113ab08731d58373cb38524d010">tbl</link>[n]&#32;=&#32;SDEFL_NIL;
+581 &#32;&#32;}
+582 &#32;&#32;<emphasis role="keywordflow">do</emphasis>&#32;{<emphasis role="keywordtype">int</emphasis>&#32;blk_end&#32;=&#32;i&#32;+&#32;<link linkend="__classes_2lib_2external_2sdefl_8h_1aed7135e287d8aafbc564db27f6575edb">SDEFL_BLK_MAX</link>&#32;&lt;&#32;in_len&#32;?&#32;i&#32;+&#32;<link linkend="__classes_2lib_2external_2sdefl_8h_1aed7135e287d8aafbc564db27f6575edb">SDEFL_BLK_MAX</link>&#32;:&#32;in_len;
+583 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">while</emphasis>&#32;(i&#32;&lt;&#32;blk_end)&#32;{
+584 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">struct&#32;</emphasis>sdefl_match&#32;m&#32;=&#32;{0};
+585 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;max_match&#32;=&#32;((in_len-i)&gt;SDEFL_MAX_MATCH)&#32;?&#32;SDEFL_MAX_MATCH:(in_len-i);
+586 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;nice_match&#32;=&#32;pref[lvl]&#32;&lt;&#32;max_match&#32;?&#32;pref[lvl]&#32;:&#32;max_match;
+587 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="_namespaceutils_1a187ff8156e2bfba6bc234ed6bfd64b3f">run</link>&#32;=&#32;1,&#32;inc&#32;=&#32;1,&#32;run_inc;
+588 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(max_match&#32;&gt;&#32;<link linkend="__classes_2lib_2external_2sdefl_8h_1a99ce03608b17edeefecf1335e99c1d15">SDEFL_MIN_MATCH</link>)&#32;{
+589 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;sdefl_fnd(&amp;m,&#32;s,&#32;max_chain,&#32;max_match,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a83ad0ee7f1e06b59c90271716e689080">in</link>,&#32;i);
+590 &#32;&#32;&#32;&#32;&#32;&#32;}
+591 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(lvl&#32;&gt;=&#32;5&#32;&amp;&amp;&#32;m.len&#32;&gt;=&#32;<link linkend="__classes_2lib_2external_2sdefl_8h_1a99ce03608b17edeefecf1335e99c1d15">SDEFL_MIN_MATCH</link>&#32;&amp;&amp;&#32;m.len&#32;&lt;&#32;nice_match){
+592 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">struct&#32;</emphasis>sdefl_match&#32;m2&#32;=&#32;{0};
+593 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;sdefl_fnd(&amp;m2,&#32;s,&#32;max_chain,&#32;m.len+1,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a83ad0ee7f1e06b59c90271716e689080">in</link>,&#32;i+1);
+594 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;m.len&#32;=&#32;(m2.len&#32;&gt;&#32;m.len)&#32;?&#32;0&#32;:&#32;m.<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a30ee67aa502329a88f4a203775adfa1a">len</link>;
+595 &#32;&#32;&#32;&#32;&#32;&#32;}
+596 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(m.len&#32;&gt;=&#32;<link linkend="__classes_2lib_2external_2sdefl_8h_1a99ce03608b17edeefecf1335e99c1d15">SDEFL_MIN_MATCH</link>)&#32;{
+597 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(litlen)&#32;{
+598 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;sdefl_seq(s,&#32;i&#32;-&#32;litlen,&#32;litlen);
+599 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;litlen&#32;=&#32;0;
+600 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+601 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;sdefl_seq(s,&#32;-m.off,&#32;m.len);
+602 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;sdefl_reg_match(s,&#32;m.off,&#32;m.len);
+603 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(lvl&#32;&lt;&#32;2&#32;&amp;&amp;&#32;m.len&#32;&gt;=&#32;nice_match)&#32;{
+604 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;inc&#32;=&#32;m.len;
+605 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}&#32;<emphasis role="keywordflow">else</emphasis>&#32;{
+606 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_namespaceutils_1a187ff8156e2bfba6bc234ed6bfd64b3f">run</link>&#32;=&#32;m.len;
+607 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+608 &#32;&#32;&#32;&#32;&#32;&#32;}&#32;<emphasis role="keywordflow">else</emphasis>&#32;{
+609 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;s-&gt;<link linkend="_structsdefl_1a07628ee6182b1f4fe77010df27558d9c">freq</link>.<link linkend="_structsdefl__freq_1a9472074a95a85fa8ba57782c0d045045">lit</link>[<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a83ad0ee7f1e06b59c90271716e689080">in</link>[i]]++;
+610 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;litlen++;
+611 &#32;&#32;&#32;&#32;&#32;&#32;}
+612 &#32;&#32;&#32;&#32;&#32;&#32;run_inc&#32;=&#32;<link linkend="_namespaceutils_1a187ff8156e2bfba6bc234ed6bfd64b3f">run</link>&#32;*&#32;inc;
+613 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(in_len&#32;-&#32;(i&#32;+&#32;run_inc)&#32;&gt;&#32;<link linkend="__classes_2lib_2external_2sdefl_8h_1a99ce03608b17edeefecf1335e99c1d15">SDEFL_MIN_MATCH</link>)&#32;{
+614 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">while</emphasis>&#32;(run--&#32;&gt;&#32;0)&#32;{
+615 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;h&#32;=&#32;sdefl_hash32(&amp;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a83ad0ee7f1e06b59c90271716e689080">in</link>[i]);
+616 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;s-&gt;<link linkend="_structsdefl_1a03ea5271b2e5e392db3ac1c867a31975">prv</link>[i&amp;<link linkend="__classes_2lib_2external_2sdefl_8h_1a21caea1115bd66f0752e0b7994da86e3">SDEFL_WIN_MSK</link>]&#32;=&#32;s-&gt;<link linkend="_structsdefl_1a61ae3113ab08731d58373cb38524d010">tbl</link>[h];
+617 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;s-&gt;<link linkend="_structsdefl_1a61ae3113ab08731d58373cb38524d010">tbl</link>[h]&#32;=&#32;i,&#32;i&#32;+=&#32;inc;
+618 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+619 &#32;&#32;&#32;&#32;&#32;&#32;}&#32;<emphasis role="keywordflow">else</emphasis>&#32;{
+620 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;i&#32;+=&#32;run_inc;
+621 &#32;&#32;&#32;&#32;&#32;&#32;}
+622 &#32;&#32;&#32;&#32;}
+623 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(litlen)&#32;{
+624 &#32;&#32;&#32;&#32;&#32;&#32;sdefl_seq(s,&#32;i&#32;-&#32;litlen,&#32;litlen);
+625 &#32;&#32;&#32;&#32;&#32;&#32;litlen&#32;=&#32;0;
+626 &#32;&#32;&#32;&#32;}
+627 &#32;&#32;&#32;&#32;sdefl_flush(&amp;q,&#32;s,&#32;blk_end&#32;==&#32;in_len,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a83ad0ee7f1e06b59c90271716e689080">in</link>);
+628 &#32;&#32;}&#32;<emphasis role="keywordflow">while</emphasis>&#32;(i&#32;&lt;&#32;in_len);
+629 
+630 &#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(s-&gt;<link linkend="_structsdefl_1aae723579aadb3f30acd1871bfbd0a5f4">bitcnt</link>)
+631 &#32;&#32;&#32;&#32;sdefl_put(&amp;q,&#32;s,&#32;0x00,&#32;8&#32;-&#32;s-&gt;<link linkend="_structsdefl_1aae723579aadb3f30acd1871bfbd0a5f4">bitcnt</link>);
+632 &#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;(<emphasis role="keywordtype">int</emphasis>)(q&#32;-&#32;out);
+633 }
+634 <emphasis role="keyword">extern</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>
+635 <link linkend="__classes_2lib_2external_2sdefl_8h_1a533998d27616589206cd346826ac2f59">sdeflate</link>(<emphasis role="keyword">struct</emphasis>&#32;<link linkend="_structsdefl">sdefl</link>&#32;*s,&#32;<emphasis role="keywordtype">void</emphasis>&#32;*out,&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>&#32;*<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a83ad0ee7f1e06b59c90271716e689080">in</link>,&#32;<emphasis role="keywordtype">int</emphasis>&#32;n,&#32;<emphasis role="keywordtype">int</emphasis>&#32;lvl)&#32;{
+636 &#32;&#32;s-&gt;<link linkend="_structsdefl_1ab74d4949538a90a0d35a9e7ec584c9de">bits</link>&#32;=&#32;s-&gt;<link linkend="_structsdefl_1aae723579aadb3f30acd1871bfbd0a5f4">bitcnt</link>&#32;=&#32;0;
+637 &#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;sdefl_compr(s,&#32;(<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>*)out,&#32;(<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>*)<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a83ad0ee7f1e06b59c90271716e689080">in</link>,&#32;n,&#32;lvl);
+638 }
+639 <emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">unsigned</emphasis>
+640 sdefl_adler32(<emphasis role="keywordtype">unsigned</emphasis>&#32;adler32,&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>&#32;*<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a83ad0ee7f1e06b59c90271716e689080">in</link>,&#32;<emphasis role="keywordtype">int</emphasis>&#32;in_len)&#32;{
+641 <emphasis role="preprocessor">&#32;&#32;#define&#32;SDEFL_ADLER_INIT&#32;(1)</emphasis>
+642 &#32;&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;ADLER_MOD&#32;=&#32;65521;
+643 &#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;s1&#32;=&#32;adler32&#32;&amp;&#32;0xffff;
+644 &#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;s2&#32;=&#32;adler32&#32;&gt;&gt;&#32;16;
+645 &#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;blk_len,&#32;i;
+646 
+647 &#32;&#32;blk_len&#32;=&#32;in_len&#32;%&#32;5552;
+648 &#32;&#32;<emphasis role="keywordflow">while</emphasis>&#32;(in_len)&#32;{
+649 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(i&#32;=&#32;0;&#32;i&#32;+&#32;7&#32;&lt;&#32;blk_len;&#32;i&#32;+=&#32;8)&#32;{
+650 &#32;&#32;&#32;&#32;&#32;&#32;s1&#32;+=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a83ad0ee7f1e06b59c90271716e689080">in</link>[0];&#32;s2&#32;+=&#32;s1;
+651 &#32;&#32;&#32;&#32;&#32;&#32;s1&#32;+=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a83ad0ee7f1e06b59c90271716e689080">in</link>[1];&#32;s2&#32;+=&#32;s1;
+652 &#32;&#32;&#32;&#32;&#32;&#32;s1&#32;+=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a83ad0ee7f1e06b59c90271716e689080">in</link>[2];&#32;s2&#32;+=&#32;s1;
+653 &#32;&#32;&#32;&#32;&#32;&#32;s1&#32;+=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a83ad0ee7f1e06b59c90271716e689080">in</link>[3];&#32;s2&#32;+=&#32;s1;
+654 &#32;&#32;&#32;&#32;&#32;&#32;s1&#32;+=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a83ad0ee7f1e06b59c90271716e689080">in</link>[4];&#32;s2&#32;+=&#32;s1;
+655 &#32;&#32;&#32;&#32;&#32;&#32;s1&#32;+=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a83ad0ee7f1e06b59c90271716e689080">in</link>[5];&#32;s2&#32;+=&#32;s1;
+656 &#32;&#32;&#32;&#32;&#32;&#32;s1&#32;+=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a83ad0ee7f1e06b59c90271716e689080">in</link>[6];&#32;s2&#32;+=&#32;s1;
+657 &#32;&#32;&#32;&#32;&#32;&#32;s1&#32;+=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a83ad0ee7f1e06b59c90271716e689080">in</link>[7];&#32;s2&#32;+=&#32;s1;
+658 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a83ad0ee7f1e06b59c90271716e689080">in</link>&#32;+=&#32;8;
+659 &#32;&#32;&#32;&#32;}
+660 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(;&#32;i&#32;&lt;&#32;blk_len;&#32;++i)&#32;{
+661 &#32;&#32;&#32;&#32;&#32;&#32;s1&#32;+=&#32;*<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a83ad0ee7f1e06b59c90271716e689080">in</link>++,&#32;s2&#32;+=&#32;s1;
+662 &#32;&#32;&#32;&#32;}
+663 &#32;&#32;&#32;&#32;s1&#32;%=&#32;ADLER_MOD;
+664 &#32;&#32;&#32;&#32;s2&#32;%=&#32;ADLER_MOD;
+665 &#32;&#32;&#32;&#32;in_len&#32;-=&#32;blk_len;
+666 &#32;&#32;&#32;&#32;blk_len&#32;=&#32;5552;
+667 &#32;&#32;}
+668 &#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;(<emphasis role="keywordtype">unsigned</emphasis>)(s2&#32;&lt;&lt;&#32;16)&#32;+&#32;(<emphasis role="keywordtype">unsigned</emphasis>)s1;
+669 }
+670 <emphasis role="keyword">extern</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>
+671 <link linkend="__classes_2lib_2external_2sdefl_8h_1afe38e2d89b24c67626baba855efd4b71">zsdeflate</link>(<emphasis role="keyword">struct</emphasis>&#32;<link linkend="_structsdefl">sdefl</link>&#32;*s,&#32;<emphasis role="keywordtype">void</emphasis>&#32;*out,&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>&#32;*<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a83ad0ee7f1e06b59c90271716e689080">in</link>,&#32;<emphasis role="keywordtype">int</emphasis>&#32;n,&#32;<emphasis role="keywordtype">int</emphasis>&#32;lvl)&#32;{
+672 &#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;p&#32;=&#32;0;
+673 &#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1ac8729153468b5dcf13f971b21d84d4e5">a</link>&#32;=&#32;0;
+674 &#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>&#32;*q&#32;=&#32;(<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>*)out;
+675 
+676 &#32;&#32;s-&gt;<link linkend="_structsdefl_1ab74d4949538a90a0d35a9e7ec584c9de">bits</link>&#32;=&#32;s-&gt;<link linkend="_structsdefl_1aae723579aadb3f30acd1871bfbd0a5f4">bitcnt</link>&#32;=&#32;0;
+677 &#32;&#32;sdefl_put(&amp;q,&#32;s,&#32;0x78,&#32;8);&#32;<emphasis role="comment">/*&#32;deflate,&#32;32k&#32;window&#32;*/</emphasis>
+678 &#32;&#32;sdefl_put(&amp;q,&#32;s,&#32;0x01,&#32;8);&#32;<emphasis role="comment">/*&#32;fast&#32;compression&#32;*/</emphasis>
+679 &#32;&#32;q&#32;+=&#32;sdefl_compr(s,&#32;q,&#32;(<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>*)<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a83ad0ee7f1e06b59c90271716e689080">in</link>,&#32;n,&#32;lvl);
+680 
+681 &#32;&#32;<emphasis role="comment">/*&#32;append&#32;adler&#32;checksum&#32;*/</emphasis>
+682 &#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1ac8729153468b5dcf13f971b21d84d4e5">a</link>&#32;=&#32;sdefl_adler32(SDEFL_ADLER_INIT,&#32;(<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>*)<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a83ad0ee7f1e06b59c90271716e689080">in</link>,&#32;n);
+683 &#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(p&#32;=&#32;0;&#32;p&#32;&lt;&#32;4;&#32;++p)&#32;{
+684 &#32;&#32;&#32;&#32;sdefl_put(&amp;q,&#32;s,&#32;(<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1ac8729153468b5dcf13f971b21d84d4e5">a</link>&#32;&gt;&gt;&#32;24)&#32;&amp;&#32;0xFF,&#32;8);
+685 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1ac8729153468b5dcf13f971b21d84d4e5">a</link>&#32;&lt;&lt;=&#32;8;
+686 &#32;&#32;}
+687 &#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;(<emphasis role="keywordtype">int</emphasis>)(q&#32;-&#32;(<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>*)out);
+688 }
+689 <emphasis role="keyword">extern</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>
+690 <link linkend="__classes_2lib_2external_2sdefl_8h_1a4bf29defead9cd3bc9fcd7323134b7d0">sdefl_bound</link>(<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a30ee67aa502329a88f4a203775adfa1a">len</link>)&#32;{
+691 &#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1ac8729153468b5dcf13f971b21d84d4e5">a</link>&#32;=&#32;128&#32;+&#32;(<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a30ee67aa502329a88f4a203775adfa1a">len</link>&#32;*&#32;110)&#32;/&#32;100;
+692 &#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a6eba317e3cf44d6d26c04a5a8f197dcb">b</link>&#32;=&#32;128&#32;+&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a30ee67aa502329a88f4a203775adfa1a">len</link>&#32;+&#32;((<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a30ee67aa502329a88f4a203775adfa1a">len</link>&#32;/&#32;(31&#32;*&#32;1024))&#32;+&#32;1)&#32;*&#32;5;
+693 &#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;(<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1ac8729153468b5dcf13f971b21d84d4e5">a</link>&#32;&gt;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a6eba317e3cf44d6d26c04a5a8f197dcb">b</link>)&#32;?&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1ac8729153468b5dcf13f971b21d84d4e5">a</link>&#32;:&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a6eba317e3cf44d6d26c04a5a8f197dcb">b</link>;
+694 }
+695 <emphasis role="preprocessor">#endif&#32;</emphasis><emphasis role="comment">/*&#32;SDEFL_IMPLEMENTATION&#32;*/</emphasis><emphasis role="preprocessor"></emphasis>
+696 
+</programlisting></section>

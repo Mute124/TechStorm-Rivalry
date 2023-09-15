@@ -1,0 +1,112 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<section xmlns="http://docbook.org/ns/docbook" version="5.0" xmlns:xlink="http://www.w3.org/1999/xlink" xml:id="__old_2_classes_2lib_2include_2c_09_09_2pstl_2memory__impl_8h_source" xml:lang="en-US">
+<title>memory_impl.h</title>
+<indexterm><primary>C:/Users/HP/Documents/GitHub/Minero-Game/Old/Classes/lib/include/c++/pstl/memory_impl.h</primary></indexterm>
+Go to the documentation of this file.<programlisting linenumbering="unnumbered">1 <emphasis role="comment">//&#32;-*-&#32;C++&#32;-*-</emphasis>
+2 <emphasis role="comment">//===--&#32;memory_impl.h&#32;-----------------------------------------------------===//</emphasis>
+3 <emphasis role="comment">//</emphasis>
+4 <emphasis role="comment">//&#32;Part&#32;of&#32;the&#32;LLVM&#32;Project,&#32;under&#32;the&#32;Apache&#32;License&#32;v2.0&#32;with&#32;LLVM&#32;Exceptions.</emphasis>
+5 <emphasis role="comment">//&#32;See&#32;https://llvm.org/LICENSE.txt&#32;for&#32;license&#32;information.</emphasis>
+6 <emphasis role="comment">//&#32;SPDX-License-Identifier:&#32;Apache-2.0&#32;WITH&#32;LLVM-exception</emphasis>
+7 <emphasis role="comment">//</emphasis>
+8 <emphasis role="comment">//===----------------------------------------------------------------------===//</emphasis>
+9 
+10 <emphasis role="preprocessor">#ifndef&#32;_PSTL_MEMORY_IMPL_H</emphasis>
+11 <emphasis role="preprocessor">#define&#32;_PSTL_MEMORY_IMPL_H</emphasis>
+12 
+13 <emphasis role="preprocessor">#include&#32;&lt;iterator&gt;</emphasis>
+14 
+15 <emphasis role="preprocessor">#include&#32;&quot;<link linkend="__old_2_classes_2lib_2include_2c_09_09_2pstl_2unseq__backend__simd_8h">unseq_backend_simd.h</link>&quot;</emphasis>
+16 
+17 <emphasis role="keyword">namespace&#32;</emphasis><link linkend="_namespace____pstl">__pstl</link>
+18 {
+19 <emphasis role="keyword">namespace&#32;</emphasis>__internal
+20 {
+21 
+22 <emphasis role="comment">//------------------------------------------------------------------------</emphasis>
+23 <emphasis role="comment">//&#32;uninitialized_move</emphasis>
+24 <emphasis role="comment">//------------------------------------------------------------------------</emphasis>
+25 
+26 <emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">typename</emphasis>&#32;_ForwardIterator,&#32;<emphasis role="keyword">typename</emphasis>&#32;_OutputIterator&gt;
+27 _OutputIterator
+28 <link linkend="_namespace____pstl_1_1____internal_1af0e19ee5ecb61c1dc825f6cf32f73187">__brick_uninitialized_move</link>(_ForwardIterator&#32;__first,&#32;_ForwardIterator&#32;__last,&#32;_OutputIterator&#32;__result,
+29 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">/*vector=*/</emphasis>std::false_type)&#32;<emphasis role="keyword">noexcept</emphasis>
+30 {
+31 &#32;&#32;&#32;&#32;<emphasis role="keyword">using&#32;</emphasis>_ValueType&#32;=&#32;<emphasis role="keyword">typename</emphasis>&#32;std::iterator_traits&lt;_OutputIterator&gt;::value_type;
+32 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(;&#32;__first&#32;!=&#32;__last;&#32;++__first,&#32;++__result)
+33 &#32;&#32;&#32;&#32;{
+34 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;::new&#32;(std::addressof(*__result))&#32;_ValueType(<link linkend="_namespacestd_1ac7095819f6a8da64d69b1ee3029c52be">std::move</link>(*__first));
+35 &#32;&#32;&#32;&#32;}
+36 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__result;
+37 }
+38 
+39 <emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">typename</emphasis>&#32;_ForwardIterator,&#32;<emphasis role="keyword">typename</emphasis>&#32;_OutputIterator&gt;
+40 _OutputIterator
+41 <link linkend="_namespace____pstl_1_1____internal_1af0e19ee5ecb61c1dc825f6cf32f73187">__brick_uninitialized_move</link>(_ForwardIterator&#32;__first,&#32;_ForwardIterator&#32;__last,&#32;_OutputIterator&#32;__result,
+42 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">/*vector=*/</emphasis>std::true_type)&#32;<emphasis role="keyword">noexcept</emphasis>
+43 {
+44 &#32;&#32;&#32;&#32;<emphasis role="keyword">using&#32;</emphasis>__ValueType&#32;=&#32;<emphasis role="keyword">typename</emphasis>&#32;std::iterator_traits&lt;_OutputIterator&gt;::value_type;
+45 &#32;&#32;&#32;&#32;<emphasis role="keyword">using&#32;</emphasis>_ReferenceType1&#32;=&#32;<emphasis role="keyword">typename</emphasis>&#32;std::iterator_traits&lt;_ForwardIterator&gt;::reference;
+46 &#32;&#32;&#32;&#32;<emphasis role="keyword">using&#32;</emphasis>_ReferenceType2&#32;=&#32;<emphasis role="keyword">typename</emphasis>&#32;std::iterator_traits&lt;_OutputIterator&gt;::reference;
+47 
+48 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="_namespace____pstl_1_1____unseq__backend_1af633b9e9ab66296f5dd7efba7c834932">__unseq_backend::__simd_walk_2</link>(
+49 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__first,&#32;__last&#32;-&#32;__first,&#32;__result,
+50 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;[](_ReferenceType1&#32;__x,&#32;_ReferenceType2&#32;__y)&#32;{&#32;::new&#32;(std::addressof(__y))&#32;__ValueType(<link linkend="_namespacestd_1ac7095819f6a8da64d69b1ee3029c52be">std::move</link>(__x));&#32;});
+51 }
+52 
+53 <emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">typename</emphasis>&#32;_Iterator&gt;
+54 <emphasis role="keywordtype">void</emphasis>
+55 <link linkend="_namespace____pstl_1_1____internal_1a30e2ecbaecd03b7e1e3d0b9eeaed24db">__brick_destroy</link>(_Iterator&#32;__first,&#32;_Iterator&#32;__last,&#32;<emphasis role="comment">/*vector*/</emphasis>&#32;std::false_type)&#32;<emphasis role="keyword">noexcept</emphasis>
+56 {
+57 &#32;&#32;&#32;&#32;<emphasis role="keyword">using&#32;</emphasis>_ValueType&#32;=&#32;<emphasis role="keyword">typename</emphasis>&#32;std::iterator_traits&lt;_Iterator&gt;::value_type;
+58 
+59 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(;&#32;__first&#32;!=&#32;__last;&#32;++__first)
+60 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__first-&gt;~_ValueType();
+61 }
+62 
+63 <emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">typename</emphasis>&#32;_Iterator&gt;
+64 <emphasis role="keywordtype">void</emphasis>
+65 <link linkend="_namespace____pstl_1_1____internal_1a30e2ecbaecd03b7e1e3d0b9eeaed24db">__brick_destroy</link>(_Iterator&#32;__first,&#32;_Iterator&#32;__last,&#32;<emphasis role="comment">/*vector*/</emphasis>&#32;std::true_type)&#32;<emphasis role="keyword">noexcept</emphasis>
+66 {
+67 &#32;&#32;&#32;&#32;<emphasis role="keyword">using&#32;</emphasis>_ValueType&#32;=&#32;<emphasis role="keyword">typename</emphasis>&#32;std::iterator_traits&lt;_Iterator&gt;::value_type;
+68 &#32;&#32;&#32;&#32;<emphasis role="keyword">using&#32;</emphasis>_ReferenceType&#32;=&#32;<emphasis role="keyword">typename</emphasis>&#32;std::iterator_traits&lt;_Iterator&gt;::reference;
+69 
+70 &#32;&#32;&#32;&#32;<link linkend="_namespace____pstl_1_1____unseq__backend_1a2196b03264f94d6785c560717628cfd2">__unseq_backend::__simd_walk_1</link>(__first,&#32;__last&#32;-&#32;__first,&#32;[](_ReferenceType&#32;__x)&#32;{&#32;__x.~_ValueType();&#32;});
+71 }
+72 
+73 <emphasis role="comment">//------------------------------------------------------------------------</emphasis>
+74 <emphasis role="comment">//&#32;uninitialized&#32;copy</emphasis>
+75 <emphasis role="comment">//------------------------------------------------------------------------</emphasis>
+76 
+77 <emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">typename</emphasis>&#32;_ForwardIterator,&#32;<emphasis role="keyword">typename</emphasis>&#32;_OutputIterator&gt;
+78 _OutputIterator
+79 <link linkend="_namespace____pstl_1_1____internal_1a4fb75417b7d24445de9704f283dc126b">__brick_uninitialized_copy</link>(_ForwardIterator&#32;__first,&#32;_ForwardIterator&#32;__last,&#32;_OutputIterator&#32;__result,
+80 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">/*vector=*/</emphasis>std::false_type)&#32;<emphasis role="keyword">noexcept</emphasis>
+81 {
+82 &#32;&#32;&#32;&#32;<emphasis role="keyword">using&#32;</emphasis>_ValueType&#32;=&#32;<emphasis role="keyword">typename</emphasis>&#32;std::iterator_traits&lt;_OutputIterator&gt;::value_type;
+83 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(;&#32;__first&#32;!=&#32;__last;&#32;++__first,&#32;++__result)
+84 &#32;&#32;&#32;&#32;{
+85 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;::new&#32;(std::addressof(*__result))&#32;_ValueType(*__first);
+86 &#32;&#32;&#32;&#32;}
+87 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__result;
+88 }
+89 
+90 <emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">typename</emphasis>&#32;_ForwardIterator,&#32;<emphasis role="keyword">typename</emphasis>&#32;_OutputIterator&gt;
+91 _OutputIterator
+92 <link linkend="_namespace____pstl_1_1____internal_1a4fb75417b7d24445de9704f283dc126b">__brick_uninitialized_copy</link>(_ForwardIterator&#32;__first,&#32;_ForwardIterator&#32;__last,&#32;_OutputIterator&#32;__result,
+93 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">/*vector=*/</emphasis>std::true_type)&#32;<emphasis role="keyword">noexcept</emphasis>
+94 {
+95 &#32;&#32;&#32;&#32;<emphasis role="keyword">using&#32;</emphasis>__ValueType&#32;=&#32;<emphasis role="keyword">typename</emphasis>&#32;std::iterator_traits&lt;_OutputIterator&gt;::value_type;
+96 &#32;&#32;&#32;&#32;<emphasis role="keyword">using&#32;</emphasis>_ReferenceType1&#32;=&#32;<emphasis role="keyword">typename</emphasis>&#32;std::iterator_traits&lt;_ForwardIterator&gt;::reference;
+97 &#32;&#32;&#32;&#32;<emphasis role="keyword">using&#32;</emphasis>_ReferenceType2&#32;=&#32;<emphasis role="keyword">typename</emphasis>&#32;std::iterator_traits&lt;_OutputIterator&gt;::reference;
+98 
+99 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="_namespace____pstl_1_1____unseq__backend_1af633b9e9ab66296f5dd7efba7c834932">__unseq_backend::__simd_walk_2</link>(
+100 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__first,&#32;__last&#32;-&#32;__first,&#32;__result,
+101 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;[](_ReferenceType1&#32;__x,&#32;_ReferenceType2&#32;__y)&#32;{&#32;::new&#32;(std::addressof(__y))&#32;__ValueType(__x);&#32;});
+102 }
+103 
+104 }&#32;<emphasis role="comment">//&#32;namespace&#32;__internal</emphasis>
+105 }&#32;<emphasis role="comment">//&#32;namespace&#32;__pstl</emphasis>
+106 
+107 <emphasis role="preprocessor">#endif&#32;</emphasis><emphasis role="comment">/*&#32;_PSTL_MEMORY_IMPL_H&#32;*/</emphasis><emphasis role="preprocessor"></emphasis>
+</programlisting></section>

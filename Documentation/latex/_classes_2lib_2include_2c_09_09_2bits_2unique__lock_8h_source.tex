@@ -1,0 +1,233 @@
+\doxysection{unique\+\_\+lock.\+h}
+\hypertarget{_classes_2lib_2include_2c_09_09_2bits_2unique__lock_8h_source}{}\label{_classes_2lib_2include_2c_09_09_2bits_2unique__lock_8h_source}\index{C:/Users/HP/Documents/GitHub/Minero-\/Game/Classes/lib/include/c++/bits/unique\_lock.h@{C:/Users/HP/Documents/GitHub/Minero-\/Game/Classes/lib/include/c++/bits/unique\_lock.h}}
+\mbox{\hyperlink{_classes_2lib_2include_2c_09_09_2bits_2unique__lock_8h}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{comment}{//\ std::unique\_lock\ implementation\ -\/*-\/\ C++\ -\/*-\/}}
+\DoxyCodeLine{00002\ }
+\DoxyCodeLine{00003\ \textcolor{comment}{//\ Copyright\ (C)\ 2008-\/2022\ Free\ Software\ Foundation,\ Inc.}}
+\DoxyCodeLine{00004\ \textcolor{comment}{//}}
+\DoxyCodeLine{00005\ \textcolor{comment}{//\ This\ file\ is\ part\ of\ the\ GNU\ ISO\ C++\ Library.\ \ This\ library\ is\ free}}
+\DoxyCodeLine{00006\ \textcolor{comment}{//\ software;\ you\ can\ redistribute\ it\ and/or\ modify\ it\ under\ the}}
+\DoxyCodeLine{00007\ \textcolor{comment}{//\ terms\ of\ the\ GNU\ General\ Public\ License\ as\ published\ by\ the}}
+\DoxyCodeLine{00008\ \textcolor{comment}{//\ Free\ Software\ Foundation;\ either\ version\ 3,\ or\ (at\ your\ option)}}
+\DoxyCodeLine{00009\ \textcolor{comment}{//\ any\ later\ version.}}
+\DoxyCodeLine{00010\ }
+\DoxyCodeLine{00011\ \textcolor{comment}{//\ This\ library\ is\ distributed\ in\ the\ hope\ that\ it\ will\ be\ useful,}}
+\DoxyCodeLine{00012\ \textcolor{comment}{//\ but\ WITHOUT\ ANY\ WARRANTY;\ without\ even\ the\ implied\ warranty\ of}}
+\DoxyCodeLine{00013\ \textcolor{comment}{//\ MERCHANTABILITY\ or\ FITNESS\ FOR\ A\ PARTICULAR\ PURPOSE.\ \ See\ the}}
+\DoxyCodeLine{00014\ \textcolor{comment}{//\ GNU\ General\ Public\ License\ for\ more\ details.}}
+\DoxyCodeLine{00015\ }
+\DoxyCodeLine{00016\ \textcolor{comment}{//\ Under\ Section\ 7\ of\ GPL\ version\ 3,\ you\ are\ granted\ additional}}
+\DoxyCodeLine{00017\ \textcolor{comment}{//\ permissions\ described\ in\ the\ GCC\ Runtime\ Library\ Exception,\ version}}
+\DoxyCodeLine{00018\ \textcolor{comment}{//\ 3.1,\ as\ published\ by\ the\ Free\ Software\ Foundation.}}
+\DoxyCodeLine{00019\ }
+\DoxyCodeLine{00020\ \textcolor{comment}{//\ You\ should\ have\ received\ a\ copy\ of\ the\ GNU\ General\ Public\ License\ and}}
+\DoxyCodeLine{00021\ \textcolor{comment}{//\ a\ copy\ of\ the\ GCC\ Runtime\ Library\ Exception\ along\ with\ this\ program;}}
+\DoxyCodeLine{00022\ \textcolor{comment}{//\ see\ the\ files\ COPYING3\ and\ COPYING.RUNTIME\ respectively.\ \ If\ not,\ see}}
+\DoxyCodeLine{00023\ \textcolor{comment}{//\ <http://www.gnu.org/licenses/>.}}
+\DoxyCodeLine{00024\ }
+\DoxyCodeLine{00030\ \textcolor{preprocessor}{\#ifndef\ \_GLIBCXX\_UNIQUE\_LOCK\_H}}
+\DoxyCodeLine{00031\ \textcolor{preprocessor}{\#define\ \_GLIBCXX\_UNIQUE\_LOCK\_H\ 1}}
+\DoxyCodeLine{00032\ }
+\DoxyCodeLine{00033\ \textcolor{preprocessor}{\#pragma\ GCC\ system\_header}}
+\DoxyCodeLine{00034\ }
+\DoxyCodeLine{00035\ \textcolor{preprocessor}{\#if\ \_\_cplusplus\ <\ 201103L}}
+\DoxyCodeLine{00036\ \textcolor{preprocessor}{\#\ include\ <bits/c++0x\_warning.h>}}
+\DoxyCodeLine{00037\ \textcolor{preprocessor}{\#else}}
+\DoxyCodeLine{00038\ }
+\DoxyCodeLine{00039\ \textcolor{preprocessor}{\#include\ <bits/chrono.h>}}
+\DoxyCodeLine{00040\ \textcolor{preprocessor}{\#include\ <bits/move.h>}\ \textcolor{comment}{//\ for\ std::swap}}
+\DoxyCodeLine{00041\ \textcolor{preprocessor}{\#include\ <bits/std\_mutex.h>}\ \textcolor{comment}{//\ for\ std::defer\_lock\_t}}
+\DoxyCodeLine{00042\ }
+\DoxyCodeLine{00043\ \textcolor{keyword}{namespace\ }\mbox{\hyperlink{namespacestd}{std}}\ \mbox{\hyperlink{_classes_2lib_2include_2c_09_09_2x86__64-w64-mingw32_2bits_2c_09_09config_8h_a44377df0d3503f0b3d9ab316dd8ddf8b}{\_GLIBCXX\_VISIBILITY}}(default)}
+\DoxyCodeLine{00044\ \{}
+\DoxyCodeLine{00045\ \_GLIBCXX\_BEGIN\_NAMESPACE\_VERSION}
+\DoxyCodeLine{00046\ }
+\DoxyCodeLine{00056\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Mutex>}
+\DoxyCodeLine{00057\ \ \ \ \ \textcolor{keyword}{class\ }unique\_lock}
+\DoxyCodeLine{00058\ \ \ \ \ \{}
+\DoxyCodeLine{00059\ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00060\ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ \_Mutex\ mutex\_type;}
+\DoxyCodeLine{00061\ }
+\DoxyCodeLine{00062\ \ \ \ \ \ \ unique\_lock()\ noexcept}
+\DoxyCodeLine{00063\ \ \ \ \ \ \ :\ \_M\_device(0),\ \_M\_owns(\mbox{\hyperlink{_classes_2lib_2include_2stdbool_8h_a65e9886d74aaee76545e83dd09011727}{false}})}
+\DoxyCodeLine{00064\ \ \ \ \ \ \ \{\ \}}
+\DoxyCodeLine{00065\ }
+\DoxyCodeLine{00066\ \ \ \ \ \ \ \textcolor{keyword}{explicit}\ unique\_lock(mutex\_type\&\ \_\_m)}
+\DoxyCodeLine{00067\ \ \ \ \ \ \ :\ \_M\_device(\mbox{\hyperlink{namespacestd}{std}}::\_\_addressof(\_\_m)),\ \_M\_owns(\mbox{\hyperlink{_classes_2lib_2include_2stdbool_8h_a65e9886d74aaee76545e83dd09011727}{false}})}
+\DoxyCodeLine{00068\ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00069\ \ \ \ \ lock();}
+\DoxyCodeLine{00070\ \ \ \ \ \_M\_owns\ =\ \textcolor{keyword}{true};}
+\DoxyCodeLine{00071\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00072\ }
+\DoxyCodeLine{00073\ \ \ \ \ \ \ unique\_lock(mutex\_type\&\ \_\_m,\ defer\_lock\_t)\ noexcept}
+\DoxyCodeLine{00074\ \ \ \ \ \ \ :\ \_M\_device(std::\_\_addressof(\_\_m)),\ \_M\_owns(\textcolor{keyword}{false})}
+\DoxyCodeLine{00075\ \ \ \ \ \ \ \{\ \}}
+\DoxyCodeLine{00076\ }
+\DoxyCodeLine{00077\ \ \ \ \ \ \ unique\_lock(mutex\_type\&\ \_\_m,\ try\_to\_lock\_t)}
+\DoxyCodeLine{00078\ \ \ \ \ \ \ :\ \_M\_device(\mbox{\hyperlink{namespacestd}{std}}::\_\_addressof(\_\_m)),\ \_M\_owns(\_M\_device-\/>try\_lock())}
+\DoxyCodeLine{00079\ \ \ \ \ \ \ \{\ \}}
+\DoxyCodeLine{00080\ }
+\DoxyCodeLine{00081\ \ \ \ \ \ \ unique\_lock(mutex\_type\&\ \_\_m,\ adopt\_lock\_t)\ noexcept}
+\DoxyCodeLine{00082\ \ \ \ \ \ \ :\ \_M\_device(std::\_\_addressof(\_\_m)),\ \_M\_owns(\textcolor{keyword}{true})}
+\DoxyCodeLine{00083\ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00084\ \ \ \ \ \textcolor{comment}{//\ XXX\ calling\ thread\ owns\ mutex}}
+\DoxyCodeLine{00085\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00086\ }
+\DoxyCodeLine{00087\ \ \ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Clock,\ \textcolor{keyword}{typename}\ \_Duration>}
+\DoxyCodeLine{00088\ \ \ \ \ unique\_lock(mutex\_type\&\ \_\_m,}
+\DoxyCodeLine{00089\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ chrono::time\_point<\_Clock,\ \_Duration>\&\ \_\_atime)}
+\DoxyCodeLine{00090\ \ \ \ \ :\ \_M\_device(\mbox{\hyperlink{namespacestd}{std}}::\_\_addressof(\_\_m)),}
+\DoxyCodeLine{00091\ \ \ \ \ \ \ \_M\_owns(\_M\_device-\/>try\_lock\_until(\_\_atime))}
+\DoxyCodeLine{00092\ \ \ \ \ \{\ \}}
+\DoxyCodeLine{00093\ }
+\DoxyCodeLine{00094\ \ \ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Rep,\ \textcolor{keyword}{typename}\ \_Period>}
+\DoxyCodeLine{00095\ \ \ \ \ unique\_lock(mutex\_type\&\ \_\_m,}
+\DoxyCodeLine{00096\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ chrono::duration<\_Rep,\ \_Period>\&\ \_\_rtime)}
+\DoxyCodeLine{00097\ \ \ \ \ :\ \_M\_device(\mbox{\hyperlink{namespacestd}{std}}::\_\_addressof(\_\_m)),}
+\DoxyCodeLine{00098\ \ \ \ \ \ \ \_M\_owns(\_M\_device-\/>try\_lock\_for(\_\_rtime))}
+\DoxyCodeLine{00099\ \ \ \ \ \{\ \}}
+\DoxyCodeLine{00100\ }
+\DoxyCodeLine{00101\ \ \ \ \ \ \ \string~unique\_lock()}
+\DoxyCodeLine{00102\ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00103\ \ \ \ \ \textcolor{keywordflow}{if}\ (\_M\_owns)}
+\DoxyCodeLine{00104\ \ \ \ \ \ \ unlock();}
+\DoxyCodeLine{00105\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00106\ }
+\DoxyCodeLine{00107\ \ \ \ \ \ \ unique\_lock(\textcolor{keyword}{const}\ unique\_lock\&)\ =\ \textcolor{keyword}{delete};}
+\DoxyCodeLine{00108\ \ \ \ \ \ \ unique\_lock\&\ operator=(\textcolor{keyword}{const}\ unique\_lock\&)\ =\ \textcolor{keyword}{delete};}
+\DoxyCodeLine{00109\ }
+\DoxyCodeLine{00110\ \ \ \ \ \ \ unique\_lock(unique\_lock\&\&\ \_\_u)\ noexcept}
+\DoxyCodeLine{00111\ \ \ \ \ \ \ :\ \_M\_device(\_\_u.\_M\_device),\ \_M\_owns(\_\_u.\_M\_owns)}
+\DoxyCodeLine{00112\ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00113\ \ \ \ \ \_\_u.\_M\_device\ =\ 0;}
+\DoxyCodeLine{00114\ \ \ \ \ \_\_u.\_M\_owns\ =\ \textcolor{keyword}{false};}
+\DoxyCodeLine{00115\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00116\ }
+\DoxyCodeLine{00117\ \ \ \ \ \ \ unique\_lock\&\ operator=(unique\_lock\&\&\ \_\_u)\ \textcolor{keyword}{noexcept}}
+\DoxyCodeLine{00118\ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00119\ \ \ \ \ \textcolor{keywordflow}{if}(\_M\_owns)}
+\DoxyCodeLine{00120\ \ \ \ \ \ \ unlock();}
+\DoxyCodeLine{00121\ }
+\DoxyCodeLine{00122\ \ \ \ \ unique\_lock(\mbox{\hyperlink{namespacestd_ac7095819f6a8da64d69b1ee3029c52be}{std::move}}(\_\_u)).swap(*\textcolor{keyword}{this});}
+\DoxyCodeLine{00123\ }
+\DoxyCodeLine{00124\ \ \ \ \ \_\_u.\_M\_device\ =\ 0;}
+\DoxyCodeLine{00125\ \ \ \ \ \_\_u.\_M\_owns\ =\ \textcolor{keyword}{false};}
+\DoxyCodeLine{00126\ }
+\DoxyCodeLine{00127\ \ \ \ \ \textcolor{keywordflow}{return}\ *\textcolor{keyword}{this};}
+\DoxyCodeLine{00128\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00129\ }
+\DoxyCodeLine{00130\ \ \ \ \ \ \ \textcolor{keywordtype}{void}}
+\DoxyCodeLine{00131\ \ \ \ \ \ \ lock()}
+\DoxyCodeLine{00132\ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00133\ \ \ \ \ \textcolor{keywordflow}{if}\ (!\_M\_device)}
+\DoxyCodeLine{00134\ \ \ \ \ \ \ \_\_throw\_system\_error(\textcolor{keywordtype}{int}(errc::operation\_not\_permitted));}
+\DoxyCodeLine{00135\ \ \ \ \ \textcolor{keywordflow}{else}\ \textcolor{keywordflow}{if}\ (\_M\_owns)}
+\DoxyCodeLine{00136\ \ \ \ \ \ \ \_\_throw\_system\_error(\textcolor{keywordtype}{int}(errc::resource\_deadlock\_would\_occur));}
+\DoxyCodeLine{00137\ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{00138\ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00139\ \ \ \ \ \ \ \ \ \_M\_device-\/>lock();}
+\DoxyCodeLine{00140\ \ \ \ \ \ \ \ \ \_M\_owns\ =\ \textcolor{keyword}{true};}
+\DoxyCodeLine{00141\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00142\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00143\ }
+\DoxyCodeLine{00144\ \ \ \ \ \ \ \textcolor{keywordtype}{bool}}
+\DoxyCodeLine{00145\ \ \ \ \ \ \ try\_lock()}
+\DoxyCodeLine{00146\ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00147\ \ \ \ \ \textcolor{keywordflow}{if}\ (!\_M\_device)}
+\DoxyCodeLine{00148\ \ \ \ \ \ \ \_\_throw\_system\_error(\textcolor{keywordtype}{int}(errc::operation\_not\_permitted));}
+\DoxyCodeLine{00149\ \ \ \ \ \textcolor{keywordflow}{else}\ \textcolor{keywordflow}{if}\ (\_M\_owns)}
+\DoxyCodeLine{00150\ \ \ \ \ \ \ \_\_throw\_system\_error(\textcolor{keywordtype}{int}(errc::resource\_deadlock\_would\_occur));}
+\DoxyCodeLine{00151\ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{00152\ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00153\ \ \ \ \ \ \ \ \ \_M\_owns\ =\ \_M\_device-\/>try\_lock();}
+\DoxyCodeLine{00154\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \_M\_owns;}
+\DoxyCodeLine{00155\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00156\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00157\ }
+\DoxyCodeLine{00158\ \ \ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Clock,\ \textcolor{keyword}{typename}\ \_Duration>}
+\DoxyCodeLine{00159\ \ \ \ \ \textcolor{keywordtype}{bool}}
+\DoxyCodeLine{00160\ \ \ \ \ try\_lock\_until(\textcolor{keyword}{const}\ chrono::time\_point<\_Clock,\ \_Duration>\&\ \_\_atime)}
+\DoxyCodeLine{00161\ \ \ \ \ \{}
+\DoxyCodeLine{00162\ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (!\_M\_device)}
+\DoxyCodeLine{00163\ \ \ \ \ \ \ \ \ \_\_throw\_system\_error(\textcolor{keywordtype}{int}(errc::operation\_not\_permitted));}
+\DoxyCodeLine{00164\ \ \ \ \ \ \ \textcolor{keywordflow}{else}\ \textcolor{keywordflow}{if}\ (\_M\_owns)}
+\DoxyCodeLine{00165\ \ \ \ \ \ \ \ \ \_\_throw\_system\_error(\textcolor{keywordtype}{int}(errc::resource\_deadlock\_would\_occur));}
+\DoxyCodeLine{00166\ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{00167\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00168\ \ \ \ \ \ \ \ \ \ \ \_M\_owns\ =\ \_M\_device-\/>try\_lock\_until(\_\_atime);}
+\DoxyCodeLine{00169\ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \_M\_owns;}
+\DoxyCodeLine{00170\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00171\ \ \ \ \ \}}
+\DoxyCodeLine{00172\ }
+\DoxyCodeLine{00173\ \ \ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Rep,\ \textcolor{keyword}{typename}\ \_Period>}
+\DoxyCodeLine{00174\ \ \ \ \ \textcolor{keywordtype}{bool}}
+\DoxyCodeLine{00175\ \ \ \ \ try\_lock\_for(\textcolor{keyword}{const}\ chrono::duration<\_Rep,\ \_Period>\&\ \_\_rtime)}
+\DoxyCodeLine{00176\ \ \ \ \ \{}
+\DoxyCodeLine{00177\ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (!\_M\_device)}
+\DoxyCodeLine{00178\ \ \ \ \ \ \ \ \ \_\_throw\_system\_error(\textcolor{keywordtype}{int}(errc::operation\_not\_permitted));}
+\DoxyCodeLine{00179\ \ \ \ \ \ \ \textcolor{keywordflow}{else}\ \textcolor{keywordflow}{if}\ (\_M\_owns)}
+\DoxyCodeLine{00180\ \ \ \ \ \ \ \ \ \_\_throw\_system\_error(\textcolor{keywordtype}{int}(errc::resource\_deadlock\_would\_occur));}
+\DoxyCodeLine{00181\ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{00182\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00183\ \ \ \ \ \ \ \ \ \ \ \_M\_owns\ =\ \_M\_device-\/>try\_lock\_for(\_\_rtime);}
+\DoxyCodeLine{00184\ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \_M\_owns;}
+\DoxyCodeLine{00185\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00186\ \ \ \ \ \ \}}
+\DoxyCodeLine{00187\ }
+\DoxyCodeLine{00188\ \ \ \ \ \ \ \textcolor{keywordtype}{void}}
+\DoxyCodeLine{00189\ \ \ \ \ \ \ unlock()}
+\DoxyCodeLine{00190\ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00191\ \ \ \ \ \textcolor{keywordflow}{if}\ (!\_M\_owns)}
+\DoxyCodeLine{00192\ \ \ \ \ \ \ \_\_throw\_system\_error(\textcolor{keywordtype}{int}(errc::operation\_not\_permitted));}
+\DoxyCodeLine{00193\ \ \ \ \ \textcolor{keywordflow}{else}\ \textcolor{keywordflow}{if}\ (\_M\_device)}
+\DoxyCodeLine{00194\ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00195\ \ \ \ \ \ \ \ \ \_M\_device-\/>unlock();}
+\DoxyCodeLine{00196\ \ \ \ \ \ \ \ \ \_M\_owns\ =\ \textcolor{keyword}{false};}
+\DoxyCodeLine{00197\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00198\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00199\ }
+\DoxyCodeLine{00200\ \ \ \ \ \ \ \textcolor{keywordtype}{void}}
+\DoxyCodeLine{00201\ \ \ \ \ \ \ \mbox{\hyperlink{namespacestd_a3ece115a1c8ed9020a20f1d0b70efda8}{swap}}(unique\_lock\&\ \_\_u)\ \textcolor{keyword}{noexcept}}
+\DoxyCodeLine{00202\ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00203\ \ \ \ \ \mbox{\hyperlink{namespacestd_a3ece115a1c8ed9020a20f1d0b70efda8}{std::swap}}(\_M\_device,\ \_\_u.\_M\_device);}
+\DoxyCodeLine{00204\ \ \ \ \ \mbox{\hyperlink{namespacestd_a3ece115a1c8ed9020a20f1d0b70efda8}{std::swap}}(\_M\_owns,\ \_\_u.\_M\_owns);}
+\DoxyCodeLine{00205\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00206\ }
+\DoxyCodeLine{00207\ \ \ \ \ \ \ mutex\_type*}
+\DoxyCodeLine{00208\ \ \ \ \ \ \ release()\ noexcept}
+\DoxyCodeLine{00209\ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00210\ \ \ \ \ mutex\_type*\ \_\_ret\ =\ \_M\_device;}
+\DoxyCodeLine{00211\ \ \ \ \ \_M\_device\ =\ 0;}
+\DoxyCodeLine{00212\ \ \ \ \ \_M\_owns\ =\ \textcolor{keyword}{false};}
+\DoxyCodeLine{00213\ \ \ \ \ \textcolor{keywordflow}{return}\ \_\_ret;}
+\DoxyCodeLine{00214\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00215\ }
+\DoxyCodeLine{00216\ \ \ \ \ \ \ \textcolor{keywordtype}{bool}}
+\DoxyCodeLine{00217\ \ \ \ \ \ \ owns\_lock()\ const\ noexcept}
+\DoxyCodeLine{00218\ \ \ \ \ \ \ \{\ \textcolor{keywordflow}{return}\ \_M\_owns;\ \}}
+\DoxyCodeLine{00219\ }
+\DoxyCodeLine{00220\ \ \ \ \ \ \ \textcolor{keyword}{explicit}\ \textcolor{keyword}{operator}\ \mbox{\hyperlink{_classes_2lib_2include_2stdbool_8h_abb452686968e48b67397da5f97445f5b}{bool}}()\ const\ noexcept}
+\DoxyCodeLine{00221\ \ \ \ \ \ \ \{\ \textcolor{keywordflow}{return}\ owns\_lock();\ \}}
+\DoxyCodeLine{00222\ }
+\DoxyCodeLine{00223\ \ \ \ \ \ \ mutex\_type*}
+\DoxyCodeLine{00224\ \ \ \ \ \ \ mutex()\ const\ noexcept}
+\DoxyCodeLine{00225\ \ \ \ \ \ \ \{\ \textcolor{keywordflow}{return}\ \_M\_device;\ \}}
+\DoxyCodeLine{00226\ }
+\DoxyCodeLine{00227\ \ \ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00228\ \ \ \ \ \ \ mutex\_type*\ \ \ \_M\_device;}
+\DoxyCodeLine{00229\ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ \ \ \ \ \ \_M\_owns;}
+\DoxyCodeLine{00230\ \ \ \ \ \};}
+\DoxyCodeLine{00231\ }
+\DoxyCodeLine{00234\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Mutex>}
+\DoxyCodeLine{00235\ \ \ \ \ \textcolor{keyword}{inline}\ \textcolor{keywordtype}{void}}
+\DoxyCodeLine{00236\ \ \ \ \ \mbox{\hyperlink{namespacestd_a3ece115a1c8ed9020a20f1d0b70efda8}{swap}}(unique\_lock<\_Mutex>\&\ \_\_x,\ unique\_lock<\_Mutex>\&\ \_\_y)\ \textcolor{keyword}{noexcept}}
+\DoxyCodeLine{00237\ \ \ \ \ \{\ \_\_x.swap(\_\_y);\ \}}
+\DoxyCodeLine{00238\ }
+\DoxyCodeLine{00239\ \_GLIBCXX\_END\_NAMESPACE\_VERSION}
+\DoxyCodeLine{00240\ \}\ \textcolor{comment}{//\ namespace}}
+\DoxyCodeLine{00241\ }
+\DoxyCodeLine{00242\ \textcolor{preprocessor}{\#endif\ }\textcolor{comment}{//\ C++11}}
+\DoxyCodeLine{00243\ \textcolor{preprocessor}{\#endif\ }\textcolor{comment}{//\ \_GLIBCXX\_UNIQUE\_LOCK\_H}}
+
+\end{DoxyCode}

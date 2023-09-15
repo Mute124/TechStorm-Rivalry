@@ -1,0 +1,666 @@
+\doxysection{qoa.\+h}
+\hypertarget{_classes_2lib_2external_2qoa_8h_source}{}\label{_classes_2lib_2external_2qoa_8h_source}\index{C:/Users/HP/Documents/GitHub/Minero-\/Game/Classes/lib/external/qoa.h@{C:/Users/HP/Documents/GitHub/Minero-\/Game/Classes/lib/external/qoa.h}}
+\mbox{\hyperlink{_classes_2lib_2external_2qoa_8h}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{comment}{/*}}
+\DoxyCodeLine{00002\ \textcolor{comment}{}}
+\DoxyCodeLine{00003\ \textcolor{comment}{Copyright\ (c)\ 2023,\ Dominic\ Szablewski\ -\/\ https://phoboslab.org}}
+\DoxyCodeLine{00004\ \textcolor{comment}{SPDX-\/License-\/Identifier:\ MIT}}
+\DoxyCodeLine{00005\ \textcolor{comment}{}}
+\DoxyCodeLine{00006\ \textcolor{comment}{QOA\ -\/\ The\ "{}Quite\ OK\ Audio"{}\ format\ for\ fast,\ lossy\ audio\ compression}}
+\DoxyCodeLine{00007\ \textcolor{comment}{}}
+\DoxyCodeLine{00008\ \textcolor{comment}{}}
+\DoxyCodeLine{00009\ \textcolor{comment}{-\/-\/\ Data\ Format}}
+\DoxyCodeLine{00010\ \textcolor{comment}{}}
+\DoxyCodeLine{00011\ \textcolor{comment}{A\ QOA\ file\ has\ an\ 8\ byte\ file\ header,\ followed\ by\ a\ number\ of\ frames.\ Each\ frame\ }}
+\DoxyCodeLine{00012\ \textcolor{comment}{consists\ of\ an\ 8\ byte\ frame\ header,\ the\ current\ 8\ byte\ en-\//decoder\ state\ per}}
+\DoxyCodeLine{00013\ \textcolor{comment}{channel\ and\ 256\ slices\ per\ channel.\ Each\ slice\ is\ 8\ bytes\ wide\ and\ encodes\ 20\ }}
+\DoxyCodeLine{00014\ \textcolor{comment}{samples\ of\ audio\ data.}}
+\DoxyCodeLine{00015\ \textcolor{comment}{}}
+\DoxyCodeLine{00016\ \textcolor{comment}{Note\ that\ the\ last\ frame\ of\ a\ file\ may\ contain\ less\ than\ 256\ slices\ per\ channel.}}
+\DoxyCodeLine{00017\ \textcolor{comment}{The\ last\ slice\ (per\ channel)\ in\ the\ last\ frame\ may\ contain\ less\ 20\ samples,\ but}}
+\DoxyCodeLine{00018\ \textcolor{comment}{the\ slice\ will\ still\ be\ 8\ bytes\ wide,\ with\ the\ unused\ samples\ zeroed\ out.}}
+\DoxyCodeLine{00019\ \textcolor{comment}{}}
+\DoxyCodeLine{00020\ \textcolor{comment}{The\ samplerate\ and\ number\ of\ channels\ is\ only\ stated\ in\ the\ frame\ headers,\ but}}
+\DoxyCodeLine{00021\ \textcolor{comment}{not\ in\ the\ file\ header.\ A\ decoder\ may\ peek\ into\ the\ first\ frame\ of\ the\ file\ to\ }}
+\DoxyCodeLine{00022\ \textcolor{comment}{find\ these\ values.}}
+\DoxyCodeLine{00023\ \textcolor{comment}{}}
+\DoxyCodeLine{00024\ \textcolor{comment}{In\ a\ valid\ QOA\ file\ all\ frames\ have\ the\ same\ number\ of\ channels\ and\ the\ same}}
+\DoxyCodeLine{00025\ \textcolor{comment}{samplerate.\ These\ restrictions\ may\ be\ relaxed\ for\ streaming.\ This\ remains\ to\ }}
+\DoxyCodeLine{00026\ \textcolor{comment}{be\ decided.}}
+\DoxyCodeLine{00027\ \textcolor{comment}{}}
+\DoxyCodeLine{00028\ \textcolor{comment}{All\ values\ in\ a\ QOA\ file\ are\ BIG\ ENDIAN.\ Luckily,\ EVERYTHING\ in\ a\ QOA\ file,}}
+\DoxyCodeLine{00029\ \textcolor{comment}{including\ the\ headers,\ is\ 64\ bit\ aligned,\ so\ it's\ possible\ to\ read\ files\ with\ }}
+\DoxyCodeLine{00030\ \textcolor{comment}{just\ a\ read\_u64()\ that\ does\ the\ byte\ swapping\ if\ necessary.}}
+\DoxyCodeLine{00031\ \textcolor{comment}{}}
+\DoxyCodeLine{00032\ \textcolor{comment}{In\ pseudocode,\ the\ file\ layout\ is\ as\ follows:}}
+\DoxyCodeLine{00033\ \textcolor{comment}{}}
+\DoxyCodeLine{00034\ \textcolor{comment}{struct\ \{}}
+\DoxyCodeLine{00035\ \textcolor{comment}{\ \ \ \ struct\ \{}}
+\DoxyCodeLine{00036\ \textcolor{comment}{\ \ \ \ \ \ \ \ char\ \ \ \ \ magic[4];\ \ \ \ \ \ \ \ \ //\ magic\ bytes\ 'qoaf'}}
+\DoxyCodeLine{00037\ \textcolor{comment}{\ \ \ \ \ \ \ \ uint32\_t\ samples;\ \ \ \ \ \ \ \ \ \ //\ number\ of\ samples\ per\ channel\ in\ this\ file}}
+\DoxyCodeLine{00038\ \textcolor{comment}{\ \ \ \ \}\ file\_header;\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ //\ =\ 64\ bits}}
+\DoxyCodeLine{00039\ \textcolor{comment}{}}
+\DoxyCodeLine{00040\ \textcolor{comment}{\ \ \ \ struct\ \{}}
+\DoxyCodeLine{00041\ \textcolor{comment}{\ \ \ \ \ \ \ \ struct\ \{}}
+\DoxyCodeLine{00042\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ uint8\_t\ \ num\_channels;\ //\ number\ of\ channels}}
+\DoxyCodeLine{00043\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ uint24\_t\ samplerate;\ \ \ //\ samplerate\ in\ hz}}
+\DoxyCodeLine{00044\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ uint16\_t\ fsamples;\ \ \ \ \ //\ sample\ count\ per\ channel\ in\ this\ frame}}
+\DoxyCodeLine{00045\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ uint16\_t\ fsize;\ \ \ \ \ \ \ \ //\ frame\ size\ (including\ the\ frame\ header)}}
+\DoxyCodeLine{00046\ \textcolor{comment}{\ \ \ \ \ \ \ \ \}\ frame\_header;\ \ \ \ \ \ \ \ \ \ \ \ //\ =\ 64\ bits}}
+\DoxyCodeLine{00047\ \textcolor{comment}{}}
+\DoxyCodeLine{00048\ \textcolor{comment}{\ \ \ \ \ \ \ \ struct\ \{}}
+\DoxyCodeLine{00049\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ int16\_t\ history[4];\ \ \ \ //\ =\ 64\ bits}}
+\DoxyCodeLine{00050\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ int16\_t\ weights[4];\ \ \ \ //\ =\ 64\ bits}}
+\DoxyCodeLine{00051\ \textcolor{comment}{\ \ \ \ \ \ \ \ \}\ lms\_state[num\_channels];\ }}
+\DoxyCodeLine{00052\ \textcolor{comment}{}}
+\DoxyCodeLine{00053\ \textcolor{comment}{\ \ \ \ \ \ \ \ qoa\_slice\_t\ slices[256][num\_channels];\ //\ =\ 64\ bits\ each}}
+\DoxyCodeLine{00054\ \textcolor{comment}{\ \ \ \ \}\ frames[samples\ *\ channels\ /\ qoa\_max\_framesize()];}}
+\DoxyCodeLine{00055\ \textcolor{comment}{\}\ qoa\_file;}}
+\DoxyCodeLine{00056\ \textcolor{comment}{}}
+\DoxyCodeLine{00057\ \textcolor{comment}{Wheras\ the\ 64bit\ qoa\_slice\_t\ is\ defined\ as\ follows:}}
+\DoxyCodeLine{00058\ \textcolor{comment}{}}
+\DoxyCodeLine{00059\ \textcolor{comment}{.-\/\ QOA\_SLICE\ -\/-\/\ 64\ bits,\ 20\ samples\ -\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\//\ \ /-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/.}}
+\DoxyCodeLine{00060\ \textcolor{comment}{|\ \ \ \ \ \ \ \ Byte[0]\ \ \ \ \ \ \ \ \ |\ \ \ \ \ \ \ \ Byte[1]\ \ \ \ \ \ \ \ \ |\ \ Byte[2]\ \ \(\backslash\)\ \ \(\backslash\)\ \ Byte[7]\ \ \ |}}
+\DoxyCodeLine{00061\ \textcolor{comment}{|\ 7\ \ 6\ \ 5\ \ 4\ \ 3\ \ 2\ \ 1\ \ 0\ |\ 7\ \ 6\ \ 5\ \ 4\ \ 3\ \ 2\ \ 1\ \ 0\ |\ 7\ \ 6\ \ 5\ \ \ /\ \ /\ \ \ \ 2\ \ 1\ \ 0\ |}}
+\DoxyCodeLine{00062\ \textcolor{comment}{|-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/+-\/-\/-\/-\/-\/-\/-\/-\/+-\/-\/-\/-\/-\/-\/-\/-\/+-\/-\/-\/-\/-\/-\/-\/-\/+-\/-\/-\/-\/-\/-\/-\/-\/-\/+-\/-\/-\/-\/-\/-\/-\/-\/-\/+-\/\(\backslash\)\ \ \(\backslash\)-\/-\/+-\/-\/-\/-\/-\/-\/-\/-\/-\/|}}
+\DoxyCodeLine{00063\ \textcolor{comment}{|\ \ sf\_index\ \ |\ \ r00\ \ \ |\ \ \ r01\ \ |\ \ \ r02\ \ |\ \ r03\ \ \ \ |\ \ \ r04\ \ \ |\ /\ \ /\ \ |\ \ \ r19\ \ \ |}}
+\DoxyCodeLine{00064\ \textcolor{comment}{\`{}-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/\(\backslash\)\ \ \(\backslash\)-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/`}}
+\DoxyCodeLine{00065\ \textcolor{comment}{}}
+\DoxyCodeLine{00066\ \textcolor{comment}{\`{}sf\_index`\ defines\ the\ scalefactor\ to\ use\ for\ this\ slice\ as\ an\ index\ into\ the}}
+\DoxyCodeLine{00067\ \textcolor{comment}{qoa\_scalefactor\_tab[16]}}
+\DoxyCodeLine{00068\ \textcolor{comment}{}}
+\DoxyCodeLine{00069\ \textcolor{comment}{\`{}r00`-\/-\/`r19`\ are\ the\ residuals\ for\ the\ individual\ samples,\ divided\ by\ the}}
+\DoxyCodeLine{00070\ \textcolor{comment}{scalefactor\ and\ quantized\ by\ the\ qoa\_quant\_tab[].}}
+\DoxyCodeLine{00071\ \textcolor{comment}{}}
+\DoxyCodeLine{00072\ \textcolor{comment}{In\ the\ decoder,\ a\ prediction\ of\ the\ next\ sample\ is\ computed\ by\ multiplying\ the\ }}
+\DoxyCodeLine{00073\ \textcolor{comment}{state\ (the\ last\ four\ output\ samples)\ with\ the\ predictor.\ The\ residual\ from\ the\ }}
+\DoxyCodeLine{00074\ \textcolor{comment}{slice\ is\ then\ dequantized\ using\ the\ qoa\_dequant\_tab[]\ and\ added\ to\ the\ }}
+\DoxyCodeLine{00075\ \textcolor{comment}{prediction.\ The\ result\ is\ clamped\ to\ int16\ to\ form\ the\ final\ output\ sample.}}
+\DoxyCodeLine{00076\ \textcolor{comment}{}}
+\DoxyCodeLine{00077\ \textcolor{comment}{*/}}
+\DoxyCodeLine{00078\ }
+\DoxyCodeLine{00079\ }
+\DoxyCodeLine{00080\ }
+\DoxyCodeLine{00081\ \textcolor{comment}{/*\ -\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/}}
+\DoxyCodeLine{00082\ \textcolor{comment}{\ \ \ \ Header\ -\/\ Public\ functions\ */}}
+\DoxyCodeLine{00083\ }
+\DoxyCodeLine{00084\ \textcolor{preprocessor}{\#ifndef\ QOA\_H}}
+\DoxyCodeLine{00085\ \textcolor{preprocessor}{\#define\ QOA\_H}}
+\DoxyCodeLine{00086\ }
+\DoxyCodeLine{00087\ \textcolor{preprocessor}{\#ifdef\ \_\_cplusplus}}
+\DoxyCodeLine{00088\ \textcolor{keyword}{extern}\ \textcolor{stringliteral}{"{}C"{}}\ \{}
+\DoxyCodeLine{00089\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00090\ }
+\DoxyCodeLine{00091\ \textcolor{preprocessor}{\#define\ QOA\_MIN\_FILESIZE\ 16}}
+\DoxyCodeLine{00092\ \textcolor{preprocessor}{\#define\ QOA\_MAX\_CHANNELS\ 8}}
+\DoxyCodeLine{00093\ }
+\DoxyCodeLine{00094\ \textcolor{preprocessor}{\#define\ QOA\_SLICE\_LEN\ 20}}
+\DoxyCodeLine{00095\ \textcolor{preprocessor}{\#define\ QOA\_SLICES\_PER\_FRAME\ 256}}
+\DoxyCodeLine{00096\ \textcolor{preprocessor}{\#define\ QOA\_FRAME\_LEN\ (QOA\_SLICES\_PER\_FRAME\ *\ QOA\_SLICE\_LEN)}}
+\DoxyCodeLine{00097\ \textcolor{preprocessor}{\#define\ QOA\_LMS\_LEN\ 4}}
+\DoxyCodeLine{00098\ \textcolor{preprocessor}{\#define\ QOA\_MAGIC\ 0x716f6166\ }\textcolor{comment}{/*\ 'qoaf'\ */}\textcolor{preprocessor}{}}
+\DoxyCodeLine{00099\ }
+\DoxyCodeLine{00100\ \textcolor{preprocessor}{\#define\ QOA\_FRAME\_SIZE(channels,\ slices)\ \(\backslash\)}}
+\DoxyCodeLine{00101\ \textcolor{preprocessor}{\ \ \ \ (8\ +\ QOA\_LMS\_LEN\ *\ 4\ *\ channels\ +\ 8\ *\ slices\ *\ channels)}}
+\DoxyCodeLine{00102\ }
+\DoxyCodeLine{00103\ \textcolor{keyword}{typedef}\ \textcolor{keyword}{struct\ }\{}
+\DoxyCodeLine{00104\ \ \ \ \ \textcolor{keywordtype}{int}\ history[\mbox{\hyperlink{_classes_2lib_2external_2qoa_8h_abaa086b0fe99726af23dfd3b7e3fa499}{QOA\_LMS\_LEN}}];}
+\DoxyCodeLine{00105\ \ \ \ \ \textcolor{keywordtype}{int}\ weights[\mbox{\hyperlink{_classes_2lib_2external_2qoa_8h_abaa086b0fe99726af23dfd3b7e3fa499}{QOA\_LMS\_LEN}}];}
+\DoxyCodeLine{00106\ \}\ \mbox{\hyperlink{structqoa__lms__t}{qoa\_lms\_t}};}
+\DoxyCodeLine{00107\ }
+\DoxyCodeLine{00108\ \textcolor{keyword}{typedef}\ \textcolor{keyword}{struct\ }\{}
+\DoxyCodeLine{00109\ \ \ \ \ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ \mbox{\hyperlink{structqoa__desc_a33e92402e0008fd44a71f5393a0d07b0}{channels}};}
+\DoxyCodeLine{00110\ \ \ \ \ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ \mbox{\hyperlink{structqoa__desc_ad5d475ca7fcfef58fadce55d488c6f1a}{samplerate}};}
+\DoxyCodeLine{00111\ \ \ \ \ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ \mbox{\hyperlink{structqoa__desc_a631e1e164d8a7b1ee966577d903cb41a}{samples}};}
+\DoxyCodeLine{00112\ \ \ \ \ \mbox{\hyperlink{structqoa__lms__t}{qoa\_lms\_t}}\ lms[\mbox{\hyperlink{_classes_2lib_2external_2qoa_8h_a6a1ea9336c21d7de8db36a5aac89e320}{QOA\_MAX\_CHANNELS}}];}
+\DoxyCodeLine{00113\ \textcolor{preprocessor}{\ \ \ \ \#ifdef\ QOA\_RECORD\_TOTAL\_ERROR}}
+\DoxyCodeLine{00114\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{double}\ \mbox{\hyperlink{_classes_2lib_2glm_2test_2core_2core__func__integer__bit__count_8cpp_ab34dedbf30a51859090cbab92fa60edb}{error}};}
+\DoxyCodeLine{00115\ \textcolor{preprocessor}{\ \ \ \ \#endif}}
+\DoxyCodeLine{00116\ \}\ \mbox{\hyperlink{structqoa__desc}{qoa\_desc}};}
+\DoxyCodeLine{00117\ }
+\DoxyCodeLine{00118\ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ \mbox{\hyperlink{_classes_2lib_2external_2qoa_8h_a5f8811e1ae7b22f82a4d7fadd0a04f75}{qoa\_encode\_header}}(\mbox{\hyperlink{structqoa__desc}{qoa\_desc}}\ *qoa,\ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{char}\ *bytes);}
+\DoxyCodeLine{00119\ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ \mbox{\hyperlink{_classes_2lib_2external_2qoa_8h_a3938043cda7fb5b1c50614d55bdb5b8c}{qoa\_encode\_frame}}(\textcolor{keyword}{const}\ \textcolor{keywordtype}{short}\ *sample\_data,\ \mbox{\hyperlink{structqoa__desc}{qoa\_desc}}\ *qoa,\ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ frame\_len,\ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{char}\ *bytes);}
+\DoxyCodeLine{00120\ \textcolor{keywordtype}{void}\ *\mbox{\hyperlink{_classes_2lib_2external_2qoa_8h_ab956d022df26af9b453cf2d1484917e5}{qoa\_encode}}(\textcolor{keyword}{const}\ \textcolor{keywordtype}{short}\ *sample\_data,\ \mbox{\hyperlink{structqoa__desc}{qoa\_desc}}\ *qoa,\ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ *out\_len);}
+\DoxyCodeLine{00121\ }
+\DoxyCodeLine{00122\ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ \mbox{\hyperlink{_classes_2lib_2external_2qoa_8h_a000231eba8a5ce040596c7dbb16a36df}{qoa\_max\_frame\_size}}(\mbox{\hyperlink{structqoa__desc}{qoa\_desc}}\ *qoa);}
+\DoxyCodeLine{00123\ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ \mbox{\hyperlink{_classes_2lib_2external_2qoa_8h_a3e623d05c427eb1ed8b76ca8c36b04f6}{qoa\_decode\_header}}(\textcolor{keyword}{const}\ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{char}\ *bytes,\ \textcolor{keywordtype}{int}\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_a3d1e3edfcf61ca2d831883e1afbad89e}{size}},\ \mbox{\hyperlink{structqoa__desc}{qoa\_desc}}\ *qoa);}
+\DoxyCodeLine{00124\ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ \mbox{\hyperlink{_classes_2lib_2external_2qoa_8h_ab24537aedf9ace4efe796acc5ba32208}{qoa\_decode\_frame}}(\textcolor{keyword}{const}\ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{char}\ *bytes,\ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_a3d1e3edfcf61ca2d831883e1afbad89e}{size}},\ \mbox{\hyperlink{structqoa__desc}{qoa\_desc}}\ *qoa,\ \textcolor{keywordtype}{short}\ *sample\_data,\ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ *frame\_len);}
+\DoxyCodeLine{00125\ \textcolor{keywordtype}{short}\ *\mbox{\hyperlink{_classes_2lib_2external_2qoa_8h_aa6cdde6612dc54bcc6db683c550b712d}{qoa\_decode}}(\textcolor{keyword}{const}\ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{char}\ *bytes,\ \textcolor{keywordtype}{int}\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_a3d1e3edfcf61ca2d831883e1afbad89e}{size}},\ \mbox{\hyperlink{structqoa__desc}{qoa\_desc}}\ *file);}
+\DoxyCodeLine{00126\ }
+\DoxyCodeLine{00127\ \textcolor{preprocessor}{\#ifndef\ QOA\_NO\_STDIO}}
+\DoxyCodeLine{00128\ }
+\DoxyCodeLine{00129\ \textcolor{keywordtype}{int}\ \mbox{\hyperlink{_classes_2lib_2external_2qoa_8h_ad7c7fb3280e07faf230acd73d5ac296d}{qoa\_write}}(\textcolor{keyword}{const}\ \textcolor{keywordtype}{char}\ *\mbox{\hyperlink{_classes_2lib_2m_i_n_i-master_2tests_2testhuge_8cpp_a42a21beb8018ac623f4d09db1343b9cf}{filename}},\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{short}\ *sample\_data,\ \mbox{\hyperlink{structqoa__desc}{qoa\_desc}}\ *qoa);}
+\DoxyCodeLine{00130\ \textcolor{keywordtype}{void}\ *\mbox{\hyperlink{_classes_2lib_2external_2qoa_8h_aa2ec86b27718cd9bf0e89ea90e90e6e1}{qoa\_read}}(\textcolor{keyword}{const}\ \textcolor{keywordtype}{char}\ *\mbox{\hyperlink{_classes_2lib_2m_i_n_i-master_2tests_2testhuge_8cpp_a42a21beb8018ac623f4d09db1343b9cf}{filename}},\ \mbox{\hyperlink{structqoa__desc}{qoa\_desc}}\ *qoa);}
+\DoxyCodeLine{00131\ }
+\DoxyCodeLine{00132\ \textcolor{preprocessor}{\#endif\ }\textcolor{comment}{/*\ QOA\_NO\_STDIO\ */}\textcolor{preprocessor}{}}
+\DoxyCodeLine{00133\ }
+\DoxyCodeLine{00134\ }
+\DoxyCodeLine{00135\ \textcolor{preprocessor}{\#ifdef\ \_\_cplusplus}}
+\DoxyCodeLine{00136\ \}}
+\DoxyCodeLine{00137\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00138\ \textcolor{preprocessor}{\#endif\ }\textcolor{comment}{/*\ QOA\_H\ */}\textcolor{preprocessor}{}}
+\DoxyCodeLine{00139\ }
+\DoxyCodeLine{00140\ }
+\DoxyCodeLine{00141\ \textcolor{comment}{/*\ -\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/}}
+\DoxyCodeLine{00142\ \textcolor{comment}{\ \ \ \ Implementation\ */}}
+\DoxyCodeLine{00143\ }
+\DoxyCodeLine{00144\ \textcolor{preprocessor}{\#ifdef\ QOA\_IMPLEMENTATION}}
+\DoxyCodeLine{00145\ \textcolor{preprocessor}{\#include\ <stdlib.h>}}
+\DoxyCodeLine{00146\ }
+\DoxyCodeLine{00147\ \textcolor{preprocessor}{\#ifndef\ QOA\_MALLOC}}
+\DoxyCodeLine{00148\ \textcolor{preprocessor}{\ \ \ \ \#define\ QOA\_MALLOC(sz)\ malloc(sz)}}
+\DoxyCodeLine{00149\ \textcolor{preprocessor}{\ \ \ \ \#define\ QOA\_FREE(p)\ free(p)}}
+\DoxyCodeLine{00150\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00151\ }
+\DoxyCodeLine{00152\ \textcolor{keyword}{typedef}\ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{long}\ \textcolor{keywordtype}{long}\ qoa\_uint64\_t;}
+\DoxyCodeLine{00153\ }
+\DoxyCodeLine{00154\ }
+\DoxyCodeLine{00155\ \textcolor{comment}{/*\ The\ quant\_tab\ provides\ an\ index\ into\ the\ dequant\_tab\ for\ residuals\ in\ the}}
+\DoxyCodeLine{00156\ \textcolor{comment}{range\ of\ -\/8\ ..\ 8.\ It\ maps\ this\ range\ to\ just\ 3bits\ and\ becomes\ less\ accurate\ at\ }}
+\DoxyCodeLine{00157\ \textcolor{comment}{the\ higher\ end.\ Note\ that\ the\ residual\ zero\ is\ identical\ to\ the\ lowest\ positive\ }}
+\DoxyCodeLine{00158\ \textcolor{comment}{value.\ This\ is\ mostly\ fine,\ since\ the\ qoa\_div()\ function\ always\ rounds\ away\ }}
+\DoxyCodeLine{00159\ \textcolor{comment}{from\ zero.\ */}}
+\DoxyCodeLine{00160\ }
+\DoxyCodeLine{00161\ \textcolor{keyword}{static}\ \textcolor{keywordtype}{int}\ qoa\_quant\_tab[17]\ =\ \{}
+\DoxyCodeLine{00162\ \ \ \ \ 7,\ 7,\ 7,\ 5,\ 5,\ 3,\ 3,\ 1,\ \textcolor{comment}{/*\ -\/8..-\/1\ */}}
+\DoxyCodeLine{00163\ \ \ \ \ 0,\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ \ 0\ \ \ \ \ */}}
+\DoxyCodeLine{00164\ \ \ \ \ 0,\ 2,\ 2,\ 4,\ 4,\ 6,\ 6,\ 6\ \ \textcolor{comment}{/*\ \ 1..\ 8\ */}}
+\DoxyCodeLine{00165\ \};}
+\DoxyCodeLine{00166\ }
+\DoxyCodeLine{00167\ }
+\DoxyCodeLine{00168\ \textcolor{comment}{/*\ We\ have\ 16\ different\ scalefactors.\ Like\ the\ quantized\ residuals\ these\ become}}
+\DoxyCodeLine{00169\ \textcolor{comment}{less\ accurate\ at\ the\ higher\ end.\ In\ theory,\ the\ highest\ scalefactor\ that\ we}}
+\DoxyCodeLine{00170\ \textcolor{comment}{would\ need\ to\ encode\ the\ highest\ 16bit\ residual\ is\ (2**16)/8\ =\ 8192.\ However\ we}}
+\DoxyCodeLine{00171\ \textcolor{comment}{rely\ on\ the\ LMS\ filter\ to\ predict\ samples\ accurately\ enough\ that\ a\ maximum\ }}
+\DoxyCodeLine{00172\ \textcolor{comment}{residual\ of\ one\ quarter\ of\ the\ 16\ bit\ range\ is\ high\ sufficient.\ I.e.\ with\ the\ }}
+\DoxyCodeLine{00173\ \textcolor{comment}{scalefactor\ 2048\ times\ the\ quant\ range\ of\ 8\ we\ can\ encode\ residuals\ up\ to\ 2**14.}}
+\DoxyCodeLine{00174\ \textcolor{comment}{}}
+\DoxyCodeLine{00175\ \textcolor{comment}{The\ scalefactor\ values\ are\ computed\ as:}}
+\DoxyCodeLine{00176\ \textcolor{comment}{scalefactor\_tab[s]\ <-\/\ round(pow(s\ +\ 1,\ 2.75))\ */}}
+\DoxyCodeLine{00177\ }
+\DoxyCodeLine{00178\ \textcolor{keyword}{static}\ \textcolor{keywordtype}{int}\ qoa\_scalefactor\_tab[16]\ =\ \{}
+\DoxyCodeLine{00179\ \ \ \ \ 1,\ 7,\ 21,\ 45,\ 84,\ 138,\ 211,\ 304,\ 421,\ 562,\ 731,\ 928,\ 1157,\ 1419,\ 1715,\ 2048}
+\DoxyCodeLine{00180\ \};}
+\DoxyCodeLine{00181\ }
+\DoxyCodeLine{00182\ }
+\DoxyCodeLine{00183\ \textcolor{comment}{/*\ The\ reciprocal\_tab\ maps\ each\ of\ the\ 16\ scalefactors\ to\ their\ rounded\ }}
+\DoxyCodeLine{00184\ \textcolor{comment}{reciprocals\ 1/scalefactor.\ This\ allows\ us\ to\ calculate\ the\ scaled\ residuals\ in\ }}
+\DoxyCodeLine{00185\ \textcolor{comment}{the\ encoder\ with\ just\ one\ multiplication\ instead\ of\ an\ expensive\ division.\ We\ }}
+\DoxyCodeLine{00186\ \textcolor{comment}{do\ this\ in\ .16\ fixed\ point\ with\ integers,\ instead\ of\ floats.}}
+\DoxyCodeLine{00187\ \textcolor{comment}{}}
+\DoxyCodeLine{00188\ \textcolor{comment}{The\ reciprocal\_tab\ is\ computed\ as:}}
+\DoxyCodeLine{00189\ \textcolor{comment}{reciprocal\_tab[s]\ <-\/\ ((1<<16)\ +\ scalefactor\_tab[s]\ -\/\ 1)\ /\ scalefactor\_tab[s]\ */}}
+\DoxyCodeLine{00190\ }
+\DoxyCodeLine{00191\ \textcolor{keyword}{static}\ \textcolor{keywordtype}{int}\ qoa\_reciprocal\_tab[16]\ =\ \{}
+\DoxyCodeLine{00192\ \ \ \ \ 65536,\ 9363,\ 3121,\ 1457,\ 781,\ 475,\ 311,\ 216,\ 156,\ 117,\ 90,\ 71,\ 57,\ 47,\ 39,\ 32}
+\DoxyCodeLine{00193\ \};}
+\DoxyCodeLine{00194\ }
+\DoxyCodeLine{00195\ }
+\DoxyCodeLine{00196\ \textcolor{comment}{/*\ The\ dequant\_tab\ maps\ each\ of\ the\ scalefactors\ and\ quantized\ residuals\ to\ }}
+\DoxyCodeLine{00197\ \textcolor{comment}{their\ unscaled\ \&\ dequantized\ version.}}
+\DoxyCodeLine{00198\ \textcolor{comment}{}}
+\DoxyCodeLine{00199\ \textcolor{comment}{Since\ qoa\_div\ rounds\ away\ from\ the\ zero,\ the\ smallest\ entries\ are\ mapped\ to\ 3/4}}
+\DoxyCodeLine{00200\ \textcolor{comment}{instead\ of\ 1.\ The\ dequant\_tab\ assumes\ the\ following\ dequantized\ values\ for\ each\ }}
+\DoxyCodeLine{00201\ \textcolor{comment}{of\ the\ quant\_tab\ indices\ and\ is\ computed\ as:}}
+\DoxyCodeLine{00202\ \textcolor{comment}{float\ dqt[8]\ =\ \{0.75,\ -\/0.75,\ 2.5,\ -\/2.5,\ 4.5,\ -\/4.5,\ 7,\ -\/7\};}}
+\DoxyCodeLine{00203\ \textcolor{comment}{dequant\_tab[s][q]\ <-\/\ round(scalefactor\_tab[s]\ *\ dqt[q])\ */}}
+\DoxyCodeLine{00204\ }
+\DoxyCodeLine{00205\ \textcolor{keyword}{static}\ \textcolor{keywordtype}{int}\ qoa\_dequant\_tab[16][8]\ =\ \{}
+\DoxyCodeLine{00206\ \ \ \ \ \{\ \ \ 1,\ \ \ \ -\/1,\ \ \ \ 3,\ \ \ \ -\/3,\ \ \ \ 5,\ \ \ \ -\/5,\ \ \ \ \ 7,\ \ \ \ \ -\/7\},}
+\DoxyCodeLine{00207\ \ \ \ \ \{\ \ \ 5,\ \ \ \ -\/5,\ \ \ 18,\ \ \ -\/18,\ \ \ 32,\ \ \ -\/32,\ \ \ \ 49,\ \ \ \ -\/49\},}
+\DoxyCodeLine{00208\ \ \ \ \ \{\ \ 16,\ \ \ -\/16,\ \ \ 53,\ \ \ -\/53,\ \ \ 95,\ \ \ -\/95,\ \ \ 147,\ \ \ -\/147\},}
+\DoxyCodeLine{00209\ \ \ \ \ \{\ \ 34,\ \ \ -\/34,\ \ 113,\ \ -\/113,\ \ 203,\ \ -\/203,\ \ \ 315,\ \ \ -\/315\},}
+\DoxyCodeLine{00210\ \ \ \ \ \{\ \ 63,\ \ \ -\/63,\ \ 210,\ \ -\/210,\ \ 378,\ \ -\/378,\ \ \ 588,\ \ \ -\/588\},}
+\DoxyCodeLine{00211\ \ \ \ \ \{\ 104,\ \ -\/104,\ \ 345,\ \ -\/345,\ \ 621,\ \ -\/621,\ \ \ 966,\ \ \ -\/966\},}
+\DoxyCodeLine{00212\ \ \ \ \ \{\ 158,\ \ -\/158,\ \ 528,\ \ -\/528,\ \ 950,\ \ -\/950,\ \ 1477,\ \ -\/1477\},}
+\DoxyCodeLine{00213\ \ \ \ \ \{\ 228,\ \ -\/228,\ \ 760,\ \ -\/760,\ 1368,\ -\/1368,\ \ 2128,\ \ -\/2128\},}
+\DoxyCodeLine{00214\ \ \ \ \ \{\ 316,\ \ -\/316,\ 1053,\ -\/1053,\ 1895,\ -\/1895,\ \ 2947,\ \ -\/2947\},}
+\DoxyCodeLine{00215\ \ \ \ \ \{\ 422,\ \ -\/422,\ 1405,\ -\/1405,\ 2529,\ -\/2529,\ \ 3934,\ \ -\/3934\},}
+\DoxyCodeLine{00216\ \ \ \ \ \{\ 548,\ \ -\/548,\ 1828,\ -\/1828,\ 3290,\ -\/3290,\ \ 5117,\ \ -\/5117\},}
+\DoxyCodeLine{00217\ \ \ \ \ \{\ 696,\ \ -\/696,\ 2320,\ -\/2320,\ 4176,\ -\/4176,\ \ 6496,\ \ -\/6496\},}
+\DoxyCodeLine{00218\ \ \ \ \ \{\ 868,\ \ -\/868,\ 2893,\ -\/2893,\ 5207,\ -\/5207,\ \ 8099,\ \ -\/8099\},}
+\DoxyCodeLine{00219\ \ \ \ \ \{1064,\ -\/1064,\ 3548,\ -\/3548,\ 6386,\ -\/6386,\ \ 9933,\ \ -\/9933\},}
+\DoxyCodeLine{00220\ \ \ \ \ \{1286,\ -\/1286,\ 4288,\ -\/4288,\ 7718,\ -\/7718,\ 12005,\ -\/12005\},}
+\DoxyCodeLine{00221\ \ \ \ \ \{1536,\ -\/1536,\ 5120,\ -\/5120,\ 9216,\ -\/9216,\ 14336,\ -\/14336\},}
+\DoxyCodeLine{00222\ \};}
+\DoxyCodeLine{00223\ }
+\DoxyCodeLine{00224\ }
+\DoxyCodeLine{00225\ \textcolor{comment}{/*\ The\ Least\ Mean\ Squares\ Filter\ is\ the\ heart\ of\ QOA.\ It\ predicts\ the\ next}}
+\DoxyCodeLine{00226\ \textcolor{comment}{sample\ based\ on\ the\ previous\ 4\ reconstructed\ samples.\ It\ does\ so\ by\ continuously}}
+\DoxyCodeLine{00227\ \textcolor{comment}{adjusting\ 4\ weights\ based\ on\ the\ residual\ of\ the\ previous\ prediction.}}
+\DoxyCodeLine{00228\ \textcolor{comment}{}}
+\DoxyCodeLine{00229\ \textcolor{comment}{The\ next\ sample\ is\ predicted\ as\ the\ sum\ of\ (weight[i]\ *\ history[i]).}}
+\DoxyCodeLine{00230\ \textcolor{comment}{}}
+\DoxyCodeLine{00231\ \textcolor{comment}{The\ adjustment\ of\ the\ weights\ is\ done\ with\ a\ "{}Sign-\/Sign-\/LMS"{}\ that\ adds\ or}}
+\DoxyCodeLine{00232\ \textcolor{comment}{subtracts\ the\ residual\ to\ each\ weight,\ based\ on\ the\ corresponding\ sample\ from\ }}
+\DoxyCodeLine{00233\ \textcolor{comment}{the\ history.\ This,\ surprisingly,\ is\ sufficient\ to\ get\ worthwhile\ predictions.}}
+\DoxyCodeLine{00234\ \textcolor{comment}{}}
+\DoxyCodeLine{00235\ \textcolor{comment}{This\ is\ all\ done\ with\ fixed\ point\ integers.\ Hence\ the\ right-\/shifts\ when\ updating}}
+\DoxyCodeLine{00236\ \textcolor{comment}{the\ weights\ and\ calculating\ the\ prediction.\ */}}
+\DoxyCodeLine{00237\ }
+\DoxyCodeLine{00238\ \textcolor{keyword}{static}\ \textcolor{keywordtype}{int}\ qoa\_lms\_predict(\mbox{\hyperlink{structqoa__lms__t}{qoa\_lms\_t}}\ *lms)\ \{}
+\DoxyCodeLine{00239\ \ \ \ \ \textcolor{keywordtype}{int}\ prediction\ =\ 0;}
+\DoxyCodeLine{00240\ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{int}\ i\ =\ 0;\ i\ <\ \mbox{\hyperlink{_classes_2lib_2external_2qoa_8h_abaa086b0fe99726af23dfd3b7e3fa499}{QOA\_LMS\_LEN}};\ i++)\ \{}
+\DoxyCodeLine{00241\ \ \ \ \ \ \ \ \ prediction\ +=\ lms-\/>\mbox{\hyperlink{structqoa__lms__t_a086f7ad0f8998f503676e69a733e3a97}{weights}}[i]\ *\ lms-\/>\mbox{\hyperlink{structqoa__lms__t_aae536c16534305aefca6c00405b3625d}{history}}[i];}
+\DoxyCodeLine{00242\ \ \ \ \ \}}
+\DoxyCodeLine{00243\ \ \ \ \ \textcolor{keywordflow}{return}\ prediction\ >>\ 13;}
+\DoxyCodeLine{00244\ \}}
+\DoxyCodeLine{00245\ }
+\DoxyCodeLine{00246\ \textcolor{keyword}{static}\ \textcolor{keywordtype}{void}\ qoa\_lms\_update(\mbox{\hyperlink{structqoa__lms__t}{qoa\_lms\_t}}\ *lms,\ \textcolor{keywordtype}{int}\ \mbox{\hyperlink{structsample}{sample}},\ \textcolor{keywordtype}{int}\ residual)\ \{}
+\DoxyCodeLine{00247\ \ \ \ \ \textcolor{keywordtype}{int}\ delta\ =\ residual\ >>\ 4;}
+\DoxyCodeLine{00248\ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{int}\ i\ =\ 0;\ i\ <\ \mbox{\hyperlink{_classes_2lib_2external_2qoa_8h_abaa086b0fe99726af23dfd3b7e3fa499}{QOA\_LMS\_LEN}};\ i++)\ \{}
+\DoxyCodeLine{00249\ \ \ \ \ \ \ \ \ lms-\/>\mbox{\hyperlink{structqoa__lms__t_a086f7ad0f8998f503676e69a733e3a97}{weights}}[i]\ +=\ lms-\/>\mbox{\hyperlink{structqoa__lms__t_aae536c16534305aefca6c00405b3625d}{history}}[i]\ <\ 0\ ?\ -\/delta\ :\ delta;}
+\DoxyCodeLine{00250\ \ \ \ \ \}}
+\DoxyCodeLine{00251\ }
+\DoxyCodeLine{00252\ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{int}\ i\ =\ 0;\ i\ <\ \mbox{\hyperlink{_classes_2lib_2external_2qoa_8h_abaa086b0fe99726af23dfd3b7e3fa499}{QOA\_LMS\_LEN}}-\/1;\ i++)\ \{}
+\DoxyCodeLine{00253\ \ \ \ \ \ \ \ \ lms-\/>\mbox{\hyperlink{structqoa__lms__t_aae536c16534305aefca6c00405b3625d}{history}}[i]\ =\ lms-\/>\mbox{\hyperlink{structqoa__lms__t_aae536c16534305aefca6c00405b3625d}{history}}[i+1];}
+\DoxyCodeLine{00254\ \ \ \ \ \}}
+\DoxyCodeLine{00255\ \ \ \ \ lms-\/>\mbox{\hyperlink{structqoa__lms__t_aae536c16534305aefca6c00405b3625d}{history}}[\mbox{\hyperlink{_classes_2lib_2external_2qoa_8h_abaa086b0fe99726af23dfd3b7e3fa499}{QOA\_LMS\_LEN}}-\/1]\ =\ \mbox{\hyperlink{structsample}{sample}};}
+\DoxyCodeLine{00256\ \}}
+\DoxyCodeLine{00257\ }
+\DoxyCodeLine{00258\ }
+\DoxyCodeLine{00259\ \textcolor{comment}{/*\ qoa\_div()\ implements\ a\ rounding\ division,\ but\ avoids\ rounding\ to\ zero\ for\ }}
+\DoxyCodeLine{00260\ \textcolor{comment}{small\ numbers.\ E.g.\ 0.1\ will\ be\ rounded\ to\ 1.\ Note\ that\ 0\ itself\ still\ }}
+\DoxyCodeLine{00261\ \textcolor{comment}{returns\ as\ 0,\ which\ is\ handled\ in\ the\ qoa\_quant\_tab[].}}
+\DoxyCodeLine{00262\ \textcolor{comment}{qoa\_div()\ takes\ an\ index\ into\ the\ .16\ fixed\ point\ qoa\_reciprocal\_tab\ as\ an}}
+\DoxyCodeLine{00263\ \textcolor{comment}{argument,\ so\ it\ can\ do\ the\ division\ with\ a\ cheaper\ integer\ multiplication.\ */}}
+\DoxyCodeLine{00264\ }
+\DoxyCodeLine{00265\ \textcolor{keyword}{static}\ \textcolor{keyword}{inline}\ \textcolor{keywordtype}{int}\ qoa\_div(\textcolor{keywordtype}{int}\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2glad_8h_a14cfbe2fc2234f5504618905b69d1e06}{v}},\ \textcolor{keywordtype}{int}\ scalefactor)\ \{}
+\DoxyCodeLine{00266\ \ \ \ \ \textcolor{keywordtype}{int}\ reciprocal\ =\ qoa\_reciprocal\_tab[scalefactor];}
+\DoxyCodeLine{00267\ \ \ \ \ \textcolor{keywordtype}{int}\ n\ =\ (\mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2glad_8h_a14cfbe2fc2234f5504618905b69d1e06}{v}}\ *\ reciprocal\ +\ (1\ <<\ 15))\ >>\ 16;}
+\DoxyCodeLine{00268\ \ \ \ \ n\ =\ n\ +\ ((\mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2glad_8h_a14cfbe2fc2234f5504618905b69d1e06}{v}}\ >\ 0)\ -\/\ (\mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2glad_8h_a14cfbe2fc2234f5504618905b69d1e06}{v}}\ <\ 0))\ -\/\ ((n\ >\ 0)\ -\/\ (n\ <\ 0));\ \textcolor{comment}{/*\ round\ away\ from\ 0\ */}}
+\DoxyCodeLine{00269\ \ \ \ \ \textcolor{keywordflow}{return}\ n;}
+\DoxyCodeLine{00270\ \}}
+\DoxyCodeLine{00271\ }
+\DoxyCodeLine{00272\ \textcolor{keyword}{static}\ \textcolor{keyword}{inline}\ \textcolor{keywordtype}{int}\ qoa\_clamp(\textcolor{keywordtype}{int}\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2glad_8h_a14cfbe2fc2234f5504618905b69d1e06}{v}},\ \textcolor{keywordtype}{int}\ \mbox{\hyperlink{toml_8hpp_aef6fbc596e7e69a80f14c34a2b786a14}{min}},\ \textcolor{keywordtype}{int}\ max)\ \{}
+\DoxyCodeLine{00273\ \ \ \ \ \textcolor{keywordflow}{return}\ (\mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2glad_8h_a14cfbe2fc2234f5504618905b69d1e06}{v}}\ <\ \mbox{\hyperlink{toml_8hpp_aef6fbc596e7e69a80f14c34a2b786a14}{min}})\ ?\ \mbox{\hyperlink{toml_8hpp_aef6fbc596e7e69a80f14c34a2b786a14}{min}}\ :\ (\mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2glad_8h_a14cfbe2fc2234f5504618905b69d1e06}{v}}\ >\ \mbox{\hyperlink{group__core__func__common_gae02d42887fc5570451f880e3c624b9ac}{max}})\ ?\ max\ :\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2glad_8h_a14cfbe2fc2234f5504618905b69d1e06}{v}};}
+\DoxyCodeLine{00274\ \}}
+\DoxyCodeLine{00275\ }
+\DoxyCodeLine{00276\ \textcolor{keyword}{static}\ \textcolor{keyword}{inline}\ qoa\_uint64\_t\ qoa\_read\_u64(\textcolor{keyword}{const}\ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{char}\ *bytes,\ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ *p)\ \{}
+\DoxyCodeLine{00277\ \ \ \ \ bytes\ +=\ *p;}
+\DoxyCodeLine{00278\ \ \ \ \ *p\ +=\ 8;}
+\DoxyCodeLine{00279\ \ \ \ \ \textcolor{keywordflow}{return}\ }
+\DoxyCodeLine{00280\ \ \ \ \ \ \ \ \ ((qoa\_uint64\_t)(bytes[0])\ <<\ 56)\ |\ ((qoa\_uint64\_t)(bytes[1])\ <<\ 48)\ |}
+\DoxyCodeLine{00281\ \ \ \ \ \ \ \ \ ((qoa\_uint64\_t)(bytes[2])\ <<\ 40)\ |\ ((qoa\_uint64\_t)(bytes[3])\ <<\ 32)\ |}
+\DoxyCodeLine{00282\ \ \ \ \ \ \ \ \ ((qoa\_uint64\_t)(bytes[4])\ <<\ 24)\ |\ ((qoa\_uint64\_t)(bytes[5])\ <<\ 16)\ |}
+\DoxyCodeLine{00283\ \ \ \ \ \ \ \ \ ((qoa\_uint64\_t)(bytes[6])\ <<\ \ 8)\ |\ ((qoa\_uint64\_t)(bytes[7])\ <<\ \ 0);}
+\DoxyCodeLine{00284\ \}}
+\DoxyCodeLine{00285\ }
+\DoxyCodeLine{00286\ \textcolor{keyword}{static}\ \textcolor{keyword}{inline}\ \textcolor{keywordtype}{void}\ qoa\_write\_u64(qoa\_uint64\_t\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2glad_8h_a14cfbe2fc2234f5504618905b69d1e06}{v}},\ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{char}\ *bytes,\ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ *p)\ \{}
+\DoxyCodeLine{00287\ \ \ \ \ bytes\ +=\ *p;}
+\DoxyCodeLine{00288\ \ \ \ \ *p\ +=\ 8;}
+\DoxyCodeLine{00289\ \ \ \ \ bytes[0]\ =\ (\mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2glad_8h_a14cfbe2fc2234f5504618905b69d1e06}{v}}\ >>\ 56)\ \&\ 0xff;}
+\DoxyCodeLine{00290\ \ \ \ \ bytes[1]\ =\ (\mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2glad_8h_a14cfbe2fc2234f5504618905b69d1e06}{v}}\ >>\ 48)\ \&\ 0xff;}
+\DoxyCodeLine{00291\ \ \ \ \ bytes[2]\ =\ (\mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2glad_8h_a14cfbe2fc2234f5504618905b69d1e06}{v}}\ >>\ 40)\ \&\ 0xff;}
+\DoxyCodeLine{00292\ \ \ \ \ bytes[3]\ =\ (\mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2glad_8h_a14cfbe2fc2234f5504618905b69d1e06}{v}}\ >>\ 32)\ \&\ 0xff;}
+\DoxyCodeLine{00293\ \ \ \ \ bytes[4]\ =\ (\mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2glad_8h_a14cfbe2fc2234f5504618905b69d1e06}{v}}\ >>\ 24)\ \&\ 0xff;}
+\DoxyCodeLine{00294\ \ \ \ \ bytes[5]\ =\ (\mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2glad_8h_a14cfbe2fc2234f5504618905b69d1e06}{v}}\ >>\ 16)\ \&\ 0xff;}
+\DoxyCodeLine{00295\ \ \ \ \ bytes[6]\ =\ (\mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2glad_8h_a14cfbe2fc2234f5504618905b69d1e06}{v}}\ >>\ \ 8)\ \&\ 0xff;}
+\DoxyCodeLine{00296\ \ \ \ \ bytes[7]\ =\ (\mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2glad_8h_a14cfbe2fc2234f5504618905b69d1e06}{v}}\ >>\ \ 0)\ \&\ 0xff;}
+\DoxyCodeLine{00297\ \}}
+\DoxyCodeLine{00298\ }
+\DoxyCodeLine{00299\ }
+\DoxyCodeLine{00300\ \textcolor{comment}{/*\ -\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/}}
+\DoxyCodeLine{00301\ \textcolor{comment}{\ \ \ \ Encoder\ */}}
+\DoxyCodeLine{00302\ }
+\DoxyCodeLine{00303\ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ \mbox{\hyperlink{_classes_2lib_2external_2qoa_8h_a5f8811e1ae7b22f82a4d7fadd0a04f75}{qoa\_encode\_header}}(\mbox{\hyperlink{structqoa__desc}{qoa\_desc}}\ *qoa,\ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{char}\ *bytes)\ \{}
+\DoxyCodeLine{00304\ \ \ \ \ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ p\ =\ 0;}
+\DoxyCodeLine{00305\ \ \ \ \ qoa\_write\_u64(((qoa\_uint64\_t)\mbox{\hyperlink{_classes_2lib_2external_2qoa_8h_a9f5f9bf1ff8ed002a0356391cf971f99}{QOA\_MAGIC}}\ <<\ 32)\ |\ qoa-\/>\mbox{\hyperlink{structqoa__desc_a631e1e164d8a7b1ee966577d903cb41a}{samples}},\ bytes,\ \&p);}
+\DoxyCodeLine{00306\ \ \ \ \ \textcolor{keywordflow}{return}\ p;}
+\DoxyCodeLine{00307\ \}}
+\DoxyCodeLine{00308\ }
+\DoxyCodeLine{00309\ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ \mbox{\hyperlink{_classes_2lib_2external_2qoa_8h_a3938043cda7fb5b1c50614d55bdb5b8c}{qoa\_encode\_frame}}(\textcolor{keyword}{const}\ \textcolor{keywordtype}{short}\ *sample\_data,\ \mbox{\hyperlink{structqoa__desc}{qoa\_desc}}\ *qoa,\ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ frame\_len,\ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{char}\ *bytes)\ \{}
+\DoxyCodeLine{00310\ \ \ \ \ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ channels\ =\ qoa-\/>\mbox{\hyperlink{structqoa__desc_a33e92402e0008fd44a71f5393a0d07b0}{channels}};}
+\DoxyCodeLine{00311\ }
+\DoxyCodeLine{00312\ \ \ \ \ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ p\ =\ 0;}
+\DoxyCodeLine{00313\ \ \ \ \ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ slices\ =\ (frame\_len\ +\ \mbox{\hyperlink{_classes_2lib_2external_2qoa_8h_adf18113c750bfc97ae5b412522920b89}{QOA\_SLICE\_LEN}}\ -\/\ 1)\ /\ \mbox{\hyperlink{_classes_2lib_2external_2qoa_8h_adf18113c750bfc97ae5b412522920b89}{QOA\_SLICE\_LEN}};}
+\DoxyCodeLine{00314\ \ \ \ \ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ frame\_size\ =\ \mbox{\hyperlink{_classes_2lib_2external_2qoa_8h_a505b6cd6d453b08569bf60c7530cb9b2}{QOA\_FRAME\_SIZE}}(channels,\ slices);}
+\DoxyCodeLine{00315\ }
+\DoxyCodeLine{00316\ \ \ \ \ \textcolor{comment}{/*\ Write\ the\ frame\ header\ */}}
+\DoxyCodeLine{00317\ \ \ \ \ qoa\_write\_u64((}
+\DoxyCodeLine{00318\ \ \ \ \ \ \ \ \ (qoa\_uint64\_t)qoa-\/>\mbox{\hyperlink{structqoa__desc_a33e92402e0008fd44a71f5393a0d07b0}{channels}}\ \ \ <<\ 56\ |}
+\DoxyCodeLine{00319\ \ \ \ \ \ \ \ \ (qoa\_uint64\_t)qoa-\/>\mbox{\hyperlink{structqoa__desc_ad5d475ca7fcfef58fadce55d488c6f1a}{samplerate}}\ <<\ 32\ |}
+\DoxyCodeLine{00320\ \ \ \ \ \ \ \ \ (qoa\_uint64\_t)frame\_len\ \ \ \ \ \ \ <<\ 16\ |}
+\DoxyCodeLine{00321\ \ \ \ \ \ \ \ \ (qoa\_uint64\_t)frame\_size}
+\DoxyCodeLine{00322\ \ \ \ \ ),\ bytes,\ \&p);}
+\DoxyCodeLine{00323\ }
+\DoxyCodeLine{00324\ \ \ \ \ \textcolor{comment}{/*\ Write\ the\ current\ LMS\ state\ */}}
+\DoxyCodeLine{00325\ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{int}\ c\ =\ 0;\ c\ <\ channels;\ c++)\ \{}
+\DoxyCodeLine{00326\ \ \ \ \ \ \ \ \ qoa\_uint64\_t\ weights\ =\ 0;}
+\DoxyCodeLine{00327\ \ \ \ \ \ \ \ \ qoa\_uint64\_t\ history\ =\ 0;}
+\DoxyCodeLine{00328\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{int}\ i\ =\ 0;\ i\ <\ \mbox{\hyperlink{_classes_2lib_2external_2qoa_8h_abaa086b0fe99726af23dfd3b7e3fa499}{QOA\_LMS\_LEN}};\ i++)\ \{}
+\DoxyCodeLine{00329\ \ \ \ \ \ \ \ \ \ \ \ \ history\ =\ (history\ <<\ 16)\ |\ (qoa-\/>\mbox{\hyperlink{structqoa__desc_a8620e714b73593e9a95a7e9d11ec8eea}{lms}}[c].\mbox{\hyperlink{structqoa__lms__t_aae536c16534305aefca6c00405b3625d}{history}}[i]\ \&\ 0xffff);}
+\DoxyCodeLine{00330\ \ \ \ \ \ \ \ \ \ \ \ \ weights\ =\ (weights\ <<\ 16)\ |\ (qoa-\/>\mbox{\hyperlink{structqoa__desc_a8620e714b73593e9a95a7e9d11ec8eea}{lms}}[c].\mbox{\hyperlink{structqoa__lms__t_a086f7ad0f8998f503676e69a733e3a97}{weights}}[i]\ \&\ 0xffff);}
+\DoxyCodeLine{00331\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00332\ \ \ \ \ \ \ \ \ qoa\_write\_u64(history,\ bytes,\ \&p);}
+\DoxyCodeLine{00333\ \ \ \ \ \ \ \ \ qoa\_write\_u64(weights,\ bytes,\ \&p);}
+\DoxyCodeLine{00334\ \ \ \ \ \}}
+\DoxyCodeLine{00335\ }
+\DoxyCodeLine{00336\ \ \ \ \ \textcolor{comment}{/*\ We\ encode\ all\ samples\ with\ the\ channels\ interleaved\ on\ a\ slice\ level.}}
+\DoxyCodeLine{00337\ \textcolor{comment}{\ \ \ \ E.g.\ for\ stereo:\ (ch-\/0,\ slice\ 0),\ (ch\ 1,\ slice\ 0),\ (ch\ 0,\ slice\ 1),\ ...*/}}
+\DoxyCodeLine{00338\ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{int}\ sample\_index\ =\ 0;\ sample\_index\ <\ frame\_len;\ sample\_index\ +=\ \mbox{\hyperlink{_classes_2lib_2external_2qoa_8h_adf18113c750bfc97ae5b412522920b89}{QOA\_SLICE\_LEN}})\ \{}
+\DoxyCodeLine{00339\ }
+\DoxyCodeLine{00340\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{int}\ c\ =\ 0;\ c\ <\ channels;\ c++)\ \{}
+\DoxyCodeLine{00341\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ slice\_len\ =\ qoa\_clamp(\mbox{\hyperlink{_classes_2lib_2external_2qoa_8h_adf18113c750bfc97ae5b412522920b89}{QOA\_SLICE\_LEN}},\ 0,\ frame\_len\ -\/\ sample\_index);}
+\DoxyCodeLine{00342\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ slice\_start\ =\ sample\_index\ *\ channels\ +\ c;}
+\DoxyCodeLine{00343\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ slice\_end\ =\ (sample\_index\ +\ slice\_len)\ *\ channels\ +\ c;\ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00344\ }
+\DoxyCodeLine{00345\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Brute\ for\ search\ for\ the\ best\ scalefactor.\ Just\ go\ through\ all}}
+\DoxyCodeLine{00346\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ 16\ scalefactors,\ encode\ all\ samples\ for\ the\ current\ slice\ and\ }}
+\DoxyCodeLine{00347\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ meassure\ the\ total\ squared\ error.\ */}}
+\DoxyCodeLine{00348\ \ \ \ \ \ \ \ \ \ \ \ \ qoa\_uint64\_t\ best\_error\ =\ -\/1;}
+\DoxyCodeLine{00349\ \ \ \ \ \ \ \ \ \ \ \ \ qoa\_uint64\_t\ best\_slice;}
+\DoxyCodeLine{00350\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{structqoa__lms__t}{qoa\_lms\_t}}\ best\_lms;}
+\DoxyCodeLine{00351\ }
+\DoxyCodeLine{00352\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{int}\ scalefactor\ =\ 0;\ scalefactor\ <\ 16;\ scalefactor++)\ \{}
+\DoxyCodeLine{00353\ }
+\DoxyCodeLine{00354\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ We\ have\ to\ reset\ the\ LMS\ state\ to\ the\ last\ known\ good\ one}}
+\DoxyCodeLine{00355\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ before\ trying\ each\ scalefactor,\ as\ each\ pass\ updates\ the\ LMS}}
+\DoxyCodeLine{00356\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ state\ when\ encoding.\ */}}
+\DoxyCodeLine{00357\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{structqoa__lms__t}{qoa\_lms\_t}}\ lms\ =\ qoa-\/>\mbox{\hyperlink{structqoa__desc_a8620e714b73593e9a95a7e9d11ec8eea}{lms}}[c];}
+\DoxyCodeLine{00358\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ qoa\_uint64\_t\ slice\ =\ scalefactor;}
+\DoxyCodeLine{00359\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ qoa\_uint64\_t\ current\_error\ =\ 0;}
+\DoxyCodeLine{00360\ }
+\DoxyCodeLine{00361\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{int}\ si\ =\ slice\_start;\ si\ <\ slice\_end;\ si\ +=\ channels)\ \{}
+\DoxyCodeLine{00362\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ \mbox{\hyperlink{structsample}{sample}}\ =\ sample\_data[si];}
+\DoxyCodeLine{00363\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ predicted\ =\ qoa\_lms\_predict(\&lms);}
+\DoxyCodeLine{00364\ }
+\DoxyCodeLine{00365\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ residual\ =\ \mbox{\hyperlink{structsample}{sample}}\ -\/\ predicted;}
+\DoxyCodeLine{00366\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ scaled\ =\ qoa\_div(residual,\ scalefactor);}
+\DoxyCodeLine{00367\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ clamped\ =\ qoa\_clamp(scaled,\ -\/8,\ 8);}
+\DoxyCodeLine{00368\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ quantized\ =\ qoa\_quant\_tab[clamped\ +\ 8];}
+\DoxyCodeLine{00369\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ dequantized\ =\ qoa\_dequant\_tab[scalefactor][quantized];}
+\DoxyCodeLine{00370\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ reconstructed\ =\ qoa\_clamp(predicted\ +\ dequantized,\ -\/32768,\ 32767);}
+\DoxyCodeLine{00371\ }
+\DoxyCodeLine{00372\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{long}\ \textcolor{keywordtype}{long}\ \mbox{\hyperlink{_classes_2lib_2glm_2test_2core_2core__func__integer__bit__count_8cpp_ab34dedbf30a51859090cbab92fa60edb}{error}}\ =\ (\mbox{\hyperlink{structsample}{sample}}\ -\/\ reconstructed);}
+\DoxyCodeLine{00373\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ current\_error\ +=\ \mbox{\hyperlink{_classes_2lib_2glm_2test_2core_2core__func__integer__bit__count_8cpp_ab34dedbf30a51859090cbab92fa60edb}{error}}\ *\ \mbox{\hyperlink{_classes_2lib_2glm_2test_2core_2core__func__integer__bit__count_8cpp_ab34dedbf30a51859090cbab92fa60edb}{error}};}
+\DoxyCodeLine{00374\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (current\_error\ >\ best\_error)\ \{}
+\DoxyCodeLine{00375\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{00376\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00377\ }
+\DoxyCodeLine{00378\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ qoa\_lms\_update(\&lms,\ reconstructed,\ dequantized);}
+\DoxyCodeLine{00379\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ slice\ =\ (slice\ <<\ 3)\ |\ quantized;}
+\DoxyCodeLine{00380\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00381\ }
+\DoxyCodeLine{00382\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (current\_error\ <\ best\_error)\ \{}
+\DoxyCodeLine{00383\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ best\_error\ =\ current\_error;}
+\DoxyCodeLine{00384\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ best\_slice\ =\ slice;}
+\DoxyCodeLine{00385\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ best\_lms\ =\ lms;}
+\DoxyCodeLine{00386\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00387\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00388\ }
+\DoxyCodeLine{00389\ \ \ \ \ \ \ \ \ \ \ \ \ qoa-\/>\mbox{\hyperlink{structqoa__desc_a8620e714b73593e9a95a7e9d11ec8eea}{lms}}[c]\ =\ best\_lms;}
+\DoxyCodeLine{00390\ \textcolor{preprocessor}{\ \ \ \ \ \ \ \ \ \ \ \ \#ifdef\ QOA\_RECORD\_TOTAL\_ERROR}}
+\DoxyCodeLine{00391\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ qoa-\/>error\ +=\ best\_error;}
+\DoxyCodeLine{00392\ \textcolor{preprocessor}{\ \ \ \ \ \ \ \ \ \ \ \ \#endif}}
+\DoxyCodeLine{00393\ }
+\DoxyCodeLine{00394\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ If\ this\ slice\ was\ shorter\ than\ QOA\_SLICE\_LEN,\ we\ have\ to\ left-\/}}
+\DoxyCodeLine{00395\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ shift\ all\ encoded\ data,\ to\ ensure\ the\ rightmost\ bits\ are\ the\ empty}}
+\DoxyCodeLine{00396\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ ones.\ This\ should\ only\ happen\ in\ the\ last\ frame\ of\ a\ file\ as\ all}}
+\DoxyCodeLine{00397\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ slices\ are\ completely\ filled\ otherwise.\ */}}
+\DoxyCodeLine{00398\ \ \ \ \ \ \ \ \ \ \ \ \ best\_slice\ <<=\ (\mbox{\hyperlink{_classes_2lib_2external_2qoa_8h_adf18113c750bfc97ae5b412522920b89}{QOA\_SLICE\_LEN}}\ -\/\ slice\_len)\ *\ 3;}
+\DoxyCodeLine{00399\ \ \ \ \ \ \ \ \ \ \ \ \ qoa\_write\_u64(best\_slice,\ bytes,\ \&p);}
+\DoxyCodeLine{00400\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00401\ \ \ \ \ \}}
+\DoxyCodeLine{00402\ \ \ \ \ }
+\DoxyCodeLine{00403\ \ \ \ \ \textcolor{keywordflow}{return}\ p;}
+\DoxyCodeLine{00404\ \}}
+\DoxyCodeLine{00405\ }
+\DoxyCodeLine{00406\ \textcolor{keywordtype}{void}\ *\mbox{\hyperlink{_classes_2lib_2external_2qoa_8h_ab956d022df26af9b453cf2d1484917e5}{qoa\_encode}}(\textcolor{keyword}{const}\ \textcolor{keywordtype}{short}\ *sample\_data,\ \mbox{\hyperlink{structqoa__desc}{qoa\_desc}}\ *qoa,\ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ *out\_len)\ \{}
+\DoxyCodeLine{00407\ \ \ \ \ \textcolor{keywordflow}{if}\ (}
+\DoxyCodeLine{00408\ \ \ \ \ \ \ \ \ qoa-\/>\mbox{\hyperlink{structqoa__desc_a631e1e164d8a7b1ee966577d903cb41a}{samples}}\ ==\ 0\ ||\ }
+\DoxyCodeLine{00409\ \ \ \ \ \ \ \ \ qoa-\/>\mbox{\hyperlink{structqoa__desc_ad5d475ca7fcfef58fadce55d488c6f1a}{samplerate}}\ ==\ 0\ ||\ qoa-\/>\mbox{\hyperlink{structqoa__desc_ad5d475ca7fcfef58fadce55d488c6f1a}{samplerate}}\ >\ 0xffffff\ ||}
+\DoxyCodeLine{00410\ \ \ \ \ \ \ \ \ qoa-\/>\mbox{\hyperlink{structqoa__desc_a33e92402e0008fd44a71f5393a0d07b0}{channels}}\ ==\ 0\ ||\ qoa-\/>\mbox{\hyperlink{structqoa__desc_a33e92402e0008fd44a71f5393a0d07b0}{channels}}\ >\ \mbox{\hyperlink{_classes_2lib_2external_2qoa_8h_a6a1ea9336c21d7de8db36a5aac89e320}{QOA\_MAX\_CHANNELS}}}
+\DoxyCodeLine{00411\ \ \ \ \ )\ \{}
+\DoxyCodeLine{00412\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{_classes_2lib_2external_2miniaudio_8h_a070d2ce7b6bb7e5c05602aa8c308d0c4}{NULL}};}
+\DoxyCodeLine{00413\ \ \ \ \ \}}
+\DoxyCodeLine{00414\ }
+\DoxyCodeLine{00415\ \ \ \ \ \textcolor{comment}{/*\ Calculate\ the\ encoded\ size\ and\ allocate\ */}}
+\DoxyCodeLine{00416\ \ \ \ \ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ num\_frames\ =\ (qoa-\/>\mbox{\hyperlink{structqoa__desc_a631e1e164d8a7b1ee966577d903cb41a}{samples}}\ +\ \mbox{\hyperlink{_classes_2lib_2external_2qoa_8h_a5117261d786f17ca3b4b938f5955b9ad}{QOA\_FRAME\_LEN}}-\/1)\ /\ \mbox{\hyperlink{_classes_2lib_2external_2qoa_8h_a5117261d786f17ca3b4b938f5955b9ad}{QOA\_FRAME\_LEN}};}
+\DoxyCodeLine{00417\ \ \ \ \ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ num\_slices\ =\ (qoa-\/>\mbox{\hyperlink{structqoa__desc_a631e1e164d8a7b1ee966577d903cb41a}{samples}}\ +\ \mbox{\hyperlink{_classes_2lib_2external_2qoa_8h_adf18113c750bfc97ae5b412522920b89}{QOA\_SLICE\_LEN}}-\/1)\ /\ \mbox{\hyperlink{_classes_2lib_2external_2qoa_8h_adf18113c750bfc97ae5b412522920b89}{QOA\_SLICE\_LEN}};}
+\DoxyCodeLine{00418\ \ \ \ \ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ encoded\_size\ =\ 8\ +\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ 8\ byte\ file\ header\ */}}
+\DoxyCodeLine{00419\ \ \ \ \ \ \ \ \ num\_frames\ *\ 8\ +\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ 8\ byte\ frame\ headers\ */}}
+\DoxyCodeLine{00420\ \ \ \ \ \ \ \ \ num\_frames\ *\ \mbox{\hyperlink{_classes_2lib_2external_2qoa_8h_abaa086b0fe99726af23dfd3b7e3fa499}{QOA\_LMS\_LEN}}\ *\ 4\ *\ qoa-\/>\mbox{\hyperlink{structqoa__desc_a33e92402e0008fd44a71f5393a0d07b0}{channels}}\ +\ \textcolor{comment}{/*\ 4\ *\ 4\ bytes\ lms\ state\ per\ channel\ */}}
+\DoxyCodeLine{00421\ \ \ \ \ \ \ \ \ num\_slices\ *\ 8\ *\ qoa-\/>\mbox{\hyperlink{structqoa__desc_a33e92402e0008fd44a71f5393a0d07b0}{channels}};\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ 8\ byte\ slices\ */}}
+\DoxyCodeLine{00422\ }
+\DoxyCodeLine{00423\ \ \ \ \ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{char}\ *bytes\ =\ \mbox{\hyperlink{_classes_2lib_2raudio_8c_a4f99e79065c8f72acef86805e80ed032}{QOA\_MALLOC}}(encoded\_size);}
+\DoxyCodeLine{00424\ }
+\DoxyCodeLine{00425\ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{int}\ c\ =\ 0;\ c\ <\ qoa-\/>\mbox{\hyperlink{structqoa__desc_a33e92402e0008fd44a71f5393a0d07b0}{channels}};\ c++)\ \{}
+\DoxyCodeLine{00426\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Set\ the\ initial\ LMS\ weights\ to\ \{0,\ 0,\ -\/1,\ 2\}.\ This\ helps\ with\ the\ }}
+\DoxyCodeLine{00427\ \textcolor{comment}{\ \ \ \ \ \ \ \ prediction\ of\ the\ first\ few\ ms\ of\ a\ file.\ */}}
+\DoxyCodeLine{00428\ \ \ \ \ \ \ \ \ qoa-\/>\mbox{\hyperlink{structqoa__desc_a8620e714b73593e9a95a7e9d11ec8eea}{lms}}[c].\mbox{\hyperlink{structqoa__lms__t_a086f7ad0f8998f503676e69a733e3a97}{weights}}[0]\ =\ 0;}
+\DoxyCodeLine{00429\ \ \ \ \ \ \ \ \ qoa-\/>\mbox{\hyperlink{structqoa__desc_a8620e714b73593e9a95a7e9d11ec8eea}{lms}}[c].\mbox{\hyperlink{structqoa__lms__t_a086f7ad0f8998f503676e69a733e3a97}{weights}}[1]\ =\ 0;}
+\DoxyCodeLine{00430\ \ \ \ \ \ \ \ \ qoa-\/>\mbox{\hyperlink{structqoa__desc_a8620e714b73593e9a95a7e9d11ec8eea}{lms}}[c].\mbox{\hyperlink{structqoa__lms__t_a086f7ad0f8998f503676e69a733e3a97}{weights}}[2]\ =\ -\/(1<<13);}
+\DoxyCodeLine{00431\ \ \ \ \ \ \ \ \ qoa-\/>\mbox{\hyperlink{structqoa__desc_a8620e714b73593e9a95a7e9d11ec8eea}{lms}}[c].\mbox{\hyperlink{structqoa__lms__t_a086f7ad0f8998f503676e69a733e3a97}{weights}}[3]\ =\ \ (1<<14);}
+\DoxyCodeLine{00432\ }
+\DoxyCodeLine{00433\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Explicitly\ set\ the\ history\ samples\ to\ 0,\ as\ we\ might\ have\ some}}
+\DoxyCodeLine{00434\ \textcolor{comment}{\ \ \ \ \ \ \ \ garbage\ in\ there.\ */}}
+\DoxyCodeLine{00435\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{int}\ i\ =\ 0;\ i\ <\ \mbox{\hyperlink{_classes_2lib_2external_2qoa_8h_abaa086b0fe99726af23dfd3b7e3fa499}{QOA\_LMS\_LEN}};\ i++)\ \{}
+\DoxyCodeLine{00436\ \ \ \ \ \ \ \ \ \ \ \ \ qoa-\/>\mbox{\hyperlink{structqoa__desc_a8620e714b73593e9a95a7e9d11ec8eea}{lms}}[c].\mbox{\hyperlink{structqoa__lms__t_aae536c16534305aefca6c00405b3625d}{history}}[i]\ =\ 0;}
+\DoxyCodeLine{00437\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00438\ \ \ \ \ \}}
+\DoxyCodeLine{00439\ }
+\DoxyCodeLine{00440\ }
+\DoxyCodeLine{00441\ \ \ \ \ \textcolor{comment}{/*\ Encode\ the\ header\ and\ go\ through\ all\ frames\ */}}
+\DoxyCodeLine{00442\ \ \ \ \ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ p\ =\ \mbox{\hyperlink{_classes_2lib_2external_2qoa_8h_a5f8811e1ae7b22f82a4d7fadd0a04f75}{qoa\_encode\_header}}(qoa,\ bytes);}
+\DoxyCodeLine{00443\ \textcolor{preprocessor}{\ \ \ \ \#ifdef\ QOA\_RECORD\_TOTAL\_ERROR}}
+\DoxyCodeLine{00444\ \ \ \ \ \ \ \ \ qoa-\/>error\ =\ 0;}
+\DoxyCodeLine{00445\ \textcolor{preprocessor}{\ \ \ \ \#endif}}
+\DoxyCodeLine{00446\ }
+\DoxyCodeLine{00447\ \ \ \ \ \textcolor{keywordtype}{int}\ frame\_len\ =\ \mbox{\hyperlink{_classes_2lib_2external_2qoa_8h_a5117261d786f17ca3b4b938f5955b9ad}{QOA\_FRAME\_LEN}};}
+\DoxyCodeLine{00448\ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{int}\ sample\_index\ =\ 0;\ sample\_index\ <\ qoa-\/>\mbox{\hyperlink{structqoa__desc_a631e1e164d8a7b1ee966577d903cb41a}{samples}};\ sample\_index\ +=\ frame\_len)\ \{}
+\DoxyCodeLine{00449\ \ \ \ \ \ \ \ \ frame\_len\ =\ qoa\_clamp(\mbox{\hyperlink{_classes_2lib_2external_2qoa_8h_a5117261d786f17ca3b4b938f5955b9ad}{QOA\_FRAME\_LEN}},\ 0,\ qoa-\/>\mbox{\hyperlink{structqoa__desc_a631e1e164d8a7b1ee966577d903cb41a}{samples}}\ -\/\ sample\_index);\ \ \ \ \ \ \ }
+\DoxyCodeLine{00450\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \textcolor{keywordtype}{short}\ *frame\_samples\ =\ sample\_data\ +\ sample\_index\ *\ qoa-\/>\mbox{\hyperlink{structqoa__desc_a33e92402e0008fd44a71f5393a0d07b0}{channels}};}
+\DoxyCodeLine{00451\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ frame\_size\ =\ \mbox{\hyperlink{_classes_2lib_2external_2qoa_8h_a3938043cda7fb5b1c50614d55bdb5b8c}{qoa\_encode\_frame}}(frame\_samples,\ qoa,\ frame\_len,\ bytes\ +\ p);}
+\DoxyCodeLine{00452\ \ \ \ \ \ \ \ \ p\ +=\ frame\_size;}
+\DoxyCodeLine{00453\ \ \ \ \ \}}
+\DoxyCodeLine{00454\ }
+\DoxyCodeLine{00455\ \ \ \ \ *out\_len\ =\ p;}
+\DoxyCodeLine{00456\ \ \ \ \ \textcolor{keywordflow}{return}\ bytes;}
+\DoxyCodeLine{00457\ \}}
+\DoxyCodeLine{00458\ }
+\DoxyCodeLine{00459\ }
+\DoxyCodeLine{00460\ }
+\DoxyCodeLine{00461\ \textcolor{comment}{/*\ -\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/}}
+\DoxyCodeLine{00462\ \textcolor{comment}{\ \ \ \ Decoder\ */}}
+\DoxyCodeLine{00463\ }
+\DoxyCodeLine{00464\ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ \mbox{\hyperlink{_classes_2lib_2external_2qoa_8h_a000231eba8a5ce040596c7dbb16a36df}{qoa\_max\_frame\_size}}(\mbox{\hyperlink{structqoa__desc}{qoa\_desc}}\ *qoa)\ \{}
+\DoxyCodeLine{00465\ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{_classes_2lib_2external_2qoa_8h_a505b6cd6d453b08569bf60c7530cb9b2}{QOA\_FRAME\_SIZE}}(qoa-\/>\mbox{\hyperlink{structqoa__desc_a33e92402e0008fd44a71f5393a0d07b0}{channels}},\ \mbox{\hyperlink{_classes_2lib_2external_2qoa_8h_af60d80e1171869fb25915dc5e61f63d8}{QOA\_SLICES\_PER\_FRAME}});}
+\DoxyCodeLine{00466\ \}}
+\DoxyCodeLine{00467\ }
+\DoxyCodeLine{00468\ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ \mbox{\hyperlink{_classes_2lib_2external_2qoa_8h_a3e623d05c427eb1ed8b76ca8c36b04f6}{qoa\_decode\_header}}(\textcolor{keyword}{const}\ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{char}\ *bytes,\ \textcolor{keywordtype}{int}\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_a3d1e3edfcf61ca2d831883e1afbad89e}{size}},\ \mbox{\hyperlink{structqoa__desc}{qoa\_desc}}\ *qoa)\ \{}
+\DoxyCodeLine{00469\ \ \ \ \ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ p\ =\ 0;}
+\DoxyCodeLine{00470\ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_a3d1e3edfcf61ca2d831883e1afbad89e}{size}}\ <\ \mbox{\hyperlink{_classes_2lib_2external_2qoa_8h_a8700d92239b99ae61f6de4ea139849dc}{QOA\_MIN\_FILESIZE}})\ \{}
+\DoxyCodeLine{00471\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ 0;}
+\DoxyCodeLine{00472\ \ \ \ \ \}}
+\DoxyCodeLine{00473\ }
+\DoxyCodeLine{00474\ }
+\DoxyCodeLine{00475\ \ \ \ \ \textcolor{comment}{/*\ Read\ the\ file\ header,\ verify\ the\ magic\ number\ ('qoaf')\ and\ read\ the\ }}
+\DoxyCodeLine{00476\ \textcolor{comment}{\ \ \ \ total\ number\ of\ samples.\ */}}
+\DoxyCodeLine{00477\ \ \ \ \ qoa\_uint64\_t\ file\_header\ =\ qoa\_read\_u64(bytes,\ \&p);}
+\DoxyCodeLine{00478\ }
+\DoxyCodeLine{00479\ \ \ \ \ \textcolor{keywordflow}{if}\ ((file\_header\ >>\ 32)\ !=\ \mbox{\hyperlink{_classes_2lib_2external_2qoa_8h_a9f5f9bf1ff8ed002a0356391cf971f99}{QOA\_MAGIC}})\ \{}
+\DoxyCodeLine{00480\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ 0;}
+\DoxyCodeLine{00481\ \ \ \ \ \}}
+\DoxyCodeLine{00482\ }
+\DoxyCodeLine{00483\ \ \ \ \ qoa-\/>\mbox{\hyperlink{structqoa__desc_a631e1e164d8a7b1ee966577d903cb41a}{samples}}\ =\ file\_header\ \&\ 0xffffffff;}
+\DoxyCodeLine{00484\ \ \ \ \ \textcolor{keywordflow}{if}\ (!qoa-\/>\mbox{\hyperlink{structqoa__desc_a631e1e164d8a7b1ee966577d903cb41a}{samples}})\ \{}
+\DoxyCodeLine{00485\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ 0;}
+\DoxyCodeLine{00486\ \ \ \ \ \}}
+\DoxyCodeLine{00487\ }
+\DoxyCodeLine{00488\ \ \ \ \ \textcolor{comment}{/*\ Peek\ into\ the\ first\ frame\ header\ to\ get\ the\ number\ of\ channels\ and}}
+\DoxyCodeLine{00489\ \textcolor{comment}{\ \ \ \ the\ samplerate.\ */}}
+\DoxyCodeLine{00490\ \ \ \ \ qoa\_uint64\_t\ frame\_header\ =\ qoa\_read\_u64(bytes,\ \&p);}
+\DoxyCodeLine{00491\ \ \ \ \ qoa-\/>\mbox{\hyperlink{structqoa__desc_a33e92402e0008fd44a71f5393a0d07b0}{channels}}\ \ \ =\ (frame\_header\ >>\ 56)\ \&\ 0x0000ff;}
+\DoxyCodeLine{00492\ \ \ \ \ qoa-\/>\mbox{\hyperlink{structqoa__desc_ad5d475ca7fcfef58fadce55d488c6f1a}{samplerate}}\ =\ (frame\_header\ >>\ 32)\ \&\ 0xffffff;}
+\DoxyCodeLine{00493\ }
+\DoxyCodeLine{00494\ \ \ \ \ \textcolor{keywordflow}{if}\ (qoa-\/>\mbox{\hyperlink{structqoa__desc_a33e92402e0008fd44a71f5393a0d07b0}{channels}}\ ==\ 0\ ||\ qoa-\/>\mbox{\hyperlink{structqoa__desc_a631e1e164d8a7b1ee966577d903cb41a}{samples}}\ ==\ 0\ ||\ qoa-\/>\mbox{\hyperlink{structqoa__desc_ad5d475ca7fcfef58fadce55d488c6f1a}{samplerate}}\ ==\ 0)\ \{}
+\DoxyCodeLine{00495\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ 0;}
+\DoxyCodeLine{00496\ \ \ \ \ \}}
+\DoxyCodeLine{00497\ }
+\DoxyCodeLine{00498\ \ \ \ \ \textcolor{keywordflow}{return}\ 8;}
+\DoxyCodeLine{00499\ \}}
+\DoxyCodeLine{00500\ }
+\DoxyCodeLine{00501\ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ \mbox{\hyperlink{_classes_2lib_2external_2qoa_8h_ab24537aedf9ace4efe796acc5ba32208}{qoa\_decode\_frame}}(\textcolor{keyword}{const}\ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{char}\ *bytes,\ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_a3d1e3edfcf61ca2d831883e1afbad89e}{size}},\ \mbox{\hyperlink{structqoa__desc}{qoa\_desc}}\ *qoa,\ \textcolor{keywordtype}{short}\ *sample\_data,\ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ *frame\_len)\ \{}
+\DoxyCodeLine{00502\ \ \ \ \ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ p\ =\ 0;}
+\DoxyCodeLine{00503\ \ \ \ \ *frame\_len\ =\ 0;}
+\DoxyCodeLine{00504\ }
+\DoxyCodeLine{00505\ \ \ \ \ \textcolor{keywordflow}{if}\ (size\ <\ 8\ +\ QOA\_LMS\_LEN\ *\ 4\ *\ qoa-\/>channels)\ \{}
+\DoxyCodeLine{00506\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ 0;}
+\DoxyCodeLine{00507\ \ \ \ \ \}}
+\DoxyCodeLine{00508\ }
+\DoxyCodeLine{00509\ \ \ \ \ \textcolor{comment}{/*\ Read\ and\ verify\ the\ frame\ header\ */}}
+\DoxyCodeLine{00510\ \ \ \ \ qoa\_uint64\_t\ frame\_header\ =\ qoa\_read\_u64(bytes,\ \&p);}
+\DoxyCodeLine{00511\ \ \ \ \ \textcolor{keywordtype}{int}\ channels\ \ \ =\ (frame\_header\ >>\ 56)\ \&\ 0x0000ff;}
+\DoxyCodeLine{00512\ \ \ \ \ \textcolor{keywordtype}{int}\ samplerate\ =\ (frame\_header\ >>\ 32)\ \&\ 0xffffff;}
+\DoxyCodeLine{00513\ \ \ \ \ \textcolor{keywordtype}{int}\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_aba70cd077c2c52c15358c231c6d293aa}{samples}}\ \ \ \ =\ (frame\_header\ >>\ 16)\ \&\ 0x00ffff;}
+\DoxyCodeLine{00514\ \ \ \ \ \textcolor{keywordtype}{int}\ frame\_size\ =\ (frame\_header\ \ \ \ \ \ )\ \&\ 0x00ffff;}
+\DoxyCodeLine{00515\ }
+\DoxyCodeLine{00516\ \ \ \ \ \textcolor{keywordtype}{int}\ data\_size\ =\ frame\_size\ -\/\ 8\ -\/\ \mbox{\hyperlink{_classes_2lib_2external_2qoa_8h_abaa086b0fe99726af23dfd3b7e3fa499}{QOA\_LMS\_LEN}}\ *\ 4\ *\ channels;}
+\DoxyCodeLine{00517\ \ \ \ \ \textcolor{keywordtype}{int}\ num\_slices\ =\ data\_size\ /\ 8;}
+\DoxyCodeLine{00518\ \ \ \ \ \textcolor{keywordtype}{int}\ max\_total\_samples\ =\ num\_slices\ *\ \mbox{\hyperlink{_classes_2lib_2external_2qoa_8h_adf18113c750bfc97ae5b412522920b89}{QOA\_SLICE\_LEN}};}
+\DoxyCodeLine{00519\ }
+\DoxyCodeLine{00520\ \ \ \ \ \textcolor{keywordflow}{if}\ (}
+\DoxyCodeLine{00521\ \ \ \ \ \ \ \ \ channels\ !=\ qoa-\/>\mbox{\hyperlink{structqoa__desc_a33e92402e0008fd44a71f5393a0d07b0}{channels}}\ ||\ }
+\DoxyCodeLine{00522\ \ \ \ \ \ \ \ \ samplerate\ !=\ qoa-\/>\mbox{\hyperlink{structqoa__desc_ad5d475ca7fcfef58fadce55d488c6f1a}{samplerate}}\ ||}
+\DoxyCodeLine{00523\ \ \ \ \ \ \ \ \ frame\_size\ >\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_a3d1e3edfcf61ca2d831883e1afbad89e}{size}}\ ||}
+\DoxyCodeLine{00524\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_aba70cd077c2c52c15358c231c6d293aa}{samples}}\ *\ channels\ >\ max\_total\_samples}
+\DoxyCodeLine{00525\ \ \ \ \ )\ \{}
+\DoxyCodeLine{00526\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ 0;}
+\DoxyCodeLine{00527\ \ \ \ \ \}}
+\DoxyCodeLine{00528\ }
+\DoxyCodeLine{00529\ }
+\DoxyCodeLine{00530\ \ \ \ \ \textcolor{comment}{/*\ Read\ the\ LMS\ state:\ 4\ x\ 2\ bytes\ history,\ 4\ x\ 2\ bytes\ weights\ per\ channel\ */}}
+\DoxyCodeLine{00531\ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{int}\ c\ =\ 0;\ c\ <\ channels;\ c++)\ \{}
+\DoxyCodeLine{00532\ \ \ \ \ \ \ \ \ qoa\_uint64\_t\ history\ =\ qoa\_read\_u64(bytes,\ \&p);}
+\DoxyCodeLine{00533\ \ \ \ \ \ \ \ \ qoa\_uint64\_t\ weights\ =\ qoa\_read\_u64(bytes,\ \&p);}
+\DoxyCodeLine{00534\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{int}\ i\ =\ 0;\ i\ <\ \mbox{\hyperlink{_classes_2lib_2external_2qoa_8h_abaa086b0fe99726af23dfd3b7e3fa499}{QOA\_LMS\_LEN}};\ i++)\ \{}
+\DoxyCodeLine{00535\ \ \ \ \ \ \ \ \ \ \ \ \ qoa-\/>\mbox{\hyperlink{structqoa__desc_a8620e714b73593e9a95a7e9d11ec8eea}{lms}}[c].\mbox{\hyperlink{structqoa__lms__t_aae536c16534305aefca6c00405b3625d}{history}}[i]\ =\ ((\textcolor{keywordtype}{signed}\ short)(history\ >>\ 48));}
+\DoxyCodeLine{00536\ \ \ \ \ \ \ \ \ \ \ \ \ history\ <<=\ 16;}
+\DoxyCodeLine{00537\ \ \ \ \ \ \ \ \ \ \ \ \ qoa-\/>\mbox{\hyperlink{structqoa__desc_a8620e714b73593e9a95a7e9d11ec8eea}{lms}}[c].\mbox{\hyperlink{structqoa__lms__t_a086f7ad0f8998f503676e69a733e3a97}{weights}}[i]\ =\ ((\textcolor{keywordtype}{signed}\ short)(weights\ >>\ 48));}
+\DoxyCodeLine{00538\ \ \ \ \ \ \ \ \ \ \ \ \ weights\ <<=\ 16;}
+\DoxyCodeLine{00539\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00540\ \ \ \ \ \}}
+\DoxyCodeLine{00541\ }
+\DoxyCodeLine{00542\ }
+\DoxyCodeLine{00543\ \ \ \ \ \textcolor{comment}{/*\ Decode\ all\ slices\ for\ all\ channels\ in\ this\ frame\ */}}
+\DoxyCodeLine{00544\ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{int}\ sample\_index\ =\ 0;\ sample\_index\ <\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_aba70cd077c2c52c15358c231c6d293aa}{samples}};\ sample\_index\ +=\ \mbox{\hyperlink{_classes_2lib_2external_2qoa_8h_adf18113c750bfc97ae5b412522920b89}{QOA\_SLICE\_LEN}})\ \{}
+\DoxyCodeLine{00545\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{int}\ c\ =\ 0;\ c\ <\ channels;\ c++)\ \{}
+\DoxyCodeLine{00546\ \ \ \ \ \ \ \ \ \ \ \ \ qoa\_uint64\_t\ slice\ =\ qoa\_read\_u64(bytes,\ \&p);}
+\DoxyCodeLine{00547\ }
+\DoxyCodeLine{00548\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ scalefactor\ =\ (slice\ >>\ 60)\ \&\ 0xf;}
+\DoxyCodeLine{00549\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ slice\_start\ =\ sample\_index\ *\ channels\ +\ c;}
+\DoxyCodeLine{00550\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ slice\_end\ =\ qoa\_clamp(sample\_index\ +\ \mbox{\hyperlink{_classes_2lib_2external_2qoa_8h_adf18113c750bfc97ae5b412522920b89}{QOA\_SLICE\_LEN}},\ 0,\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_aba70cd077c2c52c15358c231c6d293aa}{samples}})\ *\ channels\ +\ c;}
+\DoxyCodeLine{00551\ }
+\DoxyCodeLine{00552\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{int}\ si\ =\ slice\_start;\ si\ <\ slice\_end;\ si\ +=\ channels)\ \{}
+\DoxyCodeLine{00553\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ predicted\ =\ qoa\_lms\_predict(\&qoa-\/>\mbox{\hyperlink{structqoa__desc_a8620e714b73593e9a95a7e9d11ec8eea}{lms}}[c]);}
+\DoxyCodeLine{00554\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ quantized\ =\ (slice\ >>\ 57)\ \&\ 0x7;}
+\DoxyCodeLine{00555\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ dequantized\ =\ qoa\_dequant\_tab[scalefactor][quantized];}
+\DoxyCodeLine{00556\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ reconstructed\ =\ qoa\_clamp(predicted\ +\ dequantized,\ -\/32768,\ 32767);}
+\DoxyCodeLine{00557\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00558\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ sample\_data[si]\ =\ reconstructed;}
+\DoxyCodeLine{00559\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ slice\ <<=\ 3;}
+\DoxyCodeLine{00560\ }
+\DoxyCodeLine{00561\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ qoa\_lms\_update(\&qoa-\/>\mbox{\hyperlink{structqoa__desc_a8620e714b73593e9a95a7e9d11ec8eea}{lms}}[c],\ reconstructed,\ dequantized);}
+\DoxyCodeLine{00562\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00563\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00564\ \ \ \ \ \}}
+\DoxyCodeLine{00565\ }
+\DoxyCodeLine{00566\ \ \ \ \ *frame\_len\ =\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_aba70cd077c2c52c15358c231c6d293aa}{samples}};}
+\DoxyCodeLine{00567\ \ \ \ \ \textcolor{keywordflow}{return}\ p;}
+\DoxyCodeLine{00568\ \}}
+\DoxyCodeLine{00569\ }
+\DoxyCodeLine{00570\ \textcolor{keywordtype}{short}\ *\mbox{\hyperlink{_classes_2lib_2external_2qoa_8h_aa6cdde6612dc54bcc6db683c550b712d}{qoa\_decode}}(\textcolor{keyword}{const}\ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{char}\ *bytes,\ \textcolor{keywordtype}{int}\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_a3d1e3edfcf61ca2d831883e1afbad89e}{size}},\ \mbox{\hyperlink{structqoa__desc}{qoa\_desc}}\ *qoa)\ \{}
+\DoxyCodeLine{00571\ \ \ \ \ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ p\ =\ \mbox{\hyperlink{_classes_2lib_2external_2qoa_8h_a3e623d05c427eb1ed8b76ca8c36b04f6}{qoa\_decode\_header}}(bytes,\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_a3d1e3edfcf61ca2d831883e1afbad89e}{size}},\ qoa);}
+\DoxyCodeLine{00572\ \ \ \ \ \textcolor{keywordflow}{if}\ (!p)\ \{}
+\DoxyCodeLine{00573\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{_classes_2lib_2external_2miniaudio_8h_a070d2ce7b6bb7e5c05602aa8c308d0c4}{NULL}};}
+\DoxyCodeLine{00574\ \ \ \ \ \}}
+\DoxyCodeLine{00575\ }
+\DoxyCodeLine{00576\ \ \ \ \ \textcolor{comment}{/*\ Calculate\ the\ required\ size\ of\ the\ sample\ buffer\ and\ allocate\ */}}
+\DoxyCodeLine{00577\ \ \ \ \ \textcolor{keywordtype}{int}\ total\_samples\ =\ qoa-\/>\mbox{\hyperlink{structqoa__desc_a631e1e164d8a7b1ee966577d903cb41a}{samples}}\ *\ qoa-\/>\mbox{\hyperlink{structqoa__desc_a33e92402e0008fd44a71f5393a0d07b0}{channels}};}
+\DoxyCodeLine{00578\ \ \ \ \ \textcolor{keywordtype}{short}\ *sample\_data\ =\ \mbox{\hyperlink{_classes_2lib_2raudio_8c_a4f99e79065c8f72acef86805e80ed032}{QOA\_MALLOC}}(total\_samples\ *\ \textcolor{keyword}{sizeof}(\textcolor{keywordtype}{short}));}
+\DoxyCodeLine{00579\ }
+\DoxyCodeLine{00580\ \ \ \ \ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ sample\_index\ =\ 0;}
+\DoxyCodeLine{00581\ \ \ \ \ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ frame\_len;}
+\DoxyCodeLine{00582\ \ \ \ \ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ frame\_size;}
+\DoxyCodeLine{00583\ }
+\DoxyCodeLine{00584\ \ \ \ \ \textcolor{comment}{/*\ Decode\ all\ frames\ */}}
+\DoxyCodeLine{00585\ \ \ \ \ \textcolor{keywordflow}{do}\ \{}
+\DoxyCodeLine{00586\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{short}\ *sample\_ptr\ =\ sample\_data\ +\ sample\_index\ *\ qoa-\/>\mbox{\hyperlink{structqoa__desc_a33e92402e0008fd44a71f5393a0d07b0}{channels}};}
+\DoxyCodeLine{00587\ \ \ \ \ \ \ \ \ frame\_size\ =\ \mbox{\hyperlink{_classes_2lib_2external_2qoa_8h_ab24537aedf9ace4efe796acc5ba32208}{qoa\_decode\_frame}}(bytes\ +\ p,\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_a3d1e3edfcf61ca2d831883e1afbad89e}{size}}\ -\/\ p,\ qoa,\ sample\_ptr,\ \&frame\_len);}
+\DoxyCodeLine{00588\ }
+\DoxyCodeLine{00589\ \ \ \ \ \ \ \ \ p\ +=\ frame\_size;}
+\DoxyCodeLine{00590\ \ \ \ \ \ \ \ \ sample\_index\ +=\ frame\_len;}
+\DoxyCodeLine{00591\ \ \ \ \ \}\ \textcolor{keywordflow}{while}\ (frame\_size\ \&\&\ sample\_index\ <\ qoa-\/>\mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_aba70cd077c2c52c15358c231c6d293aa}{samples}});}
+\DoxyCodeLine{00592\ }
+\DoxyCodeLine{00593\ \ \ \ \ qoa-\/>\mbox{\hyperlink{structqoa__desc_a631e1e164d8a7b1ee966577d903cb41a}{samples}}\ =\ sample\_index;}
+\DoxyCodeLine{00594\ \ \ \ \ \textcolor{keywordflow}{return}\ sample\_data;}
+\DoxyCodeLine{00595\ \}}
+\DoxyCodeLine{00596\ }
+\DoxyCodeLine{00597\ }
+\DoxyCodeLine{00598\ }
+\DoxyCodeLine{00599\ \textcolor{comment}{/*\ -\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/}}
+\DoxyCodeLine{00600\ \textcolor{comment}{\ \ \ \ File\ read/write\ convenience\ functions\ */}}
+\DoxyCodeLine{00601\ }
+\DoxyCodeLine{00602\ \textcolor{preprocessor}{\#ifndef\ QOA\_NO\_STDIO}}
+\DoxyCodeLine{00603\ \textcolor{preprocessor}{\#include\ <stdio.h>}}
+\DoxyCodeLine{00604\ }
+\DoxyCodeLine{00605\ \textcolor{keywordtype}{int}\ \mbox{\hyperlink{_classes_2lib_2external_2qoa_8h_ad7c7fb3280e07faf230acd73d5ac296d}{qoa\_write}}(\textcolor{keyword}{const}\ \textcolor{keywordtype}{char}\ *\mbox{\hyperlink{_classes_2lib_2m_i_n_i-master_2tests_2testhuge_8cpp_a42a21beb8018ac623f4d09db1343b9cf}{filename}},\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{short}\ *sample\_data,\ \mbox{\hyperlink{structqoa__desc}{qoa\_desc}}\ *qoa)\ \{}
+\DoxyCodeLine{00606\ \ \ \ \ FILE\ *\mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2glad_8h_a0fdda94b8b7e64884690244028f455ba}{f}}\ =\ fopen(\mbox{\hyperlink{_classes_2lib_2m_i_n_i-master_2tests_2testhuge_8cpp_a42a21beb8018ac623f4d09db1343b9cf}{filename}},\ \textcolor{stringliteral}{"{}wb"{}});}
+\DoxyCodeLine{00607\ \ \ \ \ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_a3d1e3edfcf61ca2d831883e1afbad89e}{size}};}
+\DoxyCodeLine{00608\ \ \ \ \ \textcolor{keywordtype}{void}\ *encoded;}
+\DoxyCodeLine{00609\ }
+\DoxyCodeLine{00610\ \ \ \ \ \textcolor{keywordflow}{if}\ (!\mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2glad_8h_a0fdda94b8b7e64884690244028f455ba}{f}})\ \{}
+\DoxyCodeLine{00611\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ 0;}
+\DoxyCodeLine{00612\ \ \ \ \ \}}
+\DoxyCodeLine{00613\ }
+\DoxyCodeLine{00614\ \ \ \ \ encoded\ =\ \mbox{\hyperlink{_classes_2lib_2external_2qoa_8h_ab956d022df26af9b453cf2d1484917e5}{qoa\_encode}}(sample\_data,\ qoa,\ \&\mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_a3d1e3edfcf61ca2d831883e1afbad89e}{size}});}
+\DoxyCodeLine{00615\ \ \ \ \ \textcolor{keywordflow}{if}\ (!encoded)\ \{}
+\DoxyCodeLine{00616\ \ \ \ \ \ \ \ \ fclose(\mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2glad_8h_a0fdda94b8b7e64884690244028f455ba}{f}});}
+\DoxyCodeLine{00617\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ 0;}
+\DoxyCodeLine{00618\ \ \ \ \ \}}
+\DoxyCodeLine{00619\ }
+\DoxyCodeLine{00620\ \ \ \ \ fwrite(encoded,\ 1,\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_a3d1e3edfcf61ca2d831883e1afbad89e}{size}},\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2glad_8h_a0fdda94b8b7e64884690244028f455ba}{f}});}
+\DoxyCodeLine{00621\ \ \ \ \ fclose(\mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2glad_8h_a0fdda94b8b7e64884690244028f455ba}{f}});}
+\DoxyCodeLine{00622\ }
+\DoxyCodeLine{00623\ \ \ \ \ \mbox{\hyperlink{_classes_2lib_2raudio_8c_a10458f6c1910a6eddd51ea08a9592499}{QOA\_FREE}}(encoded);}
+\DoxyCodeLine{00624\ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_a3d1e3edfcf61ca2d831883e1afbad89e}{size}};}
+\DoxyCodeLine{00625\ \}}
+\DoxyCodeLine{00626\ }
+\DoxyCodeLine{00627\ \textcolor{keywordtype}{void}\ *\mbox{\hyperlink{_classes_2lib_2external_2qoa_8h_aa2ec86b27718cd9bf0e89ea90e90e6e1}{qoa\_read}}(\textcolor{keyword}{const}\ \textcolor{keywordtype}{char}\ *\mbox{\hyperlink{_classes_2lib_2m_i_n_i-master_2tests_2testhuge_8cpp_a42a21beb8018ac623f4d09db1343b9cf}{filename}},\ \mbox{\hyperlink{structqoa__desc}{qoa\_desc}}\ *qoa)\ \{}
+\DoxyCodeLine{00628\ \ \ \ \ FILE\ *\mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2glad_8h_a0fdda94b8b7e64884690244028f455ba}{f}}\ =\ fopen(\mbox{\hyperlink{_classes_2lib_2m_i_n_i-master_2tests_2testhuge_8cpp_a42a21beb8018ac623f4d09db1343b9cf}{filename}},\ \textcolor{stringliteral}{"{}rb"{}});}
+\DoxyCodeLine{00629\ \ \ \ \ \textcolor{keywordtype}{int}\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_a3d1e3edfcf61ca2d831883e1afbad89e}{size}},\ bytes\_read;}
+\DoxyCodeLine{00630\ \ \ \ \ \textcolor{keywordtype}{void}\ *\mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_a89ce72163394e6aef63b551a8806e93f}{data}};}
+\DoxyCodeLine{00631\ \ \ \ \ \textcolor{keywordtype}{short}\ *sample\_data;}
+\DoxyCodeLine{00632\ }
+\DoxyCodeLine{00633\ \ \ \ \ \textcolor{keywordflow}{if}\ (!\mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2glad_8h_a0fdda94b8b7e64884690244028f455ba}{f}})\ \{}
+\DoxyCodeLine{00634\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{_classes_2lib_2external_2miniaudio_8h_a070d2ce7b6bb7e5c05602aa8c308d0c4}{NULL}};}
+\DoxyCodeLine{00635\ \ \ \ \ \}}
+\DoxyCodeLine{00636\ }
+\DoxyCodeLine{00637\ \ \ \ \ fseek(\mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2glad_8h_a0fdda94b8b7e64884690244028f455ba}{f}},\ 0,\ SEEK\_END);}
+\DoxyCodeLine{00638\ \ \ \ \ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_a3d1e3edfcf61ca2d831883e1afbad89e}{size}}\ =\ ftell(\mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2glad_8h_a0fdda94b8b7e64884690244028f455ba}{f}});}
+\DoxyCodeLine{00639\ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_a3d1e3edfcf61ca2d831883e1afbad89e}{size}}\ <=\ 0)\ \{}
+\DoxyCodeLine{00640\ \ \ \ \ \ \ \ \ fclose(\mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2glad_8h_a0fdda94b8b7e64884690244028f455ba}{f}});}
+\DoxyCodeLine{00641\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{_classes_2lib_2external_2miniaudio_8h_a070d2ce7b6bb7e5c05602aa8c308d0c4}{NULL}};}
+\DoxyCodeLine{00642\ \ \ \ \ \}}
+\DoxyCodeLine{00643\ \ \ \ \ fseek(\mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2glad_8h_a0fdda94b8b7e64884690244028f455ba}{f}},\ 0,\ SEEK\_SET);}
+\DoxyCodeLine{00644\ }
+\DoxyCodeLine{00645\ \ \ \ \ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_a89ce72163394e6aef63b551a8806e93f}{data}}\ =\ \mbox{\hyperlink{_classes_2lib_2raudio_8c_a4f99e79065c8f72acef86805e80ed032}{QOA\_MALLOC}}(\mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_a3d1e3edfcf61ca2d831883e1afbad89e}{size}});}
+\DoxyCodeLine{00646\ \ \ \ \ \textcolor{keywordflow}{if}\ (!\mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_a89ce72163394e6aef63b551a8806e93f}{data}})\ \{}
+\DoxyCodeLine{00647\ \ \ \ \ \ \ \ \ fclose(\mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2glad_8h_a0fdda94b8b7e64884690244028f455ba}{f}});}
+\DoxyCodeLine{00648\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{_classes_2lib_2external_2miniaudio_8h_a070d2ce7b6bb7e5c05602aa8c308d0c4}{NULL}};}
+\DoxyCodeLine{00649\ \ \ \ \ \}}
+\DoxyCodeLine{00650\ }
+\DoxyCodeLine{00651\ \ \ \ \ bytes\_read\ =\ fread(\mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_a89ce72163394e6aef63b551a8806e93f}{data}},\ 1,\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_a3d1e3edfcf61ca2d831883e1afbad89e}{size}},\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2glad_8h_a0fdda94b8b7e64884690244028f455ba}{f}});}
+\DoxyCodeLine{00652\ \ \ \ \ fclose(\mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2glad_8h_a0fdda94b8b7e64884690244028f455ba}{f}});}
+\DoxyCodeLine{00653\ }
+\DoxyCodeLine{00654\ \ \ \ \ sample\_data\ =\ \mbox{\hyperlink{_classes_2lib_2external_2qoa_8h_aa6cdde6612dc54bcc6db683c550b712d}{qoa\_decode}}(\mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_a89ce72163394e6aef63b551a8806e93f}{data}},\ bytes\_read,\ qoa);}
+\DoxyCodeLine{00655\ \ \ \ \ \mbox{\hyperlink{_classes_2lib_2raudio_8c_a10458f6c1910a6eddd51ea08a9592499}{QOA\_FREE}}(\mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_a89ce72163394e6aef63b551a8806e93f}{data}});}
+\DoxyCodeLine{00656\ \ \ \ \ \textcolor{keywordflow}{return}\ sample\_data;}
+\DoxyCodeLine{00657\ \}}
+\DoxyCodeLine{00658\ }
+\DoxyCodeLine{00659\ \textcolor{preprocessor}{\#endif\ }\textcolor{comment}{/*\ QOA\_NO\_STDIO\ */}\textcolor{preprocessor}{}}
+\DoxyCodeLine{00660\ \textcolor{preprocessor}{\#endif\ }\textcolor{comment}{/*\ QOA\_IMPLEMENTATION\ */}\textcolor{preprocessor}{}}
+
+\end{DoxyCode}

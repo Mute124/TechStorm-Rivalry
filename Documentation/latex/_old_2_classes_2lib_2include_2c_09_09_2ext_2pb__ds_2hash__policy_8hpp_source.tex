@@ -1,0 +1,532 @@
+\doxysection{hash\+\_\+policy.\+hpp}
+\hypertarget{_old_2_classes_2lib_2include_2c_09_09_2ext_2pb__ds_2hash__policy_8hpp_source}{}\label{_old_2_classes_2lib_2include_2c_09_09_2ext_2pb__ds_2hash__policy_8hpp_source}\index{C:/Users/HP/Documents/GitHub/Minero-\/Game/Old/Classes/lib/include/c++/ext/pb\_ds/hash\_policy.hpp@{C:/Users/HP/Documents/GitHub/Minero-\/Game/Old/Classes/lib/include/c++/ext/pb\_ds/hash\_policy.hpp}}
+\mbox{\hyperlink{_old_2_classes_2lib_2include_2c_09_09_2ext_2pb__ds_2hash__policy_8hpp}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{comment}{//\ -\/*-\/\ C++\ -\/*-\/}}
+\DoxyCodeLine{00002\ }
+\DoxyCodeLine{00003\ \textcolor{comment}{//\ Copyright\ (C)\ 2005-\/2022\ Free\ Software\ Foundation,\ Inc.}}
+\DoxyCodeLine{00004\ \textcolor{comment}{//}}
+\DoxyCodeLine{00005\ \textcolor{comment}{//\ This\ file\ is\ part\ of\ the\ GNU\ ISO\ C++\ Library.\ \ This\ library\ is\ free}}
+\DoxyCodeLine{00006\ \textcolor{comment}{//\ software;\ you\ can\ redistribute\ it\ and/or\ modify\ it\ under\ the\ terms}}
+\DoxyCodeLine{00007\ \textcolor{comment}{//\ of\ the\ GNU\ General\ Public\ License\ as\ published\ by\ the\ Free\ Software}}
+\DoxyCodeLine{00008\ \textcolor{comment}{//\ Foundation;\ either\ version\ 3,\ or\ (at\ your\ option)\ any\ later}}
+\DoxyCodeLine{00009\ \textcolor{comment}{//\ version.}}
+\DoxyCodeLine{00010\ }
+\DoxyCodeLine{00011\ \textcolor{comment}{//\ This\ library\ is\ distributed\ in\ the\ hope\ that\ it\ will\ be\ useful,\ but}}
+\DoxyCodeLine{00012\ \textcolor{comment}{//\ WITHOUT\ ANY\ WARRANTY;\ without\ even\ the\ implied\ warranty\ of}}
+\DoxyCodeLine{00013\ \textcolor{comment}{//\ MERCHANTABILITY\ or\ FITNESS\ FOR\ A\ PARTICULAR\ PURPOSE.\ \ See\ the\ GNU}}
+\DoxyCodeLine{00014\ \textcolor{comment}{//\ General\ Public\ License\ for\ more\ details.}}
+\DoxyCodeLine{00015\ }
+\DoxyCodeLine{00016\ \textcolor{comment}{//\ Under\ Section\ 7\ of\ GPL\ version\ 3,\ you\ are\ granted\ additional}}
+\DoxyCodeLine{00017\ \textcolor{comment}{//\ permissions\ described\ in\ the\ GCC\ Runtime\ Library\ Exception,\ version}}
+\DoxyCodeLine{00018\ \textcolor{comment}{//\ 3.1,\ as\ published\ by\ the\ Free\ Software\ Foundation.}}
+\DoxyCodeLine{00019\ }
+\DoxyCodeLine{00020\ \textcolor{comment}{//\ You\ should\ have\ received\ a\ copy\ of\ the\ GNU\ General\ Public\ License\ and}}
+\DoxyCodeLine{00021\ \textcolor{comment}{//\ a\ copy\ of\ the\ GCC\ Runtime\ Library\ Exception\ along\ with\ this\ program;}}
+\DoxyCodeLine{00022\ \textcolor{comment}{//\ see\ the\ files\ COPYING3\ and\ COPYING.RUNTIME\ respectively.\ \ If\ not,\ see}}
+\DoxyCodeLine{00023\ \textcolor{comment}{//\ <http://www.gnu.org/licenses/>.}}
+\DoxyCodeLine{00024\ }
+\DoxyCodeLine{00025\ \textcolor{comment}{//\ Copyright\ (C)\ 2004\ Ami\ Tavory\ and\ Vladimir\ Dreizin,\ IBM-\/HRL.}}
+\DoxyCodeLine{00026\ }
+\DoxyCodeLine{00027\ \textcolor{comment}{//\ Permission\ to\ use,\ copy,\ modify,\ sell,\ and\ distribute\ this\ software}}
+\DoxyCodeLine{00028\ \textcolor{comment}{//\ is\ hereby\ granted\ without\ fee,\ provided\ that\ the\ above\ copyright}}
+\DoxyCodeLine{00029\ \textcolor{comment}{//\ notice\ appears\ in\ all\ copies,\ and\ that\ both\ that\ copyright\ notice}}
+\DoxyCodeLine{00030\ \textcolor{comment}{//\ and\ this\ permission\ notice\ appear\ in\ supporting\ documentation.\ None}}
+\DoxyCodeLine{00031\ \textcolor{comment}{//\ of\ the\ above\ authors,\ nor\ IBM\ Haifa\ Research\ Laboratories,\ make\ any}}
+\DoxyCodeLine{00032\ \textcolor{comment}{//\ representation\ about\ the\ suitability\ of\ this\ software\ for\ any}}
+\DoxyCodeLine{00033\ \textcolor{comment}{//\ purpose.\ It\ is\ provided\ "{}as\ is"{}\ without\ express\ or\ implied}}
+\DoxyCodeLine{00034\ \textcolor{comment}{//\ warranty.}}
+\DoxyCodeLine{00035\ }
+\DoxyCodeLine{00041\ \textcolor{preprocessor}{\#ifndef\ PB\_DS\_HASH\_POLICY\_HPP}}
+\DoxyCodeLine{00042\ \textcolor{preprocessor}{\#define\ PB\_DS\_HASH\_POLICY\_HPP}}
+\DoxyCodeLine{00043\ }
+\DoxyCodeLine{00044\ \textcolor{preprocessor}{\#include\ <bits/c++config.h>}}
+\DoxyCodeLine{00045\ \textcolor{preprocessor}{\#include\ <algorithm>}}
+\DoxyCodeLine{00046\ \textcolor{preprocessor}{\#include\ <vector>}}
+\DoxyCodeLine{00047\ \textcolor{preprocessor}{\#include\ <cmath>}}
+\DoxyCodeLine{00048\ \textcolor{preprocessor}{\#include\ <ext/pb\_ds/exception.hpp>}}
+\DoxyCodeLine{00049\ \textcolor{preprocessor}{\#include\ <ext/pb\_ds/detail/type\_utils.hpp>}}
+\DoxyCodeLine{00050\ \textcolor{preprocessor}{\#include\ <ext/pb\_ds/detail/hash\_fn/mask\_based\_range\_hashing.hpp>}}
+\DoxyCodeLine{00051\ \textcolor{preprocessor}{\#include\ <ext/pb\_ds/detail/hash\_fn/mod\_based\_range\_hashing.hpp>}}
+\DoxyCodeLine{00052\ \textcolor{preprocessor}{\#include\ <ext/pb\_ds/detail/resize\_policy/hash\_load\_check\_resize\_trigger\_size\_base.hpp>}}
+\DoxyCodeLine{00053\ }
+\DoxyCodeLine{00054\ \textcolor{keyword}{namespace\ }\mbox{\hyperlink{namespace____gnu__pbds}{\_\_gnu\_pbds}}}
+\DoxyCodeLine{00055\ \{}
+\DoxyCodeLine{00056\ \textcolor{preprocessor}{\#define\ PB\_DS\_CLASS\_T\_DEC\ template<typename\ Size\_Type>}}
+\DoxyCodeLine{00057\ \textcolor{preprocessor}{\#define\ PB\_DS\_CLASS\_C\_DEC\ linear\_probe\_fn<Size\_Type>}}
+\DoxyCodeLine{00058\ }
+\DoxyCodeLine{00060\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ Size\_Type\ =\ std::\textcolor{keywordtype}{size\_t}>}
+\DoxyCodeLine{00061\ \ \ \textcolor{keyword}{class\ }linear\_probe\_fn}
+\DoxyCodeLine{00062\ \ \ \{}
+\DoxyCodeLine{00063\ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00064\ \ \ \ \ \textcolor{keyword}{typedef}\ Size\_Type\ \mbox{\hyperlink{class____gnu__pbds_1_1linear__probe__fn_aaf0b1d54dda6d85d8f1025ef40125b54}{size\_type}};}
+\DoxyCodeLine{00065\ }
+\DoxyCodeLine{00066\ \ \ \ \ \textcolor{keywordtype}{void}}
+\DoxyCodeLine{00067\ \ \ \ \ \mbox{\hyperlink{class____gnu__pbds_1_1linear__probe__fn_aba1130faf76b9b2acda7ef5f76b47127}{swap}}(\mbox{\hyperlink{_classes_2lib_2include_2c_09_09_2ext_2pb__ds_2detail_2bin__search__tree___2bin__search__tree___8hpp_a304b8b73a11afe64bfca54576b91263b}{PB\_DS\_CLASS\_C\_DEC}}\&\ other);}
+\DoxyCodeLine{00068\ }
+\DoxyCodeLine{00069\ \ \ \textcolor{keyword}{protected}:}
+\DoxyCodeLine{00071\ \ \ \ \ \textcolor{keyword}{inline}\ \mbox{\hyperlink{class____gnu__pbds_1_1linear__probe__fn_aaf0b1d54dda6d85d8f1025ef40125b54}{size\_type}}}
+\DoxyCodeLine{00072\ \ \ \ \ \mbox{\hyperlink{class____gnu__pbds_1_1linear__probe__fn_a2157046a86e4bdfeb4ae33ef885e9167}{operator()}}(\mbox{\hyperlink{class____gnu__pbds_1_1linear__probe__fn_aaf0b1d54dda6d85d8f1025ef40125b54}{size\_type}}\ i)\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00073\ \ \ \};}
+\DoxyCodeLine{00074\ }
+\DoxyCodeLine{00075\ \textcolor{preprocessor}{\#include\ <ext/pb\_ds/detail/hash\_fn/linear\_probe\_fn\_imp.hpp>}}
+\DoxyCodeLine{00076\ }
+\DoxyCodeLine{00077\ \textcolor{preprocessor}{\#undef\ PB\_DS\_CLASS\_T\_DEC}}
+\DoxyCodeLine{00078\ \textcolor{preprocessor}{\#undef\ PB\_DS\_CLASS\_C\_DEC}}
+\DoxyCodeLine{00079\ }
+\DoxyCodeLine{00080\ \textcolor{preprocessor}{\#define\ PB\_DS\_CLASS\_T\_DEC\ template<typename\ Size\_Type>}}
+\DoxyCodeLine{00081\ \textcolor{preprocessor}{\#define\ PB\_DS\_CLASS\_C\_DEC\ quadratic\_probe\_fn<Size\_Type>}}
+\DoxyCodeLine{00082\ }
+\DoxyCodeLine{00084\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ Size\_Type\ =\ std::\textcolor{keywordtype}{size\_t}>}
+\DoxyCodeLine{00085\ \ \ \textcolor{keyword}{class\ }\mbox{\hyperlink{class____gnu__pbds_1_1quadratic__probe__fn}{quadratic\_probe\_fn}}}
+\DoxyCodeLine{00086\ \ \ \{}
+\DoxyCodeLine{00087\ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00088\ \ \ \ \ \textcolor{keyword}{typedef}\ Size\_Type\ \mbox{\hyperlink{class____gnu__pbds_1_1quadratic__probe__fn_a80677b80fba8e537a76cefc11ca771a8}{size\_type}};}
+\DoxyCodeLine{00089\ }
+\DoxyCodeLine{00090\ \ \ \ \ \textcolor{keywordtype}{void}}
+\DoxyCodeLine{00091\ \ \ \ \ \mbox{\hyperlink{class____gnu__pbds_1_1quadratic__probe__fn_a0d6e12ced4799487ff36d5b859a669b5}{swap}}(\mbox{\hyperlink{_classes_2lib_2include_2c_09_09_2ext_2pb__ds_2detail_2bin__search__tree___2bin__search__tree___8hpp_a304b8b73a11afe64bfca54576b91263b}{PB\_DS\_CLASS\_C\_DEC}}\&\ other);}
+\DoxyCodeLine{00092\ }
+\DoxyCodeLine{00093\ \ \ \textcolor{keyword}{protected}:}
+\DoxyCodeLine{00095\ \ \ \ \ \textcolor{keyword}{inline}\ \mbox{\hyperlink{class____gnu__pbds_1_1quadratic__probe__fn_a80677b80fba8e537a76cefc11ca771a8}{size\_type}}}
+\DoxyCodeLine{00096\ \ \ \ \ \mbox{\hyperlink{class____gnu__pbds_1_1quadratic__probe__fn_a1af48a13b9400a49e8b50c866e4737aa}{operator()}}(\mbox{\hyperlink{class____gnu__pbds_1_1quadratic__probe__fn_a80677b80fba8e537a76cefc11ca771a8}{size\_type}}\ i)\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00097\ \ \ \};}
+\DoxyCodeLine{00098\ }
+\DoxyCodeLine{00099\ \textcolor{preprocessor}{\#include\ <ext/pb\_ds/detail/hash\_fn/quadratic\_probe\_fn\_imp.hpp>}}
+\DoxyCodeLine{00100\ }
+\DoxyCodeLine{00101\ \textcolor{preprocessor}{\#undef\ PB\_DS\_CLASS\_T\_DEC}}
+\DoxyCodeLine{00102\ \textcolor{preprocessor}{\#undef\ PB\_DS\_CLASS\_C\_DEC}}
+\DoxyCodeLine{00103\ }
+\DoxyCodeLine{00104\ \textcolor{preprocessor}{\#define\ PB\_DS\_CLASS\_T\_DEC\ template<typename\ Size\_Type>}}
+\DoxyCodeLine{00105\ \textcolor{preprocessor}{\#define\ PB\_DS\_CLASS\_C\_DEC\ direct\_mask\_range\_hashing<Size\_Type>}}
+\DoxyCodeLine{00106\ }
+\DoxyCodeLine{00108\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ Size\_Type\ =\ std::\textcolor{keywordtype}{size\_t}>}
+\DoxyCodeLine{00109\ \ \ \textcolor{keyword}{class\ }\mbox{\hyperlink{class____gnu__pbds_1_1direct__mask__range__hashing}{direct\_mask\_range\_hashing}}}
+\DoxyCodeLine{00110\ \ \ :\ \textcolor{keyword}{public}\ \mbox{\hyperlink{class____gnu__pbds_1_1detail_1_1mask__based__range__hashing}{detail::mask\_based\_range\_hashing}}<Size\_Type>}
+\DoxyCodeLine{00111\ \ \ \{}
+\DoxyCodeLine{00112\ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00113\ \ \ \ \ \textcolor{keyword}{typedef}\ \mbox{\hyperlink{class____gnu__pbds_1_1detail_1_1mask__based__range__hashing}{detail::mask\_based\_range\_hashing<Size\_Type>}}\ mask\_based\_base;}
+\DoxyCodeLine{00114\ }
+\DoxyCodeLine{00115\ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00116\ \ \ \ \ \textcolor{keyword}{typedef}\ Size\_Type\ \mbox{\hyperlink{class____gnu__pbds_1_1direct__mask__range__hashing_a02078ecc00e2e5e0dbfa57808341ac7f}{size\_type}};}
+\DoxyCodeLine{00117\ }
+\DoxyCodeLine{00118\ \ \ \ \ \textcolor{keywordtype}{void}}
+\DoxyCodeLine{00119\ \ \ \ \ \mbox{\hyperlink{class____gnu__pbds_1_1direct__mask__range__hashing_a199bc79740bd6fd5fc7ff6f156a7e8cc}{swap}}(\mbox{\hyperlink{_classes_2lib_2include_2c_09_09_2ext_2pb__ds_2detail_2bin__search__tree___2bin__search__tree___8hpp_a304b8b73a11afe64bfca54576b91263b}{PB\_DS\_CLASS\_C\_DEC}}\&\ other);}
+\DoxyCodeLine{00120\ }
+\DoxyCodeLine{00121\ \ \ \textcolor{keyword}{protected}:}
+\DoxyCodeLine{00122\ \ \ \ \ \textcolor{keywordtype}{void}}
+\DoxyCodeLine{00123\ \ \ \ \ \mbox{\hyperlink{class____gnu__pbds_1_1direct__mask__range__hashing_a1d6ffb60812e450b4396fcbfd1c2e1d2}{notify\_resized}}(\mbox{\hyperlink{class____gnu__pbds_1_1direct__mask__range__hashing_a02078ecc00e2e5e0dbfa57808341ac7f}{size\_type}}\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_a3d1e3edfcf61ca2d831883e1afbad89e}{size}});}
+\DoxyCodeLine{00124\ }
+\DoxyCodeLine{00127\ \ \ \ \ \textcolor{keyword}{inline}\ \mbox{\hyperlink{class____gnu__pbds_1_1direct__mask__range__hashing_a02078ecc00e2e5e0dbfa57808341ac7f}{size\_type}}}
+\DoxyCodeLine{00128\ \ \ \ \ \mbox{\hyperlink{class____gnu__pbds_1_1direct__mask__range__hashing_a0c4e753aaa7d9e0763bb509cde1920d6}{operator()}}(\mbox{\hyperlink{class____gnu__pbds_1_1direct__mask__range__hashing_a02078ecc00e2e5e0dbfa57808341ac7f}{size\_type}}\ hash)\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00129\ \ \ \};}
+\DoxyCodeLine{00130\ }
+\DoxyCodeLine{00131\ \textcolor{preprocessor}{\#include\ <ext/pb\_ds/detail/hash\_fn/direct\_mask\_range\_hashing\_imp.hpp>}}
+\DoxyCodeLine{00132\ }
+\DoxyCodeLine{00133\ \textcolor{preprocessor}{\#undef\ PB\_DS\_CLASS\_T\_DEC}}
+\DoxyCodeLine{00134\ \textcolor{preprocessor}{\#undef\ PB\_DS\_CLASS\_C\_DEC}}
+\DoxyCodeLine{00135\ }
+\DoxyCodeLine{00136\ \textcolor{preprocessor}{\#define\ PB\_DS\_CLASS\_T\_DEC\ template<typename\ Size\_Type>}}
+\DoxyCodeLine{00137\ \textcolor{preprocessor}{\#define\ PB\_DS\_CLASS\_C\_DEC\ direct\_mod\_range\_hashing<Size\_Type>}}
+\DoxyCodeLine{00138\ }
+\DoxyCodeLine{00140\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ Size\_Type\ =\ std::\textcolor{keywordtype}{size\_t}>}
+\DoxyCodeLine{00141\ \ \ \textcolor{keyword}{class\ }\mbox{\hyperlink{class____gnu__pbds_1_1direct__mod__range__hashing}{direct\_mod\_range\_hashing}}}
+\DoxyCodeLine{00142\ \ \ :\ \textcolor{keyword}{public}\ \mbox{\hyperlink{class____gnu__pbds_1_1detail_1_1mod__based__range__hashing}{detail::mod\_based\_range\_hashing}}<Size\_Type>}
+\DoxyCodeLine{00143\ \ \ \{}
+\DoxyCodeLine{00144\ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00145\ \ \ \ \ \textcolor{keyword}{typedef}\ Size\_Type\ \mbox{\hyperlink{class____gnu__pbds_1_1direct__mod__range__hashing_a69026bda29bec3e64ca260edc31fa9f8}{size\_type}};}
+\DoxyCodeLine{00146\ }
+\DoxyCodeLine{00147\ \ \ \ \ \textcolor{keywordtype}{void}}
+\DoxyCodeLine{00148\ \ \ \ \ \mbox{\hyperlink{class____gnu__pbds_1_1direct__mod__range__hashing_ae33e0f416ca38247514e151b1e3f6054}{swap}}(\mbox{\hyperlink{_classes_2lib_2include_2c_09_09_2ext_2pb__ds_2detail_2bin__search__tree___2bin__search__tree___8hpp_a304b8b73a11afe64bfca54576b91263b}{PB\_DS\_CLASS\_C\_DEC}}\&\ other);}
+\DoxyCodeLine{00149\ }
+\DoxyCodeLine{00150\ \ \ \textcolor{keyword}{protected}:}
+\DoxyCodeLine{00151\ \ \ \ \ \textcolor{keywordtype}{void}}
+\DoxyCodeLine{00152\ \ \ \ \ \mbox{\hyperlink{class____gnu__pbds_1_1direct__mod__range__hashing_a69622a3a60b6575a92988949ba63c67a}{notify\_resized}}(\mbox{\hyperlink{class____gnu__pbds_1_1direct__mod__range__hashing_a69026bda29bec3e64ca260edc31fa9f8}{size\_type}}\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_a3d1e3edfcf61ca2d831883e1afbad89e}{size}});}
+\DoxyCodeLine{00153\ }
+\DoxyCodeLine{00156\ \ \ \ \ \textcolor{keyword}{inline}\ \mbox{\hyperlink{class____gnu__pbds_1_1direct__mod__range__hashing_a69026bda29bec3e64ca260edc31fa9f8}{size\_type}}}
+\DoxyCodeLine{00157\ \ \ \ \ \mbox{\hyperlink{class____gnu__pbds_1_1direct__mod__range__hashing_a7e5f3882e94e2faee2a5d8d781f0284d}{operator()}}(\mbox{\hyperlink{class____gnu__pbds_1_1direct__mod__range__hashing_a69026bda29bec3e64ca260edc31fa9f8}{size\_type}}\ hash)\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00158\ }
+\DoxyCodeLine{00159\ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00160\ \ \ \ \ \textcolor{keyword}{typedef}\ \mbox{\hyperlink{class____gnu__pbds_1_1detail_1_1mod__based__range__hashing}{detail::mod\_based\_range\_hashing<size\_type>}}\ \mbox{\hyperlink{class____gnu__pbds_1_1detail_1_1mod__based__range__hashing}{mod\_based\_base}};}
+\DoxyCodeLine{00161\ \ \ \};}
+\DoxyCodeLine{00162\ }
+\DoxyCodeLine{00163\ \textcolor{preprocessor}{\#include\ <ext/pb\_ds/detail/hash\_fn/direct\_mod\_range\_hashing\_imp.hpp>}}
+\DoxyCodeLine{00164\ }
+\DoxyCodeLine{00165\ \textcolor{preprocessor}{\#undef\ PB\_DS\_CLASS\_T\_DEC}}
+\DoxyCodeLine{00166\ \textcolor{preprocessor}{\#undef\ PB\_DS\_CLASS\_C\_DEC}}
+\DoxyCodeLine{00167\ }
+\DoxyCodeLine{00168\ \textcolor{preprocessor}{\#define\ PB\_DS\_CLASS\_T\_DEC\ template<bool\ External\_Load\_Access,\ typename\ Size\_Type>}}
+\DoxyCodeLine{00169\ \textcolor{preprocessor}{\#define\ PB\_DS\_CLASS\_C\_DEC\ hash\_load\_check\_resize\_trigger<External\_Load\_Access,\ Size\_Type>}}
+\DoxyCodeLine{00170\ \textcolor{preprocessor}{\#define\ PB\_DS\_SIZE\_BASE\_C\_DEC\ detail::hash\_load\_check\_resize\_trigger\_size\_base<Size\_Type,\ External\_Load\_Access>}}
+\DoxyCodeLine{00171\ }
+\DoxyCodeLine{00174\ \ \ \textcolor{keyword}{template}<\textcolor{keywordtype}{bool}\ External\_Load\_Access\ =\ false,\ \textcolor{keyword}{typename}\ Size\_Type\ =\ std::\textcolor{keywordtype}{size\_t}>}
+\DoxyCodeLine{00175\ \ \ \textcolor{keyword}{class\ }hash\_load\_check\_resize\_trigger\ :\ \textcolor{keyword}{private}\ \mbox{\hyperlink{_classes_2lib_2include_2c_09_09_2ext_2pb__ds_2hash__policy_8hpp_a642e8b6faf09630d3e8fc49bdb0f8e1a}{PB\_DS\_SIZE\_BASE\_C\_DEC}}}
+\DoxyCodeLine{00176\ \ \ \{}
+\DoxyCodeLine{00177\ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00178\ \ \ \ \ \textcolor{keyword}{typedef}\ Size\_Type\ \mbox{\hyperlink{class____gnu__pbds_1_1hash__load__check__resize__trigger_ab91fcad03de831e32d2ceba42ab9893c}{size\_type}};}
+\DoxyCodeLine{00179\ }
+\DoxyCodeLine{00180\ \ \ \ \ \textcolor{keyword}{enum}}
+\DoxyCodeLine{00181\ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00185\ \ \ \ \ \mbox{\hyperlink{class____gnu__pbds_1_1hash__load__check__resize__trigger_ae3b4c8cc019ac476199f0f66b80afdb6aa019cba1dcaba30ba1049fc462adab77}{external\_load\_access}}\ =\ External\_Load\_Access}
+\DoxyCodeLine{00186\ \ \ \ \ \ \ \};}
+\DoxyCodeLine{00187\ }
+\DoxyCodeLine{00191\ \ \ \ \ \mbox{\hyperlink{class____gnu__pbds_1_1hash__load__check__resize__trigger_af5404477bbd9dca79da25daf6bd77592}{hash\_load\_check\_resize\_trigger}}(\textcolor{keywordtype}{float}\ load\_min\ =\ 0.125,}
+\DoxyCodeLine{00192\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{float}\ load\_max\ =\ 0.5);}
+\DoxyCodeLine{00193\ }
+\DoxyCodeLine{00194\ \ \ \ \ \textcolor{keywordtype}{void}}
+\DoxyCodeLine{00195\ \ \ \ \ \mbox{\hyperlink{class____gnu__pbds_1_1hash__load__check__resize__trigger_adad5100ba76ddd2d553e8eaf3997e8a5}{swap}}(\mbox{\hyperlink{class____gnu__pbds_1_1hash__load__check__resize__trigger}{hash\_load\_check\_resize\_trigger}}\&\ other);}
+\DoxyCodeLine{00196\ }
+\DoxyCodeLine{00197\ \ \ \ \ \textcolor{keyword}{virtual}}
+\DoxyCodeLine{00198\ \ \ \ \ \mbox{\hyperlink{class____gnu__pbds_1_1hash__load__check__resize__trigger_a8e323998793759f3216713e01ee8c28f}{\string~hash\_load\_check\_resize\_trigger}}();}
+\DoxyCodeLine{00199\ }
+\DoxyCodeLine{00201\ \ \ \ \ \textcolor{keyword}{inline}\ std::pair<float,\ float>}
+\DoxyCodeLine{00202\ \ \ \ \ \mbox{\hyperlink{class____gnu__pbds_1_1hash__load__check__resize__trigger_a81fa82cbe3d7c6eab0febcba7f31a4d2}{get\_loads}}()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00203\ }
+\DoxyCodeLine{00206\ \ \ \ \ \textcolor{keywordtype}{void}}
+\DoxyCodeLine{00207\ \ \ \ \ \mbox{\hyperlink{class____gnu__pbds_1_1hash__load__check__resize__trigger_a5dba0dabb39ff7313a02f51b1bfefe24}{set\_loads}}(std::pair<float,\ float>\ load\_pair);}
+\DoxyCodeLine{00208\ }
+\DoxyCodeLine{00209\ \ \ \textcolor{keyword}{protected}:}
+\DoxyCodeLine{00210\ \ \ \ \ \textcolor{keyword}{inline}\ \textcolor{keywordtype}{void}}
+\DoxyCodeLine{00211\ \ \ \ \ \mbox{\hyperlink{class____gnu__pbds_1_1hash__load__check__resize__trigger_ac4fa09c9f734c2288de0a0b8d661a8e7}{notify\_insert\_search\_start}}();}
+\DoxyCodeLine{00212\ }
+\DoxyCodeLine{00213\ \ \ \ \ \textcolor{keyword}{inline}\ \textcolor{keywordtype}{void}}
+\DoxyCodeLine{00214\ \ \ \ \ \mbox{\hyperlink{class____gnu__pbds_1_1hash__load__check__resize__trigger_aba2f80b07071cf80a4f4e7615d3495c6}{notify\_insert\_search\_collision}}();}
+\DoxyCodeLine{00215\ }
+\DoxyCodeLine{00216\ \ \ \ \ \textcolor{keyword}{inline}\ \textcolor{keywordtype}{void}}
+\DoxyCodeLine{00217\ \ \ \ \ \mbox{\hyperlink{class____gnu__pbds_1_1hash__load__check__resize__trigger_a3fdda9fd32513c3fc94b5cdfac26e3bf}{notify\_insert\_search\_end}}();}
+\DoxyCodeLine{00218\ }
+\DoxyCodeLine{00219\ \ \ \ \ \textcolor{keyword}{inline}\ \textcolor{keywordtype}{void}}
+\DoxyCodeLine{00220\ \ \ \ \ \mbox{\hyperlink{class____gnu__pbds_1_1hash__load__check__resize__trigger_a21335464e6c3f49e00ee120f56572367}{notify\_find\_search\_start}}();}
+\DoxyCodeLine{00221\ }
+\DoxyCodeLine{00222\ \ \ \ \ \textcolor{keyword}{inline}\ \textcolor{keywordtype}{void}}
+\DoxyCodeLine{00223\ \ \ \ \ \mbox{\hyperlink{class____gnu__pbds_1_1hash__load__check__resize__trigger_a13dbf0fc725d4f73cbd5fd577cc709b4}{notify\_find\_search\_collision}}();}
+\DoxyCodeLine{00224\ }
+\DoxyCodeLine{00225\ \ \ \ \ \textcolor{keyword}{inline}\ \textcolor{keywordtype}{void}}
+\DoxyCodeLine{00226\ \ \ \ \ \mbox{\hyperlink{class____gnu__pbds_1_1hash__load__check__resize__trigger_a9aa3036fe447f1292c48327abbe87f5b}{notify\_find\_search\_end}}();}
+\DoxyCodeLine{00227\ }
+\DoxyCodeLine{00228\ \ \ \ \ \textcolor{keyword}{inline}\ \textcolor{keywordtype}{void}}
+\DoxyCodeLine{00229\ \ \ \ \ \mbox{\hyperlink{class____gnu__pbds_1_1hash__load__check__resize__trigger_a16f4b501109711ceedee29f6ff5e04a4}{notify\_erase\_search\_start}}();}
+\DoxyCodeLine{00230\ }
+\DoxyCodeLine{00231\ \ \ \ \ \textcolor{keyword}{inline}\ \textcolor{keywordtype}{void}}
+\DoxyCodeLine{00232\ \ \ \ \ \mbox{\hyperlink{class____gnu__pbds_1_1hash__load__check__resize__trigger_a031bbb804dd718c127cb8a54577613fb}{notify\_erase\_search\_collision}}();}
+\DoxyCodeLine{00233\ }
+\DoxyCodeLine{00234\ \ \ \ \ \textcolor{keyword}{inline}\ \textcolor{keywordtype}{void}}
+\DoxyCodeLine{00235\ \ \ \ \ \mbox{\hyperlink{class____gnu__pbds_1_1hash__load__check__resize__trigger_ad0283006cc8b358f9ee79b5b4a87c1e1}{notify\_erase\_search\_end}}();}
+\DoxyCodeLine{00236\ }
+\DoxyCodeLine{00239\ \ \ \ \ \textcolor{keyword}{inline}\ \textcolor{keywordtype}{void}}
+\DoxyCodeLine{00240\ \ \ \ \ \mbox{\hyperlink{class____gnu__pbds_1_1hash__load__check__resize__trigger_a6389dcb57ad2dc82804a7dbf32d96fc8}{notify\_inserted}}(\mbox{\hyperlink{class____gnu__pbds_1_1hash__load__check__resize__trigger_ab91fcad03de831e32d2ceba42ab9893c}{size\_type}}\ num\_entries);}
+\DoxyCodeLine{00241\ }
+\DoxyCodeLine{00242\ \ \ \ \ \textcolor{keyword}{inline}\ \textcolor{keywordtype}{void}}
+\DoxyCodeLine{00243\ \ \ \ \ \mbox{\hyperlink{class____gnu__pbds_1_1hash__load__check__resize__trigger_a56848ffd07edfea8452fb7b199dcae42}{notify\_erased}}(\mbox{\hyperlink{class____gnu__pbds_1_1hash__load__check__resize__trigger_ab91fcad03de831e32d2ceba42ab9893c}{size\_type}}\ num\_entries);}
+\DoxyCodeLine{00244\ }
+\DoxyCodeLine{00246\ \ \ \ \ \textcolor{keywordtype}{void}}
+\DoxyCodeLine{00247\ \ \ \ \ \mbox{\hyperlink{class____gnu__pbds_1_1hash__load__check__resize__trigger_a4c92b235ca2dcda57fe3d4cee1afb48b}{notify\_cleared}}();}
+\DoxyCodeLine{00248\ }
+\DoxyCodeLine{00251\ \ \ \ \ \textcolor{keywordtype}{void}}
+\DoxyCodeLine{00252\ \ \ \ \ \mbox{\hyperlink{class____gnu__pbds_1_1hash__load__check__resize__trigger_a027d59f653ccc3272bb94540164bfd77}{notify\_resized}}(\mbox{\hyperlink{class____gnu__pbds_1_1hash__load__check__resize__trigger_ab91fcad03de831e32d2ceba42ab9893c}{size\_type}}\ new\_size);}
+\DoxyCodeLine{00253\ }
+\DoxyCodeLine{00254\ \ \ \ \ \textcolor{keywordtype}{void}}
+\DoxyCodeLine{00255\ \ \ \ \ \mbox{\hyperlink{class____gnu__pbds_1_1hash__load__check__resize__trigger_a71b06de31989feead687b088884abe41}{notify\_externally\_resized}}(\mbox{\hyperlink{class____gnu__pbds_1_1hash__load__check__resize__trigger_ab91fcad03de831e32d2ceba42ab9893c}{size\_type}}\ new\_size);}
+\DoxyCodeLine{00256\ }
+\DoxyCodeLine{00257\ \ \ \ \ \textcolor{keyword}{inline}\ \textcolor{keywordtype}{bool}}
+\DoxyCodeLine{00258\ \ \ \ \ \mbox{\hyperlink{class____gnu__pbds_1_1hash__load__check__resize__trigger_a211d714166aa4a6b12dd530f20c8c8b4}{is\_resize\_needed}}()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00259\ }
+\DoxyCodeLine{00260\ \ \ \ \ \textcolor{keyword}{inline}\ \textcolor{keywordtype}{bool}}
+\DoxyCodeLine{00261\ \ \ \ \ \mbox{\hyperlink{class____gnu__pbds_1_1hash__load__check__resize__trigger_a95b166b26a761188b7ba90da8341f4c3}{is\_grow\_needed}}(\mbox{\hyperlink{class____gnu__pbds_1_1hash__load__check__resize__trigger_ab91fcad03de831e32d2ceba42ab9893c}{size\_type}}\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_a3d1e3edfcf61ca2d831883e1afbad89e}{size}},\ \mbox{\hyperlink{class____gnu__pbds_1_1hash__load__check__resize__trigger_ab91fcad03de831e32d2ceba42ab9893c}{size\_type}}\ num\_entries)\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00262\ }
+\DoxyCodeLine{00263\ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00264\ \ \ \ \ \textcolor{keyword}{virtual}\ \textcolor{keywordtype}{void}}
+\DoxyCodeLine{00265\ \ \ \ \ do\_resize(\mbox{\hyperlink{class____gnu__pbds_1_1hash__load__check__resize__trigger_ab91fcad03de831e32d2ceba42ab9893c}{size\_type}}\ new\_size);}
+\DoxyCodeLine{00266\ }
+\DoxyCodeLine{00267\ \ \ \ \ \textcolor{keyword}{typedef}\ \mbox{\hyperlink{_classes_2lib_2include_2c_09_09_2ext_2pb__ds_2hash__policy_8hpp_a642e8b6faf09630d3e8fc49bdb0f8e1a}{PB\_DS\_SIZE\_BASE\_C\_DEC}}\ size\_base;}
+\DoxyCodeLine{00268\ }
+\DoxyCodeLine{00269\ \textcolor{preprocessor}{\#ifdef\ \_GLIBCXX\_DEBUG}}
+\DoxyCodeLine{00270\ \ \ \ \ \textcolor{keywordtype}{void}}
+\DoxyCodeLine{00271\ \ \ \ \ assert\_valid(\textcolor{keyword}{const}\ \textcolor{keywordtype}{char}*\ file,\ \textcolor{keywordtype}{int}\ line)\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00272\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00273\ }
+\DoxyCodeLine{00274\ \ \ \ \ \textcolor{keywordtype}{float}\ \ \ m\_load\_min;}
+\DoxyCodeLine{00275\ \ \ \ \ \textcolor{keywordtype}{float}\ \ \ m\_load\_max;}
+\DoxyCodeLine{00276\ \ \ \ \ \mbox{\hyperlink{class____gnu__pbds_1_1hash__load__check__resize__trigger_ab91fcad03de831e32d2ceba42ab9893c}{size\_type}}\ \ m\_next\_shrink\_size;}
+\DoxyCodeLine{00277\ \ \ \ \ \mbox{\hyperlink{class____gnu__pbds_1_1hash__load__check__resize__trigger_ab91fcad03de831e32d2ceba42ab9893c}{size\_type}}\ \ m\_next\_grow\_size;}
+\DoxyCodeLine{00278\ \ \ \ \ \textcolor{keywordtype}{bool}\ \ \ \ m\_resize\_needed;}
+\DoxyCodeLine{00279\ \ \ \};}
+\DoxyCodeLine{00280\ }
+\DoxyCodeLine{00281\ \textcolor{preprocessor}{\#include\ <ext/pb\_ds/detail/resize\_policy/hash\_load\_check\_resize\_trigger\_imp.hpp>}}
+\DoxyCodeLine{00282\ }
+\DoxyCodeLine{00283\ \textcolor{preprocessor}{\#undef\ PB\_DS\_CLASS\_T\_DEC}}
+\DoxyCodeLine{00284\ \textcolor{preprocessor}{\#undef\ PB\_DS\_CLASS\_C\_DEC}}
+\DoxyCodeLine{00285\ \textcolor{preprocessor}{\#undef\ PB\_DS\_SIZE\_BASE\_C\_DEC}}
+\DoxyCodeLine{00286\ }
+\DoxyCodeLine{00287\ \textcolor{preprocessor}{\#define\ PB\_DS\_CLASS\_T\_DEC\ template<bool\ External\_Load\_Access,\ typename\ Size\_Type>}}
+\DoxyCodeLine{00288\ \textcolor{preprocessor}{\#define\ PB\_DS\_CLASS\_C\_DEC\ cc\_hash\_max\_collision\_check\_resize\_trigger<External\_Load\_Access,\ Size\_Type>}}
+\DoxyCodeLine{00289\ }
+\DoxyCodeLine{00292\ \ \ \textcolor{keyword}{template}<\textcolor{keywordtype}{bool}\ External\_Load\_Access\ =\ false,\ \textcolor{keyword}{typename}\ Size\_Type\ =\ std::\textcolor{keywordtype}{size\_t}>}
+\DoxyCodeLine{00293\ \ \ \textcolor{keyword}{class\ }\mbox{\hyperlink{class____gnu__pbds_1_1cc__hash__max__collision__check__resize__trigger}{cc\_hash\_max\_collision\_check\_resize\_trigger}}}
+\DoxyCodeLine{00294\ \ \ \{}
+\DoxyCodeLine{00295\ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00296\ \ \ \ \ \textcolor{keyword}{typedef}\ Size\_Type\ \ \ \mbox{\hyperlink{class____gnu__pbds_1_1cc__hash__max__collision__check__resize__trigger_ac8286a480601224bc2ec1a9875f8f63d}{size\_type}};}
+\DoxyCodeLine{00297\ }
+\DoxyCodeLine{00298\ \ \ \ \ \textcolor{keyword}{enum}}
+\DoxyCodeLine{00299\ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00303\ \ \ \ \ \mbox{\hyperlink{class____gnu__pbds_1_1cc__hash__max__collision__check__resize__trigger_a08765168d7ab84bffd6c3362b04151c5a2779d767bb166eca87095a720b516b6a}{external\_load\_access}}\ =\ External\_Load\_Access}
+\DoxyCodeLine{00304\ \ \ \ \ \ \ \};}
+\DoxyCodeLine{00305\ }
+\DoxyCodeLine{00308\ \ \ \ \ \mbox{\hyperlink{class____gnu__pbds_1_1cc__hash__max__collision__check__resize__trigger_a3570f81e8bebfa7c217839b679c1692c}{cc\_hash\_max\_collision\_check\_resize\_trigger}}(\textcolor{keywordtype}{float}\ load\ =\ 0.5);}
+\DoxyCodeLine{00309\ }
+\DoxyCodeLine{00310\ \ \ \ \ \textcolor{keywordtype}{void}}
+\DoxyCodeLine{00311\ \ \ \ \ \mbox{\hyperlink{class____gnu__pbds_1_1cc__hash__max__collision__check__resize__trigger_ada26842de72ecc2704446d8696ccef7e}{swap}}(\mbox{\hyperlink{_classes_2lib_2include_2c_09_09_2ext_2pb__ds_2detail_2bin__search__tree___2bin__search__tree___8hpp_a304b8b73a11afe64bfca54576b91263b}{PB\_DS\_CLASS\_C\_DEC}}\&\ other);}
+\DoxyCodeLine{00312\ }
+\DoxyCodeLine{00314\ \ \ \ \ \textcolor{keyword}{inline}\ \textcolor{keywordtype}{float}}
+\DoxyCodeLine{00315\ \ \ \ \ \mbox{\hyperlink{class____gnu__pbds_1_1cc__hash__max__collision__check__resize__trigger_a65eddf9416d51fc632010a8667fe58c2}{get\_load}}()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00316\ }
+\DoxyCodeLine{00318\ \ \ \ \ \textcolor{keywordtype}{void}}
+\DoxyCodeLine{00319\ \ \ \ \ \mbox{\hyperlink{class____gnu__pbds_1_1cc__hash__max__collision__check__resize__trigger_acbe6814913bb7c30a34f4fc4d99d4e01}{set\_load}}(\textcolor{keywordtype}{float}\ load);}
+\DoxyCodeLine{00320\ }
+\DoxyCodeLine{00321\ \ \ \textcolor{keyword}{protected}:}
+\DoxyCodeLine{00323\ \ \ \ \ \textcolor{keyword}{inline}\ \textcolor{keywordtype}{void}}
+\DoxyCodeLine{00324\ \ \ \ \ \mbox{\hyperlink{class____gnu__pbds_1_1cc__hash__max__collision__check__resize__trigger_ac180a1382d59cb873053ef1a00aeaf7a}{notify\_insert\_search\_start}}();}
+\DoxyCodeLine{00325\ }
+\DoxyCodeLine{00327\ \ \ \ \ \textcolor{keyword}{inline}\ \textcolor{keywordtype}{void}}
+\DoxyCodeLine{00328\ \ \ \ \ \mbox{\hyperlink{class____gnu__pbds_1_1cc__hash__max__collision__check__resize__trigger_a0ada2bfdc28eb5b321d4e40ae1d383f1}{notify\_insert\_search\_collision}}();}
+\DoxyCodeLine{00329\ }
+\DoxyCodeLine{00331\ \ \ \ \ \textcolor{keyword}{inline}\ \textcolor{keywordtype}{void}}
+\DoxyCodeLine{00332\ \ \ \ \ \mbox{\hyperlink{class____gnu__pbds_1_1cc__hash__max__collision__check__resize__trigger_a64694cff7ecc080077cf5a1d77cfb91f}{notify\_insert\_search\_end}}();}
+\DoxyCodeLine{00333\ }
+\DoxyCodeLine{00335\ \ \ \ \ \textcolor{keyword}{inline}\ \textcolor{keywordtype}{void}}
+\DoxyCodeLine{00336\ \ \ \ \ \mbox{\hyperlink{class____gnu__pbds_1_1cc__hash__max__collision__check__resize__trigger_aecfd626845c5f41b5996a98ce41abe5d}{notify\_find\_search\_start}}();}
+\DoxyCodeLine{00337\ }
+\DoxyCodeLine{00339\ \ \ \ \ \textcolor{keyword}{inline}\ \textcolor{keywordtype}{void}}
+\DoxyCodeLine{00340\ \ \ \ \ \mbox{\hyperlink{class____gnu__pbds_1_1cc__hash__max__collision__check__resize__trigger_aa657361a797637c5894f887b2f68b08d}{notify\_find\_search\_collision}}();}
+\DoxyCodeLine{00341\ }
+\DoxyCodeLine{00343\ \ \ \ \ \textcolor{keyword}{inline}\ \textcolor{keywordtype}{void}}
+\DoxyCodeLine{00344\ \ \ \ \ \mbox{\hyperlink{class____gnu__pbds_1_1cc__hash__max__collision__check__resize__trigger_a495e2209b7f02d5006404aaaa1087768}{notify\_find\_search\_end}}();}
+\DoxyCodeLine{00345\ }
+\DoxyCodeLine{00347\ \ \ \ \ \textcolor{keyword}{inline}\ \textcolor{keywordtype}{void}}
+\DoxyCodeLine{00348\ \ \ \ \ \mbox{\hyperlink{class____gnu__pbds_1_1cc__hash__max__collision__check__resize__trigger_a240b4b28ea1cdc784d5e95c62db3c15f}{notify\_erase\_search\_start}}();}
+\DoxyCodeLine{00349\ }
+\DoxyCodeLine{00351\ \ \ \ \ \textcolor{keyword}{inline}\ \textcolor{keywordtype}{void}}
+\DoxyCodeLine{00352\ \ \ \ \ \mbox{\hyperlink{class____gnu__pbds_1_1cc__hash__max__collision__check__resize__trigger_a751447ee7cf5a38825c91c46156f1553}{notify\_erase\_search\_collision}}();}
+\DoxyCodeLine{00353\ }
+\DoxyCodeLine{00355\ \ \ \ \ \textcolor{keyword}{inline}\ \textcolor{keywordtype}{void}}
+\DoxyCodeLine{00356\ \ \ \ \ \mbox{\hyperlink{class____gnu__pbds_1_1cc__hash__max__collision__check__resize__trigger_ad2553af559204a400e889dfce3793555}{notify\_erase\_search\_end}}();}
+\DoxyCodeLine{00357\ }
+\DoxyCodeLine{00359\ \ \ \ \ \textcolor{keyword}{inline}\ \textcolor{keywordtype}{void}}
+\DoxyCodeLine{00360\ \ \ \ \ \mbox{\hyperlink{class____gnu__pbds_1_1cc__hash__max__collision__check__resize__trigger_a3873f31f2d3d3ff8118f48fa2bead1a8}{notify\_inserted}}(\mbox{\hyperlink{class____gnu__pbds_1_1cc__hash__max__collision__check__resize__trigger_ac8286a480601224bc2ec1a9875f8f63d}{size\_type}}\ num\_entries);}
+\DoxyCodeLine{00361\ }
+\DoxyCodeLine{00363\ \ \ \ \ \textcolor{keyword}{inline}\ \textcolor{keywordtype}{void}}
+\DoxyCodeLine{00364\ \ \ \ \ \mbox{\hyperlink{class____gnu__pbds_1_1cc__hash__max__collision__check__resize__trigger_a1f46c2c9b293370318f1e2abb64cfcc1}{notify\_erased}}(\mbox{\hyperlink{class____gnu__pbds_1_1cc__hash__max__collision__check__resize__trigger_ac8286a480601224bc2ec1a9875f8f63d}{size\_type}}\ num\_entries);}
+\DoxyCodeLine{00365\ }
+\DoxyCodeLine{00367\ \ \ \ \ \textcolor{keywordtype}{void}}
+\DoxyCodeLine{00368\ \ \ \ \ \mbox{\hyperlink{class____gnu__pbds_1_1cc__hash__max__collision__check__resize__trigger_afe7436bbd2219b3bb023834046574805}{notify\_cleared}}();}
+\DoxyCodeLine{00369\ }
+\DoxyCodeLine{00372\ \ \ \ \ \textcolor{keywordtype}{void}}
+\DoxyCodeLine{00373\ \ \ \ \ \mbox{\hyperlink{class____gnu__pbds_1_1cc__hash__max__collision__check__resize__trigger_a21c9dcb73448b7a0e82857a272ad43a8}{notify\_resized}}(\mbox{\hyperlink{class____gnu__pbds_1_1cc__hash__max__collision__check__resize__trigger_ac8286a480601224bc2ec1a9875f8f63d}{size\_type}}\ new\_size);}
+\DoxyCodeLine{00374\ }
+\DoxyCodeLine{00376\ \ \ \ \ \textcolor{keywordtype}{void}}
+\DoxyCodeLine{00377\ \ \ \ \ \mbox{\hyperlink{class____gnu__pbds_1_1cc__hash__max__collision__check__resize__trigger_a548dc80e54ce98dfb63b6197b0a5367f}{notify\_externally\_resized}}(\mbox{\hyperlink{class____gnu__pbds_1_1cc__hash__max__collision__check__resize__trigger_ac8286a480601224bc2ec1a9875f8f63d}{size\_type}}\ new\_size);}
+\DoxyCodeLine{00378\ }
+\DoxyCodeLine{00380\ \ \ \ \ \textcolor{keyword}{inline}\ \textcolor{keywordtype}{bool}}
+\DoxyCodeLine{00381\ \ \ \ \ \mbox{\hyperlink{class____gnu__pbds_1_1cc__hash__max__collision__check__resize__trigger_a7c5123f36dfca1b53699730fd2d184e8}{is\_resize\_needed}}()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00382\ }
+\DoxyCodeLine{00385\ \ \ \ \ \textcolor{keyword}{inline}\ \textcolor{keywordtype}{bool}}
+\DoxyCodeLine{00386\ \ \ \ \ \mbox{\hyperlink{class____gnu__pbds_1_1cc__hash__max__collision__check__resize__trigger_ad50aebe50070ae305b6c17a522bf6d0b}{is\_grow\_needed}}(\mbox{\hyperlink{class____gnu__pbds_1_1cc__hash__max__collision__check__resize__trigger_ac8286a480601224bc2ec1a9875f8f63d}{size\_type}}\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_a3d1e3edfcf61ca2d831883e1afbad89e}{size}},\ \mbox{\hyperlink{class____gnu__pbds_1_1cc__hash__max__collision__check__resize__trigger_ac8286a480601224bc2ec1a9875f8f63d}{size\_type}}\ num\_entries)\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00387\ }
+\DoxyCodeLine{00388\ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00389\ \ \ \ \ \textcolor{keywordtype}{void}}
+\DoxyCodeLine{00390\ \ \ \ \ calc\_max\_num\_coll();}
+\DoxyCodeLine{00391\ }
+\DoxyCodeLine{00392\ \ \ \ \ \textcolor{keyword}{inline}\ \textcolor{keywordtype}{void}}
+\DoxyCodeLine{00393\ \ \ \ \ calc\_resize\_needed();}
+\DoxyCodeLine{00394\ }
+\DoxyCodeLine{00395\ \ \ \ \ \textcolor{keywordtype}{float}\ \ \ m\_load;}
+\DoxyCodeLine{00396\ \ \ \ \ \mbox{\hyperlink{class____gnu__pbds_1_1cc__hash__max__collision__check__resize__trigger_ac8286a480601224bc2ec1a9875f8f63d}{size\_type}}\ \ m\_size;}
+\DoxyCodeLine{00397\ \ \ \ \ \mbox{\hyperlink{class____gnu__pbds_1_1cc__hash__max__collision__check__resize__trigger_ac8286a480601224bc2ec1a9875f8f63d}{size\_type}}\ \ m\_num\_col;}
+\DoxyCodeLine{00398\ \ \ \ \ \mbox{\hyperlink{class____gnu__pbds_1_1cc__hash__max__collision__check__resize__trigger_ac8286a480601224bc2ec1a9875f8f63d}{size\_type}}\ \ m\_max\_col;}
+\DoxyCodeLine{00399\ \ \ \ \ \textcolor{keywordtype}{bool}\ \ \ \ m\_resize\_needed;}
+\DoxyCodeLine{00400\ \ \ \};}
+\DoxyCodeLine{00401\ }
+\DoxyCodeLine{00402\ \textcolor{preprocessor}{\#include\ <ext/pb\_ds/detail/resize\_policy/cc\_hash\_max\_collision\_check\_resize\_trigger\_imp.hpp>}}
+\DoxyCodeLine{00403\ }
+\DoxyCodeLine{00404\ \textcolor{preprocessor}{\#undef\ PB\_DS\_CLASS\_T\_DEC}}
+\DoxyCodeLine{00405\ \textcolor{preprocessor}{\#undef\ PB\_DS\_CLASS\_C\_DEC}}
+\DoxyCodeLine{00406\ }
+\DoxyCodeLine{00407\ \textcolor{preprocessor}{\#define\ PB\_DS\_CLASS\_T\_DEC\ template<typename\ Size\_Type>}}
+\DoxyCodeLine{00408\ \textcolor{preprocessor}{\#define\ PB\_DS\_CLASS\_C\_DEC\ hash\_exponential\_size\_policy<Size\_Type>}}
+\DoxyCodeLine{00409\ }
+\DoxyCodeLine{00412\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ Size\_Type\ =\ std::\textcolor{keywordtype}{size\_t}>}
+\DoxyCodeLine{00413\ \ \ \textcolor{keyword}{class\ }\mbox{\hyperlink{class____gnu__pbds_1_1hash__exponential__size__policy}{hash\_exponential\_size\_policy}}}
+\DoxyCodeLine{00414\ \ \ \{}
+\DoxyCodeLine{00415\ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00416\ \ \ \ \ \textcolor{keyword}{typedef}\ Size\_Type\ \mbox{\hyperlink{class____gnu__pbds_1_1hash__exponential__size__policy_a5eb89dd5b3edf1987accc5787b43b4d6}{size\_type}};}
+\DoxyCodeLine{00417\ }
+\DoxyCodeLine{00422\ \ \ \ \ \mbox{\hyperlink{class____gnu__pbds_1_1hash__exponential__size__policy_afaa82af641851bf662b2cf2f60ea1eb9}{hash\_exponential\_size\_policy}}(\mbox{\hyperlink{class____gnu__pbds_1_1hash__exponential__size__policy_a5eb89dd5b3edf1987accc5787b43b4d6}{size\_type}}\ start\_size\ =\ 8,}
+\DoxyCodeLine{00423\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class____gnu__pbds_1_1hash__exponential__size__policy_a5eb89dd5b3edf1987accc5787b43b4d6}{size\_type}}\ grow\_factor\ =\ 2);}
+\DoxyCodeLine{00424\ }
+\DoxyCodeLine{00425\ \ \ \ \ \textcolor{keywordtype}{void}}
+\DoxyCodeLine{00426\ \ \ \ \ \mbox{\hyperlink{class____gnu__pbds_1_1hash__exponential__size__policy_a00509d52c8d945020d11e1dcca03a1b9}{swap}}(\mbox{\hyperlink{_classes_2lib_2include_2c_09_09_2ext_2pb__ds_2detail_2bin__search__tree___2bin__search__tree___8hpp_a304b8b73a11afe64bfca54576b91263b}{PB\_DS\_CLASS\_C\_DEC}}\&\ other);}
+\DoxyCodeLine{00427\ }
+\DoxyCodeLine{00428\ \ \ \textcolor{keyword}{protected}:}
+\DoxyCodeLine{00429\ \ \ \ \ \mbox{\hyperlink{class____gnu__pbds_1_1hash__exponential__size__policy_a5eb89dd5b3edf1987accc5787b43b4d6}{size\_type}}}
+\DoxyCodeLine{00430\ \ \ \ \ \mbox{\hyperlink{class____gnu__pbds_1_1hash__exponential__size__policy_a014d7a181ee23dce2e7e080dfc719e60}{get\_nearest\_larger\_size}}(\mbox{\hyperlink{class____gnu__pbds_1_1hash__exponential__size__policy_a5eb89dd5b3edf1987accc5787b43b4d6}{size\_type}}\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_a3d1e3edfcf61ca2d831883e1afbad89e}{size}})\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00431\ }
+\DoxyCodeLine{00432\ \ \ \ \ \mbox{\hyperlink{class____gnu__pbds_1_1hash__exponential__size__policy_a5eb89dd5b3edf1987accc5787b43b4d6}{size\_type}}}
+\DoxyCodeLine{00433\ \ \ \ \ \mbox{\hyperlink{class____gnu__pbds_1_1hash__exponential__size__policy_a5af7570651220b1902f50cd9a0e31216}{get\_nearest\_smaller\_size}}(\mbox{\hyperlink{class____gnu__pbds_1_1hash__exponential__size__policy_a5eb89dd5b3edf1987accc5787b43b4d6}{size\_type}}\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_a3d1e3edfcf61ca2d831883e1afbad89e}{size}})\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00434\ }
+\DoxyCodeLine{00435\ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00436\ \ \ \ \ \mbox{\hyperlink{class____gnu__pbds_1_1hash__exponential__size__policy_a5eb89dd5b3edf1987accc5787b43b4d6}{size\_type}}\ m\_start\_size;}
+\DoxyCodeLine{00437\ \ \ \ \ \mbox{\hyperlink{class____gnu__pbds_1_1hash__exponential__size__policy_a5eb89dd5b3edf1987accc5787b43b4d6}{size\_type}}\ m\_grow\_factor;}
+\DoxyCodeLine{00438\ \ \ \};}
+\DoxyCodeLine{00439\ }
+\DoxyCodeLine{00440\ \textcolor{preprocessor}{\#include\ <ext/pb\_ds/detail/resize\_policy/hash\_exponential\_size\_policy\_imp.hpp>}}
+\DoxyCodeLine{00441\ }
+\DoxyCodeLine{00442\ \textcolor{preprocessor}{\#undef\ PB\_DS\_CLASS\_T\_DEC}}
+\DoxyCodeLine{00443\ \textcolor{preprocessor}{\#undef\ PB\_DS\_CLASS\_C\_DEC}}
+\DoxyCodeLine{00444\ }
+\DoxyCodeLine{00445\ \textcolor{preprocessor}{\#define\ PB\_DS\_CLASS\_T\_DEC}}
+\DoxyCodeLine{00446\ \textcolor{preprocessor}{\#define\ PB\_DS\_CLASS\_C\_DEC\ hash\_prime\_size\_policy}}
+\DoxyCodeLine{00447\ }
+\DoxyCodeLine{00450\ \ \ \textcolor{keyword}{class\ }\mbox{\hyperlink{class____gnu__pbds_1_1hash__prime__size__policy}{hash\_prime\_size\_policy}}}
+\DoxyCodeLine{00451\ \ \ \{}
+\DoxyCodeLine{00452\ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00454\ \ \ \ \ \textcolor{keyword}{typedef}\ std::size\_t\ \mbox{\hyperlink{class____gnu__pbds_1_1hash__prime__size__policy_a74744bfab3764b78a3cf339de9479a80}{size\_type}};}
+\DoxyCodeLine{00455\ }
+\DoxyCodeLine{00459\ \ \ \ \ \mbox{\hyperlink{class____gnu__pbds_1_1hash__prime__size__policy_ad18b7b7fe2840b81542376ddb4e0bcfa}{hash\_prime\_size\_policy}}(\mbox{\hyperlink{class____gnu__pbds_1_1hash__prime__size__policy_a74744bfab3764b78a3cf339de9479a80}{size\_type}}\ start\_size\ =\ 8);}
+\DoxyCodeLine{00460\ }
+\DoxyCodeLine{00461\ \ \ \ \ \textcolor{keyword}{inline}\ \textcolor{keywordtype}{void}}
+\DoxyCodeLine{00462\ \ \ \ \ \mbox{\hyperlink{class____gnu__pbds_1_1hash__prime__size__policy_a16a9a53d0fc391811a0681d5c1e099c6}{swap}}(\mbox{\hyperlink{_classes_2lib_2include_2c_09_09_2ext_2pb__ds_2detail_2bin__search__tree___2bin__search__tree___8hpp_a304b8b73a11afe64bfca54576b91263b}{PB\_DS\_CLASS\_C\_DEC}}\&\ other);}
+\DoxyCodeLine{00463\ }
+\DoxyCodeLine{00464\ \ \ \textcolor{keyword}{protected}:}
+\DoxyCodeLine{00465\ \ \ \ \ \mbox{\hyperlink{class____gnu__pbds_1_1hash__prime__size__policy_a74744bfab3764b78a3cf339de9479a80}{size\_type}}}
+\DoxyCodeLine{00466\ \ \ \ \ \mbox{\hyperlink{class____gnu__pbds_1_1hash__prime__size__policy_a604be1d1993de3bb62d3da51c59de72f}{get\_nearest\_larger\_size}}(\mbox{\hyperlink{class____gnu__pbds_1_1hash__prime__size__policy_a74744bfab3764b78a3cf339de9479a80}{size\_type}}\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_a3d1e3edfcf61ca2d831883e1afbad89e}{size}})\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00467\ }
+\DoxyCodeLine{00468\ \ \ \ \ \mbox{\hyperlink{class____gnu__pbds_1_1hash__prime__size__policy_a74744bfab3764b78a3cf339de9479a80}{size\_type}}}
+\DoxyCodeLine{00469\ \ \ \ \ \mbox{\hyperlink{class____gnu__pbds_1_1hash__prime__size__policy_a5f88cf9271d0f334553f6ffd4107ab32}{get\_nearest\_smaller\_size}}(\mbox{\hyperlink{class____gnu__pbds_1_1hash__prime__size__policy_a74744bfab3764b78a3cf339de9479a80}{size\_type}}\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_a3d1e3edfcf61ca2d831883e1afbad89e}{size}})\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00470\ }
+\DoxyCodeLine{00471\ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00472\ \ \ \ \ \mbox{\hyperlink{class____gnu__pbds_1_1hash__prime__size__policy_a74744bfab3764b78a3cf339de9479a80}{size\_type}}\ m\_start\_size;}
+\DoxyCodeLine{00473\ \ \ \};}
+\DoxyCodeLine{00474\ }
+\DoxyCodeLine{00475\ \textcolor{preprocessor}{\#include\ <ext/pb\_ds/detail/resize\_policy/hash\_prime\_size\_policy\_imp.hpp>}}
+\DoxyCodeLine{00476\ }
+\DoxyCodeLine{00477\ \textcolor{preprocessor}{\#undef\ PB\_DS\_CLASS\_T\_DEC}}
+\DoxyCodeLine{00478\ \textcolor{preprocessor}{\#undef\ PB\_DS\_CLASS\_C\_DEC}}
+\DoxyCodeLine{00479\ }
+\DoxyCodeLine{00480\ \textcolor{preprocessor}{\#define\ PB\_DS\_CLASS\_T\_DEC\ template<typename\ Size\_Policy,\ typename\ Trigger\_Policy,\ bool\ External\_Size\_Access,\ typename\ Size\_Type>}}
+\DoxyCodeLine{00481\ }
+\DoxyCodeLine{00482\ \textcolor{preprocessor}{\#define\ PB\_DS\_CLASS\_C\_DEC\ hash\_standard\_resize\_policy<Size\_Policy,\ Trigger\_Policy,\ External\_Size\_Access,\ Size\_Type>}}
+\DoxyCodeLine{00483\ }
+\DoxyCodeLine{00485\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ Size\_Policy\ =\ hash\_exponential\_size\_policy<>,}
+\DoxyCodeLine{00486\ \ \ \ \ \ \ \ \textcolor{keyword}{typename}\ Trigger\_Policy\ =\ hash\_load\_check\_re\textcolor{keywordtype}{size\_t}rigger<>,}
+\DoxyCodeLine{00487\ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ External\_Size\_Access\ =\ false,}
+\DoxyCodeLine{00488\ \ \ \ \ \ \ \ \textcolor{keyword}{typename}\ Size\_Type\ =\ std::\textcolor{keywordtype}{size\_t}>}
+\DoxyCodeLine{00489\ \ \ \textcolor{keyword}{class\ }\mbox{\hyperlink{class____gnu__pbds_1_1hash__standard__resize__policy}{hash\_standard\_resize\_policy}}}
+\DoxyCodeLine{00490\ \ \ :\ \textcolor{keyword}{public}\ Size\_Policy,\ \textcolor{keyword}{public}\ Trigger\_Policy}
+\DoxyCodeLine{00491\ \ \ \{}
+\DoxyCodeLine{00492\ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00493\ \ \ \ \ \textcolor{keyword}{typedef}\ Size\_Type\ \ \ \ \ \ \ \mbox{\hyperlink{class____gnu__pbds_1_1hash__standard__resize__policy_ae716ba9c592311481b68746a4e10a154}{size\_type}};}
+\DoxyCodeLine{00494\ \ \ \ \ \textcolor{keyword}{typedef}\ Trigger\_Policy\ \ \mbox{\hyperlink{class____gnu__pbds_1_1hash__standard__resize__policy_a467bae98cccab9d55d45eed0a4a847aa}{trigger\_policy}};}
+\DoxyCodeLine{00495\ \ \ \ \ \textcolor{keyword}{typedef}\ Size\_Policy\ \ \ \ \ \mbox{\hyperlink{class____gnu__pbds_1_1hash__standard__resize__policy_a005b9db248419f0e050380f701c270d4}{size\_policy}};}
+\DoxyCodeLine{00496\ }
+\DoxyCodeLine{00497\ \ \ \ \ \textcolor{keyword}{enum}}
+\DoxyCodeLine{00498\ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00499\ \ \ \ \ \mbox{\hyperlink{class____gnu__pbds_1_1hash__standard__resize__policy_a2164ac85b7410fa687ba5f80273e1c81ab93f8d14283fe7f77f5a46dd7f82d009}{external\_size\_access}}\ =\ External\_Size\_Access}
+\DoxyCodeLine{00500\ \ \ \ \ \ \ \};}
+\DoxyCodeLine{00501\ }
+\DoxyCodeLine{00503\ \ \ \ \ \mbox{\hyperlink{class____gnu__pbds_1_1hash__standard__resize__policy_adecad428987dfd07cf4df9aa49a25dc3}{hash\_standard\_resize\_policy}}();}
+\DoxyCodeLine{00504\ }
+\DoxyCodeLine{00507\ \ \ \ \ \mbox{\hyperlink{class____gnu__pbds_1_1hash__standard__resize__policy_aba05ccfca9dd3a44f331377bd7cc2c42}{hash\_standard\_resize\_policy}}(\textcolor{keyword}{const}\ Size\_Policy\&\ r\_size\_policy);}
+\DoxyCodeLine{00508\ }
+\DoxyCodeLine{00513\ \ \ \ \ \mbox{\hyperlink{class____gnu__pbds_1_1hash__standard__resize__policy_a8f0e49859d29501c85eacf73af545119}{hash\_standard\_resize\_policy}}(\textcolor{keyword}{const}\ Size\_Policy\&\ r\_size\_policy,}
+\DoxyCodeLine{00514\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ Trigger\_Policy\&\ r\_trigger\_policy);}
+\DoxyCodeLine{00515\ }
+\DoxyCodeLine{00516\ \ \ \ \ \textcolor{keyword}{virtual}}
+\DoxyCodeLine{00517\ \ \ \ \ \mbox{\hyperlink{class____gnu__pbds_1_1hash__standard__resize__policy_aa725e20173328d8dd5d9a5f714c36152}{\string~hash\_standard\_resize\_policy}}();}
+\DoxyCodeLine{00518\ }
+\DoxyCodeLine{00519\ \ \ \ \ \textcolor{keyword}{inline}\ \textcolor{keywordtype}{void}}
+\DoxyCodeLine{00520\ \ \ \ \ \mbox{\hyperlink{class____gnu__pbds_1_1hash__standard__resize__policy_a4e287e1cf616b0fc055661b7d997cad6}{swap}}(\mbox{\hyperlink{_classes_2lib_2include_2c_09_09_2ext_2pb__ds_2detail_2bin__search__tree___2bin__search__tree___8hpp_a304b8b73a11afe64bfca54576b91263b}{PB\_DS\_CLASS\_C\_DEC}}\&\ other);}
+\DoxyCodeLine{00521\ }
+\DoxyCodeLine{00523\ \ \ \ \ Size\_Policy\&}
+\DoxyCodeLine{00524\ \ \ \ \ \mbox{\hyperlink{class____gnu__pbds_1_1hash__standard__resize__policy_a85ef6c33782f4a5e1e7fd2921d010e1a}{get\_size\_policy}}();}
+\DoxyCodeLine{00525\ }
+\DoxyCodeLine{00527\ \ \ \ \ \textcolor{keyword}{const}\ Size\_Policy\&}
+\DoxyCodeLine{00528\ \ \ \ \ \mbox{\hyperlink{class____gnu__pbds_1_1hash__standard__resize__policy_acbf933ac9a8d4356949207fa762ad9e9}{get\_size\_policy}}()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00529\ }
+\DoxyCodeLine{00531\ \ \ \ \ Trigger\_Policy\&}
+\DoxyCodeLine{00532\ \ \ \ \ \mbox{\hyperlink{class____gnu__pbds_1_1hash__standard__resize__policy_ab897e097208419985aaba8fa685f7af1}{get\_trigger\_policy}}();}
+\DoxyCodeLine{00533\ }
+\DoxyCodeLine{00535\ \ \ \ \ \textcolor{keyword}{const}\ Trigger\_Policy\&}
+\DoxyCodeLine{00536\ \ \ \ \ \mbox{\hyperlink{class____gnu__pbds_1_1hash__standard__resize__policy_ab98dda215945468c1fae60ccd9253f8b}{get\_trigger\_policy}}()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00537\ }
+\DoxyCodeLine{00539\ \ \ \ \ \textcolor{keyword}{inline}\ \mbox{\hyperlink{class____gnu__pbds_1_1hash__standard__resize__policy_ae716ba9c592311481b68746a4e10a154}{size\_type}}}
+\DoxyCodeLine{00540\ \ \ \ \ \mbox{\hyperlink{class____gnu__pbds_1_1hash__standard__resize__policy_ab1e873de0a82024f07b44a0854a17ddf}{get\_actual\_size}}()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00541\ }
+\DoxyCodeLine{00545\ \ \ \ \ \textcolor{keywordtype}{void}}
+\DoxyCodeLine{00546\ \ \ \ \ \mbox{\hyperlink{class____gnu__pbds_1_1hash__standard__resize__policy_aa602ba7bfa4925ea84591734c68d49e2}{resize}}(\mbox{\hyperlink{class____gnu__pbds_1_1hash__standard__resize__policy_ae716ba9c592311481b68746a4e10a154}{size\_type}}\ suggested\_new\_size);}
+\DoxyCodeLine{00547\ }
+\DoxyCodeLine{00548\ \ \ \textcolor{keyword}{protected}:}
+\DoxyCodeLine{00549\ \ \ \ \ \textcolor{keyword}{inline}\ \textcolor{keywordtype}{void}}
+\DoxyCodeLine{00550\ \ \ \ \ \mbox{\hyperlink{class____gnu__pbds_1_1hash__standard__resize__policy_a4795705e1b9a658e88e18fc448b52d29}{notify\_insert\_search\_start}}();}
+\DoxyCodeLine{00551\ }
+\DoxyCodeLine{00552\ \ \ \ \ \textcolor{keyword}{inline}\ \textcolor{keywordtype}{void}}
+\DoxyCodeLine{00553\ \ \ \ \ \mbox{\hyperlink{class____gnu__pbds_1_1hash__standard__resize__policy_a856e5cbd1d5aa9666a3359756d143c0c}{notify\_insert\_search\_collision}}();}
+\DoxyCodeLine{00554\ }
+\DoxyCodeLine{00555\ \ \ \ \ \textcolor{keyword}{inline}\ \textcolor{keywordtype}{void}}
+\DoxyCodeLine{00556\ \ \ \ \ \mbox{\hyperlink{class____gnu__pbds_1_1hash__standard__resize__policy_a23b854ff97f1e0800a44b2b41adb49e2}{notify\_insert\_search\_end}}();}
+\DoxyCodeLine{00557\ }
+\DoxyCodeLine{00558\ \ \ \ \ \textcolor{keyword}{inline}\ \textcolor{keywordtype}{void}}
+\DoxyCodeLine{00559\ \ \ \ \ \mbox{\hyperlink{class____gnu__pbds_1_1hash__standard__resize__policy_a136ce5ea0d4cb4528b5d8ead912b09ff}{notify\_find\_search\_start}}();}
+\DoxyCodeLine{00560\ }
+\DoxyCodeLine{00561\ \ \ \ \ \textcolor{keyword}{inline}\ \textcolor{keywordtype}{void}}
+\DoxyCodeLine{00562\ \ \ \ \ \mbox{\hyperlink{class____gnu__pbds_1_1hash__standard__resize__policy_a676f441c75f8316e37af747ea476bdb3}{notify\_find\_search\_collision}}();}
+\DoxyCodeLine{00563\ }
+\DoxyCodeLine{00564\ \ \ \ \ \textcolor{keyword}{inline}\ \textcolor{keywordtype}{void}}
+\DoxyCodeLine{00565\ \ \ \ \ \mbox{\hyperlink{class____gnu__pbds_1_1hash__standard__resize__policy_aa9a83d25b41399b9a7e165ce2d2ebdf1}{notify\_find\_search\_end}}();}
+\DoxyCodeLine{00566\ }
+\DoxyCodeLine{00567\ \ \ \ \ \textcolor{keyword}{inline}\ \textcolor{keywordtype}{void}}
+\DoxyCodeLine{00568\ \ \ \ \ \mbox{\hyperlink{class____gnu__pbds_1_1hash__standard__resize__policy_a1ad6075bf4a2aed7b5ac8b37cb17ea96}{notify\_erase\_search\_start}}();}
+\DoxyCodeLine{00569\ }
+\DoxyCodeLine{00570\ \ \ \ \ \textcolor{keyword}{inline}\ \textcolor{keywordtype}{void}}
+\DoxyCodeLine{00571\ \ \ \ \ \mbox{\hyperlink{class____gnu__pbds_1_1hash__standard__resize__policy_a8024fc3e3c963f20b21ca7b144a48b2a}{notify\_erase\_search\_collision}}();}
+\DoxyCodeLine{00572\ }
+\DoxyCodeLine{00573\ \ \ \ \ \textcolor{keyword}{inline}\ \textcolor{keywordtype}{void}}
+\DoxyCodeLine{00574\ \ \ \ \ \mbox{\hyperlink{class____gnu__pbds_1_1hash__standard__resize__policy_a43fa1ca48a330409b56ef66a7f728d5a}{notify\_erase\_search\_end}}();}
+\DoxyCodeLine{00575\ }
+\DoxyCodeLine{00576\ \ \ \ \ \textcolor{keyword}{inline}\ \textcolor{keywordtype}{void}}
+\DoxyCodeLine{00577\ \ \ \ \ \mbox{\hyperlink{class____gnu__pbds_1_1hash__standard__resize__policy_a0053be28e62bdbdbc3b25126c3b3da8d}{notify\_inserted}}(\mbox{\hyperlink{class____gnu__pbds_1_1hash__standard__resize__policy_ae716ba9c592311481b68746a4e10a154}{size\_type}}\ num\_e);}
+\DoxyCodeLine{00578\ }
+\DoxyCodeLine{00579\ \ \ \ \ \textcolor{keyword}{inline}\ \textcolor{keywordtype}{void}}
+\DoxyCodeLine{00580\ \ \ \ \ \mbox{\hyperlink{class____gnu__pbds_1_1hash__standard__resize__policy_a85a1743d67b2c1e62a6f4662004d00b0}{notify\_erased}}(\mbox{\hyperlink{class____gnu__pbds_1_1hash__standard__resize__policy_ae716ba9c592311481b68746a4e10a154}{size\_type}}\ num\_e);}
+\DoxyCodeLine{00581\ }
+\DoxyCodeLine{00582\ \ \ \ \ \textcolor{keywordtype}{void}}
+\DoxyCodeLine{00583\ \ \ \ \ \mbox{\hyperlink{class____gnu__pbds_1_1hash__standard__resize__policy_a0d68c8522bd65aa20aaaa0caef387cb5}{notify\_cleared}}();}
+\DoxyCodeLine{00584\ }
+\DoxyCodeLine{00585\ \ \ \ \ \textcolor{keywordtype}{void}}
+\DoxyCodeLine{00586\ \ \ \ \ \mbox{\hyperlink{class____gnu__pbds_1_1hash__standard__resize__policy_a195c2ee31a20e3a09fbf40cc6bb93e65}{notify\_resized}}(\mbox{\hyperlink{class____gnu__pbds_1_1hash__standard__resize__policy_ae716ba9c592311481b68746a4e10a154}{size\_type}}\ new\_size);}
+\DoxyCodeLine{00587\ }
+\DoxyCodeLine{00588\ \ \ \ \ \textcolor{keyword}{inline}\ \textcolor{keywordtype}{bool}}
+\DoxyCodeLine{00589\ \ \ \ \ \mbox{\hyperlink{class____gnu__pbds_1_1hash__standard__resize__policy_a249a7b8b985cdbe402fdd7de9e15fa65}{is\_resize\_needed}}()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00590\ }
+\DoxyCodeLine{00595\ \ \ \ \ \mbox{\hyperlink{class____gnu__pbds_1_1hash__standard__resize__policy_ae716ba9c592311481b68746a4e10a154}{size\_type}}}
+\DoxyCodeLine{00596\ \ \ \ \ \mbox{\hyperlink{class____gnu__pbds_1_1hash__standard__resize__policy_a59607830af324861fac594baff5bfdcd}{get\_new\_size}}(\mbox{\hyperlink{class____gnu__pbds_1_1hash__standard__resize__policy_ae716ba9c592311481b68746a4e10a154}{size\_type}}\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_a3d1e3edfcf61ca2d831883e1afbad89e}{size}},\ \mbox{\hyperlink{class____gnu__pbds_1_1hash__standard__resize__policy_ae716ba9c592311481b68746a4e10a154}{size\_type}}\ num\_used\_e)\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00597\ }
+\DoxyCodeLine{00598\ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00600\ \ \ \ \ \textcolor{keyword}{virtual}\ \textcolor{keywordtype}{void}}
+\DoxyCodeLine{00601\ \ \ \ \ do\_resize(\mbox{\hyperlink{class____gnu__pbds_1_1hash__standard__resize__policy_ae716ba9c592311481b68746a4e10a154}{size\_type}}\ new\_size);}
+\DoxyCodeLine{00602\ }
+\DoxyCodeLine{00603\ \ \ \ \ \textcolor{keyword}{typedef}\ Trigger\_Policy\ trigger\_policy\_base;}
+\DoxyCodeLine{00604\ }
+\DoxyCodeLine{00605\ \ \ \ \ \textcolor{keyword}{typedef}\ Size\_Policy\ size\_policy\_base;}
+\DoxyCodeLine{00606\ }
+\DoxyCodeLine{00607\ \ \ \ \ \mbox{\hyperlink{class____gnu__pbds_1_1hash__standard__resize__policy_ae716ba9c592311481b68746a4e10a154}{size\_type}}\ m\_size;}
+\DoxyCodeLine{00608\ \ \ \};}
+\DoxyCodeLine{00609\ }
+\DoxyCodeLine{00610\ \textcolor{preprocessor}{\#include\ <ext/pb\_ds/detail/resize\_policy/hash\_standard\_resize\_policy\_imp.hpp>}}
+\DoxyCodeLine{00611\ }
+\DoxyCodeLine{00612\ \textcolor{preprocessor}{\#undef\ PB\_DS\_CLASS\_T\_DEC}}
+\DoxyCodeLine{00613\ \textcolor{preprocessor}{\#undef\ PB\_DS\_CLASS\_C\_DEC}}
+\DoxyCodeLine{00614\ }
+\DoxyCodeLine{00615\ \}\ \textcolor{comment}{//\ namespace\ \_\_gnu\_pbds}}
+\DoxyCodeLine{00616\ }
+\DoxyCodeLine{00617\ \textcolor{preprocessor}{\#endif}}
+
+\end{DoxyCode}

@@ -1,0 +1,696 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<section xmlns="http://docbook.org/ns/docbook" version="5.0" xmlns:xlink="http://www.w3.org/1999/xlink" xml:id="__old_2_classes_2lib_2include_2c_09_09_2bits_2codecvt_8h_source" xml:lang="en-US">
+<title>codecvt.h</title>
+<indexterm><primary>C:/Users/HP/Documents/GitHub/Minero-Game/Old/Classes/lib/include/c++/bits/codecvt.h</primary></indexterm>
+Go to the documentation of this file.<programlisting linenumbering="unnumbered">1 <emphasis role="comment">//&#32;Locale&#32;support&#32;(codecvt)&#32;-*-&#32;C++&#32;-*-</emphasis>
+2 
+3 <emphasis role="comment">//&#32;Copyright&#32;(C)&#32;2000-2022&#32;Free&#32;Software&#32;Foundation,&#32;Inc.</emphasis>
+4 <emphasis role="comment">//</emphasis>
+5 <emphasis role="comment">//&#32;This&#32;file&#32;is&#32;part&#32;of&#32;the&#32;GNU&#32;ISO&#32;C++&#32;Library.&#32;&#32;This&#32;library&#32;is&#32;free</emphasis>
+6 <emphasis role="comment">//&#32;software;&#32;you&#32;can&#32;redistribute&#32;it&#32;and/or&#32;modify&#32;it&#32;under&#32;the</emphasis>
+7 <emphasis role="comment">//&#32;terms&#32;of&#32;the&#32;GNU&#32;General&#32;Public&#32;License&#32;as&#32;published&#32;by&#32;the</emphasis>
+8 <emphasis role="comment">//&#32;Free&#32;Software&#32;Foundation;&#32;either&#32;version&#32;3,&#32;or&#32;(at&#32;your&#32;option)</emphasis>
+9 <emphasis role="comment">//&#32;any&#32;later&#32;version.</emphasis>
+10 
+11 <emphasis role="comment">//&#32;This&#32;library&#32;is&#32;distributed&#32;in&#32;the&#32;hope&#32;that&#32;it&#32;will&#32;be&#32;useful,</emphasis>
+12 <emphasis role="comment">//&#32;but&#32;WITHOUT&#32;ANY&#32;WARRANTY;&#32;without&#32;even&#32;the&#32;implied&#32;warranty&#32;of</emphasis>
+13 <emphasis role="comment">//&#32;MERCHANTABILITY&#32;or&#32;FITNESS&#32;FOR&#32;A&#32;PARTICULAR&#32;PURPOSE.&#32;&#32;See&#32;the</emphasis>
+14 <emphasis role="comment">//&#32;GNU&#32;General&#32;Public&#32;License&#32;for&#32;more&#32;details.</emphasis>
+15 
+16 <emphasis role="comment">//&#32;Under&#32;Section&#32;7&#32;of&#32;GPL&#32;version&#32;3,&#32;you&#32;are&#32;granted&#32;additional</emphasis>
+17 <emphasis role="comment">//&#32;permissions&#32;described&#32;in&#32;the&#32;GCC&#32;Runtime&#32;Library&#32;Exception,&#32;version</emphasis>
+18 <emphasis role="comment">//&#32;3.1,&#32;as&#32;published&#32;by&#32;the&#32;Free&#32;Software&#32;Foundation.</emphasis>
+19 
+20 <emphasis role="comment">//&#32;You&#32;should&#32;have&#32;received&#32;a&#32;copy&#32;of&#32;the&#32;GNU&#32;General&#32;Public&#32;License&#32;and</emphasis>
+21 <emphasis role="comment">//&#32;a&#32;copy&#32;of&#32;the&#32;GCC&#32;Runtime&#32;Library&#32;Exception&#32;along&#32;with&#32;this&#32;program;</emphasis>
+22 <emphasis role="comment">//&#32;see&#32;the&#32;files&#32;COPYING3&#32;and&#32;COPYING.RUNTIME&#32;respectively.&#32;&#32;If&#32;not,&#32;see</emphasis>
+23 <emphasis role="comment">//&#32;&lt;http://www.gnu.org/licenses/&gt;.</emphasis>
+24 
+30 <emphasis role="comment">//</emphasis>
+31 <emphasis role="comment">//&#32;ISO&#32;C++&#32;14882:&#32;22.2.1.5&#32;Template&#32;class&#32;codecvt</emphasis>
+32 <emphasis role="comment">//</emphasis>
+33 
+34 <emphasis role="comment">//&#32;Written&#32;by&#32;Benjamin&#32;Kosnik&#32;&lt;bkoz@redhat.com&gt;</emphasis>
+35 
+36 <emphasis role="preprocessor">#ifndef&#32;_CODECVT_H</emphasis>
+37 <emphasis role="preprocessor">#define&#32;_CODECVT_H&#32;1</emphasis>
+38 
+39 <emphasis role="preprocessor">#pragma&#32;GCC&#32;system_header</emphasis>
+40 
+41 <emphasis role="preprocessor">#include&#32;&lt;bits/c++config.h&gt;</emphasis>
+42 <emphasis role="preprocessor">#include&#32;&lt;bits/locale_classes.h&gt;</emphasis>&#32;<emphasis role="comment">//&#32;locale::facet</emphasis>
+43 
+44 <emphasis role="keyword">namespace&#32;</emphasis><link linkend="_namespacestd">std</link>&#32;<link linkend="__classes_2lib_2include_2c_09_09_2x86__64-w64-mingw32_2bits_2c_09_09config_8h_1a44377df0d3503f0b3d9ab316dd8ddf8b">_GLIBCXX_VISIBILITY</link>(default)
+45 {
+46 _GLIBCXX_BEGIN_NAMESPACE_VERSION
+47 
+49 &#32;&#32;<emphasis role="keyword">class&#32;</emphasis>codecvt_base
+50 &#32;&#32;{
+51 &#32;&#32;<emphasis role="keyword">public</emphasis>:
+52 &#32;&#32;&#32;&#32;<emphasis role="keyword">enum</emphasis>&#32;<link linkend="__classes_2lib_2glm_2test_2core_2core__func__integer_8cpp_1a937d4dd628a8858b443a399410d2600b">result</link>
+53 &#32;&#32;&#32;&#32;{
+54 &#32;&#32;&#32;&#32;&#32;&#32;ok,
+55 &#32;&#32;&#32;&#32;&#32;&#32;partial,
+56 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2glm_2test_2core_2core__func__integer__bit__count_8cpp_1ab34dedbf30a51859090cbab92fa60edb">error</link>,
+57 &#32;&#32;&#32;&#32;&#32;&#32;noconv
+58 &#32;&#32;&#32;&#32;};
+59 &#32;&#32;};
+60 
+70 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_InternT,&#32;<emphasis role="keyword">typename</emphasis>&#32;_ExternT,&#32;<emphasis role="keyword">typename</emphasis>&#32;_StateT&gt;
+71 &#32;&#32;&#32;&#32;<emphasis role="keyword">class&#32;</emphasis>__codecvt_abstract_base
+72 &#32;&#32;&#32;&#32;:&#32;<emphasis role="keyword">public</emphasis>&#32;locale::facet,&#32;<emphasis role="keyword">public</emphasis>&#32;codecvt_base
+73 &#32;&#32;&#32;&#32;{
+74 &#32;&#32;&#32;&#32;<emphasis role="keyword">public</emphasis>:
+75 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Types:</emphasis>
+76 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;codecvt_base::result&#32;&#32;<link linkend="__classes_2lib_2glm_2test_2core_2core__func__integer_8cpp_1a937d4dd628a8858b443a399410d2600b">result</link>;
+77 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;_InternT&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;intern_type;
+78 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;_ExternT&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;extern_type;
+79 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;_StateT&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;state_type;
+80 
+81 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;22.2.1.5.1&#32;codecvt&#32;members</emphasis>
+118 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2glm_2test_2core_2core__func__integer_8cpp_1a937d4dd628a8858b443a399410d2600b">result</link>
+119 &#32;&#32;&#32;&#32;&#32;&#32;out(state_type&amp;&#32;__state,&#32;<emphasis role="keyword">const</emphasis>&#32;intern_type*&#32;__from,
+120 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;intern_type*&#32;__from_end,&#32;<emphasis role="keyword">const</emphasis>&#32;intern_type*&amp;&#32;__from_next,
+121 &#32;&#32;&#32;&#32;&#32;&#32;extern_type*&#32;__to,&#32;extern_type*&#32;__to_end,
+122 &#32;&#32;&#32;&#32;&#32;&#32;extern_type*&amp;&#32;__to_next)<emphasis role="keyword">&#32;const</emphasis>
+123 <emphasis role="keyword">&#32;&#32;&#32;&#32;&#32;&#32;</emphasis>{
+124 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;this-&gt;do_out(__state,&#32;__from,&#32;__from_end,&#32;__from_next,
+125 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__to,&#32;__to_end,&#32;__to_next);
+126 &#32;&#32;&#32;&#32;&#32;&#32;}
+127 
+157 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2glm_2test_2core_2core__func__integer_8cpp_1a937d4dd628a8858b443a399410d2600b">result</link>
+158 &#32;&#32;&#32;&#32;&#32;&#32;unshift(state_type&amp;&#32;__state,&#32;extern_type*&#32;__to,&#32;extern_type*&#32;__to_end,
+159 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;extern_type*&amp;&#32;__to_next)<emphasis role="keyword">&#32;const</emphasis>
+160 <emphasis role="keyword">&#32;&#32;&#32;&#32;&#32;&#32;</emphasis>{&#32;<emphasis role="keywordflow">return</emphasis>&#32;this-&gt;do_unshift(__state,&#32;__to,__to_end,__to_next);&#32;}
+161 
+198 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2glm_2test_2core_2core__func__integer_8cpp_1a937d4dd628a8858b443a399410d2600b">result</link>
+199 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a83ad0ee7f1e06b59c90271716e689080">in</link>(state_type&amp;&#32;__state,&#32;<emphasis role="keyword">const</emphasis>&#32;extern_type*&#32;__from,
+200 &#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;extern_type*&#32;__from_end,&#32;<emphasis role="keyword">const</emphasis>&#32;extern_type*&amp;&#32;__from_next,
+201 &#32;&#32;&#32;&#32;&#32;intern_type*&#32;__to,&#32;intern_type*&#32;__to_end,
+202 &#32;&#32;&#32;&#32;&#32;intern_type*&amp;&#32;__to_next)<emphasis role="keyword">&#32;const</emphasis>
+203 <emphasis role="keyword">&#32;&#32;&#32;&#32;&#32;&#32;</emphasis>{
+204 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;this-&gt;do_in(__state,&#32;__from,&#32;__from_end,&#32;__from_next,
+205 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__to,&#32;__to_end,&#32;__to_next);
+206 &#32;&#32;&#32;&#32;&#32;&#32;}
+207 
+208 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>
+209 &#32;&#32;&#32;&#32;&#32;&#32;encoding()&#32;<emphasis role="keyword">const</emphasis>&#32;throw()
+210 &#32;&#32;&#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;this-&gt;do_encoding();&#32;}
+211 
+212 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">bool</emphasis>
+213 &#32;&#32;&#32;&#32;&#32;&#32;always_noconv()&#32;<emphasis role="keyword">const</emphasis>&#32;throw()
+214 &#32;&#32;&#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;this-&gt;do_always_noconv();&#32;}
+215 
+216 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>
+217 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_namespacelength">length</link>(state_type&amp;&#32;__state,&#32;<emphasis role="keyword">const</emphasis>&#32;extern_type*&#32;__from,
+218 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;extern_type*&#32;__end,&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;__max)<emphasis role="keyword">&#32;const</emphasis>
+219 <emphasis role="keyword">&#32;&#32;&#32;&#32;&#32;&#32;</emphasis>{&#32;<emphasis role="keywordflow">return</emphasis>&#32;this-&gt;do_length(__state,&#32;__from,&#32;__end,&#32;__max);&#32;}
+220 
+221 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>
+222 &#32;&#32;&#32;&#32;&#32;&#32;max_length()&#32;<emphasis role="keyword">const</emphasis>&#32;throw()
+223 &#32;&#32;&#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;this-&gt;do_max_length();&#32;}
+224 
+225 &#32;&#32;&#32;&#32;<emphasis role="keyword">protected</emphasis>:
+226 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">explicit</emphasis>
+227 &#32;&#32;&#32;&#32;&#32;&#32;__codecvt_abstract_base(<emphasis role="keywordtype">size_t</emphasis>&#32;__refs&#32;=&#32;0)&#32;:&#32;locale::facet(__refs)&#32;{&#32;}
+228 
+229 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">virtual</emphasis>
+230 &#32;&#32;&#32;&#32;&#32;&#32;~__codecvt_abstract_base()&#32;{&#32;}
+231 
+239 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">virtual</emphasis>&#32;<link linkend="__classes_2lib_2glm_2test_2core_2core__func__integer_8cpp_1a937d4dd628a8858b443a399410d2600b">result</link>
+240 &#32;&#32;&#32;&#32;&#32;&#32;do_out(state_type&amp;&#32;__state,&#32;<emphasis role="keyword">const</emphasis>&#32;intern_type*&#32;__from,
+241 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;intern_type*&#32;__from_end,&#32;<emphasis role="keyword">const</emphasis>&#32;intern_type*&amp;&#32;__from_next,
+242 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;extern_type*&#32;__to,&#32;extern_type*&#32;__to_end,
+243 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;extern_type*&amp;&#32;__to_next)&#32;<emphasis role="keyword">const</emphasis>&#32;=&#32;0;
+244 
+245 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">virtual</emphasis>&#32;<link linkend="__classes_2lib_2glm_2test_2core_2core__func__integer_8cpp_1a937d4dd628a8858b443a399410d2600b">result</link>
+246 &#32;&#32;&#32;&#32;&#32;&#32;do_unshift(state_type&amp;&#32;__state,&#32;extern_type*&#32;__to,
+247 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;extern_type*&#32;__to_end,&#32;extern_type*&amp;&#32;__to_next)&#32;<emphasis role="keyword">const</emphasis>&#32;=&#32;0;
+248 
+249 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">virtual</emphasis>&#32;<link linkend="__classes_2lib_2glm_2test_2core_2core__func__integer_8cpp_1a937d4dd628a8858b443a399410d2600b">result</link>
+250 &#32;&#32;&#32;&#32;&#32;&#32;do_in(state_type&amp;&#32;__state,&#32;<emphasis role="keyword">const</emphasis>&#32;extern_type*&#32;__from,
+251 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;extern_type*&#32;__from_end,&#32;<emphasis role="keyword">const</emphasis>&#32;extern_type*&amp;&#32;__from_next,
+252 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;intern_type*&#32;__to,&#32;intern_type*&#32;__to_end,
+253 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;intern_type*&amp;&#32;__to_next)&#32;<emphasis role="keyword">const</emphasis>&#32;=&#32;0;
+254 
+255 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">virtual</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>
+256 &#32;&#32;&#32;&#32;&#32;&#32;do_encoding()&#32;<emphasis role="keyword">const</emphasis>&#32;throw()&#32;=&#32;0;
+257 
+258 &#32;&#32;&#32;&#32;&#32;&#32;virtual&#32;<emphasis role="keywordtype">bool</emphasis>
+259 &#32;&#32;&#32;&#32;&#32;&#32;do_always_noconv()&#32;const&#32;throw()&#32;=&#32;0;
+260 
+261 &#32;&#32;&#32;&#32;&#32;&#32;virtual&#32;<emphasis role="keywordtype">int</emphasis>
+262 &#32;&#32;&#32;&#32;&#32;&#32;do_length(state_type&amp;,&#32;const&#32;extern_type*&#32;__from,
+263 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;const&#32;extern_type*&#32;__end,&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;__max)&#32;const&#32;=&#32;0;
+264 
+265 &#32;&#32;&#32;&#32;&#32;&#32;virtual&#32;<emphasis role="keywordtype">int</emphasis>
+266 &#32;&#32;&#32;&#32;&#32;&#32;do_max_length()&#32;const&#32;throw()&#32;=&#32;0;
+267 &#32;&#32;&#32;&#32;};
+268 
+276 &#32;&#32;&#32;template&lt;typename&#32;_InternT,&#32;typename&#32;_ExternT,&#32;typename&#32;_StateT&gt;
+277 &#32;&#32;&#32;&#32;class&#32;codecvt
+278 &#32;&#32;&#32;&#32;:&#32;public&#32;__codecvt_abstract_base&lt;_InternT,&#32;_ExternT,&#32;_StateT&gt;
+279 &#32;&#32;&#32;&#32;{
+280 &#32;&#32;&#32;&#32;<emphasis role="keyword">public</emphasis>:
+281 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Types:</emphasis>
+282 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;codecvt_base::result&#32;&#32;<link linkend="__classes_2lib_2glm_2test_2core_2core__func__integer_8cpp_1a937d4dd628a8858b443a399410d2600b">result</link>;
+283 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;_InternT&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;intern_type;
+284 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;_ExternT&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;extern_type;
+285 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;_StateT&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;state_type;
+286 
+287 &#32;&#32;&#32;&#32;<emphasis role="keyword">protected</emphasis>:
+288 &#32;&#32;&#32;&#32;&#32;&#32;__c_locale&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_M_c_locale_codecvt;
+289 
+290 &#32;&#32;&#32;&#32;<emphasis role="keyword">public</emphasis>:
+291 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">static</emphasis>&#32;locale::id&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2external_2glfw_2src_2cocoa__platform_8h_1ae52362b10d585638f5b96140e90f1b7a">id</link>;
+292 
+293 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">explicit</emphasis>
+294 &#32;&#32;&#32;&#32;&#32;&#32;codecvt(<emphasis role="keywordtype">size_t</emphasis>&#32;__refs&#32;=&#32;0)
+295 &#32;&#32;&#32;&#32;&#32;&#32;:&#32;__codecvt_abstract_base&lt;_InternT,&#32;_ExternT,&#32;_StateT&gt;&#32;(__refs),
+296 &#32;&#32;&#32;&#32;_M_c_locale_codecvt(0)
+297 &#32;&#32;&#32;&#32;&#32;&#32;{&#32;}
+298 
+299 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">explicit</emphasis>
+300 &#32;&#32;&#32;&#32;&#32;&#32;codecvt(__c_locale&#32;__cloc,&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;__refs&#32;=&#32;0);
+301 
+302 &#32;&#32;&#32;&#32;<emphasis role="keyword">protected</emphasis>:
+303 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">virtual</emphasis>
+304 &#32;&#32;&#32;&#32;&#32;&#32;~codecvt()&#32;{&#32;}
+305 
+306 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">virtual</emphasis>&#32;<link linkend="__classes_2lib_2glm_2test_2core_2core__func__integer_8cpp_1a937d4dd628a8858b443a399410d2600b">result</link>
+307 &#32;&#32;&#32;&#32;&#32;&#32;do_out(state_type&amp;&#32;__state,&#32;<emphasis role="keyword">const</emphasis>&#32;intern_type*&#32;__from,
+308 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;intern_type*&#32;__from_end,&#32;<emphasis role="keyword">const</emphasis>&#32;intern_type*&amp;&#32;__from_next,
+309 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;extern_type*&#32;__to,&#32;extern_type*&#32;__to_end,
+310 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;extern_type*&amp;&#32;__to_next)&#32;<emphasis role="keyword">const</emphasis>;
+311 
+312 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">virtual</emphasis>&#32;<link linkend="__classes_2lib_2glm_2test_2core_2core__func__integer_8cpp_1a937d4dd628a8858b443a399410d2600b">result</link>
+313 &#32;&#32;&#32;&#32;&#32;&#32;do_unshift(state_type&amp;&#32;__state,&#32;extern_type*&#32;__to,
+314 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;extern_type*&#32;__to_end,&#32;extern_type*&amp;&#32;__to_next)&#32;<emphasis role="keyword">const</emphasis>;
+315 
+316 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">virtual</emphasis>&#32;<link linkend="__classes_2lib_2glm_2test_2core_2core__func__integer_8cpp_1a937d4dd628a8858b443a399410d2600b">result</link>
+317 &#32;&#32;&#32;&#32;&#32;&#32;do_in(state_type&amp;&#32;__state,&#32;<emphasis role="keyword">const</emphasis>&#32;extern_type*&#32;__from,
+318 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;extern_type*&#32;__from_end,&#32;<emphasis role="keyword">const</emphasis>&#32;extern_type*&amp;&#32;__from_next,
+319 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;intern_type*&#32;__to,&#32;intern_type*&#32;__to_end,
+320 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;intern_type*&amp;&#32;__to_next)&#32;<emphasis role="keyword">const</emphasis>;
+321 
+322 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">virtual</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>
+323 &#32;&#32;&#32;&#32;&#32;&#32;do_encoding()&#32;<emphasis role="keyword">const</emphasis>&#32;throw();
+324 
+325 &#32;&#32;&#32;&#32;&#32;&#32;virtual&#32;<emphasis role="keywordtype">bool</emphasis>
+326 &#32;&#32;&#32;&#32;&#32;&#32;do_always_noconv()&#32;const&#32;throw();
+327 
+328 &#32;&#32;&#32;&#32;&#32;&#32;virtual&#32;<emphasis role="keywordtype">int</emphasis>
+329 &#32;&#32;&#32;&#32;&#32;&#32;do_length(state_type&amp;,&#32;const&#32;extern_type*&#32;__from,
+330 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;const&#32;extern_type*&#32;__end,&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;__max)&#32;const;
+331 
+332 &#32;&#32;&#32;&#32;&#32;&#32;virtual&#32;<emphasis role="keywordtype">int</emphasis>
+333 &#32;&#32;&#32;&#32;&#32;&#32;do_max_length()&#32;const&#32;throw();
+334 &#32;&#32;&#32;&#32;};
+335 
+336 &#32;&#32;template&lt;typename&#32;_InternT,&#32;typename&#32;_ExternT,&#32;typename&#32;_StateT&gt;
+337 &#32;&#32;&#32;&#32;locale::<emphasis role="keywordtype">id</emphasis>&#32;codecvt&lt;_InternT,&#32;_ExternT,&#32;_StateT&gt;::<emphasis role="keywordtype">id</emphasis>;
+338 
+340 &#32;&#32;template&lt;&gt;
+341 &#32;&#32;&#32;&#32;class&#32;codecvt&lt;<emphasis role="keywordtype">char</emphasis>,&#32;<emphasis role="keywordtype">char</emphasis>,&#32;mbstate_t&gt;
+342 &#32;&#32;&#32;&#32;:&#32;public&#32;__codecvt_abstract_base&lt;<emphasis role="keywordtype">char</emphasis>,&#32;<emphasis role="keywordtype">char</emphasis>,&#32;mbstate_t&gt;
+343 &#32;&#32;&#32;&#32;{
+344 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">friend</emphasis>&#32;<emphasis role="keyword">class&#32;</emphasis>messages&lt;char&gt;;
+345 
+346 &#32;&#32;&#32;&#32;<emphasis role="keyword">public</emphasis>:
+347 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Types:</emphasis>
+348 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;intern_type;
+349 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;extern_type;
+350 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;mbstate_t&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;state_type;
+351 
+352 &#32;&#32;&#32;&#32;<emphasis role="keyword">protected</emphasis>:
+353 &#32;&#32;&#32;&#32;&#32;&#32;__c_locale&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_M_c_locale_codecvt;
+354 
+355 &#32;&#32;&#32;&#32;<emphasis role="keyword">public</emphasis>:
+356 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">static</emphasis>&#32;locale::id&#32;<link linkend="__classes_2lib_2external_2glfw_2src_2cocoa__platform_8h_1ae52362b10d585638f5b96140e90f1b7a">id</link>;
+357 
+358 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">explicit</emphasis>
+359 &#32;&#32;&#32;&#32;&#32;&#32;codecvt(<emphasis role="keywordtype">size_t</emphasis>&#32;__refs&#32;=&#32;0);
+360 
+361 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">explicit</emphasis>
+362 &#32;&#32;&#32;&#32;&#32;&#32;codecvt(__c_locale&#32;__cloc,&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;__refs&#32;=&#32;0);
+363 
+364 &#32;&#32;&#32;&#32;<emphasis role="keyword">protected</emphasis>:
+365 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">virtual</emphasis>
+366 &#32;&#32;&#32;&#32;&#32;&#32;~codecvt();
+367 
+368 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">virtual</emphasis>&#32;<link linkend="__classes_2lib_2glm_2test_2core_2core__func__integer_8cpp_1a937d4dd628a8858b443a399410d2600b">result</link>
+369 &#32;&#32;&#32;&#32;&#32;&#32;do_out(state_type&amp;&#32;__state,&#32;<emphasis role="keyword">const</emphasis>&#32;intern_type*&#32;__from,
+370 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;intern_type*&#32;__from_end,&#32;<emphasis role="keyword">const</emphasis>&#32;intern_type*&amp;&#32;__from_next,
+371 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;extern_type*&#32;__to,&#32;extern_type*&#32;__to_end,
+372 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;extern_type*&amp;&#32;__to_next)&#32;<emphasis role="keyword">const</emphasis>;
+373 
+374 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">virtual</emphasis>&#32;<link linkend="__classes_2lib_2glm_2test_2core_2core__func__integer_8cpp_1a937d4dd628a8858b443a399410d2600b">result</link>
+375 &#32;&#32;&#32;&#32;&#32;&#32;do_unshift(state_type&amp;&#32;__state,&#32;extern_type*&#32;__to,
+376 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;extern_type*&#32;__to_end,&#32;extern_type*&amp;&#32;__to_next)&#32;<emphasis role="keyword">const</emphasis>;
+377 
+378 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">virtual</emphasis>&#32;<link linkend="__classes_2lib_2glm_2test_2core_2core__func__integer_8cpp_1a937d4dd628a8858b443a399410d2600b">result</link>
+379 &#32;&#32;&#32;&#32;&#32;&#32;do_in(state_type&amp;&#32;__state,&#32;<emphasis role="keyword">const</emphasis>&#32;extern_type*&#32;__from,
+380 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;extern_type*&#32;__from_end,&#32;<emphasis role="keyword">const</emphasis>&#32;extern_type*&amp;&#32;__from_next,
+381 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;intern_type*&#32;__to,&#32;intern_type*&#32;__to_end,
+382 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;intern_type*&amp;&#32;__to_next)&#32;<emphasis role="keyword">const</emphasis>;
+383 
+384 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">virtual</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>
+385 &#32;&#32;&#32;&#32;&#32;&#32;do_encoding()&#32;<emphasis role="keyword">const</emphasis>&#32;throw();
+386 
+387 &#32;&#32;&#32;&#32;&#32;&#32;virtual&#32;<emphasis role="keywordtype">bool</emphasis>
+388 &#32;&#32;&#32;&#32;&#32;&#32;do_always_noconv()&#32;const&#32;throw();
+389 
+390 &#32;&#32;&#32;&#32;&#32;&#32;virtual&#32;<emphasis role="keywordtype">int</emphasis>
+391 &#32;&#32;&#32;&#32;&#32;&#32;do_length(state_type&amp;,&#32;const&#32;extern_type*&#32;__from,
+392 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;const&#32;extern_type*&#32;__end,&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;__max)&#32;const;
+393 
+394 &#32;&#32;&#32;&#32;&#32;&#32;virtual&#32;<emphasis role="keywordtype">int</emphasis>
+395 &#32;&#32;&#32;&#32;&#32;&#32;do_max_length()&#32;const&#32;throw();
+396 &#32;&#32;};
+397 
+398 <emphasis role="preprocessor">#ifdef&#32;_GLIBCXX_USE_WCHAR_T</emphasis>
+403 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;&gt;
+404 &#32;&#32;&#32;&#32;<emphasis role="keyword">class&#32;</emphasis>codecvt&lt;<link linkend="__classes_2lib_2include_2stddef_8h_1a5f245e933e58ed4d268146a5b1f116ca">wchar_t</link>,&#32;char,&#32;mbstate_t&gt;
+405 &#32;&#32;&#32;&#32;:&#32;<emphasis role="keyword">public</emphasis>&#32;__codecvt_abstract_base&lt;wchar_t,&#32;char,&#32;mbstate_t&gt;
+406 &#32;&#32;&#32;&#32;{
+407 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">friend</emphasis>&#32;<emphasis role="keyword">class&#32;</emphasis>messages&lt;<link linkend="__classes_2lib_2include_2stddef_8h_1a5f245e933e58ed4d268146a5b1f116ca">wchar_t</link>&gt;;
+408 
+409 &#32;&#32;&#32;&#32;<emphasis role="keyword">public</emphasis>:
+410 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Types:</emphasis>
+411 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keywordtype">wchar_t</emphasis>&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;intern_type;
+412 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;extern_type;
+413 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;mbstate_t&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;state_type;
+414 
+415 &#32;&#32;&#32;&#32;<emphasis role="keyword">protected</emphasis>:
+416 &#32;&#32;&#32;&#32;&#32;&#32;__c_locale&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_M_c_locale_codecvt;
+417 
+418 &#32;&#32;&#32;&#32;<emphasis role="keyword">public</emphasis>:
+419 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">static</emphasis>&#32;locale::id&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2external_2glfw_2src_2cocoa__platform_8h_1ae52362b10d585638f5b96140e90f1b7a">id</link>;
+420 
+421 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">explicit</emphasis>
+422 &#32;&#32;&#32;&#32;&#32;&#32;codecvt(<emphasis role="keywordtype">size_t</emphasis>&#32;__refs&#32;=&#32;0);
+423 
+424 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">explicit</emphasis>
+425 &#32;&#32;&#32;&#32;&#32;&#32;codecvt(__c_locale&#32;__cloc,&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;__refs&#32;=&#32;0);
+426 
+427 &#32;&#32;&#32;&#32;<emphasis role="keyword">protected</emphasis>:
+428 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">virtual</emphasis>
+429 &#32;&#32;&#32;&#32;&#32;&#32;~codecvt();
+430 
+431 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">virtual</emphasis>&#32;<link linkend="__classes_2lib_2glm_2test_2core_2core__func__integer_8cpp_1a937d4dd628a8858b443a399410d2600b">result</link>
+432 &#32;&#32;&#32;&#32;&#32;&#32;do_out(state_type&amp;&#32;__state,&#32;<emphasis role="keyword">const</emphasis>&#32;intern_type*&#32;__from,
+433 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;intern_type*&#32;__from_end,&#32;<emphasis role="keyword">const</emphasis>&#32;intern_type*&amp;&#32;__from_next,
+434 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;extern_type*&#32;__to,&#32;extern_type*&#32;__to_end,
+435 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;extern_type*&amp;&#32;__to_next)&#32;<emphasis role="keyword">const</emphasis>;
+436 
+437 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">virtual</emphasis>&#32;<link linkend="__classes_2lib_2glm_2test_2core_2core__func__integer_8cpp_1a937d4dd628a8858b443a399410d2600b">result</link>
+438 &#32;&#32;&#32;&#32;&#32;&#32;do_unshift(state_type&amp;&#32;__state,
+439 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;extern_type*&#32;__to,&#32;extern_type*&#32;__to_end,
+440 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;extern_type*&amp;&#32;__to_next)&#32;<emphasis role="keyword">const</emphasis>;
+441 
+442 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">virtual</emphasis>&#32;<link linkend="__classes_2lib_2glm_2test_2core_2core__func__integer_8cpp_1a937d4dd628a8858b443a399410d2600b">result</link>
+443 &#32;&#32;&#32;&#32;&#32;&#32;do_in(state_type&amp;&#32;__state,
+444 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;extern_type*&#32;__from,&#32;<emphasis role="keyword">const</emphasis>&#32;extern_type*&#32;__from_end,
+445 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;extern_type*&amp;&#32;__from_next,
+446 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;intern_type*&#32;__to,&#32;intern_type*&#32;__to_end,
+447 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;intern_type*&amp;&#32;__to_next)&#32;<emphasis role="keyword">const</emphasis>;
+448 
+449 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">virtual</emphasis>
+450 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;do_encoding()&#32;<emphasis role="keyword">const</emphasis>&#32;throw();
+451 
+452 &#32;&#32;&#32;&#32;&#32;&#32;virtual
+453 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">bool</emphasis>&#32;do_always_noconv()&#32;const&#32;throw();
+454 
+455 &#32;&#32;&#32;&#32;&#32;&#32;virtual
+456 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;do_length(state_type&amp;,&#32;const&#32;extern_type*&#32;__from,
+457 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;const&#32;extern_type*&#32;__end,&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;__max)&#32;const;
+458 
+459 &#32;&#32;&#32;&#32;&#32;&#32;virtual&#32;<emphasis role="keywordtype">int</emphasis>
+460 &#32;&#32;&#32;&#32;&#32;&#32;do_max_length()&#32;const&#32;throw();
+461 &#32;&#32;&#32;&#32;};
+462 <emphasis role="preprocessor">#endif&#32;</emphasis><emphasis role="comment">//_GLIBCXX_USE_WCHAR_T</emphasis>
+463 
+464 <emphasis role="preprocessor">#if&#32;__cplusplus&#32;&gt;=&#32;201103L</emphasis>
+469 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;&gt;
+470 &#32;&#32;&#32;&#32;<emphasis role="keyword">class&#32;</emphasis>codecvt&lt;char16_t,&#32;char,&#32;mbstate_t&gt;
+471 &#32;&#32;&#32;&#32;:&#32;<emphasis role="keyword">public</emphasis>&#32;__codecvt_abstract_base&lt;char16_t,&#32;char,&#32;mbstate_t&gt;
+472 &#32;&#32;&#32;&#32;{
+473 &#32;&#32;&#32;&#32;<emphasis role="keyword">public</emphasis>:
+474 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Types:</emphasis>
+475 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keywordtype">char16_t</emphasis>&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;intern_type;
+476 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;extern_type;
+477 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;mbstate_t&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;state_type;
+478 
+479 &#32;&#32;&#32;&#32;<emphasis role="keyword">public</emphasis>:
+480 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">static</emphasis>&#32;locale::id&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2external_2glfw_2src_2cocoa__platform_8h_1ae52362b10d585638f5b96140e90f1b7a">id</link>;
+481 
+482 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">explicit</emphasis>
+483 &#32;&#32;&#32;&#32;&#32;&#32;codecvt(<emphasis role="keywordtype">size_t</emphasis>&#32;__refs&#32;=&#32;0)
+484 &#32;&#32;&#32;&#32;&#32;&#32;:&#32;__codecvt_abstract_base&lt;char16_t,&#32;char,&#32;mbstate_t&gt;(__refs)&#32;{&#32;}
+485 
+486 &#32;&#32;&#32;&#32;<emphasis role="keyword">protected</emphasis>:
+487 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">virtual</emphasis>
+488 &#32;&#32;&#32;&#32;&#32;&#32;~codecvt();
+489 
+490 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">virtual</emphasis>&#32;<link linkend="__classes_2lib_2glm_2test_2core_2core__func__integer_8cpp_1a937d4dd628a8858b443a399410d2600b">result</link>
+491 &#32;&#32;&#32;&#32;&#32;&#32;do_out(state_type&amp;&#32;__state,&#32;<emphasis role="keyword">const</emphasis>&#32;intern_type*&#32;__from,
+492 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;intern_type*&#32;__from_end,&#32;<emphasis role="keyword">const</emphasis>&#32;intern_type*&amp;&#32;__from_next,
+493 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;extern_type*&#32;__to,&#32;extern_type*&#32;__to_end,
+494 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;extern_type*&amp;&#32;__to_next)&#32;<emphasis role="keyword">const</emphasis>;
+495 
+496 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">virtual</emphasis>&#32;<link linkend="__classes_2lib_2glm_2test_2core_2core__func__integer_8cpp_1a937d4dd628a8858b443a399410d2600b">result</link>
+497 &#32;&#32;&#32;&#32;&#32;&#32;do_unshift(state_type&amp;&#32;__state,
+498 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;extern_type*&#32;__to,&#32;extern_type*&#32;__to_end,
+499 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;extern_type*&amp;&#32;__to_next)&#32;<emphasis role="keyword">const</emphasis>;
+500 
+501 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">virtual</emphasis>&#32;<link linkend="__classes_2lib_2glm_2test_2core_2core__func__integer_8cpp_1a937d4dd628a8858b443a399410d2600b">result</link>
+502 &#32;&#32;&#32;&#32;&#32;&#32;do_in(state_type&amp;&#32;__state,
+503 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;extern_type*&#32;__from,&#32;<emphasis role="keyword">const</emphasis>&#32;extern_type*&#32;__from_end,
+504 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;extern_type*&amp;&#32;__from_next,
+505 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;intern_type*&#32;__to,&#32;intern_type*&#32;__to_end,
+506 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;intern_type*&amp;&#32;__to_next)&#32;<emphasis role="keyword">const</emphasis>;
+507 
+508 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">virtual</emphasis>
+509 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;do_encoding()&#32;<emphasis role="keyword">const</emphasis>&#32;throw();
+510 
+511 &#32;&#32;&#32;&#32;&#32;&#32;virtual
+512 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">bool</emphasis>&#32;do_always_noconv()&#32;const&#32;throw();
+513 
+514 &#32;&#32;&#32;&#32;&#32;&#32;virtual
+515 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;do_length(state_type&amp;,&#32;const&#32;extern_type*&#32;__from,
+516 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;const&#32;extern_type*&#32;__end,&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;__max)&#32;const;
+517 
+518 &#32;&#32;&#32;&#32;&#32;&#32;virtual&#32;<emphasis role="keywordtype">int</emphasis>
+519 &#32;&#32;&#32;&#32;&#32;&#32;do_max_length()&#32;const&#32;throw();
+520 &#32;&#32;&#32;&#32;};
+521 
+526 &#32;&#32;template&lt;&gt;
+527 &#32;&#32;&#32;&#32;class&#32;codecvt&lt;<emphasis role="keywordtype">char32_t</emphasis>,&#32;<emphasis role="keywordtype">char</emphasis>,&#32;mbstate_t&gt;
+528 &#32;&#32;&#32;&#32;:&#32;public&#32;__codecvt_abstract_base&lt;<emphasis role="keywordtype">char32_t</emphasis>,&#32;<emphasis role="keywordtype">char</emphasis>,&#32;mbstate_t&gt;
+529 &#32;&#32;&#32;&#32;{
+530 &#32;&#32;&#32;&#32;<emphasis role="keyword">public</emphasis>:
+531 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Types:</emphasis>
+532 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keywordtype">char32_t</emphasis>&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;intern_type;
+533 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;extern_type;
+534 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;mbstate_t&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;state_type;
+535 
+536 &#32;&#32;&#32;&#32;<emphasis role="keyword">public</emphasis>:
+537 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">static</emphasis>&#32;locale::id&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2external_2glfw_2src_2cocoa__platform_8h_1ae52362b10d585638f5b96140e90f1b7a">id</link>;
+538 
+539 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">explicit</emphasis>
+540 &#32;&#32;&#32;&#32;&#32;&#32;codecvt(<emphasis role="keywordtype">size_t</emphasis>&#32;__refs&#32;=&#32;0)
+541 &#32;&#32;&#32;&#32;&#32;&#32;:&#32;__codecvt_abstract_base&lt;char32_t,&#32;char,&#32;mbstate_t&gt;(__refs)&#32;{&#32;}
+542 
+543 &#32;&#32;&#32;&#32;<emphasis role="keyword">protected</emphasis>:
+544 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">virtual</emphasis>
+545 &#32;&#32;&#32;&#32;&#32;&#32;~codecvt();
+546 
+547 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">virtual</emphasis>&#32;<link linkend="__classes_2lib_2glm_2test_2core_2core__func__integer_8cpp_1a937d4dd628a8858b443a399410d2600b">result</link>
+548 &#32;&#32;&#32;&#32;&#32;&#32;do_out(state_type&amp;&#32;__state,&#32;<emphasis role="keyword">const</emphasis>&#32;intern_type*&#32;__from,
+549 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;intern_type*&#32;__from_end,&#32;<emphasis role="keyword">const</emphasis>&#32;intern_type*&amp;&#32;__from_next,
+550 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;extern_type*&#32;__to,&#32;extern_type*&#32;__to_end,
+551 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;extern_type*&amp;&#32;__to_next)&#32;<emphasis role="keyword">const</emphasis>;
+552 
+553 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">virtual</emphasis>&#32;<link linkend="__classes_2lib_2glm_2test_2core_2core__func__integer_8cpp_1a937d4dd628a8858b443a399410d2600b">result</link>
+554 &#32;&#32;&#32;&#32;&#32;&#32;do_unshift(state_type&amp;&#32;__state,
+555 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;extern_type*&#32;__to,&#32;extern_type*&#32;__to_end,
+556 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;extern_type*&amp;&#32;__to_next)&#32;<emphasis role="keyword">const</emphasis>;
+557 
+558 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">virtual</emphasis>&#32;<link linkend="__classes_2lib_2glm_2test_2core_2core__func__integer_8cpp_1a937d4dd628a8858b443a399410d2600b">result</link>
+559 &#32;&#32;&#32;&#32;&#32;&#32;do_in(state_type&amp;&#32;__state,
+560 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;extern_type*&#32;__from,&#32;<emphasis role="keyword">const</emphasis>&#32;extern_type*&#32;__from_end,
+561 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;extern_type*&amp;&#32;__from_next,
+562 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;intern_type*&#32;__to,&#32;intern_type*&#32;__to_end,
+563 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;intern_type*&amp;&#32;__to_next)&#32;<emphasis role="keyword">const</emphasis>;
+564 
+565 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">virtual</emphasis>
+566 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;do_encoding()&#32;<emphasis role="keyword">const</emphasis>&#32;throw();
+567 
+568 &#32;&#32;&#32;&#32;&#32;&#32;virtual
+569 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">bool</emphasis>&#32;do_always_noconv()&#32;const&#32;throw();
+570 
+571 &#32;&#32;&#32;&#32;&#32;&#32;virtual
+572 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;do_length(state_type&amp;,&#32;const&#32;extern_type*&#32;__from,
+573 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;const&#32;extern_type*&#32;__end,&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;__max)&#32;const;
+574 
+575 &#32;&#32;&#32;&#32;&#32;&#32;virtual&#32;<emphasis role="keywordtype">int</emphasis>
+576 &#32;&#32;&#32;&#32;&#32;&#32;do_max_length()&#32;const&#32;throw();
+577 &#32;&#32;&#32;&#32;};
+578 
+579 <emphasis role="preprocessor">#ifdef&#32;_GLIBCXX_USE_CHAR8_T</emphasis>
+584 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;&gt;
+585 &#32;&#32;&#32;&#32;<emphasis role="keyword">class&#32;</emphasis>codecvt&lt;char16_t,&#32;char8_t,&#32;mbstate_t&gt;
+586 &#32;&#32;&#32;&#32;:&#32;<emphasis role="keyword">public</emphasis>&#32;__codecvt_abstract_base&lt;char16_t,&#32;char8_t,&#32;mbstate_t&gt;
+587 &#32;&#32;&#32;&#32;{
+588 &#32;&#32;&#32;&#32;<emphasis role="keyword">public</emphasis>:
+589 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Types:</emphasis>
+590 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keywordtype">char16_t</emphasis>&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;intern_type;
+591 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keywordtype">char8_t</emphasis>&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;extern_type;
+592 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;mbstate_t&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;state_type;
+593 
+594 &#32;&#32;&#32;&#32;<emphasis role="keyword">public</emphasis>:
+595 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">static</emphasis>&#32;locale::id&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2external_2glfw_2src_2cocoa__platform_8h_1ae52362b10d585638f5b96140e90f1b7a">id</link>;
+596 
+597 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">explicit</emphasis>
+598 &#32;&#32;&#32;&#32;&#32;&#32;codecvt(<emphasis role="keywordtype">size_t</emphasis>&#32;__refs&#32;=&#32;0)
+599 &#32;&#32;&#32;&#32;&#32;&#32;:&#32;__codecvt_abstract_base&lt;char16_t,&#32;char8_t,&#32;mbstate_t&gt;(__refs)&#32;{&#32;}
+600 
+601 &#32;&#32;&#32;&#32;<emphasis role="keyword">protected</emphasis>:
+602 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">virtual</emphasis>
+603 &#32;&#32;&#32;&#32;&#32;&#32;~codecvt();
+604 
+605 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">virtual</emphasis>&#32;<link linkend="__classes_2lib_2glm_2test_2core_2core__func__integer_8cpp_1a937d4dd628a8858b443a399410d2600b">result</link>
+606 &#32;&#32;&#32;&#32;&#32;&#32;do_out(state_type&amp;&#32;__state,&#32;<emphasis role="keyword">const</emphasis>&#32;intern_type*&#32;__from,
+607 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;intern_type*&#32;__from_end,&#32;<emphasis role="keyword">const</emphasis>&#32;intern_type*&amp;&#32;__from_next,
+608 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;extern_type*&#32;__to,&#32;extern_type*&#32;__to_end,
+609 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;extern_type*&amp;&#32;__to_next)&#32;<emphasis role="keyword">const</emphasis>;
+610 
+611 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">virtual</emphasis>&#32;<link linkend="__classes_2lib_2glm_2test_2core_2core__func__integer_8cpp_1a937d4dd628a8858b443a399410d2600b">result</link>
+612 &#32;&#32;&#32;&#32;&#32;&#32;do_unshift(state_type&amp;&#32;__state,
+613 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;extern_type*&#32;__to,&#32;extern_type*&#32;__to_end,
+614 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;extern_type*&amp;&#32;__to_next)&#32;<emphasis role="keyword">const</emphasis>;
+615 
+616 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">virtual</emphasis>&#32;<link linkend="__classes_2lib_2glm_2test_2core_2core__func__integer_8cpp_1a937d4dd628a8858b443a399410d2600b">result</link>
+617 &#32;&#32;&#32;&#32;&#32;&#32;do_in(state_type&amp;&#32;__state,
+618 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;extern_type*&#32;__from,&#32;<emphasis role="keyword">const</emphasis>&#32;extern_type*&#32;__from_end,
+619 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;extern_type*&amp;&#32;__from_next,
+620 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;intern_type*&#32;__to,&#32;intern_type*&#32;__to_end,
+621 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;intern_type*&amp;&#32;__to_next)&#32;<emphasis role="keyword">const</emphasis>;
+622 
+623 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">virtual</emphasis>
+624 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;do_encoding()&#32;<emphasis role="keyword">const</emphasis>&#32;throw();
+625 
+626 &#32;&#32;&#32;&#32;&#32;&#32;virtual
+627 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">bool</emphasis>&#32;do_always_noconv()&#32;const&#32;throw();
+628 
+629 &#32;&#32;&#32;&#32;&#32;&#32;virtual
+630 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;do_length(state_type&amp;,&#32;const&#32;extern_type*&#32;__from,
+631 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;const&#32;extern_type*&#32;__end,&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;__max)&#32;const;
+632 
+633 &#32;&#32;&#32;&#32;&#32;&#32;virtual&#32;<emphasis role="keywordtype">int</emphasis>
+634 &#32;&#32;&#32;&#32;&#32;&#32;do_max_length()&#32;const&#32;throw();
+635 &#32;&#32;&#32;&#32;};
+636 
+641 &#32;&#32;template&lt;&gt;
+642 &#32;&#32;&#32;&#32;class&#32;codecvt&lt;<emphasis role="keywordtype">char32_t</emphasis>,&#32;<emphasis role="keywordtype">char8_t</emphasis>,&#32;mbstate_t&gt;
+643 &#32;&#32;&#32;&#32;:&#32;public&#32;__codecvt_abstract_base&lt;<emphasis role="keywordtype">char32_t</emphasis>,&#32;<emphasis role="keywordtype">char8_t</emphasis>,&#32;mbstate_t&gt;
+644 &#32;&#32;&#32;&#32;{
+645 &#32;&#32;&#32;&#32;<emphasis role="keyword">public</emphasis>:
+646 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Types:</emphasis>
+647 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keywordtype">char32_t</emphasis>&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;intern_type;
+648 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keywordtype">char8_t</emphasis>&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;extern_type;
+649 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;mbstate_t&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;state_type;
+650 
+651 &#32;&#32;&#32;&#32;<emphasis role="keyword">public</emphasis>:
+652 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">static</emphasis>&#32;locale::id&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2external_2glfw_2src_2cocoa__platform_8h_1ae52362b10d585638f5b96140e90f1b7a">id</link>;
+653 
+654 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">explicit</emphasis>
+655 &#32;&#32;&#32;&#32;&#32;&#32;codecvt(<emphasis role="keywordtype">size_t</emphasis>&#32;__refs&#32;=&#32;0)
+656 &#32;&#32;&#32;&#32;&#32;&#32;:&#32;__codecvt_abstract_base&lt;char32_t,&#32;char8_t,&#32;mbstate_t&gt;(__refs)&#32;{&#32;}
+657 
+658 &#32;&#32;&#32;&#32;<emphasis role="keyword">protected</emphasis>:
+659 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">virtual</emphasis>
+660 &#32;&#32;&#32;&#32;&#32;&#32;~codecvt();
+661 
+662 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">virtual</emphasis>&#32;<link linkend="__classes_2lib_2glm_2test_2core_2core__func__integer_8cpp_1a937d4dd628a8858b443a399410d2600b">result</link>
+663 &#32;&#32;&#32;&#32;&#32;&#32;do_out(state_type&amp;&#32;__state,&#32;<emphasis role="keyword">const</emphasis>&#32;intern_type*&#32;__from,
+664 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;intern_type*&#32;__from_end,&#32;<emphasis role="keyword">const</emphasis>&#32;intern_type*&amp;&#32;__from_next,
+665 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;extern_type*&#32;__to,&#32;extern_type*&#32;__to_end,
+666 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;extern_type*&amp;&#32;__to_next)&#32;<emphasis role="keyword">const</emphasis>;
+667 
+668 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">virtual</emphasis>&#32;<link linkend="__classes_2lib_2glm_2test_2core_2core__func__integer_8cpp_1a937d4dd628a8858b443a399410d2600b">result</link>
+669 &#32;&#32;&#32;&#32;&#32;&#32;do_unshift(state_type&amp;&#32;__state,
+670 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;extern_type*&#32;__to,&#32;extern_type*&#32;__to_end,
+671 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;extern_type*&amp;&#32;__to_next)&#32;<emphasis role="keyword">const</emphasis>;
+672 
+673 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">virtual</emphasis>&#32;<link linkend="__classes_2lib_2glm_2test_2core_2core__func__integer_8cpp_1a937d4dd628a8858b443a399410d2600b">result</link>
+674 &#32;&#32;&#32;&#32;&#32;&#32;do_in(state_type&amp;&#32;__state,
+675 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;extern_type*&#32;__from,&#32;<emphasis role="keyword">const</emphasis>&#32;extern_type*&#32;__from_end,
+676 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;extern_type*&amp;&#32;__from_next,
+677 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;intern_type*&#32;__to,&#32;intern_type*&#32;__to_end,
+678 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;intern_type*&amp;&#32;__to_next)&#32;<emphasis role="keyword">const</emphasis>;
+679 
+680 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">virtual</emphasis>
+681 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;do_encoding()&#32;<emphasis role="keyword">const</emphasis>&#32;throw();
+682 
+683 &#32;&#32;&#32;&#32;&#32;&#32;virtual
+684 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">bool</emphasis>&#32;do_always_noconv()&#32;const&#32;throw();
+685 
+686 &#32;&#32;&#32;&#32;&#32;&#32;virtual
+687 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;do_length(state_type&amp;,&#32;const&#32;extern_type*&#32;__from,
+688 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;const&#32;extern_type*&#32;__end,&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;__max)&#32;const;
+689 
+690 &#32;&#32;&#32;&#32;&#32;&#32;virtual&#32;<emphasis role="keywordtype">int</emphasis>
+691 &#32;&#32;&#32;&#32;&#32;&#32;do_max_length()&#32;const&#32;throw();
+692 &#32;&#32;&#32;&#32;};
+693 <emphasis role="preprocessor">#endif&#32;</emphasis><emphasis role="comment">//&#32;_GLIBCXX_USE_CHAR8_T</emphasis>
+694 
+695 <emphasis role="preprocessor">#endif&#32;</emphasis><emphasis role="comment">//&#32;C++11</emphasis>
+696 
+698 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_InternT,&#32;<emphasis role="keyword">typename</emphasis>&#32;_ExternT,&#32;<emphasis role="keyword">typename</emphasis>&#32;_StateT&gt;
+699 &#32;&#32;&#32;&#32;<emphasis role="keyword">class&#32;</emphasis>codecvt_byname&#32;:&#32;<emphasis role="keyword">public</emphasis>&#32;codecvt&lt;_InternT,&#32;_ExternT,&#32;_StateT&gt;
+700 &#32;&#32;&#32;&#32;{
+701 &#32;&#32;&#32;&#32;<emphasis role="keyword">public</emphasis>:
+702 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">explicit</emphasis>
+703 &#32;&#32;&#32;&#32;&#32;&#32;codecvt_byname(<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>*&#32;__s,&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;__refs&#32;=&#32;0)
+704 &#32;&#32;&#32;&#32;&#32;&#32;:&#32;codecvt&lt;_InternT,&#32;_ExternT,&#32;_StateT&gt;(__refs)
+705 &#32;&#32;&#32;&#32;&#32;&#32;{
+706 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__builtin_strcmp(__s,&#32;<emphasis role="stringliteral">&quot;C&quot;</emphasis>)&#32;!=&#32;0
+707 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&amp;&amp;&#32;__builtin_strcmp(__s,&#32;<emphasis role="stringliteral">&quot;POSIX&quot;</emphasis>)&#32;!=&#32;0)
+708 &#32;&#32;&#32;&#32;&#32;&#32;{
+709 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;this-&gt;_S_destroy_c_locale(this-&gt;_M_c_locale_codecvt);
+710 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;this-&gt;_S_create_c_locale(this-&gt;_M_c_locale_codecvt,&#32;__s);
+711 &#32;&#32;&#32;&#32;&#32;&#32;}
+712 &#32;&#32;&#32;&#32;&#32;&#32;}
+713 
+714 <emphasis role="preprocessor">#if&#32;__cplusplus&#32;&gt;=&#32;201103L</emphasis>
+715 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">explicit</emphasis>
+716 &#32;&#32;&#32;&#32;&#32;&#32;codecvt_byname(<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">string</emphasis>&amp;&#32;__s,&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;__refs&#32;=&#32;0)
+717 &#32;&#32;&#32;&#32;&#32;&#32;:&#32;codecvt_byname(__s.c_str(),&#32;__refs)&#32;{&#32;}
+718 <emphasis role="preprocessor">#endif</emphasis>
+719 
+720 &#32;&#32;&#32;&#32;<emphasis role="keyword">protected</emphasis>:
+721 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">virtual</emphasis>
+722 &#32;&#32;&#32;&#32;&#32;&#32;~codecvt_byname()&#32;{&#32;}
+723 &#32;&#32;&#32;&#32;};
+724 
+725 <emphasis role="preprocessor">#if&#32;__cplusplus&#32;&gt;=&#32;201103L</emphasis>
+726 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;&gt;
+727 &#32;&#32;&#32;&#32;<emphasis role="keyword">class&#32;</emphasis>codecvt_byname&lt;char16_t,&#32;char,&#32;mbstate_t&gt;
+728 &#32;&#32;&#32;&#32;:&#32;<emphasis role="keyword">public</emphasis>&#32;codecvt&lt;char16_t,&#32;char,&#32;mbstate_t&gt;
+729 &#32;&#32;&#32;&#32;{
+730 &#32;&#32;&#32;&#32;<emphasis role="keyword">public</emphasis>:
+731 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">explicit</emphasis>
+732 &#32;&#32;&#32;&#32;&#32;&#32;codecvt_byname(<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>*,&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;__refs&#32;=&#32;0)
+733 &#32;&#32;&#32;&#32;&#32;&#32;:&#32;codecvt&lt;char16_t,&#32;char,&#32;mbstate_t&gt;(__refs)&#32;{&#32;}
+734 
+735 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">explicit</emphasis>
+736 &#32;&#32;&#32;&#32;&#32;&#32;codecvt_byname(<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">string</emphasis>&amp;&#32;__s,&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;__refs&#32;=&#32;0)
+737 &#32;&#32;&#32;&#32;&#32;&#32;:&#32;codecvt_byname(__s.c_str(),&#32;__refs)&#32;{&#32;}
+738 
+739 &#32;&#32;&#32;&#32;<emphasis role="keyword">protected</emphasis>:
+740 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">virtual</emphasis>
+741 &#32;&#32;&#32;&#32;&#32;&#32;~codecvt_byname()&#32;{&#32;}
+742 &#32;&#32;&#32;&#32;};
+743 
+744 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;&gt;
+745 &#32;&#32;&#32;&#32;<emphasis role="keyword">class&#32;</emphasis>codecvt_byname&lt;char32_t,&#32;char,&#32;mbstate_t&gt;
+746 &#32;&#32;&#32;&#32;:&#32;<emphasis role="keyword">public</emphasis>&#32;codecvt&lt;char32_t,&#32;char,&#32;mbstate_t&gt;
+747 &#32;&#32;&#32;&#32;{
+748 &#32;&#32;&#32;&#32;<emphasis role="keyword">public</emphasis>:
+749 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">explicit</emphasis>
+750 &#32;&#32;&#32;&#32;&#32;&#32;codecvt_byname(<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>*,&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;__refs&#32;=&#32;0)
+751 &#32;&#32;&#32;&#32;&#32;&#32;:&#32;codecvt&lt;char32_t,&#32;char,&#32;mbstate_t&gt;(__refs)&#32;{&#32;}
+752 
+753 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">explicit</emphasis>
+754 &#32;&#32;&#32;&#32;&#32;&#32;codecvt_byname(<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">string</emphasis>&amp;&#32;__s,&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;__refs&#32;=&#32;0)
+755 &#32;&#32;&#32;&#32;&#32;&#32;:&#32;codecvt_byname(__s.c_str(),&#32;__refs)&#32;{&#32;}
+756 
+757 &#32;&#32;&#32;&#32;<emphasis role="keyword">protected</emphasis>:
+758 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">virtual</emphasis>
+759 &#32;&#32;&#32;&#32;&#32;&#32;~codecvt_byname()&#32;{&#32;}
+760 &#32;&#32;&#32;&#32;};
+761 
+762 <emphasis role="preprocessor">#if&#32;defined(_GLIBCXX_USE_CHAR8_T)</emphasis>
+763 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;&gt;
+764 &#32;&#32;&#32;&#32;<emphasis role="keyword">class&#32;</emphasis>codecvt_byname&lt;char16_t,&#32;char8_t,&#32;mbstate_t&gt;
+765 &#32;&#32;&#32;&#32;:&#32;<emphasis role="keyword">public</emphasis>&#32;codecvt&lt;char16_t,&#32;char8_t,&#32;mbstate_t&gt;
+766 &#32;&#32;&#32;&#32;{
+767 &#32;&#32;&#32;&#32;<emphasis role="keyword">public</emphasis>:
+768 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">explicit</emphasis>
+769 &#32;&#32;&#32;&#32;&#32;&#32;codecvt_byname(<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>*,&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;__refs&#32;=&#32;0)
+770 &#32;&#32;&#32;&#32;&#32;&#32;:&#32;codecvt&lt;char16_t,&#32;char8_t,&#32;mbstate_t&gt;(__refs)&#32;{&#32;}
+771 
+772 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">explicit</emphasis>
+773 &#32;&#32;&#32;&#32;&#32;&#32;codecvt_byname(<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">string</emphasis>&amp;&#32;__s,&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;__refs&#32;=&#32;0)
+774 &#32;&#32;&#32;&#32;&#32;&#32;:&#32;codecvt_byname(__s.c_str(),&#32;__refs)&#32;{&#32;}
+775 
+776 &#32;&#32;&#32;&#32;<emphasis role="keyword">protected</emphasis>:
+777 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">virtual</emphasis>
+778 &#32;&#32;&#32;&#32;&#32;&#32;~codecvt_byname()&#32;{&#32;}
+779 &#32;&#32;&#32;&#32;};
+780 
+781 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;&gt;
+782 &#32;&#32;&#32;&#32;<emphasis role="keyword">class&#32;</emphasis>codecvt_byname&lt;char32_t,&#32;char8_t,&#32;mbstate_t&gt;
+783 &#32;&#32;&#32;&#32;:&#32;<emphasis role="keyword">public</emphasis>&#32;codecvt&lt;char32_t,&#32;char8_t,&#32;mbstate_t&gt;
+784 &#32;&#32;&#32;&#32;{
+785 &#32;&#32;&#32;&#32;<emphasis role="keyword">public</emphasis>:
+786 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">explicit</emphasis>
+787 &#32;&#32;&#32;&#32;&#32;&#32;codecvt_byname(<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>*,&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;__refs&#32;=&#32;0)
+788 &#32;&#32;&#32;&#32;&#32;&#32;:&#32;codecvt&lt;char32_t,&#32;char8_t,&#32;mbstate_t&gt;(__refs)&#32;{&#32;}
+789 
+790 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">explicit</emphasis>
+791 &#32;&#32;&#32;&#32;&#32;&#32;codecvt_byname(<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">string</emphasis>&amp;&#32;__s,&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;__refs&#32;=&#32;0)
+792 &#32;&#32;&#32;&#32;&#32;&#32;:&#32;codecvt_byname(__s.c_str(),&#32;__refs)&#32;{&#32;}
+793 
+794 &#32;&#32;&#32;&#32;<emphasis role="keyword">protected</emphasis>:
+795 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">virtual</emphasis>
+796 &#32;&#32;&#32;&#32;&#32;&#32;~codecvt_byname()&#32;{&#32;}
+797 &#32;&#32;&#32;&#32;};
+798 <emphasis role="preprocessor">#endif</emphasis>
+799 
+800 <emphasis role="preprocessor">#endif&#32;</emphasis><emphasis role="comment">//&#32;C++11</emphasis>
+801 
+802 &#32;&#32;<emphasis role="comment">//&#32;Inhibit&#32;implicit&#32;instantiations&#32;for&#32;required&#32;instantiations,</emphasis>
+803 &#32;&#32;<emphasis role="comment">//&#32;which&#32;are&#32;defined&#32;via&#32;explicit&#32;instantiations&#32;elsewhere.</emphasis>
+804 <emphasis role="preprocessor">#if&#32;_GLIBCXX_EXTERN_TEMPLATE</emphasis>
+805 &#32;&#32;<emphasis role="keyword">extern</emphasis>&#32;<emphasis role="keyword">template</emphasis>&#32;<emphasis role="keyword">class&#32;</emphasis>codecvt_byname&lt;char,&#32;char,&#32;mbstate_t&gt;;
+806 
+807 &#32;&#32;<emphasis role="keyword">extern</emphasis>&#32;<emphasis role="keyword">template</emphasis>
+808 &#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;codecvt&lt;char,&#32;char,&#32;mbstate_t&gt;&amp;
+809 &#32;&#32;&#32;&#32;use_facet&lt;codecvt&lt;char,&#32;char,&#32;mbstate_t&gt;&#32;&gt;(<emphasis role="keyword">const</emphasis>&#32;locale&amp;);
+810 
+811 &#32;&#32;<emphasis role="keyword">extern</emphasis>&#32;<emphasis role="keyword">template</emphasis>
+812 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">bool</emphasis>
+813 &#32;&#32;&#32;&#32;has_facet&lt;codecvt&lt;char,&#32;char,&#32;mbstate_t&gt;&#32;&gt;(<emphasis role="keyword">const</emphasis>&#32;locale&amp;);
+814 
+815 <emphasis role="preprocessor">#ifdef&#32;_GLIBCXX_USE_WCHAR_T</emphasis>
+816 &#32;&#32;<emphasis role="keyword">extern</emphasis>&#32;<emphasis role="keyword">template</emphasis>&#32;<emphasis role="keyword">class&#32;</emphasis>codecvt_byname&lt;wchar_t,&#32;char,&#32;mbstate_t&gt;;
+817 
+818 &#32;&#32;<emphasis role="keyword">extern</emphasis>&#32;<emphasis role="keyword">template</emphasis>
+819 &#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;codecvt&lt;wchar_t,&#32;char,&#32;mbstate_t&gt;&amp;
+820 &#32;&#32;&#32;&#32;use_facet&lt;codecvt&lt;wchar_t,&#32;char,&#32;mbstate_t&gt;&#32;&gt;(<emphasis role="keyword">const</emphasis>&#32;locale&amp;);
+821 
+822 &#32;&#32;<emphasis role="keyword">extern</emphasis>&#32;<emphasis role="keyword">template</emphasis>
+823 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">bool</emphasis>
+824 &#32;&#32;&#32;&#32;has_facet&lt;codecvt&lt;wchar_t,&#32;char,&#32;mbstate_t&gt;&#32;&gt;(<emphasis role="keyword">const</emphasis>&#32;locale&amp;);
+825 <emphasis role="preprocessor">#endif</emphasis>
+826 
+827 <emphasis role="preprocessor">#if&#32;__cplusplus&#32;&gt;=&#32;201103L</emphasis>
+828 &#32;&#32;<emphasis role="keyword">extern</emphasis>&#32;<emphasis role="keyword">template</emphasis>&#32;<emphasis role="keyword">class&#32;</emphasis>codecvt_byname&lt;char16_t,&#32;char,&#32;mbstate_t&gt;;
+829 &#32;&#32;<emphasis role="keyword">extern</emphasis>&#32;<emphasis role="keyword">template</emphasis>&#32;<emphasis role="keyword">class&#32;</emphasis>codecvt_byname&lt;char32_t,&#32;char,&#32;mbstate_t&gt;;
+830 
+831 <emphasis role="preprocessor">#if&#32;defined(_GLIBCXX_USE_CHAR8_T)</emphasis>
+832 &#32;&#32;<emphasis role="keyword">extern</emphasis>&#32;<emphasis role="keyword">template</emphasis>&#32;<emphasis role="keyword">class&#32;</emphasis>codecvt_byname&lt;char16_t,&#32;char8_t,&#32;mbstate_t&gt;;
+833 &#32;&#32;<emphasis role="keyword">extern</emphasis>&#32;<emphasis role="keyword">template</emphasis>&#32;<emphasis role="keyword">class&#32;</emphasis>codecvt_byname&lt;char32_t,&#32;char8_t,&#32;mbstate_t&gt;;
+834 <emphasis role="preprocessor">#endif</emphasis>
+835 
+836 <emphasis role="preprocessor">#endif</emphasis>
+837 
+838 <emphasis role="preprocessor">#endif</emphasis>
+839 
+840 _GLIBCXX_END_NAMESPACE_VERSION
+841 }&#32;<emphasis role="comment">//&#32;namespace&#32;std</emphasis>
+842 
+843 <emphasis role="preprocessor">#endif&#32;</emphasis><emphasis role="comment">//&#32;_CODECVT_H</emphasis>
+</programlisting></section>

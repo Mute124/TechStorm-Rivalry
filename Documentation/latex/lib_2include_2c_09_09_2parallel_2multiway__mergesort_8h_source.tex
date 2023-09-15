@@ -1,0 +1,449 @@
+\doxysection{multiway\+\_\+mergesort.\+h}
+\hypertarget{lib_2include_2c_09_09_2parallel_2multiway__mergesort_8h_source}{}\label{lib_2include_2c_09_09_2parallel_2multiway__mergesort_8h_source}\index{C:/Users/HP/Documents/GitHub/Minero-\/Game/lib/include/c++/parallel/multiway\_mergesort.h@{C:/Users/HP/Documents/GitHub/Minero-\/Game/lib/include/c++/parallel/multiway\_mergesort.h}}
+\mbox{\hyperlink{lib_2include_2c_09_09_2parallel_2multiway__mergesort_8h}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{comment}{//\ -\/*-\/\ C++\ -\/*-\/}}
+\DoxyCodeLine{00002\ }
+\DoxyCodeLine{00003\ \textcolor{comment}{//\ Copyright\ (C)\ 2007-\/2022\ Free\ Software\ Foundation,\ Inc.}}
+\DoxyCodeLine{00004\ \textcolor{comment}{//}}
+\DoxyCodeLine{00005\ \textcolor{comment}{//\ This\ file\ is\ part\ of\ the\ GNU\ ISO\ C++\ Library.\ \ This\ library\ is\ free}}
+\DoxyCodeLine{00006\ \textcolor{comment}{//\ software;\ you\ can\ redistribute\ it\ and/or\ modify\ it\ under\ the\ terms}}
+\DoxyCodeLine{00007\ \textcolor{comment}{//\ of\ the\ GNU\ General\ Public\ License\ as\ published\ by\ the\ Free\ Software}}
+\DoxyCodeLine{00008\ \textcolor{comment}{//\ Foundation;\ either\ version\ 3,\ or\ (at\ your\ option)\ any\ later}}
+\DoxyCodeLine{00009\ \textcolor{comment}{//\ version.}}
+\DoxyCodeLine{00010\ }
+\DoxyCodeLine{00011\ \textcolor{comment}{//\ This\ library\ is\ distributed\ in\ the\ hope\ that\ it\ will\ be\ useful,\ but}}
+\DoxyCodeLine{00012\ \textcolor{comment}{//\ WITHOUT\ ANY\ WARRANTY;\ without\ even\ the\ implied\ warranty\ of}}
+\DoxyCodeLine{00013\ \textcolor{comment}{//\ MERCHANTABILITY\ or\ FITNESS\ FOR\ A\ PARTICULAR\ PURPOSE.\ \ See\ the\ GNU}}
+\DoxyCodeLine{00014\ \textcolor{comment}{//\ General\ Public\ License\ for\ more\ details.}}
+\DoxyCodeLine{00015\ }
+\DoxyCodeLine{00016\ \textcolor{comment}{//\ Under\ Section\ 7\ of\ GPL\ version\ 3,\ you\ are\ granted\ additional}}
+\DoxyCodeLine{00017\ \textcolor{comment}{//\ permissions\ described\ in\ the\ GCC\ Runtime\ Library\ Exception,\ version}}
+\DoxyCodeLine{00018\ \textcolor{comment}{//\ 3.1,\ as\ published\ by\ the\ Free\ Software\ Foundation.}}
+\DoxyCodeLine{00019\ }
+\DoxyCodeLine{00020\ \textcolor{comment}{//\ You\ should\ have\ received\ a\ copy\ of\ the\ GNU\ General\ Public\ License\ and}}
+\DoxyCodeLine{00021\ \textcolor{comment}{//\ a\ copy\ of\ the\ GCC\ Runtime\ Library\ Exception\ along\ with\ this\ program;}}
+\DoxyCodeLine{00022\ \textcolor{comment}{//\ see\ the\ files\ COPYING3\ and\ COPYING.RUNTIME\ respectively.\ \ If\ not,\ see}}
+\DoxyCodeLine{00023\ \textcolor{comment}{//\ <http://www.gnu.org/licenses/>.}}
+\DoxyCodeLine{00024\ }
+\DoxyCodeLine{00030\ \textcolor{comment}{//\ Written\ by\ Johannes\ Singler.}}
+\DoxyCodeLine{00031\ }
+\DoxyCodeLine{00032\ \textcolor{preprocessor}{\#ifndef\ \_GLIBCXX\_PARALLEL\_MULTIWAY\_MERGESORT\_H}}
+\DoxyCodeLine{00033\ \textcolor{preprocessor}{\#define\ \_GLIBCXX\_PARALLEL\_MULTIWAY\_MERGESORT\_H\ 1}}
+\DoxyCodeLine{00034\ }
+\DoxyCodeLine{00035\ \textcolor{preprocessor}{\#include\ <vector>}}
+\DoxyCodeLine{00036\ }
+\DoxyCodeLine{00037\ \textcolor{preprocessor}{\#include\ <parallel/basic\_iterator.h>}}
+\DoxyCodeLine{00038\ \textcolor{preprocessor}{\#include\ <bits/stl\_algo.h>}}
+\DoxyCodeLine{00039\ \textcolor{preprocessor}{\#include\ <parallel/parallel.h>}}
+\DoxyCodeLine{00040\ \textcolor{preprocessor}{\#include\ <parallel/multiway\_merge.h>}}
+\DoxyCodeLine{00041\ }
+\DoxyCodeLine{00042\ \textcolor{keyword}{namespace\ }\mbox{\hyperlink{namespace____gnu__parallel}{\_\_gnu\_parallel}}}
+\DoxyCodeLine{00043\ \{}
+\DoxyCodeLine{00045\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_DifferenceTp>}
+\DoxyCodeLine{00046\ \ \ \ \ \textcolor{keyword}{struct\ }\_Piece}
+\DoxyCodeLine{00047\ \ \ \ \ \{}
+\DoxyCodeLine{00048\ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ \_DifferenceTp\ \mbox{\hyperlink{struct____gnu__parallel_1_1___piece_a9f0c6c61a9a7533caef59976577b811b}{\_DifferenceType}};}
+\DoxyCodeLine{00049\ }
+\DoxyCodeLine{00051\ \ \ \ \ \ \ \mbox{\hyperlink{struct____gnu__parallel_1_1___piece_a9f0c6c61a9a7533caef59976577b811b}{\_DifferenceType}}\ \mbox{\hyperlink{struct____gnu__parallel_1_1___piece_a6f846c8afc04193f46d5a1a490bd3ee2}{\_M\_begin}};}
+\DoxyCodeLine{00052\ }
+\DoxyCodeLine{00054\ \ \ \ \ \ \ \mbox{\hyperlink{struct____gnu__parallel_1_1___piece_a9f0c6c61a9a7533caef59976577b811b}{\_DifferenceType}}\ \mbox{\hyperlink{struct____gnu__parallel_1_1___piece_ab0315ceba623516eccee17cd7650d705}{\_M\_end}};}
+\DoxyCodeLine{00055\ \ \ \ \ \};}
+\DoxyCodeLine{00056\ }
+\DoxyCodeLine{00060\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_RAIter>}
+\DoxyCodeLine{00061\ \ \ \ \ \textcolor{keyword}{struct\ }\mbox{\hyperlink{struct____gnu__parallel_1_1___p_m_w_m_s_sorting_data}{\_PMWMSSortingData}}}
+\DoxyCodeLine{00062\ \ \ \ \ \{}
+\DoxyCodeLine{00063\ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ std::iterator\_traits<\_RAIter>\ \mbox{\hyperlink{struct____gnu__parallel_1_1___p_m_w_m_s_sorting_data_a9bab30fb555c46b53bbd9adf9767a755}{\_TraitsType}};}
+\DoxyCodeLine{00064\ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ \textcolor{keyword}{typename}\ \_TraitsType::value\_type\ \mbox{\hyperlink{struct____gnu__parallel_1_1___p_m_w_m_s_sorting_data_a431c66184fd23ef25c443a7c6a2434a9}{\_ValueType}};}
+\DoxyCodeLine{00065\ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ \textcolor{keyword}{typename}\ \_TraitsType::difference\_type\ \mbox{\hyperlink{struct____gnu__parallel_1_1___p_m_w_m_s_sorting_data_abb95588a57381fb47c7c2f00ced785de}{\_DifferenceType}};}
+\DoxyCodeLine{00066\ }
+\DoxyCodeLine{00068\ \ \ \ \ \ \ \mbox{\hyperlink{namespace____gnu__parallel_a05e502e51bfc3233671730f74a44dc6a}{\_ThreadIndex}}\ \mbox{\hyperlink{struct____gnu__parallel_1_1___p_m_w_m_s_sorting_data_a96502c73cd4bc2be361ec19eb3ff4927}{\_M\_num\_threads}};}
+\DoxyCodeLine{00069\ }
+\DoxyCodeLine{00071\ \ \ \ \ \ \ \_RAIter\ \mbox{\hyperlink{struct____gnu__parallel_1_1___p_m_w_m_s_sorting_data_a3a63332260c5462d462764091a404a49}{\_M\_source}};}
+\DoxyCodeLine{00072\ }
+\DoxyCodeLine{00074\ \ \ \ \ \ \ \mbox{\hyperlink{struct____gnu__parallel_1_1___p_m_w_m_s_sorting_data_abb95588a57381fb47c7c2f00ced785de}{\_DifferenceType}}*\ \mbox{\hyperlink{struct____gnu__parallel_1_1___p_m_w_m_s_sorting_data_a476ce96783723d9b5883a8db45a70300}{\_M\_starts}};}
+\DoxyCodeLine{00075\ }
+\DoxyCodeLine{00077\ \ \ \ \ \ \ \mbox{\hyperlink{struct____gnu__parallel_1_1___p_m_w_m_s_sorting_data_a431c66184fd23ef25c443a7c6a2434a9}{\_ValueType}}**\ \mbox{\hyperlink{struct____gnu__parallel_1_1___p_m_w_m_s_sorting_data_a1495689aa558582a087448226673380b}{\_M\_temporary}};}
+\DoxyCodeLine{00078\ }
+\DoxyCodeLine{00080\ \ \ \ \ \ \ \mbox{\hyperlink{struct____gnu__parallel_1_1___p_m_w_m_s_sorting_data_a431c66184fd23ef25c443a7c6a2434a9}{\_ValueType}}*\ \mbox{\hyperlink{struct____gnu__parallel_1_1___p_m_w_m_s_sorting_data_afc20a62b7e96102e3ad7013587b76539}{\_M\_samples}};}
+\DoxyCodeLine{00081\ }
+\DoxyCodeLine{00083\ \ \ \ \ \ \ \mbox{\hyperlink{struct____gnu__parallel_1_1___p_m_w_m_s_sorting_data_abb95588a57381fb47c7c2f00ced785de}{\_DifferenceType}}*\ \mbox{\hyperlink{struct____gnu__parallel_1_1___p_m_w_m_s_sorting_data_a905263695d4a6934445659c285e187a6}{\_M\_offsets}};}
+\DoxyCodeLine{00084\ }
+\DoxyCodeLine{00086\ \ \ \ \ \ \ std::vector<\_Piece<\_DifferenceType>\ >*\ \mbox{\hyperlink{struct____gnu__parallel_1_1___p_m_w_m_s_sorting_data_ad1e0c6fa5bf53d9291385a9865a5a77d}{\_M\_pieces}};}
+\DoxyCodeLine{00087\ \ \ \};}
+\DoxyCodeLine{00088\ }
+\DoxyCodeLine{00095\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_RAIter,\ \textcolor{keyword}{typename}\ \_DifferenceTp>}
+\DoxyCodeLine{00096\ \ \ \ \ \textcolor{keywordtype}{void}}
+\DoxyCodeLine{00097\ \ \ \ \ \mbox{\hyperlink{namespace____gnu__parallel_a56184d12b3d8f441fc14150b15a091c7}{\_\_determine\_samples}}(\mbox{\hyperlink{struct____gnu__parallel_1_1___p_m_w_m_s_sorting_data}{\_PMWMSSortingData<\_RAIter>}}*\ \_\_sd,}
+\DoxyCodeLine{00098\ \ \ \ \ \ \ \ \ \ \ \ \ \_DifferenceTp\ \_\_num\_samples)}
+\DoxyCodeLine{00099\ \ \ \ \ \{}
+\DoxyCodeLine{00100\ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ std::iterator\_traits<\_RAIter>\ \_TraitsType;}
+\DoxyCodeLine{00101\ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ \textcolor{keyword}{typename}\ \_TraitsType::value\_type\ \_ValueType;}
+\DoxyCodeLine{00102\ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ \_DifferenceTp\ \_DifferenceType;}
+\DoxyCodeLine{00103\ }
+\DoxyCodeLine{00104\ \ \ \ \ \ \ \mbox{\hyperlink{namespace____gnu__parallel_a05e502e51bfc3233671730f74a44dc6a}{\_ThreadIndex}}\ \_\_iam\ =\ \mbox{\hyperlink{_classes_2lib_2include_2omp_8h_aa03cf372d8266eef024262a68d304e1b}{omp\_get\_thread\_num}}();}
+\DoxyCodeLine{00105\ }
+\DoxyCodeLine{00106\ \ \ \ \ \ \ \_DifferenceType*\ \_\_es\ =\ \textcolor{keyword}{new}\ \_DifferenceType[\_\_num\_samples\ +\ 2];}
+\DoxyCodeLine{00107\ }
+\DoxyCodeLine{00108\ \ \ \ \ \ \ \mbox{\hyperlink{namespace____gnu__parallel_ac799255921e70b0378d145924d673f9c}{\_\_equally\_split}}(\_\_sd-\/>\mbox{\hyperlink{struct____gnu__parallel_1_1___p_m_w_m_s_sorting_data_a476ce96783723d9b5883a8db45a70300}{\_M\_starts}}[\_\_iam\ +\ 1]\ -\/\ \_\_sd-\/>\mbox{\hyperlink{struct____gnu__parallel_1_1___p_m_w_m_s_sorting_data_a476ce96783723d9b5883a8db45a70300}{\_M\_starts}}[\_\_iam],\ }
+\DoxyCodeLine{00109\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_\_num\_samples\ +\ 1,\ \_\_es);}
+\DoxyCodeLine{00110\ }
+\DoxyCodeLine{00111\ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\_DifferenceType\ \_\_i\ =\ 0;\ \_\_i\ <\ \_\_num\_samples;\ ++\_\_i)}
+\DoxyCodeLine{00112\ \ \ \ \ ::new(\&(\_\_sd-\/>\mbox{\hyperlink{struct____gnu__parallel_1_1___p_m_w_m_s_sorting_data_afc20a62b7e96102e3ad7013587b76539}{\_M\_samples}}[\_\_iam\ *\ \_\_num\_samples\ +\ \_\_i]))}
+\DoxyCodeLine{00113\ \ \ \ \ \ \ \ \ \_ValueType(\_\_sd-\/>\mbox{\hyperlink{struct____gnu__parallel_1_1___p_m_w_m_s_sorting_data_a3a63332260c5462d462764091a404a49}{\_M\_source}}[\_\_sd-\/>\mbox{\hyperlink{struct____gnu__parallel_1_1___p_m_w_m_s_sorting_data_a476ce96783723d9b5883a8db45a70300}{\_M\_starts}}[\_\_iam]}
+\DoxyCodeLine{00114\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ +\ \_\_es[\_\_i\ +\ 1]]);}
+\DoxyCodeLine{00115\ }
+\DoxyCodeLine{00116\ \ \ \ \ \ \ \textcolor{keyword}{delete}[]\ \_\_es;}
+\DoxyCodeLine{00117\ \ \ \ \ \}}
+\DoxyCodeLine{00118\ }
+\DoxyCodeLine{00120\ \ \ \textcolor{keyword}{template}<\textcolor{keywordtype}{bool}\ \_\_exact,\ \textcolor{keyword}{typename}\ \_RAIter,}
+\DoxyCodeLine{00121\ \ \ \ \ \ \ \ \textcolor{keyword}{typename}\ \_Compare,\ \textcolor{keyword}{typename}\ \_SortingPlacesIterator>}
+\DoxyCodeLine{00122\ \ \ \ \ \textcolor{keyword}{struct\ }\_SplitConsistently}
+\DoxyCodeLine{00123\ \ \ \ \ \{\ \};}
+\DoxyCodeLine{00124\ }
+\DoxyCodeLine{00126\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_RAIter,\ \textcolor{keyword}{typename}\ \_Compare,}
+\DoxyCodeLine{00127\ \ \ \ \ \ \ \ \textcolor{keyword}{typename}\ \_SortingPlacesIterator>}
+\DoxyCodeLine{00128\ \ \ \ \ \textcolor{keyword}{struct\ }\_SplitConsistently<\mbox{\hyperlink{_classes_2lib_2include_2stdbool_8h_a41f9c5fb8b08eb5dc3edce4dcb37fee7}{true}},\ \_RAIter,\ \_Compare,\ \_SortingPlacesIterator>}
+\DoxyCodeLine{00129\ \ \ \ \ \{}
+\DoxyCodeLine{00130\ \ \ \ \ \ \ \textcolor{keywordtype}{void}}
+\DoxyCodeLine{00131\ \ \ \ \ \ \ \mbox{\hyperlink{struct____gnu__parallel_1_1___split_consistently_3_01true_00_01___r_a_iter_00_01___compare_00_01___sorting_places_iterator_01_4_ac4ff1ecd7f975541e8eb6135f922bacd}{operator()}}(\textcolor{keyword}{const}\ \mbox{\hyperlink{namespace____gnu__parallel_a05e502e51bfc3233671730f74a44dc6a}{\_ThreadIndex}}\ \_\_iam,}
+\DoxyCodeLine{00132\ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{struct____gnu__parallel_1_1___p_m_w_m_s_sorting_data}{\_PMWMSSortingData<\_RAIter>}}*\ \_\_sd,}
+\DoxyCodeLine{00133\ \ \ \ \ \ \ \ \ \ \_Compare\&\ \_\_comp,}
+\DoxyCodeLine{00134\ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \textcolor{keyword}{typename}}
+\DoxyCodeLine{00135\ \ \ \ \ \ \ \ \ \ std::iterator\_traits<\_RAIter>::difference\_type}
+\DoxyCodeLine{00136\ \ \ \ \ \ \ \ \ \ \_\_num\_samples)\textcolor{keyword}{\ const}}
+\DoxyCodeLine{00137\ \textcolor{keyword}{\ \ \ \ \ \ }\{}
+\DoxyCodeLine{00138\ \textcolor{preprocessor}{\#\ \ \ \ \ \ \ pragma\ omp\ barrier}}
+\DoxyCodeLine{00139\ }
+\DoxyCodeLine{00140\ \ \ \ \ std::vector<std::pair<\_SortingPlacesIterator,}
+\DoxyCodeLine{00141\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_SortingPlacesIterator>\ >}
+\DoxyCodeLine{00142\ \ \ \ \ \ \ \_\_seqs(\_\_sd-\/>\mbox{\hyperlink{struct____gnu__parallel_1_1___p_m_w_m_s_sorting_data_a96502c73cd4bc2be361ec19eb3ff4927}{\_M\_num\_threads}});}
+\DoxyCodeLine{00143\ \ \ \ \ \textcolor{keywordflow}{for}\ (\mbox{\hyperlink{namespace____gnu__parallel_a05e502e51bfc3233671730f74a44dc6a}{\_ThreadIndex}}\ \_\_s\ =\ 0;\ \_\_s\ <\ \_\_sd-\/>\mbox{\hyperlink{struct____gnu__parallel_1_1___p_m_w_m_s_sorting_data_a96502c73cd4bc2be361ec19eb3ff4927}{\_M\_num\_threads}};\ \_\_s++)}
+\DoxyCodeLine{00144\ \ \ \ \ \ \ \_\_seqs[\_\_s]\ =\ std::make\_pair(\_\_sd-\/>\mbox{\hyperlink{struct____gnu__parallel_1_1___p_m_w_m_s_sorting_data_a1495689aa558582a087448226673380b}{\_M\_temporary}}[\_\_s],}
+\DoxyCodeLine{00145\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_\_sd-\/>\mbox{\hyperlink{struct____gnu__parallel_1_1___p_m_w_m_s_sorting_data_a1495689aa558582a087448226673380b}{\_M\_temporary}}[\_\_s]}
+\DoxyCodeLine{00146\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ +\ (\_\_sd-\/>\mbox{\hyperlink{struct____gnu__parallel_1_1___p_m_w_m_s_sorting_data_a476ce96783723d9b5883a8db45a70300}{\_M\_starts}}[\_\_s\ +\ 1]}
+\DoxyCodeLine{00147\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ -\/\ \_\_sd-\/>\mbox{\hyperlink{struct____gnu__parallel_1_1___p_m_w_m_s_sorting_data_a476ce96783723d9b5883a8db45a70300}{\_M\_starts}}[\_\_s]));}
+\DoxyCodeLine{00148\ }
+\DoxyCodeLine{00149\ \ \ \ \ std::vector<\_SortingPlacesIterator>\ \_\_offsets(\_\_sd-\/>\mbox{\hyperlink{struct____gnu__parallel_1_1___p_m_w_m_s_sorting_data_a96502c73cd4bc2be361ec19eb3ff4927}{\_M\_num\_threads}});}
+\DoxyCodeLine{00150\ }
+\DoxyCodeLine{00151\ \ \ \ \ \textcolor{comment}{//\ if\ not\ last\ thread}}
+\DoxyCodeLine{00152\ \ \ \ \ \textcolor{keywordflow}{if}\ (\_\_iam\ <\ \_\_sd-\/>\_M\_num\_threads\ -\/\ 1)}
+\DoxyCodeLine{00153\ \ \ \ \ \ \ \mbox{\hyperlink{namespace____gnu__parallel_ade1f4c5da0794c4f1a09465d4aee6c1d}{multiseq\_partition}}(\_\_seqs.begin(),\ \_\_seqs.end(),}
+\DoxyCodeLine{00154\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_\_sd-\/>\mbox{\hyperlink{struct____gnu__parallel_1_1___p_m_w_m_s_sorting_data_a476ce96783723d9b5883a8db45a70300}{\_M\_starts}}[\_\_iam\ +\ 1],\ \_\_offsets.begin(),}
+\DoxyCodeLine{00155\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_\_comp);}
+\DoxyCodeLine{00156\ }
+\DoxyCodeLine{00157\ \ \ \ \ \textcolor{keywordflow}{for}\ (\mbox{\hyperlink{namespace____gnu__parallel_a05e502e51bfc3233671730f74a44dc6a}{\_ThreadIndex}}\ \_\_seq\ =\ 0;\ \_\_seq\ <\ \_\_sd-\/>\mbox{\hyperlink{struct____gnu__parallel_1_1___p_m_w_m_s_sorting_data_a96502c73cd4bc2be361ec19eb3ff4927}{\_M\_num\_threads}};\ \_\_seq++)}
+\DoxyCodeLine{00158\ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00159\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ for\ each\ sequence}}
+\DoxyCodeLine{00160\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\_\_iam\ <\ (\_\_sd-\/>\mbox{\hyperlink{struct____gnu__parallel_1_1___p_m_w_m_s_sorting_data_a96502c73cd4bc2be361ec19eb3ff4927}{\_M\_num\_threads}}\ -\/\ 1))}
+\DoxyCodeLine{00161\ \ \ \ \ \ \ \ \ \ \ \_\_sd-\/>\mbox{\hyperlink{struct____gnu__parallel_1_1___p_m_w_m_s_sorting_data_ad1e0c6fa5bf53d9291385a9865a5a77d}{\_M\_pieces}}[\_\_iam][\_\_seq].\_M\_end}
+\DoxyCodeLine{00162\ \ \ \ \ \ \ \ \ =\ \_\_offsets[\_\_seq]\ -\/\ \_\_seqs[\_\_seq].first;}
+\DoxyCodeLine{00163\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{00164\ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ very\ end\ of\ this\ sequence}}
+\DoxyCodeLine{00165\ \ \ \ \ \ \ \ \ \ \ \_\_sd-\/>\mbox{\hyperlink{struct____gnu__parallel_1_1___p_m_w_m_s_sorting_data_ad1e0c6fa5bf53d9291385a9865a5a77d}{\_M\_pieces}}[\_\_iam][\_\_seq].\_M\_end\ =}
+\DoxyCodeLine{00166\ \ \ \ \ \ \ \ \ \_\_sd-\/>\mbox{\hyperlink{struct____gnu__parallel_1_1___p_m_w_m_s_sorting_data_a476ce96783723d9b5883a8db45a70300}{\_M\_starts}}[\_\_seq\ +\ 1]\ -\/\ \_\_sd-\/>\mbox{\hyperlink{struct____gnu__parallel_1_1___p_m_w_m_s_sorting_data_a476ce96783723d9b5883a8db45a70300}{\_M\_starts}}[\_\_seq];}
+\DoxyCodeLine{00167\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00168\ }
+\DoxyCodeLine{00169\ \textcolor{preprocessor}{\#\ \ \ \ \ \ \ pragma\ omp\ barrier}}
+\DoxyCodeLine{00170\ }
+\DoxyCodeLine{00171\ \ \ \ \ \textcolor{keywordflow}{for}\ (\mbox{\hyperlink{namespace____gnu__parallel_a05e502e51bfc3233671730f74a44dc6a}{\_ThreadIndex}}\ \_\_seq\ =\ 0;\ \_\_seq\ <\ \_\_sd-\/>\mbox{\hyperlink{struct____gnu__parallel_1_1___p_m_w_m_s_sorting_data_a96502c73cd4bc2be361ec19eb3ff4927}{\_M\_num\_threads}};\ \_\_seq++)}
+\DoxyCodeLine{00172\ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00173\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ For\ each\ sequence.}}
+\DoxyCodeLine{00174\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\_\_iam\ >\ 0)}
+\DoxyCodeLine{00175\ \ \ \ \ \ \ \ \ \ \ \_\_sd-\/>\mbox{\hyperlink{struct____gnu__parallel_1_1___p_m_w_m_s_sorting_data_ad1e0c6fa5bf53d9291385a9865a5a77d}{\_M\_pieces}}[\_\_iam][\_\_seq].\_M\_begin\ =}
+\DoxyCodeLine{00176\ \ \ \ \ \ \ \ \ \_\_sd-\/>\mbox{\hyperlink{struct____gnu__parallel_1_1___p_m_w_m_s_sorting_data_ad1e0c6fa5bf53d9291385a9865a5a77d}{\_M\_pieces}}[\_\_iam\ -\/\ 1][\_\_seq].\_M\_end;}
+\DoxyCodeLine{00177\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{00178\ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ Absolute\ beginning.}}
+\DoxyCodeLine{00179\ \ \ \ \ \ \ \ \ \ \ \_\_sd-\/>\mbox{\hyperlink{struct____gnu__parallel_1_1___p_m_w_m_s_sorting_data_ad1e0c6fa5bf53d9291385a9865a5a77d}{\_M\_pieces}}[\_\_iam][\_\_seq].\_M\_begin\ =\ 0;}
+\DoxyCodeLine{00180\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00181\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00182\ \ \ \};}
+\DoxyCodeLine{00183\ }
+\DoxyCodeLine{00185\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_RAIter,\ \textcolor{keyword}{typename}\ \_Compare,}
+\DoxyCodeLine{00186\ \ \ \ \ \ \ \ \textcolor{keyword}{typename}\ \_SortingPlacesIterator>}
+\DoxyCodeLine{00187\ \ \ \ \ \textcolor{keyword}{struct\ }\_SplitConsistently<\mbox{\hyperlink{_classes_2lib_2include_2stdbool_8h_a65e9886d74aaee76545e83dd09011727}{false}},\ \_RAIter,\ \_Compare,\ \_SortingPlacesIterator>}
+\DoxyCodeLine{00188\ \ \ \ \ \{}
+\DoxyCodeLine{00189\ \ \ \ \ \ \ \textcolor{keywordtype}{void}}
+\DoxyCodeLine{00190\ \ \ \ \ \ \ \mbox{\hyperlink{struct____gnu__parallel_1_1___split_consistently_3_01false_00_01___r_a_iter_00_01___compare_00_02e8a2baf2019ec7bfe13dbc6d2774065_a9bce2d3f03bdc60e1de14c2b79544a32}{operator()}}(\textcolor{keyword}{const}\ \mbox{\hyperlink{namespace____gnu__parallel_a05e502e51bfc3233671730f74a44dc6a}{\_ThreadIndex}}\ \_\_iam,}
+\DoxyCodeLine{00191\ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{struct____gnu__parallel_1_1___p_m_w_m_s_sorting_data}{\_PMWMSSortingData<\_RAIter>}}*\ \_\_sd,}
+\DoxyCodeLine{00192\ \ \ \ \ \ \ \ \ \ \_Compare\&\ \_\_comp,}
+\DoxyCodeLine{00193\ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \textcolor{keyword}{typename}}
+\DoxyCodeLine{00194\ \ \ \ \ \ \ \ \ \ std::iterator\_traits<\_RAIter>::difference\_type}
+\DoxyCodeLine{00195\ \ \ \ \ \ \ \ \ \ \_\_num\_samples)\textcolor{keyword}{\ const}}
+\DoxyCodeLine{00196\ \textcolor{keyword}{\ \ \ \ \ \ }\{}
+\DoxyCodeLine{00197\ \ \ \ \ \textcolor{keyword}{typedef}\ std::iterator\_traits<\_RAIter>\ \_TraitsType;}
+\DoxyCodeLine{00198\ \ \ \ \ \textcolor{keyword}{typedef}\ \textcolor{keyword}{typename}\ \_TraitsType::value\_type\ \_ValueType;}
+\DoxyCodeLine{00199\ \ \ \ \ \textcolor{keyword}{typedef}\ \textcolor{keyword}{typename}\ \_TraitsType::difference\_type\ \_DifferenceType;}
+\DoxyCodeLine{00200\ }
+\DoxyCodeLine{00201\ \ \ \ \ \mbox{\hyperlink{namespace____gnu__parallel_a56184d12b3d8f441fc14150b15a091c7}{\_\_determine\_samples}}(\_\_sd,\ \_\_num\_samples);}
+\DoxyCodeLine{00202\ }
+\DoxyCodeLine{00203\ \textcolor{preprocessor}{\#\ \ \ \ \ \ \ pragma\ omp\ barrier}}
+\DoxyCodeLine{00204\ }
+\DoxyCodeLine{00205\ \textcolor{preprocessor}{\#\ \ \ \ \ \ \ pragma\ omp\ single}}
+\DoxyCodeLine{00206\ \ \ \ \ \mbox{\hyperlink{namespacestd_a73a397864aa701b5bd48fae555f4f935}{\_\_gnu\_sequential::sort}}(\_\_sd-\/>\mbox{\hyperlink{struct____gnu__parallel_1_1___p_m_w_m_s_sorting_data_afc20a62b7e96102e3ad7013587b76539}{\_M\_samples}},}
+\DoxyCodeLine{00207\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_\_sd-\/>\mbox{\hyperlink{struct____gnu__parallel_1_1___p_m_w_m_s_sorting_data_afc20a62b7e96102e3ad7013587b76539}{\_M\_samples}}}
+\DoxyCodeLine{00208\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ +\ (\_\_num\_samples\ *\ \_\_sd-\/>\mbox{\hyperlink{struct____gnu__parallel_1_1___p_m_w_m_s_sorting_data_a96502c73cd4bc2be361ec19eb3ff4927}{\_M\_num\_threads}}),}
+\DoxyCodeLine{00209\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_\_comp);}
+\DoxyCodeLine{00210\ }
+\DoxyCodeLine{00211\ \textcolor{preprocessor}{\#\ \ \ \ \ \ \ pragma\ omp\ barrier}}
+\DoxyCodeLine{00212\ }
+\DoxyCodeLine{00213\ \ \ \ \ \textcolor{keywordflow}{for}\ (\mbox{\hyperlink{namespace____gnu__parallel_a05e502e51bfc3233671730f74a44dc6a}{\_ThreadIndex}}\ \_\_s\ =\ 0;\ \_\_s\ <\ \_\_sd-\/>\mbox{\hyperlink{struct____gnu__parallel_1_1___p_m_w_m_s_sorting_data_a96502c73cd4bc2be361ec19eb3ff4927}{\_M\_num\_threads}};\ ++\_\_s)}
+\DoxyCodeLine{00214\ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00215\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ For\ each\ sequence.}}
+\DoxyCodeLine{00216\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\_\_num\_samples\ *\ \_\_iam\ >\ 0)}
+\DoxyCodeLine{00217\ \ \ \ \ \ \ \ \ \ \ \_\_sd-\/>\mbox{\hyperlink{struct____gnu__parallel_1_1___p_m_w_m_s_sorting_data_ad1e0c6fa5bf53d9291385a9865a5a77d}{\_M\_pieces}}[\_\_iam][\_\_s].\_M\_begin\ =}
+\DoxyCodeLine{00218\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::lower\_bound(\_\_sd-\/>\mbox{\hyperlink{struct____gnu__parallel_1_1___p_m_w_m_s_sorting_data_a1495689aa558582a087448226673380b}{\_M\_temporary}}[\_\_s],}
+\DoxyCodeLine{00219\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_\_sd-\/>\mbox{\hyperlink{struct____gnu__parallel_1_1___p_m_w_m_s_sorting_data_a1495689aa558582a087448226673380b}{\_M\_temporary}}[\_\_s]}
+\DoxyCodeLine{00220\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ +\ (\_\_sd-\/>\mbox{\hyperlink{struct____gnu__parallel_1_1___p_m_w_m_s_sorting_data_a476ce96783723d9b5883a8db45a70300}{\_M\_starts}}[\_\_s\ +\ 1]}
+\DoxyCodeLine{00221\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ -\/\ \_\_sd-\/>\mbox{\hyperlink{struct____gnu__parallel_1_1___p_m_w_m_s_sorting_data_a476ce96783723d9b5883a8db45a70300}{\_M\_starts}}[\_\_s]),}
+\DoxyCodeLine{00222\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_\_sd-\/>\mbox{\hyperlink{struct____gnu__parallel_1_1___p_m_w_m_s_sorting_data_afc20a62b7e96102e3ad7013587b76539}{\_M\_samples}}[\_\_num\_samples\ *\ \_\_iam],}
+\DoxyCodeLine{00223\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_\_comp)}
+\DoxyCodeLine{00224\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ -\/\ \_\_sd-\/>\mbox{\hyperlink{struct____gnu__parallel_1_1___p_m_w_m_s_sorting_data_a1495689aa558582a087448226673380b}{\_M\_temporary}}[\_\_s];}
+\DoxyCodeLine{00225\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{00226\ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ Absolute\ beginning.}}
+\DoxyCodeLine{00227\ \ \ \ \ \ \ \ \ \ \ \_\_sd-\/>\mbox{\hyperlink{struct____gnu__parallel_1_1___p_m_w_m_s_sorting_data_ad1e0c6fa5bf53d9291385a9865a5a77d}{\_M\_pieces}}[\_\_iam][\_\_s].\_M\_begin\ =\ 0;}
+\DoxyCodeLine{00228\ }
+\DoxyCodeLine{00229\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ ((\_\_num\_samples\ *\ (\_\_iam\ +\ 1))\ <}
+\DoxyCodeLine{00230\ \ \ \ \ \ \ \ \ (\_\_num\_samples\ *\ \_\_sd-\/>\mbox{\hyperlink{struct____gnu__parallel_1_1___p_m_w_m_s_sorting_data_a96502c73cd4bc2be361ec19eb3ff4927}{\_M\_num\_threads}}))}
+\DoxyCodeLine{00231\ \ \ \ \ \ \ \ \ \ \ \_\_sd-\/>\mbox{\hyperlink{struct____gnu__parallel_1_1___p_m_w_m_s_sorting_data_ad1e0c6fa5bf53d9291385a9865a5a77d}{\_M\_pieces}}[\_\_iam][\_\_s].\_M\_end\ =}
+\DoxyCodeLine{00232\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::lower\_bound(\_\_sd-\/>\mbox{\hyperlink{struct____gnu__parallel_1_1___p_m_w_m_s_sorting_data_a1495689aa558582a087448226673380b}{\_M\_temporary}}[\_\_s],}
+\DoxyCodeLine{00233\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_\_sd-\/>\mbox{\hyperlink{struct____gnu__parallel_1_1___p_m_w_m_s_sorting_data_a1495689aa558582a087448226673380b}{\_M\_temporary}}[\_\_s]}
+\DoxyCodeLine{00234\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ +\ (\_\_sd-\/>\mbox{\hyperlink{struct____gnu__parallel_1_1___p_m_w_m_s_sorting_data_a476ce96783723d9b5883a8db45a70300}{\_M\_starts}}[\_\_s\ +\ 1]}
+\DoxyCodeLine{00235\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ -\/\ \_\_sd-\/>\mbox{\hyperlink{struct____gnu__parallel_1_1___p_m_w_m_s_sorting_data_a476ce96783723d9b5883a8db45a70300}{\_M\_starts}}[\_\_s]),}
+\DoxyCodeLine{00236\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_\_sd-\/>\mbox{\hyperlink{struct____gnu__parallel_1_1___p_m_w_m_s_sorting_data_afc20a62b7e96102e3ad7013587b76539}{\_M\_samples}}[\_\_num\_samples\ *\ (\_\_iam\ +\ 1)],}
+\DoxyCodeLine{00237\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_\_comp)}
+\DoxyCodeLine{00238\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ -\/\ \_\_sd-\/>\mbox{\hyperlink{struct____gnu__parallel_1_1___p_m_w_m_s_sorting_data_a1495689aa558582a087448226673380b}{\_M\_temporary}}[\_\_s];}
+\DoxyCodeLine{00239\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{00240\ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ Absolute\ end.}}
+\DoxyCodeLine{00241\ \ \ \ \ \ \ \ \ \ \ \_\_sd-\/>\mbox{\hyperlink{struct____gnu__parallel_1_1___p_m_w_m_s_sorting_data_ad1e0c6fa5bf53d9291385a9865a5a77d}{\_M\_pieces}}[\_\_iam][\_\_s].\_M\_end\ =\ (\_\_sd-\/>\mbox{\hyperlink{struct____gnu__parallel_1_1___p_m_w_m_s_sorting_data_a476ce96783723d9b5883a8db45a70300}{\_M\_starts}}[\_\_s\ +\ 1]}
+\DoxyCodeLine{00242\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ -\/\ \_\_sd-\/>\mbox{\hyperlink{struct____gnu__parallel_1_1___p_m_w_m_s_sorting_data_a476ce96783723d9b5883a8db45a70300}{\_M\_starts}}[\_\_s]);}
+\DoxyCodeLine{00243\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00244\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00245\ \ \ \};}
+\DoxyCodeLine{00246\ \ \ }
+\DoxyCodeLine{00247\ \ \ \textcolor{keyword}{template}<\textcolor{keywordtype}{bool}\ \_\_stable,\ \textcolor{keyword}{typename}\ \_RAIter,\ \textcolor{keyword}{typename}\ \_Compare>}
+\DoxyCodeLine{00248\ \ \ \ \ \textcolor{keyword}{struct\ }\_\_possibly\_stable\_sort}
+\DoxyCodeLine{00249\ \ \ \ \ \{\ \};}
+\DoxyCodeLine{00250\ }
+\DoxyCodeLine{00251\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_RAIter,\ \textcolor{keyword}{typename}\ \_Compare>}
+\DoxyCodeLine{00252\ \ \ \ \ \textcolor{keyword}{struct\ }\_\_possibly\_stable\_sort<\mbox{\hyperlink{_classes_2lib_2include_2stdbool_8h_a41f9c5fb8b08eb5dc3edce4dcb37fee7}{true}},\ \_RAIter,\ \_Compare>}
+\DoxyCodeLine{00253\ \ \ \ \ \{}
+\DoxyCodeLine{00254\ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{struct____gnu__parallel_1_1____possibly__stable__sort_3_01true_00_01___r_a_iter_00_01___compare_01_4_ab21dd43fd2180bea33a7d262a4ccf2e6}{operator()}}(\textcolor{keyword}{const}\ \_RAIter\&\ \_\_begin,}
+\DoxyCodeLine{00255\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \_RAIter\&\ \_\_end,\ \_Compare\&\ \_\_comp)\textcolor{keyword}{\ const}}
+\DoxyCodeLine{00256\ \textcolor{keyword}{\ \ \ \ \ \ }\{\ \mbox{\hyperlink{namespacestd_ac4ae475114c7f06297db807234405f8a}{\_\_gnu\_sequential::stable\_sort}}(\_\_begin,\ \_\_end,\ \_\_comp);\ \}}
+\DoxyCodeLine{00257\ \ \ \ \ \};}
+\DoxyCodeLine{00258\ }
+\DoxyCodeLine{00259\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_RAIter,\ \textcolor{keyword}{typename}\ \_Compare>}
+\DoxyCodeLine{00260\ \ \ \ \ \textcolor{keyword}{struct\ }\_\_possibly\_stable\_sort<\mbox{\hyperlink{_classes_2lib_2include_2stdbool_8h_a65e9886d74aaee76545e83dd09011727}{false}},\ \_RAIter,\ \_Compare>}
+\DoxyCodeLine{00261\ \ \ \ \ \{}
+\DoxyCodeLine{00262\ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{struct____gnu__parallel_1_1____possibly__stable__sort_3_01false_00_01___r_a_iter_00_01___compare_01_4_ac5c180e0fedda5af0385ab97ebd75d1c}{operator()}}(\textcolor{keyword}{const}\ \_RAIter\ \_\_begin,}
+\DoxyCodeLine{00263\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \_RAIter\ \_\_end,\ \_Compare\&\ \_\_comp)\textcolor{keyword}{\ const}}
+\DoxyCodeLine{00264\ \textcolor{keyword}{\ \ \ \ \ \ }\{\ \mbox{\hyperlink{namespacestd_a73a397864aa701b5bd48fae555f4f935}{\_\_gnu\_sequential::sort}}(\_\_begin,\ \_\_end,\ \_\_comp);\ \}}
+\DoxyCodeLine{00265\ \ \ \ \ \};}
+\DoxyCodeLine{00266\ }
+\DoxyCodeLine{00267\ \ \ \textcolor{keyword}{template}<\textcolor{keywordtype}{bool}\ \_\_stable,\ \textcolor{keyword}{typename}\ \_Seq\_RAIter,}
+\DoxyCodeLine{00268\ \ \ \ \ \ \ \ \textcolor{keyword}{typename}\ \_RAIter,\ \textcolor{keyword}{typename}\ \_Compare,}
+\DoxyCodeLine{00269\ \ \ \ \ \ \ \ \textcolor{keyword}{typename}\ \_DiffType>}
+\DoxyCodeLine{00270\ \ \ \ \ \textcolor{keyword}{struct\ }\_\_possibly\_stable\_multiway\_merge}
+\DoxyCodeLine{00271\ \ \ \ \ \{\ \};}
+\DoxyCodeLine{00272\ }
+\DoxyCodeLine{00273\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Seq\_RAIter,\ \textcolor{keyword}{typename}\ \_RAIter,}
+\DoxyCodeLine{00274\ \ \ \ \ \ \ \ \textcolor{keyword}{typename}\ \_Compare,\ \textcolor{keyword}{typename}\ \_DiffType>}
+\DoxyCodeLine{00275\ \ \ \ \ \textcolor{keyword}{struct\ }\_\_possibly\_stable\_multiway\_merge<\mbox{\hyperlink{_classes_2lib_2include_2stdbool_8h_a41f9c5fb8b08eb5dc3edce4dcb37fee7}{true}},\ \_Seq\_RAIter,}
+\DoxyCodeLine{00276\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_RAIter,\ \_Compare,\ \_DiffType>}
+\DoxyCodeLine{00277\ \ \ \ \ \{}
+\DoxyCodeLine{00278\ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{struct____gnu__parallel_1_1____possibly__stable__multiway__merge_3_01true_00_01___seq___r_a_iter2ecdcf729effea6ea63a4538fbabf431_a962d987934439281004114a414348ed1}{operator()}}(\textcolor{keyword}{const}\ \_Seq\_RAIter\&\ \_\_seqs\_begin,}
+\DoxyCodeLine{00279\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \_Seq\_RAIter\&\ \_\_seqs\_end,}
+\DoxyCodeLine{00280\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \_RAIter\&\ \_\_target,}
+\DoxyCodeLine{00281\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_Compare\&\ \_\_comp,}
+\DoxyCodeLine{00282\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_DiffType\ \_\_length\_am)\textcolor{keyword}{\ const}}
+\DoxyCodeLine{00283\ \textcolor{keyword}{\ \ \ \ \ \ }\{\ \mbox{\hyperlink{namespace____gnu__parallel_a27f5da3fdd4d5f56eecd6a078ec7bae2}{stable\_multiway\_merge}}(\_\_seqs\_begin,\ \_\_seqs\_end,\ \_\_target,}
+\DoxyCodeLine{00284\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_\_length\_am,\ \_\_comp,\ \mbox{\hyperlink{struct____gnu__parallel_1_1sequential__tag}{sequential\_tag}}());\ \}}
+\DoxyCodeLine{00285\ \ \ \ \ \};}
+\DoxyCodeLine{00286\ }
+\DoxyCodeLine{00287\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Seq\_RAIter,\ \textcolor{keyword}{typename}\ \_RAIter,}
+\DoxyCodeLine{00288\ \ \ \ \ \ \ \ \textcolor{keyword}{typename}\ \_Compare,\ \textcolor{keyword}{typename}\ \_DiffType>}
+\DoxyCodeLine{00289\ \ \ \ \ \textcolor{keyword}{struct\ }\_\_possibly\_stable\_multiway\_merge<\mbox{\hyperlink{_classes_2lib_2include_2stdbool_8h_a65e9886d74aaee76545e83dd09011727}{false}},\ \_Seq\_RAIter,}
+\DoxyCodeLine{00290\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_RAIter,\ \_Compare,\ \_DiffType>}
+\DoxyCodeLine{00291\ \ \ \ \ \{}
+\DoxyCodeLine{00292\ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{struct____gnu__parallel_1_1____possibly__stable__multiway__merge_3_01false_00_01___seq___r_a_itebbe515fc6f7648d1418c8d56e63df41f_a499ffcbf43662c47ba9e330e7374afb2}{operator()}}(\textcolor{keyword}{const}\ \_Seq\_RAIter\&\ \_\_seqs\_begin,}
+\DoxyCodeLine{00293\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \_Seq\_RAIter\&\ \_\_seqs\_end,}
+\DoxyCodeLine{00294\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \_RAIter\&\ \_\_target,}
+\DoxyCodeLine{00295\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_Compare\&\ \_\_comp,}
+\DoxyCodeLine{00296\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_DiffType\ \_\_length\_am)\textcolor{keyword}{\ const}}
+\DoxyCodeLine{00297\ \textcolor{keyword}{\ \ \ \ \ \ }\{\ \mbox{\hyperlink{namespace____gnu__parallel_a25294b0a47406aefa9ebc5e0c151d0ce}{multiway\_merge}}(\_\_seqs\_begin,\ \_\_seqs\_end,\ \_\_target,\ \_\_length\_am,}
+\DoxyCodeLine{00298\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_\_comp,\ \mbox{\hyperlink{struct____gnu__parallel_1_1sequential__tag}{sequential\_tag}}());\ \}}
+\DoxyCodeLine{00299\ \ \ \ \ \};}
+\DoxyCodeLine{00300\ }
+\DoxyCodeLine{00305\ \ \ \textcolor{keyword}{template}<\textcolor{keywordtype}{bool}\ \_\_stable,\ \textcolor{keywordtype}{bool}\ \_\_exact,\ \textcolor{keyword}{typename}\ \_RAIter,}
+\DoxyCodeLine{00306\ \ \ \ \ \ \ \ \textcolor{keyword}{typename}\ \_Compare>}
+\DoxyCodeLine{00307\ \ \ \ \ \textcolor{keywordtype}{void}}
+\DoxyCodeLine{00308\ \ \ \ \ \mbox{\hyperlink{namespace____gnu__parallel_aaf84903cd78722fcd19b20ccb69c47e4}{parallel\_sort\_mwms\_pu}}(\_PMWMSSortingData<\_RAIter>*\ \_\_sd,}
+\DoxyCodeLine{00309\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_Compare\&\ \_\_comp)}
+\DoxyCodeLine{00310\ \ \ \ \ \{}
+\DoxyCodeLine{00311\ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ std::iterator\_traits<\_RAIter>\ \_TraitsType;}
+\DoxyCodeLine{00312\ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ \textcolor{keyword}{typename}\ \_TraitsType::value\_type\ \_ValueType;}
+\DoxyCodeLine{00313\ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ \textcolor{keyword}{typename}\ \_TraitsType::difference\_type\ \_DifferenceType;}
+\DoxyCodeLine{00314\ }
+\DoxyCodeLine{00315\ \ \ \ \ \ \ \mbox{\hyperlink{namespace____gnu__parallel_a05e502e51bfc3233671730f74a44dc6a}{\_ThreadIndex}}\ \_\_iam\ =\ \mbox{\hyperlink{_classes_2lib_2include_2omp_8h_aa03cf372d8266eef024262a68d304e1b}{omp\_get\_thread\_num}}();}
+\DoxyCodeLine{00316\ }
+\DoxyCodeLine{00317\ \ \ \ \ \ \ \textcolor{comment}{//\ Length\ of\ this\ thread's\ chunk,\ before\ merging.}}
+\DoxyCodeLine{00318\ \ \ \ \ \ \ \_DifferenceType\ \_\_length\_local\ =}
+\DoxyCodeLine{00319\ \ \ \ \ \_\_sd-\/>\_M\_starts[\_\_iam\ +\ 1]\ -\/\ \_\_sd-\/>\_M\_starts[\_\_iam];}
+\DoxyCodeLine{00320\ }
+\DoxyCodeLine{00321\ \ \ \ \ \ \ \textcolor{comment}{//\ Sort\ in\ temporary\ storage,\ leave\ space\ for\ sentinel.}}
+\DoxyCodeLine{00322\ }
+\DoxyCodeLine{00323\ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ \_ValueType*\ \_SortingPlacesIterator;}
+\DoxyCodeLine{00324\ }
+\DoxyCodeLine{00325\ \ \ \ \ \ \ \_\_sd-\/>\_M\_temporary[\_\_iam]\ =}
+\DoxyCodeLine{00326\ \ \ \ \ \ \ \ \ \textcolor{keyword}{static\_cast<}\_ValueType*\textcolor{keyword}{>}(::operator\ \textcolor{keyword}{new}(\textcolor{keyword}{sizeof}(\_ValueType)}
+\DoxyCodeLine{00327\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ *\ (\_\_length\_local\ +\ 1)));}
+\DoxyCodeLine{00328\ }
+\DoxyCodeLine{00329\ \ \ \ \ \ \ \textcolor{comment}{//\ Copy\ there.}}
+\DoxyCodeLine{00330\ \ \ \ \ \ \ \mbox{\hyperlink{namespacestd_ae8f76360bfad6375b33b57235ca96d97}{std::uninitialized\_copy}}(\_\_sd-\/>\_M\_source\ +\ \_\_sd-\/>\_M\_starts[\_\_iam],}
+\DoxyCodeLine{00331\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_\_sd-\/>\_M\_source\ +\ \_\_sd-\/>\_M\_starts[\_\_iam]}
+\DoxyCodeLine{00332\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ +\ \_\_length\_local,}
+\DoxyCodeLine{00333\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_\_sd-\/>\_M\_temporary[\_\_iam]);}
+\DoxyCodeLine{00334\ }
+\DoxyCodeLine{00335\ \ \ \ \ \ \ \_\_possibly\_stable\_sort<\_\_stable,\ \_SortingPlacesIterator,\ \_Compare>()}
+\DoxyCodeLine{00336\ \ \ \ \ \ \ \ \ (\_\_sd-\/>\_M\_temporary[\_\_iam],}
+\DoxyCodeLine{00337\ \ \ \ \ \ \_\_sd-\/>\_M\_temporary[\_\_iam]\ +\ \_\_length\_local,}
+\DoxyCodeLine{00338\ \ \ \ \ \ \ \ \ \ \_\_comp);}
+\DoxyCodeLine{00339\ }
+\DoxyCodeLine{00340\ \ \ \ \ \ \ \textcolor{comment}{//\ Invariant:\ locally\ sorted\ subsequence\ in\ sd-\/>\_M\_temporary[\_\_iam],}}
+\DoxyCodeLine{00341\ \ \ \ \ \ \ \textcolor{comment}{//\ \_\_sd-\/>\_M\_temporary[\_\_iam]\ +\ \_\_length\_local.}}
+\DoxyCodeLine{00342\ }
+\DoxyCodeLine{00343\ \ \ \ \ \ \ \textcolor{comment}{//\ No\ barrier\ here:\ Synchronization\ is\ done\ by\ the\ splitting\ routine.}}
+\DoxyCodeLine{00344\ }
+\DoxyCodeLine{00345\ \ \ \ \ \ \ \_DifferenceType\ \_\_num\_samples\ =}
+\DoxyCodeLine{00346\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{struct____gnu__parallel_1_1___settings_adf11d9453707f1145a9e221ab7630bd3}{\_Settings::get}}().\mbox{\hyperlink{struct____gnu__parallel_1_1___settings_a0f435bbb73735fb8fdec296eed3c5996}{sort\_mwms\_oversampling}}\ *\ \_\_sd-\/>\_M\_num\_threads\ -\/\ 1;}
+\DoxyCodeLine{00347\ \ \ \ \ \ \ \_SplitConsistently<\_\_exact,\ \_RAIter,\ \_Compare,\ \_SortingPlacesIterator>()}
+\DoxyCodeLine{00348\ \ \ \ \ \ \ \ \ (\_\_iam,\ \_\_sd,\ \_\_comp,\ \_\_num\_samples);}
+\DoxyCodeLine{00349\ }
+\DoxyCodeLine{00350\ \ \ \ \ \ \ \textcolor{comment}{//\ Offset\ from\ \_\_target\ \_\_begin,\ \_\_length\ after\ merging.}}
+\DoxyCodeLine{00351\ \ \ \ \ \ \ \_DifferenceType\ \_\_offset\ =\ 0,\ \_\_length\_am\ =\ 0;}
+\DoxyCodeLine{00352\ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\mbox{\hyperlink{namespace____gnu__parallel_a05e502e51bfc3233671730f74a44dc6a}{\_ThreadIndex}}\ \_\_s\ =\ 0;\ \_\_s\ <\ \_\_sd-\/>\_M\_num\_threads;\ \_\_s++)}
+\DoxyCodeLine{00353\ \ \ \ \ \{}
+\DoxyCodeLine{00354\ \ \ \ \ \ \ \_\_length\_am\ +=\ (\_\_sd-\/>\_M\_pieces[\_\_iam][\_\_s].\_M\_end}
+\DoxyCodeLine{00355\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ -\/\ \_\_sd-\/>\_M\_pieces[\_\_iam][\_\_s].\_M\_begin);}
+\DoxyCodeLine{00356\ \ \ \ \ \ \ \_\_offset\ +=\ \_\_sd-\/>\_M\_pieces[\_\_iam][\_\_s].\_M\_begin;}
+\DoxyCodeLine{00357\ \ \ \ \ \}}
+\DoxyCodeLine{00358\ }
+\DoxyCodeLine{00359\ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ std::vector<}
+\DoxyCodeLine{00360\ \ \ \ \ \ \ \ \ std::pair<\_SortingPlacesIterator,\ \_SortingPlacesIterator>\ >}
+\DoxyCodeLine{00361\ \ \ \ \ \ \ \ \ \_SeqVector;}
+\DoxyCodeLine{00362\ \ \ \ \ \ \ \_SeqVector\ \_\_seqs(\_\_sd-\/>\_M\_num\_threads);}
+\DoxyCodeLine{00363\ }
+\DoxyCodeLine{00364\ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\mbox{\hyperlink{namespace____gnu__parallel_a05e502e51bfc3233671730f74a44dc6a}{\_ThreadIndex}}\ \_\_s\ =\ 0;\ \_\_s\ <\ \_\_sd-\/>\_M\_num\_threads;\ ++\_\_s)}
+\DoxyCodeLine{00365\ \ \ \ \ \{}
+\DoxyCodeLine{00366\ \ \ \ \ \ \ \_\_seqs[\_\_s]\ =}
+\DoxyCodeLine{00367\ \ \ \ \ \ \ \ \ std::make\_pair(\_\_sd-\/>\_M\_temporary[\_\_s]}
+\DoxyCodeLine{00368\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ +\ \_\_sd-\/>\_M\_pieces[\_\_iam][\_\_s].\_M\_begin,}
+\DoxyCodeLine{00369\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_\_sd-\/>\_M\_temporary[\_\_s]}
+\DoxyCodeLine{00370\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ +\ \_\_sd-\/>\_M\_pieces[\_\_iam][\_\_s].\_M\_end);}
+\DoxyCodeLine{00371\ \ \ \ \ \}}
+\DoxyCodeLine{00372\ }
+\DoxyCodeLine{00373\ \ \ \ \ \ \ \_\_possibly\_stable\_multiway\_merge<}
+\DoxyCodeLine{00374\ \ \ \ \ \ \ \ \ \_\_stable,\ \textcolor{keyword}{typename}\ \_SeqVector::iterator,}
+\DoxyCodeLine{00375\ \ \ \ \ \_RAIter,\ \_Compare,\ \_DifferenceType>()(\_\_seqs.begin(),\ \_\_seqs.end(),}
+\DoxyCodeLine{00376\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_\_sd-\/>\_M\_source\ +\ \_\_offset,\ \_\_comp,}
+\DoxyCodeLine{00377\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_\_length\_am);}
+\DoxyCodeLine{00378\ }
+\DoxyCodeLine{00379\ \textcolor{preprocessor}{\#\ \ \ \ \ pragma\ omp\ barrier}}
+\DoxyCodeLine{00380\ }
+\DoxyCodeLine{00381\ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\_DifferenceType\ \_\_i\ =\ 0;\ \_\_i\ <\ \_\_length\_local;\ ++\_\_i)}
+\DoxyCodeLine{00382\ \ \ \ \ \_\_sd-\/>\_M\_temporary[\_\_iam][\_\_i].\string~\_ValueType();}
+\DoxyCodeLine{00383\ \ \ \ \ \ \ ::operator\ \textcolor{keyword}{delete}(\_\_sd-\/>\_M\_temporary[\_\_iam]);}
+\DoxyCodeLine{00384\ \ \ \ \ \}}
+\DoxyCodeLine{00385\ }
+\DoxyCodeLine{00392\ \ \ \textcolor{keyword}{template}<\textcolor{keywordtype}{bool}\ \_\_stable,\ \textcolor{keywordtype}{bool}\ \_\_exact,\ \textcolor{keyword}{typename}\ \_RAIter,}
+\DoxyCodeLine{00393\ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{typename}\ \_Compare>}
+\DoxyCodeLine{00394\ \ \ \ \ \textcolor{keywordtype}{void}}
+\DoxyCodeLine{00395\ \ \ \ \ \mbox{\hyperlink{namespace____gnu__parallel_ae193ac43730550b537828a117dd2797f}{parallel\_sort\_mwms}}(\_RAIter\ \_\_begin,\ \_RAIter\ \_\_end,}
+\DoxyCodeLine{00396\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_Compare\ \_\_comp,}
+\DoxyCodeLine{00397\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace____gnu__parallel_a05e502e51bfc3233671730f74a44dc6a}{\_ThreadIndex}}\ \_\_num\_threads)}
+\DoxyCodeLine{00398\ \ \ \ \ \{}
+\DoxyCodeLine{00399\ \ \ \ \ \ \ \mbox{\hyperlink{_classes_2lib_2include_2c_09_09_2parallel_2compiletime__settings_8h_a77fb93c9cecec331ccee755972695128}{\_GLIBCXX\_CALL}}(\_\_end\ -\/\ \_\_begin)}
+\DoxyCodeLine{00400\ }
+\DoxyCodeLine{00401\ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ std::iterator\_traits<\_RAIter>\ \_TraitsType;}
+\DoxyCodeLine{00402\ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ \textcolor{keyword}{typename}\ \_TraitsType::value\_type\ \_ValueType;}
+\DoxyCodeLine{00403\ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ \textcolor{keyword}{typename}\ \_TraitsType::difference\_type\ \_DifferenceType;}
+\DoxyCodeLine{00404\ }
+\DoxyCodeLine{00405\ \ \ \ \ \ \ \_DifferenceType\ \_\_n\ =\ \_\_end\ -\/\ \_\_begin;}
+\DoxyCodeLine{00406\ }
+\DoxyCodeLine{00407\ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\_\_n\ <=\ 1)}
+\DoxyCodeLine{00408\ \ \ \ \ \textcolor{keywordflow}{return};}
+\DoxyCodeLine{00409\ }
+\DoxyCodeLine{00410\ \ \ \ \ \ \ \textcolor{comment}{//\ at\ least\ one\ element\ per\ thread}}
+\DoxyCodeLine{00411\ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\_\_num\_threads\ >\ \_\_n)}
+\DoxyCodeLine{00412\ \ \ \ \ \_\_num\_threads\ =\ \textcolor{keyword}{static\_cast<}\mbox{\hyperlink{namespace____gnu__parallel_a05e502e51bfc3233671730f74a44dc6a}{\_ThreadIndex}}\textcolor{keyword}{>}(\_\_n);}
+\DoxyCodeLine{00413\ }
+\DoxyCodeLine{00414\ \ \ \ \ \ \ \textcolor{comment}{//\ shared\ variables}}
+\DoxyCodeLine{00415\ \ \ \ \ \ \ \_PMWMSSortingData<\_RAIter>\ \_\_sd;}
+\DoxyCodeLine{00416\ \ \ \ \ \ \ \_DifferenceType*\ \_\_starts;}
+\DoxyCodeLine{00417\ \ \ \ \ \ \ \_DifferenceType\ \_\_size;}
+\DoxyCodeLine{00418\ }
+\DoxyCodeLine{00419\ \textcolor{preprocessor}{\#\ \ \ \ \ pragma\ omp\ parallel\ num\_threads(\_\_num\_threads)}}
+\DoxyCodeLine{00420\ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00421\ \ \ \ \ \ \ \ \ \_\_num\_threads\ =\ \mbox{\hyperlink{_classes_2lib_2include_2omp_8h_ac42ead04531fd33507e3d3a6f648b200}{omp\_get\_num\_threads}}();\ \textcolor{comment}{//no\ more\ threads\ than\ requested}}
+\DoxyCodeLine{00422\ }
+\DoxyCodeLine{00423\ \textcolor{preprocessor}{\#\ \ \ \ \ \ \ pragma\ omp\ single}}
+\DoxyCodeLine{00424\ \ \ \ \ \{}
+\DoxyCodeLine{00425\ \ \ \ \ \ \ \_\_sd.\_M\_num\_threads\ =\ \_\_num\_threads;}
+\DoxyCodeLine{00426\ \ \ \ \ \ \ \_\_sd.\_M\_source\ =\ \_\_begin;}
+\DoxyCodeLine{00427\ \ \ \ \ \ \ }
+\DoxyCodeLine{00428\ \ \ \ \ \ \ \_\_sd.\_M\_temporary\ =\ \textcolor{keyword}{new}\ \_ValueType*[\_\_num\_threads];}
+\DoxyCodeLine{00429\ }
+\DoxyCodeLine{00430\ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (!\_\_exact)}
+\DoxyCodeLine{00431\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00432\ \ \ \ \ \ \ \ \ \ \ \_\_size\ =}
+\DoxyCodeLine{00433\ \ \ \ \ \ \ \ \ (\mbox{\hyperlink{struct____gnu__parallel_1_1___settings_adf11d9453707f1145a9e221ab7630bd3}{\_Settings::get}}().\mbox{\hyperlink{struct____gnu__parallel_1_1___settings_a0f435bbb73735fb8fdec296eed3c5996}{sort\_mwms\_oversampling}}\ *\ \_\_num\_threads\ -\/\ 1)}
+\DoxyCodeLine{00434\ \ \ \ \ \ \ \ \ *\ \_\_num\_threads;}
+\DoxyCodeLine{00435\ \ \ \ \ \ \ \ \ \ \ \_\_sd.\_M\_samples\ =\ \textcolor{keyword}{static\_cast<}\_ValueType*\textcolor{keyword}{>}}
+\DoxyCodeLine{00436\ \ \ \ \ \ \ \ \ (::operator\ \textcolor{keyword}{new}(\_\_size\ *\ \textcolor{keyword}{sizeof}(\_ValueType)));}
+\DoxyCodeLine{00437\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00438\ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{00439\ \ \ \ \ \ \ \ \ \_\_sd.\_M\_samples\ =\ 0;}
+\DoxyCodeLine{00440\ }
+\DoxyCodeLine{00441\ \ \ \ \ \ \ \_\_sd.\_M\_offsets\ =\ \textcolor{keyword}{new}\ \_DifferenceType[\_\_num\_threads\ -\/\ 1];}
+\DoxyCodeLine{00442\ \ \ \ \ \ \ \_\_sd.\_M\_pieces}
+\DoxyCodeLine{00443\ \ \ \ \ \ \ \ \ =\ \textcolor{keyword}{new}\ std::vector<\_Piece<\_DifferenceType>\ >[\_\_num\_threads];}
+\DoxyCodeLine{00444\ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\mbox{\hyperlink{namespace____gnu__parallel_a05e502e51bfc3233671730f74a44dc6a}{\_ThreadIndex}}\ \_\_s\ =\ 0;\ \_\_s\ <\ \_\_num\_threads;\ ++\_\_s)}
+\DoxyCodeLine{00445\ \ \ \ \ \ \ \ \ \_\_sd.\_M\_pieces[\_\_s].resize(\_\_num\_threads);}
+\DoxyCodeLine{00446\ \ \ \ \ \ \ \_\_starts\ =\ \_\_sd.\_M\_starts\ =\ \textcolor{keyword}{new}\ \_DifferenceType[\_\_num\_threads\ +\ 1];}
+\DoxyCodeLine{00447\ }
+\DoxyCodeLine{00448\ \ \ \ \ \ \ \_DifferenceType\ \_\_chunk\_length\ =\ \_\_n\ /\ \_\_num\_threads;}
+\DoxyCodeLine{00449\ \ \ \ \ \ \ \_DifferenceType\ \mbox{\hyperlink{namespace____pstl_1_1____tbb__backend_a412bd21d61e578eab6a5afe510c8f07d}{\_\_split}}\ =\ \_\_n\ \%\ \_\_num\_threads;}
+\DoxyCodeLine{00450\ \ \ \ \ \ \ \_DifferenceType\ \_\_pos\ =\ 0;}
+\DoxyCodeLine{00451\ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\mbox{\hyperlink{namespace____gnu__parallel_a05e502e51bfc3233671730f74a44dc6a}{\_ThreadIndex}}\ \_\_i\ =\ 0;\ \_\_i\ <\ \_\_num\_threads;\ ++\_\_i)}
+\DoxyCodeLine{00452\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00453\ \ \ \ \ \ \ \ \ \ \ \_\_starts[\_\_i]\ =\ \_\_pos;}
+\DoxyCodeLine{00454\ \ \ \ \ \ \ \ \ \ \ \_\_pos\ +=\ ((\_\_i\ <\ \mbox{\hyperlink{namespace____pstl_1_1____tbb__backend_a412bd21d61e578eab6a5afe510c8f07d}{\_\_split}})}
+\DoxyCodeLine{00455\ \ \ \ \ \ \ \ \ \ \ \ \ ?\ (\_\_chunk\_length\ +\ 1)\ :\ \_\_chunk\_length);}
+\DoxyCodeLine{00456\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00457\ \ \ \ \ \ \ \_\_starts[\_\_num\_threads]\ =\ \_\_pos;}
+\DoxyCodeLine{00458\ \ \ \ \ \}\ \textcolor{comment}{//single}}
+\DoxyCodeLine{00459\ }
+\DoxyCodeLine{00460\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ Now\ sort\ in\ parallel.}}
+\DoxyCodeLine{00461\ \ \ \ \ \ \ \ \ parallel\_sort\_mwms\_pu<\_\_stable,\ \_\_exact>(\&\_\_sd,\ \_\_comp);}
+\DoxyCodeLine{00462\ \ \ \ \ \ \ \}\ \textcolor{comment}{//parallel}}
+\DoxyCodeLine{00463\ }
+\DoxyCodeLine{00464\ \ \ \ \ \ \ \textcolor{keyword}{delete}[]\ \_\_starts;}
+\DoxyCodeLine{00465\ \ \ \ \ \ \ \textcolor{keyword}{delete}[]\ \_\_sd.\_M\_temporary;}
+\DoxyCodeLine{00466\ }
+\DoxyCodeLine{00467\ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (!\_\_exact)}
+\DoxyCodeLine{00468\ \ \ \ \ \{}
+\DoxyCodeLine{00469\ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\_DifferenceType\ \_\_i\ =\ 0;\ \_\_i\ <\ \_\_size;\ ++\_\_i)}
+\DoxyCodeLine{00470\ \ \ \ \ \ \ \ \ \_\_sd.\_M\_samples[\_\_i].\string~\_ValueType();}
+\DoxyCodeLine{00471\ \ \ \ \ \ \ ::operator\ \textcolor{keyword}{delete}(\_\_sd.\_M\_samples);}
+\DoxyCodeLine{00472\ \ \ \ \ \}}
+\DoxyCodeLine{00473\ }
+\DoxyCodeLine{00474\ \ \ \ \ \ \ \textcolor{keyword}{delete}[]\ \_\_sd.\_M\_offsets;}
+\DoxyCodeLine{00475\ \ \ \ \ \ \ \textcolor{keyword}{delete}[]\ \_\_sd.\_M\_pieces;}
+\DoxyCodeLine{00476\ \ \ \ \ \}}
+\DoxyCodeLine{00477\ }
+\DoxyCodeLine{00478\ \}\ \textcolor{comment}{//namespace\ \_\_gnu\_parallel}}
+\DoxyCodeLine{00479\ }
+\DoxyCodeLine{00480\ \textcolor{preprocessor}{\#endif\ }\textcolor{comment}{/*\ \_GLIBCXX\_PARALLEL\_MULTIWAY\_MERGESORT\_H\ */}\textcolor{preprocessor}{}}
+
+\end{DoxyCode}

@@ -1,0 +1,27 @@
+var group__configuration =
+[
+    [ "TOML_ASSERT", "group__configuration.html#ga8c407a8f6fe52a795db35be3f00393f8", null ],
+    [ "TOML_ASSERT_ASSUME", "group__configuration.html#ga989dd9b9610c274f1eb99e8e77997ee9", null ],
+    [ "TOML_CALLCONV", "group__configuration.html#ga2bfc7ae4747f15378d92249aadce019e", null ],
+    [ "TOML_ENABLE_FLOAT16", "group__configuration.html#ga56ab81041897681ac38ceba52a380b97", null ],
+    [ "TOML_ENABLE_FORMATTERS", "group__configuration.html#ga9fc77582d9de77f59d2ddc9ae1f748ca", null ],
+    [ "TOML_ENABLE_PARSER", "group__configuration.html#ga121912d75d4624de6ab6854e41d8a852", null ],
+    [ "TOML_ENABLE_SIMD", "group__configuration.html#gabc26d565182ee6697b0a7766e669e852", null ],
+    [ "TOML_ENABLE_UNRELEASED_FEATURES", "group__configuration.html#ga1110ff7d189a7738b9109d120f568b6b", null ],
+    [ "TOML_ENABLE_WINDOWS_COMPAT", "group__configuration.html#ga94867db67c98e0e9d4fbb70690951fbf", null ],
+    [ "TOML_EXCEPTIONS", "group__configuration.html#ga93097ecd88ca4bca393f60a78bda643b", null ],
+    [ "TOML_EXPORTED_CLASS", "group__configuration.html#ga3d7aebf91431575688d573f09a17559a", null ],
+    [ "TOML_EXPORTED_FREE_FUNCTION", "group__configuration.html#gac40a454cde06de4e76df3d6d460a3544", null ],
+    [ "TOML_EXPORTED_MEMBER_FUNCTION", "group__configuration.html#gadf515bb7a6b8ce6b14bf86c8961a63cb", null ],
+    [ "TOML_EXPORTED_STATIC_FUNCTION", "group__configuration.html#ga8436c6f378c73f3446a3b6f1e2c5e81c", null ],
+    [ "TOML_HAS_CUSTOM_OPTIONAL_TYPE", "group__configuration.html#ga0f6a688021ea2fc13e1c76acd64e4bbc", null ],
+    [ "TOML_HEADER_ONLY", "group__configuration.html#ga8219bfd7e75587516385b6022b28abc2", null ],
+    [ "TOML_IMPLEMENTATION", "group__configuration.html#ga27ee69835a1ddff9dbaf3015b4b08a11", null ],
+    [ "TOML_INCLUDE_WINDOWS_H", "group__configuration.html#ga419bb627cf9a2a7feb9621358f2dc255", null ],
+    [ "TOML_LIFETIME_HOOKS", "group__configuration.html#ga117fe6e84eb06cbfb6ee0a007663a1e5", null ],
+    [ "TOML_MAX_NESTED_VALUES", "group__configuration.html#ga9c9d5c24d1da441070611cb02cf78993", null ],
+    [ "TOML_SHARED_LIB", "group__configuration.html#ga87f51a784286c7b6024f8f5e4257fdd4", null ],
+    [ "TOML_UNDEF_MACROS", "group__configuration.html#ga92f612e13566656e59e6799fed8028de", null ],
+    [ "TOML_DISABLE_WARNINGS", "group__configuration.html#ga6c2a5b158c0a6d208edd992229d91d78", null ],
+    [ "TOML_ENABLE_WARNINGS", "group__configuration.html#ga4e1f9eaceb60becba33cd64d3a85e3ed", null ]
+];

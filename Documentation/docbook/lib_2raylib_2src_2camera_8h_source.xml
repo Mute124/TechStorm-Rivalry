@@ -1,0 +1,527 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<section xmlns="http://docbook.org/ns/docbook" version="5.0" xmlns:xlink="http://www.w3.org/1999/xlink" xml:id="_lib_2raylib_2src_2camera_8h_source" xml:lang="en-US">
+<title>camera.h</title>
+<indexterm><primary>C:/Users/HP/Documents/GitHub/Minero-Game/lib/raylib/src/camera.h</primary></indexterm>
+Go to the documentation of this file.<programlisting linenumbering="unnumbered">1 <emphasis role="comment">/*******************************************************************************************</emphasis>
+2 <emphasis role="comment">*</emphasis>
+3 <emphasis role="comment">*&#32;&#32;&#32;raylib.camera&#32;-&#32;Camera&#32;system&#32;with&#32;multiple&#32;modes&#32;support</emphasis>
+4 <emphasis role="comment">*</emphasis>
+5 <emphasis role="comment">*&#32;&#32;&#32;NOTE:&#32;Memory&#32;footprint&#32;of&#32;this&#32;library&#32;is&#32;aproximately&#32;52&#32;bytes&#32;(global&#32;variables)</emphasis>
+6 <emphasis role="comment">*</emphasis>
+7 <emphasis role="comment">*&#32;&#32;&#32;CONFIGURATION:</emphasis>
+8 <emphasis role="comment">*</emphasis>
+9 <emphasis role="comment">*&#32;&#32;&#32;#define&#32;CAMERA_IMPLEMENTATION</emphasis>
+10 <emphasis role="comment">*&#32;&#32;&#32;&#32;&#32;&#32;&#32;Generates&#32;the&#32;implementation&#32;of&#32;the&#32;library&#32;into&#32;the&#32;included&#32;file.</emphasis>
+11 <emphasis role="comment">*&#32;&#32;&#32;&#32;&#32;&#32;&#32;If&#32;not&#32;defined,&#32;the&#32;library&#32;is&#32;in&#32;header&#32;only&#32;mode&#32;and&#32;can&#32;be&#32;included&#32;in&#32;other&#32;headers</emphasis>
+12 <emphasis role="comment">*&#32;&#32;&#32;&#32;&#32;&#32;&#32;or&#32;source&#32;files&#32;without&#32;problems.&#32;But&#32;only&#32;ONE&#32;file&#32;should&#32;hold&#32;the&#32;implementation.</emphasis>
+13 <emphasis role="comment">*</emphasis>
+14 <emphasis role="comment">*&#32;&#32;&#32;#define&#32;CAMERA_STANDALONE</emphasis>
+15 <emphasis role="comment">*&#32;&#32;&#32;&#32;&#32;&#32;&#32;If&#32;defined,&#32;the&#32;library&#32;can&#32;be&#32;used&#32;as&#32;standalone&#32;as&#32;a&#32;camera&#32;system&#32;but&#32;some</emphasis>
+16 <emphasis role="comment">*&#32;&#32;&#32;&#32;&#32;&#32;&#32;functions&#32;must&#32;be&#32;redefined&#32;to&#32;manage&#32;inputs&#32;accordingly.</emphasis>
+17 <emphasis role="comment">*</emphasis>
+18 <emphasis role="comment">*&#32;&#32;&#32;CONTRIBUTORS:</emphasis>
+19 <emphasis role="comment">*&#32;&#32;&#32;&#32;&#32;&#32;&#32;Ramon&#32;Santamaria:&#32;&#32;&#32;Supervision,&#32;review,&#32;update&#32;and&#32;maintenance</emphasis>
+20 <emphasis role="comment">*&#32;&#32;&#32;&#32;&#32;&#32;&#32;Marc&#32;Palau:&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;Initial&#32;implementation&#32;(2014)</emphasis>
+21 <emphasis role="comment">*</emphasis>
+22 <emphasis role="comment">*</emphasis>
+23 <emphasis role="comment">*&#32;&#32;&#32;LICENSE:&#32;zlib/libpng</emphasis>
+24 <emphasis role="comment">*</emphasis>
+25 <emphasis role="comment">*&#32;&#32;&#32;Copyright&#32;(c)&#32;2015-2020&#32;Ramon&#32;Santamaria&#32;(@raysan5)</emphasis>
+26 <emphasis role="comment">*</emphasis>
+27 <emphasis role="comment">*&#32;&#32;&#32;This&#32;software&#32;is&#32;provided&#32;&quot;as-is&quot;,&#32;without&#32;any&#32;express&#32;or&#32;implied&#32;warranty.&#32;In&#32;no&#32;event</emphasis>
+28 <emphasis role="comment">*&#32;&#32;&#32;will&#32;the&#32;authors&#32;be&#32;held&#32;liable&#32;for&#32;any&#32;damages&#32;arising&#32;from&#32;the&#32;use&#32;of&#32;this&#32;software.</emphasis>
+29 <emphasis role="comment">*</emphasis>
+30 <emphasis role="comment">*&#32;&#32;&#32;Permission&#32;is&#32;granted&#32;to&#32;anyone&#32;to&#32;use&#32;this&#32;software&#32;for&#32;any&#32;purpose,&#32;including&#32;commercial</emphasis>
+31 <emphasis role="comment">*&#32;&#32;&#32;applications,&#32;and&#32;to&#32;alter&#32;it&#32;and&#32;redistribute&#32;it&#32;freely,&#32;subject&#32;to&#32;the&#32;following&#32;restrictions:</emphasis>
+32 <emphasis role="comment">*</emphasis>
+33 <emphasis role="comment">*&#32;&#32;&#32;&#32;&#32;1.&#32;The&#32;origin&#32;of&#32;this&#32;software&#32;must&#32;not&#32;be&#32;misrepresented;&#32;you&#32;must&#32;not&#32;claim&#32;that&#32;you</emphasis>
+34 <emphasis role="comment">*&#32;&#32;&#32;&#32;&#32;wrote&#32;the&#32;original&#32;software.&#32;If&#32;you&#32;use&#32;this&#32;software&#32;in&#32;a&#32;product,&#32;an&#32;acknowledgment</emphasis>
+35 <emphasis role="comment">*&#32;&#32;&#32;&#32;&#32;in&#32;the&#32;product&#32;documentation&#32;would&#32;be&#32;appreciated&#32;but&#32;is&#32;not&#32;required.</emphasis>
+36 <emphasis role="comment">*</emphasis>
+37 <emphasis role="comment">*&#32;&#32;&#32;&#32;&#32;2.&#32;Altered&#32;source&#32;versions&#32;must&#32;be&#32;plainly&#32;marked&#32;as&#32;such,&#32;and&#32;must&#32;not&#32;be&#32;misrepresented</emphasis>
+38 <emphasis role="comment">*&#32;&#32;&#32;&#32;&#32;as&#32;being&#32;the&#32;original&#32;software.</emphasis>
+39 <emphasis role="comment">*</emphasis>
+40 <emphasis role="comment">*&#32;&#32;&#32;&#32;&#32;3.&#32;This&#32;notice&#32;may&#32;not&#32;be&#32;removed&#32;or&#32;altered&#32;from&#32;any&#32;source&#32;distribution.</emphasis>
+41 <emphasis role="comment">*</emphasis>
+42 <emphasis role="comment">**********************************************************************************************/</emphasis>
+43 
+44 <emphasis role="preprocessor">#ifndef&#32;CAMERA_H</emphasis>
+45 <emphasis role="preprocessor">#define&#32;CAMERA_H</emphasis>
+46 
+47 <emphasis role="comment">//----------------------------------------------------------------------------------</emphasis>
+48 <emphasis role="comment">//&#32;Defines&#32;and&#32;Macros</emphasis>
+49 <emphasis role="comment">//----------------------------------------------------------------------------------</emphasis>
+50 <emphasis role="comment">//...</emphasis>
+51 
+52 <emphasis role="comment">//----------------------------------------------------------------------------------</emphasis>
+53 <emphasis role="comment">//&#32;Types&#32;and&#32;Structures&#32;Definition</emphasis>
+54 <emphasis role="comment">//&#32;NOTE:&#32;Below&#32;types&#32;are&#32;required&#32;for&#32;CAMERA_STANDALONE&#32;usage</emphasis>
+55 <emphasis role="comment">//----------------------------------------------------------------------------------</emphasis>
+56 <emphasis role="preprocessor">#if&#32;defined(CAMERA_STANDALONE)</emphasis>
+57 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Vector2&#32;type</emphasis>
+58 &#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">struct&#32;</emphasis><link linkend="_struct_vector2">Vector2</link>&#32;{
+59 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">float</emphasis>&#32;<link linkend="_struct_vector2_1a046bb8d17a876acc49415128dc0502f2">x</link>;
+60 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">float</emphasis>&#32;<link linkend="_struct_vector2_1a0e07bad05f01ed811b909a2eef97f9e2">y</link>;
+61 &#32;&#32;&#32;&#32;}&#32;<link linkend="_struct_vector2">Vector2</link>;
+62 
+63 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Vector3&#32;type</emphasis>
+64 &#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">struct&#32;</emphasis><link linkend="_struct_vector3">Vector3</link>&#32;{
+65 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">float</emphasis>&#32;<link linkend="_struct_vector3_1a7e2d3237b29a2f29d7b3d8b2934e35f2">x</link>;
+66 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">float</emphasis>&#32;<link linkend="_struct_vector3_1a86eb35a9fa2d5a49e7fad66a35fa9c13">y</link>;
+67 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">float</emphasis>&#32;<link linkend="_struct_vector3_1aa8c9461eb24bd2c364258078811a3e9d">z</link>;
+68 &#32;&#32;&#32;&#32;}&#32;<link linkend="_struct_vector3">Vector3</link>;
+69 
+70 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Camera&#32;type,&#32;defines&#32;a&#32;camera&#32;position/orientation&#32;in&#32;3d&#32;space</emphasis>
+71 &#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">struct&#32;</emphasis><link linkend="_struct_camera3_d">Camera3D</link>&#32;{
+72 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_struct_vector3">Vector3</link>&#32;<link linkend="_struct_camera3_d_1a78c3d3310cebdfe1054e10f62c8d15ce">position</link>;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Camera&#32;position</emphasis>
+73 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_struct_vector3">Vector3</link>&#32;<link linkend="_struct_camera3_d_1ae87720bc94914ae37215b5057dba2c07">target</link>;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Camera&#32;target&#32;it&#32;looks-at</emphasis>
+74 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_struct_vector3">Vector3</link>&#32;<link linkend="_struct_camera3_d_1a63352199d3af7056c993d8b5c1bcfbe4">up</link>;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Camera&#32;up&#32;vector&#32;(rotation&#32;over&#32;its&#32;axis)</emphasis>
+75 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">float</emphasis>&#32;<link linkend="_struct_camera3_d_1ae4fcff0ce33690cbe7b4d0259c448e8e">fovy</link>;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Camera&#32;field-of-view&#32;apperture&#32;in&#32;Y&#32;(degrees)&#32;in&#32;perspective,&#32;used&#32;as&#32;near&#32;plane&#32;width&#32;in&#32;orthographic</emphasis>
+76 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="_struct_camera3_d_1a34685ce5003559759e3c903bfbc5c46e">type</link>;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Camera&#32;type,&#32;defines&#32;projection&#32;type:&#32;CAMERA_PERSPECTIVE&#32;or&#32;CAMERA_ORTHOGRAPHIC</emphasis>
+77 &#32;&#32;&#32;&#32;}&#32;<link linkend="_struct_camera3_d">Camera3D</link>;
+78 
+79 &#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<link linkend="_struct_camera3_d">Camera3D</link>&#32;<link linkend="__classes_2lib_2raylib_8h_1a3c09d25578723b8a82da7808fc461c11">Camera</link>;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Camera&#32;type&#32;fallback,&#32;defaults&#32;to&#32;Camera3D</emphasis>
+80 
+81 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Camera&#32;system&#32;modes</emphasis>
+82 &#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">enum</emphasis>&#32;{
+83 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_8h_1ac6e73fe6ce68e10b0acd6d2312bdbb35ad92b667c7667e6ae20ee60c6dbe35f08">CAMERA_CUSTOM</link>&#32;=&#32;0,
+84 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_8h_1ac6e73fe6ce68e10b0acd6d2312bdbb35aa2047d9bda997c7b3ff7000feff88c90">CAMERA_FREE</link>,
+85 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_8h_1ac6e73fe6ce68e10b0acd6d2312bdbb35a5993778026f9058046510b602220f635">CAMERA_ORBITAL</link>,
+86 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_8h_1ac6e73fe6ce68e10b0acd6d2312bdbb35a7f979c63ce2ee9127eb5d69986bbb2f9">CAMERA_FIRST_PERSON</link>,
+87 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_8h_1ac6e73fe6ce68e10b0acd6d2312bdbb35a6c23689e2f42530a480950f7875bc82a">CAMERA_THIRD_PERSON</link>
+88 &#32;&#32;&#32;&#32;}&#32;<link linkend="__classes_2lib_2raylib_8h_1ac6e73fe6ce68e10b0acd6d2312bdbb35">CameraMode</link>;
+89 
+90 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Camera&#32;projection&#32;modes</emphasis>
+91 &#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">enum</emphasis>&#32;{
+92 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_8h_1a2d3e98136f7933519abb019705f0d2d8acbb2df9c79c81eae7447f379bac5aa7e">CAMERA_PERSPECTIVE</link>&#32;=&#32;0,
+93 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_8h_1a2d3e98136f7933519abb019705f0d2d8af88d1708d9ea09bcd902cdebb4e31ead">CAMERA_ORTHOGRAPHIC</link>
+94 &#32;&#32;&#32;&#32;}&#32;<link linkend="__classes_2lib_2raylib_2src_2raylib_8h_1af7eb92b45c5f7f64f02821f87c385ebb">CameraType</link>;
+95 <emphasis role="preprocessor">#endif</emphasis>
+96 
+97 <emphasis role="preprocessor">#ifdef&#32;__cplusplus</emphasis>
+98 <emphasis role="keyword">extern</emphasis>&#32;<emphasis role="stringliteral">&quot;C&quot;</emphasis>&#32;{&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Prevents&#32;name&#32;mangling&#32;of&#32;functions</emphasis>
+99 <emphasis role="preprocessor">#endif</emphasis>
+100 
+101 <emphasis role="comment">//----------------------------------------------------------------------------------</emphasis>
+102 <emphasis role="comment">//&#32;Global&#32;Variables&#32;Definition</emphasis>
+103 <emphasis role="comment">//----------------------------------------------------------------------------------</emphasis>
+104 <emphasis role="comment">//...</emphasis>
+105 
+106 <emphasis role="comment">//----------------------------------------------------------------------------------</emphasis>
+107 <emphasis role="comment">//&#32;Module&#32;Functions&#32;Declaration</emphasis>
+108 <emphasis role="comment">//----------------------------------------------------------------------------------</emphasis>
+109 <emphasis role="preprocessor">#if&#32;defined(CAMERA_STANDALONE)</emphasis>
+110 <emphasis role="keywordtype">void</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2raylib_8h_1afab7375cadbc089f77ad6fdb9065e8e3">SetCameraMode</link>(<link linkend="_struct_camera3_d">Camera</link>&#32;<link linkend="__classes_2lib_2glm_2test_2cmake_2test__find__glm_8cpp_1a8f389d10179adf56cc907127d615c000">camera</link>,&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a1e71d9c196e4683cc06c4b54d53f7ef5">mode</link>);&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Set&#32;camera&#32;mode&#32;(multiple&#32;camera&#32;modes&#32;available)</emphasis>
+111 <emphasis role="keywordtype">void</emphasis>&#32;<link linkend="__classes_2lib_2raylib_8h_1adc7bb09d8b200ff74240ee1375552020">UpdateCamera</link>(<link linkend="_struct_camera3_d">Camera</link>&#32;*<link linkend="__classes_2lib_2glm_2test_2cmake_2test__find__glm_8cpp_1a8f389d10179adf56cc907127d615c000">camera</link>);&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Update&#32;camera&#32;position&#32;for&#32;selected&#32;mode</emphasis>
+112 
+113 <emphasis role="keywordtype">void</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2raylib_8h_1a335d98962a1d13deb263e4abf72a5fe1">SetCameraPanControl</link>(<emphasis role="keywordtype">int</emphasis>&#32;panKey);&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Set&#32;camera&#32;pan&#32;key&#32;to&#32;combine&#32;with&#32;mouse&#32;movement&#32;(free&#32;camera)</emphasis>
+114 <emphasis role="keywordtype">void</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2raylib_8h_1af9a6940a1d7b92113d8fa7ab6b209db6">SetCameraAltControl</link>(<emphasis role="keywordtype">int</emphasis>&#32;altKey);&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Set&#32;camera&#32;alt&#32;key&#32;to&#32;combine&#32;with&#32;mouse&#32;movement&#32;(free&#32;camera)</emphasis>
+115 <emphasis role="keywordtype">void</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2raylib_8h_1a2f1360dc1fb47d84d9a00cd1e2f2871f">SetCameraSmoothZoomControl</link>(<emphasis role="keywordtype">int</emphasis>&#32;szoomKey);&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Set&#32;camera&#32;smooth&#32;zoom&#32;key&#32;to&#32;combine&#32;with&#32;mouse&#32;(free&#32;camera)</emphasis>
+116 <emphasis role="keywordtype">void</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2raylib_8h_1a9c23a10dab4d74d70af19b412e3ddef9">SetCameraMoveControls</link>(<emphasis role="keywordtype">int</emphasis>&#32;frontKey,&#32;<emphasis role="keywordtype">int</emphasis>&#32;backKey,
+117 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;rightKey,&#32;<emphasis role="keywordtype">int</emphasis>&#32;leftKey,
+118 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;upKey,&#32;<emphasis role="keywordtype">int</emphasis>&#32;downKey);&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Set&#32;camera&#32;move&#32;controls&#32;(1st&#32;person&#32;and&#32;3rd&#32;person&#32;cameras)</emphasis>
+119 <emphasis role="preprocessor">#endif</emphasis>
+120 
+121 <emphasis role="preprocessor">#ifdef&#32;__cplusplus</emphasis>
+122 }
+123 <emphasis role="preprocessor">#endif</emphasis>
+124 
+125 <emphasis role="preprocessor">#endif&#32;</emphasis><emphasis role="comment">//&#32;CAMERA_H</emphasis>
+126 
+127 
+128 <emphasis role="comment">/***********************************************************************************</emphasis>
+129 <emphasis role="comment">*</emphasis>
+130 <emphasis role="comment">*&#32;&#32;&#32;CAMERA&#32;IMPLEMENTATION</emphasis>
+131 <emphasis role="comment">*</emphasis>
+132 <emphasis role="comment">************************************************************************************/</emphasis>
+133 
+134 <emphasis role="preprocessor">#if&#32;defined(CAMERA_IMPLEMENTATION)</emphasis>
+135 
+136 <emphasis role="preprocessor">#include&#32;&lt;math.h&gt;</emphasis>&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Required&#32;for:&#32;sinf(),&#32;cosf(),&#32;sqrtf()</emphasis>
+137 
+138 <emphasis role="preprocessor">#ifndef&#32;PI</emphasis>
+139 <emphasis role="preprocessor">&#32;&#32;&#32;&#32;#define&#32;PI&#32;3.14159265358979323846</emphasis>
+140 <emphasis role="preprocessor">#endif</emphasis>
+141 <emphasis role="preprocessor">#ifndef&#32;DEG2RAD</emphasis>
+142 <emphasis role="preprocessor">&#32;&#32;&#32;&#32;#define&#32;DEG2RAD&#32;(PI/180.0f)</emphasis>
+143 <emphasis role="preprocessor">#endif</emphasis>
+144 <emphasis role="preprocessor">#ifndef&#32;RAD2DEG</emphasis>
+145 <emphasis role="preprocessor">&#32;&#32;&#32;&#32;#define&#32;RAD2DEG&#32;(180.0f/PI)</emphasis>
+146 <emphasis role="preprocessor">#endif</emphasis>
+147 
+148 <emphasis role="comment">//----------------------------------------------------------------------------------</emphasis>
+149 <emphasis role="comment">//&#32;Defines&#32;and&#32;Macros</emphasis>
+150 <emphasis role="comment">//----------------------------------------------------------------------------------</emphasis>
+151 <emphasis role="comment">//&#32;Camera&#32;mouse&#32;movement&#32;sensitivity</emphasis>
+152 <emphasis role="preprocessor">#define&#32;CAMERA_MOUSE_MOVE_SENSITIVITY&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;0.003f</emphasis>
+153 <emphasis role="preprocessor">#define&#32;CAMERA_MOUSE_SCROLL_SENSITIVITY&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;1.5f</emphasis>
+154 
+155 <emphasis role="comment">//&#32;FREE_CAMERA</emphasis>
+156 <emphasis role="preprocessor">#define&#32;CAMERA_FREE_MOUSE_SENSITIVITY&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;0.01f</emphasis>
+157 <emphasis role="preprocessor">#define&#32;CAMERA_FREE_DISTANCE_MIN_CLAMP&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;0.3f</emphasis>
+158 <emphasis role="preprocessor">#define&#32;CAMERA_FREE_DISTANCE_MAX_CLAMP&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;120.0f</emphasis>
+159 <emphasis role="preprocessor">#define&#32;CAMERA_FREE_MIN_CLAMP&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;85.0f</emphasis>
+160 <emphasis role="preprocessor">#define&#32;CAMERA_FREE_MAX_CLAMP&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;-85.0f</emphasis>
+161 <emphasis role="preprocessor">#define&#32;CAMERA_FREE_SMOOTH_ZOOM_SENSITIVITY&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;0.05f</emphasis>
+162 <emphasis role="preprocessor">#define&#32;CAMERA_FREE_PANNING_DIVIDER&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;5.1f</emphasis>
+163 
+164 <emphasis role="comment">//&#32;ORBITAL_CAMERA</emphasis>
+165 <emphasis role="preprocessor">#define&#32;CAMERA_ORBITAL_SPEED&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;0.01f&#32;&#32;&#32;&#32;&#32;&#32;&#32;</emphasis><emphasis role="comment">//&#32;Radians&#32;per&#32;frame</emphasis>
+166 
+167 <emphasis role="comment">//&#32;FIRST_PERSON</emphasis>
+168 <emphasis role="comment">//#define&#32;CAMERA_FIRST_PERSON_MOUSE_SENSITIVITY&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;0.003f</emphasis>
+169 <emphasis role="preprocessor">#define&#32;CAMERA_FIRST_PERSON_FOCUS_DISTANCE&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;25.0f</emphasis>
+170 <emphasis role="preprocessor">#define&#32;CAMERA_FIRST_PERSON_MIN_CLAMP&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;89.0f</emphasis>
+171 <emphasis role="preprocessor">#define&#32;CAMERA_FIRST_PERSON_MAX_CLAMP&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;-89.0f</emphasis>
+172 
+173 <emphasis role="preprocessor">#define&#32;CAMERA_FIRST_PERSON_STEP_TRIGONOMETRIC_DIVIDER&#32;&#32;5.0f</emphasis>
+174 <emphasis role="preprocessor">#define&#32;CAMERA_FIRST_PERSON_STEP_DIVIDER&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;30.0f</emphasis>
+175 <emphasis role="preprocessor">#define&#32;CAMERA_FIRST_PERSON_WAVING_DIVIDER&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;200.0f</emphasis>
+176 
+177 <emphasis role="comment">//&#32;THIRD_PERSON</emphasis>
+178 <emphasis role="comment">//#define&#32;CAMERA_THIRD_PERSON_MOUSE_SENSITIVITY&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;0.003f</emphasis>
+179 <emphasis role="preprocessor">#define&#32;CAMERA_THIRD_PERSON_DISTANCE_CLAMP&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;1.2f</emphasis>
+180 <emphasis role="preprocessor">#define&#32;CAMERA_THIRD_PERSON_MIN_CLAMP&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;5.0f</emphasis>
+181 <emphasis role="preprocessor">#define&#32;CAMERA_THIRD_PERSON_MAX_CLAMP&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;-85.0f</emphasis>
+182 <emphasis role="preprocessor">#define&#32;CAMERA_THIRD_PERSON_OFFSET&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;(Vector3){&#32;0.4f,&#32;0.0f,&#32;0.0f&#32;}</emphasis>
+183 
+184 <emphasis role="comment">//&#32;PLAYER&#32;(used&#32;by&#32;camera)</emphasis>
+185 <emphasis role="preprocessor">#define&#32;PLAYER_MOVEMENT_SENSITIVITY&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;20.0f</emphasis>
+186 
+187 <emphasis role="comment">//----------------------------------------------------------------------------------</emphasis>
+188 <emphasis role="comment">//&#32;Types&#32;and&#32;Structures&#32;Definition</emphasis>
+189 <emphasis role="comment">//----------------------------------------------------------------------------------</emphasis>
+190 <emphasis role="comment">//&#32;Camera&#32;move&#32;modes&#32;(first&#32;person&#32;and&#32;third&#32;person&#32;cameras)</emphasis>
+191 <emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">enum</emphasis>&#32;{
+192 &#32;&#32;&#32;&#32;MOVE_FRONT&#32;=&#32;0,
+193 &#32;&#32;&#32;&#32;MOVE_BACK,
+194 &#32;&#32;&#32;&#32;MOVE_RIGHT,
+195 &#32;&#32;&#32;&#32;MOVE_LEFT,
+196 &#32;&#32;&#32;&#32;MOVE_UP,
+197 &#32;&#32;&#32;&#32;MOVE_DOWN
+198 }&#32;CameraMove;
+199 
+200 <emphasis role="comment">//&#32;Camera&#32;global&#32;state&#32;context&#32;data</emphasis>
+201 <emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">struct&#32;</emphasis>{
+202 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a1e71d9c196e4683cc06c4b54d53f7ef5">mode</link>;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Current&#32;camera&#32;mode</emphasis>
+203 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">float</emphasis>&#32;targetDistance;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Camera&#32;distance&#32;from&#32;position&#32;to&#32;target</emphasis>
+204 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">float</emphasis>&#32;playerEyesPosition;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Default&#32;player&#32;eyes&#32;position&#32;from&#32;ground&#32;(in&#32;meters)</emphasis>
+205 &#32;&#32;&#32;&#32;<link linkend="_struct_vector2">Vector2</link>&#32;<link linkend="_group__ext__quaternion__trigonometric_1ga8aa248b31d5ade470c87304df5eb7bd8">angle</link>;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Camera&#32;angle&#32;in&#32;plane&#32;XZ</emphasis>
+206 
+207 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;moveControl[6];
+208 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;smoothZoomControl;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;raylib:&#32;KEY_LEFT_CONTROL</emphasis>
+209 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;altControl;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;raylib:&#32;KEY_LEFT_ALT</emphasis>
+210 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;panControl;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;raylib:&#32;MOUSE_MIDDLE_BUTTON</emphasis>
+211 }&#32;<link linkend="_class_camera_data">CameraData</link>;
+212 
+213 <emphasis role="comment">//----------------------------------------------------------------------------------</emphasis>
+214 <emphasis role="comment">//&#32;Global&#32;Variables&#32;Definition</emphasis>
+215 <emphasis role="comment">//----------------------------------------------------------------------------------</emphasis>
+216 <emphasis role="keyword">static</emphasis>&#32;<link linkend="_class_camera_data">CameraData</link>&#32;CAMERA&#32;=&#32;{&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Global&#32;CAMERA&#32;state&#32;context</emphasis>
+217 &#32;&#32;&#32;&#32;.mode&#32;=&#32;0,
+218 &#32;&#32;&#32;&#32;.targetDistance&#32;=&#32;0,
+219 &#32;&#32;&#32;&#32;.playerEyesPosition&#32;=&#32;1.85f,
+220 &#32;&#32;&#32;&#32;.angle&#32;=&#32;{&#32;0&#32;},
+221 &#32;&#32;&#32;&#32;.moveControl&#32;=&#32;{&#32;<emphasis role="charliteral">&apos;W&apos;</emphasis>,&#32;<emphasis role="charliteral">&apos;S&apos;</emphasis>,&#32;<emphasis role="charliteral">&apos;D&apos;</emphasis>,&#32;<emphasis role="charliteral">&apos;A&apos;</emphasis>,&#32;<emphasis role="charliteral">&apos;E&apos;</emphasis>,&#32;<emphasis role="charliteral">&apos;Q&apos;</emphasis>&#32;},
+222 &#32;&#32;&#32;&#32;.smoothZoomControl&#32;=&#32;341,
+223 &#32;&#32;&#32;&#32;.altControl&#32;=&#32;342,
+224 &#32;&#32;&#32;&#32;.panControl&#32;=&#32;2
+225 };
+226 
+227 <emphasis role="comment">//----------------------------------------------------------------------------------</emphasis>
+228 <emphasis role="comment">//&#32;Module&#32;specific&#32;Functions&#32;Declaration</emphasis>
+229 <emphasis role="comment">//----------------------------------------------------------------------------------</emphasis>
+230 <emphasis role="preprocessor">#if&#32;defined(CAMERA_STANDALONE)</emphasis>
+231 <emphasis role="comment">//&#32;NOTE:&#32;Camera&#32;controls&#32;depend&#32;on&#32;some&#32;raylib&#32;input&#32;functions</emphasis>
+232 <emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>&#32;<link linkend="__classes_2lib_2raylib_8h_1afb701d6c2abb3c78832afb61516d5d30">EnableCursor</link>()&#32;{}&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Unlock&#32;cursor</emphasis>
+233 <emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>&#32;<link linkend="__classes_2lib_2raylib_8h_1ac911ba72896bda9254a42a3d2338a0e5">DisableCursor</link>()&#32;{}&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Lock&#32;cursor</emphasis>
+234 
+235 <emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2raylib_8h_1aa452c026db4f0f42d59d6af8a612979e">IsKeyDown</link>(<emphasis role="keywordtype">int</emphasis>&#32;key)&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;0;&#32;}
+236 
+237 <emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2raylib_8h_1a8da42c84f5963f9da5533c7b6d67a910">IsMouseButtonDown</link>(<emphasis role="keywordtype">int</emphasis>&#32;button)&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;0;}
+238 <emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2raylib_8h_1a72d8a2693a830e061d0928468df9b562">GetMouseWheelMove</link>()&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;0;&#32;}
+239 <emphasis role="keyword">static</emphasis>&#32;<link linkend="_struct_vector2">Vector2</link>&#32;<link linkend="__classes_2lib_2raylib_8h_1ab9f5c010c30d4652f5d3c26c652a5ab6">GetMousePosition</link>()&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;(<link linkend="_struct_vector2">Vector2</link>){&#32;0.0f,&#32;0.0f&#32;};&#32;}
+240 <emphasis role="preprocessor">#endif</emphasis>
+241 
+242 <emphasis role="comment">//----------------------------------------------------------------------------------</emphasis>
+243 <emphasis role="comment">//&#32;Module&#32;Functions&#32;Definition</emphasis>
+244 <emphasis role="comment">//----------------------------------------------------------------------------------</emphasis>
+245 
+246 <emphasis role="comment">//&#32;Select&#32;camera&#32;mode&#32;(multiple&#32;camera&#32;modes&#32;available)</emphasis>
+247 <emphasis role="keywordtype">void</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2raylib_8h_1afab7375cadbc089f77ad6fdb9065e8e3">SetCameraMode</link>(<link linkend="_struct_camera3_d">Camera</link>&#32;<link linkend="__classes_2lib_2glm_2test_2cmake_2test__find__glm_8cpp_1a8f389d10179adf56cc907127d615c000">camera</link>,&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a1e71d9c196e4683cc06c4b54d53f7ef5">mode</link>)
+248 {
+249 &#32;&#32;&#32;&#32;<link linkend="_struct_vector3">Vector3</link>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a0779c3b73f9aa3a0ac5b0139b5d291d9">v1</link>&#32;=&#32;<link linkend="__classes_2lib_2glm_2test_2cmake_2test__find__glm_8cpp_1a8f389d10179adf56cc907127d615c000">camera</link>.position;
+250 &#32;&#32;&#32;&#32;<link linkend="_struct_vector3">Vector3</link>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a9a09a1837922b2b806f4589096a52049">v2</link>&#32;=&#32;<link linkend="__classes_2lib_2glm_2test_2cmake_2test__find__glm_8cpp_1a8f389d10179adf56cc907127d615c000">camera</link>.target;
+251 
+252 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">float</emphasis>&#32;dx&#32;=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a9a09a1837922b2b806f4589096a52049">v2</link>.x&#32;-&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a0779c3b73f9aa3a0ac5b0139b5d291d9">v1</link>.x;
+253 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">float</emphasis>&#32;dy&#32;=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a9a09a1837922b2b806f4589096a52049">v2</link>.y&#32;-&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a0779c3b73f9aa3a0ac5b0139b5d291d9">v1</link>.y;
+254 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">float</emphasis>&#32;dz&#32;=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a9a09a1837922b2b806f4589096a52049">v2</link>.z&#32;-&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a0779c3b73f9aa3a0ac5b0139b5d291d9">v1</link>.z;
+255 
+256 &#32;&#32;&#32;&#32;CAMERA.targetDistance&#32;=&#32;sqrtf(dx*dx&#32;+&#32;dy*dy&#32;+&#32;dz*dz);
+257 
+258 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Camera&#32;angle&#32;calculation</emphasis>
+259 &#32;&#32;&#32;&#32;CAMERA.angle.x&#32;=&#32;atan2f(dx,&#32;dz);&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Camera&#32;angle&#32;in&#32;plane&#32;XZ&#32;(0&#32;aligned&#32;with&#32;Z,&#32;move&#32;positive&#32;CCW)</emphasis>
+260 &#32;&#32;&#32;&#32;CAMERA.angle.y&#32;=&#32;atan2f(dy,&#32;sqrtf(dx*dx&#32;+&#32;dz*dz));&#32;<emphasis role="comment">//&#32;Camera&#32;angle&#32;in&#32;plane&#32;XY&#32;(0&#32;aligned&#32;with&#32;X,&#32;move&#32;positive&#32;CW)</emphasis>
+261 
+262 &#32;&#32;&#32;&#32;CAMERA.playerEyesPosition&#32;=&#32;<link linkend="__classes_2lib_2glm_2test_2cmake_2test__find__glm_8cpp_1a8f389d10179adf56cc907127d615c000">camera</link>.position.y;
+263 
+264 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Lock&#32;cursor&#32;for&#32;first&#32;person&#32;and&#32;third&#32;person&#32;cameras</emphasis>
+265 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;((<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a1e71d9c196e4683cc06c4b54d53f7ef5">mode</link>&#32;==&#32;<link linkend="__classes_2lib_2raylib_8h_1ac6e73fe6ce68e10b0acd6d2312bdbb35a7f979c63ce2ee9127eb5d69986bbb2f9">CAMERA_FIRST_PERSON</link>)&#32;||&#32;(<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a1e71d9c196e4683cc06c4b54d53f7ef5">mode</link>&#32;==&#32;<link linkend="__classes_2lib_2raylib_8h_1ac6e73fe6ce68e10b0acd6d2312bdbb35a6c23689e2f42530a480950f7875bc82a">CAMERA_THIRD_PERSON</link>))&#32;<link linkend="__classes_2lib_2raylib_8h_1ac911ba72896bda9254a42a3d2338a0e5">DisableCursor</link>();
+266 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>&#32;<link linkend="__classes_2lib_2raylib_8h_1afb701d6c2abb3c78832afb61516d5d30">EnableCursor</link>();
+267 
+268 &#32;&#32;&#32;&#32;CAMERA.mode&#32;=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a1e71d9c196e4683cc06c4b54d53f7ef5">mode</link>;
+269 }
+270 
+271 <emphasis role="comment">//&#32;Update&#32;camera&#32;depending&#32;on&#32;selected&#32;mode</emphasis>
+272 <emphasis role="comment">//&#32;NOTE:&#32;Camera&#32;controls&#32;depend&#32;on&#32;some&#32;raylib&#32;functions:</emphasis>
+273 <emphasis role="comment">//&#32;&#32;&#32;&#32;&#32;&#32;&#32;System:&#32;EnableCursor(),&#32;DisableCursor()</emphasis>
+274 <emphasis role="comment">//&#32;&#32;&#32;&#32;&#32;&#32;&#32;Mouse:&#32;IsMouseButtonDown(),&#32;GetMousePosition(),&#32;GetMouseWheelMove()</emphasis>
+275 <emphasis role="comment">//&#32;&#32;&#32;&#32;&#32;&#32;&#32;Keys:&#32;&#32;IsKeyDown()</emphasis>
+276 <emphasis role="comment">//&#32;TODO:&#32;Port&#32;to&#32;quaternion-based&#32;camera&#32;(?)</emphasis>
+277 <emphasis role="keywordtype">void</emphasis>&#32;<link linkend="__classes_2lib_2raylib_8h_1adc7bb09d8b200ff74240ee1375552020">UpdateCamera</link>(<link linkend="_struct_camera3_d">Camera</link>&#32;*<link linkend="__classes_2lib_2glm_2test_2cmake_2test__find__glm_8cpp_1a8f389d10179adf56cc907127d615c000">camera</link>)
+278 {
+279 &#32;&#32;&#32;&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;swingCounter&#32;=&#32;0;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Used&#32;for&#32;1st&#32;person&#32;swinging&#32;movement</emphasis>
+280 &#32;&#32;&#32;&#32;<emphasis role="keyword">static</emphasis>&#32;<link linkend="_struct_vector2">Vector2</link>&#32;previousMousePosition&#32;=&#32;{&#32;0.0f,&#32;0.0f&#32;};
+281 
+282 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;TODO:&#32;Compute&#32;CAMERA.targetDistance&#32;and&#32;CAMERA.angle&#32;here&#32;(?)</emphasis>
+283 
+284 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Mouse&#32;movement&#32;detection</emphasis>
+285 &#32;&#32;&#32;&#32;<link linkend="_struct_vector2">Vector2</link>&#32;mousePositionDelta&#32;=&#32;{&#32;0.0f,&#32;0.0f&#32;};
+286 &#32;&#32;&#32;&#32;<link linkend="_struct_vector2">Vector2</link>&#32;mousePosition&#32;=&#32;<link linkend="__classes_2lib_2raylib_8h_1ab9f5c010c30d4652f5d3c26c652a5ab6">GetMousePosition</link>();
+287 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;mouseWheelMove&#32;=&#32;<link linkend="__classes_2lib_2raylib_8h_1a72d8a2693a830e061d0928468df9b562">GetMouseWheelMove</link>();
+288 
+289 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Keys&#32;input&#32;detection</emphasis>
+290 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">bool</emphasis>&#32;panKey&#32;=&#32;<link linkend="__classes_2lib_2raylib_8h_1a8da42c84f5963f9da5533c7b6d67a910">IsMouseButtonDown</link>(CAMERA.panControl);
+291 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">bool</emphasis>&#32;altKey&#32;=&#32;<link linkend="__classes_2lib_2raylib_8h_1aa452c026db4f0f42d59d6af8a612979e">IsKeyDown</link>(CAMERA.altControl);
+292 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">bool</emphasis>&#32;szoomKey&#32;=&#32;<link linkend="__classes_2lib_2raylib_8h_1aa452c026db4f0f42d59d6af8a612979e">IsKeyDown</link>(CAMERA.smoothZoomControl);
+293 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">bool</emphasis>&#32;direction[6]&#32;=&#32;{&#32;<link linkend="__classes_2lib_2raylib_8h_1aa452c026db4f0f42d59d6af8a612979e">IsKeyDown</link>(CAMERA.moveControl[MOVE_FRONT]),
+294 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_8h_1aa452c026db4f0f42d59d6af8a612979e">IsKeyDown</link>(CAMERA.moveControl[MOVE_BACK]),
+295 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_8h_1aa452c026db4f0f42d59d6af8a612979e">IsKeyDown</link>(CAMERA.moveControl[MOVE_RIGHT]),
+296 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_8h_1aa452c026db4f0f42d59d6af8a612979e">IsKeyDown</link>(CAMERA.moveControl[MOVE_LEFT]),
+297 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_8h_1aa452c026db4f0f42d59d6af8a612979e">IsKeyDown</link>(CAMERA.moveControl[MOVE_UP]),
+298 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_8h_1aa452c026db4f0f42d59d6af8a612979e">IsKeyDown</link>(CAMERA.moveControl[MOVE_DOWN])&#32;};
+299 
+300 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;TODO:&#32;Touch&#32;input&#32;detection&#32;(probably&#32;gestures&#32;system&#32;required)</emphasis>
+301 
+302 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(CAMERA.mode&#32;!=&#32;<link linkend="__classes_2lib_2raylib_8h_1ac6e73fe6ce68e10b0acd6d2312bdbb35ad92b667c7667e6ae20ee60c6dbe35f08">CAMERA_CUSTOM</link>)
+303 &#32;&#32;&#32;&#32;{
+304 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;mousePositionDelta.<link linkend="_struct_vector2_1a046bb8d17a876acc49415128dc0502f2">x</link>&#32;=&#32;mousePosition.<link linkend="_struct_vector2_1a046bb8d17a876acc49415128dc0502f2">x</link>&#32;-&#32;previousMousePosition.<link linkend="_struct_vector2_1a046bb8d17a876acc49415128dc0502f2">x</link>;
+305 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;mousePositionDelta.<link linkend="_struct_vector2_1a0e07bad05f01ed811b909a2eef97f9e2">y</link>&#32;=&#32;mousePosition.<link linkend="_struct_vector2_1a0e07bad05f01ed811b909a2eef97f9e2">y</link>&#32;-&#32;previousMousePosition.<link linkend="_struct_vector2_1a0e07bad05f01ed811b909a2eef97f9e2">y</link>;
+306 
+307 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;previousMousePosition&#32;=&#32;mousePosition;
+308 &#32;&#32;&#32;&#32;}
+309 
+310 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Support&#32;for&#32;multiple&#32;automatic&#32;camera&#32;modes</emphasis>
+311 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;NOTE:&#32;In&#32;case&#32;of&#32;CAMERA_CUSTOM&#32;nothing&#32;happens&#32;here,&#32;user&#32;must&#32;update&#32;it&#32;manually</emphasis>
+312 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">switch</emphasis>&#32;(CAMERA.mode)
+313 &#32;&#32;&#32;&#32;{
+314 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">case</emphasis>&#32;<link linkend="__classes_2lib_2raylib_8h_1ac6e73fe6ce68e10b0acd6d2312bdbb35aa2047d9bda997c7b3ff7000feff88c90">CAMERA_FREE</link>:&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Camera&#32;free&#32;controls,&#32;using&#32;standard&#32;3d-content-creation&#32;scheme</emphasis>
+315 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+316 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Camera&#32;zoom</emphasis>
+317 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;((CAMERA.targetDistance&#32;&lt;&#32;CAMERA_FREE_DISTANCE_MAX_CLAMP)&#32;&amp;&amp;&#32;(mouseWheelMove&#32;&lt;&#32;0))
+318 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+319 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;CAMERA.targetDistance&#32;-=&#32;(mouseWheelMove*CAMERA_MOUSE_SCROLL_SENSITIVITY);
+320 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(CAMERA.targetDistance&#32;&gt;&#32;CAMERA_FREE_DISTANCE_MAX_CLAMP)&#32;CAMERA.targetDistance&#32;=&#32;CAMERA_FREE_DISTANCE_MAX_CLAMP;
+321 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+322 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;
+323 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Camera&#32;looking&#32;down</emphasis>
+324 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;TODO:&#32;Review,&#32;weird&#32;comparison&#32;of&#32;CAMERA.targetDistance&#32;==&#32;120.0f?</emphasis>
+325 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>&#32;<emphasis role="keywordflow">if</emphasis>&#32;((<link linkend="__classes_2lib_2glm_2test_2cmake_2test__find__glm_8cpp_1a8f389d10179adf56cc907127d615c000">camera</link>-&gt;position.y&#32;&gt;&#32;<link linkend="__classes_2lib_2glm_2test_2cmake_2test__find__glm_8cpp_1a8f389d10179adf56cc907127d615c000">camera</link>-&gt;target.y)&#32;&amp;&amp;&#32;(CAMERA.targetDistance&#32;==&#32;CAMERA_FREE_DISTANCE_MAX_CLAMP)&#32;&amp;&amp;&#32;(mouseWheelMove&#32;&lt;&#32;0))
+326 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+327 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2glm_2test_2cmake_2test__find__glm_8cpp_1a8f389d10179adf56cc907127d615c000">camera</link>-&gt;target.x&#32;+=&#32;mouseWheelMove*(<link linkend="__classes_2lib_2glm_2test_2cmake_2test__find__glm_8cpp_1a8f389d10179adf56cc907127d615c000">camera</link>-&gt;target.x&#32;-&#32;<link linkend="__classes_2lib_2glm_2test_2cmake_2test__find__glm_8cpp_1a8f389d10179adf56cc907127d615c000">camera</link>-&gt;position.x)*CAMERA_MOUSE_SCROLL_SENSITIVITY/CAMERA.targetDistance;
+328 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2glm_2test_2cmake_2test__find__glm_8cpp_1a8f389d10179adf56cc907127d615c000">camera</link>-&gt;target.y&#32;+=&#32;mouseWheelMove*(<link linkend="__classes_2lib_2glm_2test_2cmake_2test__find__glm_8cpp_1a8f389d10179adf56cc907127d615c000">camera</link>-&gt;target.y&#32;-&#32;<link linkend="__classes_2lib_2glm_2test_2cmake_2test__find__glm_8cpp_1a8f389d10179adf56cc907127d615c000">camera</link>-&gt;position.y)*CAMERA_MOUSE_SCROLL_SENSITIVITY/CAMERA.targetDistance;
+329 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2glm_2test_2cmake_2test__find__glm_8cpp_1a8f389d10179adf56cc907127d615c000">camera</link>-&gt;target.z&#32;+=&#32;mouseWheelMove*(<link linkend="__classes_2lib_2glm_2test_2cmake_2test__find__glm_8cpp_1a8f389d10179adf56cc907127d615c000">camera</link>-&gt;target.z&#32;-&#32;<link linkend="__classes_2lib_2glm_2test_2cmake_2test__find__glm_8cpp_1a8f389d10179adf56cc907127d615c000">camera</link>-&gt;position.z)*CAMERA_MOUSE_SCROLL_SENSITIVITY/CAMERA.targetDistance;
+330 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+331 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>&#32;<emphasis role="keywordflow">if</emphasis>&#32;((<link linkend="__classes_2lib_2glm_2test_2cmake_2test__find__glm_8cpp_1a8f389d10179adf56cc907127d615c000">camera</link>-&gt;position.y&#32;&gt;&#32;<link linkend="__classes_2lib_2glm_2test_2cmake_2test__find__glm_8cpp_1a8f389d10179adf56cc907127d615c000">camera</link>-&gt;target.y)&#32;&amp;&amp;&#32;(<link linkend="__classes_2lib_2glm_2test_2cmake_2test__find__glm_8cpp_1a8f389d10179adf56cc907127d615c000">camera</link>-&gt;target.y&#32;&gt;=&#32;0))
+332 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+333 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2glm_2test_2cmake_2test__find__glm_8cpp_1a8f389d10179adf56cc907127d615c000">camera</link>-&gt;target.x&#32;+=&#32;mouseWheelMove*(<link linkend="__classes_2lib_2glm_2test_2cmake_2test__find__glm_8cpp_1a8f389d10179adf56cc907127d615c000">camera</link>-&gt;target.x&#32;-&#32;<link linkend="__classes_2lib_2glm_2test_2cmake_2test__find__glm_8cpp_1a8f389d10179adf56cc907127d615c000">camera</link>-&gt;position.x)*CAMERA_MOUSE_SCROLL_SENSITIVITY/CAMERA.targetDistance;
+334 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2glm_2test_2cmake_2test__find__glm_8cpp_1a8f389d10179adf56cc907127d615c000">camera</link>-&gt;target.y&#32;+=&#32;mouseWheelMove*(<link linkend="__classes_2lib_2glm_2test_2cmake_2test__find__glm_8cpp_1a8f389d10179adf56cc907127d615c000">camera</link>-&gt;target.y&#32;-&#32;<link linkend="__classes_2lib_2glm_2test_2cmake_2test__find__glm_8cpp_1a8f389d10179adf56cc907127d615c000">camera</link>-&gt;position.y)*CAMERA_MOUSE_SCROLL_SENSITIVITY/CAMERA.targetDistance;
+335 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2glm_2test_2cmake_2test__find__glm_8cpp_1a8f389d10179adf56cc907127d615c000">camera</link>-&gt;target.z&#32;+=&#32;mouseWheelMove*(<link linkend="__classes_2lib_2glm_2test_2cmake_2test__find__glm_8cpp_1a8f389d10179adf56cc907127d615c000">camera</link>-&gt;target.z&#32;-&#32;<link linkend="__classes_2lib_2glm_2test_2cmake_2test__find__glm_8cpp_1a8f389d10179adf56cc907127d615c000">camera</link>-&gt;position.z)*CAMERA_MOUSE_SCROLL_SENSITIVITY/CAMERA.targetDistance;
+336 
+337 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;if&#32;(camera-&gt;target.y&#32;&lt;&#32;0)&#32;camera-&gt;target.y&#32;=&#32;-0.001;</emphasis>
+338 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+339 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>&#32;<emphasis role="keywordflow">if</emphasis>&#32;((<link linkend="__classes_2lib_2glm_2test_2cmake_2test__find__glm_8cpp_1a8f389d10179adf56cc907127d615c000">camera</link>-&gt;position.y&#32;&gt;&#32;<link linkend="__classes_2lib_2glm_2test_2cmake_2test__find__glm_8cpp_1a8f389d10179adf56cc907127d615c000">camera</link>-&gt;target.y)&#32;&amp;&amp;&#32;(<link linkend="__classes_2lib_2glm_2test_2cmake_2test__find__glm_8cpp_1a8f389d10179adf56cc907127d615c000">camera</link>-&gt;target.y&#32;&lt;&#32;0)&#32;&amp;&amp;&#32;(mouseWheelMove&#32;&gt;&#32;0))
+340 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+341 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;CAMERA.targetDistance&#32;-=&#32;(mouseWheelMove*CAMERA_MOUSE_SCROLL_SENSITIVITY);
+342 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(CAMERA.targetDistance&#32;&lt;&#32;CAMERA_FREE_DISTANCE_MIN_CLAMP)&#32;CAMERA.targetDistance&#32;=&#32;CAMERA_FREE_DISTANCE_MIN_CLAMP;
+343 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+344 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Camera&#32;looking&#32;up</emphasis>
+345 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;TODO:&#32;Review,&#32;weird&#32;comparisson&#32;of&#32;CAMERA.targetDistance&#32;==&#32;120.0f?</emphasis>
+346 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>&#32;<emphasis role="keywordflow">if</emphasis>&#32;((<link linkend="__classes_2lib_2glm_2test_2cmake_2test__find__glm_8cpp_1a8f389d10179adf56cc907127d615c000">camera</link>-&gt;position.y&#32;&lt;&#32;<link linkend="__classes_2lib_2glm_2test_2cmake_2test__find__glm_8cpp_1a8f389d10179adf56cc907127d615c000">camera</link>-&gt;target.y)&#32;&amp;&amp;&#32;(CAMERA.targetDistance&#32;==&#32;CAMERA_FREE_DISTANCE_MAX_CLAMP)&#32;&amp;&amp;&#32;(mouseWheelMove&#32;&lt;&#32;0))
+347 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+348 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2glm_2test_2cmake_2test__find__glm_8cpp_1a8f389d10179adf56cc907127d615c000">camera</link>-&gt;target.x&#32;+=&#32;mouseWheelMove*(<link linkend="__classes_2lib_2glm_2test_2cmake_2test__find__glm_8cpp_1a8f389d10179adf56cc907127d615c000">camera</link>-&gt;target.x&#32;-&#32;<link linkend="__classes_2lib_2glm_2test_2cmake_2test__find__glm_8cpp_1a8f389d10179adf56cc907127d615c000">camera</link>-&gt;position.x)*CAMERA_MOUSE_SCROLL_SENSITIVITY/CAMERA.targetDistance;
+349 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2glm_2test_2cmake_2test__find__glm_8cpp_1a8f389d10179adf56cc907127d615c000">camera</link>-&gt;target.y&#32;+=&#32;mouseWheelMove*(<link linkend="__classes_2lib_2glm_2test_2cmake_2test__find__glm_8cpp_1a8f389d10179adf56cc907127d615c000">camera</link>-&gt;target.y&#32;-&#32;<link linkend="__classes_2lib_2glm_2test_2cmake_2test__find__glm_8cpp_1a8f389d10179adf56cc907127d615c000">camera</link>-&gt;position.y)*CAMERA_MOUSE_SCROLL_SENSITIVITY/CAMERA.targetDistance;
+350 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2glm_2test_2cmake_2test__find__glm_8cpp_1a8f389d10179adf56cc907127d615c000">camera</link>-&gt;target.z&#32;+=&#32;mouseWheelMove*(<link linkend="__classes_2lib_2glm_2test_2cmake_2test__find__glm_8cpp_1a8f389d10179adf56cc907127d615c000">camera</link>-&gt;target.z&#32;-&#32;<link linkend="__classes_2lib_2glm_2test_2cmake_2test__find__glm_8cpp_1a8f389d10179adf56cc907127d615c000">camera</link>-&gt;position.z)*CAMERA_MOUSE_SCROLL_SENSITIVITY/CAMERA.targetDistance;
+351 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+352 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>&#32;<emphasis role="keywordflow">if</emphasis>&#32;((<link linkend="__classes_2lib_2glm_2test_2cmake_2test__find__glm_8cpp_1a8f389d10179adf56cc907127d615c000">camera</link>-&gt;position.y&#32;&lt;&#32;<link linkend="__classes_2lib_2glm_2test_2cmake_2test__find__glm_8cpp_1a8f389d10179adf56cc907127d615c000">camera</link>-&gt;target.y)&#32;&amp;&amp;&#32;(<link linkend="__classes_2lib_2glm_2test_2cmake_2test__find__glm_8cpp_1a8f389d10179adf56cc907127d615c000">camera</link>-&gt;target.y&#32;&lt;=&#32;0))
+353 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+354 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2glm_2test_2cmake_2test__find__glm_8cpp_1a8f389d10179adf56cc907127d615c000">camera</link>-&gt;target.x&#32;+=&#32;mouseWheelMove*(<link linkend="__classes_2lib_2glm_2test_2cmake_2test__find__glm_8cpp_1a8f389d10179adf56cc907127d615c000">camera</link>-&gt;target.x&#32;-&#32;<link linkend="__classes_2lib_2glm_2test_2cmake_2test__find__glm_8cpp_1a8f389d10179adf56cc907127d615c000">camera</link>-&gt;position.x)*CAMERA_MOUSE_SCROLL_SENSITIVITY/CAMERA.targetDistance;
+355 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2glm_2test_2cmake_2test__find__glm_8cpp_1a8f389d10179adf56cc907127d615c000">camera</link>-&gt;target.y&#32;+=&#32;mouseWheelMove*(<link linkend="__classes_2lib_2glm_2test_2cmake_2test__find__glm_8cpp_1a8f389d10179adf56cc907127d615c000">camera</link>-&gt;target.y&#32;-&#32;<link linkend="__classes_2lib_2glm_2test_2cmake_2test__find__glm_8cpp_1a8f389d10179adf56cc907127d615c000">camera</link>-&gt;position.y)*CAMERA_MOUSE_SCROLL_SENSITIVITY/CAMERA.targetDistance;
+356 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2glm_2test_2cmake_2test__find__glm_8cpp_1a8f389d10179adf56cc907127d615c000">camera</link>-&gt;target.z&#32;+=&#32;mouseWheelMove*(<link linkend="__classes_2lib_2glm_2test_2cmake_2test__find__glm_8cpp_1a8f389d10179adf56cc907127d615c000">camera</link>-&gt;target.z&#32;-&#32;<link linkend="__classes_2lib_2glm_2test_2cmake_2test__find__glm_8cpp_1a8f389d10179adf56cc907127d615c000">camera</link>-&gt;position.z)*CAMERA_MOUSE_SCROLL_SENSITIVITY/CAMERA.targetDistance;
+357 
+358 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;if&#32;(camera-&gt;target.y&#32;&gt;&#32;0)&#32;camera-&gt;target.y&#32;=&#32;0.001;</emphasis>
+359 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+360 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>&#32;<emphasis role="keywordflow">if</emphasis>&#32;((<link linkend="__classes_2lib_2glm_2test_2cmake_2test__find__glm_8cpp_1a8f389d10179adf56cc907127d615c000">camera</link>-&gt;position.y&#32;&lt;&#32;<link linkend="__classes_2lib_2glm_2test_2cmake_2test__find__glm_8cpp_1a8f389d10179adf56cc907127d615c000">camera</link>-&gt;target.y)&#32;&amp;&amp;&#32;(<link linkend="__classes_2lib_2glm_2test_2cmake_2test__find__glm_8cpp_1a8f389d10179adf56cc907127d615c000">camera</link>-&gt;target.y&#32;&gt;&#32;0)&#32;&amp;&amp;&#32;(mouseWheelMove&#32;&gt;&#32;0))
+361 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+362 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;CAMERA.targetDistance&#32;-=&#32;(mouseWheelMove*CAMERA_MOUSE_SCROLL_SENSITIVITY);
+363 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(CAMERA.targetDistance&#32;&lt;&#32;CAMERA_FREE_DISTANCE_MIN_CLAMP)&#32;CAMERA.targetDistance&#32;=&#32;CAMERA_FREE_DISTANCE_MIN_CLAMP;
+364 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+365 
+366 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Input&#32;keys&#32;checks</emphasis>
+367 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(panKey)
+368 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+369 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(altKey)&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Alternative&#32;key&#32;behaviour</emphasis>
+370 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+371 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(szoomKey)
+372 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+373 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Camera&#32;smooth&#32;zoom</emphasis>
+374 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;CAMERA.targetDistance&#32;+=&#32;(mousePositionDelta.<link linkend="_struct_vector2_1a0e07bad05f01ed811b909a2eef97f9e2">y</link>*CAMERA_FREE_SMOOTH_ZOOM_SENSITIVITY);
+375 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+376 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>
+377 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+378 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Camera&#32;rotation</emphasis>
+379 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;CAMERA.angle.x&#32;+=&#32;mousePositionDelta.<link linkend="_struct_vector2_1a046bb8d17a876acc49415128dc0502f2">x</link>*-CAMERA_FREE_MOUSE_SENSITIVITY;
+380 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;CAMERA.angle.y&#32;+=&#32;mousePositionDelta.<link linkend="_struct_vector2_1a0e07bad05f01ed811b909a2eef97f9e2">y</link>*-CAMERA_FREE_MOUSE_SENSITIVITY;
+381 
+382 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Angle&#32;clamp</emphasis>
+383 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(CAMERA.angle.y&#32;&gt;&#32;CAMERA_FREE_MIN_CLAMP*<link linkend="__classes_2lib_2raylib_8h_1af7e8592d0a634bd3642e9fd508ea8022">DEG2RAD</link>)&#32;CAMERA.angle.y&#32;=&#32;CAMERA_FREE_MIN_CLAMP*<link linkend="__classes_2lib_2raylib_8h_1af7e8592d0a634bd3642e9fd508ea8022">DEG2RAD</link>;
+384 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>&#32;<emphasis role="keywordflow">if</emphasis>&#32;(CAMERA.angle.y&#32;&lt;&#32;CAMERA_FREE_MAX_CLAMP*<link linkend="__classes_2lib_2raylib_8h_1af7e8592d0a634bd3642e9fd508ea8022">DEG2RAD</link>)&#32;CAMERA.angle.y&#32;=&#32;CAMERA_FREE_MAX_CLAMP*<link linkend="__classes_2lib_2raylib_8h_1af7e8592d0a634bd3642e9fd508ea8022">DEG2RAD</link>;
+385 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+386 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+387 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>
+388 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+389 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Camera&#32;panning</emphasis>
+390 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2glm_2test_2cmake_2test__find__glm_8cpp_1a8f389d10179adf56cc907127d615c000">camera</link>-&gt;target.x&#32;+=&#32;((mousePositionDelta.<link linkend="_struct_vector2_1a046bb8d17a876acc49415128dc0502f2">x</link>*CAMERA_FREE_MOUSE_SENSITIVITY)*cosf(CAMERA.angle.x)&#32;+&#32;(mousePositionDelta.<link linkend="_struct_vector2_1a0e07bad05f01ed811b909a2eef97f9e2">y</link>*CAMERA_FREE_MOUSE_SENSITIVITY)*sinf(CAMERA.angle.x)*sinf(CAMERA.angle.y))*(CAMERA.targetDistance/CAMERA_FREE_PANNING_DIVIDER);
+391 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2glm_2test_2cmake_2test__find__glm_8cpp_1a8f389d10179adf56cc907127d615c000">camera</link>-&gt;target.y&#32;+=&#32;((mousePositionDelta.<link linkend="_struct_vector2_1a0e07bad05f01ed811b909a2eef97f9e2">y</link>*CAMERA_FREE_MOUSE_SENSITIVITY)*cosf(CAMERA.angle.y))*(CAMERA.targetDistance/CAMERA_FREE_PANNING_DIVIDER);
+392 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2glm_2test_2cmake_2test__find__glm_8cpp_1a8f389d10179adf56cc907127d615c000">camera</link>-&gt;target.z&#32;+=&#32;((mousePositionDelta.<link linkend="_struct_vector2_1a046bb8d17a876acc49415128dc0502f2">x</link>*-CAMERA_FREE_MOUSE_SENSITIVITY)*sinf(CAMERA.angle.x)&#32;+&#32;(mousePositionDelta.<link linkend="_struct_vector2_1a0e07bad05f01ed811b909a2eef97f9e2">y</link>*CAMERA_FREE_MOUSE_SENSITIVITY)*cosf(CAMERA.angle.x)*sinf(CAMERA.angle.y))*(CAMERA.targetDistance/CAMERA_FREE_PANNING_DIVIDER);
+393 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+394 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+395 
+396 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Update&#32;camera&#32;position&#32;with&#32;changes</emphasis>
+397 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2glm_2test_2cmake_2test__find__glm_8cpp_1a8f389d10179adf56cc907127d615c000">camera</link>-&gt;position.x&#32;=&#32;-sinf(CAMERA.angle.x)*CAMERA.targetDistance*cosf(CAMERA.angle.y)&#32;+&#32;<link linkend="__classes_2lib_2glm_2test_2cmake_2test__find__glm_8cpp_1a8f389d10179adf56cc907127d615c000">camera</link>-&gt;target.x;
+398 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2glm_2test_2cmake_2test__find__glm_8cpp_1a8f389d10179adf56cc907127d615c000">camera</link>-&gt;position.y&#32;=&#32;-sinf(CAMERA.angle.y)*CAMERA.targetDistance&#32;+&#32;<link linkend="__classes_2lib_2glm_2test_2cmake_2test__find__glm_8cpp_1a8f389d10179adf56cc907127d615c000">camera</link>-&gt;target.y;
+399 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2glm_2test_2cmake_2test__find__glm_8cpp_1a8f389d10179adf56cc907127d615c000">camera</link>-&gt;position.z&#32;=&#32;-cosf(CAMERA.angle.x)*CAMERA.targetDistance*cosf(CAMERA.angle.y)&#32;+&#32;<link linkend="__classes_2lib_2glm_2test_2cmake_2test__find__glm_8cpp_1a8f389d10179adf56cc907127d615c000">camera</link>-&gt;target.z;
+400 
+401 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}&#32;<emphasis role="keywordflow">break</emphasis>;
+402 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">case</emphasis>&#32;<link linkend="__classes_2lib_2raylib_8h_1ac6e73fe6ce68e10b0acd6d2312bdbb35a5993778026f9058046510b602220f635">CAMERA_ORBITAL</link>:&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Camera&#32;just&#32;orbits&#32;around&#32;target,&#32;only&#32;zoom&#32;allowed</emphasis>
+403 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+404 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;CAMERA.angle.x&#32;+=&#32;CAMERA_ORBITAL_SPEED;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Camera&#32;orbit&#32;angle</emphasis>
+405 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;CAMERA.targetDistance&#32;-=&#32;(mouseWheelMove*CAMERA_MOUSE_SCROLL_SENSITIVITY);&#32;&#32;&#32;<emphasis role="comment">//&#32;Camera&#32;zoom</emphasis>
+406 
+407 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Camera&#32;distance&#32;clamp</emphasis>
+408 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(CAMERA.targetDistance&#32;&lt;&#32;CAMERA_THIRD_PERSON_DISTANCE_CLAMP)&#32;CAMERA.targetDistance&#32;=&#32;CAMERA_THIRD_PERSON_DISTANCE_CLAMP;
+409 
+410 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Update&#32;camera&#32;position&#32;with&#32;changes</emphasis>
+411 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2glm_2test_2cmake_2test__find__glm_8cpp_1a8f389d10179adf56cc907127d615c000">camera</link>-&gt;position.x&#32;=&#32;sinf(CAMERA.angle.x)*CAMERA.targetDistance*cosf(CAMERA.angle.y)&#32;+&#32;<link linkend="__classes_2lib_2glm_2test_2cmake_2test__find__glm_8cpp_1a8f389d10179adf56cc907127d615c000">camera</link>-&gt;target.x;
+412 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2glm_2test_2cmake_2test__find__glm_8cpp_1a8f389d10179adf56cc907127d615c000">camera</link>-&gt;position.y&#32;=&#32;((CAMERA.angle.y&#32;&lt;=&#32;0.0f)?&#32;1&#32;:&#32;-1)*sinf(CAMERA.<link linkend="_group__ext__quaternion__trigonometric_1ga8aa248b31d5ade470c87304df5eb7bd8">angle</link>.<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a4f27f1eebce8c31db01bb39fab9ef561">y</link>)*CAMERA.targetDistance*sinf(CAMERA.<link linkend="_group__ext__quaternion__trigonometric_1ga8aa248b31d5ade470c87304df5eb7bd8">angle</link>.<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a4f27f1eebce8c31db01bb39fab9ef561">y</link>)&#32;+&#32;<link linkend="__classes_2lib_2glm_2test_2cmake_2test__find__glm_8cpp_1a8f389d10179adf56cc907127d615c000">camera</link>-&gt;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1af9d0cbbbeb7414e786c41899e5a856d7">target</link>.<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a4f27f1eebce8c31db01bb39fab9ef561">y</link>;
+413 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2glm_2test_2cmake_2test__find__glm_8cpp_1a8f389d10179adf56cc907127d615c000">camera</link>-&gt;position.z&#32;=&#32;cosf(CAMERA.angle.x)*CAMERA.targetDistance*cosf(CAMERA.angle.y)&#32;+&#32;<link linkend="__classes_2lib_2glm_2test_2cmake_2test__find__glm_8cpp_1a8f389d10179adf56cc907127d615c000">camera</link>-&gt;target.z;
+414 
+415 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}&#32;<emphasis role="keywordflow">break</emphasis>;
+416 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">case</emphasis>&#32;<link linkend="__classes_2lib_2raylib_8h_1ac6e73fe6ce68e10b0acd6d2312bdbb35a7f979c63ce2ee9127eb5d69986bbb2f9">CAMERA_FIRST_PERSON</link>:&#32;&#32;&#32;<emphasis role="comment">//&#32;Camera&#32;moves&#32;as&#32;in&#32;a&#32;first-person&#32;game,&#32;controls&#32;are&#32;configurable</emphasis>
+417 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+418 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2glm_2test_2cmake_2test__find__glm_8cpp_1a8f389d10179adf56cc907127d615c000">camera</link>-&gt;position.x&#32;+=&#32;(sinf(CAMERA.angle.x)*direction[MOVE_BACK]&#32;-
+419 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;sinf(CAMERA.angle.x)*direction[MOVE_FRONT]&#32;-
+420 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;cosf(CAMERA.angle.x)*direction[MOVE_LEFT]&#32;+
+421 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;cosf(CAMERA.angle.x)*direction[MOVE_RIGHT])/PLAYER_MOVEMENT_SENSITIVITY;
+422 
+423 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2glm_2test_2cmake_2test__find__glm_8cpp_1a8f389d10179adf56cc907127d615c000">camera</link>-&gt;position.y&#32;+=&#32;(sinf(CAMERA.angle.y)*direction[MOVE_FRONT]&#32;-
+424 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;sinf(CAMERA.angle.y)*direction[MOVE_BACK]&#32;+
+425 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;1.0f*direction[MOVE_UP]&#32;-&#32;1.0f*direction[MOVE_DOWN])/PLAYER_MOVEMENT_SENSITIVITY;
+426 
+427 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2glm_2test_2cmake_2test__find__glm_8cpp_1a8f389d10179adf56cc907127d615c000">camera</link>-&gt;position.z&#32;+=&#32;(cosf(CAMERA.angle.x)*direction[MOVE_BACK]&#32;-
+428 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;cosf(CAMERA.angle.x)*direction[MOVE_FRONT]&#32;+
+429 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;sinf(CAMERA.angle.x)*direction[MOVE_LEFT]&#32;-
+430 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;sinf(CAMERA.angle.x)*direction[MOVE_RIGHT])/PLAYER_MOVEMENT_SENSITIVITY;
+431 
+432 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Camera&#32;orientation&#32;calculation</emphasis>
+433 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;CAMERA.angle.x&#32;+=&#32;(mousePositionDelta.<link linkend="_struct_vector2_1a046bb8d17a876acc49415128dc0502f2">x</link>*-CAMERA_MOUSE_MOVE_SENSITIVITY);
+434 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;CAMERA.angle.y&#32;+=&#32;(mousePositionDelta.<link linkend="_struct_vector2_1a0e07bad05f01ed811b909a2eef97f9e2">y</link>*-CAMERA_MOUSE_MOVE_SENSITIVITY);
+435 
+436 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Angle&#32;clamp</emphasis>
+437 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(CAMERA.angle.y&#32;&gt;&#32;CAMERA_FIRST_PERSON_MIN_CLAMP*<link linkend="__classes_2lib_2raylib_8h_1af7e8592d0a634bd3642e9fd508ea8022">DEG2RAD</link>)&#32;CAMERA.angle.y&#32;=&#32;CAMERA_FIRST_PERSON_MIN_CLAMP*<link linkend="__classes_2lib_2raylib_8h_1af7e8592d0a634bd3642e9fd508ea8022">DEG2RAD</link>;
+438 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>&#32;<emphasis role="keywordflow">if</emphasis>&#32;(CAMERA.angle.y&#32;&lt;&#32;CAMERA_FIRST_PERSON_MAX_CLAMP*<link linkend="__classes_2lib_2raylib_8h_1af7e8592d0a634bd3642e9fd508ea8022">DEG2RAD</link>)&#32;CAMERA.angle.y&#32;=&#32;CAMERA_FIRST_PERSON_MAX_CLAMP*<link linkend="__classes_2lib_2raylib_8h_1af7e8592d0a634bd3642e9fd508ea8022">DEG2RAD</link>;
+439 
+440 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Recalculate&#32;camera&#32;target&#32;considering&#32;translation&#32;and&#32;rotation</emphasis>
+441 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_struct_matrix">Matrix</link>&#32;translation&#32;=&#32;<link linkend="__classes_2lib_2raylib_2src_2raymath_8h_1a9a9af30f1220ff67c7f62cfa374caaea">MatrixTranslate</link>(0,&#32;0,&#32;(CAMERA.targetDistance/CAMERA_FREE_PANNING_DIVIDER));
+442 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_struct_matrix">Matrix</link>&#32;<link linkend="_group__gtx__quaternion_1gadbb992b52cef49dd3b11966e34260d17">rotation</link>&#32;=&#32;<link linkend="__classes_2lib_2raylib_2src_2raymath_8h_1a1c34235588e208f7351c5f6864df6f88">MatrixRotateXYZ</link>((<link linkend="_struct_vector3">Vector3</link>){&#32;<link linkend="__classes_2lib_2raylib_8h_1a598a3330b3c21701223ee0ca14316eca">PI</link>*2&#32;-&#32;CAMERA.angle.y,&#32;<link linkend="__classes_2lib_2raylib_8h_1a598a3330b3c21701223ee0ca14316eca">PI</link>*2&#32;-&#32;CAMERA.angle.x,&#32;0&#32;});
+443 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_struct_matrix">Matrix</link>&#32;<link linkend="_namespacestd_1a83797c5677d80005911de218c819adab">transform</link>&#32;=&#32;<link linkend="__classes_2lib_2raylib_2src_2raymath_8h_1a60f94abbb7266c03e4f55c6726f62073">MatrixMultiply</link>(translation,&#32;rotation);
+444 
+445 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2glm_2test_2cmake_2test__find__glm_8cpp_1a8f389d10179adf56cc907127d615c000">camera</link>-&gt;target.x&#32;=&#32;<link linkend="__classes_2lib_2glm_2test_2cmake_2test__find__glm_8cpp_1a8f389d10179adf56cc907127d615c000">camera</link>-&gt;position.x&#32;-&#32;<link linkend="_namespacestd_1a83797c5677d80005911de218c819adab">transform</link>.m12;
+446 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2glm_2test_2cmake_2test__find__glm_8cpp_1a8f389d10179adf56cc907127d615c000">camera</link>-&gt;target.y&#32;=&#32;<link linkend="__classes_2lib_2glm_2test_2cmake_2test__find__glm_8cpp_1a8f389d10179adf56cc907127d615c000">camera</link>-&gt;position.y&#32;-&#32;<link linkend="_namespacestd_1a83797c5677d80005911de218c819adab">transform</link>.m13;
+447 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2glm_2test_2cmake_2test__find__glm_8cpp_1a8f389d10179adf56cc907127d615c000">camera</link>-&gt;target.z&#32;=&#32;<link linkend="__classes_2lib_2glm_2test_2cmake_2test__find__glm_8cpp_1a8f389d10179adf56cc907127d615c000">camera</link>-&gt;position.z&#32;-&#32;<link linkend="_namespacestd_1a83797c5677d80005911de218c819adab">transform</link>.m14;
+448 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;
+449 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;If&#32;movement&#32;detected&#32;(some&#32;key&#32;pressed),&#32;increase&#32;swinging</emphasis>
+450 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(<emphasis role="keywordtype">int</emphasis>&#32;i&#32;=&#32;0;&#32;i&#32;&lt;&#32;6;&#32;i++)&#32;<emphasis role="keywordflow">if</emphasis>&#32;(direction[i])&#32;{&#32;swingCounter++;&#32;<emphasis role="keywordflow">break</emphasis>;&#32;}
+451 
+452 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Camera&#32;position&#32;update</emphasis>
+453 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;NOTE:&#32;On&#32;CAMERA_FIRST_PERSON&#32;player&#32;Y-movement&#32;is&#32;limited&#32;to&#32;player&#32;&apos;eyes&#32;position&apos;</emphasis>
+454 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2glm_2test_2cmake_2test__find__glm_8cpp_1a8f389d10179adf56cc907127d615c000">camera</link>-&gt;position.y&#32;=&#32;CAMERA.playerEyesPosition&#32;-&#32;sinf(swingCounter/CAMERA_FIRST_PERSON_STEP_TRIGONOMETRIC_DIVIDER)/CAMERA_FIRST_PERSON_STEP_DIVIDER;
+455 
+456 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2glm_2test_2cmake_2test__find__glm_8cpp_1a8f389d10179adf56cc907127d615c000">camera</link>-&gt;up.x&#32;=&#32;sinf(swingCounter/(CAMERA_FIRST_PERSON_STEP_TRIGONOMETRIC_DIVIDER*2))/CAMERA_FIRST_PERSON_WAVING_DIVIDER;
+457 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2glm_2test_2cmake_2test__find__glm_8cpp_1a8f389d10179adf56cc907127d615c000">camera</link>-&gt;up.z&#32;=&#32;-sinf(swingCounter/(CAMERA_FIRST_PERSON_STEP_TRIGONOMETRIC_DIVIDER*2))/CAMERA_FIRST_PERSON_WAVING_DIVIDER;
+458 
+459 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}&#32;<emphasis role="keywordflow">break</emphasis>;
+460 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">case</emphasis>&#32;<link linkend="__classes_2lib_2raylib_8h_1ac6e73fe6ce68e10b0acd6d2312bdbb35a6c23689e2f42530a480950f7875bc82a">CAMERA_THIRD_PERSON</link>:&#32;&#32;&#32;<emphasis role="comment">//&#32;Camera&#32;moves&#32;as&#32;in&#32;a&#32;third-person&#32;game,&#32;following&#32;target&#32;at&#32;a&#32;distance,&#32;controls&#32;are&#32;configurable</emphasis>
+461 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+462 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2glm_2test_2cmake_2test__find__glm_8cpp_1a8f389d10179adf56cc907127d615c000">camera</link>-&gt;position.x&#32;+=&#32;(sinf(CAMERA.angle.x)*direction[MOVE_BACK]&#32;-
+463 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;sinf(CAMERA.angle.x)*direction[MOVE_FRONT]&#32;-
+464 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;cosf(CAMERA.angle.x)*direction[MOVE_LEFT]&#32;+
+465 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;cosf(CAMERA.angle.x)*direction[MOVE_RIGHT])/PLAYER_MOVEMENT_SENSITIVITY;
+466 
+467 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2glm_2test_2cmake_2test__find__glm_8cpp_1a8f389d10179adf56cc907127d615c000">camera</link>-&gt;position.y&#32;+=&#32;(sinf(CAMERA.angle.y)*direction[MOVE_FRONT]&#32;-
+468 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;sinf(CAMERA.angle.y)*direction[MOVE_BACK]&#32;+
+469 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;1.0f*direction[MOVE_UP]&#32;-&#32;1.0f*direction[MOVE_DOWN])/PLAYER_MOVEMENT_SENSITIVITY;
+470 
+471 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2glm_2test_2cmake_2test__find__glm_8cpp_1a8f389d10179adf56cc907127d615c000">camera</link>-&gt;position.z&#32;+=&#32;(cosf(CAMERA.angle.x)*direction[MOVE_BACK]&#32;-
+472 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;cosf(CAMERA.angle.x)*direction[MOVE_FRONT]&#32;+
+473 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;sinf(CAMERA.angle.x)*direction[MOVE_LEFT]&#32;-
+474 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;sinf(CAMERA.angle.x)*direction[MOVE_RIGHT])/PLAYER_MOVEMENT_SENSITIVITY;
+475 
+476 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Camera&#32;orientation&#32;calculation</emphasis>
+477 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;CAMERA.angle.x&#32;+=&#32;(mousePositionDelta.<link linkend="_struct_vector2_1a046bb8d17a876acc49415128dc0502f2">x</link>*-CAMERA_MOUSE_MOVE_SENSITIVITY);
+478 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;CAMERA.angle.y&#32;+=&#32;(mousePositionDelta.<link linkend="_struct_vector2_1a0e07bad05f01ed811b909a2eef97f9e2">y</link>*-CAMERA_MOUSE_MOVE_SENSITIVITY);
+479 
+480 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Angle&#32;clamp</emphasis>
+481 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(CAMERA.angle.y&#32;&gt;&#32;CAMERA_THIRD_PERSON_MIN_CLAMP*<link linkend="__classes_2lib_2raylib_8h_1af7e8592d0a634bd3642e9fd508ea8022">DEG2RAD</link>)&#32;CAMERA.angle.y&#32;=&#32;CAMERA_THIRD_PERSON_MIN_CLAMP*<link linkend="__classes_2lib_2raylib_8h_1af7e8592d0a634bd3642e9fd508ea8022">DEG2RAD</link>;
+482 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>&#32;<emphasis role="keywordflow">if</emphasis>&#32;(CAMERA.angle.y&#32;&lt;&#32;CAMERA_THIRD_PERSON_MAX_CLAMP*<link linkend="__classes_2lib_2raylib_8h_1af7e8592d0a634bd3642e9fd508ea8022">DEG2RAD</link>)&#32;CAMERA.angle.y&#32;=&#32;CAMERA_THIRD_PERSON_MAX_CLAMP*<link linkend="__classes_2lib_2raylib_8h_1af7e8592d0a634bd3642e9fd508ea8022">DEG2RAD</link>;
+483 
+484 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Camera&#32;zoom</emphasis>
+485 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;CAMERA.targetDistance&#32;-=&#32;(mouseWheelMove*CAMERA_MOUSE_SCROLL_SENSITIVITY);
+486 
+487 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Camera&#32;distance&#32;clamp</emphasis>
+488 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(CAMERA.targetDistance&#32;&lt;&#32;CAMERA_THIRD_PERSON_DISTANCE_CLAMP)&#32;CAMERA.targetDistance&#32;=&#32;CAMERA_THIRD_PERSON_DISTANCE_CLAMP;
+489 
+490 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;TODO:&#32;It&#32;seems&#32;camera-&gt;position&#32;is&#32;not&#32;correctly&#32;updated&#32;or&#32;some&#32;rounding&#32;issue&#32;makes&#32;the&#32;camera&#32;move&#32;straight&#32;to&#32;camera-&gt;target...</emphasis>
+491 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2glm_2test_2cmake_2test__find__glm_8cpp_1a8f389d10179adf56cc907127d615c000">camera</link>-&gt;position.x&#32;=&#32;sinf(CAMERA.angle.x)*CAMERA.targetDistance*cosf(CAMERA.angle.y)&#32;+&#32;<link linkend="__classes_2lib_2glm_2test_2cmake_2test__find__glm_8cpp_1a8f389d10179adf56cc907127d615c000">camera</link>-&gt;target.x;
+492 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(CAMERA.angle.y&#32;&lt;=&#32;0.0f)&#32;<link linkend="__classes_2lib_2glm_2test_2cmake_2test__find__glm_8cpp_1a8f389d10179adf56cc907127d615c000">camera</link>-&gt;position.y&#32;=&#32;sinf(CAMERA.angle.y)*CAMERA.targetDistance*sinf(CAMERA.angle.y)&#32;+&#32;<link linkend="__classes_2lib_2glm_2test_2cmake_2test__find__glm_8cpp_1a8f389d10179adf56cc907127d615c000">camera</link>-&gt;target.y;
+493 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>&#32;<link linkend="__classes_2lib_2glm_2test_2cmake_2test__find__glm_8cpp_1a8f389d10179adf56cc907127d615c000">camera</link>-&gt;position.y&#32;=&#32;-sinf(CAMERA.angle.y)*CAMERA.targetDistance*sinf(CAMERA.angle.y)&#32;+&#32;<link linkend="__classes_2lib_2glm_2test_2cmake_2test__find__glm_8cpp_1a8f389d10179adf56cc907127d615c000">camera</link>-&gt;target.y;
+494 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2glm_2test_2cmake_2test__find__glm_8cpp_1a8f389d10179adf56cc907127d615c000">camera</link>-&gt;position.z&#32;=&#32;cosf(CAMERA.angle.x)*CAMERA.targetDistance*cosf(CAMERA.angle.y)&#32;+&#32;<link linkend="__classes_2lib_2glm_2test_2cmake_2test__find__glm_8cpp_1a8f389d10179adf56cc907127d615c000">camera</link>-&gt;target.z;
+495 
+496 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}&#32;<emphasis role="keywordflow">break</emphasis>;
+497 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">case</emphasis>&#32;<link linkend="__classes_2lib_2raylib_8h_1ac6e73fe6ce68e10b0acd6d2312bdbb35ad92b667c7667e6ae20ee60c6dbe35f08">CAMERA_CUSTOM</link>:&#32;<emphasis role="keywordflow">break</emphasis>;
+498 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">default</emphasis>:&#32;<emphasis role="keywordflow">break</emphasis>;
+499 &#32;&#32;&#32;&#32;}
+500 }
+501 
+502 <emphasis role="comment">//&#32;Set&#32;camera&#32;pan&#32;key&#32;to&#32;combine&#32;with&#32;mouse&#32;movement&#32;(free&#32;camera)</emphasis>
+503 <emphasis role="keywordtype">void</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2raylib_8h_1a335d98962a1d13deb263e4abf72a5fe1">SetCameraPanControl</link>(<emphasis role="keywordtype">int</emphasis>&#32;panKey)&#32;{&#32;CAMERA.panControl&#32;=&#32;panKey;&#32;}
+504 
+505 <emphasis role="comment">//&#32;Set&#32;camera&#32;alt&#32;key&#32;to&#32;combine&#32;with&#32;mouse&#32;movement&#32;(free&#32;camera)</emphasis>
+506 <emphasis role="keywordtype">void</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2raylib_8h_1af9a6940a1d7b92113d8fa7ab6b209db6">SetCameraAltControl</link>(<emphasis role="keywordtype">int</emphasis>&#32;altKey)&#32;{&#32;CAMERA.altControl&#32;=&#32;altKey;&#32;}
+507 
+508 <emphasis role="comment">//&#32;Set&#32;camera&#32;smooth&#32;zoom&#32;key&#32;to&#32;combine&#32;with&#32;mouse&#32;(free&#32;camera)</emphasis>
+509 <emphasis role="keywordtype">void</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2raylib_8h_1a2f1360dc1fb47d84d9a00cd1e2f2871f">SetCameraSmoothZoomControl</link>(<emphasis role="keywordtype">int</emphasis>&#32;szoomKey)&#32;{&#32;CAMERA.smoothZoomControl&#32;=&#32;szoomKey;&#32;}
+510 
+511 <emphasis role="comment">//&#32;Set&#32;camera&#32;move&#32;controls&#32;(1st&#32;person&#32;and&#32;3rd&#32;person&#32;cameras)</emphasis>
+512 <emphasis role="keywordtype">void</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2raylib_8h_1a9c23a10dab4d74d70af19b412e3ddef9">SetCameraMoveControls</link>(<emphasis role="keywordtype">int</emphasis>&#32;frontKey,&#32;<emphasis role="keywordtype">int</emphasis>&#32;backKey,&#32;<emphasis role="keywordtype">int</emphasis>&#32;rightKey,&#32;<emphasis role="keywordtype">int</emphasis>&#32;leftKey,&#32;<emphasis role="keywordtype">int</emphasis>&#32;upKey,&#32;<emphasis role="keywordtype">int</emphasis>&#32;downKey)
+513 {
+514 &#32;&#32;&#32;&#32;CAMERA.moveControl[MOVE_FRONT]&#32;=&#32;frontKey;
+515 &#32;&#32;&#32;&#32;CAMERA.moveControl[MOVE_BACK]&#32;=&#32;backKey;
+516 &#32;&#32;&#32;&#32;CAMERA.moveControl[MOVE_RIGHT]&#32;=&#32;rightKey;
+517 &#32;&#32;&#32;&#32;CAMERA.moveControl[MOVE_LEFT]&#32;=&#32;leftKey;
+518 &#32;&#32;&#32;&#32;CAMERA.moveControl[MOVE_UP]&#32;=&#32;upKey;
+519 &#32;&#32;&#32;&#32;CAMERA.moveControl[MOVE_DOWN]&#32;=&#32;downKey;
+520 }
+521 
+522 <emphasis role="preprocessor">#endif&#32;</emphasis><emphasis role="comment">//&#32;CAMERA_IMPLEMENTATION</emphasis>
+</programlisting></section>

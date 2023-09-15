@@ -1,0 +1,59 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<section xmlns="http://docbook.org/ns/docbook" version="5.0" xmlns:xlink="http://www.w3.org/1999/xlink" xml:id="__classes_2lib_2_smooth-_infinite-_voxel-_terrain-master_2_t_queue_8h_source" xml:lang="en-US">
+<title>TQueue.h</title>
+<indexterm><primary>C:/Users/HP/Documents/GitHub/Minero-Game/Classes/lib/Smooth-Infinite-Voxel-Terrain-master/TQueue.h</primary></indexterm>
+Go to the documentation of this file.<programlisting linenumbering="unnumbered">1 <emphasis role="comment">//&#32;class&#32;TQueue</emphasis>
+2 <emphasis role="preprocessor">#include&#32;&lt;pthread.h&gt;</emphasis>
+3 <emphasis role="preprocessor">#include&#32;&lt;list&gt;</emphasis>
+4 <emphasis role="keyword">using&#32;namespace&#32;</emphasis><link linkend="_namespacestd">std</link>;
+5 
+6 <emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">typename</emphasis>&#32;T&gt;&#32;<emphasis role="keyword">class&#32;</emphasis><link linkend="_class_t_queue">TQueue</link>
+7 {
+8 &#32;&#32;list&lt;T&gt;&#32;queue;
+9 &#32;&#32;<link linkend="__classes_2lib_2pthread_8h_1a50d9d56f346ce3e4ce711d7d1acea193">pthread_mutex_t</link>&#32;mutex;
+10 &#32;&#32;<link linkend="__classes_2lib_2pthread_8h_1a889b578630430003a00009eb9bc682f1">pthread_cond_t</link>&#32;conditionalVar;
+11 &#32;&#32;
+12 &#32;&#32;<emphasis role="keyword">public</emphasis>:
+13 &#32;&#32;
+14 &#32;&#32;<link linkend="_class_t_queue_1af1e5d6e6ba17c67c3ddc1c55735066be">TQueue</link>(){
+15 &#32;&#32;&#32;&#32;<emphasis role="comment">//initialize&#32;the&#32;mutex&#32;and&#32;conditional&#32;variable</emphasis>
+16 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2pthread_8h_1a766f78ccf9846265c8f379ee92852a2c">pthread_mutex_init</link>(&amp;mutex,&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>);
+17 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2pthread_8h_1a9ae7756a4d025b42386fc1835efa6975">pthread_cond_init</link>(&amp;conditionalVar,&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>);
+18 &#32;&#32;}
+19 &#32;&#32;
+20 &#32;&#32;<emphasis role="keywordtype">void</emphasis>&#32;<link linkend="_class_t_queue_1a22a1a42324ee6951db125b207269ec59">additem</link>(T&#32;item){&#32;<emphasis role="comment">//should&#32;be&#32;called&#32;by&#32;the&#32;producer&#32;thread</emphasis>
+21 &#32;&#32;&#32;&#32;<emphasis role="comment">//lock&#32;the&#32;queue&#32;to&#32;prevent&#32;competition&#32;between&#32;threads</emphasis>
+22 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2pthread_8h_1a4ca880f3d1afbb33cea07c60934cc49a">pthread_mutex_lock</link>(&amp;mutex);
+23 &#32;&#32;&#32;&#32;queue.push_back(item);&#32;<emphasis role="comment">//add&#32;item&#32;to&#32;the&#32;list</emphasis>
+24 &#32;&#32;&#32;&#32;
+25 &#32;&#32;&#32;&#32;<emphasis role="comment">//use&#32;signal&#32;to&#32;wake&#32;up&#32;only&#32;one&#32;item</emphasis>
+26 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2pthread_8h_1a4ba961fe959f9d2c2770e822ae51184f">pthread_cond_signal</link>(&amp;conditionalVar);
+27 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2pthread_8h_1a7e057138b5fb17da713695ebb25732e1">pthread_mutex_unlock</link>(&amp;mutex);
+28 &#32;&#32;}
+29 &#32;&#32;
+30 &#32;&#32;T&#32;<link linkend="_class_t_queue_1ad0ea661e97b0ced1e7f0fe4fe212f10a">removeItem</link>(){&#32;<emphasis role="comment">//should&#32;be&#32;called&#32;by&#32;the&#32;consumer&#32;thread</emphasis>
+31 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2pthread_8h_1a4ca880f3d1afbb33cea07c60934cc49a">pthread_mutex_lock</link>(&amp;mutex);
+32 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">while</emphasis>(queue.size()&#32;==&#32;0){
+33 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//tell&#32;the&#32;consumer&#32;thread&#32;to&#32;sleep&#32;and&#32;wait</emphasis>
+34 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2pthread_8h_1a9eb8d1c21f8f6da4114b33e12dfcd069">pthread_cond_wait</link>(&amp;conditionalVariable,&#32;&amp;mutex);
+35 &#32;&#32;&#32;&#32;}
+36 &#32;&#32;&#32;&#32;
+37 &#32;&#32;&#32;&#32;<emphasis role="comment">//get&#32;the&#32;item&#32;from&#32;the&#32;list&#32;and&#32;pop&#32;it&#32;out</emphasis>
+38 &#32;&#32;&#32;&#32;T&#32;item&#32;=&#32;queue.front();
+39 &#32;&#32;&#32;&#32;queue.pop_front();
+40 &#32;&#32;&#32;&#32;
+41 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2pthread_8h_1a7e057138b5fb17da713695ebb25732e1">pthread_mutex_unlock</link>(&amp;mutex);
+42 &#32;&#32;&#32;&#32;
+43 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;item;
+44 &#32;&#32;&#32;&#32;
+45 &#32;&#32;}
+46 &#32;&#32;
+47 &#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="_class_t_queue_1aafb801eeba63430b1e61c463af2b87e3">queue_size</link>(){
+48 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2pthread_8h_1a4ca880f3d1afbb33cea07c60934cc49a">pthread_mutex_lock</link>(&amp;mutex);
+49 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a3d1e3edfcf61ca2d831883e1afbad89e">size</link>&#32;=&#32;queue.size();
+50 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2pthread_8h_1a7e057138b5fb17da713695ebb25732e1">pthread_mutex_unlock</link>(&amp;mutex);
+51 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a3d1e3edfcf61ca2d831883e1afbad89e">size</link>;
+52 &#32;&#32;}
+53 &#32;&#32;
+54 }
+</programlisting></section>

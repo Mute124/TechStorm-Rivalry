@@ -1,0 +1,469 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<section xmlns="http://docbook.org/ns/docbook" version="5.0" xmlns:xlink="http://www.w3.org/1999/xlink" xml:id="_lib_2include_2c_09_09_2debug_2functions_8h_source" xml:lang="en-US">
+<title>functions.h</title>
+<indexterm><primary>C:/Users/HP/Documents/GitHub/Minero-Game/lib/include/c++/debug/functions.h</primary></indexterm>
+Go to the documentation of this file.<programlisting linenumbering="unnumbered">1 <emphasis role="comment">//&#32;Debugging&#32;support&#32;implementation&#32;-*-&#32;C++&#32;-*-</emphasis>
+2 
+3 <emphasis role="comment">//&#32;Copyright&#32;(C)&#32;2003-2022&#32;Free&#32;Software&#32;Foundation,&#32;Inc.</emphasis>
+4 <emphasis role="comment">//</emphasis>
+5 <emphasis role="comment">//&#32;This&#32;file&#32;is&#32;part&#32;of&#32;the&#32;GNU&#32;ISO&#32;C++&#32;Library.&#32;&#32;This&#32;library&#32;is&#32;free</emphasis>
+6 <emphasis role="comment">//&#32;software;&#32;you&#32;can&#32;redistribute&#32;it&#32;and/or&#32;modify&#32;it&#32;under&#32;the</emphasis>
+7 <emphasis role="comment">//&#32;terms&#32;of&#32;the&#32;GNU&#32;General&#32;Public&#32;License&#32;as&#32;published&#32;by&#32;the</emphasis>
+8 <emphasis role="comment">//&#32;Free&#32;Software&#32;Foundation;&#32;either&#32;version&#32;3,&#32;or&#32;(at&#32;your&#32;option)</emphasis>
+9 <emphasis role="comment">//&#32;any&#32;later&#32;version.</emphasis>
+10 
+11 <emphasis role="comment">//&#32;This&#32;library&#32;is&#32;distributed&#32;in&#32;the&#32;hope&#32;that&#32;it&#32;will&#32;be&#32;useful,</emphasis>
+12 <emphasis role="comment">//&#32;but&#32;WITHOUT&#32;ANY&#32;WARRANTY;&#32;without&#32;even&#32;the&#32;implied&#32;warranty&#32;of</emphasis>
+13 <emphasis role="comment">//&#32;MERCHANTABILITY&#32;or&#32;FITNESS&#32;FOR&#32;A&#32;PARTICULAR&#32;PURPOSE.&#32;&#32;See&#32;the</emphasis>
+14 <emphasis role="comment">//&#32;GNU&#32;General&#32;Public&#32;License&#32;for&#32;more&#32;details.</emphasis>
+15 
+16 <emphasis role="comment">//&#32;Under&#32;Section&#32;7&#32;of&#32;GPL&#32;version&#32;3,&#32;you&#32;are&#32;granted&#32;additional</emphasis>
+17 <emphasis role="comment">//&#32;permissions&#32;described&#32;in&#32;the&#32;GCC&#32;Runtime&#32;Library&#32;Exception,&#32;version</emphasis>
+18 <emphasis role="comment">//&#32;3.1,&#32;as&#32;published&#32;by&#32;the&#32;Free&#32;Software&#32;Foundation.</emphasis>
+19 
+20 <emphasis role="comment">//&#32;You&#32;should&#32;have&#32;received&#32;a&#32;copy&#32;of&#32;the&#32;GNU&#32;General&#32;Public&#32;License&#32;and</emphasis>
+21 <emphasis role="comment">//&#32;a&#32;copy&#32;of&#32;the&#32;GCC&#32;Runtime&#32;Library&#32;Exception&#32;along&#32;with&#32;this&#32;program;</emphasis>
+22 <emphasis role="comment">//&#32;see&#32;the&#32;files&#32;COPYING3&#32;and&#32;COPYING.RUNTIME&#32;respectively.&#32;&#32;If&#32;not,&#32;see</emphasis>
+23 <emphasis role="comment">//&#32;&lt;http://www.gnu.org/licenses/&gt;.</emphasis>
+24 
+29 <emphasis role="preprocessor">#ifndef&#32;_GLIBCXX_DEBUG_FUNCTIONS_H</emphasis>
+30 <emphasis role="preprocessor">#define&#32;_GLIBCXX_DEBUG_FUNCTIONS_H&#32;1</emphasis>
+31 
+32 <emphasis role="preprocessor">#include&#32;&lt;bits/stl_function.h&gt;</emphasis>&#32;&#32;<emphasis role="comment">//&#32;for&#32;less</emphasis>
+33 
+34 <emphasis role="preprocessor">#if&#32;__cplusplus&#32;&gt;=&#32;201103L</emphasis>
+35 <emphasis role="preprocessor">#&#32;include&#32;&lt;bits/stl_iterator.h&gt;</emphasis>&#32;<emphasis role="comment">//&#32;for&#32;__miter_base</emphasis>
+36 <emphasis role="preprocessor">#&#32;include&#32;&lt;type_traits&gt;</emphasis>&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;for&#32;is_lvalue_reference&#32;and&#32;__conditional_t.</emphasis>
+37 <emphasis role="preprocessor">#endif</emphasis>
+38 
+39 <emphasis role="preprocessor">#include&#32;&lt;debug/helper_functions.h&gt;</emphasis>
+40 <emphasis role="preprocessor">#include&#32;&lt;debug/formatter.h&gt;</emphasis>
+41 
+42 <emphasis role="keyword">namespace&#32;</emphasis><link linkend="_namespace____gnu__debug">__gnu_debug</link>
+43 {
+44 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Sequence&gt;
+45 &#32;&#32;&#32;&#32;<emphasis role="keyword">struct&#32;</emphasis><link linkend="_struct____gnu__debug_1_1___insert__range__from__self__is__safe">_Insert_range_from_self_is_safe</link>
+46 &#32;&#32;&#32;&#32;{&#32;<emphasis role="keyword">enum</emphasis>&#32;{&#32;<link linkend="_struct____gnu__debug_1_1___insert__range__from__self__is__safe_1ac89b53d249cec8c786feb26d1109e0e1a106666de71ff1569e9e445496de929e8">__value</link>&#32;=&#32;0&#32;};&#32;};
+47 
+48 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Sequence&gt;
+49 &#32;&#32;&#32;&#32;<emphasis role="keyword">struct&#32;</emphasis><link linkend="_struct____gnu__debug_1_1___is__contiguous__sequence">_Is_contiguous_sequence</link>&#32;:&#32;std::__false_type&#32;{&#32;};
+50 
+51 &#32;&#32;<emphasis role="comment">/*&#32;Checks&#32;that&#32;[first,&#32;last)&#32;is&#32;a&#32;valid&#32;range,&#32;and&#32;then&#32;returns</emphasis>
+52 <emphasis role="comment">&#32;&#32;&#32;*&#32;__first.&#32;This&#32;routine&#32;is&#32;useful&#32;when&#32;we&#32;can&apos;t&#32;use&#32;a&#32;separate</emphasis>
+53 <emphasis role="comment">&#32;&#32;&#32;*&#32;assertion&#32;statement&#32;because,&#32;e.g.,&#32;we&#32;are&#32;in&#32;a&#32;constructor.</emphasis>
+54 <emphasis role="comment">&#32;&#32;*/</emphasis>
+55 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_InputIterator&gt;
+56 &#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;_InputIterator
+57 &#32;&#32;&#32;&#32;<link linkend="_namespace____gnu__debug_1ad59179a185c074a84904c8fd2f812f64">__check_valid_range</link>(<emphasis role="keyword">const</emphasis>&#32;_InputIterator&amp;&#32;__first,
+58 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;_InputIterator&amp;&#32;__last,
+59 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>*&#32;__file,
+60 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;__line,
+61 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>*&#32;__function)
+62 &#32;&#32;&#32;&#32;{
+63 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_lib_2include_2c_09_09_2debug_2macros_8h_1a5944e899640ec0852389a6d07e0b9b61">__glibcxx_check_valid_range_at</link>(__first,&#32;__last,
+64 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__file,&#32;__line,&#32;__function);
+65 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__first;
+66 &#32;&#32;&#32;&#32;}
+67 
+68 &#32;&#32;<emphasis role="comment">/*&#32;Handle&#32;the&#32;case&#32;where&#32;__other&#32;is&#32;a&#32;pointer&#32;to&#32;_Sequence::value_type.&#32;*/</emphasis>
+69 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Iterator,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Sequence,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Category&gt;
+70 &#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>
+71 &#32;&#32;&#32;&#32;<link linkend="_namespace____gnu__debug_1a751305fd2294c20ef62edf3f81a8c36a">__foreign_iterator_aux4</link>(
+72 &#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator">_Safe_iterator&lt;_Iterator, _Sequence, _Category&gt;</link>&amp;&#32;__it,
+73 &#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keyword">typename</emphasis>&#32;_Sequence::value_type*&#32;__other)
+74 &#32;&#32;&#32;&#32;{
+75 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keyword">typename</emphasis>&#32;_Sequence::value_type*&#32;_PointerType;
+76 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;std::less&lt;_PointerType&gt;&#32;_Less;
+77 <emphasis role="preprocessor">#if&#32;__cplusplus&#32;&gt;=&#32;201103L</emphasis>
+78 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">constexpr</emphasis>&#32;_Less&#32;__l{};
+79 <emphasis role="preprocessor">#else</emphasis>
+80 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;_Less&#32;__l&#32;=&#32;_Less();
+81 <emphasis role="preprocessor">#endif</emphasis>
+82 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;_Sequence*&#32;__seq&#32;=&#32;__it.<link linkend="_class____gnu__debug_1_1___safe__iterator_1a11704a65f7bb3df9b8cf2e63745d8d66">_M_get_sequence</link>();
+83 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;_PointerType&#32;__begin&#32;=&#32;std::__addressof(*__seq-&gt;_M_base().begin());
+84 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;_PointerType&#32;__end&#32;=&#32;std::__addressof(*(__seq-&gt;_M_base().end()-1));
+85 
+86 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Check&#32;whether&#32;__other&#32;points&#32;within&#32;the&#32;contiguous&#32;storage.</emphasis>
+87 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__l(__other,&#32;__begin)&#32;||&#32;__l(__end,&#32;__other);
+88 &#32;&#32;&#32;&#32;}
+89 
+90 &#32;&#32;<emphasis role="comment">/*&#32;Fallback&#32;overload&#32;for&#32;when&#32;we&#32;can&apos;t&#32;tell,&#32;assume&#32;it&#32;is&#32;valid.&#32;*/</emphasis>
+91 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Iterator,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Sequence,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Category&gt;
+92 &#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>
+93 &#32;&#32;&#32;&#32;<link linkend="_namespace____gnu__debug_1a751305fd2294c20ef62edf3f81a8c36a">__foreign_iterator_aux4</link>(
+94 &#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator">_Safe_iterator&lt;_Iterator, _Sequence, _Category&gt;</link>&amp;,&#32;...)
+95 &#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;<emphasis role="keyword">true</emphasis>;&#32;}
+96 
+97 &#32;&#32;<emphasis role="comment">/*&#32;Handle&#32;sequences&#32;with&#32;contiguous&#32;storage&#32;*/</emphasis>
+98 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Iterator,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Sequence,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Category,
+99 &#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;_InputIterator&gt;
+100 &#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>
+101 &#32;&#32;&#32;&#32;<link linkend="_namespace____gnu__debug_1a348ec2dc61e36a61b9f140258cef708a">__foreign_iterator_aux3</link>(
+102 &#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator">_Safe_iterator&lt;_Iterator, _Sequence, _Category&gt;</link>&amp;&#32;__it,
+103 &#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;_InputIterator&amp;&#32;__other,&#32;<emphasis role="keyword">const</emphasis>&#32;_InputIterator&amp;&#32;__other_end,
+104 &#32;&#32;&#32;&#32;std::__true_type)
+105 &#32;&#32;&#32;&#32;{
+106 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__other&#32;==&#32;__other_end)
+107 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<emphasis role="keyword">true</emphasis>;&#32;&#32;<emphasis role="comment">//&#32;inserting&#32;nothing&#32;is&#32;safe&#32;even&#32;if&#32;not&#32;foreign&#32;iters</emphasis>
+108 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__it.<link linkend="_class____gnu__debug_1_1___safe__iterator_1a11704a65f7bb3df9b8cf2e63745d8d66">_M_get_sequence</link>()-&gt;empty())
+109 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<emphasis role="keyword">true</emphasis>;&#32;&#32;<emphasis role="comment">//&#32;can&apos;t&#32;be&#32;self-inserting&#32;if&#32;self&#32;is&#32;empty</emphasis>
+110 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="_namespace____gnu__debug_1a751305fd2294c20ef62edf3f81a8c36a">__foreign_iterator_aux4</link>(__it,&#32;std::__addressof(*__other));
+111 &#32;&#32;&#32;&#32;}
+112 
+113 &#32;&#32;<emphasis role="comment">/*&#32;Handle&#32;non-contiguous&#32;containers,&#32;assume&#32;it&#32;is&#32;valid.&#32;*/</emphasis>
+114 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Iterator,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Sequence,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Category,
+115 &#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;_InputIterator&gt;
+116 &#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>
+117 &#32;&#32;&#32;&#32;<link linkend="_namespace____gnu__debug_1a348ec2dc61e36a61b9f140258cef708a">__foreign_iterator_aux3</link>(
+118 &#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator">_Safe_iterator&lt;_Iterator, _Sequence, _Category&gt;</link>&amp;,
+119 &#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;_InputIterator&amp;,&#32;<emphasis role="keyword">const</emphasis>&#32;_InputIterator&amp;,
+120 &#32;&#32;&#32;&#32;std::__false_type)
+121 &#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;<emphasis role="keyword">true</emphasis>;&#32;}
+122 
+124 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Iterator,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Sequence,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Category,
+125 &#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;_OtherIterator&gt;
+126 &#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>
+127 &#32;&#32;&#32;&#32;<link linkend="_namespace____gnu__debug_1abf375a8881d7ac42d203d4921c8432b2">__foreign_iterator_aux2</link>(
+128 &#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator">_Safe_iterator&lt;_Iterator, _Sequence, _Category&gt;</link>&amp;&#32;__it,
+129 &#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator">_Safe_iterator&lt;_OtherIterator, _Sequence, _Category&gt;</link>&amp;&#32;__other,
+130 &#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator">_Safe_iterator&lt;_OtherIterator, _Sequence, _Category&gt;</link>&amp;)
+131 &#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;__it.<link linkend="_class____gnu__debug_1_1___safe__iterator_1a11704a65f7bb3df9b8cf2e63745d8d66">_M_get_sequence</link>()&#32;!=&#32;__other.<link linkend="_class____gnu__debug_1_1___safe__iterator_1a11704a65f7bb3df9b8cf2e63745d8d66">_M_get_sequence</link>();&#32;}
+132 
+134 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Iterator,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Sequence,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Category,
+135 &#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;_OtherIterator,&#32;<emphasis role="keyword">typename</emphasis>&#32;_OtherSequence,
+136 &#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;_OtherCategory&gt;
+137 &#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>
+138 &#32;&#32;&#32;&#32;<link linkend="_namespace____gnu__debug_1abf375a8881d7ac42d203d4921c8432b2">__foreign_iterator_aux2</link>(
+139 &#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator">_Safe_iterator&lt;_Iterator, _Sequence, _Category&gt;</link>&amp;,
+140 &#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator">_Safe_iterator</link>&lt;_OtherIterator,&#32;_OtherSequence,
+141 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_OtherCategory&gt;&amp;,
+142 &#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator">_Safe_iterator</link>&lt;_OtherIterator,&#32;_OtherSequence,
+143 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_OtherCategory&gt;&amp;)
+144 &#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;<emphasis role="keyword">true</emphasis>;&#32;}
+145 
+146 &#32;&#32;<emphasis role="comment">/*&#32;Handle&#32;non-debug&#32;iterators.&#32;*/</emphasis>
+147 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Iterator,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Sequence,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Category,
+148 &#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;_InputIterator&gt;
+149 &#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>
+150 &#32;&#32;&#32;&#32;<link linkend="_namespace____gnu__debug_1abf375a8881d7ac42d203d4921c8432b2">__foreign_iterator_aux2</link>(
+151 &#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator">_Safe_iterator&lt;_Iterator, _Sequence, _Category&gt;</link>&amp;&#32;__it,
+152 &#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;_InputIterator&amp;&#32;__other,
+153 &#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;_InputIterator&amp;&#32;__other_end)
+154 &#32;&#32;&#32;&#32;{
+155 <emphasis role="preprocessor">#if&#32;__cplusplus&#32;&lt;&#32;201103L</emphasis>
+156 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<link linkend="_struct____gnu__debug_1_1___is__contiguous__sequence">_Is_contiguous_sequence&lt;_Sequence&gt;</link>&#32;__tag;
+157 <emphasis role="preprocessor">#else</emphasis>
+158 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">using&#32;</emphasis>__lvalref&#32;=&#32;std::is_lvalue_reference&lt;
+159 &#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;std::iterator_traits&lt;_InputIterator&gt;::reference&gt;;
+160 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">using&#32;</emphasis>__contiguous&#32;=&#32;<link linkend="_struct____gnu__debug_1_1___is__contiguous__sequence">_Is_contiguous_sequence&lt;_Sequence&gt;</link>;
+161 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">using&#32;</emphasis>__tag&#32;=&#32;std::__conditional_t&lt;__lvalref::value,&#32;__contiguous,
+162 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;std::__false_type&gt;;
+163 <emphasis role="preprocessor">#endif</emphasis>
+164 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="_namespace____gnu__debug_1a348ec2dc61e36a61b9f140258cef708a">__foreign_iterator_aux3</link>(__it,&#32;__other,&#32;__other_end,&#32;__tag());
+165 &#32;&#32;&#32;&#32;}
+166 
+167 &#32;&#32;<emphasis role="comment">/*&#32;Handle&#32;the&#32;case&#32;where&#32;we&#32;aren&apos;t&#32;really&#32;inserting&#32;a&#32;range&#32;after&#32;all&#32;*/</emphasis>
+168 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Iterator,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Sequence,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Category,
+169 &#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;_Integral&gt;
+170 &#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>
+171 &#32;&#32;&#32;&#32;<link linkend="_namespace____gnu__debug_1a3c62c796270c0807e359e192899b195d">__foreign_iterator_aux</link>(
+172 &#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator">_Safe_iterator&lt;_Iterator, _Sequence, _Category&gt;</link>&amp;,
+173 &#32;&#32;&#32;&#32;_Integral,&#32;_Integral,&#32;std::__true_type)
+174 &#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;<emphasis role="keyword">true</emphasis>;&#32;}
+175 
+176 &#32;&#32;<emphasis role="comment">/*&#32;Handle&#32;all&#32;iterators.&#32;*/</emphasis>
+177 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Iterator,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Sequence,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Category,
+178 &#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;_InputIterator&gt;
+179 &#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>
+180 &#32;&#32;&#32;&#32;<link linkend="_namespace____gnu__debug_1a3c62c796270c0807e359e192899b195d">__foreign_iterator_aux</link>(
+181 &#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator">_Safe_iterator&lt;_Iterator, _Sequence, _Category&gt;</link>&amp;&#32;__it,
+182 &#32;&#32;&#32;&#32;_InputIterator&#32;__other,&#32;_InputIterator&#32;__other_end,
+183 &#32;&#32;&#32;&#32;std::__false_type)
+184 &#32;&#32;&#32;&#32;{
+185 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="_struct____gnu__debug_1_1___insert__range__from__self__is__safe">_Insert_range_from_self_is_safe&lt;_Sequence&gt;::__value</link>
+186 &#32;&#32;&#32;&#32;||&#32;<link linkend="_namespace____gnu__debug_1abf375a8881d7ac42d203d4921c8432b2">__foreign_iterator_aux2</link>(__it,&#32;std::__miter_base(__other),
+187 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;std::__miter_base(__other_end));
+188 &#32;&#32;&#32;&#32;}
+189 
+190 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Iterator,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Sequence,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Category,
+191 &#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;_InputIterator&gt;
+192 &#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>
+193 &#32;&#32;&#32;&#32;<link linkend="_namespace____gnu__debug_1afc1f2fc793beaba993007c005a5524d4">__foreign_iterator</link>(
+194 &#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator">_Safe_iterator&lt;_Iterator, _Sequence, _Category&gt;</link>&amp;&#32;__it,
+195 &#32;&#32;&#32;&#32;_InputIterator&#32;__other,&#32;_InputIterator&#32;__other_end)
+196 &#32;&#32;&#32;&#32;{
+197 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">typename</emphasis>&#32;std::__is_integer&lt;_InputIterator&gt;::__type&#32;_Integral;
+198 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="_namespace____gnu__debug_1a3c62c796270c0807e359e192899b195d">__foreign_iterator_aux</link>(__it,&#32;__other,&#32;__other_end,&#32;_Integral());
+199 &#32;&#32;&#32;&#32;}
+200 
+201 &#32;&#32;<emphasis role="comment">//&#32;Can&apos;t&#32;check&#32;if&#32;an&#32;input&#32;iterator&#32;sequence&#32;is&#32;sorted,&#32;because&#32;we</emphasis>
+202 &#32;&#32;<emphasis role="comment">//&#32;can&apos;t&#32;step&#32;through&#32;the&#32;sequence.</emphasis>
+203 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_InputIterator&gt;
+204 &#32;&#32;&#32;&#32;_GLIBCXX20_CONSTEXPR
+205 &#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>
+206 &#32;&#32;&#32;&#32;<link linkend="_namespace____gnu__debug_1a74cd6dab5052e34e53fa39afcf85501e">__check_sorted_aux</link>(<emphasis role="keyword">const</emphasis>&#32;_InputIterator&amp;,&#32;<emphasis role="keyword">const</emphasis>&#32;_InputIterator&amp;,
+207 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;std::input_iterator_tag)
+208 &#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;<emphasis role="keyword">true</emphasis>;&#32;}
+209 
+210 &#32;&#32;<emphasis role="comment">//&#32;Can&#32;verify&#32;if&#32;a&#32;forward&#32;iterator&#32;sequence&#32;is&#32;in&#32;fact&#32;sorted&#32;using</emphasis>
+211 &#32;&#32;<emphasis role="comment">//&#32;std::__is_sorted</emphasis>
+212 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_ForwardIterator&gt;
+213 &#32;&#32;&#32;&#32;_GLIBCXX20_CONSTEXPR
+214 &#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>
+215 &#32;&#32;&#32;&#32;<link linkend="_namespace____gnu__debug_1a74cd6dab5052e34e53fa39afcf85501e">__check_sorted_aux</link>(_ForwardIterator&#32;__first,&#32;_ForwardIterator&#32;__last,
+216 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;std::forward_iterator_tag)
+217 &#32;&#32;&#32;&#32;{
+218 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__first&#32;==&#32;__last)
+219 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<emphasis role="keyword">true</emphasis>;
+220 
+221 &#32;&#32;&#32;&#32;&#32;&#32;_ForwardIterator&#32;__next&#32;=&#32;__first;
+222 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(++__next;&#32;__next&#32;!=&#32;__last;&#32;__first&#32;=&#32;__next,&#32;(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a0f7193911e632cd84da4082d5c628fe3">void</link>)++__next)
+223 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(*__next&#32;&lt;&#32;*__first)
+224 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<emphasis role="keyword">false</emphasis>;
+225 
+226 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<emphasis role="keyword">true</emphasis>;
+227 &#32;&#32;&#32;&#32;}
+228 
+229 &#32;&#32;<emphasis role="comment">//&#32;Can&apos;t&#32;check&#32;if&#32;an&#32;input&#32;iterator&#32;sequence&#32;is&#32;sorted,&#32;because&#32;we&#32;can&apos;t&#32;step</emphasis>
+230 &#32;&#32;<emphasis role="comment">//&#32;through&#32;the&#32;sequence.</emphasis>
+231 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_InputIterator,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Predicate&gt;
+232 &#32;&#32;&#32;&#32;_GLIBCXX20_CONSTEXPR
+233 &#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>
+234 &#32;&#32;&#32;&#32;<link linkend="_namespace____gnu__debug_1a74cd6dab5052e34e53fa39afcf85501e">__check_sorted_aux</link>(<emphasis role="keyword">const</emphasis>&#32;_InputIterator&amp;,&#32;<emphasis role="keyword">const</emphasis>&#32;_InputIterator&amp;,
+235 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_Predicate,&#32;std::input_iterator_tag)
+236 &#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;<emphasis role="keyword">true</emphasis>;&#32;}
+237 
+238 &#32;&#32;<emphasis role="comment">//&#32;Can&#32;verify&#32;if&#32;a&#32;forward&#32;iterator&#32;sequence&#32;is&#32;in&#32;fact&#32;sorted&#32;using</emphasis>
+239 &#32;&#32;<emphasis role="comment">//&#32;std::__is_sorted</emphasis>
+240 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_ForwardIterator,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Predicate&gt;
+241 &#32;&#32;&#32;&#32;_GLIBCXX20_CONSTEXPR
+242 &#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>
+243 &#32;&#32;&#32;&#32;<link linkend="_namespace____gnu__debug_1a74cd6dab5052e34e53fa39afcf85501e">__check_sorted_aux</link>(_ForwardIterator&#32;__first,&#32;_ForwardIterator&#32;__last,
+244 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_Predicate&#32;__pred,&#32;std::forward_iterator_tag)
+245 &#32;&#32;&#32;&#32;{
+246 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__first&#32;==&#32;__last)
+247 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<emphasis role="keyword">true</emphasis>;
+248 
+249 &#32;&#32;&#32;&#32;&#32;&#32;_ForwardIterator&#32;__next&#32;=&#32;__first;
+250 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(++__next;&#32;__next&#32;!=&#32;__last;&#32;__first&#32;=&#32;__next,&#32;(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a0f7193911e632cd84da4082d5c628fe3">void</link>)++__next)
+251 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__pred(*__next,&#32;*__first))
+252 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<emphasis role="keyword">false</emphasis>;
+253 
+254 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<emphasis role="keyword">true</emphasis>;
+255 &#32;&#32;&#32;&#32;}
+256 
+257 &#32;&#32;<emphasis role="comment">//&#32;Determine&#32;if&#32;a&#32;sequence&#32;is&#32;sorted.</emphasis>
+258 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_InputIterator&gt;
+259 &#32;&#32;&#32;&#32;_GLIBCXX20_CONSTEXPR
+260 &#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>
+261 &#32;&#32;&#32;&#32;<link linkend="_namespace____gnu__debug_1a057953c09e8c69805993f15d4179e28f">__check_sorted</link>(<emphasis role="keyword">const</emphasis>&#32;_InputIterator&amp;&#32;__first,&#32;<emphasis role="keyword">const</emphasis>&#32;_InputIterator&amp;&#32;__last)
+262 &#32;&#32;&#32;&#32;{
+263 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="_namespace____gnu__debug_1a74cd6dab5052e34e53fa39afcf85501e">__check_sorted_aux</link>(__first,&#32;__last,
+264 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;std::__iterator_category(__first));
+265 &#32;&#32;&#32;&#32;}
+266 
+267 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_InputIterator,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Predicate&gt;
+268 &#32;&#32;&#32;&#32;_GLIBCXX20_CONSTEXPR
+269 &#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>
+270 &#32;&#32;&#32;&#32;<link linkend="_namespace____gnu__debug_1a057953c09e8c69805993f15d4179e28f">__check_sorted</link>(<emphasis role="keyword">const</emphasis>&#32;_InputIterator&amp;&#32;__first,&#32;<emphasis role="keyword">const</emphasis>&#32;_InputIterator&amp;&#32;__last,
+271 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_Predicate&#32;__pred)
+272 &#32;&#32;&#32;&#32;{
+273 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="_namespace____gnu__debug_1a74cd6dab5052e34e53fa39afcf85501e">__check_sorted_aux</link>(__first,&#32;__last,&#32;__pred,
+274 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;std::__iterator_category(__first));
+275 &#32;&#32;&#32;&#32;}
+276 
+277 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_InputIterator&gt;
+278 &#32;&#32;&#32;&#32;_GLIBCXX20_CONSTEXPR
+279 &#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>
+280 &#32;&#32;&#32;&#32;<link linkend="_namespace____gnu__debug_1a1a63d867aaca079b068ac6935533a82a">__check_sorted_set_aux</link>(<emphasis role="keyword">const</emphasis>&#32;_InputIterator&amp;&#32;__first,
+281 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;_InputIterator&amp;&#32;__last,
+282 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;std::__true_type)
+283 &#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="_namespace____gnu__debug_1a057953c09e8c69805993f15d4179e28f">__check_sorted</link>(__first,&#32;__last);&#32;}
+284 
+285 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_InputIterator&gt;
+286 &#32;&#32;&#32;&#32;_GLIBCXX20_CONSTEXPR
+287 &#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>
+288 &#32;&#32;&#32;&#32;<link linkend="_namespace____gnu__debug_1a1a63d867aaca079b068ac6935533a82a">__check_sorted_set_aux</link>(<emphasis role="keyword">const</emphasis>&#32;_InputIterator&amp;,
+289 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;_InputIterator&amp;,
+290 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;std::__false_type)
+291 &#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;<emphasis role="keyword">true</emphasis>;&#32;}
+292 
+293 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_InputIterator,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Predicate&gt;
+294 &#32;&#32;&#32;&#32;_GLIBCXX20_CONSTEXPR
+295 &#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>
+296 &#32;&#32;&#32;&#32;<link linkend="_namespace____gnu__debug_1a1a63d867aaca079b068ac6935533a82a">__check_sorted_set_aux</link>(<emphasis role="keyword">const</emphasis>&#32;_InputIterator&amp;&#32;__first,
+297 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;_InputIterator&amp;&#32;__last,
+298 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_Predicate&#32;__pred,&#32;std::__true_type)
+299 &#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="_namespace____gnu__debug_1a057953c09e8c69805993f15d4179e28f">__check_sorted</link>(__first,&#32;__last,&#32;__pred);&#32;}
+300 
+301 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_InputIterator,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Predicate&gt;
+302 &#32;&#32;&#32;&#32;_GLIBCXX20_CONSTEXPR
+303 &#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>
+304 &#32;&#32;&#32;&#32;<link linkend="_namespace____gnu__debug_1a1a63d867aaca079b068ac6935533a82a">__check_sorted_set_aux</link>(<emphasis role="keyword">const</emphasis>&#32;_InputIterator&amp;,
+305 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;_InputIterator&amp;,&#32;_Predicate,
+306 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;std::__false_type)
+307 &#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;<emphasis role="keyword">true</emphasis>;&#32;}
+308 
+309 &#32;&#32;<emphasis role="comment">//&#32;...&#32;special&#32;variant&#32;used&#32;in&#32;std::merge,&#32;std::includes,&#32;std::set_*.</emphasis>
+310 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_InputIterator1,&#32;<emphasis role="keyword">typename</emphasis>&#32;_InputIterator2&gt;
+311 &#32;&#32;&#32;&#32;_GLIBCXX20_CONSTEXPR
+312 &#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>
+313 &#32;&#32;&#32;&#32;<link linkend="_namespace____gnu__debug_1a5418e32aa0769e428659329219dec2c6">__check_sorted_set</link>(<emphasis role="keyword">const</emphasis>&#32;_InputIterator1&amp;&#32;__first,
+314 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;_InputIterator1&amp;&#32;__last,
+315 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;_InputIterator2&amp;)
+316 &#32;&#32;&#32;&#32;{
+317 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">typename</emphasis>&#32;std::iterator_traits&lt;_InputIterator1&gt;::value_type
+318 &#32;&#32;&#32;&#32;_ValueType1;
+319 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">typename</emphasis>&#32;std::iterator_traits&lt;_InputIterator2&gt;::value_type
+320 &#32;&#32;&#32;&#32;_ValueType2;
+321 
+322 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">typename</emphasis>&#32;std::__are_same&lt;_ValueType1,&#32;_ValueType2&gt;::__type
+323 &#32;&#32;&#32;&#32;_SameType;
+324 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="_namespace____gnu__debug_1a1a63d867aaca079b068ac6935533a82a">__check_sorted_set_aux</link>(__first,&#32;__last,&#32;_SameType());
+325 &#32;&#32;&#32;&#32;}
+326 
+327 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_InputIterator1,&#32;<emphasis role="keyword">typename</emphasis>&#32;_InputIterator2,
+328 &#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;_Predicate&gt;
+329 &#32;&#32;&#32;&#32;_GLIBCXX20_CONSTEXPR
+330 &#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>
+331 &#32;&#32;&#32;&#32;<link linkend="_namespace____gnu__debug_1a5418e32aa0769e428659329219dec2c6">__check_sorted_set</link>(<emphasis role="keyword">const</emphasis>&#32;_InputIterator1&amp;&#32;__first,
+332 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;_InputIterator1&amp;&#32;__last,
+333 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;_InputIterator2&amp;,&#32;_Predicate&#32;__pred)
+334 &#32;&#32;&#32;&#32;{
+335 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">typename</emphasis>&#32;std::iterator_traits&lt;_InputIterator1&gt;::value_type
+336 &#32;&#32;&#32;&#32;_ValueType1;
+337 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">typename</emphasis>&#32;std::iterator_traits&lt;_InputIterator2&gt;::value_type
+338 &#32;&#32;&#32;&#32;_ValueType2;
+339 
+340 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">typename</emphasis>&#32;std::__are_same&lt;_ValueType1,&#32;_ValueType2&gt;::__type
+341 &#32;&#32;&#32;&#32;_SameType;
+342 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="_namespace____gnu__debug_1a1a63d867aaca079b068ac6935533a82a">__check_sorted_set_aux</link>(__first,&#32;__last,&#32;__pred,&#32;_SameType());
+343 &#32;&#32;&#32;}
+344 
+345 &#32;&#32;<emphasis role="comment">//&#32;_GLIBCXX_RESOLVE_LIB_DEFECTS</emphasis>
+346 &#32;&#32;<emphasis role="comment">//&#32;270.&#32;Binary&#32;search&#32;requirements&#32;overly&#32;strict</emphasis>
+347 &#32;&#32;<emphasis role="comment">//&#32;Determine&#32;if&#32;a&#32;sequence&#32;is&#32;partitioned&#32;w.r.t.&#32;this&#32;element.</emphasis>
+348 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_ForwardIterator,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+349 &#32;&#32;&#32;&#32;_GLIBCXX20_CONSTEXPR
+350 &#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>
+351 &#32;&#32;&#32;&#32;<link linkend="_namespace____gnu__debug_1a46f0279f9f405bcbb8c9d0466cb0ca52">__check_partitioned_lower</link>(_ForwardIterator&#32;__first,
+352 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_ForwardIterator&#32;__last,&#32;<emphasis role="keyword">const</emphasis>&#32;_Tp&amp;&#32;__value)
+353 &#32;&#32;&#32;&#32;{
+354 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">while</emphasis>&#32;(__first&#32;!=&#32;__last&#32;&amp;&amp;&#32;*__first&#32;&lt;&#32;__value)
+355 &#32;&#32;&#32;&#32;++__first;
+356 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__first&#32;!=&#32;__last)
+357 &#32;&#32;&#32;&#32;{
+358 &#32;&#32;&#32;&#32;&#32;&#32;++__first;
+359 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">while</emphasis>&#32;(__first&#32;!=&#32;__last&#32;&amp;&amp;&#32;!(*__first&#32;&lt;&#32;__value))
+360 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;++__first;
+361 &#32;&#32;&#32;&#32;}
+362 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__first&#32;==&#32;__last;
+363 &#32;&#32;&#32;&#32;}
+364 
+365 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_ForwardIterator,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+366 &#32;&#32;&#32;&#32;_GLIBCXX20_CONSTEXPR
+367 &#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>
+368 &#32;&#32;&#32;&#32;<link linkend="_namespace____gnu__debug_1acc1ad9ee2fe652d6e2821050e936e179">__check_partitioned_upper</link>(_ForwardIterator&#32;__first,
+369 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_ForwardIterator&#32;__last,&#32;<emphasis role="keyword">const</emphasis>&#32;_Tp&amp;&#32;__value)
+370 &#32;&#32;&#32;&#32;{
+371 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">while</emphasis>&#32;(__first&#32;!=&#32;__last&#32;&amp;&amp;&#32;!(__value&#32;&lt;&#32;*__first))
+372 &#32;&#32;&#32;&#32;++__first;
+373 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__first&#32;!=&#32;__last)
+374 &#32;&#32;&#32;&#32;{
+375 &#32;&#32;&#32;&#32;&#32;&#32;++__first;
+376 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">while</emphasis>&#32;(__first&#32;!=&#32;__last&#32;&amp;&amp;&#32;__value&#32;&lt;&#32;*__first)
+377 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;++__first;
+378 &#32;&#32;&#32;&#32;}
+379 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__first&#32;==&#32;__last;
+380 &#32;&#32;&#32;&#32;}
+381 
+382 &#32;&#32;<emphasis role="comment">//&#32;Determine&#32;if&#32;a&#32;sequence&#32;is&#32;partitioned&#32;w.r.t.&#32;this&#32;element.</emphasis>
+383 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_ForwardIterator,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Tp,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Pred&gt;
+384 &#32;&#32;&#32;&#32;_GLIBCXX20_CONSTEXPR
+385 &#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>
+386 &#32;&#32;&#32;&#32;<link linkend="_namespace____gnu__debug_1a46f0279f9f405bcbb8c9d0466cb0ca52">__check_partitioned_lower</link>(_ForwardIterator&#32;__first,
+387 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_ForwardIterator&#32;__last,&#32;<emphasis role="keyword">const</emphasis>&#32;_Tp&amp;&#32;__value,
+388 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_Pred&#32;__pred)
+389 &#32;&#32;&#32;&#32;{
+390 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">while</emphasis>&#32;(__first&#32;!=&#32;__last&#32;&amp;&amp;&#32;<emphasis role="keywordtype">bool</emphasis>(__pred(*__first,&#32;__value)))
+391 &#32;&#32;&#32;&#32;++__first;
+392 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__first&#32;!=&#32;__last)
+393 &#32;&#32;&#32;&#32;{
+394 &#32;&#32;&#32;&#32;&#32;&#32;++__first;
+395 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">while</emphasis>&#32;(__first&#32;!=&#32;__last&#32;&amp;&amp;&#32;!<emphasis role="keywordtype">bool</emphasis>(__pred(*__first,&#32;__value)))
+396 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;++__first;
+397 &#32;&#32;&#32;&#32;}
+398 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__first&#32;==&#32;__last;
+399 &#32;&#32;&#32;&#32;}
+400 
+401 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_ForwardIterator,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Tp,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Pred&gt;
+402 &#32;&#32;&#32;&#32;_GLIBCXX20_CONSTEXPR
+403 &#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>
+404 &#32;&#32;&#32;&#32;<link linkend="_namespace____gnu__debug_1acc1ad9ee2fe652d6e2821050e936e179">__check_partitioned_upper</link>(_ForwardIterator&#32;__first,
+405 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_ForwardIterator&#32;__last,&#32;<emphasis role="keyword">const</emphasis>&#32;_Tp&amp;&#32;__value,
+406 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_Pred&#32;__pred)
+407 &#32;&#32;&#32;&#32;{
+408 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">while</emphasis>&#32;(__first&#32;!=&#32;__last&#32;&amp;&amp;&#32;!<emphasis role="keywordtype">bool</emphasis>(__pred(__value,&#32;*__first)))
+409 &#32;&#32;&#32;&#32;++__first;
+410 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__first&#32;!=&#32;__last)
+411 &#32;&#32;&#32;&#32;{
+412 &#32;&#32;&#32;&#32;&#32;&#32;++__first;
+413 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">while</emphasis>&#32;(__first&#32;!=&#32;__last&#32;&amp;&amp;&#32;<emphasis role="keywordtype">bool</emphasis>(__pred(__value,&#32;*__first)))
+414 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;++__first;
+415 &#32;&#32;&#32;&#32;}
+416 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__first&#32;==&#32;__last;
+417 &#32;&#32;&#32;&#32;}
+418 
+419 <emphasis role="preprocessor">#if&#32;__cplusplus&#32;&gt;=&#32;201103L</emphasis>
+420 &#32;&#32;<emphasis role="keyword">struct&#32;</emphasis>_Irreflexive_checker
+421 &#32;&#32;{
+422 &#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_It&gt;
+423 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keyword">typename</emphasis>&#32;std::iterator_traits&lt;_It&gt;::reference
+424 &#32;&#32;&#32;&#32;&#32;&#32;__ref();
+425 
+426 &#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_It,
+427 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;=&#32;<emphasis role="keyword">decltype</emphasis>(__ref&lt;_It&gt;()&#32;&lt;&#32;__ref&lt;_It&gt;())&gt;
+428 &#32;&#32;&#32;&#32;&#32;&#32;_GLIBCXX20_CONSTEXPR
+429 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>
+430 &#32;&#32;&#32;&#32;&#32;&#32;_S_is_valid(_It&#32;__it)
+431 &#32;&#32;&#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;!(*__it&#32;&lt;&#32;*__it);&#32;}
+432 
+433 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Fallback&#32;method&#32;if&#32;operator&#32;doesn&apos;t&#32;exist.</emphasis>
+434 &#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>...&#32;_Args&gt;
+435 &#32;&#32;&#32;&#32;&#32;&#32;_GLIBCXX20_CONSTEXPR
+436 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>
+437 &#32;&#32;&#32;&#32;&#32;&#32;_S_is_valid(_Args...)
+438 &#32;&#32;&#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;<emphasis role="keyword">true</emphasis>;&#32;}
+439 
+440 &#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_It,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Pred,&#32;<emphasis role="keyword">typename</emphasis>
+441 &#32;&#32;&#32;&#32;=&#32;<emphasis role="keyword">decltype</emphasis>(std::declval&lt;_Pred&gt;()(__ref&lt;_It&gt;(),&#32;__ref&lt;_It&gt;()))&gt;
+442 &#32;&#32;&#32;&#32;&#32;&#32;_GLIBCXX20_CONSTEXPR
+443 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>
+444 &#32;&#32;&#32;&#32;&#32;&#32;_S_is_valid_pred(_It&#32;__it,&#32;_Pred&#32;__pred)
+445 &#32;&#32;&#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;!__pred(*__it,&#32;*__it);&#32;}
+446 
+447 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Fallback&#32;method&#32;if&#32;predicate&#32;can&apos;t&#32;be&#32;invoked.</emphasis>
+448 &#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>...&#32;_Args&gt;
+449 &#32;&#32;&#32;&#32;&#32;&#32;_GLIBCXX20_CONSTEXPR
+450 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>
+451 &#32;&#32;&#32;&#32;&#32;&#32;_S_is_valid_pred(_Args...)
+452 &#32;&#32;&#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;<emphasis role="keyword">true</emphasis>;&#32;}
+453 &#32;&#32;};
+454 
+455 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Iterator&gt;
+456 &#32;&#32;&#32;&#32;_GLIBCXX20_CONSTEXPR
+457 &#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>
+458 &#32;&#32;&#32;&#32;__is_irreflexive(_Iterator&#32;__it)
+459 &#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;_Irreflexive_checker::_S_is_valid(__it);&#32;}
+460 
+461 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Iterator,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Pred&gt;
+462 &#32;&#32;&#32;&#32;_GLIBCXX20_CONSTEXPR
+463 &#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>
+464 &#32;&#32;&#32;&#32;__is_irreflexive_pred(_Iterator&#32;__it,&#32;_Pred&#32;__pred)
+465 &#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;_Irreflexive_checker::_S_is_valid_pred(__it,&#32;__pred);&#32;}
+466 <emphasis role="preprocessor">#endif</emphasis>
+467 
+468 }&#32;<emphasis role="comment">//&#32;namespace&#32;__gnu_debug</emphasis>
+469 
+470 <emphasis role="preprocessor">#endif</emphasis>
+</programlisting></section>

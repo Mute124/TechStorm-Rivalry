@@ -1,0 +1,675 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<section xmlns="http://docbook.org/ns/docbook" version="5.0" xmlns:xlink="http://www.w3.org/1999/xlink" xml:id="__classes_2lib_2external_2msf__gif_8h_source" xml:lang="en-US">
+<title>msf_gif.h</title>
+<indexterm><primary>C:/Users/HP/Documents/GitHub/Minero-Game/Classes/lib/external/msf_gif.h</primary></indexterm>
+Go to the documentation of this file.<programlisting linenumbering="unnumbered">1 <emphasis role="comment">/*</emphasis>
+2 <emphasis role="comment">HOW&#32;TO&#32;USE:</emphasis>
+3 <emphasis role="comment"></emphasis>
+4 <emphasis role="comment">&#32;&#32;&#32;&#32;In&#32;exactly&#32;one&#32;translation&#32;unit&#32;(.c&#32;or&#32;.cpp&#32;file),&#32;#define&#32;MSF_GIF_IMPL&#32;before&#32;including&#32;the&#32;header,&#32;like&#32;so:</emphasis>
+5 <emphasis role="comment"></emphasis>
+6 <emphasis role="comment">&#32;&#32;&#32;&#32;#define&#32;MSF_GIF_IMPL</emphasis>
+7 <emphasis role="comment">&#32;&#32;&#32;&#32;#include&#32;&quot;msf_gif.h&quot;</emphasis>
+8 <emphasis role="comment"></emphasis>
+9 <emphasis role="comment">&#32;&#32;&#32;&#32;Everywhere&#32;else,&#32;just&#32;include&#32;the&#32;header&#32;like&#32;normal.</emphasis>
+10 <emphasis role="comment"></emphasis>
+11 <emphasis role="comment"></emphasis>
+12 <emphasis role="comment">USAGE&#32;EXAMPLE:</emphasis>
+13 <emphasis role="comment"></emphasis>
+14 <emphasis role="comment">&#32;&#32;&#32;&#32;int&#32;width&#32;=&#32;480,&#32;height&#32;=&#32;320,&#32;centisecondsPerFrame&#32;=&#32;5,&#32;bitDepth&#32;=&#32;16;</emphasis>
+15 <emphasis role="comment">&#32;&#32;&#32;&#32;MsfGifState&#32;gifState&#32;=&#32;{};</emphasis>
+16 <emphasis role="comment">&#32;&#32;&#32;&#32;//&#32;msf_gif_bgra_flag&#32;=&#32;true;&#32;//optionally,&#32;set&#32;this&#32;flag&#32;if&#32;your&#32;pixels&#32;are&#32;in&#32;BGRA&#32;format&#32;instead&#32;of&#32;RGBA</emphasis>
+17 <emphasis role="comment">&#32;&#32;&#32;&#32;//&#32;msf_gif_alpha_threshold&#32;=&#32;128;&#32;//optionally,&#32;enable&#32;transparency&#32;(see&#32;function&#32;documentation&#32;below&#32;for&#32;details)</emphasis>
+18 <emphasis role="comment">&#32;&#32;&#32;&#32;msf_gif_begin(&amp;gifState,&#32;width,&#32;height);</emphasis>
+19 <emphasis role="comment">&#32;&#32;&#32;&#32;msf_gif_frame(&amp;gifState,&#32;...,&#32;centisecondsPerFrame,&#32;bitDepth,&#32;width&#32;*&#32;4);&#32;//frame&#32;1</emphasis>
+20 <emphasis role="comment">&#32;&#32;&#32;&#32;msf_gif_frame(&amp;gifState,&#32;...,&#32;centisecondsPerFrame,&#32;bitDepth,&#32;width&#32;*&#32;4);&#32;//frame&#32;2</emphasis>
+21 <emphasis role="comment">&#32;&#32;&#32;&#32;msf_gif_frame(&amp;gifState,&#32;...,&#32;centisecondsPerFrame,&#32;bitDepth,&#32;width&#32;*&#32;4);&#32;//frame&#32;3,&#32;etc...</emphasis>
+22 <emphasis role="comment">&#32;&#32;&#32;&#32;MsfGifResult&#32;result&#32;=&#32;msf_gif_end(&amp;gifState);</emphasis>
+23 <emphasis role="comment">&#32;&#32;&#32;&#32;if&#32;(result.data)&#32;{</emphasis>
+24 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;FILE&#32;*&#32;fp&#32;=&#32;fopen(&quot;MyGif.gif&quot;,&#32;&quot;wb&quot;);</emphasis>
+25 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;fwrite(result.data,&#32;result.dataSize,&#32;1,&#32;fp);</emphasis>
+26 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;fclose(fp);</emphasis>
+27 <emphasis role="comment">&#32;&#32;&#32;&#32;}</emphasis>
+28 <emphasis role="comment">&#32;&#32;&#32;&#32;msf_gif_free(result);</emphasis>
+29 <emphasis role="comment"></emphasis>
+30 <emphasis role="comment">Detailed&#32;function&#32;documentation&#32;can&#32;be&#32;found&#32;in&#32;the&#32;header&#32;section&#32;below.</emphasis>
+31 <emphasis role="comment"></emphasis>
+32 <emphasis role="comment"></emphasis>
+33 <emphasis role="comment">ERROR&#32;HANDLING:</emphasis>
+34 <emphasis role="comment"></emphasis>
+35 <emphasis role="comment">&#32;&#32;&#32;&#32;If&#32;memory&#32;allocation&#32;fails,&#32;the&#32;functions&#32;will&#32;signal&#32;the&#32;error&#32;via&#32;their&#32;return&#32;values.</emphasis>
+36 <emphasis role="comment">&#32;&#32;&#32;&#32;If&#32;one&#32;function&#32;call&#32;fails,&#32;the&#32;library&#32;will&#32;free&#32;all&#32;of&#32;its&#32;allocations,</emphasis>
+37 <emphasis role="comment">&#32;&#32;&#32;&#32;and&#32;all&#32;subsequent&#32;calls&#32;will&#32;safely&#32;no-op&#32;and&#32;return&#32;0&#32;until&#32;the&#32;next&#32;call&#32;to&#32;`msf_gif_begin()`.</emphasis>
+38 <emphasis role="comment">&#32;&#32;&#32;&#32;Therefore,&#32;it&apos;s&#32;safe&#32;to&#32;check&#32;only&#32;the&#32;return&#32;value&#32;of&#32;`msf_gif_end()`.</emphasis>
+39 <emphasis role="comment"></emphasis>
+40 <emphasis role="comment"></emphasis>
+41 <emphasis role="comment">REPLACING&#32;MALLOC:</emphasis>
+42 <emphasis role="comment"></emphasis>
+43 <emphasis role="comment">&#32;&#32;&#32;&#32;This&#32;library&#32;uses&#32;malloc+realloc+free&#32;internally&#32;for&#32;memory&#32;allocation.</emphasis>
+44 <emphasis role="comment">&#32;&#32;&#32;&#32;To&#32;facilitate&#32;integration&#32;with&#32;custom&#32;memory&#32;allocators,&#32;these&#32;calls&#32;go&#32;through&#32;macros,&#32;which&#32;can&#32;be&#32;redefined.</emphasis>
+45 <emphasis role="comment">&#32;&#32;&#32;&#32;The&#32;expected&#32;function&#32;signature&#32;equivalents&#32;of&#32;the&#32;macros&#32;are&#32;as&#32;follows:</emphasis>
+46 <emphasis role="comment"></emphasis>
+47 <emphasis role="comment">&#32;&#32;&#32;&#32;void&#32;*&#32;MSF_GIF_MALLOC(void&#32;*&#32;context,&#32;size_t&#32;newSize)</emphasis>
+48 <emphasis role="comment">&#32;&#32;&#32;&#32;void&#32;*&#32;MSF_GIF_REALLOC(void&#32;*&#32;context,&#32;void&#32;*&#32;oldMemory,&#32;size_t&#32;oldSize,&#32;size_t&#32;newSize)</emphasis>
+49 <emphasis role="comment">&#32;&#32;&#32;&#32;void&#32;MSF_GIF_FREE(void&#32;*&#32;context,&#32;void&#32;*&#32;oldMemory,&#32;size_t&#32;oldSize)</emphasis>
+50 <emphasis role="comment"></emphasis>
+51 <emphasis role="comment">&#32;&#32;&#32;&#32;If&#32;your&#32;allocator&#32;needs&#32;a&#32;context&#32;pointer,&#32;you&#32;can&#32;set&#32;the&#32;`customAllocatorContext`&#32;field&#32;of&#32;the&#32;MsfGifState&#32;struct</emphasis>
+52 <emphasis role="comment">&#32;&#32;&#32;&#32;before&#32;calling&#32;msf_gif_begin(),&#32;and&#32;it&#32;will&#32;be&#32;passed&#32;to&#32;all&#32;subsequent&#32;allocator&#32;macro&#32;calls.</emphasis>
+53 <emphasis role="comment"></emphasis>
+54 <emphasis role="comment">&#32;&#32;&#32;&#32;The&#32;maximum&#32;number&#32;of&#32;bytes&#32;the&#32;library&#32;will&#32;allocate&#32;to&#32;encode&#32;a&#32;single&#32;gif&#32;is&#32;bounded&#32;by&#32;the&#32;following&#32;formula:</emphasis>
+55 <emphasis role="comment">&#32;&#32;&#32;&#32;`(2&#32;*&#32;1024&#32;*&#32;1024)&#32;+&#32;(width&#32;*&#32;height&#32;*&#32;8)&#32;+&#32;((1024&#32;+&#32;width&#32;*&#32;height&#32;*&#32;1.5)&#32;*&#32;3&#32;*&#32;frameCount)`</emphasis>
+56 <emphasis role="comment">&#32;&#32;&#32;&#32;The&#32;peak&#32;heap&#32;memory&#32;usage&#32;in&#32;bytes,&#32;if&#32;using&#32;a&#32;general-purpose&#32;heap&#32;allocator,&#32;is&#32;bounded&#32;by&#32;the&#32;following&#32;formula:</emphasis>
+57 <emphasis role="comment">&#32;&#32;&#32;&#32;`(2&#32;*&#32;1024&#32;*&#32;1024)&#32;+&#32;(width&#32;*&#32;height&#32;*&#32;9.5)&#32;+&#32;1024&#32;+&#32;(16&#32;*&#32;frameCount)&#32;+&#32;(2&#32;*&#32;sizeOfResultingGif)</emphasis>
+58 <emphasis role="comment"></emphasis>
+59 <emphasis role="comment"></emphasis>
+60 <emphasis role="comment">See&#32;end&#32;of&#32;file&#32;for&#32;license&#32;information.</emphasis>
+61 <emphasis role="comment">*/</emphasis>
+62 
+63 <emphasis role="comment">//version&#32;2.2</emphasis>
+64 
+68 
+69 <emphasis role="preprocessor">#ifndef&#32;MSF_GIF_H</emphasis>
+70 <emphasis role="preprocessor">#define&#32;MSF_GIF_H</emphasis>
+71 
+72 <emphasis role="preprocessor">#include&#32;&lt;stdint.h&gt;</emphasis>
+73 <emphasis role="preprocessor">#include&#32;&lt;stddef.h&gt;</emphasis>
+74 
+75 <emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">struct&#32;</emphasis>{
+76 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>&#32;*&#32;<link linkend="_struct_msf_gif_result_1a6801ea8e5330ebe2a664f9c2e1f9f677">data</link>;
+77 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;<link linkend="_struct_msf_gif_result_1aeeb6c05f6015630b679f36c2a3a10e3e">dataSize</link>;
+78 
+79 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;<link linkend="_struct_msf_gif_result_1a7476fae86b0b9f1f0c59c01ddd305bc2">allocSize</link>;&#32;<emphasis role="comment">//internal&#32;use</emphasis>
+80 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>&#32;*&#32;<link linkend="_struct_msf_gif_result_1a7f33d4546f68765e6a61b643ee390512">contextPointer</link>;&#32;<emphasis role="comment">//internal&#32;use</emphasis>
+81 }&#32;<link linkend="_struct_msf_gif_result">MsfGifResult</link>;
+82 
+83 <emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">struct&#32;</emphasis>{&#32;<emphasis role="comment">//internal&#32;use</emphasis>
+84 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2external_2glfw_2deps_2vs2008_2stdint_8h_1a435d1572bf3f880d55459d9805097f62">uint32_t</link>&#32;*&#32;<link linkend="_struct_msf_cooked_frame_1a672c31e719c6943b0f0bf214f220688c">pixels</link>;
+85 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1aa8bd8cf1eef34712fdb6ad58b540a2ee">depth</link>,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a22486c0c8d9f7d79a07bf22ecffeeb2f">count</link>,&#32;rbits,&#32;gbits,&#32;<link linkend="_struct_msf_cooked_frame_1a0d2b6fd0ffa90313e13a8ed4b0f33c3e">bbits</link>;
+86 }&#32;<link linkend="_struct_msf_cooked_frame">MsfCookedFrame</link>;
+87 
+88 <emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">struct&#32;</emphasis><link linkend="_struct_msf_gif_buffer">MsfGifBuffer</link>&#32;{
+89 &#32;&#32;&#32;&#32;<emphasis role="keyword">struct&#32;</emphasis><link linkend="_struct_msf_gif_buffer">MsfGifBuffer</link>&#32;*&#32;<link linkend="_struct_msf_gif_buffer_1a085580bd8900062016906e3ed225c20f">next</link>;
+90 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;<link linkend="_struct_msf_gif_buffer_1abde2e6a4633971138e1fbf91b3ab6578">size</link>;
+91 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2external_2glfw_2deps_2vs2008_2stdint_8h_1aba7bc1797add20fe3efdf37ced1182c5">uint8_t</link>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a89ce72163394e6aef63b551a8806e93f">data</link>[1];
+92 }&#32;<link linkend="__classes_2lib_2external_2msf__gif_8h_1a3bbd73210dd4591aa641640d811affd9">MsfGifBuffer</link>;
+93 
+94 <emphasis role="keyword">typedef</emphasis>&#32;<link linkend="__classes_2lib_2include_2stddef_8h_1aa9d55e2f20e580b7445617d0d12fff6e">size_t</link>&#32;(*&#32;<link linkend="__classes_2lib_2external_2msf__gif_8h_1a35e9617d95a72185423fbeed5799ddee">MsfGifFileWriteFunc</link>)&#32;(<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>&#32;*&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a7bd7b5e409950ac3449c78baf3205f4b">buffer</link>,&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a3d1e3edfcf61ca2d831883e1afbad89e">size</link>,&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a22486c0c8d9f7d79a07bf22ecffeeb2f">count</link>,&#32;<emphasis role="keywordtype">void</emphasis>&#32;*&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a020a78e9ab6f08067423e5d76c0277d0">stream</link>);
+95 <emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">struct&#32;</emphasis>{
+96 &#32;&#32;&#32;&#32;<link linkend="_lib_2external_2msf__gif_8h_1a35e9617d95a72185423fbeed5799ddee">MsfGifFileWriteFunc</link>&#32;<link linkend="_struct_msf_gif_state_1a698f5903d791c7b8c24f8a6457fa77ab">fileWriteFunc</link>;
+97 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>&#32;*&#32;<link linkend="_struct_msf_gif_state_1a3d10e459a553a843c7fe89b2a9b0f5f9">fileWriteData</link>;
+98 &#32;&#32;&#32;&#32;<link linkend="_struct_msf_cooked_frame">MsfCookedFrame</link>&#32;<link linkend="_struct_msf_gif_state_1adf44a6fa90bfab78dce2d2476ac0c91b">previousFrame</link>;
+99 &#32;&#32;&#32;&#32;<link linkend="_struct_msf_cooked_frame">MsfCookedFrame</link>&#32;<link linkend="_struct_msf_gif_state_1aaa45de0e7300f1f4b7d74188dec4a23b">currentFrame</link>;
+100 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2external_2glfw_2deps_2vs2008_2stdint_8h_1a269259c924dce846340ddbb810db2e3c">int16_t</link>&#32;*&#32;<link linkend="_struct_msf_gif_state_1a67cd898002faf0e39dff4669b53dba96">lzwMem</link>;
+101 &#32;&#32;&#32;&#32;<link linkend="_struct_msf_gif_buffer">MsfGifBuffer</link>&#32;*&#32;<link linkend="_struct_msf_gif_state_1afdef66bb4c8d9499fcefbb4707406557">listHead</link>;
+102 &#32;&#32;&#32;&#32;<link linkend="_struct_msf_gif_buffer">MsfGifBuffer</link>&#32;*&#32;<link linkend="_struct_msf_gif_state_1a731e6da3cbbb24973ccb6b1104b36673">listTail</link>;
+103 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a3ce386e55bbeb900c1b23e064b89bd04">width</link>,&#32;<link linkend="_struct_msf_gif_state_1abfaf4cf66e6008868495beb0d533110a">height</link>;
+104 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>&#32;*&#32;<link linkend="_struct_msf_gif_state_1a68d36b3099231a78aed3f033e40fa741">customAllocatorContext</link>;
+105 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="_struct_msf_gif_state_1aada90a704b137efbbadaade9eb82d044">framesSubmitted</link>;&#32;<emphasis role="comment">//needed&#32;for&#32;transparency&#32;to&#32;work&#32;correctly&#32;(because&#32;we&#32;reach&#32;into&#32;the&#32;previous&#32;frame)</emphasis>
+106 }&#32;<link linkend="_struct_msf_gif_state">MsfGifState</link>;
+107 
+108 <emphasis role="preprocessor">#ifdef&#32;__cplusplus</emphasis>
+109 <emphasis role="keyword">extern</emphasis>&#32;<emphasis role="stringliteral">&quot;C&quot;</emphasis>&#32;{
+110 <emphasis role="preprocessor">#endif&#32;</emphasis><emphasis role="comment">//__cplusplus</emphasis>
+111 
+117 <emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2external_2msf__gif_8h_1aa0170c8cb35cb68eb2863c5f960c8eb9">msf_gif_begin</link>(<link linkend="_struct_msf_gif_state">MsfGifState</link>&#32;*&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a48fc485a2a8834589d1f1afeec65193c">handle</link>,&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a3ce386e55bbeb900c1b23e064b89bd04">width</link>,&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1aedd0ea77029b98ce91e47c19addcb68f">height</link>);
+118 
+136 <emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2external_2msf__gif_8h_1a2ae6cae42e2b5064f29759df597795c9">msf_gif_frame</link>(<link linkend="_struct_msf_gif_state">MsfGifState</link>&#32;*&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a48fc485a2a8834589d1f1afeec65193c">handle</link>,&#32;<link linkend="__classes_2lib_2external_2glfw_2deps_2vs2008_2stdint_8h_1aba7bc1797add20fe3efdf37ced1182c5">uint8_t</link>&#32;*&#32;pixelData,&#32;<emphasis role="keywordtype">int</emphasis>&#32;centiSecondsPerFame,&#32;<emphasis role="keywordtype">int</emphasis>&#32;maxBitDepth,&#32;<emphasis role="keywordtype">int</emphasis>&#32;pitchInBytes);
+137 
+142 <link linkend="_struct_msf_gif_result">MsfGifResult</link>&#32;<link linkend="__classes_2lib_2external_2msf__gif_8h_1a866da5b406360865244db94376ff69c5">msf_gif_end</link>(<link linkend="_struct_msf_gif_state">MsfGifState</link>&#32;*&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a48fc485a2a8834589d1f1afeec65193c">handle</link>);
+143 
+147 <emphasis role="keywordtype">void</emphasis>&#32;<link linkend="__classes_2lib_2external_2msf__gif_8h_1a1a1d6a8b4cfcdada4ba367d39b4d14c9">msf_gif_free</link>(<link linkend="_struct_msf_gif_result">MsfGifResult</link>&#32;<link linkend="__classes_2lib_2glm_2test_2core_2core__func__integer_8cpp_1a937d4dd628a8858b443a399410d2600b">result</link>);
+148 
+149 <emphasis role="comment">//The&#32;gif&#32;format&#32;only&#32;supports&#32;1-bit&#32;transparency,&#32;meaning&#32;a&#32;pixel&#32;will&#32;either&#32;be&#32;fully&#32;transparent&#32;or&#32;fully&#32;opaque.</emphasis>
+150 <emphasis role="comment">//Pixels&#32;with&#32;an&#32;alpha&#32;value&#32;less&#32;than&#32;the&#32;alpha&#32;threshold&#32;will&#32;be&#32;treated&#32;as&#32;transparent.</emphasis>
+151 <emphasis role="comment">//To&#32;enable&#32;exporting&#32;transparent&#32;gifs,&#32;set&#32;it&#32;to&#32;a&#32;value&#32;between&#32;1&#32;and&#32;255&#32;(inclusive)&#32;before&#32;calling&#32;msf_gif_frame().</emphasis>
+152 <emphasis role="comment">//Setting&#32;it&#32;to&#32;0&#32;causes&#32;the&#32;alpha&#32;channel&#32;to&#32;be&#32;ignored.&#32;Its&#32;initial&#32;value&#32;is&#32;0.</emphasis>
+153 <emphasis role="keyword">extern</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2external_2msf__gif_8h_1a722d964bced81a1581f58ebe9013e496">msf_gif_alpha_threshold</link>;
+154 
+155 <emphasis role="comment">//Set&#32;`msf_gif_bgra_flag&#32;=&#32;true`&#32;before&#32;calling&#32;`msf_gif_frame()`&#32;if&#32;your&#32;pixels&#32;are&#32;in&#32;BGRA&#32;byte&#32;order&#32;instead&#32;of&#32;RBGA.</emphasis>
+156 <emphasis role="keyword">extern</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2external_2msf__gif_8h_1afc4b864d43f07427e87783bef2c33507">msf_gif_bgra_flag</link>;
+157 
+158 
+159 
+160 <emphasis role="comment">//TO-FILE&#32;FUNCTIONS</emphasis>
+161 <emphasis role="comment">//These&#32;functions&#32;are&#32;equivalent&#32;to&#32;the&#32;ones&#32;above,&#32;but&#32;they&#32;write&#32;results&#32;to&#32;a&#32;file&#32;incrementally,</emphasis>
+162 <emphasis role="comment">//instead&#32;of&#32;building&#32;a&#32;buffer&#32;in&#32;memory.&#32;This&#32;can&#32;result&#32;in&#32;lower&#32;memory&#32;usage&#32;when&#32;saving&#32;large&#32;gifs,</emphasis>
+163 <emphasis role="comment">//because&#32;memory&#32;usage&#32;is&#32;bounded&#32;by&#32;only&#32;the&#32;size&#32;of&#32;a&#32;single&#32;frame,&#32;and&#32;is&#32;not&#32;dependent&#32;on&#32;the&#32;number&#32;of&#32;frames.</emphasis>
+164 <emphasis role="comment">//There&#32;is&#32;currently&#32;no&#32;reason&#32;to&#32;use&#32;these&#32;unless&#32;you&#32;are&#32;on&#32;a&#32;memory-constrained&#32;platform.</emphasis>
+165 <emphasis role="comment">//If&#32;in&#32;doubt&#32;about&#32;which&#32;API&#32;to&#32;use,&#32;for&#32;now&#32;you&#32;should&#32;use&#32;the&#32;normal&#32;(non-file)&#32;functions&#32;above.</emphasis>
+166 <emphasis role="comment">//The&#32;signature&#32;of&#32;MsfGifFileWriteFunc&#32;matches&#32;fwrite&#32;for&#32;convenience,&#32;so&#32;that&#32;you&#32;can&#32;use&#32;the&#32;C&#32;file&#32;API&#32;like&#32;so:</emphasis>
+167 <emphasis role="comment">//&#32;&#32;FILE&#32;*&#32;fp&#32;=&#32;fopen(&quot;MyGif.gif&quot;,&#32;&quot;wb&quot;);</emphasis>
+168 <emphasis role="comment">//&#32;&#32;msf_gif_begin_to_file(&amp;handle,&#32;width,&#32;height,&#32;(MsfGifFileWriteFunc)&#32;fwrite,&#32;(void&#32;*)&#32;fp);</emphasis>
+169 <emphasis role="comment">//&#32;&#32;msf_gif_frame_to_file(...)</emphasis>
+170 <emphasis role="comment">//&#32;&#32;msf_gif_end_to_file(&amp;handle);</emphasis>
+171 <emphasis role="comment">//&#32;&#32;fclose(fp);</emphasis>
+172 <emphasis role="comment">//If&#32;you&#32;use&#32;a&#32;custom&#32;file&#32;write&#32;function,&#32;you&#32;must&#32;take&#32;care&#32;to&#32;return&#32;the&#32;same&#32;values&#32;that&#32;fwrite()&#32;would&#32;return.</emphasis>
+173 <emphasis role="comment">//Note&#32;that&#32;all&#32;three&#32;functions&#32;will&#32;potentially&#32;write&#32;to&#32;the&#32;file.</emphasis>
+174 <emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2external_2msf__gif_8h_1a0cb671aa94acffde7ffcd19a2fd0fb57">msf_gif_begin_to_file</link>(<link linkend="_struct_msf_gif_state">MsfGifState</link>&#32;*&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a48fc485a2a8834589d1f1afeec65193c">handle</link>,&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a3ce386e55bbeb900c1b23e064b89bd04">width</link>,&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1aedd0ea77029b98ce91e47c19addcb68f">height</link>,&#32;<link linkend="__classes_2lib_2external_2msf__gif_8h_1a35e9617d95a72185423fbeed5799ddee">MsfGifFileWriteFunc</link>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a18ae3ab36a07e388833b568cfdfa90c8">func</link>,&#32;<emphasis role="keywordtype">void</emphasis>&#32;*&#32;filePointer);
+175 <emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2external_2msf__gif_8h_1a7fabde6ef824ba37c8f44e70611b61a8">msf_gif_frame_to_file</link>(<link linkend="_struct_msf_gif_state">MsfGifState</link>&#32;*&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a48fc485a2a8834589d1f1afeec65193c">handle</link>,&#32;<link linkend="__classes_2lib_2external_2glfw_2deps_2vs2008_2stdint_8h_1aba7bc1797add20fe3efdf37ced1182c5">uint8_t</link>&#32;*&#32;pixelData,&#32;<emphasis role="keywordtype">int</emphasis>&#32;centiSecondsPerFame,&#32;<emphasis role="keywordtype">int</emphasis>&#32;maxBitDepth,&#32;<emphasis role="keywordtype">int</emphasis>&#32;pitchInBytes);
+176 <emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2external_2msf__gif_8h_1a8426490072c80f98487ce7a18520af17">msf_gif_end_to_file</link>(<link linkend="_struct_msf_gif_state">MsfGifState</link>&#32;*&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a48fc485a2a8834589d1f1afeec65193c">handle</link>);&#32;<emphasis role="comment">//returns&#32;0&#32;on&#32;error&#32;and&#32;non-zero&#32;on&#32;success</emphasis>
+177 
+178 <emphasis role="preprocessor">#ifdef&#32;__cplusplus</emphasis>
+179 }
+180 <emphasis role="preprocessor">#endif&#32;</emphasis><emphasis role="comment">//__cplusplus</emphasis>
+181 
+182 <emphasis role="preprocessor">#endif&#32;</emphasis><emphasis role="comment">//MSF_GIF_H</emphasis>
+183 
+187 
+188 <emphasis role="preprocessor">#ifdef&#32;MSF_GIF_IMPL</emphasis>
+189 <emphasis role="preprocessor">#ifndef&#32;MSF_GIF_ALREADY_IMPLEMENTED_IN_THIS_TRANSLATION_UNIT</emphasis>
+190 <emphasis role="preprocessor">#define&#32;MSF_GIF_ALREADY_IMPLEMENTED_IN_THIS_TRANSLATION_UNIT</emphasis>
+191 
+192 <emphasis role="comment">//ensure&#32;the&#32;library&#32;user&#32;has&#32;either&#32;defined&#32;all&#32;of&#32;malloc/realloc/free,&#32;or&#32;none</emphasis>
+193 <emphasis role="preprocessor">#if&#32;defined(MSF_GIF_MALLOC)&#32;&amp;&amp;&#32;defined(MSF_GIF_REALLOC)&#32;&amp;&amp;&#32;defined(MSF_GIF_FREE)&#32;</emphasis><emphasis role="comment">//ok</emphasis>
+194 <emphasis role="preprocessor">#elif&#32;!defined(MSF_GIF_MALLOC)&#32;&amp;&amp;&#32;!defined(MSF_GIF_REALLOC)&#32;&amp;&amp;&#32;!defined(MSF_GIF_FREE)&#32;</emphasis><emphasis role="comment">//ok</emphasis>
+195 <emphasis role="preprocessor">#else</emphasis>
+196 <emphasis role="preprocessor">#error&#32;&quot;You&#32;must&#32;either&#32;define&#32;all&#32;of&#32;MSF_GIF_MALLOC,&#32;MSF_GIF_REALLOC,&#32;and&#32;MSF_GIF_FREE,&#32;or&#32;define&#32;none&#32;of&#32;them&quot;</emphasis>
+197 <emphasis role="preprocessor">#endif</emphasis>
+198 
+199 <emphasis role="comment">//provide&#32;default&#32;allocator&#32;definitions&#32;that&#32;redirect&#32;to&#32;the&#32;standard&#32;global&#32;allocator</emphasis>
+200 <emphasis role="preprocessor">#if&#32;!defined(MSF_GIF_MALLOC)</emphasis>
+201 <emphasis role="preprocessor">#include&#32;&lt;stdlib.h&gt;</emphasis>&#32;<emphasis role="comment">//malloc,&#32;etc.</emphasis>
+202 <emphasis role="preprocessor">#define&#32;MSF_GIF_MALLOC(contextPointer,&#32;newSize)&#32;malloc(newSize)</emphasis>
+203 <emphasis role="preprocessor">#define&#32;MSF_GIF_REALLOC(contextPointer,&#32;oldMemory,&#32;oldSize,&#32;newSize)&#32;realloc(oldMemory,&#32;newSize)</emphasis>
+204 <emphasis role="preprocessor">#define&#32;MSF_GIF_FREE(contextPointer,&#32;oldMemory,&#32;oldSize)&#32;free(oldMemory)</emphasis>
+205 <emphasis role="preprocessor">#endif</emphasis>
+206 
+207 <emphasis role="comment">//instrumentation&#32;for&#32;capturing&#32;profiling&#32;traces&#32;(useless&#32;for&#32;the&#32;library&#32;user,&#32;but&#32;useful&#32;for&#32;the&#32;library&#32;author)</emphasis>
+208 <emphasis role="preprocessor">#ifdef&#32;MSF_GIF_ENABLE_TRACING</emphasis>
+209 <emphasis role="preprocessor">#define&#32;MsfTimeFunc&#32;TimeFunc</emphasis>
+210 <emphasis role="preprocessor">#define&#32;MsfTimeLoop&#32;TimeLoop</emphasis>
+211 <emphasis role="preprocessor">#define&#32;msf_init_profiling_thread&#32;init_profiling_thread</emphasis>
+212 <emphasis role="preprocessor">#else</emphasis>
+213 <emphasis role="preprocessor">#define&#32;MsfTimeFunc</emphasis>
+214 <emphasis role="preprocessor">#define&#32;MsfTimeLoop(name)</emphasis>
+215 <emphasis role="preprocessor">#define&#32;msf_init_profiling_thread()</emphasis>
+216 <emphasis role="preprocessor">#endif&#32;</emphasis><emphasis role="comment">//MSF_GIF_ENABLE_TRACING</emphasis>
+217 
+218 <emphasis role="preprocessor">#include&#32;&lt;string.h&gt;</emphasis>&#32;<emphasis role="comment">//memcpy</emphasis>
+219 
+220 <emphasis role="comment">//TODO:&#32;use&#32;compiler-specific&#32;notation&#32;to&#32;force-inline&#32;functions&#32;currently&#32;marked&#32;inline</emphasis>
+221 <emphasis role="preprocessor">#if&#32;defined(__GNUC__)&#32;</emphasis><emphasis role="comment">//gcc,&#32;clang</emphasis>
+222 <emphasis role="keyword">static</emphasis>&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;msf_bit_log(<emphasis role="keywordtype">int</emphasis>&#32;i)&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;32&#32;-&#32;__builtin_clz(i);&#32;}
+223 <emphasis role="preprocessor">#elif&#32;defined(_MSC_VER)&#32;</emphasis><emphasis role="comment">//msvc</emphasis>
+224 <emphasis role="preprocessor">#include&#32;&lt;intrin.h&gt;</emphasis>
+225 <emphasis role="keyword">static</emphasis>&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;msf_bit_log(<emphasis role="keywordtype">int</emphasis>&#32;i)&#32;{&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">long</emphasis>&#32;idx;&#32;_BitScanReverse(&amp;idx,&#32;i);&#32;<emphasis role="keywordflow">return</emphasis>&#32;idx&#32;+&#32;1;&#32;}
+226 <emphasis role="preprocessor">#else&#32;</emphasis><emphasis role="comment">//fallback&#32;implementation&#32;for&#32;other&#32;compilers</emphasis>
+227 <emphasis role="comment">//from&#32;https://stackoverflow.com/a/31718095/3064745&#32;-&#32;thanks!</emphasis>
+228 <emphasis role="keyword">static</emphasis>&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;msf_bit_log(<emphasis role="keywordtype">int</emphasis>&#32;i)&#32;{
+229 &#32;&#32;&#32;&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;MultiplyDeBruijnBitPosition[32]&#32;=&#32;{
+230 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;0,&#32;9,&#32;1,&#32;10,&#32;13,&#32;21,&#32;2,&#32;29,&#32;11,&#32;14,&#32;16,&#32;18,&#32;22,&#32;25,&#32;3,&#32;30,
+231 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;8,&#32;12,&#32;20,&#32;28,&#32;15,&#32;17,&#32;24,&#32;7,&#32;19,&#32;27,&#32;23,&#32;6,&#32;26,&#32;5,&#32;4,&#32;31,
+232 &#32;&#32;&#32;&#32;};
+233 &#32;&#32;&#32;&#32;i&#32;|=&#32;i&#32;&gt;&gt;&#32;1;
+234 &#32;&#32;&#32;&#32;i&#32;|=&#32;i&#32;&gt;&gt;&#32;2;
+235 &#32;&#32;&#32;&#32;i&#32;|=&#32;i&#32;&gt;&gt;&#32;4;
+236 &#32;&#32;&#32;&#32;i&#32;|=&#32;i&#32;&gt;&gt;&#32;8;
+237 &#32;&#32;&#32;&#32;i&#32;|=&#32;i&#32;&gt;&gt;&#32;16;
+238 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;MultiplyDeBruijnBitPosition[(<link linkend="__classes_2lib_2external_2glfw_2deps_2vs2008_2stdint_8h_1a435d1572bf3f880d55459d9805097f62">uint32_t</link>)(i&#32;*&#32;0x07C4ACDDU)&#32;&gt;&gt;&#32;27]&#32;+&#32;1;
+239 }
+240 <emphasis role="preprocessor">#endif</emphasis>
+241 <emphasis role="keyword">static</emphasis>&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;msf_imin(<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1ac8729153468b5dcf13f971b21d84d4e5">a</link>,&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a6eba317e3cf44d6d26c04a5a8f197dcb">b</link>)&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1ac8729153468b5dcf13f971b21d84d4e5">a</link>&#32;&lt;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a6eba317e3cf44d6d26c04a5a8f197dcb">b</link>?&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1ac8729153468b5dcf13f971b21d84d4e5">a</link>&#32;:&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a6eba317e3cf44d6d26c04a5a8f197dcb">b</link>;&#32;}
+242 <emphasis role="keyword">static</emphasis>&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;msf_imax(<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1ac8729153468b5dcf13f971b21d84d4e5">a</link>,&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a6eba317e3cf44d6d26c04a5a8f197dcb">b</link>)&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a6eba317e3cf44d6d26c04a5a8f197dcb">b</link>&#32;&lt;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1ac8729153468b5dcf13f971b21d84d4e5">a</link>?&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1ac8729153468b5dcf13f971b21d84d4e5">a</link>&#32;:&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a6eba317e3cf44d6d26c04a5a8f197dcb">b</link>;&#32;}
+243 
+247 
+248 <emphasis role="preprocessor">#if&#32;(defined&#32;(__SSE2__)&#32;||&#32;defined&#32;(_M_X64)&#32;||&#32;_M_IX86_FP&#32;==&#32;2)&#32;&amp;&amp;&#32;!defined(MSF_GIF_NO_SSE2)</emphasis>
+249 <emphasis role="preprocessor">#include&#32;&lt;emmintrin.h&gt;</emphasis>
+250 <emphasis role="preprocessor">#endif</emphasis>
+251 
+252 <emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2external_2msf__gif_8h_1a722d964bced81a1581f58ebe9013e496">msf_gif_alpha_threshold</link>&#32;=&#32;0;
+253 <emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2external_2msf__gif_8h_1afc4b864d43f07427e87783bef2c33507">msf_gif_bgra_flag</link>&#32;=&#32;0;
+254 
+255 <emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>&#32;msf_cook_frame(<link linkend="_struct_msf_cooked_frame">MsfCookedFrame</link>&#32;*&#32;frame,&#32;<link linkend="__classes_2lib_2external_2glfw_2deps_2vs2008_2stdint_8h_1aba7bc1797add20fe3efdf37ced1182c5">uint8_t</link>&#32;*&#32;raw,&#32;<link linkend="__classes_2lib_2external_2glfw_2deps_2vs2008_2stdint_8h_1aba7bc1797add20fe3efdf37ced1182c5">uint8_t</link>&#32;*&#32;used,
+256 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a3ce386e55bbeb900c1b23e064b89bd04">width</link>,&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1aedd0ea77029b98ce91e47c19addcb68f">height</link>,&#32;<emphasis role="keywordtype">int</emphasis>&#32;pitch,&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1aa8bd8cf1eef34712fdb6ad58b540a2ee">depth</link>)
+257 {&#32;MsfTimeFunc
+258 &#32;&#32;&#32;&#32;<emphasis role="comment">//bit&#32;depth&#32;for&#32;each&#32;channel</emphasis>
+259 &#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;rdepthsArray[17]&#32;=&#32;{&#32;0,&#32;0,&#32;1,&#32;1,&#32;1,&#32;2,&#32;2,&#32;2,&#32;3,&#32;3,&#32;3,&#32;4,&#32;4,&#32;4,&#32;5,&#32;5,&#32;5&#32;};
+260 &#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;gdepthsArray[17]&#32;=&#32;{&#32;0,&#32;1,&#32;1,&#32;1,&#32;2,&#32;2,&#32;2,&#32;3,&#32;3,&#32;3,&#32;4,&#32;4,&#32;4,&#32;5,&#32;5,&#32;5,&#32;6&#32;};
+261 &#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;bdepthsArray[17]&#32;=&#32;{&#32;0,&#32;0,&#32;0,&#32;1,&#32;1,&#32;1,&#32;2,&#32;2,&#32;2,&#32;3,&#32;3,&#32;3,&#32;4,&#32;4,&#32;4,&#32;5,&#32;5&#32;};
+262 &#32;&#32;&#32;&#32;<emphasis role="comment">//this&#32;extra&#32;level&#32;of&#32;indirection&#32;looks&#32;unnecessary&#32;but&#32;we&#32;need&#32;to&#32;explicitly&#32;decay&#32;the&#32;arrays&#32;to&#32;pointers</emphasis>
+263 &#32;&#32;&#32;&#32;<emphasis role="comment">//in&#32;order&#32;to&#32;be&#32;able&#32;to&#32;swap&#32;them&#32;because&#32;of&#32;C&apos;s&#32;annoying&#32;not-quite-pointers,&#32;not-quite-value-types&#32;stack&#32;arrays.</emphasis>
+264 &#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;*&#32;rdepths&#32;=&#32;<link linkend="__classes_2lib_2external_2msf__gif_8h_1afc4b864d43f07427e87783bef2c33507">msf_gif_bgra_flag</link>?&#32;bdepthsArray&#32;:&#32;rdepthsArray;
+265 &#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;*&#32;gdepths&#32;=&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;gdepthsArray;
+266 &#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;*&#32;bdepths&#32;=&#32;<link linkend="__classes_2lib_2external_2msf__gif_8h_1afc4b864d43f07427e87783bef2c33507">msf_gif_bgra_flag</link>?&#32;rdepthsArray&#32;:&#32;bdepthsArray;
+267 
+268 &#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;ditherKernel[16]&#32;=&#32;{
+269 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;0&#32;&lt;&lt;&#32;12,&#32;&#32;8&#32;&lt;&lt;&#32;12,&#32;&#32;2&#32;&lt;&lt;&#32;12,&#32;10&#32;&lt;&lt;&#32;12,
+270 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;12&#32;&lt;&lt;&#32;12,&#32;&#32;4&#32;&lt;&lt;&#32;12,&#32;14&#32;&lt;&lt;&#32;12,&#32;&#32;6&#32;&lt;&lt;&#32;12,
+271 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;3&#32;&lt;&lt;&#32;12,&#32;11&#32;&lt;&lt;&#32;12,&#32;&#32;1&#32;&lt;&lt;&#32;12,&#32;&#32;9&#32;&lt;&lt;&#32;12,
+272 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;15&#32;&lt;&lt;&#32;12,&#32;&#32;7&#32;&lt;&lt;&#32;12,&#32;13&#32;&lt;&lt;&#32;12,&#32;&#32;5&#32;&lt;&lt;&#32;12,
+273 &#32;&#32;&#32;&#32;};
+274 
+275 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2external_2glfw_2deps_2vs2008_2stdint_8h_1a435d1572bf3f880d55459d9805097f62">uint32_t</link>&#32;*&#32;cooked&#32;=&#32;frame-&gt;<link linkend="_struct_msf_cooked_frame_1a672c31e719c6943b0f0bf214f220688c">pixels</link>;
+276 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a22486c0c8d9f7d79a07bf22ecffeeb2f">count</link>&#32;=&#32;0;
+277 &#32;&#32;&#32;&#32;MsfTimeLoop(<emphasis role="stringliteral">&quot;do&quot;</emphasis>)&#32;do&#32;{
+278 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;rbits&#32;=&#32;rdepths[<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1aa8bd8cf1eef34712fdb6ad58b540a2ee">depth</link>],&#32;gbits&#32;=&#32;gdepths[<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1aa8bd8cf1eef34712fdb6ad58b540a2ee">depth</link>],&#32;bbits&#32;=&#32;bdepths[<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1aa8bd8cf1eef34712fdb6ad58b540a2ee">depth</link>];
+279 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;paletteSize&#32;=&#32;(1&#32;&lt;&lt;&#32;(rbits&#32;+&#32;gbits&#32;+&#32;bbits))&#32;+&#32;1;
+280 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;memset(used,&#32;0,&#32;paletteSize&#32;*&#32;<emphasis role="keyword">sizeof</emphasis>(<link linkend="__classes_2lib_2external_2glfw_2deps_2vs2008_2stdint_8h_1aba7bc1797add20fe3efdf37ced1182c5">uint8_t</link>));
+281 
+282 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//TODO:&#32;document&#32;what&#32;this&#32;math&#32;does&#32;and&#32;why&#32;it&apos;s&#32;correct</emphasis>
+283 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;rdiff&#32;=&#32;(1&#32;&lt;&lt;&#32;(8&#32;-&#32;rbits))&#32;-&#32;1;
+284 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;gdiff&#32;=&#32;(1&#32;&lt;&lt;&#32;(8&#32;-&#32;gbits))&#32;-&#32;1;
+285 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;bdiff&#32;=&#32;(1&#32;&lt;&lt;&#32;(8&#32;-&#32;bbits))&#32;-&#32;1;
+286 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">short</emphasis>&#32;rmul&#32;=&#32;(short)&#32;((255.0f&#32;-&#32;rdiff)&#32;/&#32;255.0f&#32;*&#32;257);
+287 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">short</emphasis>&#32;gmul&#32;=&#32;(short)&#32;((255.0f&#32;-&#32;gdiff)&#32;/&#32;255.0f&#32;*&#32;257);
+288 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">short</emphasis>&#32;bmul&#32;=&#32;(short)&#32;((255.0f&#32;-&#32;bdiff)&#32;/&#32;255.0f&#32;*&#32;257);
+289 
+290 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;gmask&#32;=&#32;((1&#32;&lt;&lt;&#32;gbits)&#32;-&#32;1)&#32;&lt;&lt;&#32;rbits;
+291 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;bmask&#32;=&#32;((1&#32;&lt;&lt;&#32;bbits)&#32;-&#32;1)&#32;&lt;&lt;&#32;rbits&#32;&lt;&lt;&#32;gbits;
+292 
+293 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;MsfTimeLoop(<emphasis role="stringliteral">&quot;cook&quot;</emphasis>)&#32;for&#32;(<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a4f27f1eebce8c31db01bb39fab9ef561">y</link>&#32;=&#32;0;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a4f27f1eebce8c31db01bb39fab9ef561">y</link>&#32;&lt;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1aedd0ea77029b98ce91e47c19addcb68f">height</link>;&#32;++<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a4f27f1eebce8c31db01bb39fab9ef561">y</link>)&#32;{
+294 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1ac916c0825494ac3acd4457effd2823d2">x</link>&#32;=&#32;0;
+295 
+296 <emphasis role="preprocessor">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;#if&#32;(defined&#32;(__SSE2__)&#32;||&#32;defined&#32;(_M_X64)&#32;||&#32;_M_IX86_FP&#32;==&#32;2)&#32;&amp;&amp;&#32;!defined(MSF_GIF_NO_SSE2)</emphasis>
+297 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__m128i&#32;k&#32;=&#32;_mm_loadu_si128((__m128i&#32;*)&#32;&amp;ditherKernel[(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a4f27f1eebce8c31db01bb39fab9ef561">y</link>&#32;&amp;&#32;3)&#32;*&#32;4]);
+298 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__m128i&#32;k2&#32;=&#32;_mm_or_si128(_mm_srli_epi32(k,&#32;rbits),&#32;_mm_slli_epi32(_mm_srli_epi32(k,&#32;bbits),&#32;16));
+299 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1ac916c0825494ac3acd4457effd2823d2">x</link>&#32;&lt;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a3ce386e55bbeb900c1b23e064b89bd04">width</link>&#32;-&#32;3;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1ac916c0825494ac3acd4457effd2823d2">x</link>&#32;+=&#32;4)&#32;{
+300 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2external_2glfw_2deps_2vs2008_2stdint_8h_1aba7bc1797add20fe3efdf37ced1182c5">uint8_t</link>&#32;*&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a620525fb1b4102cd9522c24b0e7d3e40">pixels</link>&#32;=&#32;&amp;raw[<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a4f27f1eebce8c31db01bb39fab9ef561">y</link>&#32;*&#32;<link linkend="_group__gtc__quaternion_1ga7603e81477b46ddb448896909bc04928">pitch</link>&#32;+&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1ac916c0825494ac3acd4457effd2823d2">x</link>&#32;*&#32;4];
+301 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__m128i&#32;p&#32;=&#32;_mm_loadu_si128((__m128i&#32;*)&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a620525fb1b4102cd9522c24b0e7d3e40">pixels</link>);
+302 
+303 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__m128i&#32;rb&#32;=&#32;_mm_and_si128(p,&#32;_mm_set1_epi32(0x00FF00FF));
+304 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__m128i&#32;rb1&#32;=&#32;_mm_mullo_epi16(rb,&#32;_mm_set_epi16(bmul,&#32;rmul,&#32;bmul,&#32;rmul,&#32;bmul,&#32;rmul,&#32;bmul,&#32;rmul));
+305 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__m128i&#32;rb2&#32;=&#32;_mm_adds_epu16(rb1,&#32;k2);
+306 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__m128i&#32;r3&#32;=&#32;_mm_srli_epi32(_mm_and_si128(rb2,&#32;_mm_set1_epi32(0x0000FFFF)),&#32;16&#32;-&#32;rbits);
+307 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__m128i&#32;b3&#32;=&#32;_mm_and_si128(_mm_srli_epi32(rb2,&#32;32&#32;-&#32;rbits&#32;-&#32;gbits&#32;-&#32;bbits),&#32;_mm_set1_epi32(bmask));
+308 
+309 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__m128i&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a9cd653b1648845554169fbc3a3f6d37a">g</link>&#32;=&#32;_mm_and_si128(_mm_srli_epi32(p,&#32;8),&#32;_mm_set1_epi32(0x000000FF));
+310 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__m128i&#32;g1&#32;=&#32;_mm_mullo_epi16(<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a9cd653b1648845554169fbc3a3f6d37a">g</link>,&#32;_mm_set1_epi32(gmul));
+311 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__m128i&#32;g2&#32;=&#32;_mm_adds_epu16(g1,&#32;_mm_srli_epi32(k,&#32;gbits));
+312 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__m128i&#32;g3&#32;=&#32;_mm_and_si128(_mm_srli_epi32(g2,&#32;16&#32;-&#32;rbits&#32;-&#32;gbits),&#32;_mm_set1_epi32(gmask));
+313 
+314 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__m128i&#32;out&#32;=&#32;_mm_or_si128(_mm_or_si128(r3,&#32;g3),&#32;b3);
+315 
+316 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//mask&#32;in&#32;transparency&#32;based&#32;on&#32;threshold</emphasis>
+317 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//NOTE:&#32;we&#32;can&#32;theoretically&#32;do&#32;a&#32;sub&#32;instead&#32;of&#32;srli&#32;by&#32;doing&#32;an&#32;unsigned&#32;compare&#32;via&#32;bias</emphasis>
+318 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;&#32;&#32;&#32;&#32;&#32;to&#32;maybe&#32;save&#32;a&#32;TINY&#32;amount&#32;of&#32;throughput?&#32;but&#32;lol&#32;who&#32;cares&#32;maybe&#32;I&apos;ll&#32;do&#32;it&#32;later&#32;-m</emphasis>
+319 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__m128i&#32;invAlphaMask&#32;=&#32;_mm_cmplt_epi32(_mm_srli_epi32(p,&#32;24),&#32;_mm_set1_epi32(<link linkend="__classes_2lib_2external_2msf__gif_8h_1a722d964bced81a1581f58ebe9013e496">msf_gif_alpha_threshold</link>));
+320 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;out&#32;=&#32;_mm_or_si128(_mm_and_si128(invAlphaMask,&#32;_mm_set1_epi32(paletteSize&#32;-&#32;1)),&#32;_mm_andnot_si128(invAlphaMask,&#32;out));
+321 
+322 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//TODO:&#32;does&#32;storing&#32;this&#32;as&#32;a&#32;__m128i&#32;then&#32;reading&#32;it&#32;back&#32;as&#32;a&#32;uint32_t&#32;violate&#32;strict&#32;aliasing?</emphasis>
+323 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2external_2glfw_2deps_2vs2008_2stdint_8h_1a435d1572bf3f880d55459d9805097f62">uint32_t</link>&#32;*&#32;c&#32;=&#32;&amp;cooked[<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a4f27f1eebce8c31db01bb39fab9ef561">y</link>&#32;*&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a3ce386e55bbeb900c1b23e064b89bd04">width</link>&#32;+&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1ac916c0825494ac3acd4457effd2823d2">x</link>];
+324 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2avxintrin_8h_1ad8f6a27fe514fda127ff1aa9770de6b3">_mm_storeu_si128</link>((__m128i&#32;*)&#32;c,&#32;out);
+325 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+326 <emphasis role="preprocessor">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;#endif</emphasis>
+327 
+328 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//scalar&#32;cleanup&#32;loop</emphasis>
+329 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1ac916c0825494ac3acd4457effd2823d2">x</link>&#32;&lt;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a3ce386e55bbeb900c1b23e064b89bd04">width</link>;&#32;++<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1ac916c0825494ac3acd4457effd2823d2">x</link>)&#32;{
+330 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2external_2glfw_2deps_2vs2008_2stdint_8h_1aba7bc1797add20fe3efdf37ced1182c5">uint8_t</link>&#32;*&#32;p&#32;=&#32;&amp;raw[<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a4f27f1eebce8c31db01bb39fab9ef561">y</link>&#32;*&#32;<link linkend="_group__gtc__quaternion_1ga7603e81477b46ddb448896909bc04928">pitch</link>&#32;+&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1ac916c0825494ac3acd4457effd2823d2">x</link>&#32;*&#32;4];
+331 
+332 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//transparent&#32;pixel&#32;if&#32;alpha&#32;is&#32;low</emphasis>
+333 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(p[3]&#32;&lt;&#32;<link linkend="__classes_2lib_2external_2msf__gif_8h_1a722d964bced81a1581f58ebe9013e496">msf_gif_alpha_threshold</link>)&#32;{
+334 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;cooked[<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a4f27f1eebce8c31db01bb39fab9ef561">y</link>&#32;*&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a3ce386e55bbeb900c1b23e064b89bd04">width</link>&#32;+&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1ac916c0825494ac3acd4457effd2823d2">x</link>]&#32;=&#32;paletteSize&#32;-&#32;1;
+335 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">continue</emphasis>;
+336 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+337 
+338 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;dx&#32;=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1ac916c0825494ac3acd4457effd2823d2">x</link>&#32;&amp;&#32;3,&#32;dy&#32;=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a4f27f1eebce8c31db01bb39fab9ef561">y</link>&#32;&amp;&#32;3;
+339 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;k&#32;=&#32;ditherKernel[dy&#32;*&#32;4&#32;+&#32;dx];
+340 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;cooked[<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a4f27f1eebce8c31db01bb39fab9ef561">y</link>&#32;*&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a3ce386e55bbeb900c1b23e064b89bd04">width</link>&#32;+&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1ac916c0825494ac3acd4457effd2823d2">x</link>]&#32;=
+341 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;(msf_imin(65535,&#32;p[2]&#32;*&#32;bmul&#32;+&#32;(k&#32;&gt;&gt;&#32;bbits))&#32;&gt;&gt;&#32;(16&#32;-&#32;rbits&#32;-&#32;gbits&#32;-&#32;bbits)&#32;&amp;&#32;bmask)&#32;|
+342 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;(msf_imin(65535,&#32;p[1]&#32;*&#32;gmul&#32;+&#32;(k&#32;&gt;&gt;&#32;gbits))&#32;&gt;&gt;&#32;(16&#32;-&#32;rbits&#32;-&#32;gbits&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;)&#32;&amp;&#32;gmask)&#32;|
+343 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;msf_imin(65535,&#32;p[0]&#32;*&#32;rmul&#32;+&#32;(k&#32;&gt;&gt;&#32;rbits))&#32;&gt;&gt;&#32;(16&#32;-&#32;rbits&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;);
+344 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+345 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+346 
+347 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a22486c0c8d9f7d79a07bf22ecffeeb2f">count</link>&#32;=&#32;0;
+348 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;MsfTimeLoop(<emphasis role="stringliteral">&quot;mark&quot;</emphasis>)&#32;for&#32;(<emphasis role="keywordtype">int</emphasis>&#32;i&#32;=&#32;0;&#32;i&#32;&lt;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a3ce386e55bbeb900c1b23e064b89bd04">width</link>&#32;*&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1aedd0ea77029b98ce91e47c19addcb68f">height</link>;&#32;++i)&#32;{
+349 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;used[cooked[i]]&#32;=&#32;1;
+350 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+351 
+352 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//count&#32;used&#32;colors,&#32;transparent&#32;is&#32;ignored</emphasis>
+353 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;MsfTimeLoop(<emphasis role="stringliteral">&quot;count&quot;</emphasis>)&#32;for&#32;(<emphasis role="keywordtype">int</emphasis>&#32;j&#32;=&#32;0;&#32;j&#32;&lt;&#32;paletteSize&#32;-&#32;1;&#32;++j)&#32;{
+354 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a22486c0c8d9f7d79a07bf22ecffeeb2f">count</link>&#32;+=&#32;used[j];
+355 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+356 &#32;&#32;&#32;&#32;}&#32;<emphasis role="keywordflow">while</emphasis>&#32;(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a22486c0c8d9f7d79a07bf22ecffeeb2f">count</link>&#32;&gt;=&#32;256&#32;&amp;&amp;&#32;--<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1aa8bd8cf1eef34712fdb6ad58b540a2ee">depth</link>);
+357 
+358 &#32;&#32;&#32;&#32;<link linkend="_struct_msf_cooked_frame">MsfCookedFrame</link>&#32;ret&#32;=&#32;{&#32;cooked,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1aa8bd8cf1eef34712fdb6ad58b540a2ee">depth</link>,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a22486c0c8d9f7d79a07bf22ecffeeb2f">count</link>,&#32;rdepths[<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1aa8bd8cf1eef34712fdb6ad58b540a2ee">depth</link>],&#32;gdepths[<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1aa8bd8cf1eef34712fdb6ad58b540a2ee">depth</link>],&#32;bdepths[<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1aa8bd8cf1eef34712fdb6ad58b540a2ee">depth</link>]&#32;};
+359 &#32;&#32;&#32;&#32;*frame&#32;=&#32;ret;
+360 }
+361 
+365 
+366 <emphasis role="keyword">static</emphasis>&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>&#32;msf_put_code(<link linkend="__classes_2lib_2external_2glfw_2deps_2vs2008_2stdint_8h_1aba7bc1797add20fe3efdf37ced1182c5">uint8_t</link>&#32;*&#32;*&#32;writeHead,&#32;<link linkend="__classes_2lib_2external_2glfw_2deps_2vs2008_2stdint_8h_1a435d1572bf3f880d55459d9805097f62">uint32_t</link>&#32;*&#32;blockBits,&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a30ee67aa502329a88f4a203775adfa1a">len</link>,&#32;<link linkend="__classes_2lib_2external_2glfw_2deps_2vs2008_2stdint_8h_1a435d1572bf3f880d55459d9805097f62">uint32_t</link>&#32;code)&#32;{
+367 &#32;&#32;&#32;&#32;<emphasis role="comment">//insert&#32;new&#32;code&#32;into&#32;block&#32;buffer</emphasis>
+368 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;idx&#32;=&#32;*blockBits&#32;/&#32;8;
+369 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;bit&#32;=&#32;*blockBits&#32;%&#32;8;
+370 &#32;&#32;&#32;&#32;(*writeHead)[idx&#32;+&#32;0]&#32;|=&#32;code&#32;&lt;&lt;&#32;&#32;&#32;&#32;&#32;&#32;&#32;bit&#32;;
+371 &#32;&#32;&#32;&#32;(*writeHead)[idx&#32;+&#32;1]&#32;|=&#32;code&#32;&gt;&gt;&#32;(&#32;8&#32;-&#32;bit);
+372 &#32;&#32;&#32;&#32;(*writeHead)[idx&#32;+&#32;2]&#32;|=&#32;code&#32;&gt;&gt;&#32;(16&#32;-&#32;bit);
+373 &#32;&#32;&#32;&#32;*blockBits&#32;+=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a30ee67aa502329a88f4a203775adfa1a">len</link>;
+374 
+375 &#32;&#32;&#32;&#32;<emphasis role="comment">//prep&#32;the&#32;next&#32;block&#32;buffer&#32;if&#32;the&#32;current&#32;one&#32;is&#32;full</emphasis>
+376 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(*blockBits&#32;&gt;=&#32;256&#32;*&#32;8)&#32;{
+377 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;*blockBits&#32;-=&#32;255&#32;*&#32;8;
+378 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;(*writeHead)&#32;+=&#32;256;
+379 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;(*writeHead)[2]&#32;=&#32;(*writeHead)[1];
+380 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;(*writeHead)[1]&#32;=&#32;(*writeHead)[0];
+381 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;(*writeHead)[0]&#32;=&#32;255;
+382 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;memset((*writeHead)&#32;+&#32;4,&#32;0,&#32;256);
+383 &#32;&#32;&#32;&#32;}
+384 }
+385 
+386 <emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">struct&#32;</emphasis>{
+387 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2external_2glfw_2deps_2vs2008_2stdint_8h_1a269259c924dce846340ddbb810db2e3c">int16_t</link>&#32;*&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a89ce72163394e6aef63b551a8806e93f">data</link>;
+388 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a30ee67aa502329a88f4a203775adfa1a">len</link>;
+389 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1af167f0227db62527e3f6b3685385aa8e">stride</link>;
+390 }&#32;MsfStridedList;
+391 
+392 <emphasis role="keyword">static</emphasis>&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>&#32;msf_lzw_reset(MsfStridedList&#32;*&#32;lzw,&#32;<emphasis role="keywordtype">int</emphasis>&#32;tableSize,&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1af167f0227db62527e3f6b3685385aa8e">stride</link>)&#32;{&#32;MsfTimeFunc
+393 &#32;&#32;&#32;&#32;memset(lzw-&gt;data,&#32;0xFF,&#32;4096&#32;*&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1af167f0227db62527e3f6b3685385aa8e">stride</link>&#32;*&#32;<emphasis role="keyword">sizeof</emphasis>(<link linkend="__classes_2lib_2external_2glfw_2deps_2vs2008_2stdint_8h_1a269259c924dce846340ddbb810db2e3c">int16_t</link>));
+394 &#32;&#32;&#32;&#32;lzw-&gt;len&#32;=&#32;tableSize&#32;+&#32;2;
+395 &#32;&#32;&#32;&#32;lzw-&gt;stride&#32;=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1af167f0227db62527e3f6b3685385aa8e">stride</link>;
+396 }
+397 
+398 <emphasis role="keyword">static</emphasis>&#32;<link linkend="_struct_msf_gif_buffer">MsfGifBuffer</link>&#32;*&#32;msf_compress_frame(<emphasis role="keywordtype">void</emphasis>&#32;*&#32;allocContext,&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a3ce386e55bbeb900c1b23e064b89bd04">width</link>,&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1aedd0ea77029b98ce91e47c19addcb68f">height</link>,&#32;<emphasis role="keywordtype">int</emphasis>&#32;centiSeconds,
+399 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_struct_msf_cooked_frame">MsfCookedFrame</link>&#32;frame,&#32;<link linkend="_struct_msf_gif_state">MsfGifState</link>&#32;*&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a48fc485a2a8834589d1f1afeec65193c">handle</link>,&#32;<link linkend="__classes_2lib_2external_2glfw_2deps_2vs2008_2stdint_8h_1aba7bc1797add20fe3efdf37ced1182c5">uint8_t</link>&#32;*&#32;used,&#32;<link linkend="__classes_2lib_2external_2glfw_2deps_2vs2008_2stdint_8h_1a269259c924dce846340ddbb810db2e3c">int16_t</link>&#32;*&#32;lzwMem)
+400 {&#32;MsfTimeFunc
+401 &#32;&#32;&#32;&#32;<emphasis role="comment">//NOTE:&#32;we&#32;reserve&#32;enough&#32;memory&#32;for&#32;theoretical&#32;the&#32;worst&#32;case&#32;upfront&#32;because&#32;it&apos;s&#32;a&#32;reasonable&#32;amount,</emphasis>
+402 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;&#32;&#32;&#32;&#32;&#32;and&#32;prevents&#32;us&#32;from&#32;ever&#32;having&#32;to&#32;check&#32;size&#32;or&#32;realloc&#32;during&#32;compression</emphasis>
+403 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;maxBufSize&#32;=&#32;<link linkend="__classes_2lib_2include_2stddef_8h_1a276e8a32e0bbf024aadd9420b8f2d3b3">offsetof</link>(<link linkend="_struct_msf_gif_buffer">MsfGifBuffer</link>,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a89ce72163394e6aef63b551a8806e93f">data</link>)&#32;+&#32;32&#32;+&#32;256&#32;*&#32;3&#32;+&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a3ce386e55bbeb900c1b23e064b89bd04">width</link>&#32;*&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1aedd0ea77029b98ce91e47c19addcb68f">height</link>&#32;*&#32;3&#32;/&#32;2;&#32;<emphasis role="comment">//headers&#32;+&#32;color&#32;table&#32;+&#32;data</emphasis>
+404 &#32;&#32;&#32;&#32;<link linkend="_struct_msf_gif_buffer">MsfGifBuffer</link>&#32;*&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a7bd7b5e409950ac3449c78baf3205f4b">buffer</link>&#32;=&#32;(<link linkend="_struct_msf_gif_buffer">MsfGifBuffer</link>&#32;*)&#32;<link linkend="__classes_2lib_2rcore_8c_1a09a80a4d7a7f3e552195ac7f7b4b5c90">MSF_GIF_MALLOC</link>(allocContext,&#32;maxBufSize);
+405 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(!<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a7bd7b5e409950ac3449c78baf3205f4b">buffer</link>)&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>;&#32;}
+406 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2external_2glfw_2deps_2vs2008_2stdint_8h_1aba7bc1797add20fe3efdf37ced1182c5">uint8_t</link>&#32;*&#32;writeHead&#32;=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a7bd7b5e409950ac3449c78baf3205f4b">buffer</link>-&gt;<link linkend="_struct_msf_gif_buffer_1a0d8d0b24792ce4b8e141452ee741483d">data</link>;
+407 &#32;&#32;&#32;&#32;MsfStridedList&#32;lzw&#32;=&#32;{&#32;lzwMem&#32;};
+408 
+409 &#32;&#32;&#32;&#32;<emphasis role="comment">//allocate&#32;tlb</emphasis>
+410 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;totalBits&#32;=&#32;frame.<link linkend="_struct_msf_cooked_frame_1a7f07230a7f2605e055988a218fa53835">rbits</link>&#32;+&#32;frame.<link linkend="_struct_msf_cooked_frame_1aa37915ba4516dab229056f8b563774d6">gbits</link>&#32;+&#32;frame.<link linkend="_struct_msf_cooked_frame_1a0d2b6fd0ffa90313e13a8ed4b0f33c3e">bbits</link>;
+411 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;tlbSize&#32;=&#32;(1&#32;&lt;&lt;&#32;totalBits)&#32;+&#32;1;
+412 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2external_2glfw_2deps_2vs2008_2stdint_8h_1aba7bc1797add20fe3efdf37ced1182c5">uint8_t</link>&#32;tlb[(1&#32;&lt;&lt;&#32;16)&#32;+&#32;1];&#32;<emphasis role="comment">//only&#32;64k,&#32;so&#32;stack&#32;allocating&#32;is&#32;fine</emphasis>
+413 
+414 &#32;&#32;&#32;&#32;<emphasis role="comment">//generate&#32;palette</emphasis>
+415 &#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">struct&#32;</emphasis>{&#32;<link linkend="__classes_2lib_2external_2glfw_2deps_2vs2008_2stdint_8h_1aba7bc1797add20fe3efdf37ced1182c5">uint8_t</link>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1abe08814c2f72843fde4d8df41440d5a0">r</link>,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a9cd653b1648845554169fbc3a3f6d37a">g</link>,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a6eba317e3cf44d6d26c04a5a8f197dcb">b</link>;&#32;}&#32;Color3;
+416 &#32;&#32;&#32;&#32;Color3&#32;<link linkend="_classtable">table</link>[256]&#32;=&#32;{&#32;{0}&#32;};
+417 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;tableIdx&#32;=&#32;1;&#32;<emphasis role="comment">//we&#32;start&#32;counting&#32;at&#32;1&#32;because&#32;0&#32;is&#32;the&#32;transparent&#32;color</emphasis>
+418 &#32;&#32;&#32;&#32;<emphasis role="comment">//transparent&#32;is&#32;always&#32;last&#32;in&#32;the&#32;table</emphasis>
+419 &#32;&#32;&#32;&#32;tlb[tlbSize-1]&#32;=&#32;0;
+420 &#32;&#32;&#32;&#32;MsfTimeLoop(<emphasis role="stringliteral">&quot;table&quot;</emphasis>)&#32;for&#32;(<emphasis role="keywordtype">int</emphasis>&#32;i&#32;=&#32;0;&#32;i&#32;&lt;&#32;tlbSize-1;&#32;++i)&#32;{
+421 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(used[i])&#32;{
+422 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;tlb[i]&#32;=&#32;tableIdx;
+423 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;rmask&#32;=&#32;(1&#32;&lt;&lt;&#32;frame.<link linkend="_struct_msf_cooked_frame_1a7f07230a7f2605e055988a218fa53835">rbits</link>)&#32;-&#32;1;
+424 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;gmask&#32;=&#32;(1&#32;&lt;&lt;&#32;frame.<link linkend="_struct_msf_cooked_frame_1aa37915ba4516dab229056f8b563774d6">gbits</link>)&#32;-&#32;1;
+425 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//isolate&#32;components</emphasis>
+426 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1abe08814c2f72843fde4d8df41440d5a0">r</link>&#32;=&#32;i&#32;&amp;&#32;rmask;
+427 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a9cd653b1648845554169fbc3a3f6d37a">g</link>&#32;=&#32;i&#32;&gt;&gt;&#32;frame.<link linkend="_struct_msf_cooked_frame_1a7f07230a7f2605e055988a218fa53835">rbits</link>&#32;&amp;&#32;gmask;
+428 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a6eba317e3cf44d6d26c04a5a8f197dcb">b</link>&#32;=&#32;i&#32;&gt;&gt;&#32;(frame.<link linkend="_struct_msf_cooked_frame_1a7f07230a7f2605e055988a218fa53835">rbits</link>&#32;+&#32;frame.<link linkend="_struct_msf_cooked_frame_1aa37915ba4516dab229056f8b563774d6">gbits</link>);
+429 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//shift&#32;into&#32;highest&#32;bits</emphasis>
+430 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1abe08814c2f72843fde4d8df41440d5a0">r</link>&#32;&lt;&lt;=&#32;8&#32;-&#32;frame.<link linkend="_struct_msf_cooked_frame_1a7f07230a7f2605e055988a218fa53835">rbits</link>;
+431 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a9cd653b1648845554169fbc3a3f6d37a">g</link>&#32;&lt;&lt;=&#32;8&#32;-&#32;frame.<link linkend="_struct_msf_cooked_frame_1aa37915ba4516dab229056f8b563774d6">gbits</link>;
+432 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a6eba317e3cf44d6d26c04a5a8f197dcb">b</link>&#32;&lt;&lt;=&#32;8&#32;-&#32;frame.<link linkend="_struct_msf_cooked_frame_1a0d2b6fd0ffa90313e13a8ed4b0f33c3e">bbits</link>;
+433 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_classtable">table</link>[tableIdx].r&#32;=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1abe08814c2f72843fde4d8df41440d5a0">r</link>&#32;|&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1abe08814c2f72843fde4d8df41440d5a0">r</link>&#32;&gt;&gt;&#32;frame.<link linkend="_struct_msf_cooked_frame_1a7f07230a7f2605e055988a218fa53835">rbits</link>&#32;|&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1abe08814c2f72843fde4d8df41440d5a0">r</link>&#32;&gt;&gt;&#32;(frame.<link linkend="_struct_msf_cooked_frame_1a7f07230a7f2605e055988a218fa53835">rbits</link>&#32;*&#32;2)&#32;|&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1abe08814c2f72843fde4d8df41440d5a0">r</link>&#32;&gt;&gt;&#32;(frame.<link linkend="_struct_msf_cooked_frame_1a7f07230a7f2605e055988a218fa53835">rbits</link>&#32;*&#32;3);
+434 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_classtable">table</link>[tableIdx].g&#32;=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a9cd653b1648845554169fbc3a3f6d37a">g</link>&#32;|&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a9cd653b1648845554169fbc3a3f6d37a">g</link>&#32;&gt;&gt;&#32;frame.<link linkend="_struct_msf_cooked_frame_1aa37915ba4516dab229056f8b563774d6">gbits</link>&#32;|&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a9cd653b1648845554169fbc3a3f6d37a">g</link>&#32;&gt;&gt;&#32;(frame.<link linkend="_struct_msf_cooked_frame_1aa37915ba4516dab229056f8b563774d6">gbits</link>&#32;*&#32;2)&#32;|&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a9cd653b1648845554169fbc3a3f6d37a">g</link>&#32;&gt;&gt;&#32;(frame.<link linkend="_struct_msf_cooked_frame_1aa37915ba4516dab229056f8b563774d6">gbits</link>&#32;*&#32;3);
+435 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_classtable">table</link>[tableIdx].b&#32;=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a6eba317e3cf44d6d26c04a5a8f197dcb">b</link>&#32;|&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a6eba317e3cf44d6d26c04a5a8f197dcb">b</link>&#32;&gt;&gt;&#32;frame.<link linkend="_struct_msf_cooked_frame_1a0d2b6fd0ffa90313e13a8ed4b0f33c3e">bbits</link>&#32;|&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a6eba317e3cf44d6d26c04a5a8f197dcb">b</link>&#32;&gt;&gt;&#32;(frame.<link linkend="_struct_msf_cooked_frame_1a0d2b6fd0ffa90313e13a8ed4b0f33c3e">bbits</link>&#32;*&#32;2)&#32;|&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a6eba317e3cf44d6d26c04a5a8f197dcb">b</link>&#32;&gt;&gt;&#32;(frame.<link linkend="_struct_msf_cooked_frame_1a0d2b6fd0ffa90313e13a8ed4b0f33c3e">bbits</link>&#32;*&#32;3);
+436 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(<link linkend="__classes_2lib_2external_2msf__gif_8h_1afc4b864d43f07427e87783bef2c33507">msf_gif_bgra_flag</link>)&#32;{
+437 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2external_2glfw_2deps_2vs2008_2stdint_8h_1aba7bc1797add20fe3efdf37ced1182c5">uint8_t</link>&#32;temp&#32;=&#32;<link linkend="_classtable">table</link>[tableIdx].r;
+438 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_classtable">table</link>[tableIdx].r&#32;=&#32;<link linkend="_classtable">table</link>[tableIdx].b;
+439 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_classtable">table</link>[tableIdx].b&#32;=&#32;temp;
+440 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+441 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;++tableIdx;
+442 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+443 &#32;&#32;&#32;&#32;}
+444 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;hasTransparentPixels&#32;=&#32;used[tlbSize-1];
+445 
+446 &#32;&#32;&#32;&#32;<emphasis role="comment">//SPEC:&#32;&quot;Because&#32;of&#32;some&#32;algorithmic&#32;constraints&#32;however,&#32;black&#32;&amp;&#32;white&#32;images&#32;which&#32;have&#32;one&#32;color&#32;bit</emphasis>
+447 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;&#32;&#32;&#32;&#32;&#32;&#32;must&#32;be&#32;indicated&#32;as&#32;having&#32;a&#32;code&#32;size&#32;of&#32;2.&quot;</emphasis>
+448 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;tableBits&#32;=&#32;msf_imax(2,&#32;msf_bit_log(tableIdx&#32;-&#32;1));
+449 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;tableSize&#32;=&#32;1&#32;&lt;&lt;&#32;tableBits;
+450 &#32;&#32;&#32;&#32;<emphasis role="comment">//NOTE:&#32;we&#32;don&apos;t&#32;just&#32;compare&#32;`depth`&#32;field&#32;here&#32;because&#32;it&#32;will&#32;be&#32;wrong&#32;for&#32;the&#32;first&#32;frame&#32;and&#32;we&#32;will&#32;segfault</emphasis>
+451 &#32;&#32;&#32;&#32;<link linkend="_struct_msf_cooked_frame">MsfCookedFrame</link>&#32;previous&#32;=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a48fc485a2a8834589d1f1afeec65193c">handle</link>-&gt;previousFrame;
+452 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;hasSamePal&#32;=&#32;frame.<link linkend="_struct_msf_cooked_frame_1a7f07230a7f2605e055988a218fa53835">rbits</link>&#32;==&#32;previous.<link linkend="_struct_msf_cooked_frame_1a7f07230a7f2605e055988a218fa53835">rbits</link>&#32;&amp;&amp;&#32;frame.<link linkend="_struct_msf_cooked_frame_1aa37915ba4516dab229056f8b563774d6">gbits</link>&#32;==&#32;previous.<link linkend="_struct_msf_cooked_frame_1aa37915ba4516dab229056f8b563774d6">gbits</link>&#32;&amp;&amp;&#32;frame.<link linkend="_struct_msf_cooked_frame_1a0d2b6fd0ffa90313e13a8ed4b0f33c3e">bbits</link>&#32;==&#32;previous.<link linkend="_struct_msf_cooked_frame_1a0d2b6fd0ffa90313e13a8ed4b0f33c3e">bbits</link>;
+453 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;framesCompatible&#32;=&#32;hasSamePal&#32;&amp;&amp;&#32;!hasTransparentPixels;
+454 
+455 &#32;&#32;&#32;&#32;<emphasis role="comment">//NOTE:&#32;because&#32;__attribute__((__packed__))&#32;is&#32;annoyingly&#32;compiler-specific,&#32;we&#32;do&#32;this&#32;unreadable&#32;weirdness</emphasis>
+456 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">char</emphasis>&#32;headerBytes[19]&#32;=&#32;<emphasis role="stringliteral">&quot;\x21\xF9\x04\x05\0\0\0\0&quot;</emphasis>&#32;<emphasis role="stringliteral">&quot;\x2C\0\0\0\0\0\0\0\0\x80&quot;</emphasis>;
+457 &#32;&#32;&#32;&#32;<emphasis role="comment">//NOTE:&#32;we&#32;need&#32;to&#32;check&#32;the&#32;frame&#32;number&#32;because&#32;if&#32;we&#32;reach&#32;into&#32;the&#32;buffer&#32;prior&#32;to&#32;the&#32;first&#32;frame,</emphasis>
+458 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;&#32;&#32;&#32;&#32;&#32;we&apos;ll&#32;just&#32;clobber&#32;the&#32;file&#32;header&#32;instead,&#32;which&#32;is&#32;a&#32;bug</emphasis>
+459 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(hasTransparentPixels&#32;&amp;&amp;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a48fc485a2a8834589d1f1afeec65193c">handle</link>-&gt;framesSubmitted&#32;&gt;&#32;0)&#32;{
+460 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a48fc485a2a8834589d1f1afeec65193c">handle</link>-&gt;listTail-&gt;data[3]&#32;=&#32;0x09;&#32;<emphasis role="comment">//set&#32;the&#32;previous&#32;frame&apos;s&#32;disposal&#32;to&#32;background,&#32;so&#32;transparency&#32;is&#32;possible</emphasis>
+461 &#32;&#32;&#32;&#32;}
+462 &#32;&#32;&#32;&#32;memcpy(&amp;headerBytes[4],&#32;&amp;centiSeconds,&#32;2);
+463 &#32;&#32;&#32;&#32;memcpy(&amp;headerBytes[13],&#32;&amp;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a3ce386e55bbeb900c1b23e064b89bd04">width</link>,&#32;2);
+464 &#32;&#32;&#32;&#32;memcpy(&amp;headerBytes[15],&#32;&amp;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1aedd0ea77029b98ce91e47c19addcb68f">height</link>,&#32;2);
+465 &#32;&#32;&#32;&#32;headerBytes[17]&#32;|=&#32;tableBits&#32;-&#32;1;
+466 &#32;&#32;&#32;&#32;memcpy(writeHead,&#32;headerBytes,&#32;18);
+467 &#32;&#32;&#32;&#32;writeHead&#32;+=&#32;18;
+468 
+469 &#32;&#32;&#32;&#32;<emphasis role="comment">//local&#32;color&#32;table</emphasis>
+470 &#32;&#32;&#32;&#32;memcpy(writeHead,&#32;<link linkend="_classtable">table</link>,&#32;tableSize&#32;*&#32;<emphasis role="keyword">sizeof</emphasis>(Color3));
+471 &#32;&#32;&#32;&#32;writeHead&#32;+=&#32;tableSize&#32;*&#32;<emphasis role="keyword">sizeof</emphasis>(Color3);
+472 &#32;&#32;&#32;&#32;*writeHead++&#32;=&#32;tableBits;
+473 
+474 &#32;&#32;&#32;&#32;<emphasis role="comment">//prep&#32;block</emphasis>
+475 &#32;&#32;&#32;&#32;memset(writeHead,&#32;0,&#32;260);
+476 &#32;&#32;&#32;&#32;writeHead[0]&#32;=&#32;255;
+477 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2external_2glfw_2deps_2vs2008_2stdint_8h_1a435d1572bf3f880d55459d9805097f62">uint32_t</link>&#32;blockBits&#32;=&#32;8;&#32;<emphasis role="comment">//relative&#32;to&#32;block.head</emphasis>
+478 
+479 &#32;&#32;&#32;&#32;<emphasis role="comment">//SPEC:&#32;&quot;Encoders&#32;should&#32;output&#32;a&#32;Clear&#32;code&#32;as&#32;the&#32;first&#32;code&#32;of&#32;each&#32;image&#32;data&#32;stream.&quot;</emphasis>
+480 &#32;&#32;&#32;&#32;msf_lzw_reset(&amp;lzw,&#32;tableSize,&#32;tableIdx);
+481 &#32;&#32;&#32;&#32;msf_put_code(&amp;writeHead,&#32;&amp;blockBits,&#32;msf_bit_log(lzw.len&#32;-&#32;1),&#32;tableSize);
+482 
+483 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;lastCode&#32;=&#32;framesCompatible&#32;&amp;&amp;&#32;frame.<link linkend="_struct_msf_cooked_frame_1a672c31e719c6943b0f0bf214f220688c">pixels</link>[0]&#32;==&#32;previous.<link linkend="_struct_msf_cooked_frame_1a672c31e719c6943b0f0bf214f220688c">pixels</link>[0]?&#32;0&#32;:&#32;tlb[frame.<link linkend="_struct_msf_cooked_frame_1a672c31e719c6943b0f0bf214f220688c">pixels</link>[0]];
+484 &#32;&#32;&#32;&#32;MsfTimeLoop(<emphasis role="stringliteral">&quot;compress&quot;</emphasis>)&#32;for&#32;(<emphasis role="keywordtype">int</emphasis>&#32;i&#32;=&#32;1;&#32;i&#32;&lt;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a3ce386e55bbeb900c1b23e064b89bd04">width</link>&#32;*&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1aedd0ea77029b98ce91e47c19addcb68f">height</link>;&#32;++i)&#32;{
+485 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//PERF:&#32;branching&#32;vs.&#32;branchless&#32;version&#32;of&#32;this&#32;line&#32;is&#32;observed&#32;to&#32;have&#32;no&#32;discernable&#32;impact&#32;on&#32;speed</emphasis>
+486 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a69995a929d818b8b467d4593c24d98bc">color</link>&#32;=&#32;framesCompatible&#32;&amp;&amp;&#32;frame.<link linkend="_struct_msf_cooked_frame_1a672c31e719c6943b0f0bf214f220688c">pixels</link>[i]&#32;==&#32;previous.<link linkend="_struct_msf_cooked_frame_1a672c31e719c6943b0f0bf214f220688c">pixels</link>[i]?&#32;0&#32;:&#32;tlb[frame.<link linkend="_struct_msf_cooked_frame_1a672c31e719c6943b0f0bf214f220688c">pixels</link>[i]];
+487 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;code&#32;=&#32;(&amp;lzw.data[lastCode&#32;*&#32;lzw.stride])[<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a69995a929d818b8b467d4593c24d98bc">color</link>];
+488 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(code&#32;&lt;&#32;0)&#32;{
+489 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//write&#32;to&#32;code&#32;stream</emphasis>
+490 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;codeBits&#32;=&#32;msf_bit_log(lzw.len&#32;-&#32;1);
+491 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;msf_put_code(&amp;writeHead,&#32;&amp;blockBits,&#32;codeBits,&#32;lastCode);
+492 
+493 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(lzw.len&#32;&gt;&#32;4095)&#32;{
+494 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//reset&#32;buffer&#32;code&#32;table</emphasis>
+495 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;msf_put_code(&amp;writeHead,&#32;&amp;blockBits,&#32;codeBits,&#32;tableSize);
+496 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;msf_lzw_reset(&amp;lzw,&#32;tableSize,&#32;tableIdx);
+497 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}&#32;<emphasis role="keywordflow">else</emphasis>&#32;{
+498 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;(&amp;lzw.data[lastCode&#32;*&#32;lzw.stride])[<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a69995a929d818b8b467d4593c24d98bc">color</link>]&#32;=&#32;lzw.len;
+499 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;++lzw.len;
+500 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+501 
+502 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;lastCode&#32;=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a69995a929d818b8b467d4593c24d98bc">color</link>;
+503 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}&#32;<emphasis role="keywordflow">else</emphasis>&#32;{
+504 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;lastCode&#32;=&#32;code;
+505 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+506 &#32;&#32;&#32;&#32;}
+507 
+508 &#32;&#32;&#32;&#32;<emphasis role="comment">//write&#32;code&#32;for&#32;leftover&#32;index&#32;buffer&#32;contents,&#32;then&#32;the&#32;end&#32;code</emphasis>
+509 &#32;&#32;&#32;&#32;msf_put_code(&amp;writeHead,&#32;&amp;blockBits,&#32;msf_imin(12,&#32;msf_bit_log(lzw.len&#32;-&#32;1)),&#32;lastCode);
+510 &#32;&#32;&#32;&#32;msf_put_code(&amp;writeHead,&#32;&amp;blockBits,&#32;msf_imin(12,&#32;msf_bit_log(lzw.len)),&#32;tableSize&#32;+&#32;1);
+511 
+512 &#32;&#32;&#32;&#32;<emphasis role="comment">//flush&#32;remaining&#32;data</emphasis>
+513 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(blockBits&#32;&gt;&#32;8)&#32;{
+514 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;bytes&#32;=&#32;(blockBits&#32;+&#32;7)&#32;/&#32;8;&#32;<emphasis role="comment">//round&#32;up</emphasis>
+515 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;writeHead[0]&#32;=&#32;bytes&#32;-&#32;1;
+516 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;writeHead&#32;+=&#32;bytes;
+517 &#32;&#32;&#32;&#32;}
+518 &#32;&#32;&#32;&#32;*writeHead++&#32;=&#32;0;&#32;<emphasis role="comment">//terminating&#32;block</emphasis>
+519 
+520 &#32;&#32;&#32;&#32;<emphasis role="comment">//fill&#32;in&#32;buffer&#32;header&#32;and&#32;shrink&#32;buffer&#32;to&#32;fit&#32;data</emphasis>
+521 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a7bd7b5e409950ac3449c78baf3205f4b">buffer</link>-&gt;next&#32;=&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>;
+522 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a7bd7b5e409950ac3449c78baf3205f4b">buffer</link>-&gt;size&#32;=&#32;writeHead&#32;-&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a7bd7b5e409950ac3449c78baf3205f4b">buffer</link>-&gt;data;
+523 &#32;&#32;&#32;&#32;<link linkend="_struct_msf_gif_buffer">MsfGifBuffer</link>&#32;*&#32;moved&#32;=
+524 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;(<link linkend="_struct_msf_gif_buffer">MsfGifBuffer</link>&#32;*)&#32;<link linkend="__classes_2lib_2rcore_8c_1a6218414d28e486ebdb43f52b8e3f6acc">MSF_GIF_REALLOC</link>(allocContext,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a7bd7b5e409950ac3449c78baf3205f4b">buffer</link>,&#32;maxBufSize,&#32;<link linkend="__classes_2lib_2include_2stddef_8h_1a276e8a32e0bbf024aadd9420b8f2d3b3">offsetof</link>(<link linkend="_struct_msf_gif_buffer">MsfGifBuffer</link>,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a89ce72163394e6aef63b551a8806e93f">data</link>)&#32;+&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a7bd7b5e409950ac3449c78baf3205f4b">buffer</link>-&gt;size);
+525 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(!moved)&#32;{&#32;<link linkend="__classes_2lib_2rcore_8c_1a3a395207502e888775b6ff30400f5bb4">MSF_GIF_FREE</link>(allocContext,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a7bd7b5e409950ac3449c78baf3205f4b">buffer</link>,&#32;maxBufSize);&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>;&#32;}
+526 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;moved;
+527 }
+528 
+532 
+533 <emphasis role="keyword">static</emphasis>&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;lzwAllocSize&#32;=&#32;4096&#32;*&#32;256&#32;*&#32;<emphasis role="keyword">sizeof</emphasis>(<link linkend="__classes_2lib_2external_2glfw_2deps_2vs2008_2stdint_8h_1a269259c924dce846340ddbb810db2e3c">int16_t</link>);
+534 
+535 <emphasis role="comment">//NOTE:&#32;by&#32;C&#32;standard&#32;library&#32;conventions,&#32;freeing&#32;NULL&#32;should&#32;be&#32;a&#32;no-op,</emphasis>
+536 <emphasis role="comment">//&#32;&#32;&#32;&#32;&#32;&#32;but&#32;just&#32;in&#32;case&#32;the&#32;user&apos;s&#32;custom&#32;free&#32;doesn&apos;t&#32;follow&#32;that&#32;rule,&#32;we&#32;do&#32;null&#32;checks&#32;on&#32;our&#32;end&#32;as&#32;well.</emphasis>
+537 <emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>&#32;msf_free_gif_state(<link linkend="_struct_msf_gif_state">MsfGifState</link>&#32;*&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a48fc485a2a8834589d1f1afeec65193c">handle</link>)&#32;{
+538 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a48fc485a2a8834589d1f1afeec65193c">handle</link>-&gt;previousFrame.pixels)&#32;<link linkend="__classes_2lib_2rcore_8c_1a3a395207502e888775b6ff30400f5bb4">MSF_GIF_FREE</link>(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a48fc485a2a8834589d1f1afeec65193c">handle</link>-&gt;customAllocatorContext,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a48fc485a2a8834589d1f1afeec65193c">handle</link>-&gt;previousFrame.pixels,
+539 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a48fc485a2a8834589d1f1afeec65193c">handle</link>-&gt;width&#32;*&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a48fc485a2a8834589d1f1afeec65193c">handle</link>-&gt;height&#32;*&#32;<emphasis role="keyword">sizeof</emphasis>(<link linkend="__classes_2lib_2external_2glfw_2deps_2vs2008_2stdint_8h_1a435d1572bf3f880d55459d9805097f62">uint32_t</link>));
+540 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a48fc485a2a8834589d1f1afeec65193c">handle</link>-&gt;currentFrame.pixels)&#32;&#32;<link linkend="__classes_2lib_2rcore_8c_1a3a395207502e888775b6ff30400f5bb4">MSF_GIF_FREE</link>(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a48fc485a2a8834589d1f1afeec65193c">handle</link>-&gt;customAllocatorContext,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a48fc485a2a8834589d1f1afeec65193c">handle</link>-&gt;currentFrame.pixels,
+541 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a48fc485a2a8834589d1f1afeec65193c">handle</link>-&gt;width&#32;*&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a48fc485a2a8834589d1f1afeec65193c">handle</link>-&gt;height&#32;*&#32;<emphasis role="keyword">sizeof</emphasis>(<link linkend="__classes_2lib_2external_2glfw_2deps_2vs2008_2stdint_8h_1a435d1572bf3f880d55459d9805097f62">uint32_t</link>));
+542 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a48fc485a2a8834589d1f1afeec65193c">handle</link>-&gt;lzwMem)&#32;<link linkend="__classes_2lib_2rcore_8c_1a3a395207502e888775b6ff30400f5bb4">MSF_GIF_FREE</link>(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a48fc485a2a8834589d1f1afeec65193c">handle</link>-&gt;customAllocatorContext,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a48fc485a2a8834589d1f1afeec65193c">handle</link>-&gt;lzwMem,&#32;lzwAllocSize);
+543 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(<link linkend="_struct_msf_gif_buffer">MsfGifBuffer</link>&#32;*&#32;node&#32;=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a48fc485a2a8834589d1f1afeec65193c">handle</link>-&gt;listHead;&#32;node;)&#32;{
+544 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_struct_msf_gif_buffer">MsfGifBuffer</link>&#32;*&#32;next&#32;=&#32;node-&gt;<link linkend="_struct_msf_gif_buffer_1a085580bd8900062016906e3ed225c20f">next</link>;&#32;<emphasis role="comment">//NOTE:&#32;we&#32;have&#32;to&#32;copy&#32;the&#32;`next`&#32;pointer&#32;BEFORE&#32;freeing&#32;the&#32;node&#32;holding&#32;it</emphasis>
+545 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2rcore_8c_1a3a395207502e888775b6ff30400f5bb4">MSF_GIF_FREE</link>(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a48fc485a2a8834589d1f1afeec65193c">handle</link>-&gt;customAllocatorContext,&#32;node,&#32;<link linkend="__classes_2lib_2include_2stddef_8h_1a276e8a32e0bbf024aadd9420b8f2d3b3">offsetof</link>(<link linkend="_struct_msf_gif_buffer">MsfGifBuffer</link>,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a89ce72163394e6aef63b551a8806e93f">data</link>)&#32;+&#32;node-&gt;size);
+546 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;node&#32;=&#32;next;
+547 &#32;&#32;&#32;&#32;}
+548 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a48fc485a2a8834589d1f1afeec65193c">handle</link>-&gt;listHead&#32;=&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>;&#32;<emphasis role="comment">//this&#32;implicitly&#32;marks&#32;the&#32;handle&#32;as&#32;invalid&#32;until&#32;the&#32;next&#32;msf_gif_begin()&#32;call</emphasis>
+549 }
+550 
+551 <emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2external_2msf__gif_8h_1aa0170c8cb35cb68eb2863c5f960c8eb9">msf_gif_begin</link>(<link linkend="_struct_msf_gif_state">MsfGifState</link>&#32;*&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a48fc485a2a8834589d1f1afeec65193c">handle</link>,&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a3ce386e55bbeb900c1b23e064b89bd04">width</link>,&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1aedd0ea77029b98ce91e47c19addcb68f">height</link>)&#32;{&#32;MsfTimeFunc
+552 &#32;&#32;&#32;&#32;<emphasis role="comment">//NOTE:&#32;we&#32;cannot&#32;stomp&#32;the&#32;entire&#32;struct&#32;to&#32;zero&#32;because&#32;we&#32;must&#32;preserve&#32;`customAllocatorContext`.</emphasis>
+553 &#32;&#32;&#32;&#32;<link linkend="_struct_msf_cooked_frame">MsfCookedFrame</link>&#32;empty&#32;=&#32;{0};&#32;<emphasis role="comment">//god&#32;I&#32;hate&#32;MSVC...</emphasis>
+554 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a48fc485a2a8834589d1f1afeec65193c">handle</link>-&gt;previousFrame&#32;=&#32;empty;
+555 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a48fc485a2a8834589d1f1afeec65193c">handle</link>-&gt;currentFrame&#32;=&#32;empty;
+556 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a48fc485a2a8834589d1f1afeec65193c">handle</link>-&gt;width&#32;=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a3ce386e55bbeb900c1b23e064b89bd04">width</link>;
+557 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a48fc485a2a8834589d1f1afeec65193c">handle</link>-&gt;height&#32;=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1aedd0ea77029b98ce91e47c19addcb68f">height</link>;
+558 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a48fc485a2a8834589d1f1afeec65193c">handle</link>-&gt;framesSubmitted&#32;=&#32;0;
+559 
+560 &#32;&#32;&#32;&#32;<emphasis role="comment">//allocate&#32;memory&#32;for&#32;LZW&#32;buffer</emphasis>
+561 &#32;&#32;&#32;&#32;<emphasis role="comment">//NOTE:&#32;Unfortunately&#32;we&#32;can&apos;t&#32;just&#32;use&#32;stack&#32;memory&#32;for&#32;the&#32;LZW&#32;table&#32;because&#32;it&apos;s&#32;2MB,</emphasis>
+562 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;&#32;&#32;&#32;&#32;&#32;which&#32;is&#32;more&#32;stack&#32;space&#32;than&#32;most&#32;operating&#32;systems&#32;give&#32;by&#32;default,</emphasis>
+563 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;&#32;&#32;&#32;&#32;&#32;and&#32;we&#32;can&apos;t&#32;realistically&#32;expect&#32;users&#32;to&#32;be&#32;willing&#32;to&#32;override&#32;that&#32;just&#32;to&#32;use&#32;our&#32;library,</emphasis>
+564 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;&#32;&#32;&#32;&#32;&#32;so&#32;we&#32;have&#32;to&#32;allocate&#32;this&#32;on&#32;the&#32;heap.</emphasis>
+565 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a48fc485a2a8834589d1f1afeec65193c">handle</link>-&gt;lzwMem&#32;=&#32;(<link linkend="__classes_2lib_2external_2glfw_2deps_2vs2008_2stdint_8h_1a269259c924dce846340ddbb810db2e3c">int16_t</link>&#32;*)&#32;<link linkend="__classes_2lib_2rcore_8c_1a09a80a4d7a7f3e552195ac7f7b4b5c90">MSF_GIF_MALLOC</link>(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a48fc485a2a8834589d1f1afeec65193c">handle</link>-&gt;customAllocatorContext,&#32;lzwAllocSize);
+566 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a48fc485a2a8834589d1f1afeec65193c">handle</link>-&gt;previousFrame.<link linkend="_struct_msf_cooked_frame_1a672c31e719c6943b0f0bf214f220688c">pixels</link>&#32;=
+567 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;(<link linkend="__classes_2lib_2external_2glfw_2deps_2vs2008_2stdint_8h_1a435d1572bf3f880d55459d9805097f62">uint32_t</link>&#32;*)&#32;<link linkend="__classes_2lib_2rcore_8c_1a09a80a4d7a7f3e552195ac7f7b4b5c90">MSF_GIF_MALLOC</link>(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a48fc485a2a8834589d1f1afeec65193c">handle</link>-&gt;customAllocatorContext,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a48fc485a2a8834589d1f1afeec65193c">handle</link>-&gt;width&#32;*&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a48fc485a2a8834589d1f1afeec65193c">handle</link>-&gt;height&#32;*&#32;<emphasis role="keyword">sizeof</emphasis>(<link linkend="__classes_2lib_2external_2glfw_2deps_2vs2008_2stdint_8h_1a435d1572bf3f880d55459d9805097f62">uint32_t</link>));
+568 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a48fc485a2a8834589d1f1afeec65193c">handle</link>-&gt;currentFrame.pixels&#32;=
+569 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;(<link linkend="__classes_2lib_2external_2glfw_2deps_2vs2008_2stdint_8h_1a435d1572bf3f880d55459d9805097f62">uint32_t</link>&#32;*)&#32;<link linkend="__classes_2lib_2rcore_8c_1a09a80a4d7a7f3e552195ac7f7b4b5c90">MSF_GIF_MALLOC</link>(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a48fc485a2a8834589d1f1afeec65193c">handle</link>-&gt;customAllocatorContext,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a48fc485a2a8834589d1f1afeec65193c">handle</link>-&gt;width&#32;*&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a48fc485a2a8834589d1f1afeec65193c">handle</link>-&gt;height&#32;*&#32;<emphasis role="keyword">sizeof</emphasis>(<link linkend="__classes_2lib_2external_2glfw_2deps_2vs2008_2stdint_8h_1a435d1572bf3f880d55459d9805097f62">uint32_t</link>));
+570 
+571 &#32;&#32;&#32;&#32;<emphasis role="comment">//setup&#32;header&#32;buffer&#32;header&#32;(lol)</emphasis>
+572 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a48fc485a2a8834589d1f1afeec65193c">handle</link>-&gt;listHead&#32;=&#32;(<link linkend="_struct_msf_gif_buffer">MsfGifBuffer</link>&#32;*)&#32;<link linkend="__classes_2lib_2rcore_8c_1a09a80a4d7a7f3e552195ac7f7b4b5c90">MSF_GIF_MALLOC</link>(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a48fc485a2a8834589d1f1afeec65193c">handle</link>-&gt;customAllocatorContext,&#32;<link linkend="__classes_2lib_2include_2stddef_8h_1a276e8a32e0bbf024aadd9420b8f2d3b3">offsetof</link>(<link linkend="_struct_msf_gif_buffer">MsfGifBuffer</link>,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a89ce72163394e6aef63b551a8806e93f">data</link>)&#32;+&#32;32);
+573 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(!<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a48fc485a2a8834589d1f1afeec65193c">handle</link>-&gt;listHead&#32;||&#32;!<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a48fc485a2a8834589d1f1afeec65193c">handle</link>-&gt;lzwMem&#32;||&#32;!<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a48fc485a2a8834589d1f1afeec65193c">handle</link>-&gt;previousFrame.pixels&#32;||&#32;!<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a48fc485a2a8834589d1f1afeec65193c">handle</link>-&gt;currentFrame.pixels)&#32;{
+574 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;msf_free_gif_state(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a48fc485a2a8834589d1f1afeec65193c">handle</link>);
+575 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;0;
+576 &#32;&#32;&#32;&#32;}
+577 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a48fc485a2a8834589d1f1afeec65193c">handle</link>-&gt;listTail&#32;=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a48fc485a2a8834589d1f1afeec65193c">handle</link>-&gt;listHead;
+578 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a48fc485a2a8834589d1f1afeec65193c">handle</link>-&gt;listHead-&gt;next&#32;=&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>;
+579 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a48fc485a2a8834589d1f1afeec65193c">handle</link>-&gt;listHead-&gt;size&#32;=&#32;32;
+580 
+581 &#32;&#32;&#32;&#32;<emphasis role="comment">//NOTE:&#32;because&#32;__attribute__((__packed__))&#32;is&#32;annoyingly&#32;compiler-specific,&#32;we&#32;do&#32;this&#32;unreadable&#32;weirdness</emphasis>
+582 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">char</emphasis>&#32;headerBytes[33]&#32;=&#32;<emphasis role="stringliteral">&quot;GIF89a\0\0\0\0\x70\0\0&quot;</emphasis>&#32;<emphasis role="stringliteral">&quot;\x21\xFF\x0BNETSCAPE2.0\x03\x01\0\0\0&quot;</emphasis>;
+583 &#32;&#32;&#32;&#32;memcpy(&amp;headerBytes[6],&#32;&amp;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a3ce386e55bbeb900c1b23e064b89bd04">width</link>,&#32;2);
+584 &#32;&#32;&#32;&#32;memcpy(&amp;headerBytes[8],&#32;&amp;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1aedd0ea77029b98ce91e47c19addcb68f">height</link>,&#32;2);
+585 &#32;&#32;&#32;&#32;memcpy(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a48fc485a2a8834589d1f1afeec65193c">handle</link>-&gt;listHead-&gt;data,&#32;headerBytes,&#32;32);
+586 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;1;
+587 }
+588 
+589 <emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2external_2msf__gif_8h_1a2ae6cae42e2b5064f29759df597795c9">msf_gif_frame</link>(<link linkend="_struct_msf_gif_state">MsfGifState</link>&#32;*&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a48fc485a2a8834589d1f1afeec65193c">handle</link>,&#32;<link linkend="__classes_2lib_2external_2glfw_2deps_2vs2008_2stdint_8h_1aba7bc1797add20fe3efdf37ced1182c5">uint8_t</link>&#32;*&#32;pixelData,&#32;<emphasis role="keywordtype">int</emphasis>&#32;centiSecondsPerFame,&#32;<emphasis role="keywordtype">int</emphasis>&#32;maxBitDepth,&#32;<emphasis role="keywordtype">int</emphasis>&#32;pitchInBytes)
+590 {&#32;MsfTimeFunc
+591 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(!<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a48fc485a2a8834589d1f1afeec65193c">handle</link>-&gt;listHead)&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;0;&#32;}
+592 
+593 &#32;&#32;&#32;&#32;maxBitDepth&#32;=&#32;msf_imax(1,&#32;msf_imin(16,&#32;maxBitDepth));
+594 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(pitchInBytes&#32;==&#32;0)&#32;pitchInBytes&#32;=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a48fc485a2a8834589d1f1afeec65193c">handle</link>-&gt;width&#32;*&#32;4;
+595 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(pitchInBytes&#32;&lt;&#32;0)&#32;pixelData&#32;-=&#32;pitchInBytes&#32;*&#32;(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a48fc485a2a8834589d1f1afeec65193c">handle</link>-&gt;height&#32;-&#32;1);
+596 
+597 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2external_2glfw_2deps_2vs2008_2stdint_8h_1aba7bc1797add20fe3efdf37ced1182c5">uint8_t</link>&#32;used[(1&#32;&lt;&lt;&#32;16)&#32;+&#32;1];&#32;<emphasis role="comment">//only&#32;64k,&#32;so&#32;stack&#32;allocating&#32;is&#32;fine</emphasis>
+598 &#32;&#32;&#32;&#32;msf_cook_frame(&amp;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a48fc485a2a8834589d1f1afeec65193c">handle</link>-&gt;currentFrame,&#32;pixelData,&#32;used,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a48fc485a2a8834589d1f1afeec65193c">handle</link>-&gt;width,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a48fc485a2a8834589d1f1afeec65193c">handle</link>-&gt;height,&#32;pitchInBytes,
+599 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;msf_imin(maxBitDepth,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a48fc485a2a8834589d1f1afeec65193c">handle</link>-&gt;previousFrame.depth&#32;+&#32;160&#32;/&#32;msf_imax(1,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a48fc485a2a8834589d1f1afeec65193c">handle</link>-&gt;previousFrame.count)));
+600 
+601 &#32;&#32;&#32;&#32;<link linkend="_struct_msf_gif_buffer">MsfGifBuffer</link>&#32;*&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a7bd7b5e409950ac3449c78baf3205f4b">buffer</link>&#32;=&#32;msf_compress_frame(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a48fc485a2a8834589d1f1afeec65193c">handle</link>-&gt;customAllocatorContext,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a48fc485a2a8834589d1f1afeec65193c">handle</link>-&gt;width,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a48fc485a2a8834589d1f1afeec65193c">handle</link>-&gt;height,
+602 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;centiSecondsPerFame,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a48fc485a2a8834589d1f1afeec65193c">handle</link>-&gt;currentFrame,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a48fc485a2a8834589d1f1afeec65193c">handle</link>,&#32;used,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a48fc485a2a8834589d1f1afeec65193c">handle</link>-&gt;lzwMem);
+603 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(!<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a7bd7b5e409950ac3449c78baf3205f4b">buffer</link>)&#32;{&#32;msf_free_gif_state(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a48fc485a2a8834589d1f1afeec65193c">handle</link>);&#32;<emphasis role="keywordflow">return</emphasis>&#32;0;&#32;}
+604 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a48fc485a2a8834589d1f1afeec65193c">handle</link>-&gt;listTail-&gt;next&#32;=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a7bd7b5e409950ac3449c78baf3205f4b">buffer</link>;
+605 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a48fc485a2a8834589d1f1afeec65193c">handle</link>-&gt;listTail&#32;=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a7bd7b5e409950ac3449c78baf3205f4b">buffer</link>;
+606 
+607 &#32;&#32;&#32;&#32;<emphasis role="comment">//swap&#32;current&#32;and&#32;previous&#32;frames</emphasis>
+608 &#32;&#32;&#32;&#32;<link linkend="_struct_msf_cooked_frame">MsfCookedFrame</link>&#32;tmp&#32;=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a48fc485a2a8834589d1f1afeec65193c">handle</link>-&gt;previousFrame;
+609 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a48fc485a2a8834589d1f1afeec65193c">handle</link>-&gt;previousFrame&#32;=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a48fc485a2a8834589d1f1afeec65193c">handle</link>-&gt;currentFrame;
+610 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a48fc485a2a8834589d1f1afeec65193c">handle</link>-&gt;currentFrame&#32;=&#32;tmp;
+611 
+612 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a48fc485a2a8834589d1f1afeec65193c">handle</link>-&gt;framesSubmitted&#32;+=&#32;1;
+613 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;1;
+614 }
+615 
+616 <link linkend="_struct_msf_gif_result">MsfGifResult</link>&#32;<link linkend="__classes_2lib_2external_2msf__gif_8h_1a866da5b406360865244db94376ff69c5">msf_gif_end</link>(<link linkend="_struct_msf_gif_state">MsfGifState</link>&#32;*&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a48fc485a2a8834589d1f1afeec65193c">handle</link>)&#32;{&#32;MsfTimeFunc
+617 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(!<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a48fc485a2a8834589d1f1afeec65193c">handle</link>-&gt;listHead)&#32;{&#32;<link linkend="_struct_msf_gif_result">MsfGifResult</link>&#32;empty&#32;=&#32;{0};&#32;<emphasis role="keywordflow">return</emphasis>&#32;empty;&#32;}
+618 
+619 &#32;&#32;&#32;&#32;<emphasis role="comment">//first&#32;pass:&#32;determine&#32;total&#32;size</emphasis>
+620 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;total&#32;=&#32;1;&#32;<emphasis role="comment">//1&#32;byte&#32;for&#32;trailing&#32;marker</emphasis>
+621 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(<link linkend="_struct_msf_gif_buffer">MsfGifBuffer</link>&#32;*&#32;node&#32;=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a48fc485a2a8834589d1f1afeec65193c">handle</link>-&gt;listHead;&#32;node;&#32;node&#32;=&#32;node-&gt;next)&#32;{&#32;total&#32;+=&#32;node-&gt;size;&#32;}
+622 
+623 &#32;&#32;&#32;&#32;<emphasis role="comment">//second&#32;pass:&#32;write&#32;data</emphasis>
+624 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2external_2glfw_2deps_2vs2008_2stdint_8h_1aba7bc1797add20fe3efdf37ced1182c5">uint8_t</link>&#32;*&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a7bd7b5e409950ac3449c78baf3205f4b">buffer</link>&#32;=&#32;(<link linkend="__classes_2lib_2external_2glfw_2deps_2vs2008_2stdint_8h_1aba7bc1797add20fe3efdf37ced1182c5">uint8_t</link>&#32;*)&#32;<link linkend="__classes_2lib_2rcore_8c_1a09a80a4d7a7f3e552195ac7f7b4b5c90">MSF_GIF_MALLOC</link>(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a48fc485a2a8834589d1f1afeec65193c">handle</link>-&gt;customAllocatorContext,&#32;total);
+625 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a7bd7b5e409950ac3449c78baf3205f4b">buffer</link>)&#32;{
+626 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2external_2glfw_2deps_2vs2008_2stdint_8h_1aba7bc1797add20fe3efdf37ced1182c5">uint8_t</link>&#32;*&#32;writeHead&#32;=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a7bd7b5e409950ac3449c78baf3205f4b">buffer</link>;
+627 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(<link linkend="_struct_msf_gif_buffer">MsfGifBuffer</link>&#32;*&#32;node&#32;=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a48fc485a2a8834589d1f1afeec65193c">handle</link>-&gt;listHead;&#32;node;&#32;node&#32;=&#32;node-&gt;next)&#32;{
+628 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;memcpy(writeHead,&#32;node-&gt;data,&#32;node-&gt;size);
+629 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;writeHead&#32;+=&#32;node-&gt;size;
+630 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+631 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;*writeHead++&#32;=&#32;0x3B;
+632 &#32;&#32;&#32;&#32;}
+633 
+634 &#32;&#32;&#32;&#32;<emphasis role="comment">//third&#32;pass:&#32;free&#32;buffers</emphasis>
+635 &#32;&#32;&#32;&#32;msf_free_gif_state(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a48fc485a2a8834589d1f1afeec65193c">handle</link>);
+636 
+637 &#32;&#32;&#32;&#32;<link linkend="_struct_msf_gif_result">MsfGifResult</link>&#32;ret&#32;=&#32;{&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a7bd7b5e409950ac3449c78baf3205f4b">buffer</link>,&#32;total,&#32;total,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a48fc485a2a8834589d1f1afeec65193c">handle</link>-&gt;customAllocatorContext&#32;};
+638 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;ret;
+639 }
+640 
+641 <emphasis role="keywordtype">void</emphasis>&#32;<link linkend="__classes_2lib_2external_2msf__gif_8h_1a1a1d6a8b4cfcdada4ba367d39b4d14c9">msf_gif_free</link>(<link linkend="_struct_msf_gif_result">MsfGifResult</link>&#32;<link linkend="__classes_2lib_2glm_2test_2core_2core__func__integer_8cpp_1a937d4dd628a8858b443a399410d2600b">result</link>)&#32;{&#32;MsfTimeFunc
+642 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(<link linkend="__classes_2lib_2glm_2test_2core_2core__func__integer_8cpp_1a937d4dd628a8858b443a399410d2600b">result</link>.data)&#32;{&#32;<link linkend="__classes_2lib_2rcore_8c_1a3a395207502e888775b6ff30400f5bb4">MSF_GIF_FREE</link>(<link linkend="__classes_2lib_2glm_2test_2core_2core__func__integer_8cpp_1a937d4dd628a8858b443a399410d2600b">result</link>.contextPointer,&#32;<link linkend="__classes_2lib_2glm_2test_2core_2core__func__integer_8cpp_1a937d4dd628a8858b443a399410d2600b">result</link>.data,&#32;<link linkend="__classes_2lib_2glm_2test_2core_2core__func__integer_8cpp_1a937d4dd628a8858b443a399410d2600b">result</link>.allocSize);&#32;}
+643 }
+644 
+648 
+649 <emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2external_2msf__gif_8h_1a0cb671aa94acffde7ffcd19a2fd0fb57">msf_gif_begin_to_file</link>(<link linkend="_struct_msf_gif_state">MsfGifState</link>&#32;*&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a48fc485a2a8834589d1f1afeec65193c">handle</link>,&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a3ce386e55bbeb900c1b23e064b89bd04">width</link>,&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1aedd0ea77029b98ce91e47c19addcb68f">height</link>,&#32;<link linkend="__classes_2lib_2external_2msf__gif_8h_1a35e9617d95a72185423fbeed5799ddee">MsfGifFileWriteFunc</link>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a18ae3ab36a07e388833b568cfdfa90c8">func</link>,&#32;<emphasis role="keywordtype">void</emphasis>&#32;*&#32;filePointer)&#32;{
+650 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a48fc485a2a8834589d1f1afeec65193c">handle</link>-&gt;fileWriteFunc&#32;=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a18ae3ab36a07e388833b568cfdfa90c8">func</link>;
+651 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a48fc485a2a8834589d1f1afeec65193c">handle</link>-&gt;fileWriteData&#32;=&#32;filePointer;
+652 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="__classes_2lib_2external_2msf__gif_8h_1aa0170c8cb35cb68eb2863c5f960c8eb9">msf_gif_begin</link>(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a48fc485a2a8834589d1f1afeec65193c">handle</link>,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a3ce386e55bbeb900c1b23e064b89bd04">width</link>,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1aedd0ea77029b98ce91e47c19addcb68f">height</link>);
+653 }
+654 
+655 <emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2external_2msf__gif_8h_1a7fabde6ef824ba37c8f44e70611b61a8">msf_gif_frame_to_file</link>(<link linkend="_struct_msf_gif_state">MsfGifState</link>&#32;*&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a48fc485a2a8834589d1f1afeec65193c">handle</link>,&#32;<link linkend="__classes_2lib_2external_2glfw_2deps_2vs2008_2stdint_8h_1aba7bc1797add20fe3efdf37ced1182c5">uint8_t</link>&#32;*&#32;pixelData,&#32;<emphasis role="keywordtype">int</emphasis>&#32;centiSecondsPerFame,&#32;<emphasis role="keywordtype">int</emphasis>&#32;maxBitDepth,&#32;<emphasis role="keywordtype">int</emphasis>&#32;pitchInBytes)&#32;{
+656 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(!<link linkend="__classes_2lib_2external_2msf__gif_8h_1a2ae6cae42e2b5064f29759df597795c9">msf_gif_frame</link>(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a48fc485a2a8834589d1f1afeec65193c">handle</link>,&#32;pixelData,&#32;centiSecondsPerFame,&#32;maxBitDepth,&#32;pitchInBytes))&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;0;&#32;}
+657 
+658 &#32;&#32;&#32;&#32;<emphasis role="comment">//NOTE:&#32;this&#32;is&#32;a&#32;somewhat&#32;hacky&#32;implementation&#32;which&#32;is&#32;not&#32;perfectly&#32;efficient,&#32;but&#32;it&apos;s&#32;good&#32;enough&#32;for&#32;now</emphasis>
+659 &#32;&#32;&#32;&#32;<link linkend="_struct_msf_gif_buffer">MsfGifBuffer</link>&#32;*&#32;head&#32;=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a48fc485a2a8834589d1f1afeec65193c">handle</link>-&gt;listHead;
+660 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(!<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a48fc485a2a8834589d1f1afeec65193c">handle</link>-&gt;fileWriteFunc(head-&gt;<link linkend="_struct_msf_gif_buffer_1a0d8d0b24792ce4b8e141452ee741483d">data</link>,&#32;head-&gt;<link linkend="_struct_msf_gif_buffer_1abde2e6a4633971138e1fbf91b3ab6578">size</link>,&#32;1,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a48fc485a2a8834589d1f1afeec65193c">handle</link>-&gt;fileWriteData))&#32;{&#32;msf_free_gif_state(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a48fc485a2a8834589d1f1afeec65193c">handle</link>);&#32;<emphasis role="keywordflow">return</emphasis>&#32;0;&#32;}
+661 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a48fc485a2a8834589d1f1afeec65193c">handle</link>-&gt;listHead&#32;=&#32;head-&gt;<link linkend="_struct_msf_gif_buffer_1a085580bd8900062016906e3ed225c20f">next</link>;
+662 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2rcore_8c_1a3a395207502e888775b6ff30400f5bb4">MSF_GIF_FREE</link>(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a48fc485a2a8834589d1f1afeec65193c">handle</link>-&gt;customAllocatorContext,&#32;head,&#32;<link linkend="__classes_2lib_2include_2stddef_8h_1a276e8a32e0bbf024aadd9420b8f2d3b3">offsetof</link>(<link linkend="_struct_msf_gif_buffer">MsfGifBuffer</link>,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a89ce72163394e6aef63b551a8806e93f">data</link>)&#32;+&#32;head-&gt;<link linkend="_struct_msf_gif_buffer_1abde2e6a4633971138e1fbf91b3ab6578">size</link>);
+663 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;1;
+664 }
+665 
+666 <emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2external_2msf__gif_8h_1a8426490072c80f98487ce7a18520af17">msf_gif_end_to_file</link>(<link linkend="_struct_msf_gif_state">MsfGifState</link>&#32;*&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a48fc485a2a8834589d1f1afeec65193c">handle</link>)&#32;{
+667 &#32;&#32;&#32;&#32;<emphasis role="comment">//NOTE:&#32;this&#32;is&#32;a&#32;somewhat&#32;hacky&#32;implementation&#32;which&#32;is&#32;not&#32;perfectly&#32;efficient,&#32;but&#32;it&apos;s&#32;good&#32;enough&#32;for&#32;now</emphasis>
+668 &#32;&#32;&#32;&#32;<link linkend="_struct_msf_gif_result">MsfGifResult</link>&#32;<link linkend="__classes_2lib_2glm_2test_2core_2core__func__integer_8cpp_1a937d4dd628a8858b443a399410d2600b">result</link>&#32;=&#32;<link linkend="__classes_2lib_2external_2msf__gif_8h_1a866da5b406360865244db94376ff69c5">msf_gif_end</link>(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a48fc485a2a8834589d1f1afeec65193c">handle</link>);
+669 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;ret&#32;=&#32;(int)&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a48fc485a2a8834589d1f1afeec65193c">handle</link>-&gt;fileWriteFunc(<link linkend="__classes_2lib_2glm_2test_2core_2core__func__integer_8cpp_1a937d4dd628a8858b443a399410d2600b">result</link>.data,&#32;<link linkend="__classes_2lib_2glm_2test_2core_2core__func__integer_8cpp_1a937d4dd628a8858b443a399410d2600b">result</link>.dataSize,&#32;1,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a48fc485a2a8834589d1f1afeec65193c">handle</link>-&gt;fileWriteData);
+670 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2external_2msf__gif_8h_1a1a1d6a8b4cfcdada4ba367d39b4d14c9">msf_gif_free</link>(<link linkend="__classes_2lib_2glm_2test_2core_2core__func__integer_8cpp_1a937d4dd628a8858b443a399410d2600b">result</link>);
+671 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;ret;
+672 }
+673 
+674 <emphasis role="preprocessor">#endif&#32;</emphasis><emphasis role="comment">//MSF_GIF_ALREADY_IMPLEMENTED_IN_THIS_TRANSLATION_UNIT</emphasis>
+675 <emphasis role="preprocessor">#endif&#32;</emphasis><emphasis role="comment">//MSF_GIF_IMPL</emphasis>
+676 
+677 <emphasis role="comment">/*</emphasis>
+678 <emphasis role="comment">------------------------------------------------------------------------------</emphasis>
+679 <emphasis role="comment">This&#32;software&#32;is&#32;available&#32;under&#32;2&#32;licenses&#32;--&#32;choose&#32;whichever&#32;you&#32;prefer.</emphasis>
+680 <emphasis role="comment">------------------------------------------------------------------------------</emphasis>
+681 <emphasis role="comment">ALTERNATIVE&#32;A&#32;-&#32;MIT&#32;License</emphasis>
+682 <emphasis role="comment">Copyright&#32;(c)&#32;2021&#32;Miles&#32;Fogle</emphasis>
+683 <emphasis role="comment">Permission&#32;is&#32;hereby&#32;granted,&#32;free&#32;of&#32;charge,&#32;to&#32;any&#32;person&#32;obtaining&#32;a&#32;copy&#32;of</emphasis>
+684 <emphasis role="comment">this&#32;software&#32;and&#32;associated&#32;documentation&#32;files&#32;(the&#32;&quot;Software&quot;),&#32;to&#32;deal&#32;in</emphasis>
+685 <emphasis role="comment">the&#32;Software&#32;without&#32;restriction,&#32;including&#32;without&#32;limitation&#32;the&#32;rights&#32;to</emphasis>
+686 <emphasis role="comment">use,&#32;copy,&#32;modify,&#32;merge,&#32;publish,&#32;distribute,&#32;sublicense,&#32;and/or&#32;sell&#32;copies</emphasis>
+687 <emphasis role="comment">of&#32;the&#32;Software,&#32;and&#32;to&#32;permit&#32;persons&#32;to&#32;whom&#32;the&#32;Software&#32;is&#32;furnished&#32;to&#32;do</emphasis>
+688 <emphasis role="comment">so,&#32;subject&#32;to&#32;the&#32;following&#32;conditions:</emphasis>
+689 <emphasis role="comment">The&#32;above&#32;copyright&#32;notice&#32;and&#32;this&#32;permission&#32;notice&#32;shall&#32;be&#32;included&#32;in&#32;all</emphasis>
+690 <emphasis role="comment">copies&#32;or&#32;substantial&#32;portions&#32;of&#32;the&#32;Software.</emphasis>
+691 <emphasis role="comment">THE&#32;SOFTWARE&#32;IS&#32;PROVIDED&#32;&quot;AS&#32;IS&quot;,&#32;WITHOUT&#32;WARRANTY&#32;OF&#32;ANY&#32;KIND,&#32;EXPRESS&#32;OR</emphasis>
+692 <emphasis role="comment">IMPLIED,&#32;INCLUDING&#32;BUT&#32;NOT&#32;LIMITED&#32;TO&#32;THE&#32;WARRANTIES&#32;OF&#32;MERCHANTABILITY,</emphasis>
+693 <emphasis role="comment">FITNESS&#32;FOR&#32;A&#32;PARTICULAR&#32;PURPOSE&#32;AND&#32;NONINFRINGEMENT.&#32;IN&#32;NO&#32;EVENT&#32;SHALL&#32;THE</emphasis>
+694 <emphasis role="comment">AUTHORS&#32;OR&#32;COPYRIGHT&#32;HOLDERS&#32;BE&#32;LIABLE&#32;FOR&#32;ANY&#32;CLAIM,&#32;DAMAGES&#32;OR&#32;OTHER</emphasis>
+695 <emphasis role="comment">LIABILITY,&#32;WHETHER&#32;IN&#32;AN&#32;ACTION&#32;OF&#32;CONTRACT,&#32;TORT&#32;OR&#32;OTHERWISE,&#32;ARISING&#32;FROM,</emphasis>
+696 <emphasis role="comment">OUT&#32;OF&#32;OR&#32;IN&#32;CONNECTION&#32;WITH&#32;THE&#32;SOFTWARE&#32;OR&#32;THE&#32;USE&#32;OR&#32;OTHER&#32;DEALINGS&#32;IN&#32;THE</emphasis>
+697 <emphasis role="comment">SOFTWARE.</emphasis>
+698 <emphasis role="comment">------------------------------------------------------------------------------</emphasis>
+699 <emphasis role="comment">ALTERNATIVE&#32;B&#32;-&#32;Public&#32;Domain&#32;(www.unlicense.org)</emphasis>
+700 <emphasis role="comment">This&#32;is&#32;free&#32;and&#32;unencumbered&#32;software&#32;released&#32;into&#32;the&#32;public&#32;domain.</emphasis>
+701 <emphasis role="comment">Anyone&#32;is&#32;free&#32;to&#32;copy,&#32;modify,&#32;publish,&#32;use,&#32;compile,&#32;sell,&#32;or&#32;distribute&#32;this</emphasis>
+702 <emphasis role="comment">software,&#32;either&#32;in&#32;source&#32;code&#32;form&#32;or&#32;as&#32;a&#32;compiled&#32;binary,&#32;for&#32;any&#32;purpose,</emphasis>
+703 <emphasis role="comment">commercial&#32;or&#32;non-commercial,&#32;and&#32;by&#32;any&#32;means.</emphasis>
+704 <emphasis role="comment">In&#32;jurisdictions&#32;that&#32;recognize&#32;copyright&#32;laws,&#32;the&#32;author&#32;or&#32;authors&#32;of&#32;this</emphasis>
+705 <emphasis role="comment">software&#32;dedicate&#32;any&#32;and&#32;all&#32;copyright&#32;interest&#32;in&#32;the&#32;software&#32;to&#32;the&#32;public</emphasis>
+706 <emphasis role="comment">domain.&#32;We&#32;make&#32;this&#32;dedication&#32;for&#32;the&#32;benefit&#32;of&#32;the&#32;public&#32;at&#32;large&#32;and&#32;to</emphasis>
+707 <emphasis role="comment">the&#32;detriment&#32;of&#32;our&#32;heirs&#32;and&#32;successors.&#32;We&#32;intend&#32;this&#32;dedication&#32;to&#32;be&#32;an</emphasis>
+708 <emphasis role="comment">overt&#32;act&#32;of&#32;relinquishment&#32;in&#32;perpetuity&#32;of&#32;all&#32;present&#32;and&#32;future&#32;rights&#32;to</emphasis>
+709 <emphasis role="comment">this&#32;software&#32;under&#32;copyright&#32;law.</emphasis>
+710 <emphasis role="comment">THE&#32;SOFTWARE&#32;IS&#32;PROVIDED&#32;&quot;AS&#32;IS&quot;,&#32;WITHOUT&#32;WARRANTY&#32;OF&#32;ANY&#32;KIND,&#32;EXPRESS&#32;OR</emphasis>
+711 <emphasis role="comment">IMPLIED,&#32;INCLUDING&#32;BUT&#32;NOT&#32;LIMITED&#32;TO&#32;THE&#32;WARRANTIES&#32;OF&#32;MERCHANTABILITY,</emphasis>
+712 <emphasis role="comment">FITNESS&#32;FOR&#32;A&#32;PARTICULAR&#32;PURPOSE&#32;AND&#32;NONINFRINGEMENT.&#32;IN&#32;NO&#32;EVENT&#32;SHALL&#32;THE</emphasis>
+713 <emphasis role="comment">AUTHORS&#32;BE&#32;LIABLE&#32;FOR&#32;ANY&#32;CLAIM,&#32;DAMAGES&#32;OR&#32;OTHER&#32;LIABILITY,&#32;WHETHER&#32;IN&#32;AN</emphasis>
+714 <emphasis role="comment">ACTION&#32;OF&#32;CONTRACT,&#32;TORT&#32;OR&#32;OTHERWISE,&#32;ARISING&#32;FROM,&#32;OUT&#32;OF&#32;OR&#32;IN&#32;CONNECTION</emphasis>
+715 <emphasis role="comment">WITH&#32;THE&#32;SOFTWARE&#32;OR&#32;THE&#32;USE&#32;OR&#32;OTHER&#32;DEALINGS&#32;IN&#32;THE&#32;SOFTWARE.</emphasis>
+716 <emphasis role="comment">------------------------------------------------------------------------------</emphasis>
+717 <emphasis role="comment">*/</emphasis>
+</programlisting></section>

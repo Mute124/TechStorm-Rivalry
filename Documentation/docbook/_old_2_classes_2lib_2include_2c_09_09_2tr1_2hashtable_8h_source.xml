@@ -1,0 +1,1190 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<section xmlns="http://docbook.org/ns/docbook" version="5.0" xmlns:xlink="http://www.w3.org/1999/xlink" xml:id="__old_2_classes_2lib_2include_2c_09_09_2tr1_2hashtable_8h_source" xml:lang="en-US">
+<title>hashtable.h</title>
+<indexterm><primary>C:/Users/HP/Documents/GitHub/Minero-Game/Old/Classes/lib/include/c++/tr1/hashtable.h</primary></indexterm>
+Go to the documentation of this file.<programlisting linenumbering="unnumbered">1 <emphasis role="comment">//&#32;TR1&#32;hashtable.h&#32;header&#32;-*-&#32;C++&#32;-*-</emphasis>
+2 
+3 <emphasis role="comment">//&#32;Copyright&#32;(C)&#32;2007-2022&#32;Free&#32;Software&#32;Foundation,&#32;Inc.</emphasis>
+4 <emphasis role="comment">//</emphasis>
+5 <emphasis role="comment">//&#32;This&#32;file&#32;is&#32;part&#32;of&#32;the&#32;GNU&#32;ISO&#32;C++&#32;Library.&#32;&#32;This&#32;library&#32;is&#32;free</emphasis>
+6 <emphasis role="comment">//&#32;software;&#32;you&#32;can&#32;redistribute&#32;it&#32;and/or&#32;modify&#32;it&#32;under&#32;the</emphasis>
+7 <emphasis role="comment">//&#32;terms&#32;of&#32;the&#32;GNU&#32;General&#32;Public&#32;License&#32;as&#32;published&#32;by&#32;the</emphasis>
+8 <emphasis role="comment">//&#32;Free&#32;Software&#32;Foundation;&#32;either&#32;version&#32;3,&#32;or&#32;(at&#32;your&#32;option)</emphasis>
+9 <emphasis role="comment">//&#32;any&#32;later&#32;version.</emphasis>
+10 
+11 <emphasis role="comment">//&#32;This&#32;library&#32;is&#32;distributed&#32;in&#32;the&#32;hope&#32;that&#32;it&#32;will&#32;be&#32;useful,</emphasis>
+12 <emphasis role="comment">//&#32;but&#32;WITHOUT&#32;ANY&#32;WARRANTY;&#32;without&#32;even&#32;the&#32;implied&#32;warranty&#32;of</emphasis>
+13 <emphasis role="comment">//&#32;MERCHANTABILITY&#32;or&#32;FITNESS&#32;FOR&#32;A&#32;PARTICULAR&#32;PURPOSE.&#32;&#32;See&#32;the</emphasis>
+14 <emphasis role="comment">//&#32;GNU&#32;General&#32;Public&#32;License&#32;for&#32;more&#32;details.</emphasis>
+15 
+16 <emphasis role="comment">//&#32;Under&#32;Section&#32;7&#32;of&#32;GPL&#32;version&#32;3,&#32;you&#32;are&#32;granted&#32;additional</emphasis>
+17 <emphasis role="comment">//&#32;permissions&#32;described&#32;in&#32;the&#32;GCC&#32;Runtime&#32;Library&#32;Exception,&#32;version</emphasis>
+18 <emphasis role="comment">//&#32;3.1,&#32;as&#32;published&#32;by&#32;the&#32;Free&#32;Software&#32;Foundation.</emphasis>
+19 
+20 <emphasis role="comment">//&#32;You&#32;should&#32;have&#32;received&#32;a&#32;copy&#32;of&#32;the&#32;GNU&#32;General&#32;Public&#32;License&#32;and</emphasis>
+21 <emphasis role="comment">//&#32;a&#32;copy&#32;of&#32;the&#32;GCC&#32;Runtime&#32;Library&#32;Exception&#32;along&#32;with&#32;this&#32;program;</emphasis>
+22 <emphasis role="comment">//&#32;see&#32;the&#32;files&#32;COPYING3&#32;and&#32;COPYING.RUNTIME&#32;respectively.&#32;&#32;If&#32;not,&#32;see</emphasis>
+23 <emphasis role="comment">//&#32;&lt;http://www.gnu.org/licenses/&gt;.</emphasis>
+24 
+31 <emphasis role="preprocessor">#ifndef&#32;_GLIBCXX_TR1_HASHTABLE_H</emphasis>
+32 <emphasis role="preprocessor">#define&#32;_GLIBCXX_TR1_HASHTABLE_H&#32;1</emphasis>
+33 
+34 <emphasis role="preprocessor">#pragma&#32;GCC&#32;system_header</emphasis>
+35 
+36 <emphasis role="preprocessor">#include&#32;&lt;tr1/hashtable_policy.h&gt;</emphasis>
+37 <emphasis role="preprocessor">#include&#32;&lt;ext/alloc_traits.h&gt;</emphasis>
+38 
+39 <emphasis role="keyword">namespace&#32;</emphasis><link linkend="_namespacestd">std</link>&#32;<link linkend="__classes_2lib_2include_2c_09_09_2x86__64-w64-mingw32_2bits_2c_09_09config_8h_1a44377df0d3503f0b3d9ab316dd8ddf8b">_GLIBCXX_VISIBILITY</link>(default)
+40 {
+41 _GLIBCXX_BEGIN_NAMESPACE_VERSION
+42 
+43 <emphasis role="keyword">namespace&#32;</emphasis>tr1
+44 {
+45 &#32;&#32;<emphasis role="comment">//&#32;Class&#32;template&#32;_Hashtable,&#32;class&#32;definition.</emphasis>
+46 
+47 &#32;&#32;<emphasis role="comment">//&#32;Meaning&#32;of&#32;class&#32;template&#32;_Hashtable&apos;s&#32;template&#32;parameters</emphasis>
+48 
+49 &#32;&#32;<emphasis role="comment">//&#32;_Key&#32;and&#32;_Value:&#32;arbitrary&#32;CopyConstructible&#32;types.</emphasis>
+50 
+51 &#32;&#32;<emphasis role="comment">//&#32;_Allocator:&#32;an&#32;allocator&#32;type&#32;([lib.allocator.requirements])&#32;whose</emphasis>
+52 &#32;&#32;<emphasis role="comment">//&#32;value&#32;type&#32;is&#32;Value.&#32;&#32;As&#32;a&#32;conforming&#32;extension,&#32;we&#32;allow&#32;for</emphasis>
+53 &#32;&#32;<emphasis role="comment">//&#32;value&#32;type&#32;!=&#32;Value.</emphasis>
+54 
+55 &#32;&#32;<emphasis role="comment">//&#32;_ExtractKey:&#32;function&#32;object&#32;that&#32;takes&#32;a&#32;object&#32;of&#32;type&#32;Value</emphasis>
+56 &#32;&#32;<emphasis role="comment">//&#32;and&#32;returns&#32;a&#32;value&#32;of&#32;type&#32;_Key.</emphasis>
+57 
+58 &#32;&#32;<emphasis role="comment">//&#32;_Equal:&#32;function&#32;object&#32;that&#32;takes&#32;two&#32;objects&#32;of&#32;type&#32;k&#32;and&#32;returns</emphasis>
+59 &#32;&#32;<emphasis role="comment">//&#32;a&#32;bool-like&#32;value&#32;that&#32;is&#32;true&#32;if&#32;the&#32;two&#32;objects&#32;are&#32;considered&#32;equal.</emphasis>
+60 
+61 &#32;&#32;<emphasis role="comment">//&#32;_H1:&#32;the&#32;hash&#32;function.&#32;&#32;A&#32;unary&#32;function&#32;object&#32;with&#32;argument&#32;type</emphasis>
+62 &#32;&#32;<emphasis role="comment">//&#32;Key&#32;and&#32;result&#32;type&#32;size_t.&#32;&#32;Return&#32;values&#32;should&#32;be&#32;distributed</emphasis>
+63 &#32;&#32;<emphasis role="comment">//&#32;over&#32;the&#32;entire&#32;range&#32;[0,&#32;numeric_limits&lt;size_t&gt;:::max()].</emphasis>
+64 
+65 &#32;&#32;<emphasis role="comment">//&#32;_H2:&#32;the&#32;range-hashing&#32;function&#32;(in&#32;the&#32;terminology&#32;of&#32;Tavori&#32;and</emphasis>
+66 &#32;&#32;<emphasis role="comment">//&#32;Dreizin).&#32;&#32;A&#32;binary&#32;function&#32;object&#32;whose&#32;argument&#32;types&#32;and&#32;result</emphasis>
+67 &#32;&#32;<emphasis role="comment">//&#32;type&#32;are&#32;all&#32;size_t.&#32;&#32;Given&#32;arguments&#32;r&#32;and&#32;N,&#32;the&#32;return&#32;value&#32;is</emphasis>
+68 &#32;&#32;<emphasis role="comment">//&#32;in&#32;the&#32;range&#32;[0,&#32;N).</emphasis>
+69 
+70 &#32;&#32;<emphasis role="comment">//&#32;_Hash:&#32;the&#32;ranged&#32;hash&#32;function&#32;(Tavori&#32;and&#32;Dreizin).&#32;A&#32;binary&#32;function</emphasis>
+71 &#32;&#32;<emphasis role="comment">//&#32;whose&#32;argument&#32;types&#32;are&#32;_Key&#32;and&#32;size_t&#32;and&#32;whose&#32;result&#32;type&#32;is</emphasis>
+72 &#32;&#32;<emphasis role="comment">//&#32;size_t.&#32;&#32;Given&#32;arguments&#32;k&#32;and&#32;N,&#32;the&#32;return&#32;value&#32;is&#32;in&#32;the&#32;range</emphasis>
+73 &#32;&#32;<emphasis role="comment">//&#32;[0,&#32;N).&#32;&#32;Default:&#32;hash(k,&#32;N)&#32;=&#32;h2(h1(k),&#32;N).&#32;&#32;If&#32;_Hash&#32;is&#32;anything&#32;other</emphasis>
+74 &#32;&#32;<emphasis role="comment">//&#32;than&#32;the&#32;default,&#32;_H1&#32;and&#32;_H2&#32;are&#32;ignored.</emphasis>
+75 
+76 &#32;&#32;<emphasis role="comment">//&#32;_RehashPolicy:&#32;Policy&#32;class&#32;with&#32;three&#32;members,&#32;all&#32;of&#32;which&#32;govern</emphasis>
+77 &#32;&#32;<emphasis role="comment">//&#32;the&#32;bucket&#32;count.&#32;_M_next_bkt(n)&#32;returns&#32;a&#32;bucket&#32;count&#32;no&#32;smaller</emphasis>
+78 &#32;&#32;<emphasis role="comment">//&#32;than&#32;n.&#32;&#32;_M_bkt_for_elements(n)&#32;returns&#32;a&#32;bucket&#32;count&#32;appropriate</emphasis>
+79 &#32;&#32;<emphasis role="comment">//&#32;for&#32;an&#32;element&#32;count&#32;of&#32;n.&#32;&#32;_M_need_rehash(n_bkt,&#32;n_elt,&#32;n_ins)</emphasis>
+80 &#32;&#32;<emphasis role="comment">//&#32;determines&#32;whether,&#32;if&#32;the&#32;current&#32;bucket&#32;count&#32;is&#32;n_bkt&#32;and&#32;the</emphasis>
+81 &#32;&#32;<emphasis role="comment">//&#32;current&#32;element&#32;count&#32;is&#32;n_elt,&#32;we&#32;need&#32;to&#32;increase&#32;the&#32;bucket</emphasis>
+82 &#32;&#32;<emphasis role="comment">//&#32;count.&#32;&#32;If&#32;so,&#32;returns&#32;make_pair(true,&#32;n),&#32;where&#32;n&#32;is&#32;the&#32;new</emphasis>
+83 &#32;&#32;<emphasis role="comment">//&#32;bucket&#32;count.&#32;&#32;If&#32;not,&#32;returns&#32;make_pair(false,&#32;&lt;anything&gt;).</emphasis>
+84 
+85 &#32;&#32;<emphasis role="comment">//&#32;???&#32;Right&#32;now&#32;it&#32;is&#32;hard-wired&#32;that&#32;the&#32;number&#32;of&#32;buckets&#32;never</emphasis>
+86 &#32;&#32;<emphasis role="comment">//&#32;shrinks.&#32;&#32;Should&#32;we&#32;allow&#32;_RehashPolicy&#32;to&#32;change&#32;that?</emphasis>
+87 
+88 &#32;&#32;<emphasis role="comment">//&#32;__cache_hash_code:&#32;bool.&#32;&#32;true&#32;if&#32;we&#32;store&#32;the&#32;value&#32;of&#32;the&#32;hash</emphasis>
+89 &#32;&#32;<emphasis role="comment">//&#32;function&#32;along&#32;with&#32;the&#32;value.&#32;&#32;This&#32;is&#32;a&#32;time-space&#32;tradeoff.</emphasis>
+90 &#32;&#32;<emphasis role="comment">//&#32;Storing&#32;it&#32;may&#32;improve&#32;lookup&#32;speed&#32;by&#32;reducing&#32;the&#32;number&#32;of&#32;times</emphasis>
+91 &#32;&#32;<emphasis role="comment">//&#32;we&#32;need&#32;to&#32;call&#32;the&#32;Equal&#32;function.</emphasis>
+92 
+93 &#32;&#32;<emphasis role="comment">//&#32;__constant_iterators:&#32;bool.&#32;&#32;true&#32;if&#32;iterator&#32;and&#32;const_iterator&#32;are</emphasis>
+94 &#32;&#32;<emphasis role="comment">//&#32;both&#32;constant&#32;iterator&#32;types.&#32;&#32;This&#32;is&#32;true&#32;for&#32;unordered_set&#32;and</emphasis>
+95 &#32;&#32;<emphasis role="comment">//&#32;unordered_multiset,&#32;false&#32;for&#32;unordered_map&#32;and&#32;unordered_multimap.</emphasis>
+96 
+97 &#32;&#32;<emphasis role="comment">//&#32;__unique_keys:&#32;bool.&#32;&#32;true&#32;if&#32;the&#32;return&#32;value&#32;of&#32;_Hashtable::count(k)</emphasis>
+98 &#32;&#32;<emphasis role="comment">//&#32;is&#32;always&#32;at&#32;most&#32;one,&#32;false&#32;if&#32;it&#32;may&#32;be&#32;an&#32;arbitrary&#32;number.&#32;&#32;This</emphasis>
+99 &#32;&#32;<emphasis role="comment">//&#32;true&#32;for&#32;unordered_set&#32;and&#32;unordered_map,&#32;false&#32;for&#32;unordered_multiset</emphasis>
+100 &#32;&#32;<emphasis role="comment">//&#32;and&#32;unordered_multimap.</emphasis>
+101 
+102 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Key,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Value,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Allocator,
+103 &#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;_ExtractKey,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Equal,
+104 &#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;_H1,&#32;<emphasis role="keyword">typename</emphasis>&#32;_H2,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Hash,
+105 &#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;_RehashPolicy,
+106 &#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">bool</emphasis>&#32;__cache_hash_code,
+107 &#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">bool</emphasis>&#32;__constant_iterators,
+108 &#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">bool</emphasis>&#32;__unique_keys&gt;
+109 &#32;&#32;&#32;&#32;<emphasis role="keyword">class&#32;</emphasis>_Hashtable
+110 &#32;&#32;&#32;&#32;:&#32;<emphasis role="keyword">public</emphasis>&#32;__detail::_Rehash_base&lt;_RehashPolicy,
+111 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_Hashtable&lt;_Key,&#32;_Value,&#32;_Allocator,
+112 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_ExtractKey,
+113 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_Equal,&#32;_H1,&#32;_H2,&#32;_Hash,
+114 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_RehashPolicy,
+115 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__cache_hash_code,
+116 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__constant_iterators,
+117 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__unique_keys&gt;&#32;&gt;,
+118 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">public</emphasis>&#32;__detail::_Hash_code_base&lt;_Key,&#32;_Value,&#32;_ExtractKey,&#32;_Equal,
+119 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_H1,&#32;_H2,&#32;_Hash,&#32;__cache_hash_code&gt;,
+120 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">public</emphasis>&#32;__detail::_Map_base&lt;_Key,&#32;_Value,&#32;_ExtractKey,&#32;__unique_keys,
+121 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_Hashtable&lt;_Key,&#32;_Value,&#32;_Allocator,
+122 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_ExtractKey,
+123 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_Equal,&#32;_H1,&#32;_H2,&#32;_Hash,
+124 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_RehashPolicy,
+125 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__cache_hash_code,
+126 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__constant_iterators,
+127 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__unique_keys&gt;&#32;&gt;
+128 &#32;&#32;&#32;&#32;{
+129 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;__gnu_cxx::__alloc_traits&lt;_Allocator&gt;&#32;_Alloc_traits;
+130 
+131 &#32;&#32;&#32;&#32;<emphasis role="keyword">public</emphasis>:
+132 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;_Allocator&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;allocator_type;
+133 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;_Value&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;value_type;
+134 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;_Key&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;key_type;
+135 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;_Equal&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;key_equal;
+136 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;mapped_type,&#32;if&#32;present,&#32;comes&#32;from&#32;_Map_base.</emphasis>
+137 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;hasher,&#32;if&#32;present,&#32;comes&#32;from&#32;_Hash_code_base.</emphasis>
+138 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">typename</emphasis>&#32;_Allocator::difference_type&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;difference_type;
+139 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">typename</emphasis>&#32;_Allocator::size_type&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;size_type;
+140 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">typename</emphasis>&#32;_Alloc_traits::pointer&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1aca2093d4756bde9a55b94e9ff8d9c623">pointer</link>;
+141 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">typename</emphasis>&#32;_Alloc_traits::const_pointer&#32;&#32;&#32;&#32;&#32;&#32;&#32;const_pointer;
+142 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">typename</emphasis>&#32;_Alloc_traits::reference&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;reference;
+143 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">typename</emphasis>&#32;_Alloc_traits::const_reference&#32;&#32;&#32;&#32;&#32;const_reference;
+144 
+145 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;__detail::_Node_iterator&lt;value_type,&#32;__constant_iterators,
+146 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__cache_hash_code&gt;
+147 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;local_iterator;
+148 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;__detail::_Node_const_iterator&lt;value_type,
+149 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__constant_iterators,
+150 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__cache_hash_code&gt;
+151 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;const_local_iterator;
+152 
+153 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;__detail::_Hashtable_iterator&lt;value_type,&#32;__constant_iterators,
+154 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__cache_hash_code&gt;
+155 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;iterator;
+156 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;__detail::_Hashtable_const_iterator&lt;value_type,
+157 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__constant_iterators,
+158 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__cache_hash_code&gt;
+159 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;const_iterator;
+160 
+161 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Key2,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Value2,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Ex2,&#32;<emphasis role="keywordtype">bool</emphasis>&#32;__unique2,
+162 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;_Hashtable2&gt;
+163 &#32;&#32;&#32;&#32;<emphasis role="keyword">friend</emphasis>&#32;<emphasis role="keyword">struct&#32;</emphasis>__detail::_Map_base;
+164 
+165 &#32;&#32;&#32;&#32;<emphasis role="keyword">private</emphasis>:
+166 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;__detail::_Hash_node&lt;_Value,&#32;__cache_hash_code&gt;&#32;_Node;
+167 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">typename</emphasis>&#32;_Alloc_traits::template&#32;rebind&lt;_Node&gt;::other
+168 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_Node_allocator_type;
+169 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">typename</emphasis>&#32;_Alloc_traits::template&#32;rebind&lt;_Node*&gt;::other
+170 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_Bucket_allocator_type;
+171 
+172 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">typename</emphasis>&#32;_Alloc_traits::template&#32;rebind&lt;_Value&gt;::other
+173 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_Value_allocator_type;
+174 
+175 &#32;&#32;&#32;&#32;&#32;&#32;_Node_allocator_type&#32;&#32;&#32;_M_node_allocator;
+176 &#32;&#32;&#32;&#32;&#32;&#32;_Node**&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_M_buckets;
+177 &#32;&#32;&#32;&#32;&#32;&#32;size_type&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_M_bucket_count;
+178 &#32;&#32;&#32;&#32;&#32;&#32;size_type&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_M_element_count;
+179 &#32;&#32;&#32;&#32;&#32;&#32;_RehashPolicy&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_M_rehash_policy;
+180 
+181 &#32;&#32;&#32;&#32;&#32;&#32;_Node*
+182 &#32;&#32;&#32;&#32;&#32;&#32;_M_allocate_node(<emphasis role="keyword">const</emphasis>&#32;value_type&amp;&#32;__v);
+183 
+184 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+185 &#32;&#32;&#32;&#32;&#32;&#32;_M_deallocate_node(_Node*&#32;__n);
+186 
+187 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+188 &#32;&#32;&#32;&#32;&#32;&#32;_M_deallocate_nodes(_Node**,&#32;size_type);
+189 
+190 &#32;&#32;&#32;&#32;&#32;&#32;_Node**
+191 &#32;&#32;&#32;&#32;&#32;&#32;_M_allocate_buckets(size_type&#32;__n);
+192 
+193 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+194 &#32;&#32;&#32;&#32;&#32;&#32;_M_deallocate_buckets(_Node**,&#32;size_type&#32;__n);
+195 
+196 &#32;&#32;&#32;&#32;<emphasis role="keyword">public</emphasis>:
+197 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Constructor,&#32;destructor,&#32;assignment,&#32;swap</emphasis>
+198 &#32;&#32;&#32;&#32;&#32;&#32;_Hashtable(size_type&#32;__bucket_hint,
+199 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;_H1&amp;,&#32;<emphasis role="keyword">const</emphasis>&#32;_H2&amp;,&#32;<emphasis role="keyword">const</emphasis>&#32;_Hash&amp;,
+200 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;_Equal&amp;,&#32;<emphasis role="keyword">const</emphasis>&#32;_ExtractKey&amp;,
+201 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;allocator_type&amp;);
+202 
+203 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_InputIterator&gt;
+204 &#32;&#32;&#32;&#32;_Hashtable(_InputIterator&#32;__first,&#32;_InputIterator&#32;__last,
+205 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;size_type&#32;__bucket_hint,
+206 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;_H1&amp;,&#32;<emphasis role="keyword">const</emphasis>&#32;_H2&amp;,&#32;<emphasis role="keyword">const</emphasis>&#32;_Hash&amp;,
+207 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;_Equal&amp;,&#32;<emphasis role="keyword">const</emphasis>&#32;_ExtractKey&amp;,
+208 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;allocator_type&amp;);
+209 
+210 &#32;&#32;&#32;&#32;&#32;&#32;_Hashtable(<emphasis role="keyword">const</emphasis>&#32;_Hashtable&amp;);
+211 
+212 &#32;&#32;&#32;&#32;&#32;&#32;_Hashtable&amp;
+213 &#32;&#32;&#32;&#32;&#32;&#32;operator=(<emphasis role="keyword">const</emphasis>&#32;_Hashtable&amp;);
+214 
+215 &#32;&#32;&#32;&#32;&#32;&#32;~_Hashtable();
+216 
+217 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>&#32;swap(_Hashtable&amp;);
+218 
+219 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Basic&#32;container&#32;operations</emphasis>
+220 &#32;&#32;&#32;&#32;&#32;&#32;iterator
+221 &#32;&#32;&#32;&#32;&#32;&#32;begin()
+222 &#32;&#32;&#32;&#32;&#32;&#32;{
+223 &#32;&#32;&#32;&#32;iterator&#32;__i(_M_buckets);
+224 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(!__i._M_cur_node)
+225 &#32;&#32;&#32;&#32;&#32;&#32;__i._M_incr_bucket();
+226 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__i;
+227 &#32;&#32;&#32;&#32;&#32;&#32;}
+228 
+229 &#32;&#32;&#32;&#32;&#32;&#32;const_iterator
+230 &#32;&#32;&#32;&#32;&#32;&#32;begin()<emphasis role="keyword">&#32;const</emphasis>
+231 <emphasis role="keyword">&#32;&#32;&#32;&#32;&#32;&#32;</emphasis>{
+232 &#32;&#32;&#32;&#32;const_iterator&#32;__i(_M_buckets);
+233 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(!__i._M_cur_node)
+234 &#32;&#32;&#32;&#32;&#32;&#32;__i._M_incr_bucket();
+235 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__i;
+236 &#32;&#32;&#32;&#32;&#32;&#32;}
+237 
+238 &#32;&#32;&#32;&#32;&#32;&#32;iterator
+239 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a432111147038972f06e049e18a837002">end</link>()
+240 &#32;&#32;&#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;iterator(_M_buckets&#32;+&#32;_M_bucket_count);&#32;}
+241 
+242 &#32;&#32;&#32;&#32;&#32;&#32;const_iterator
+243 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a432111147038972f06e049e18a837002">end</link>()<emphasis role="keyword">&#32;const</emphasis>
+244 <emphasis role="keyword">&#32;&#32;&#32;&#32;&#32;&#32;</emphasis>{&#32;<emphasis role="keywordflow">return</emphasis>&#32;const_iterator(_M_buckets&#32;+&#32;_M_bucket_count);&#32;}
+245 
+246 &#32;&#32;&#32;&#32;&#32;&#32;size_type
+247 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a3d1e3edfcf61ca2d831883e1afbad89e">size</link>()<emphasis role="keyword">&#32;const</emphasis>
+248 <emphasis role="keyword">&#32;&#32;&#32;&#32;&#32;&#32;</emphasis>{&#32;<emphasis role="keywordflow">return</emphasis>&#32;_M_element_count;&#32;}
+249 
+250 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2x86__64-w64-mingw32_2bits_2c_09_09config_8h_1a56bc959ca1311889bcd1c5abb178ab59">_GLIBCXX_NODISCARD</link>&#32;<emphasis role="keywordtype">bool</emphasis>
+251 &#32;&#32;&#32;&#32;&#32;&#32;empty()<emphasis role="keyword">&#32;const</emphasis>
+252 <emphasis role="keyword">&#32;&#32;&#32;&#32;&#32;&#32;</emphasis>{&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a3d1e3edfcf61ca2d831883e1afbad89e">size</link>()&#32;==&#32;0;&#32;}
+253 
+254 &#32;&#32;&#32;&#32;&#32;&#32;allocator_type
+255 &#32;&#32;&#32;&#32;&#32;&#32;get_allocator()<emphasis role="keyword">&#32;const</emphasis>
+256 <emphasis role="keyword">&#32;&#32;&#32;&#32;&#32;&#32;</emphasis>{&#32;<emphasis role="keywordflow">return</emphasis>&#32;allocator_type(_M_node_allocator);&#32;}
+257 
+258 &#32;&#32;&#32;&#32;&#32;&#32;_Value_allocator_type
+259 &#32;&#32;&#32;&#32;&#32;&#32;_M_get_Value_allocator()<emphasis role="keyword">&#32;const</emphasis>
+260 <emphasis role="keyword">&#32;&#32;&#32;&#32;&#32;&#32;</emphasis>{&#32;<emphasis role="keywordflow">return</emphasis>&#32;_Value_allocator_type(_M_node_allocator);&#32;}
+261 
+262 &#32;&#32;&#32;&#32;&#32;&#32;size_type
+263 &#32;&#32;&#32;&#32;&#32;&#32;max_size()<emphasis role="keyword">&#32;const</emphasis>
+264 <emphasis role="keyword">&#32;&#32;&#32;&#32;&#32;&#32;</emphasis>{
+265 &#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;__gnu_cxx::__alloc_traits&lt;_Node_allocator_type&gt;&#32;_Traits;
+266 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;_Traits::max_size(_M_node_allocator);
+267 &#32;&#32;&#32;&#32;&#32;&#32;}
+268 
+269 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Observers</emphasis>
+270 &#32;&#32;&#32;&#32;&#32;&#32;key_equal
+271 &#32;&#32;&#32;&#32;&#32;&#32;key_eq()<emphasis role="keyword">&#32;const</emphasis>
+272 <emphasis role="keyword">&#32;&#32;&#32;&#32;&#32;&#32;</emphasis>{&#32;<emphasis role="keywordflow">return</emphasis>&#32;this-&gt;_M_eq;&#32;}
+273 
+274 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;hash_function,&#32;if&#32;present,&#32;comes&#32;from&#32;_Hash_code_base.</emphasis>
+275 
+276 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Bucket&#32;operations</emphasis>
+277 &#32;&#32;&#32;&#32;&#32;&#32;size_type
+278 &#32;&#32;&#32;&#32;&#32;&#32;bucket_count()<emphasis role="keyword">&#32;const</emphasis>
+279 <emphasis role="keyword">&#32;&#32;&#32;&#32;&#32;&#32;</emphasis>{&#32;<emphasis role="keywordflow">return</emphasis>&#32;_M_bucket_count;&#32;}
+280 
+281 &#32;&#32;&#32;&#32;&#32;&#32;size_type
+282 &#32;&#32;&#32;&#32;&#32;&#32;max_bucket_count()<emphasis role="keyword">&#32;const</emphasis>
+283 <emphasis role="keyword">&#32;&#32;&#32;&#32;&#32;&#32;</emphasis>{&#32;<emphasis role="keywordflow">return</emphasis>&#32;max_size();&#32;}
+284 
+285 &#32;&#32;&#32;&#32;&#32;&#32;size_type
+286 &#32;&#32;&#32;&#32;&#32;&#32;bucket_size(size_type&#32;__n)<emphasis role="keyword">&#32;const</emphasis>
+287 <emphasis role="keyword">&#32;&#32;&#32;&#32;&#32;&#32;</emphasis>{&#32;<emphasis role="keywordflow">return</emphasis>&#32;std::distance(begin(__n),&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a432111147038972f06e049e18a837002">end</link>(__n));&#32;}
+288 
+289 &#32;&#32;&#32;&#32;&#32;&#32;size_type
+290 &#32;&#32;&#32;&#32;&#32;&#32;bucket(<emphasis role="keyword">const</emphasis>&#32;key_type&amp;&#32;__k)<emphasis role="keyword">&#32;const</emphasis>
+291 <emphasis role="keyword">&#32;&#32;&#32;&#32;&#32;&#32;</emphasis>{
+292 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;this-&gt;_M_bucket_index(__k,&#32;this-&gt;_M_hash_code(__k),
+293 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;bucket_count());
+294 &#32;&#32;&#32;&#32;&#32;&#32;}
+295 
+296 &#32;&#32;&#32;&#32;&#32;&#32;local_iterator
+297 &#32;&#32;&#32;&#32;&#32;&#32;begin(size_type&#32;__n)
+298 &#32;&#32;&#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;local_iterator(_M_buckets[__n]);&#32;}
+299 
+300 &#32;&#32;&#32;&#32;&#32;&#32;local_iterator
+301 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a432111147038972f06e049e18a837002">end</link>(size_type)
+302 &#32;&#32;&#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;local_iterator(0);&#32;}
+303 
+304 &#32;&#32;&#32;&#32;&#32;&#32;const_local_iterator
+305 &#32;&#32;&#32;&#32;&#32;&#32;begin(size_type&#32;__n)<emphasis role="keyword">&#32;const</emphasis>
+306 <emphasis role="keyword">&#32;&#32;&#32;&#32;&#32;&#32;</emphasis>{&#32;<emphasis role="keywordflow">return</emphasis>&#32;const_local_iterator(_M_buckets[__n]);&#32;}
+307 
+308 &#32;&#32;&#32;&#32;&#32;&#32;const_local_iterator
+309 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a432111147038972f06e049e18a837002">end</link>(size_type)<emphasis role="keyword">&#32;const</emphasis>
+310 <emphasis role="keyword">&#32;&#32;&#32;&#32;&#32;&#32;</emphasis>{&#32;<emphasis role="keywordflow">return</emphasis>&#32;const_local_iterator(0);&#32;}
+311 
+312 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">float</emphasis>
+313 &#32;&#32;&#32;&#32;&#32;&#32;load_factor()<emphasis role="keyword">&#32;const</emphasis>
+314 <emphasis role="keyword">&#32;&#32;&#32;&#32;&#32;&#32;</emphasis>{
+315 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<emphasis role="keyword">static_cast&lt;</emphasis><emphasis role="keywordtype">float</emphasis><emphasis role="keyword">&gt;</emphasis>(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a3d1e3edfcf61ca2d831883e1afbad89e">size</link>())&#32;/&#32;<emphasis role="keyword">static_cast&lt;</emphasis><emphasis role="keywordtype">float</emphasis><emphasis role="keyword">&gt;</emphasis>(bucket_count());
+316 &#32;&#32;&#32;&#32;&#32;&#32;}
+317 
+318 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;max_load_factor,&#32;if&#32;present,&#32;comes&#32;from&#32;_Rehash_base.</emphasis>
+319 
+320 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Generalization&#32;of&#32;max_load_factor.&#32;&#32;Extension,&#32;not&#32;found&#32;in&#32;TR1.&#32;&#32;Only</emphasis>
+321 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;useful&#32;if&#32;_RehashPolicy&#32;is&#32;something&#32;other&#32;than&#32;the&#32;default.</emphasis>
+322 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;_RehashPolicy&amp;
+323 &#32;&#32;&#32;&#32;&#32;&#32;__rehash_policy()<emphasis role="keyword">&#32;const</emphasis>
+324 <emphasis role="keyword">&#32;&#32;&#32;&#32;&#32;&#32;</emphasis>{&#32;<emphasis role="keywordflow">return</emphasis>&#32;_M_rehash_policy;&#32;}
+325 
+326 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+327 &#32;&#32;&#32;&#32;&#32;&#32;__rehash_policy(<emphasis role="keyword">const</emphasis>&#32;_RehashPolicy&amp;);
+328 
+329 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Lookup.</emphasis>
+330 &#32;&#32;&#32;&#32;&#32;&#32;iterator
+331 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_toml_8hpp_1a334e40fb57f310a5de10f332f1914bf4">find</link>(<emphasis role="keyword">const</emphasis>&#32;key_type&amp;&#32;__k);
+332 
+333 &#32;&#32;&#32;&#32;&#32;&#32;const_iterator
+334 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_toml_8hpp_1a334e40fb57f310a5de10f332f1914bf4">find</link>(<emphasis role="keyword">const</emphasis>&#32;key_type&amp;&#32;__k)&#32;<emphasis role="keyword">const</emphasis>;
+335 
+336 &#32;&#32;&#32;&#32;&#32;&#32;size_type
+337 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a22486c0c8d9f7d79a07bf22ecffeeb2f">count</link>(<emphasis role="keyword">const</emphasis>&#32;key_type&amp;&#32;__k)&#32;<emphasis role="keyword">const</emphasis>;
+338 
+339 &#32;&#32;&#32;&#32;&#32;&#32;std::pair&lt;iterator,&#32;iterator&gt;
+340 &#32;&#32;&#32;&#32;&#32;&#32;equal_range(<emphasis role="keyword">const</emphasis>&#32;key_type&amp;&#32;__k);
+341 
+342 &#32;&#32;&#32;&#32;&#32;&#32;std::pair&lt;const_iterator,&#32;const_iterator&gt;
+343 &#32;&#32;&#32;&#32;&#32;&#32;equal_range(<emphasis role="keyword">const</emphasis>&#32;key_type&amp;&#32;__k)&#32;<emphasis role="keyword">const</emphasis>;
+344 
+345 &#32;&#32;&#32;&#32;<emphasis role="keyword">private</emphasis>:&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Find,&#32;insert&#32;and&#32;erase&#32;helper&#32;functions</emphasis>
+346 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;???&#32;This&#32;dispatching&#32;is&#32;a&#32;workaround&#32;for&#32;the&#32;fact&#32;that&#32;we&#32;don&apos;t</emphasis>
+347 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;have&#32;partial&#32;specialization&#32;of&#32;member&#32;templates;&#32;it&#32;would&#32;be</emphasis>
+348 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;better&#32;to&#32;just&#32;specialize&#32;insert&#32;on&#32;__unique_keys.&#32;&#32;There&#32;may&#32;be&#32;a</emphasis>
+349 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;cleaner&#32;workaround.</emphasis>
+350 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">typename</emphasis>&#32;__gnu_cxx::__conditional_type&lt;__unique_keys,
+351 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;std::pair&lt;iterator,&#32;bool&gt;,&#32;iterator&gt;::__type
+352 &#32;&#32;&#32;&#32;_Insert_Return_Type;
+353 
+354 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">typename</emphasis>&#32;__gnu_cxx::__conditional_type&lt;__unique_keys,
+355 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;std::_Select1st&lt;_Insert_Return_Type&gt;,
+356 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;std::_Identity&lt;_Insert_Return_Type&gt;
+357 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&gt;::__type
+358 &#32;&#32;&#32;&#32;_Insert_Conv_Type;
+359 
+360 &#32;&#32;&#32;&#32;&#32;&#32;_Node*
+361 &#32;&#32;&#32;&#32;&#32;&#32;_M_find_node(_Node*,&#32;<emphasis role="keyword">const</emphasis>&#32;key_type&amp;,
+362 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;_Hashtable::_Hash_code_type)&#32;<emphasis role="keyword">const</emphasis>;
+363 
+364 &#32;&#32;&#32;&#32;&#32;&#32;iterator
+365 &#32;&#32;&#32;&#32;&#32;&#32;_M_insert_bucket(<emphasis role="keyword">const</emphasis>&#32;value_type&amp;,&#32;size_type,
+366 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;_Hashtable::_Hash_code_type);
+367 
+368 &#32;&#32;&#32;&#32;&#32;&#32;std::pair&lt;iterator,&#32;bool&gt;
+369 &#32;&#32;&#32;&#32;&#32;&#32;_M_insert(<emphasis role="keyword">const</emphasis>&#32;value_type&amp;,&#32;std::tr1::true_type);
+370 
+371 &#32;&#32;&#32;&#32;&#32;&#32;iterator
+372 &#32;&#32;&#32;&#32;&#32;&#32;_M_insert(<emphasis role="keyword">const</emphasis>&#32;value_type&amp;,&#32;std::tr1::false_type);
+373 
+374 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+375 &#32;&#32;&#32;&#32;&#32;&#32;_M_erase_node(_Node*,&#32;_Node**);
+376 
+377 &#32;&#32;&#32;&#32;<emphasis role="keyword">public</emphasis>:
+378 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Insert&#32;and&#32;erase</emphasis>
+379 &#32;&#32;&#32;&#32;&#32;&#32;_Insert_Return_Type
+380 &#32;&#32;&#32;&#32;&#32;&#32;insert(<emphasis role="keyword">const</emphasis>&#32;value_type&amp;&#32;__v)
+381 &#32;&#32;&#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;_M_insert(__v,&#32;std::tr1::integral_constant&lt;<emphasis role="keywordtype">bool</emphasis>,
+382 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__unique_keys&gt;());&#32;}
+383 
+384 &#32;&#32;&#32;&#32;&#32;&#32;iterator
+385 &#32;&#32;&#32;&#32;&#32;&#32;insert(iterator,&#32;<emphasis role="keyword">const</emphasis>&#32;value_type&amp;&#32;__v)
+386 &#32;&#32;&#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;iterator(_Insert_Conv_Type()(this-&gt;insert(__v)));&#32;}
+387 
+388 &#32;&#32;&#32;&#32;&#32;&#32;const_iterator
+389 &#32;&#32;&#32;&#32;&#32;&#32;insert(const_iterator,&#32;<emphasis role="keyword">const</emphasis>&#32;value_type&amp;&#32;__v)
+390 &#32;&#32;&#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;const_iterator(_Insert_Conv_Type()(this-&gt;insert(__v)));&#32;}
+391 
+392 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_InputIterator&gt;
+393 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+394 &#32;&#32;&#32;&#32;insert(_InputIterator&#32;__first,&#32;_InputIterator&#32;__last);
+395 
+396 &#32;&#32;&#32;&#32;&#32;&#32;iterator
+397 &#32;&#32;&#32;&#32;&#32;&#32;erase(iterator);
+398 
+399 &#32;&#32;&#32;&#32;&#32;&#32;const_iterator
+400 &#32;&#32;&#32;&#32;&#32;&#32;erase(const_iterator);
+401 
+402 &#32;&#32;&#32;&#32;&#32;&#32;size_type
+403 &#32;&#32;&#32;&#32;&#32;&#32;erase(<emphasis role="keyword">const</emphasis>&#32;key_type&amp;);
+404 
+405 &#32;&#32;&#32;&#32;&#32;&#32;iterator
+406 &#32;&#32;&#32;&#32;&#32;&#32;erase(iterator,&#32;iterator);
+407 
+408 &#32;&#32;&#32;&#32;&#32;&#32;const_iterator
+409 &#32;&#32;&#32;&#32;&#32;&#32;erase(const_iterator,&#32;const_iterator);
+410 
+411 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+412 &#32;&#32;&#32;&#32;&#32;&#32;clear();
+413 
+414 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Set&#32;number&#32;of&#32;buckets&#32;to&#32;be&#32;appropriate&#32;for&#32;container&#32;of&#32;n&#32;element.</emphasis>
+415 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>&#32;rehash(size_type&#32;__n);
+416 
+417 &#32;&#32;&#32;&#32;<emphasis role="keyword">private</emphasis>:
+418 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Unconditionally&#32;change&#32;size&#32;of&#32;bucket&#32;array&#32;to&#32;n.</emphasis>
+419 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>&#32;_M_rehash(size_type&#32;__n);
+420 &#32;&#32;&#32;&#32;};
+421 
+422 
+423 &#32;&#32;<emphasis role="comment">//&#32;Definitions&#32;of&#32;class&#32;template&#32;_Hashtable&apos;s&#32;out-of-line&#32;member&#32;functions.</emphasis>
+424 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Key,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Value,
+425 &#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;_Allocator,&#32;<emphasis role="keyword">typename</emphasis>&#32;_ExtractKey,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Equal,
+426 &#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;_H1,&#32;<emphasis role="keyword">typename</emphasis>&#32;_H2,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Hash,&#32;<emphasis role="keyword">typename</emphasis>&#32;_RehashPolicy,
+427 &#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">bool</emphasis>&#32;__chc,&#32;<emphasis role="keywordtype">bool</emphasis>&#32;__cit,&#32;<emphasis role="keywordtype">bool</emphasis>&#32;__uk&gt;
+428 &#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;_Hashtable&lt;_Key,&#32;_Value,&#32;_Allocator,&#32;_ExtractKey,&#32;_Equal,
+429 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_H1,&#32;_H2,&#32;_Hash,&#32;_RehashPolicy,
+430 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__chc,&#32;__cit,&#32;__uk&gt;::_Node*
+431 &#32;&#32;&#32;&#32;_Hashtable&lt;_Key,&#32;_Value,&#32;_Allocator,&#32;_ExtractKey,&#32;_Equal,
+432 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_H1,&#32;_H2,&#32;_Hash,&#32;_RehashPolicy,&#32;__chc,&#32;__cit,&#32;__uk&gt;::
+433 &#32;&#32;&#32;&#32;_M_allocate_node(<emphasis role="keyword">const</emphasis>&#32;value_type&amp;&#32;__v)
+434 &#32;&#32;&#32;&#32;{
+435 &#32;&#32;&#32;&#32;&#32;&#32;_Node*&#32;__n&#32;=&#32;_M_node_allocator.allocate(1);
+436 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2bits_2exception__defines_8h_1a130bf0cd31a0783cd03563f46b46915b">__try</link>
+437 &#32;&#32;&#32;&#32;{
+438 &#32;&#32;&#32;&#32;&#32;&#32;_Value_allocator_type&#32;__a&#32;=&#32;_M_get_Value_allocator();
+439 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;__gnu_cxx::__alloc_traits&lt;_Value_allocator_type&gt;&#32;_Traits;
+440 &#32;&#32;&#32;&#32;&#32;&#32;_Traits::construct(__a,&#32;&amp;__n-&gt;_M_v,&#32;__v);
+441 &#32;&#32;&#32;&#32;&#32;&#32;__n-&gt;_M_next&#32;=&#32;0;
+442 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__n;
+443 &#32;&#32;&#32;&#32;}
+444 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2bits_2exception__defines_8h_1a9e51d2f324c18a996a3e4f9a6ba0f6c2">__catch</link>(...)
+445 &#32;&#32;&#32;&#32;{
+446 &#32;&#32;&#32;&#32;&#32;&#32;_M_node_allocator.deallocate(__n,&#32;1);
+447 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2bits_2exception__defines_8h_1a92ef03a5310b10a4243a6ec8f43494b5">__throw_exception_again</link>;
+448 &#32;&#32;&#32;&#32;}
+449 &#32;&#32;&#32;&#32;}
+450 
+451 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Key,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Value,
+452 &#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;_Allocator,&#32;<emphasis role="keyword">typename</emphasis>&#32;_ExtractKey,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Equal,
+453 &#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;_H1,&#32;<emphasis role="keyword">typename</emphasis>&#32;_H2,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Hash,&#32;<emphasis role="keyword">typename</emphasis>&#32;_RehashPolicy,
+454 &#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">bool</emphasis>&#32;__chc,&#32;<emphasis role="keywordtype">bool</emphasis>&#32;__cit,&#32;<emphasis role="keywordtype">bool</emphasis>&#32;__uk&gt;
+455 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+456 &#32;&#32;&#32;&#32;_Hashtable&lt;_Key,&#32;_Value,&#32;_Allocator,&#32;_ExtractKey,&#32;_Equal,
+457 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_H1,&#32;_H2,&#32;_Hash,&#32;_RehashPolicy,&#32;__chc,&#32;__cit,&#32;__uk&gt;::
+458 &#32;&#32;&#32;&#32;_M_deallocate_node(_Node*&#32;__n)
+459 &#32;&#32;&#32;&#32;{
+460 &#32;&#32;&#32;&#32;&#32;&#32;_Value_allocator_type&#32;__a&#32;=&#32;_M_get_Value_allocator();
+461 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;__gnu_cxx::__alloc_traits&lt;_Value_allocator_type&gt;&#32;_Traits;
+462 &#32;&#32;&#32;&#32;&#32;&#32;_Traits::destroy(__a,&#32;&amp;__n-&gt;_M_v);
+463 &#32;&#32;&#32;&#32;&#32;&#32;_M_node_allocator.deallocate(__n,&#32;1);
+464 &#32;&#32;&#32;&#32;}
+465 
+466 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Key,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Value,
+467 &#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;_Allocator,&#32;<emphasis role="keyword">typename</emphasis>&#32;_ExtractKey,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Equal,
+468 &#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;_H1,&#32;<emphasis role="keyword">typename</emphasis>&#32;_H2,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Hash,&#32;<emphasis role="keyword">typename</emphasis>&#32;_RehashPolicy,
+469 &#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">bool</emphasis>&#32;__chc,&#32;<emphasis role="keywordtype">bool</emphasis>&#32;__cit,&#32;<emphasis role="keywordtype">bool</emphasis>&#32;__uk&gt;
+470 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+471 &#32;&#32;&#32;&#32;_Hashtable&lt;_Key,&#32;_Value,&#32;_Allocator,&#32;_ExtractKey,&#32;_Equal,
+472 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_H1,&#32;_H2,&#32;_Hash,&#32;_RehashPolicy,&#32;__chc,&#32;__cit,&#32;__uk&gt;::
+473 &#32;&#32;&#32;&#32;_M_deallocate_nodes(_Node**&#32;__array,&#32;size_type&#32;__n)
+474 &#32;&#32;&#32;&#32;{
+475 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(size_type&#32;__i&#32;=&#32;0;&#32;__i&#32;&lt;&#32;__n;&#32;++__i)
+476 &#32;&#32;&#32;&#32;{
+477 &#32;&#32;&#32;&#32;&#32;&#32;_Node*&#32;__p&#32;=&#32;__array[__i];
+478 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">while</emphasis>&#32;(__p)
+479 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+480 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_Node*&#32;<link linkend="__classes_2lib_2include_2xmmintrin_8h_1ad56bf6b8c22ee698e455f99196a1fe12">__tmp</link>&#32;=&#32;__p;
+481 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__p&#32;=&#32;__p-&gt;_M_next;
+482 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_M_deallocate_node(<link linkend="__classes_2lib_2include_2xmmintrin_8h_1ad56bf6b8c22ee698e455f99196a1fe12">__tmp</link>);
+483 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+484 &#32;&#32;&#32;&#32;&#32;&#32;__array[__i]&#32;=&#32;0;
+485 &#32;&#32;&#32;&#32;}
+486 &#32;&#32;&#32;&#32;}
+487 
+488 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Key,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Value,
+489 &#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;_Allocator,&#32;<emphasis role="keyword">typename</emphasis>&#32;_ExtractKey,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Equal,
+490 &#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;_H1,&#32;<emphasis role="keyword">typename</emphasis>&#32;_H2,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Hash,&#32;<emphasis role="keyword">typename</emphasis>&#32;_RehashPolicy,
+491 &#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">bool</emphasis>&#32;__chc,&#32;<emphasis role="keywordtype">bool</emphasis>&#32;__cit,&#32;<emphasis role="keywordtype">bool</emphasis>&#32;__uk&gt;
+492 &#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;_Hashtable&lt;_Key,&#32;_Value,&#32;_Allocator,&#32;_ExtractKey,&#32;_Equal,
+493 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_H1,&#32;_H2,&#32;_Hash,&#32;_RehashPolicy,
+494 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__chc,&#32;__cit,&#32;__uk&gt;::_Node**
+495 &#32;&#32;&#32;&#32;_Hashtable&lt;_Key,&#32;_Value,&#32;_Allocator,&#32;_ExtractKey,&#32;_Equal,
+496 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_H1,&#32;_H2,&#32;_Hash,&#32;_RehashPolicy,&#32;__chc,&#32;__cit,&#32;__uk&gt;::
+497 &#32;&#32;&#32;&#32;_M_allocate_buckets(size_type&#32;__n)
+498 &#32;&#32;&#32;&#32;{
+499 &#32;&#32;&#32;&#32;&#32;&#32;_Bucket_allocator_type&#32;__alloc(_M_node_allocator);
+500 
+501 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;We&#32;allocate&#32;one&#32;extra&#32;bucket&#32;to&#32;hold&#32;a&#32;sentinel,&#32;an&#32;arbitrary</emphasis>
+502 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;non-null&#32;pointer.&#32;&#32;Iterator&#32;increment&#32;relies&#32;on&#32;this.</emphasis>
+503 &#32;&#32;&#32;&#32;&#32;&#32;_Node**&#32;__p&#32;=&#32;__alloc.allocate(__n&#32;+&#32;1);
+504 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_namespacestd_1a9042ae744521b1770e868813f939b4b7">std::fill</link>(__p,&#32;__p&#32;+&#32;__n,&#32;(_Node*)&#32;0);
+505 &#32;&#32;&#32;&#32;&#32;&#32;__p[__n]&#32;=&#32;<emphasis role="keyword">reinterpret_cast&lt;</emphasis>_Node*<emphasis role="keyword">&gt;</emphasis>(0x1000);
+506 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__p;
+507 &#32;&#32;&#32;&#32;}
+508 
+509 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Key,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Value,
+510 &#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;_Allocator,&#32;<emphasis role="keyword">typename</emphasis>&#32;_ExtractKey,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Equal,
+511 &#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;_H1,&#32;<emphasis role="keyword">typename</emphasis>&#32;_H2,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Hash,&#32;<emphasis role="keyword">typename</emphasis>&#32;_RehashPolicy,
+512 &#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">bool</emphasis>&#32;__chc,&#32;<emphasis role="keywordtype">bool</emphasis>&#32;__cit,&#32;<emphasis role="keywordtype">bool</emphasis>&#32;__uk&gt;
+513 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+514 &#32;&#32;&#32;&#32;_Hashtable&lt;_Key,&#32;_Value,&#32;_Allocator,&#32;_ExtractKey,&#32;_Equal,
+515 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_H1,&#32;_H2,&#32;_Hash,&#32;_RehashPolicy,&#32;__chc,&#32;__cit,&#32;__uk&gt;::
+516 &#32;&#32;&#32;&#32;_M_deallocate_buckets(_Node**&#32;__p,&#32;size_type&#32;__n)
+517 &#32;&#32;&#32;&#32;{
+518 &#32;&#32;&#32;&#32;&#32;&#32;_Bucket_allocator_type&#32;__alloc(_M_node_allocator);
+519 &#32;&#32;&#32;&#32;&#32;&#32;__alloc.deallocate(__p,&#32;__n&#32;+&#32;1);
+520 &#32;&#32;&#32;&#32;}
+521 
+522 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Key,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Value,
+523 &#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;_Allocator,&#32;<emphasis role="keyword">typename</emphasis>&#32;_ExtractKey,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Equal,
+524 &#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;_H1,&#32;<emphasis role="keyword">typename</emphasis>&#32;_H2,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Hash,&#32;<emphasis role="keyword">typename</emphasis>&#32;_RehashPolicy,
+525 &#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">bool</emphasis>&#32;__chc,&#32;<emphasis role="keywordtype">bool</emphasis>&#32;__cit,&#32;<emphasis role="keywordtype">bool</emphasis>&#32;__uk&gt;
+526 &#32;&#32;&#32;&#32;_Hashtable&lt;_Key,&#32;_Value,&#32;_Allocator,&#32;_ExtractKey,&#32;_Equal,
+527 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_H1,&#32;_H2,&#32;_Hash,&#32;_RehashPolicy,&#32;__chc,&#32;__cit,&#32;__uk&gt;::
+528 &#32;&#32;&#32;&#32;_Hashtable(size_type&#32;__bucket_hint,
+529 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;_H1&amp;&#32;__h1,&#32;<emphasis role="keyword">const</emphasis>&#32;_H2&amp;&#32;__h2,&#32;<emphasis role="keyword">const</emphasis>&#32;_Hash&amp;&#32;__h,
+530 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;_Equal&amp;&#32;__eq,&#32;<emphasis role="keyword">const</emphasis>&#32;_ExtractKey&amp;&#32;__exk,
+531 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;allocator_type&amp;&#32;__a)
+532 &#32;&#32;&#32;&#32;:&#32;__detail::_Rehash_base&lt;_RehashPolicy,&#32;_Hashtable&gt;(),
+533 &#32;&#32;&#32;&#32;&#32;&#32;__detail::_Hash_code_base&lt;_Key,&#32;_Value,&#32;_ExtractKey,&#32;_Equal,
+534 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_H1,&#32;_H2,&#32;_Hash,&#32;__chc&gt;(__exk,&#32;__eq,
+535 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__h1,&#32;__h2,&#32;__h),
+536 &#32;&#32;&#32;&#32;&#32;&#32;__detail::_Map_base&lt;_Key,&#32;_Value,&#32;_ExtractKey,&#32;__uk,&#32;_Hashtable&gt;(),
+537 &#32;&#32;&#32;&#32;&#32;&#32;_M_node_allocator(__a),
+538 &#32;&#32;&#32;&#32;&#32;&#32;_M_bucket_count(0),
+539 &#32;&#32;&#32;&#32;&#32;&#32;_M_element_count(0),
+540 &#32;&#32;&#32;&#32;&#32;&#32;_M_rehash_policy()
+541 &#32;&#32;&#32;&#32;{
+542 &#32;&#32;&#32;&#32;&#32;&#32;_M_bucket_count&#32;=&#32;_M_rehash_policy._M_next_bkt(__bucket_hint);
+543 &#32;&#32;&#32;&#32;&#32;&#32;_M_buckets&#32;=&#32;_M_allocate_buckets(_M_bucket_count);
+544 &#32;&#32;&#32;&#32;}
+545 
+546 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Key,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Value,
+547 &#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;_Allocator,&#32;<emphasis role="keyword">typename</emphasis>&#32;_ExtractKey,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Equal,
+548 &#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;_H1,&#32;<emphasis role="keyword">typename</emphasis>&#32;_H2,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Hash,&#32;<emphasis role="keyword">typename</emphasis>&#32;_RehashPolicy,
+549 &#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">bool</emphasis>&#32;__chc,&#32;<emphasis role="keywordtype">bool</emphasis>&#32;__cit,&#32;<emphasis role="keywordtype">bool</emphasis>&#32;__uk&gt;
+550 &#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_InputIterator&gt;
+551 &#32;&#32;&#32;&#32;&#32;&#32;_Hashtable&lt;_Key,&#32;_Value,&#32;_Allocator,&#32;_ExtractKey,&#32;_Equal,
+552 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_H1,&#32;_H2,&#32;_Hash,&#32;_RehashPolicy,&#32;__chc,&#32;__cit,&#32;__uk&gt;::
+553 &#32;&#32;&#32;&#32;&#32;&#32;_Hashtable(_InputIterator&#32;__f,&#32;_InputIterator&#32;__l,
+554 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;size_type&#32;__bucket_hint,
+555 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;_H1&amp;&#32;__h1,&#32;<emphasis role="keyword">const</emphasis>&#32;_H2&amp;&#32;__h2,&#32;<emphasis role="keyword">const</emphasis>&#32;_Hash&amp;&#32;__h,
+556 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;_Equal&amp;&#32;__eq,&#32;<emphasis role="keyword">const</emphasis>&#32;_ExtractKey&amp;&#32;__exk,
+557 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;allocator_type&amp;&#32;__a)
+558 &#32;&#32;&#32;&#32;&#32;&#32;:&#32;__detail::_Rehash_base&lt;_RehashPolicy,&#32;_Hashtable&gt;(),
+559 &#32;&#32;&#32;&#32;__detail::_Hash_code_base&lt;_Key,&#32;_Value,&#32;_ExtractKey,&#32;_Equal,
+560 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_H1,&#32;_H2,&#32;_Hash,&#32;__chc&gt;(__exk,&#32;__eq,
+561 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__h1,&#32;__h2,&#32;__h),
+562 &#32;&#32;&#32;&#32;__detail::_Map_base&lt;_Key,&#32;_Value,&#32;_ExtractKey,&#32;__uk,&#32;_Hashtable&gt;(),
+563 &#32;&#32;&#32;&#32;_M_node_allocator(__a),
+564 &#32;&#32;&#32;&#32;_M_bucket_count(0),
+565 &#32;&#32;&#32;&#32;_M_element_count(0),
+566 &#32;&#32;&#32;&#32;_M_rehash_policy()
+567 &#32;&#32;&#32;&#32;&#32;&#32;{
+568 &#32;&#32;&#32;&#32;_M_bucket_count&#32;=&#32;std::max(_M_rehash_policy._M_next_bkt(__bucket_hint),
+569 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_M_rehash_policy.
+570 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_M_bkt_for_elements(__detail::
+571 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__distance_fw(__f,
+572 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__l)));
+573 &#32;&#32;&#32;&#32;_M_buckets&#32;=&#32;_M_allocate_buckets(_M_bucket_count);
+574 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2bits_2exception__defines_8h_1a130bf0cd31a0783cd03563f46b46915b">__try</link>
+575 &#32;&#32;&#32;&#32;&#32;&#32;{
+576 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(;&#32;__f&#32;!=&#32;__l;&#32;++__f)
+577 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;this-&gt;insert(*__f);
+578 &#32;&#32;&#32;&#32;&#32;&#32;}
+579 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2bits_2exception__defines_8h_1a9e51d2f324c18a996a3e4f9a6ba0f6c2">__catch</link>(...)
+580 &#32;&#32;&#32;&#32;&#32;&#32;{
+581 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;clear();
+582 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_M_deallocate_buckets(_M_buckets,&#32;_M_bucket_count);
+583 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2bits_2exception__defines_8h_1a92ef03a5310b10a4243a6ec8f43494b5">__throw_exception_again</link>;
+584 &#32;&#32;&#32;&#32;&#32;&#32;}
+585 &#32;&#32;&#32;&#32;&#32;&#32;}
+586 
+587 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Key,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Value,
+588 &#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;_Allocator,&#32;<emphasis role="keyword">typename</emphasis>&#32;_ExtractKey,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Equal,
+589 &#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;_H1,&#32;<emphasis role="keyword">typename</emphasis>&#32;_H2,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Hash,&#32;<emphasis role="keyword">typename</emphasis>&#32;_RehashPolicy,
+590 &#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">bool</emphasis>&#32;__chc,&#32;<emphasis role="keywordtype">bool</emphasis>&#32;__cit,&#32;<emphasis role="keywordtype">bool</emphasis>&#32;__uk&gt;
+591 &#32;&#32;&#32;&#32;_Hashtable&lt;_Key,&#32;_Value,&#32;_Allocator,&#32;_ExtractKey,&#32;_Equal,
+592 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_H1,&#32;_H2,&#32;_Hash,&#32;_RehashPolicy,&#32;__chc,&#32;__cit,&#32;__uk&gt;::
+593 &#32;&#32;&#32;&#32;_Hashtable(<emphasis role="keyword">const</emphasis>&#32;_Hashtable&amp;&#32;__ht)
+594 &#32;&#32;&#32;&#32;:&#32;__detail::_Rehash_base&lt;_RehashPolicy,&#32;_Hashtable&gt;(__ht),
+595 &#32;&#32;&#32;&#32;&#32;&#32;__detail::_Hash_code_base&lt;_Key,&#32;_Value,&#32;_ExtractKey,&#32;_Equal,
+596 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_H1,&#32;_H2,&#32;_Hash,&#32;__chc&gt;(__ht),
+597 &#32;&#32;&#32;&#32;&#32;&#32;__detail::_Map_base&lt;_Key,&#32;_Value,&#32;_ExtractKey,&#32;__uk,&#32;_Hashtable&gt;(__ht),
+598 &#32;&#32;&#32;&#32;&#32;&#32;_M_node_allocator(__ht._M_node_allocator),
+599 &#32;&#32;&#32;&#32;&#32;&#32;_M_bucket_count(__ht._M_bucket_count),
+600 &#32;&#32;&#32;&#32;&#32;&#32;_M_element_count(__ht._M_element_count),
+601 &#32;&#32;&#32;&#32;&#32;&#32;_M_rehash_policy(__ht._M_rehash_policy)
+602 &#32;&#32;&#32;&#32;{
+603 &#32;&#32;&#32;&#32;&#32;&#32;_M_buckets&#32;=&#32;_M_allocate_buckets(_M_bucket_count);
+604 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2bits_2exception__defines_8h_1a130bf0cd31a0783cd03563f46b46915b">__try</link>
+605 &#32;&#32;&#32;&#32;{
+606 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(size_type&#32;__i&#32;=&#32;0;&#32;__i&#32;&lt;&#32;__ht._M_bucket_count;&#32;++__i)
+607 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+608 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_Node*&#32;__n&#32;=&#32;__ht._M_buckets[__i];
+609 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_Node**&#32;__tail&#32;=&#32;_M_buckets&#32;+&#32;__i;
+610 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">while</emphasis>&#32;(__n)
+611 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+612 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;*__tail&#32;=&#32;_M_allocate_node(__n-&gt;_M_v);
+613 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;this-&gt;_M_copy_code(*__tail,&#32;__n);
+614 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__tail&#32;=&#32;&amp;((*__tail)-&gt;_M_next);
+615 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__n&#32;=&#32;__n-&gt;_M_next;
+616 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+617 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+618 &#32;&#32;&#32;&#32;}
+619 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2bits_2exception__defines_8h_1a9e51d2f324c18a996a3e4f9a6ba0f6c2">__catch</link>(...)
+620 &#32;&#32;&#32;&#32;{
+621 &#32;&#32;&#32;&#32;&#32;&#32;clear();
+622 &#32;&#32;&#32;&#32;&#32;&#32;_M_deallocate_buckets(_M_buckets,&#32;_M_bucket_count);
+623 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2bits_2exception__defines_8h_1a92ef03a5310b10a4243a6ec8f43494b5">__throw_exception_again</link>;
+624 &#32;&#32;&#32;&#32;}
+625 &#32;&#32;&#32;&#32;}
+626 
+627 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Key,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Value,
+628 &#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;_Allocator,&#32;<emphasis role="keyword">typename</emphasis>&#32;_ExtractKey,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Equal,
+629 &#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;_H1,&#32;<emphasis role="keyword">typename</emphasis>&#32;_H2,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Hash,&#32;<emphasis role="keyword">typename</emphasis>&#32;_RehashPolicy,
+630 &#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">bool</emphasis>&#32;__chc,&#32;<emphasis role="keywordtype">bool</emphasis>&#32;__cit,&#32;<emphasis role="keywordtype">bool</emphasis>&#32;__uk&gt;
+631 &#32;&#32;&#32;&#32;_Hashtable&lt;_Key,&#32;_Value,&#32;_Allocator,&#32;_ExtractKey,&#32;_Equal,
+632 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_H1,&#32;_H2,&#32;_Hash,&#32;_RehashPolicy,&#32;__chc,&#32;__cit,&#32;__uk&gt;&amp;
+633 &#32;&#32;&#32;&#32;_Hashtable&lt;_Key,&#32;_Value,&#32;_Allocator,&#32;_ExtractKey,&#32;_Equal,
+634 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_H1,&#32;_H2,&#32;_Hash,&#32;_RehashPolicy,&#32;__chc,&#32;__cit,&#32;__uk&gt;::
+635 &#32;&#32;&#32;&#32;operator=(<emphasis role="keyword">const</emphasis>&#32;_Hashtable&amp;&#32;__ht)
+636 &#32;&#32;&#32;&#32;{
+637 &#32;&#32;&#32;&#32;&#32;&#32;_Hashtable&#32;<link linkend="__classes_2lib_2include_2xmmintrin_8h_1ad56bf6b8c22ee698e455f99196a1fe12">__tmp</link>(__ht);
+638 &#32;&#32;&#32;&#32;&#32;&#32;this-&gt;swap(<link linkend="__classes_2lib_2include_2xmmintrin_8h_1ad56bf6b8c22ee698e455f99196a1fe12">__tmp</link>);
+639 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;*<emphasis role="keyword">this</emphasis>;
+640 &#32;&#32;&#32;&#32;}
+641 
+642 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Key,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Value,
+643 &#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;_Allocator,&#32;<emphasis role="keyword">typename</emphasis>&#32;_ExtractKey,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Equal,
+644 &#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;_H1,&#32;<emphasis role="keyword">typename</emphasis>&#32;_H2,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Hash,&#32;<emphasis role="keyword">typename</emphasis>&#32;_RehashPolicy,
+645 &#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">bool</emphasis>&#32;__chc,&#32;<emphasis role="keywordtype">bool</emphasis>&#32;__cit,&#32;<emphasis role="keywordtype">bool</emphasis>&#32;__uk&gt;
+646 &#32;&#32;&#32;&#32;_Hashtable&lt;_Key,&#32;_Value,&#32;_Allocator,&#32;_ExtractKey,&#32;_Equal,
+647 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_H1,&#32;_H2,&#32;_Hash,&#32;_RehashPolicy,&#32;__chc,&#32;__cit,&#32;__uk&gt;::
+648 &#32;&#32;&#32;&#32;~_Hashtable()
+649 &#32;&#32;&#32;&#32;{
+650 &#32;&#32;&#32;&#32;&#32;&#32;clear();
+651 &#32;&#32;&#32;&#32;&#32;&#32;_M_deallocate_buckets(_M_buckets,&#32;_M_bucket_count);
+652 &#32;&#32;&#32;&#32;}
+653 
+654 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Key,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Value,
+655 &#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;_Allocator,&#32;<emphasis role="keyword">typename</emphasis>&#32;_ExtractKey,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Equal,
+656 &#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;_H1,&#32;<emphasis role="keyword">typename</emphasis>&#32;_H2,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Hash,&#32;<emphasis role="keyword">typename</emphasis>&#32;_RehashPolicy,
+657 &#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">bool</emphasis>&#32;__chc,&#32;<emphasis role="keywordtype">bool</emphasis>&#32;__cit,&#32;<emphasis role="keywordtype">bool</emphasis>&#32;__uk&gt;
+658 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+659 &#32;&#32;&#32;&#32;_Hashtable&lt;_Key,&#32;_Value,&#32;_Allocator,&#32;_ExtractKey,&#32;_Equal,
+660 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_H1,&#32;_H2,&#32;_Hash,&#32;_RehashPolicy,&#32;__chc,&#32;__cit,&#32;__uk&gt;::
+661 &#32;&#32;&#32;&#32;swap(_Hashtable&amp;&#32;__x)
+662 &#32;&#32;&#32;&#32;{
+663 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;The&#32;only&#32;base&#32;class&#32;with&#32;member&#32;variables&#32;is&#32;hash_code_base.&#32;&#32;We</emphasis>
+664 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;define&#32;_Hash_code_base::_M_swap&#32;because&#32;different&#32;specializations</emphasis>
+665 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;have&#32;different&#32;members.</emphasis>
+666 &#32;&#32;&#32;&#32;&#32;&#32;__detail::_Hash_code_base&lt;_Key,&#32;_Value,&#32;_ExtractKey,&#32;_Equal,
+667 &#32;&#32;&#32;&#32;_H1,&#32;_H2,&#32;_Hash,&#32;__chc&gt;::_M_swap(__x);
+668 
+669 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;_GLIBCXX_RESOLVE_LIB_DEFECTS</emphasis>
+670 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;431.&#32;Swapping&#32;containers&#32;with&#32;unequal&#32;allocators.</emphasis>
+671 &#32;&#32;&#32;&#32;&#32;&#32;std::__alloc_swap&lt;_Node_allocator_type&gt;::_S_do_it(_M_node_allocator,
+672 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__x._M_node_allocator);
+673 
+674 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_namespacestd_1a3ece115a1c8ed9020a20f1d0b70efda8">std::swap</link>(_M_rehash_policy,&#32;__x._M_rehash_policy);
+675 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_namespacestd_1a3ece115a1c8ed9020a20f1d0b70efda8">std::swap</link>(_M_buckets,&#32;__x._M_buckets);
+676 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_namespacestd_1a3ece115a1c8ed9020a20f1d0b70efda8">std::swap</link>(_M_bucket_count,&#32;__x._M_bucket_count);
+677 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_namespacestd_1a3ece115a1c8ed9020a20f1d0b70efda8">std::swap</link>(_M_element_count,&#32;__x._M_element_count);
+678 &#32;&#32;&#32;&#32;}
+679 
+680 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Key,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Value,
+681 &#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;_Allocator,&#32;<emphasis role="keyword">typename</emphasis>&#32;_ExtractKey,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Equal,
+682 &#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;_H1,&#32;<emphasis role="keyword">typename</emphasis>&#32;_H2,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Hash,&#32;<emphasis role="keyword">typename</emphasis>&#32;_RehashPolicy,
+683 &#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">bool</emphasis>&#32;__chc,&#32;<emphasis role="keywordtype">bool</emphasis>&#32;__cit,&#32;<emphasis role="keywordtype">bool</emphasis>&#32;__uk&gt;
+684 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+685 &#32;&#32;&#32;&#32;_Hashtable&lt;_Key,&#32;_Value,&#32;_Allocator,&#32;_ExtractKey,&#32;_Equal,
+686 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_H1,&#32;_H2,&#32;_Hash,&#32;_RehashPolicy,&#32;__chc,&#32;__cit,&#32;__uk&gt;::
+687 &#32;&#32;&#32;&#32;__rehash_policy(<emphasis role="keyword">const</emphasis>&#32;_RehashPolicy&amp;&#32;__pol)
+688 &#32;&#32;&#32;&#32;{
+689 &#32;&#32;&#32;&#32;&#32;&#32;_M_rehash_policy&#32;=&#32;__pol;
+690 &#32;&#32;&#32;&#32;&#32;&#32;size_type&#32;__n_bkt&#32;=&#32;__pol._M_bkt_for_elements(_M_element_count);
+691 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__n_bkt&#32;&gt;&#32;_M_bucket_count)
+692 &#32;&#32;&#32;&#32;_M_rehash(__n_bkt);
+693 &#32;&#32;&#32;&#32;}
+694 
+695 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Key,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Value,
+696 &#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;_Allocator,&#32;<emphasis role="keyword">typename</emphasis>&#32;_ExtractKey,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Equal,
+697 &#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;_H1,&#32;<emphasis role="keyword">typename</emphasis>&#32;_H2,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Hash,&#32;<emphasis role="keyword">typename</emphasis>&#32;_RehashPolicy,
+698 &#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">bool</emphasis>&#32;__chc,&#32;<emphasis role="keywordtype">bool</emphasis>&#32;__cit,&#32;<emphasis role="keywordtype">bool</emphasis>&#32;__uk&gt;
+699 &#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;_Hashtable&lt;_Key,&#32;_Value,&#32;_Allocator,&#32;_ExtractKey,&#32;_Equal,
+700 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_H1,&#32;_H2,&#32;_Hash,&#32;_RehashPolicy,
+701 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__chc,&#32;__cit,&#32;__uk&gt;::iterator
+702 &#32;&#32;&#32;&#32;_Hashtable&lt;_Key,&#32;_Value,&#32;_Allocator,&#32;_ExtractKey,&#32;_Equal,
+703 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_H1,&#32;_H2,&#32;_Hash,&#32;_RehashPolicy,&#32;__chc,&#32;__cit,&#32;__uk&gt;<link linkend="_toml_8hpp_1a334e40fb57f310a5de10f332f1914bf4">::</link>
+704 <link linkend="_toml_8hpp_1a334e40fb57f310a5de10f332f1914bf4">    find</link>(<emphasis role="keyword">const</emphasis>&#32;key_type&amp;&#32;__k)
+705 &#32;&#32;&#32;&#32;{
+706 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;_Hashtable::_Hash_code_type&#32;__code&#32;=&#32;this-&gt;_M_hash_code(__k);
+707 &#32;&#32;&#32;&#32;&#32;&#32;std::size_t&#32;__n&#32;=&#32;this-&gt;_M_bucket_index(__k,&#32;__code,&#32;_M_bucket_count);
+708 &#32;&#32;&#32;&#32;&#32;&#32;_Node*&#32;__p&#32;=&#32;_M_find_node(_M_buckets[__n],&#32;__k,&#32;__code);
+709 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__p&#32;?&#32;iterator(__p,&#32;_M_buckets&#32;+&#32;__n)&#32;:&#32;this-&gt;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a432111147038972f06e049e18a837002">end</link>();
+710 &#32;&#32;&#32;&#32;}
+711 
+712 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Key,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Value,
+713 &#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;_Allocator,&#32;<emphasis role="keyword">typename</emphasis>&#32;_ExtractKey,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Equal,
+714 &#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;_H1,&#32;<emphasis role="keyword">typename</emphasis>&#32;_H2,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Hash,&#32;<emphasis role="keyword">typename</emphasis>&#32;_RehashPolicy,
+715 &#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">bool</emphasis>&#32;__chc,&#32;<emphasis role="keywordtype">bool</emphasis>&#32;__cit,&#32;<emphasis role="keywordtype">bool</emphasis>&#32;__uk&gt;
+716 &#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;_Hashtable&lt;_Key,&#32;_Value,&#32;_Allocator,&#32;_ExtractKey,&#32;_Equal,
+717 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_H1,&#32;_H2,&#32;_Hash,&#32;_RehashPolicy,
+718 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__chc,&#32;__cit,&#32;__uk&gt;::const_iterator
+719 &#32;&#32;&#32;&#32;_Hashtable&lt;_Key,&#32;_Value,&#32;_Allocator,&#32;_ExtractKey,&#32;_Equal,
+720 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_H1,&#32;_H2,&#32;_Hash,&#32;_RehashPolicy,&#32;__chc,&#32;__cit,&#32;__uk&gt;<link linkend="_toml_8hpp_1a334e40fb57f310a5de10f332f1914bf4">::</link>
+721 <link linkend="_toml_8hpp_1a334e40fb57f310a5de10f332f1914bf4">    find</link>(<emphasis role="keyword">const</emphasis>&#32;key_type&amp;&#32;__k)<emphasis role="keyword">&#32;const</emphasis>
+722 <emphasis role="keyword">&#32;&#32;&#32;&#32;</emphasis>{
+723 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;_Hashtable::_Hash_code_type&#32;__code&#32;=&#32;this-&gt;_M_hash_code(__k);
+724 &#32;&#32;&#32;&#32;&#32;&#32;std::size_t&#32;__n&#32;=&#32;this-&gt;_M_bucket_index(__k,&#32;__code,&#32;_M_bucket_count);
+725 &#32;&#32;&#32;&#32;&#32;&#32;_Node*&#32;__p&#32;=&#32;_M_find_node(_M_buckets[__n],&#32;__k,&#32;__code);
+726 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__p&#32;?&#32;const_iterator(__p,&#32;_M_buckets&#32;+&#32;__n)&#32;:&#32;this-&gt;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a432111147038972f06e049e18a837002">end</link>();
+727 &#32;&#32;&#32;&#32;}
+728 
+729 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Key,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Value,
+730 &#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;_Allocator,&#32;<emphasis role="keyword">typename</emphasis>&#32;_ExtractKey,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Equal,
+731 &#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;_H1,&#32;<emphasis role="keyword">typename</emphasis>&#32;_H2,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Hash,&#32;<emphasis role="keyword">typename</emphasis>&#32;_RehashPolicy,
+732 &#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">bool</emphasis>&#32;__chc,&#32;<emphasis role="keywordtype">bool</emphasis>&#32;__cit,&#32;<emphasis role="keywordtype">bool</emphasis>&#32;__uk&gt;
+733 &#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;_Hashtable&lt;_Key,&#32;_Value,&#32;_Allocator,&#32;_ExtractKey,&#32;_Equal,
+734 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_H1,&#32;_H2,&#32;_Hash,&#32;_RehashPolicy,
+735 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__chc,&#32;__cit,&#32;__uk&gt;::size_type
+736 &#32;&#32;&#32;&#32;_Hashtable&lt;_Key,&#32;_Value,&#32;_Allocator,&#32;_ExtractKey,&#32;_Equal,
+737 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_H1,&#32;_H2,&#32;_Hash,&#32;_RehashPolicy,&#32;__chc,&#32;__cit,&#32;__uk&gt;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a22486c0c8d9f7d79a07bf22ecffeeb2f">::</link>
+738 <link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a22486c0c8d9f7d79a07bf22ecffeeb2f">    count</link>(<emphasis role="keyword">const</emphasis>&#32;key_type&amp;&#32;__k)<emphasis role="keyword">&#32;const</emphasis>
+739 <emphasis role="keyword">&#32;&#32;&#32;&#32;</emphasis>{
+740 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;_Hashtable::_Hash_code_type&#32;__code&#32;=&#32;this-&gt;_M_hash_code(__k);
+741 &#32;&#32;&#32;&#32;&#32;&#32;std::size_t&#32;__n&#32;=&#32;this-&gt;_M_bucket_index(__k,&#32;__code,&#32;_M_bucket_count);
+742 &#32;&#32;&#32;&#32;&#32;&#32;std::size_t&#32;__result&#32;=&#32;0;
+743 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(_Node*&#32;__p&#32;=&#32;_M_buckets[__n];&#32;__p;&#32;__p&#32;=&#32;__p-&gt;_M_next)
+744 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(this-&gt;_M_compare(__k,&#32;__code,&#32;__p))
+745 &#32;&#32;&#32;&#32;&#32;&#32;++__result;
+746 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__result;
+747 &#32;&#32;&#32;&#32;}
+748 
+749 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Key,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Value,
+750 &#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;_Allocator,&#32;<emphasis role="keyword">typename</emphasis>&#32;_ExtractKey,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Equal,
+751 &#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;_H1,&#32;<emphasis role="keyword">typename</emphasis>&#32;_H2,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Hash,&#32;<emphasis role="keyword">typename</emphasis>&#32;_RehashPolicy,
+752 &#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">bool</emphasis>&#32;__chc,&#32;<emphasis role="keywordtype">bool</emphasis>&#32;__cit,&#32;<emphasis role="keywordtype">bool</emphasis>&#32;__uk&gt;
+753 &#32;&#32;&#32;&#32;std::pair&lt;<emphasis role="keyword">typename</emphasis>&#32;_Hashtable&lt;_Key,&#32;_Value,&#32;_Allocator,
+754 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_ExtractKey,&#32;_Equal,&#32;_H1,
+755 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_H2,&#32;_Hash,&#32;_RehashPolicy,
+756 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__chc,&#32;__cit,&#32;__uk&gt;::iterator,
+757 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;_Hashtable&lt;_Key,&#32;_Value,&#32;_Allocator,
+758 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_ExtractKey,&#32;_Equal,&#32;_H1,
+759 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_H2,&#32;_Hash,&#32;_RehashPolicy,
+760 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__chc,&#32;__cit,&#32;__uk&gt;::iterator&gt;
+761 &#32;&#32;&#32;&#32;_Hashtable&lt;_Key,&#32;_Value,&#32;_Allocator,&#32;_ExtractKey,&#32;_Equal,
+762 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_H1,&#32;_H2,&#32;_Hash,&#32;_RehashPolicy,&#32;__chc,&#32;__cit,&#32;__uk&gt;::
+763 &#32;&#32;&#32;&#32;equal_range(<emphasis role="keyword">const</emphasis>&#32;key_type&amp;&#32;__k)
+764 &#32;&#32;&#32;&#32;{
+765 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;_Hashtable::_Hash_code_type&#32;__code&#32;=&#32;this-&gt;_M_hash_code(__k);
+766 &#32;&#32;&#32;&#32;&#32;&#32;std::size_t&#32;__n&#32;=&#32;this-&gt;_M_bucket_index(__k,&#32;__code,&#32;_M_bucket_count);
+767 &#32;&#32;&#32;&#32;&#32;&#32;_Node**&#32;__head&#32;=&#32;_M_buckets&#32;+&#32;__n;
+768 &#32;&#32;&#32;&#32;&#32;&#32;_Node*&#32;__p&#32;=&#32;_M_find_node(*__head,&#32;__k,&#32;__code);
+769 
+770 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__p)
+771 &#32;&#32;&#32;&#32;{
+772 &#32;&#32;&#32;&#32;&#32;&#32;_Node*&#32;__p1&#32;=&#32;__p-&gt;_M_next;
+773 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(;&#32;__p1;&#32;__p1&#32;=&#32;__p1-&gt;_M_next)
+774 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(!this-&gt;_M_compare(__k,&#32;__code,&#32;__p1))
+775 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">break</emphasis>;
+776 
+777 &#32;&#32;&#32;&#32;&#32;&#32;iterator&#32;__first(__p,&#32;__head);
+778 &#32;&#32;&#32;&#32;&#32;&#32;iterator&#32;__last(__p1,&#32;__head);
+779 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(!__p1)
+780 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__last._M_incr_bucket();
+781 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;std::make_pair(__first,&#32;__last);
+782 &#32;&#32;&#32;&#32;}
+783 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>
+784 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;std::make_pair(this-&gt;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a432111147038972f06e049e18a837002">end</link>(),&#32;this-&gt;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a432111147038972f06e049e18a837002">end</link>());
+785 &#32;&#32;&#32;&#32;}
+786 
+787 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Key,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Value,
+788 &#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;_Allocator,&#32;<emphasis role="keyword">typename</emphasis>&#32;_ExtractKey,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Equal,
+789 &#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;_H1,&#32;<emphasis role="keyword">typename</emphasis>&#32;_H2,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Hash,&#32;<emphasis role="keyword">typename</emphasis>&#32;_RehashPolicy,
+790 &#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">bool</emphasis>&#32;__chc,&#32;<emphasis role="keywordtype">bool</emphasis>&#32;__cit,&#32;<emphasis role="keywordtype">bool</emphasis>&#32;__uk&gt;
+791 &#32;&#32;&#32;&#32;std::pair&lt;<emphasis role="keyword">typename</emphasis>&#32;_Hashtable&lt;_Key,&#32;_Value,&#32;_Allocator,
+792 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_ExtractKey,&#32;_Equal,&#32;_H1,
+793 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_H2,&#32;_Hash,&#32;_RehashPolicy,
+794 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__chc,&#32;__cit,&#32;__uk&gt;::const_iterator,
+795 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;_Hashtable&lt;_Key,&#32;_Value,&#32;_Allocator,
+796 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_ExtractKey,&#32;_Equal,&#32;_H1,
+797 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_H2,&#32;_Hash,&#32;_RehashPolicy,
+798 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__chc,&#32;__cit,&#32;__uk&gt;::const_iterator&gt;
+799 &#32;&#32;&#32;&#32;_Hashtable&lt;_Key,&#32;_Value,&#32;_Allocator,&#32;_ExtractKey,&#32;_Equal,
+800 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_H1,&#32;_H2,&#32;_Hash,&#32;_RehashPolicy,&#32;__chc,&#32;__cit,&#32;__uk&gt;::
+801 &#32;&#32;&#32;&#32;equal_range(<emphasis role="keyword">const</emphasis>&#32;key_type&amp;&#32;__k)<emphasis role="keyword">&#32;const</emphasis>
+802 <emphasis role="keyword">&#32;&#32;&#32;&#32;</emphasis>{
+803 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;_Hashtable::_Hash_code_type&#32;__code&#32;=&#32;this-&gt;_M_hash_code(__k);
+804 &#32;&#32;&#32;&#32;&#32;&#32;std::size_t&#32;__n&#32;=&#32;this-&gt;_M_bucket_index(__k,&#32;__code,&#32;_M_bucket_count);
+805 &#32;&#32;&#32;&#32;&#32;&#32;_Node**&#32;__head&#32;=&#32;_M_buckets&#32;+&#32;__n;
+806 &#32;&#32;&#32;&#32;&#32;&#32;_Node*&#32;__p&#32;=&#32;_M_find_node(*__head,&#32;__k,&#32;__code);
+807 
+808 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__p)
+809 &#32;&#32;&#32;&#32;{
+810 &#32;&#32;&#32;&#32;&#32;&#32;_Node*&#32;__p1&#32;=&#32;__p-&gt;_M_next;
+811 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(;&#32;__p1;&#32;__p1&#32;=&#32;__p1-&gt;_M_next)
+812 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(!this-&gt;_M_compare(__k,&#32;__code,&#32;__p1))
+813 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">break</emphasis>;
+814 
+815 &#32;&#32;&#32;&#32;&#32;&#32;const_iterator&#32;__first(__p,&#32;__head);
+816 &#32;&#32;&#32;&#32;&#32;&#32;const_iterator&#32;__last(__p1,&#32;__head);
+817 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(!__p1)
+818 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__last._M_incr_bucket();
+819 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;std::make_pair(__first,&#32;__last);
+820 &#32;&#32;&#32;&#32;}
+821 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>
+822 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;std::make_pair(this-&gt;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a432111147038972f06e049e18a837002">end</link>(),&#32;this-&gt;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a432111147038972f06e049e18a837002">end</link>());
+823 &#32;&#32;&#32;&#32;}
+824 
+825 &#32;&#32;<emphasis role="comment">//&#32;Find&#32;the&#32;node&#32;whose&#32;key&#32;compares&#32;equal&#32;to&#32;k,&#32;beginning&#32;the&#32;search</emphasis>
+826 &#32;&#32;<emphasis role="comment">//&#32;at&#32;p&#32;(usually&#32;the&#32;head&#32;of&#32;a&#32;bucket).&#32;&#32;Return&#32;zero&#32;if&#32;no&#32;node&#32;is&#32;found.</emphasis>
+827 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Key,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Value,
+828 &#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;_Allocator,&#32;<emphasis role="keyword">typename</emphasis>&#32;_ExtractKey,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Equal,
+829 &#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;_H1,&#32;<emphasis role="keyword">typename</emphasis>&#32;_H2,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Hash,&#32;<emphasis role="keyword">typename</emphasis>&#32;_RehashPolicy,
+830 &#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">bool</emphasis>&#32;__chc,&#32;<emphasis role="keywordtype">bool</emphasis>&#32;__cit,&#32;<emphasis role="keywordtype">bool</emphasis>&#32;__uk&gt;
+831 &#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;_Hashtable&lt;_Key,&#32;_Value,&#32;_Allocator,&#32;_ExtractKey,
+832 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_Equal,&#32;_H1,&#32;_H2,&#32;_Hash,&#32;_RehashPolicy,
+833 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__chc,&#32;__cit,&#32;__uk&gt;::_Node*
+834 &#32;&#32;&#32;&#32;_Hashtable&lt;_Key,&#32;_Value,&#32;_Allocator,&#32;_ExtractKey,&#32;_Equal,
+835 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_H1,&#32;_H2,&#32;_Hash,&#32;_RehashPolicy,&#32;__chc,&#32;__cit,&#32;__uk&gt;::
+836 &#32;&#32;&#32;&#32;_M_find_node(_Node*&#32;__p,&#32;<emphasis role="keyword">const</emphasis>&#32;key_type&amp;&#32;__k,
+837 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;_Hashtable::_Hash_code_type&#32;__code)<emphasis role="keyword">&#32;const</emphasis>
+838 <emphasis role="keyword">&#32;&#32;&#32;&#32;</emphasis>{
+839 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(;&#32;__p;&#32;__p&#32;=&#32;__p-&gt;_M_next)
+840 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(this-&gt;_M_compare(__k,&#32;__code,&#32;__p))
+841 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__p;
+842 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;0;
+843 &#32;&#32;&#32;&#32;}
+844 
+845 &#32;&#32;<emphasis role="comment">//&#32;Insert&#32;v&#32;in&#32;bucket&#32;n&#32;(assumes&#32;no&#32;element&#32;with&#32;its&#32;key&#32;already&#32;present).</emphasis>
+846 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Key,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Value,
+847 &#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;_Allocator,&#32;<emphasis role="keyword">typename</emphasis>&#32;_ExtractKey,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Equal,
+848 &#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;_H1,&#32;<emphasis role="keyword">typename</emphasis>&#32;_H2,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Hash,&#32;<emphasis role="keyword">typename</emphasis>&#32;_RehashPolicy,
+849 &#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">bool</emphasis>&#32;__chc,&#32;<emphasis role="keywordtype">bool</emphasis>&#32;__cit,&#32;<emphasis role="keywordtype">bool</emphasis>&#32;__uk&gt;
+850 &#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;_Hashtable&lt;_Key,&#32;_Value,&#32;_Allocator,&#32;_ExtractKey,&#32;_Equal,
+851 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_H1,&#32;_H2,&#32;_Hash,&#32;_RehashPolicy,
+852 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__chc,&#32;__cit,&#32;__uk&gt;::iterator
+853 &#32;&#32;&#32;&#32;_Hashtable&lt;_Key,&#32;_Value,&#32;_Allocator,&#32;_ExtractKey,&#32;_Equal,
+854 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_H1,&#32;_H2,&#32;_Hash,&#32;_RehashPolicy,&#32;__chc,&#32;__cit,&#32;__uk&gt;::
+855 &#32;&#32;&#32;&#32;_M_insert_bucket(<emphasis role="keyword">const</emphasis>&#32;value_type&amp;&#32;__v,&#32;size_type&#32;__n,
+856 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;_Hashtable::_Hash_code_type&#32;__code)
+857 &#32;&#32;&#32;&#32;{
+858 &#32;&#32;&#32;&#32;&#32;&#32;std::pair&lt;bool,&#32;std::size_t&gt;&#32;__do_rehash
+859 &#32;&#32;&#32;&#32;=&#32;_M_rehash_policy._M_need_rehash(_M_bucket_count,
+860 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_M_element_count,&#32;1);
+861 
+862 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Allocate&#32;the&#32;new&#32;node&#32;before&#32;doing&#32;the&#32;rehash&#32;so&#32;that&#32;we&#32;don&apos;t</emphasis>
+863 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;do&#32;a&#32;rehash&#32;if&#32;the&#32;allocation&#32;throws.</emphasis>
+864 &#32;&#32;&#32;&#32;&#32;&#32;_Node*&#32;__new_node&#32;=&#32;_M_allocate_node(__v);
+865 
+866 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2bits_2exception__defines_8h_1a130bf0cd31a0783cd03563f46b46915b">__try</link>
+867 &#32;&#32;&#32;&#32;{
+868 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__do_rehash.first)
+869 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+870 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;key_type&amp;&#32;__k&#32;=&#32;this-&gt;_M_extract(__v);
+871 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__n&#32;=&#32;this-&gt;_M_bucket_index(__k,&#32;__code,&#32;__do_rehash.second);
+872 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_M_rehash(__do_rehash.second);
+873 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+874 
+875 &#32;&#32;&#32;&#32;&#32;&#32;__new_node-&gt;_M_next&#32;=&#32;_M_buckets[__n];
+876 &#32;&#32;&#32;&#32;&#32;&#32;this-&gt;_M_store_code(__new_node,&#32;__code);
+877 &#32;&#32;&#32;&#32;&#32;&#32;_M_buckets[__n]&#32;=&#32;__new_node;
+878 &#32;&#32;&#32;&#32;&#32;&#32;++_M_element_count;
+879 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;iterator(__new_node,&#32;_M_buckets&#32;+&#32;__n);
+880 &#32;&#32;&#32;&#32;}
+881 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2bits_2exception__defines_8h_1a9e51d2f324c18a996a3e4f9a6ba0f6c2">__catch</link>(...)
+882 &#32;&#32;&#32;&#32;{
+883 &#32;&#32;&#32;&#32;&#32;&#32;_M_deallocate_node(__new_node);
+884 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2bits_2exception__defines_8h_1a92ef03a5310b10a4243a6ec8f43494b5">__throw_exception_again</link>;
+885 &#32;&#32;&#32;&#32;}
+886 &#32;&#32;&#32;&#32;}
+887 
+888 &#32;&#32;<emphasis role="comment">//&#32;Insert&#32;v&#32;if&#32;no&#32;element&#32;with&#32;its&#32;key&#32;is&#32;already&#32;present.</emphasis>
+889 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Key,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Value,
+890 &#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;_Allocator,&#32;<emphasis role="keyword">typename</emphasis>&#32;_ExtractKey,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Equal,
+891 &#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;_H1,&#32;<emphasis role="keyword">typename</emphasis>&#32;_H2,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Hash,&#32;<emphasis role="keyword">typename</emphasis>&#32;_RehashPolicy,
+892 &#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">bool</emphasis>&#32;__chc,&#32;<emphasis role="keywordtype">bool</emphasis>&#32;__cit,&#32;<emphasis role="keywordtype">bool</emphasis>&#32;__uk&gt;
+893 &#32;&#32;&#32;&#32;std::pair&lt;<emphasis role="keyword">typename</emphasis>&#32;_Hashtable&lt;_Key,&#32;_Value,&#32;_Allocator,
+894 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_ExtractKey,&#32;_Equal,&#32;_H1,
+895 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_H2,&#32;_Hash,&#32;_RehashPolicy,
+896 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__chc,&#32;__cit,&#32;__uk&gt;::iterator,&#32;<emphasis role="keywordtype">bool</emphasis>&gt;
+897 &#32;&#32;&#32;&#32;_Hashtable&lt;_Key,&#32;_Value,&#32;_Allocator,&#32;_ExtractKey,&#32;_Equal,
+898 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_H1,&#32;_H2,&#32;_Hash,&#32;_RehashPolicy,&#32;__chc,&#32;__cit,&#32;__uk&gt;::
+899 &#32;&#32;_M_insert(<emphasis role="keyword">const</emphasis>&#32;value_type&amp;&#32;__v,&#32;std::tr1::true_type)
+900 &#32;&#32;&#32;&#32;{
+901 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;key_type&amp;&#32;__k&#32;=&#32;this-&gt;_M_extract(__v);
+902 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;_Hashtable::_Hash_code_type&#32;__code&#32;=&#32;this-&gt;_M_hash_code(__k);
+903 &#32;&#32;&#32;&#32;&#32;&#32;size_type&#32;__n&#32;=&#32;this-&gt;_M_bucket_index(__k,&#32;__code,&#32;_M_bucket_count);
+904 
+905 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(_Node*&#32;__p&#32;=&#32;_M_find_node(_M_buckets[__n],&#32;__k,&#32;__code))
+906 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;std::make_pair(iterator(__p,&#32;_M_buckets&#32;+&#32;__n),&#32;<emphasis role="keyword">false</emphasis>);
+907 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;std::make_pair(_M_insert_bucket(__v,&#32;__n,&#32;__code),&#32;<emphasis role="keyword">true</emphasis>);
+908 &#32;&#32;&#32;&#32;}
+909 
+910 &#32;&#32;<emphasis role="comment">//&#32;Insert&#32;v&#32;unconditionally.</emphasis>
+911 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Key,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Value,
+912 &#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;_Allocator,&#32;<emphasis role="keyword">typename</emphasis>&#32;_ExtractKey,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Equal,
+913 &#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;_H1,&#32;<emphasis role="keyword">typename</emphasis>&#32;_H2,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Hash,&#32;<emphasis role="keyword">typename</emphasis>&#32;_RehashPolicy,
+914 &#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">bool</emphasis>&#32;__chc,&#32;<emphasis role="keywordtype">bool</emphasis>&#32;__cit,&#32;<emphasis role="keywordtype">bool</emphasis>&#32;__uk&gt;
+915 &#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;_Hashtable&lt;_Key,&#32;_Value,&#32;_Allocator,&#32;_ExtractKey,&#32;_Equal,
+916 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_H1,&#32;_H2,&#32;_Hash,&#32;_RehashPolicy,
+917 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__chc,&#32;__cit,&#32;__uk&gt;::iterator
+918 &#32;&#32;&#32;&#32;_Hashtable&lt;_Key,&#32;_Value,&#32;_Allocator,&#32;_ExtractKey,&#32;_Equal,
+919 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_H1,&#32;_H2,&#32;_Hash,&#32;_RehashPolicy,&#32;__chc,&#32;__cit,&#32;__uk&gt;::
+920 &#32;&#32;&#32;&#32;_M_insert(<emphasis role="keyword">const</emphasis>&#32;value_type&amp;&#32;__v,&#32;std::tr1::false_type)
+921 &#32;&#32;&#32;&#32;{
+922 &#32;&#32;&#32;&#32;&#32;&#32;std::pair&lt;bool,&#32;std::size_t&gt;&#32;__do_rehash
+923 &#32;&#32;&#32;&#32;=&#32;_M_rehash_policy._M_need_rehash(_M_bucket_count,
+924 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_M_element_count,&#32;1);
+925 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__do_rehash.first)
+926 &#32;&#32;&#32;&#32;_M_rehash(__do_rehash.second);
+927 
+928 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;key_type&amp;&#32;__k&#32;=&#32;this-&gt;_M_extract(__v);
+929 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;_Hashtable::_Hash_code_type&#32;__code&#32;=&#32;this-&gt;_M_hash_code(__k);
+930 &#32;&#32;&#32;&#32;&#32;&#32;size_type&#32;__n&#32;=&#32;this-&gt;_M_bucket_index(__k,&#32;__code,&#32;_M_bucket_count);
+931 
+932 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;First&#32;find&#32;the&#32;node,&#32;avoid&#32;leaking&#32;new_node&#32;if&#32;compare&#32;throws.</emphasis>
+933 &#32;&#32;&#32;&#32;&#32;&#32;_Node*&#32;__prev&#32;=&#32;_M_find_node(_M_buckets[__n],&#32;__k,&#32;__code);
+934 &#32;&#32;&#32;&#32;&#32;&#32;_Node*&#32;__new_node&#32;=&#32;_M_allocate_node(__v);
+935 
+936 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__prev)
+937 &#32;&#32;&#32;&#32;{
+938 &#32;&#32;&#32;&#32;&#32;&#32;__new_node-&gt;_M_next&#32;=&#32;__prev-&gt;_M_next;
+939 &#32;&#32;&#32;&#32;&#32;&#32;__prev-&gt;_M_next&#32;=&#32;__new_node;
+940 &#32;&#32;&#32;&#32;}
+941 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>
+942 &#32;&#32;&#32;&#32;{
+943 &#32;&#32;&#32;&#32;&#32;&#32;__new_node-&gt;_M_next&#32;=&#32;_M_buckets[__n];
+944 &#32;&#32;&#32;&#32;&#32;&#32;_M_buckets[__n]&#32;=&#32;__new_node;
+945 &#32;&#32;&#32;&#32;}
+946 &#32;&#32;&#32;&#32;&#32;&#32;this-&gt;_M_store_code(__new_node,&#32;__code);
+947 
+948 &#32;&#32;&#32;&#32;&#32;&#32;++_M_element_count;
+949 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;iterator(__new_node,&#32;_M_buckets&#32;+&#32;__n);
+950 &#32;&#32;&#32;&#32;}
+951 
+952 &#32;&#32;<emphasis role="comment">//&#32;For&#32;erase(iterator)&#32;and&#32;erase(const_iterator).</emphasis>
+953 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Key,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Value,
+954 &#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;_Allocator,&#32;<emphasis role="keyword">typename</emphasis>&#32;_ExtractKey,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Equal,
+955 &#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;_H1,&#32;<emphasis role="keyword">typename</emphasis>&#32;_H2,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Hash,&#32;<emphasis role="keyword">typename</emphasis>&#32;_RehashPolicy,
+956 &#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">bool</emphasis>&#32;__chc,&#32;<emphasis role="keywordtype">bool</emphasis>&#32;__cit,&#32;<emphasis role="keywordtype">bool</emphasis>&#32;__uk&gt;
+957 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+958 &#32;&#32;&#32;&#32;_Hashtable&lt;_Key,&#32;_Value,&#32;_Allocator,&#32;_ExtractKey,&#32;_Equal,
+959 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_H1,&#32;_H2,&#32;_Hash,&#32;_RehashPolicy,&#32;__chc,&#32;__cit,&#32;__uk&gt;::
+960 &#32;&#32;&#32;&#32;_M_erase_node(_Node*&#32;__p,&#32;_Node**&#32;__b)
+961 &#32;&#32;&#32;&#32;{
+962 &#32;&#32;&#32;&#32;&#32;&#32;_Node*&#32;__cur&#32;=&#32;*__b;
+963 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__cur&#32;==&#32;__p)
+964 &#32;&#32;&#32;&#32;*__b&#32;=&#32;__cur-&gt;_M_next;
+965 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>
+966 &#32;&#32;&#32;&#32;{
+967 &#32;&#32;&#32;&#32;&#32;&#32;_Node*&#32;__next&#32;=&#32;__cur-&gt;_M_next;
+968 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">while</emphasis>&#32;(__next&#32;!=&#32;__p)
+969 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+970 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__cur&#32;=&#32;__next;
+971 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__next&#32;=&#32;__cur-&gt;_M_next;
+972 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+973 &#32;&#32;&#32;&#32;&#32;&#32;__cur-&gt;_M_next&#32;=&#32;__next-&gt;_M_next;
+974 &#32;&#32;&#32;&#32;}
+975 
+976 &#32;&#32;&#32;&#32;&#32;&#32;_M_deallocate_node(__p);
+977 &#32;&#32;&#32;&#32;&#32;&#32;--_M_element_count;
+978 &#32;&#32;&#32;&#32;}
+979 
+980 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Key,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Value,
+981 &#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;_Allocator,&#32;<emphasis role="keyword">typename</emphasis>&#32;_ExtractKey,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Equal,
+982 &#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;_H1,&#32;<emphasis role="keyword">typename</emphasis>&#32;_H2,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Hash,&#32;<emphasis role="keyword">typename</emphasis>&#32;_RehashPolicy,
+983 &#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">bool</emphasis>&#32;__chc,&#32;<emphasis role="keywordtype">bool</emphasis>&#32;__cit,&#32;<emphasis role="keywordtype">bool</emphasis>&#32;__uk&gt;
+984 &#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_InputIterator&gt;
+985 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+986 &#32;&#32;&#32;&#32;&#32;&#32;_Hashtable&lt;_Key,&#32;_Value,&#32;_Allocator,&#32;_ExtractKey,&#32;_Equal,
+987 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_H1,&#32;_H2,&#32;_Hash,&#32;_RehashPolicy,&#32;__chc,&#32;__cit,&#32;__uk&gt;::
+988 &#32;&#32;&#32;&#32;&#32;&#32;insert(_InputIterator&#32;__first,&#32;_InputIterator&#32;__last)
+989 &#32;&#32;&#32;&#32;&#32;&#32;{
+990 &#32;&#32;&#32;&#32;size_type&#32;__n_elt&#32;=&#32;__detail::__distance_fw(__first,&#32;__last);
+991 &#32;&#32;&#32;&#32;std::pair&lt;bool,&#32;std::size_t&gt;&#32;__do_rehash
+992 &#32;&#32;&#32;&#32;&#32;&#32;=&#32;_M_rehash_policy._M_need_rehash(_M_bucket_count,
+993 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_M_element_count,&#32;__n_elt);
+994 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__do_rehash.first)
+995 &#32;&#32;&#32;&#32;&#32;&#32;_M_rehash(__do_rehash.second);
+996 
+997 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(;&#32;__first&#32;!=&#32;__last;&#32;++__first)
+998 &#32;&#32;&#32;&#32;&#32;&#32;this-&gt;insert(*__first);
+999 &#32;&#32;&#32;&#32;&#32;&#32;}
+1000 
+1001 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Key,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Value,
+1002 &#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;_Allocator,&#32;<emphasis role="keyword">typename</emphasis>&#32;_ExtractKey,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Equal,
+1003 &#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;_H1,&#32;<emphasis role="keyword">typename</emphasis>&#32;_H2,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Hash,&#32;<emphasis role="keyword">typename</emphasis>&#32;_RehashPolicy,
+1004 &#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">bool</emphasis>&#32;__chc,&#32;<emphasis role="keywordtype">bool</emphasis>&#32;__cit,&#32;<emphasis role="keywordtype">bool</emphasis>&#32;__uk&gt;
+1005 &#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;_Hashtable&lt;_Key,&#32;_Value,&#32;_Allocator,&#32;_ExtractKey,&#32;_Equal,
+1006 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_H1,&#32;_H2,&#32;_Hash,&#32;_RehashPolicy,
+1007 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__chc,&#32;__cit,&#32;__uk&gt;::iterator
+1008 &#32;&#32;&#32;&#32;_Hashtable&lt;_Key,&#32;_Value,&#32;_Allocator,&#32;_ExtractKey,&#32;_Equal,
+1009 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_H1,&#32;_H2,&#32;_Hash,&#32;_RehashPolicy,&#32;__chc,&#32;__cit,&#32;__uk&gt;::
+1010 &#32;&#32;&#32;&#32;erase(iterator&#32;__it)
+1011 &#32;&#32;&#32;&#32;{
+1012 &#32;&#32;&#32;&#32;&#32;&#32;iterator&#32;__result&#32;=&#32;__it;
+1013 &#32;&#32;&#32;&#32;&#32;&#32;++__result;
+1014 &#32;&#32;&#32;&#32;&#32;&#32;_M_erase_node(__it._M_cur_node,&#32;__it._M_cur_bucket);
+1015 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__result;
+1016 &#32;&#32;&#32;&#32;}
+1017 
+1018 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Key,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Value,
+1019 &#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;_Allocator,&#32;<emphasis role="keyword">typename</emphasis>&#32;_ExtractKey,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Equal,
+1020 &#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;_H1,&#32;<emphasis role="keyword">typename</emphasis>&#32;_H2,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Hash,&#32;<emphasis role="keyword">typename</emphasis>&#32;_RehashPolicy,
+1021 &#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">bool</emphasis>&#32;__chc,&#32;<emphasis role="keywordtype">bool</emphasis>&#32;__cit,&#32;<emphasis role="keywordtype">bool</emphasis>&#32;__uk&gt;
+1022 &#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;_Hashtable&lt;_Key,&#32;_Value,&#32;_Allocator,&#32;_ExtractKey,&#32;_Equal,
+1023 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_H1,&#32;_H2,&#32;_Hash,&#32;_RehashPolicy,
+1024 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__chc,&#32;__cit,&#32;__uk&gt;::const_iterator
+1025 &#32;&#32;&#32;&#32;_Hashtable&lt;_Key,&#32;_Value,&#32;_Allocator,&#32;_ExtractKey,&#32;_Equal,
+1026 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_H1,&#32;_H2,&#32;_Hash,&#32;_RehashPolicy,&#32;__chc,&#32;__cit,&#32;__uk&gt;::
+1027 &#32;&#32;&#32;&#32;erase(const_iterator&#32;__it)
+1028 &#32;&#32;&#32;&#32;{
+1029 &#32;&#32;&#32;&#32;&#32;&#32;const_iterator&#32;__result&#32;=&#32;__it;
+1030 &#32;&#32;&#32;&#32;&#32;&#32;++__result;
+1031 &#32;&#32;&#32;&#32;&#32;&#32;_M_erase_node(__it._M_cur_node,&#32;__it._M_cur_bucket);
+1032 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__result;
+1033 &#32;&#32;&#32;&#32;}
+1034 
+1035 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Key,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Value,
+1036 &#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;_Allocator,&#32;<emphasis role="keyword">typename</emphasis>&#32;_ExtractKey,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Equal,
+1037 &#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;_H1,&#32;<emphasis role="keyword">typename</emphasis>&#32;_H2,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Hash,&#32;<emphasis role="keyword">typename</emphasis>&#32;_RehashPolicy,
+1038 &#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">bool</emphasis>&#32;__chc,&#32;<emphasis role="keywordtype">bool</emphasis>&#32;__cit,&#32;<emphasis role="keywordtype">bool</emphasis>&#32;__uk&gt;
+1039 &#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;_Hashtable&lt;_Key,&#32;_Value,&#32;_Allocator,&#32;_ExtractKey,&#32;_Equal,
+1040 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_H1,&#32;_H2,&#32;_Hash,&#32;_RehashPolicy,
+1041 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__chc,&#32;__cit,&#32;__uk&gt;::size_type
+1042 &#32;&#32;&#32;&#32;_Hashtable&lt;_Key,&#32;_Value,&#32;_Allocator,&#32;_ExtractKey,&#32;_Equal,
+1043 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_H1,&#32;_H2,&#32;_Hash,&#32;_RehashPolicy,&#32;__chc,&#32;__cit,&#32;__uk&gt;::
+1044 &#32;&#32;&#32;&#32;erase(<emphasis role="keyword">const</emphasis>&#32;key_type&amp;&#32;__k)
+1045 &#32;&#32;&#32;&#32;{
+1046 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;_Hashtable::_Hash_code_type&#32;__code&#32;=&#32;this-&gt;_M_hash_code(__k);
+1047 &#32;&#32;&#32;&#32;&#32;&#32;std::size_t&#32;__n&#32;=&#32;this-&gt;_M_bucket_index(__k,&#32;__code,&#32;_M_bucket_count);
+1048 &#32;&#32;&#32;&#32;&#32;&#32;size_type&#32;__result&#32;=&#32;0;
+1049 
+1050 &#32;&#32;&#32;&#32;&#32;&#32;_Node**&#32;__slot&#32;=&#32;_M_buckets&#32;+&#32;__n;
+1051 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">while</emphasis>&#32;(*__slot&#32;&amp;&amp;&#32;!this-&gt;_M_compare(__k,&#32;__code,&#32;*__slot))
+1052 &#32;&#32;&#32;&#32;__slot&#32;=&#32;&amp;((*__slot)-&gt;_M_next);
+1053 
+1054 &#32;&#32;&#32;&#32;&#32;&#32;_Node**&#32;__saved_slot&#32;=&#32;0;
+1055 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">while</emphasis>&#32;(*__slot&#32;&amp;&amp;&#32;this-&gt;_M_compare(__k,&#32;__code,&#32;*__slot))
+1056 &#32;&#32;&#32;&#32;{
+1057 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;_GLIBCXX_RESOLVE_LIB_DEFECTS</emphasis>
+1058 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;526.&#32;Is&#32;it&#32;undefined&#32;if&#32;a&#32;function&#32;in&#32;the&#32;standard&#32;changes</emphasis>
+1059 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;in&#32;parameters?</emphasis>
+1060 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(&amp;this-&gt;_M_extract((*__slot)-&gt;_M_v)&#32;!=&#32;&amp;__k)
+1061 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+1062 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_Node*&#32;__p&#32;=&#32;*__slot;
+1063 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;*__slot&#32;=&#32;__p-&gt;_M_next;
+1064 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_M_deallocate_node(__p);
+1065 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;--_M_element_count;
+1066 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;++__result;
+1067 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+1068 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>
+1069 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+1070 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__saved_slot&#32;=&#32;__slot;
+1071 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__slot&#32;=&#32;&amp;((*__slot)-&gt;_M_next);
+1072 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+1073 &#32;&#32;&#32;&#32;}
+1074 
+1075 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__saved_slot)
+1076 &#32;&#32;&#32;&#32;{
+1077 &#32;&#32;&#32;&#32;&#32;&#32;_Node*&#32;__p&#32;=&#32;*__saved_slot;
+1078 &#32;&#32;&#32;&#32;&#32;&#32;*__saved_slot&#32;=&#32;__p-&gt;_M_next;
+1079 &#32;&#32;&#32;&#32;&#32;&#32;_M_deallocate_node(__p);
+1080 &#32;&#32;&#32;&#32;&#32;&#32;--_M_element_count;
+1081 &#32;&#32;&#32;&#32;&#32;&#32;++__result;
+1082 &#32;&#32;&#32;&#32;}
+1083 
+1084 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__result;
+1085 &#32;&#32;&#32;&#32;}
+1086 
+1087 &#32;&#32;<emphasis role="comment">//&#32;???&#32;This&#32;could&#32;be&#32;optimized&#32;by&#32;taking&#32;advantage&#32;of&#32;the&#32;bucket</emphasis>
+1088 &#32;&#32;<emphasis role="comment">//&#32;structure,&#32;but&#32;it&apos;s&#32;not&#32;clear&#32;that&#32;it&apos;s&#32;worth&#32;doing.&#32;&#32;It&#32;probably</emphasis>
+1089 &#32;&#32;<emphasis role="comment">//&#32;wouldn&apos;t&#32;even&#32;be&#32;an&#32;optimization&#32;unless&#32;the&#32;load&#32;factor&#32;is&#32;large.</emphasis>
+1090 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Key,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Value,
+1091 &#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;_Allocator,&#32;<emphasis role="keyword">typename</emphasis>&#32;_ExtractKey,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Equal,
+1092 &#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;_H1,&#32;<emphasis role="keyword">typename</emphasis>&#32;_H2,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Hash,&#32;<emphasis role="keyword">typename</emphasis>&#32;_RehashPolicy,
+1093 &#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">bool</emphasis>&#32;__chc,&#32;<emphasis role="keywordtype">bool</emphasis>&#32;__cit,&#32;<emphasis role="keywordtype">bool</emphasis>&#32;__uk&gt;
+1094 &#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;_Hashtable&lt;_Key,&#32;_Value,&#32;_Allocator,&#32;_ExtractKey,&#32;_Equal,
+1095 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_H1,&#32;_H2,&#32;_Hash,&#32;_RehashPolicy,
+1096 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__chc,&#32;__cit,&#32;__uk&gt;::iterator
+1097 &#32;&#32;&#32;&#32;_Hashtable&lt;_Key,&#32;_Value,&#32;_Allocator,&#32;_ExtractKey,&#32;_Equal,
+1098 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_H1,&#32;_H2,&#32;_Hash,&#32;_RehashPolicy,&#32;__chc,&#32;__cit,&#32;__uk&gt;::
+1099 &#32;&#32;&#32;&#32;erase(iterator&#32;__first,&#32;iterator&#32;__last)
+1100 &#32;&#32;&#32;&#32;{
+1101 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">while</emphasis>&#32;(__first&#32;!=&#32;__last)
+1102 &#32;&#32;&#32;&#32;__first&#32;=&#32;this-&gt;erase(__first);
+1103 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__last;
+1104 &#32;&#32;&#32;&#32;}
+1105 
+1106 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Key,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Value,
+1107 &#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;_Allocator,&#32;<emphasis role="keyword">typename</emphasis>&#32;_ExtractKey,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Equal,
+1108 &#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;_H1,&#32;<emphasis role="keyword">typename</emphasis>&#32;_H2,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Hash,&#32;<emphasis role="keyword">typename</emphasis>&#32;_RehashPolicy,
+1109 &#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">bool</emphasis>&#32;__chc,&#32;<emphasis role="keywordtype">bool</emphasis>&#32;__cit,&#32;<emphasis role="keywordtype">bool</emphasis>&#32;__uk&gt;
+1110 &#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;_Hashtable&lt;_Key,&#32;_Value,&#32;_Allocator,&#32;_ExtractKey,&#32;_Equal,
+1111 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_H1,&#32;_H2,&#32;_Hash,&#32;_RehashPolicy,
+1112 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__chc,&#32;__cit,&#32;__uk&gt;::const_iterator
+1113 &#32;&#32;&#32;&#32;_Hashtable&lt;_Key,&#32;_Value,&#32;_Allocator,&#32;_ExtractKey,&#32;_Equal,
+1114 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_H1,&#32;_H2,&#32;_Hash,&#32;_RehashPolicy,&#32;__chc,&#32;__cit,&#32;__uk&gt;::
+1115 &#32;&#32;&#32;&#32;erase(const_iterator&#32;__first,&#32;const_iterator&#32;__last)
+1116 &#32;&#32;&#32;&#32;{
+1117 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">while</emphasis>&#32;(__first&#32;!=&#32;__last)
+1118 &#32;&#32;&#32;&#32;__first&#32;=&#32;this-&gt;erase(__first);
+1119 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__last;
+1120 &#32;&#32;&#32;&#32;}
+1121 
+1122 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Key,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Value,
+1123 &#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;_Allocator,&#32;<emphasis role="keyword">typename</emphasis>&#32;_ExtractKey,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Equal,
+1124 &#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;_H1,&#32;<emphasis role="keyword">typename</emphasis>&#32;_H2,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Hash,&#32;<emphasis role="keyword">typename</emphasis>&#32;_RehashPolicy,
+1125 &#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">bool</emphasis>&#32;__chc,&#32;<emphasis role="keywordtype">bool</emphasis>&#32;__cit,&#32;<emphasis role="keywordtype">bool</emphasis>&#32;__uk&gt;
+1126 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+1127 &#32;&#32;&#32;&#32;_Hashtable&lt;_Key,&#32;_Value,&#32;_Allocator,&#32;_ExtractKey,&#32;_Equal,
+1128 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_H1,&#32;_H2,&#32;_Hash,&#32;_RehashPolicy,&#32;__chc,&#32;__cit,&#32;__uk&gt;::
+1129 &#32;&#32;&#32;&#32;clear()
+1130 &#32;&#32;&#32;&#32;{
+1131 &#32;&#32;&#32;&#32;&#32;&#32;_M_deallocate_nodes(_M_buckets,&#32;_M_bucket_count);
+1132 &#32;&#32;&#32;&#32;&#32;&#32;_M_element_count&#32;=&#32;0;
+1133 &#32;&#32;&#32;&#32;}
+1134 
+1135 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Key,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Value,
+1136 &#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;_Allocator,&#32;<emphasis role="keyword">typename</emphasis>&#32;_ExtractKey,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Equal,
+1137 &#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;_H1,&#32;<emphasis role="keyword">typename</emphasis>&#32;_H2,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Hash,&#32;<emphasis role="keyword">typename</emphasis>&#32;_RehashPolicy,
+1138 &#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">bool</emphasis>&#32;__chc,&#32;<emphasis role="keywordtype">bool</emphasis>&#32;__cit,&#32;<emphasis role="keywordtype">bool</emphasis>&#32;__uk&gt;
+1139 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+1140 &#32;&#32;&#32;&#32;_Hashtable&lt;_Key,&#32;_Value,&#32;_Allocator,&#32;_ExtractKey,&#32;_Equal,
+1141 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_H1,&#32;_H2,&#32;_Hash,&#32;_RehashPolicy,&#32;__chc,&#32;__cit,&#32;__uk&gt;::
+1142 &#32;&#32;&#32;&#32;rehash(size_type&#32;__n)
+1143 &#32;&#32;&#32;&#32;{
+1144 &#32;&#32;&#32;&#32;&#32;&#32;_M_rehash(std::max(_M_rehash_policy._M_next_bkt(__n),
+1145 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_M_rehash_policy._M_bkt_for_elements(_M_element_count
+1146 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;+&#32;1)));
+1147 &#32;&#32;&#32;&#32;}
+1148 
+1149 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Key,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Value,
+1150 &#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;_Allocator,&#32;<emphasis role="keyword">typename</emphasis>&#32;_ExtractKey,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Equal,
+1151 &#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;_H1,&#32;<emphasis role="keyword">typename</emphasis>&#32;_H2,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Hash,&#32;<emphasis role="keyword">typename</emphasis>&#32;_RehashPolicy,
+1152 &#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">bool</emphasis>&#32;__chc,&#32;<emphasis role="keywordtype">bool</emphasis>&#32;__cit,&#32;<emphasis role="keywordtype">bool</emphasis>&#32;__uk&gt;
+1153 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+1154 &#32;&#32;&#32;&#32;_Hashtable&lt;_Key,&#32;_Value,&#32;_Allocator,&#32;_ExtractKey,&#32;_Equal,
+1155 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_H1,&#32;_H2,&#32;_Hash,&#32;_RehashPolicy,&#32;__chc,&#32;__cit,&#32;__uk&gt;::
+1156 &#32;&#32;&#32;&#32;_M_rehash(size_type&#32;__n)
+1157 &#32;&#32;&#32;&#32;{
+1158 &#32;&#32;&#32;&#32;&#32;&#32;_Node**&#32;__new_array&#32;=&#32;_M_allocate_buckets(__n);
+1159 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2bits_2exception__defines_8h_1a130bf0cd31a0783cd03563f46b46915b">__try</link>
+1160 &#32;&#32;&#32;&#32;{
+1161 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(size_type&#32;__i&#32;=&#32;0;&#32;__i&#32;&lt;&#32;_M_bucket_count;&#32;++__i)
+1162 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">while</emphasis>&#32;(_Node*&#32;__p&#32;=&#32;_M_buckets[__i])
+1163 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+1164 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;std::size_t&#32;__new_index&#32;=&#32;this-&gt;_M_bucket_index(__p,&#32;__n);
+1165 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_M_buckets[__i]&#32;=&#32;__p-&gt;_M_next;
+1166 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__p-&gt;_M_next&#32;=&#32;__new_array[__new_index];
+1167 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__new_array[__new_index]&#32;=&#32;__p;
+1168 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+1169 &#32;&#32;&#32;&#32;&#32;&#32;_M_deallocate_buckets(_M_buckets,&#32;_M_bucket_count);
+1170 &#32;&#32;&#32;&#32;&#32;&#32;_M_bucket_count&#32;=&#32;__n;
+1171 &#32;&#32;&#32;&#32;&#32;&#32;_M_buckets&#32;=&#32;__new_array;
+1172 &#32;&#32;&#32;&#32;}
+1173 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2bits_2exception__defines_8h_1a9e51d2f324c18a996a3e4f9a6ba0f6c2">__catch</link>(...)
+1174 &#32;&#32;&#32;&#32;{
+1175 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;A&#32;failure&#32;here&#32;means&#32;that&#32;a&#32;hash&#32;function&#32;threw&#32;an&#32;exception.</emphasis>
+1176 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;We&#32;can&apos;t&#32;restore&#32;the&#32;previous&#32;state&#32;without&#32;calling&#32;the&#32;hash</emphasis>
+1177 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;function&#32;again,&#32;so&#32;the&#32;only&#32;sensible&#32;recovery&#32;is&#32;to&#32;delete</emphasis>
+1178 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;everything.</emphasis>
+1179 &#32;&#32;&#32;&#32;&#32;&#32;_M_deallocate_nodes(__new_array,&#32;__n);
+1180 &#32;&#32;&#32;&#32;&#32;&#32;_M_deallocate_buckets(__new_array,&#32;__n);
+1181 &#32;&#32;&#32;&#32;&#32;&#32;_M_deallocate_nodes(_M_buckets,&#32;_M_bucket_count);
+1182 &#32;&#32;&#32;&#32;&#32;&#32;_M_element_count&#32;=&#32;0;
+1183 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2bits_2exception__defines_8h_1a92ef03a5310b10a4243a6ec8f43494b5">__throw_exception_again</link>;
+1184 &#32;&#32;&#32;&#32;}
+1185 &#32;&#32;&#32;&#32;}
+1186 }&#32;<emphasis role="comment">//&#32;namespace&#32;tr1</emphasis>
+1187 
+1188 _GLIBCXX_END_NAMESPACE_VERSION
+1189 }&#32;<emphasis role="comment">//&#32;namespace&#32;std</emphasis>
+1190 
+1191 <emphasis role="preprocessor">#endif&#32;</emphasis><emphasis role="comment">//&#32;_GLIBCXX_TR1_HASHTABLE_H</emphasis>
+</programlisting></section>

@@ -1,0 +1,161 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<section xmlns="http://docbook.org/ns/docbook" version="5.0" xmlns:xlink="http://www.w3.org/1999/xlink" xml:id="__old_2_classes_2lib_2include_2c_09_09_2experimental_2bits_2simd__ppc_8h_source" xml:lang="en-US">
+<title>simd_ppc.h</title>
+<indexterm><primary>C:/Users/HP/Documents/GitHub/Minero-Game/Old/Classes/lib/include/c++/experimental/bits/simd_ppc.h</primary></indexterm>
+Go to the documentation of this file.<programlisting linenumbering="unnumbered">1 <emphasis role="comment">//&#32;Simd&#32;PowerPC&#32;specific&#32;implementations&#32;-*-&#32;C++&#32;-*-</emphasis>
+2 
+3 <emphasis role="comment">//&#32;Copyright&#32;(C)&#32;2020-2022&#32;Free&#32;Software&#32;Foundation,&#32;Inc.</emphasis>
+4 <emphasis role="comment">//</emphasis>
+5 <emphasis role="comment">//&#32;This&#32;file&#32;is&#32;part&#32;of&#32;the&#32;GNU&#32;ISO&#32;C++&#32;Library.&#32;&#32;This&#32;library&#32;is&#32;free</emphasis>
+6 <emphasis role="comment">//&#32;software;&#32;you&#32;can&#32;redistribute&#32;it&#32;and/or&#32;modify&#32;it&#32;under&#32;the</emphasis>
+7 <emphasis role="comment">//&#32;terms&#32;of&#32;the&#32;GNU&#32;General&#32;Public&#32;License&#32;as&#32;published&#32;by&#32;the</emphasis>
+8 <emphasis role="comment">//&#32;Free&#32;Software&#32;Foundation;&#32;either&#32;version&#32;3,&#32;or&#32;(at&#32;your&#32;option)</emphasis>
+9 <emphasis role="comment">//&#32;any&#32;later&#32;version.</emphasis>
+10 
+11 <emphasis role="comment">//&#32;This&#32;library&#32;is&#32;distributed&#32;in&#32;the&#32;hope&#32;that&#32;it&#32;will&#32;be&#32;useful,</emphasis>
+12 <emphasis role="comment">//&#32;but&#32;WITHOUT&#32;ANY&#32;WARRANTY;&#32;without&#32;even&#32;the&#32;implied&#32;warranty&#32;of</emphasis>
+13 <emphasis role="comment">//&#32;MERCHANTABILITY&#32;or&#32;FITNESS&#32;FOR&#32;A&#32;PARTICULAR&#32;PURPOSE.&#32;&#32;See&#32;the</emphasis>
+14 <emphasis role="comment">//&#32;GNU&#32;General&#32;Public&#32;License&#32;for&#32;more&#32;details.</emphasis>
+15 
+16 <emphasis role="comment">//&#32;Under&#32;Section&#32;7&#32;of&#32;GPL&#32;version&#32;3,&#32;you&#32;are&#32;granted&#32;additional</emphasis>
+17 <emphasis role="comment">//&#32;permissions&#32;described&#32;in&#32;the&#32;GCC&#32;Runtime&#32;Library&#32;Exception,&#32;version</emphasis>
+18 <emphasis role="comment">//&#32;3.1,&#32;as&#32;published&#32;by&#32;the&#32;Free&#32;Software&#32;Foundation.</emphasis>
+19 
+20 <emphasis role="comment">//&#32;You&#32;should&#32;have&#32;received&#32;a&#32;copy&#32;of&#32;the&#32;GNU&#32;General&#32;Public&#32;License&#32;and</emphasis>
+21 <emphasis role="comment">//&#32;a&#32;copy&#32;of&#32;the&#32;GCC&#32;Runtime&#32;Library&#32;Exception&#32;along&#32;with&#32;this&#32;program;</emphasis>
+22 <emphasis role="comment">//&#32;see&#32;the&#32;files&#32;COPYING3&#32;and&#32;COPYING.RUNTIME&#32;respectively.&#32;&#32;If&#32;not,&#32;see</emphasis>
+23 <emphasis role="comment">//&#32;&lt;http://www.gnu.org/licenses/&gt;.</emphasis>
+24 
+25 <emphasis role="preprocessor">#ifndef&#32;_GLIBCXX_EXPERIMENTAL_SIMD_PPC_H_</emphasis>
+26 <emphasis role="preprocessor">#define&#32;_GLIBCXX_EXPERIMENTAL_SIMD_PPC_H_</emphasis>
+27 
+28 <emphasis role="preprocessor">#if&#32;__cplusplus&#32;&gt;=&#32;201703L</emphasis>
+29 
+30 <emphasis role="preprocessor">#ifndef&#32;__ALTIVEC__</emphasis>
+31 <emphasis role="preprocessor">#error&#32;&quot;simd_ppc.h&#32;may&#32;only&#32;be&#32;included&#32;when&#32;AltiVec/VMX&#32;is&#32;available&quot;</emphasis>
+32 <emphasis role="preprocessor">#endif</emphasis>
+33 <emphasis role="preprocessor">#include&#32;&lt;altivec.h&gt;</emphasis>
+34 
+35 _GLIBCXX_SIMD_BEGIN_NAMESPACE
+36 
+37 <emphasis role="comment">//&#32;_SimdImplPpc&#32;{{{</emphasis>
+38 <emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">typename</emphasis>&#32;_Abi,&#32;<emphasis role="keyword">typename</emphasis>&gt;
+39 &#32;&#32;<emphasis role="keyword">struct&#32;</emphasis>_SimdImplPpc&#32;:&#32;_SimdImplBuiltin&lt;_Abi&gt;
+40 &#32;&#32;{
+41 &#32;&#32;&#32;&#32;<emphasis role="keyword">using&#32;</emphasis>_Base&#32;=&#32;_SimdImplBuiltin&lt;_Abi&gt;;
+42 
+43 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Byte&#32;and&#32;halfword&#32;shift&#32;instructions&#32;on&#32;PPC&#32;only&#32;consider&#32;the&#32;low&#32;3&#32;or&#32;4</emphasis>
+44 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;bits&#32;of&#32;the&#32;RHS.&#32;Consequently,&#32;shifting&#32;by&#32;sizeof(_Tp)*CHAR_BIT&#32;(or&#32;more)</emphasis>
+45 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;is&#32;UB&#32;without&#32;extra&#32;measures.&#32;To&#32;match&#32;scalar&#32;behavior,&#32;byte&#32;and&#32;halfword</emphasis>
+46 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;shifts&#32;need&#32;an&#32;extra&#32;fixup&#32;step.</emphasis>
+47 
+48 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;_S_bit_shift_left&#32;{{{</emphasis>
+49 &#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp,&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;_Np&gt;
+50 &#32;&#32;&#32;&#32;&#32;&#32;_GLIBCXX_SIMD_INTRINSIC&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keyword">constexpr</emphasis>&#32;_SimdWrapper&lt;_Tp,&#32;_Np&gt;
+51 &#32;&#32;&#32;&#32;&#32;&#32;_S_bit_shift_left(_SimdWrapper&lt;_Tp,&#32;_Np&gt;&#32;__x,&#32;_SimdWrapper&lt;_Tp,&#32;_Np&gt;&#32;__y)
+52 &#32;&#32;&#32;&#32;&#32;&#32;{
+53 &#32;&#32;&#32;&#32;__x&#32;=&#32;_Base::_S_bit_shift_left(__x,&#32;__y);
+54 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;<emphasis role="keyword">constexpr</emphasis>&#32;(<emphasis role="keyword">sizeof</emphasis>(_Tp)&#32;&lt;&#32;<emphasis role="keyword">sizeof</emphasis>(<emphasis role="keywordtype">int</emphasis>))
+55 &#32;&#32;&#32;&#32;&#32;&#32;__x._M_data
+56 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;=&#32;(__y._M_data&#32;&lt;&#32;<emphasis role="keyword">sizeof</emphasis>(_Tp)&#32;*&#32;__CHAR_BIT__)&#32;&amp;&#32;__x._M_data;
+57 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__x;
+58 &#32;&#32;&#32;&#32;&#32;&#32;}
+59 
+60 &#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp,&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;_Np&gt;
+61 &#32;&#32;&#32;&#32;&#32;&#32;_GLIBCXX_SIMD_INTRINSIC&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keyword">constexpr</emphasis>&#32;_SimdWrapper&lt;_Tp,&#32;_Np&gt;
+62 &#32;&#32;&#32;&#32;&#32;&#32;_S_bit_shift_left(_SimdWrapper&lt;_Tp,&#32;_Np&gt;&#32;__x,&#32;<emphasis role="keywordtype">int</emphasis>&#32;__y)
+63 &#32;&#32;&#32;&#32;&#32;&#32;{
+64 &#32;&#32;&#32;&#32;__x&#32;=&#32;_Base::_S_bit_shift_left(__x,&#32;__y);
+65 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;<emphasis role="keyword">constexpr</emphasis>&#32;(<emphasis role="keyword">sizeof</emphasis>(_Tp)&#32;&lt;&#32;<emphasis role="keyword">sizeof</emphasis>(<emphasis role="keywordtype">int</emphasis>))
+66 &#32;&#32;&#32;&#32;&#32;&#32;{
+67 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__y&#32;&gt;=&#32;<emphasis role="keyword">sizeof</emphasis>(_Tp)&#32;*&#32;__CHAR_BIT__)
+68 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;{};
+69 &#32;&#32;&#32;&#32;&#32;&#32;}
+70 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__x;
+71 &#32;&#32;&#32;&#32;&#32;&#32;}
+72 
+73 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;}}}</emphasis>
+74 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;_S_bit_shift_right&#32;{{{</emphasis>
+75 &#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp,&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;_Np&gt;
+76 &#32;&#32;&#32;&#32;&#32;&#32;_GLIBCXX_SIMD_INTRINSIC&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keyword">constexpr</emphasis>&#32;_SimdWrapper&lt;_Tp,&#32;_Np&gt;
+77 &#32;&#32;&#32;&#32;&#32;&#32;_S_bit_shift_right(_SimdWrapper&lt;_Tp,&#32;_Np&gt;&#32;__x,&#32;_SimdWrapper&lt;_Tp,&#32;_Np&gt;&#32;__y)
+78 &#32;&#32;&#32;&#32;&#32;&#32;{
+79 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;<emphasis role="keyword">constexpr</emphasis>&#32;(<emphasis role="keyword">sizeof</emphasis>(_Tp)&#32;&lt;&#32;<emphasis role="keyword">sizeof</emphasis>(<emphasis role="keywordtype">int</emphasis>))
+80 &#32;&#32;&#32;&#32;&#32;&#32;{
+81 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">constexpr</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;__nbits&#32;=&#32;<emphasis role="keyword">sizeof</emphasis>(_Tp)&#32;*&#32;__CHAR_BIT__;
+82 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;<emphasis role="keyword">constexpr</emphasis>&#32;(is_unsigned_v&lt;_Tp&gt;)
+83 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;(__y._M_data&#32;&lt;&#32;__nbits)
+84 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&amp;&#32;_Base::_S_bit_shift_right(__x,&#32;__y)._M_data;
+85 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>
+86 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+87 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_Base::_S_masked_assign(_SimdWrapper&lt;_Tp,&#32;_Np&gt;(__y._M_data
+88 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&gt;=&#32;__nbits),
+89 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__y,&#32;__nbits&#32;-&#32;1);
+90 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;_Base::_S_bit_shift_right(__x,&#32;__y);
+91 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+92 &#32;&#32;&#32;&#32;&#32;&#32;}
+93 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>
+94 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;_Base::_S_bit_shift_right(__x,&#32;__y);
+95 &#32;&#32;&#32;&#32;&#32;&#32;}
+96 
+97 &#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp,&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;_Np&gt;
+98 &#32;&#32;&#32;&#32;&#32;&#32;_GLIBCXX_SIMD_INTRINSIC&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keyword">constexpr</emphasis>&#32;_SimdWrapper&lt;_Tp,&#32;_Np&gt;
+99 &#32;&#32;&#32;&#32;&#32;&#32;_S_bit_shift_right(_SimdWrapper&lt;_Tp,&#32;_Np&gt;&#32;__x,&#32;<emphasis role="keywordtype">int</emphasis>&#32;__y)
+100 &#32;&#32;&#32;&#32;&#32;&#32;{
+101 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;<emphasis role="keyword">constexpr</emphasis>&#32;(<emphasis role="keyword">sizeof</emphasis>(_Tp)&#32;&lt;&#32;<emphasis role="keyword">sizeof</emphasis>(<emphasis role="keywordtype">int</emphasis>))
+102 &#32;&#32;&#32;&#32;&#32;&#32;{
+103 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">constexpr</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;__nbits&#32;=&#32;<emphasis role="keyword">sizeof</emphasis>(_Tp)&#32;*&#32;__CHAR_BIT__;
+104 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__y&#32;&gt;=&#32;__nbits)
+105 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+106 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;<emphasis role="keyword">constexpr</emphasis>&#32;(is_unsigned_v&lt;_Tp&gt;)
+107 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;{};
+108 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>
+109 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;_Base::_S_bit_shift_right(__x,&#32;__nbits&#32;-&#32;1);
+110 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+111 &#32;&#32;&#32;&#32;&#32;&#32;}
+112 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;_Base::_S_bit_shift_right(__x,&#32;__y);
+113 &#32;&#32;&#32;&#32;&#32;&#32;}
+114 
+115 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;}}}</emphasis>
+116 &#32;&#32;};
+117 
+118 <emphasis role="comment">//&#32;}}}</emphasis>
+119 <emphasis role="comment">//&#32;_MaskImplPpc&#32;{{{</emphasis>
+120 <emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">typename</emphasis>&#32;_Abi,&#32;<emphasis role="keyword">typename</emphasis>&gt;
+121 &#32;&#32;<emphasis role="keyword">struct&#32;</emphasis>_MaskImplPpc&#32;:&#32;_MaskImplBuiltin&lt;_Abi&gt;
+122 &#32;&#32;{
+123 &#32;&#32;&#32;&#32;<emphasis role="keyword">using&#32;</emphasis>_Base&#32;=&#32;_MaskImplBuiltin&lt;_Abi&gt;;
+124 
+125 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;_S_popcount&#32;{{{</emphasis>
+126 &#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+127 &#32;&#32;&#32;&#32;&#32;&#32;_GLIBCXX_SIMD_INTRINSIC&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;_S_popcount(simd_mask&lt;_Tp,&#32;_Abi&gt;&#32;__k)
+128 &#32;&#32;&#32;&#32;&#32;&#32;{
+129 &#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keyword">auto</emphasis>&#32;__kv&#32;=&#32;__as_vector(__k);
+130 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;<emphasis role="keyword">constexpr</emphasis>&#32;(__have_power10vec)
+131 &#32;&#32;&#32;&#32;&#32;&#32;{
+132 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;vec_cntm(__to_intrin(__kv),&#32;1);
+133 &#32;&#32;&#32;&#32;&#32;&#32;}
+134 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>&#32;<emphasis role="keywordflow">if</emphasis>&#32;<emphasis role="keyword">constexpr</emphasis>&#32;(<emphasis role="keyword">sizeof</emphasis>(_Tp)&#32;&gt;=&#32;<emphasis role="keyword">sizeof</emphasis>(<emphasis role="keywordtype">int</emphasis>))
+135 &#32;&#32;&#32;&#32;&#32;&#32;{
+136 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">using&#32;</emphasis>_Intrin&#32;=&#32;__intrinsic_type16_t&lt;int&gt;;
+137 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;__sum&#32;=&#32;-vec_sums(__intrin_bitcast&lt;_Intrin&gt;(__kv),&#32;_Intrin())[3];
+138 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__sum&#32;/&#32;(<emphasis role="keyword">sizeof</emphasis>(_Tp)&#32;/&#32;<emphasis role="keyword">sizeof</emphasis>(<emphasis role="keywordtype">int</emphasis>));
+139 &#32;&#32;&#32;&#32;&#32;&#32;}
+140 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>
+141 &#32;&#32;&#32;&#32;&#32;&#32;{
+142 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keyword">auto</emphasis>&#32;__summed_to_int&#32;=&#32;vec_sum4s(__to_intrin(__kv),&#32;__intrinsic_type16_t&lt;int&gt;());
+143 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;-vec_sums(__summed_to_int,&#32;__intrinsic_type16_t&lt;int&gt;())[3];
+144 &#32;&#32;&#32;&#32;&#32;&#32;}
+145 &#32;&#32;&#32;&#32;&#32;&#32;}
+146 
+147 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;}}}</emphasis>
+148 &#32;&#32;};
+149 
+150 <emphasis role="comment">//&#32;}}}</emphasis>
+151 
+152 _GLIBCXX_SIMD_END_NAMESPACE
+153 <emphasis role="preprocessor">#endif&#32;</emphasis><emphasis role="comment">//&#32;__cplusplus&#32;&gt;=&#32;201703L</emphasis>
+154 <emphasis role="preprocessor">#endif&#32;</emphasis><emphasis role="comment">//&#32;_GLIBCXX_EXPERIMENTAL_SIMD_PPC_H_</emphasis>
+155 
+156 <emphasis role="comment">//&#32;vim:&#32;foldmethod=marker&#32;foldmarker={{{,}}}&#32;sw=2&#32;noet&#32;ts=8&#32;sts=2&#32;tw=100</emphasis>
+</programlisting></section>

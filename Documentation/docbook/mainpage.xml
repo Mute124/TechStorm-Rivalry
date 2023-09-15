@@ -1,0 +1,446 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<chapter xmlns="http://docbook.org/ns/docbook" version="5.0" xmlns:xlink="http://www.w3.org/1999/xlink" xml:id="_mainpage" xml:lang="en-US">
+<title>toml++</title>
+<indexterm><primary>toml++</primary></indexterm>
+
+<para></para>
+<section xml:id="_index_1mainpage-features">
+<title>Features</title>
+
+<para><itemizedlist>
+<listitem>
+<para>Header-only (optional!)</para>
+</listitem><listitem>
+<para>Supports the latest <link xlink:href="https://toml.io/">TOML</link> release (<link xlink:href="https://toml.io/en/v1.0.0">v1.0.0</link>), plus optional support for some unreleased TOML features</para>
+</listitem><listitem>
+<para>Passes all tests in the <link xlink:href="https://github.com/BurntSushi/toml-test">toml-test</link> suite</para>
+</listitem><listitem>
+<para>Supports serializing to JSON and YAML</para>
+</listitem><listitem>
+<para>Proper UTF-8 handling (incl. BOM)</para>
+</listitem><listitem>
+<para>C++17 (plus some C++20 features where available, e.g. experimental support for char8_t strings)</para>
+</listitem><listitem>
+<para>Doesn&apos;t require RTTI</para>
+</listitem><listitem>
+<para>Works with or without exceptions</para>
+</listitem><listitem>
+<para>Tested on Clang (6+), GCC (7+) and MSVC (VS2019)</para>
+</listitem><listitem>
+<para>Tested on x64, x86 and ARM</para>
+</listitem></itemizedlist>
+</para>
+</section>
+<section xml:id="_index_1mainpage-api-documentation">
+<title>API documentation</title>
+
+<para>You&apos;re looking at it! Browse the docs using the links at the top of the page. You can search from anywhere by pressing the TAB key.</para>
+</section>
+<section xml:id="_index_1mainpage-example">
+<title>Basic examples</title>
+<section xml:id="_index_1mainpage-example-parsing-files">
+<title>Parsing files</title>
+
+<para>Call toml::parse_file() and work with the toml::table you get back, or handle any toml::parse_error that gets thrown:</para>
+
+<para>\cpp #include &lt;iostream&gt; #include &lt;toml++/toml.h&gt;</para>
+
+<para>int <link linkend="_parse__benchmark_8cpp_1a3c04138a5bfe5d72780bb7e82a18e627">main(int argc, char** argv)</link> { toml::table tbl; try { tbl = toml::parse_file(argv[1]); std::cout &lt;&lt; tbl &lt;&lt; &quot;\n&quot;; } catch (const toml::parse_error&amp; err) { std::cerr &lt;&lt; &quot;Parsing failed:\n&quot; &lt;&lt; err &lt;&lt; &quot;\n&quot;; return 1; }</para>
+
+<para>return 0; }</para>
+
+<para>\endcpp</para>
+
+<para><formalpara><title>See also</title>
+
+<para><itemizedlist>
+<listitem>
+<para>toml::parse_file()</para>
+</listitem><listitem>
+<para>toml::table</para>
+</listitem><listitem>
+<para>toml::parse_error</para>
+</listitem></itemizedlist>
+</para>
+</formalpara>
+</para>
+</section>
+<section xml:id="_index_1mainpage-example-parsing-strings">
+<title>Parsing strings and iostreams</title>
+
+<para>Call toml::parse() and work with the toml::table you get back, or handle any toml::parse_error that gets thrown:</para>
+
+<para>\godbolt{NsR-xf}</para>
+
+<para>\cpp #include &lt;iostream&gt; #include &lt;sstream&gt; #include &lt;toml++/toml.h&gt; using namespace std::string_view_literals;</para>
+
+<para>int <link linkend="_error__printer_8cpp_1ae66f6b31b5ad750f1fe042a706a4e3d4">main()</link> { static constexpr std::string_view some_toml = R&quot;(
+        [library]
+        name = &quot;toml++&quot;
+        authors = [&quot;Mark Gillard <link xlink:href="mailto:mark.gillard@outlook.com.au">mark.gillard@outlook.com.au</link>&quot;]
+        cpp = 17
+    )&quot;sv;</para>
+
+<para>try { parse directly from a string view: { toml::table tbl = toml::parse(some_toml); std::cout &lt;&lt; tbl &lt;&lt; &quot;\n&quot;; }</para>
+
+<para>parse from a string stream: { std::stringstream ss{ std::string{ some_toml } }; toml::table tbl = toml::parse(ss); std::cout &lt;&lt; tbl &lt;&lt; &quot;\n&quot;; } } catch (const toml::parse_error&amp; err) { std::cerr &lt;&lt; &quot;Parsing failed:\n&quot; &lt;&lt; err &lt;&lt; &quot;\n&quot;; return 1; }</para>
+
+<para>return 0; } \endcpp</para>
+
+<para>\out [library] authors = [ &apos;Mark Gillard <link xlink:href="mailto:mark.gillard@outlook.com.au">mark.gillard@outlook.com.au</link>&apos; ] cpp = 17 name = &apos;toml++&apos;</para>
+
+<para>[library] authors = [ &apos;Mark Gillard <link xlink:href="mailto:mark.gillard@outlook.com.au">mark.gillard@outlook.com.au</link>&apos; ] cpp = 17 name = &apos;toml++&apos; \endout</para>
+
+<para><formalpara><title>See also</title>
+
+<para><itemizedlist>
+<listitem>
+<para>toml::parse_file()</para>
+</listitem><listitem>
+<para>toml::table</para>
+</listitem><listitem>
+<para>toml::parse_error</para>
+</listitem></itemizedlist>
+</para>
+</formalpara>
+</para>
+</section>
+<section xml:id="_index_1mainpage-example-parsing-without-exceptions">
+<title>Handling errors without exceptions</title>
+
+<para>Can&apos;t (or won&apos;t) use exceptions? That&apos;s fine too. You can disable exceptions in your compiler flags and/or explicitly disable the library&apos;s use of them by setting the option <link linkend="_group__configuration_1ga93097ecd88ca4bca393f60a78bda643b">TOML_EXCEPTIONS</link> to <computeroutput>0</computeroutput>. In either case, the parsing functions return a toml::parse_result instead of a toml::table:</para>
+
+<para>\cpp #include &lt;iostream&gt;</para>
+
+<para><link linkend="__classes_2lib_2include_2avx512fintrin_8h_1a1b7950c88593de42a92cc8558f5488f6">define</link> TOML_EXCEPTIONS 0 // only necessary if you&apos;ve left them enabled in your compiler #include &lt;toml++/toml.h&gt;</para>
+
+<para>int <link linkend="_error__printer_8cpp_1ae66f6b31b5ad750f1fe042a706a4e3d4">main()</link> { toml::parse_result result = toml::parse_file(&quot;configuration.toml&quot;); if (!result) { std::cerr &lt;&lt; &quot;Parsing failed:\n&quot; &lt;&lt; result.error() &lt;&lt; &quot;\n&quot;; return 1; }</para>
+
+<para>do_stuff_with_your_config(std::move(result).<link linkend="_classtable">table()</link>); // &apos;steal&apos; the table from the result return 0; } \endcpp</para>
+</section>
+<section xml:id="_index_1mainpage-example-custom-error-formatting">
+<title>Custom error formatting</title>
+
+<para>The examples above use an overloaded <computeroutput>operator&lt;&lt;</computeroutput> with ostreams to print basic error messages, and look like this: \out Error while parsing key: expected bare key starting character or string delimiter, saw &apos;?&apos; (error occurred at line 2, column 5) \endout</para>
+
+<para>The library doesn&apos;t natively support error colouring in TTY environments, but instead provides the requisite information for you to build that and any other custom error handling yourself if necessary via toml::parse_error&apos;s <link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a633906574fe6e39b7f2840bed0e49832">source()</link> and description() members:</para>
+
+<para>\cpp toml::table tbl; try { tbl = toml::parse_file(&quot;configuration.toml&quot;); } catch (const toml::parse_error&amp; err) { std::cerr &lt;&lt; &quot;Error parsing file &apos;&quot; &lt;&lt; *err.<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a633906574fe6e39b7f2840bed0e49832">source()</link>.path &lt;&lt; &quot;&apos;:\n&quot; &lt;&lt; err.description() &lt;&lt; &quot;\n  (&quot; &lt;&lt; err.source().begin &lt;&lt; &quot;)\n&quot;; return 1; } \endcpp</para>
+
+<para><formalpara><title>See also</title>
+
+<para><itemizedlist>
+<listitem>
+<para>toml::parse_error</para>
+</listitem><listitem>
+<para>toml::source_region</para>
+</listitem><listitem>
+<para>toml::source_position</para>
+</listitem></itemizedlist>
+</para>
+</formalpara>
+</para>
+</section>
+<section xml:id="_index_1mainpage-example-manipulations">
+<title>Working with TOML data</title>
+
+<para>A TOML document is a tree of values, arrays and tables, represented as the toml::value, toml::array and toml::table, respectively. All three inherit from toml::node, and can be easily accessed via the toml::node_view:</para>
+
+<para>\godbolt{TnevafTKd}</para>
+
+<para>\cpp #include &lt;iostream&gt; #include &lt;toml++/toml.h&gt; using namespace std::string_view_literals;</para>
+
+<para>int <link linkend="_error__printer_8cpp_1ae66f6b31b5ad750f1fe042a706a4e3d4">main()</link> { static constexpr auto source = R&quot;(
+        str = &quot;hello world&quot;
+
+        numbers = [ 1, 2, 3, &quot;four&quot;, 5.0 ]
+        vegetables = [ &quot;tomato&quot;, &quot;onion&quot;, &quot;mushroom&quot;, &quot;lettuce&quot; ]
+        minerals = [ &quot;quartz&quot;, &quot;iron&quot;, &quot;copper&quot;, &quot;diamond&quot; ]
+
+        [animals]
+        cats = [ &quot;tiger&quot;, &quot;lion&quot;, &quot;puma&quot; ]
+        birds = [ &quot;macaw&quot;, &quot;pigeon&quot;, &quot;canary&quot; ]
+        fish = [ &quot;salmon&quot;, &quot;trout&quot;, &quot;carp&quot; ]
+
+    )&quot;sv; toml::table tbl = toml::parse(source);</para>
+
+<para>different ways of directly querying data std::optional&lt;std::string_view&gt; str1 = tbl[&quot;str&quot;].value&lt;std::string_view&gt;(); std::optional&lt;std::string&gt; str2 = tbl[&quot;str&quot;].value&lt;std::string&gt;(); std::string_view str3 = tbl[&quot;str&quot;].value_or(&quot;&quot;sv); std::string&amp; str4 = tbl[&quot;str&quot;].<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a083de4c8e32ad3d9059245f26be721de">ref&lt;std::string&gt;()</link>; // dangerous</para>
+
+<para>std::cout &lt;&lt; *str1 &lt;&lt; &quot;\n&quot;; std::cout &lt;&lt; *str2 &lt;&lt; &quot;\n&quot;; std::cout &lt;&lt; str3 &lt;&lt; &quot;\n&quot;; std::cout &lt;&lt; str4 &lt;&lt; &quot;\n&quot;;</para>
+
+<para>get a toml::node_view of the element &apos;numbers&apos; using operator[] auto numbers = tbl[&quot;numbers&quot;]; std::cout &lt;&lt; &quot;table has &apos;numbers&apos;: &quot; &lt;&lt; !!numbers &lt;&lt; &quot;\n&quot;; std::cout &lt;&lt; &quot;numbers is an: &quot; &lt;&lt; numbers.type() &lt;&lt; &quot;\n&quot;; std::cout &lt;&lt; &quot;numbers: &quot; &lt;&lt; numbers &lt;&lt; &quot;\n&quot;;</para>
+
+<para>get the underlying array object to do some more advanced stuff if (toml::array* arr = numbers.as_array()) { visitation with for_each() helps deal with heterogeneous data arr-&gt;for_each([](auto&amp;&amp; el) { if constexpr (toml::is_number&lt;decltype(el)&gt;) (*el)++; else if constexpr (toml::is_string&lt;decltype(el)&gt;) el = &quot;five&quot;sv; });</para>
+
+<para>arrays are very similar to std::vector arr-&gt;push_back(7); arr-&gt;emplace_back&lt;toml::array&gt;(8, 9); std::cout &lt;&lt; &quot;numbers: &quot; &lt;&lt; numbers &lt;&lt; &quot;\n&quot;; }</para>
+
+<para>node-views can be chained to quickly query deeper std::cout &lt;&lt; &quot;cats: &quot; &lt;&lt; tbl[&quot;animals&quot;][&quot;cats&quot;] &lt;&lt; &quot;\n&quot;; std::cout &lt;&lt; &quot;fish[1]: &quot; &lt;&lt; tbl[&quot;animals&quot;][&quot;fish&quot;][1] &lt;&lt; &quot;\n&quot;;</para>
+
+<para>can also be retrieved via absolute path std::cout &lt;&lt; &quot;cats: &quot; &lt;&lt; tbl.at_path(&quot;animals.cats&quot;) &lt;&lt; &quot;\n&quot;; std::cout &lt;&lt; &quot;fish[1]: &quot; &lt;&lt; tbl.at_path(&quot;animals.fish[1]&quot;) &lt;&lt; &quot;\n&quot;;</para>
+
+<para>...even if the element doesn&apos;t exist std::cout &lt;&lt; &quot;dinosaurs: &quot; &lt;&lt; tbl[&quot;animals&quot;][&quot;dinosaurs&quot;] &lt;&lt; &quot;\n&quot;; //no dinosaurs :(</para>
+
+<para>return 0; } \endcpp</para>
+
+<para>\out hello world hello world hello world hello world table has &apos;numbers&apos;: 1 numbers is an: array numbers: [ 1, 2, 3, &apos;four&apos;, 5.0 ] numbers: [ 2, 3, 4, &apos;five&apos;, 6.0, 7, [ 8, 9 ] ] cats: [ &apos;tiger&apos;, &apos;lion&apos;, &apos;puma&apos; ] fish[1]: &apos;trout&apos; dinosaurs: \endout</para>
+
+<para><formalpara><title>See also</title>
+
+<para><itemizedlist>
+<listitem>
+<para>toml::node</para>
+</listitem><listitem>
+<para>toml::node_view</para>
+</listitem><listitem>
+<para>toml::value</para>
+</listitem><listitem>
+<para>toml::array</para>
+</listitem><listitem>
+<para>toml::table</para>
+</listitem></itemizedlist>
+</para>
+</formalpara>
+</para>
+</section>
+<section xml:id="_index_1mainpage-example-serialization">
+<title>Serializing as TOML, JSON and YAML</title>
+
+<para>All toml++ data types have overloaded <computeroutput>operator&lt;&lt;</computeroutput> for ostreams, so &apos;serializing&apos; a set of TOML data to actual TOML is done just by printing it to an ostream. Converting it to JSON and YAML is done in much the same way, but via a toml::json_formatter and toml::yaml_formatter.</para>
+
+<para>\godbolt{srdfoWMq6}</para>
+
+<para>\cpp #include &lt;iostream&gt; #include &lt;toml++/toml.h&gt;</para>
+
+<para>int <link linkend="_error__printer_8cpp_1ae66f6b31b5ad750f1fe042a706a4e3d4">main()</link> { auto tbl = toml::table{ { &quot;lib&quot;, &quot;toml++&quot; }, { &quot;cpp&quot;, toml::array{ 17, 20, &quot;and beyond&quot; } }, { &quot;toml&quot;, toml::array{ &quot;1.0.0&quot;, &quot;and beyond&quot; } }, { &quot;repo&quot;, &quot;https://github.com/marzer/tomlplusplus/&quot; }, { &quot;author&quot;, toml::table{ { &quot;name&quot;, &quot;Mark Gillard&quot; }, { &quot;github&quot;, &quot;https://github.com/marzer&quot; }, { &quot;twitter&quot;, &quot;https://twitter.com/marzer8789&quot; } } }, };</para>
+
+<para>serializing as TOML std::cout &lt;&lt; &quot;###### TOML ######&quot; &lt;&lt; &quot;\n\n&quot;; std::cout &lt;&lt; tbl &lt;&lt; &quot;\n\n&quot;;</para>
+
+<para>serializing as JSON using toml::json_formatter: std::cout &lt;&lt; &quot;###### JSON ######&quot; &lt;&lt; &quot;\n\n&quot;; std::cout &lt;&lt; toml::json_formatter{ tbl } &lt;&lt; &quot;\n\n&quot;;</para>
+
+<para>serializing as YAML using toml::yaml_formatter: std::cout &lt;&lt; &quot;###### YAML ######&quot; &lt;&lt; &quot;\n\n&quot;; std::cout &lt;&lt; toml::yaml_formatter{ tbl } &lt;&lt; &quot;\n\n&quot;;</para>
+
+<para>return 0; } \endcpp</para>
+
+<para>\out <formalpara><title>TOML</title></formalpara>
+</para>
+
+<para>cpp = [ 17, 20, &apos;and beyond&apos; ] lib = &apos;toml++&apos; repo = &apos;<link xlink:href="https://github.com/marzer/tomlplusplus/&apos;">https://github.com/marzer/tomlplusplus/&apos;</link> toml = [ &apos;1.0.0&apos;, &apos;and beyond&apos; ]</para>
+
+<para>[author] github = &apos;<link xlink:href="https://github.com/marzer&apos;">https://github.com/marzer&apos;</link> name = &apos;Mark Gillard&apos; twitter = &apos;<link xlink:href="https://twitter.com/marzer8789&apos;">https://twitter.com/marzer8789&apos;</link></para>
+
+<para><formalpara><title>JSON</title></formalpara>
+</para>
+
+<para>{ &quot;author&quot; : { &quot;github&quot; : &quot;https://github.com/marzer&quot;, &quot;name&quot; : &quot;Mark Gillard&quot;, &quot;twitter&quot; : &quot;https://twitter.com/marzer8789&quot; }, &quot;cpp&quot; : [ 17, 20, &quot;and beyond&quot; ], &quot;lib&quot; : &quot;toml++&quot;, &quot;repo&quot; : &quot;https://github.com/marzer/tomlplusplus/&quot;, &quot;toml&quot; : [ &quot;1.0.0&quot;, &quot;and beyond&quot; ] }</para>
+
+<para><formalpara><title>YAML</title></formalpara>
+</para>
+
+<para>author: github: &apos;<link xlink:href="https://github.com/marzer&apos;">https://github.com/marzer&apos;</link> name: &apos;Mark Gillard&apos; twitter: &apos;<link xlink:href="https://twitter.com/marzer8789&apos;">https://twitter.com/marzer8789&apos;</link> cpp:<itemizedlist>
+<listitem>
+<para>17</para>
+</listitem><listitem>
+<para>20</para>
+</listitem><listitem>
+<para>&apos;and beyond&apos; lib: &apos;toml++&apos; repo: &apos;<link xlink:href="https://github.com/marzer/tomlplusplus/&apos;">https://github.com/marzer/tomlplusplus/&apos;</link> toml:</para>
+</listitem><listitem>
+<para>&apos;1.0.0&apos;</para>
+</listitem><listitem>
+<para>&apos;and beyond&apos; \endout</para>
+</listitem></itemizedlist>
+</para>
+
+<para><formalpara><title>See also</title>
+
+<para><itemizedlist>
+<listitem>
+<para>toml::toml_formatter</para>
+</listitem><listitem>
+<para>toml::json_formatter</para>
+</listitem><listitem>
+<para>toml::yaml_formatter</para>
+</listitem></itemizedlist>
+</para>
+</formalpara>
+</para>
+</section>
+<section xml:id="_index_1mainpage-example-speed-up-compilation">
+<title>Speeding up compilation</title>
+
+<para>Because toml++ is a header-only library of nontrivial size you might find that compilation times noticeably increase after you add it to your project, especially if you add the library&apos;s header somewhere that&apos;s visible from a large number of translation units. You can counter this by disabling header-only mode and explicitly controlling where the library&apos;s implementation is compiled.</para>
+
+<para><emphasis role="bold">Step 1: Set <link linkend="_group__configuration_1ga8219bfd7e75587516385b6022b28abc2">TOML_HEADER_ONLY</link> to [code]0[/code] before including toml++</emphasis></para>
+
+<para>This must be the same everywhere, so either set it as a global <computeroutput>#define</computeroutput> in your build system, or do it manually before including toml++ in some global header that&apos;s used everywhere in your project: \cpp global_header_that_includes_toml++.h</para>
+
+<para><link linkend="__classes_2lib_2include_2avx512fintrin_8h_1a1b7950c88593de42a92cc8558f5488f6">define</link> TOML_HEADER_ONLY 0 #include &lt;<link linkend="_toml_8hpp">toml.hpp</link>&gt; \endcpp</para>
+
+<para><emphasis role="bold">Step 2: Define <link linkend="_group__configuration_1ga27ee69835a1ddff9dbaf3015b4b08a11">TOML_IMPLEMENTATION</link> before including toml++ in one specific translation unit</emphasis></para>
+
+<para>\cpp some_code_file.cpp</para>
+
+<para><link linkend="__classes_2lib_2include_2avx512fintrin_8h_1a1b7950c88593de42a92cc8558f5488f6">define</link> TOML_IMPLEMENTATION #include &quot;global_header_that_includes_toml++.h&quot; \endcpp</para>
+
+<para><emphasis role="bold">Bonus Step: Disable any library features you don&apos;t need</emphasis></para>
+
+<para>Some library features can be disabled wholesale so you can avoid paying their the compilation cost if you don&apos;t need them. For example, if all you need to do is serialize some code-generated TOML and don&apos;t actually need the parser at all you, can set <link linkend="_group__configuration_1ga121912d75d4624de6ab6854e41d8a852">TOML_ENABLE_PARSER</link> to <computeroutput>0</computeroutput> to disable the parser altogether. This can yield fairly significant compilation speedups since the parser accounts for a good chunk of the library&apos;s code.</para>
+
+<para><formalpara><title>See also</title>
+
+<para><link linkend="_group__configuration">Library Configuration</link></para>
+</formalpara>
+</para>
+</section>
+</section>
+<section xml:id="_index_1mainpage-adding-lib">
+<title>Adding toml++ to your project</title>
+
+<para>\m_class{m-note m-default}</para>
+
+<para>The library comes in two flavours, [emoji icecream] Single-header and [emoji sundae] Regular. The API is the same for both.</para>
+<section xml:id="_index_1mainpage-adding-lib-old-school">
+<title>&quot;The old fashioned way&quot;</title>
+
+<para><formalpara><title>[emoji icecream] Single-header flavour</title></formalpara>
+</para>
+
+<para><orderedlist>
+<listitem>
+<para>Drop <link xlink:href="https://raw.githubusercontent.com/marzer/tomlplusplus/master/toml.hpp">toml.hpp</link> wherever you like in your source tree</para>
+</listitem><listitem>
+<para>There is no step two</para>
+</listitem></orderedlist>
+</para>
+
+<para><formalpara><title>[emoji sundae] Regular flavour</title></formalpara>
+</para>
+
+<para><orderedlist>
+<listitem>
+<para>Clone \github{marzer/tomlplusplus, the repository} from GitHub</para>
+</listitem><listitem>
+<para>Add <computeroutput>tomlplusplus/include</computeroutput> to your include paths</para>
+</listitem><listitem>
+<para><computeroutput>#include &lt;toml++/toml.h&gt;</computeroutput></para>
+</listitem></orderedlist>
+</para>
+</section>
+<section xml:id="_index_1mainpage-adding-lib-conan">
+<title>Conan</title>
+
+<para>Add <computeroutput>tomlplusplus/3.3.0</computeroutput> to your conanfile.</para>
+</section>
+<section xml:id="_index_1mainpage-adding-lib-dds">
+<title>DDS</title>
+
+<para>Add <computeroutput>tomlpp</computeroutput> to your <computeroutput>package.json5</computeroutput>, e.g.: \json depends: [ &apos;tomlpp^3.3.0&apos;, ] \endjson</para>
+
+<para><formalpara><title>See also</title>
+
+<para><link xlink:href="https://dds.pizza/">What is DDS?</link></para>
+</formalpara>
+</para>
+</section>
+<section xml:id="_index_1mainpage-adding-lib-meson">
+<title>Meson</title>
+
+<para>You can install the wrap with:</para>
+
+<para>\shell meson wrap install tomlplusplus \endshell</para>
+
+<para>After that, you can use it like a regular dependency:</para>
+
+<para>\meson tomlplusplus_dep = dependency(&apos;tomlplusplus&apos;) \endmeson</para>
+
+<para>You can also add it as a subproject directly.</para>
+</section>
+<section xml:id="_index_1mainpage-adding-lib-tipi">
+<title>Tipi.build</title>
+
+<para><computeroutput>tomlplusplus</computeroutput> can be easily used in <link xlink:href="https://tipi.build">tipi.build</link> projects by adding the following entry to your <computeroutput>.tipi/deps</computeroutput>:</para>
+
+<para>\json { &quot;marzer/tomlplusplus&quot;: { } } \endjson</para>
+</section>
+<section xml:id="_index_1mainpage-adding-lib-vcpkg">
+<title>Vcpkg</title>
+
+<para>\shell vcpkg install tomlplusplus \endshell</para>
+</section>
+<section xml:id="_index_1mainpage-adding-lib-cmake-fetch-content">
+<title>CMake FetchContent</title>
+
+<para>\cmake include(FetchContent) FetchContent_Declare( tomlplusplus GIT_REPOSITORY <link xlink:href="https://github.com/marzer/tomlplusplus.git">https://github.com/marzer/tomlplusplus.git</link> GIT_TAG v3.3.0 ) FetchContent_MakeAvailable(tomlplusplus) \endcmake</para>
+
+<para><formalpara><title>See also</title>
+
+<para><link xlink:href="https://cmake.org/cmake/help/latest/module/FetchContent.html">What is FetchContent?</link></para>
+</formalpara>
+</para>
+</section>
+<section xml:id="_index_1mainpage-adding-lib-git-submodules">
+<title>Git submodules</title>
+
+<para>\shell git submodule add &#8211;depth 1 <link xlink:href="https://github.com/marzer/tomlplusplus.git">https://github.com/marzer/tomlplusplus.git</link> tomlplusplus \endshell</para>
+</section>
+<section xml:id="_index_1mainpage-adding-lib-other">
+<title>Other environments and package managers</title>
+
+<para>The C++ tooling ecosystem is a fractal nightmare of unbridled chaos so naturally I&apos;m not up-to-speed with all of the available packaging and integration options. I&apos;m always happy to see new ones supported, though! If there&apos;s some integration you&apos;d like to see and have the technical know-how to make it happen, feel free to make a pull request.</para>
+</section>
+<section xml:id="_index_1mainpage-adding-lib-python">
+<title>Special mention: Python</title>
+
+<para>There exists a python wrapper library built around toml++ called \github{bobfang1992/pytomlpp, pytomlpp} which is, at the time of writing, one of only two natively-compiled TOML libraries available for python, and thus one of the fastest options available:</para>
+
+<para>\out Parsing data.toml 5000 times: pytomlpp: 0.694 s rtoml: 0.871 s ( 1.25x) tomli: 2.625 s ( 3.78x) toml: 5.642 s ( 8.12x) qtoml: 7.760 s (11.17x) tomlkit: 32.708 s (47.09x) \endout</para>
+
+<para>Install it using <computeroutput>pip</computeroutput>:</para>
+
+<para>\shell pip install pytomlpp \endshell</para>
+
+<para>Note that I&apos;m not the owner of that project, so if you wish to report a bug relating to the python implementation please do so at their repository, not on the main toml++ one.</para>
+</section>
+</section>
+<section xml:id="_index_1mainpage-configuration">
+<title>Library configuration options</title>
+
+<para>The library exposes a number of configuration options in the form of compiler <computeroutput>#defines</computeroutput>. Things like changing the <computeroutput>optional&lt;T&gt;</computeroutput> type, disabling header-only mode, et cetera. The full list of configurables can be found on the <link linkend="_group__configuration">Library Configuration</link> page.</para>
+
+<para><formalpara><title>See also</title>
+
+<para><link linkend="_group__configuration">Library Configuration</link></para>
+</formalpara>
+</para>
+</section>
+<section xml:id="_index_1mainpage-contributing">
+<title>Contributing</title>
+
+<para>Contributions are very welcome! Either by \github{marzer/tomlplusplus/issues, reporting issues} or submitting pull requests. If you wish to submit a pull request, please see \github{marzer/tomlplusplus/blob/master/CONTRIBUTING.md, CONTRIBUTING} for all the details you need to get going.</para>
+</section>
+<section xml:id="_index_1mainpage-license">
+<title>License</title>
+
+<para>toml++ is licensed under the terms of the MIT license - see <link xlink:href="https://github.com/marzer/tomlplusplus/blob/master/LICENSE">LICENSE</link>.</para>
+
+<para>\m_class{m-note m-default}</para>
+
+<para>If you&apos;re using the single-header version of the library you don&apos;t need to explicitly distribute the license file; it is embedded in the preamble at the top of the header.</para>
+</section>
+<section xml:id="_index_1mainpage-contact">
+<title>Contacting the author</title>
+
+<para>For bug reports and feature requests please use the \github{marzer/tomlplusplus/issues, Github Issues} system. For anything else you&apos;re welcome to reach out via other means. In order of likely response speed:<itemizedlist>
+<listitem>
+<para>Gitter: <link xlink:href="https://gitter.im/marzer/tomlplusplus">marzer/tomlplusplus</link> (&quot;Discord for repos&quot;)</para>
+</listitem><listitem>
+<para>Twitter: <link xlink:href="https://twitter.com/marzer8789">marzer8789</link></para>
+</listitem><listitem>
+<para>Email: <link xlink:href="mailto:mark.gillard@outlook.com.au">mark.gillard@outlook.com.au</link></para>
+</listitem><listitem>
+<para>Facebook: <link xlink:href="https://www.facebook.com/marzer">marzer</link></para>
+</listitem><listitem>
+<para>LinkedIn: <link xlink:href="https://www.linkedin.com/in/marzer/">marzer</link> </para>
+</listitem></itemizedlist>
+</para>
+</section>
+</chapter>

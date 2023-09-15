@@ -1,0 +1,417 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<section xmlns="http://docbook.org/ns/docbook" version="5.0" xmlns:xlink="http://www.w3.org/1999/xlink" xml:id="_lib_2include_2c_09_09_2bits_2uniform__int__dist_8h_source" xml:lang="en-US">
+<title>uniform_int_dist.h</title>
+<indexterm><primary>C:/Users/HP/Documents/GitHub/Minero-Game/lib/include/c++/bits/uniform_int_dist.h</primary></indexterm>
+Go to the documentation of this file.<programlisting linenumbering="unnumbered">1 <emphasis role="comment">//&#32;Class&#32;template&#32;uniform_int_distribution&#32;-*-&#32;C++&#32;-*-</emphasis>
+2 
+3 <emphasis role="comment">//&#32;Copyright&#32;(C)&#32;2009-2022&#32;Free&#32;Software&#32;Foundation,&#32;Inc.</emphasis>
+4 <emphasis role="comment">//</emphasis>
+5 <emphasis role="comment">//&#32;This&#32;file&#32;is&#32;part&#32;of&#32;the&#32;GNU&#32;ISO&#32;C++&#32;Library.&#32;&#32;This&#32;library&#32;is&#32;free</emphasis>
+6 <emphasis role="comment">//&#32;software;&#32;you&#32;can&#32;redistribute&#32;it&#32;and/or&#32;modify&#32;it&#32;under&#32;the</emphasis>
+7 <emphasis role="comment">//&#32;terms&#32;of&#32;the&#32;GNU&#32;General&#32;Public&#32;License&#32;as&#32;published&#32;by&#32;the</emphasis>
+8 <emphasis role="comment">//&#32;Free&#32;Software&#32;Foundation;&#32;either&#32;version&#32;3,&#32;or&#32;(at&#32;your&#32;option)</emphasis>
+9 <emphasis role="comment">//&#32;any&#32;later&#32;version.</emphasis>
+10 
+11 <emphasis role="comment">//&#32;This&#32;library&#32;is&#32;distributed&#32;in&#32;the&#32;hope&#32;that&#32;it&#32;will&#32;be&#32;useful,</emphasis>
+12 <emphasis role="comment">//&#32;but&#32;WITHOUT&#32;ANY&#32;WARRANTY;&#32;without&#32;even&#32;the&#32;implied&#32;warranty&#32;of</emphasis>
+13 <emphasis role="comment">//&#32;MERCHANTABILITY&#32;or&#32;FITNESS&#32;FOR&#32;A&#32;PARTICULAR&#32;PURPOSE.&#32;&#32;See&#32;the</emphasis>
+14 <emphasis role="comment">//&#32;GNU&#32;General&#32;Public&#32;License&#32;for&#32;more&#32;details.</emphasis>
+15 
+16 <emphasis role="comment">//&#32;Under&#32;Section&#32;7&#32;of&#32;GPL&#32;version&#32;3,&#32;you&#32;are&#32;granted&#32;additional</emphasis>
+17 <emphasis role="comment">//&#32;permissions&#32;described&#32;in&#32;the&#32;GCC&#32;Runtime&#32;Library&#32;Exception,&#32;version</emphasis>
+18 <emphasis role="comment">//&#32;3.1,&#32;as&#32;published&#32;by&#32;the&#32;Free&#32;Software&#32;Foundation.</emphasis>
+19 
+20 <emphasis role="comment">//&#32;You&#32;should&#32;have&#32;received&#32;a&#32;copy&#32;of&#32;the&#32;GNU&#32;General&#32;Public&#32;License&#32;and</emphasis>
+21 <emphasis role="comment">//&#32;a&#32;copy&#32;of&#32;the&#32;GCC&#32;Runtime&#32;Library&#32;Exception&#32;along&#32;with&#32;this&#32;program;</emphasis>
+22 <emphasis role="comment">//&#32;see&#32;the&#32;files&#32;COPYING3&#32;and&#32;COPYING.RUNTIME&#32;respectively.&#32;&#32;If&#32;not,&#32;see</emphasis>
+23 <emphasis role="comment">//&#32;&lt;http://www.gnu.org/licenses/&gt;.</emphasis>
+24 
+31 <emphasis role="preprocessor">#ifndef&#32;_GLIBCXX_BITS_UNIFORM_INT_DIST_H</emphasis>
+32 <emphasis role="preprocessor">#define&#32;_GLIBCXX_BITS_UNIFORM_INT_DIST_H</emphasis>
+33 
+34 <emphasis role="preprocessor">#include&#32;&lt;type_traits&gt;</emphasis>
+35 <emphasis role="preprocessor">#include&#32;&lt;ext/numeric_traits.h&gt;</emphasis>
+36 <emphasis role="preprocessor">#if&#32;__cplusplus&#32;&gt;&#32;201703L</emphasis>
+37 <emphasis role="preprocessor">#&#32;include&#32;&lt;concepts&gt;</emphasis>
+38 <emphasis role="preprocessor">#endif</emphasis>
+39 <emphasis role="preprocessor">#include&#32;&lt;bits/concept_check.h&gt;</emphasis>&#32;<emphasis role="comment">//&#32;__glibcxx_function_requires</emphasis>
+40 
+41 <emphasis role="keyword">namespace&#32;</emphasis><link linkend="_namespacestd">std</link>&#32;<link linkend="__classes_2lib_2include_2c_09_09_2x86__64-w64-mingw32_2bits_2c_09_09config_8h_1a44377df0d3503f0b3d9ab316dd8ddf8b">_GLIBCXX_VISIBILITY</link>(default)
+42 {
+43 _GLIBCXX_BEGIN_NAMESPACE_VERSION
+44 
+45 <emphasis role="preprocessor">#ifdef&#32;__cpp_lib_concepts</emphasis>
+47 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Gen&gt;
+48 &#32;&#32;&#32;&#32;<emphasis role="keyword">concept&#32;</emphasis>uniform_random_bit_generator
+49 &#32;&#32;&#32;&#32;&#32;&#32;=&#32;invocable&lt;_Gen&amp;&gt;&#32;&amp;&amp;&#32;unsigned_integral&lt;invoke_result_t&lt;_Gen&amp;&gt;&gt;
+50 &#32;&#32;&#32;&#32;&#32;&#32;&amp;&amp;&#32;<emphasis role="keyword">requires</emphasis>
+51 &#32;&#32;&#32;&#32;&#32;&#32;{
+52 &#32;&#32;&#32;&#32;{&#32;_Gen::min()&#32;}&#32;-&gt;&#32;same_as&lt;invoke_result_t&lt;_Gen&amp;&gt;&gt;;
+53 &#32;&#32;&#32;&#32;{&#32;_Gen::max()&#32;}&#32;-&gt;&#32;same_as&lt;invoke_result_t&lt;_Gen&amp;&gt;&gt;;
+54 &#32;&#32;&#32;&#32;<emphasis role="keyword">requires</emphasis>&#32;bool_constant&lt;(_Gen::min()&#32;&lt;&#32;_Gen::max())&gt;<link linkend="_classvalue">::value</link>;
+55 &#32;&#32;&#32;&#32;&#32;&#32;};
+56 <emphasis role="preprocessor">#endif</emphasis>
+57 
+58 &#32;&#32;<emphasis role="keyword">namespace&#32;</emphasis>__detail
+59 &#32;&#32;{
+60 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Determine&#32;whether&#32;number&#32;is&#32;a&#32;power&#32;of&#32;two.</emphasis>
+61 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;This&#32;is&#32;true&#32;for&#32;zero,&#32;which&#32;is&#32;OK&#32;because&#32;we&#32;want&#32;_Power_of_2(n+1)</emphasis>
+62 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;to&#32;be&#32;true&#32;if&#32;n==numeric_limits&lt;_Tp&gt;::max()&#32;and&#32;so&#32;n+1&#32;wraps&#32;around.</emphasis>
+63 &#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+64 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">constexpr</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>
+65 &#32;&#32;&#32;&#32;&#32;&#32;_Power_of_2(_Tp&#32;__x)
+66 &#32;&#32;&#32;&#32;&#32;&#32;{
+67 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;((__x&#32;-&#32;1)&#32;&amp;&#32;__x)&#32;==&#32;0;
+68 &#32;&#32;&#32;&#32;&#32;&#32;}
+69 &#32;&#32;}
+70 
+76 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_IntType&#32;=&#32;<emphasis role="keywordtype">int</emphasis>&gt;
+77 &#32;&#32;&#32;&#32;<emphasis role="keyword">class&#32;</emphasis>uniform_int_distribution
+78 &#32;&#32;&#32;&#32;{
+79 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">static_assert</emphasis>(std::is_integral&lt;_IntType&gt;::value,
+80 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="stringliteral">&quot;template&#32;argument&#32;must&#32;be&#32;an&#32;integral&#32;type&quot;</emphasis>);
+81 
+82 &#32;&#32;&#32;&#32;<emphasis role="keyword">public</emphasis>:
+84 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;_IntType&#32;result_type;
+86 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">struct&#32;</emphasis>param_type
+87 &#32;&#32;&#32;&#32;&#32;&#32;{
+88 &#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;uniform_int_distribution&lt;_IntType&gt;&#32;distribution_type;
+89 
+90 &#32;&#32;&#32;&#32;param_type()&#32;:&#32;param_type(0)&#32;{&#32;}
+91 
+92 &#32;&#32;&#32;&#32;<emphasis role="keyword">explicit</emphasis>
+93 &#32;&#32;&#32;&#32;param_type(_IntType&#32;__a,
+94 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_IntType&#32;__b&#32;=&#32;__gnu_cxx::__int_traits&lt;_IntType&gt;::__max)
+95 &#32;&#32;&#32;&#32;:&#32;_M_a(__a),&#32;_M_b(__b)
+96 &#32;&#32;&#32;&#32;{
+97 &#32;&#32;&#32;&#32;&#32;&#32;__glibcxx_assert(_M_a&#32;&lt;=&#32;_M_b);
+98 &#32;&#32;&#32;&#32;}
+99 
+100 &#32;&#32;&#32;&#32;result_type
+101 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1ac8729153468b5dcf13f971b21d84d4e5">a</link>()<emphasis role="keyword">&#32;const</emphasis>
+102 <emphasis role="keyword">&#32;&#32;&#32;&#32;</emphasis>{&#32;<emphasis role="keywordflow">return</emphasis>&#32;_M_a;&#32;}
+103 
+104 &#32;&#32;&#32;&#32;result_type
+105 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a6eba317e3cf44d6d26c04a5a8f197dcb">b</link>()<emphasis role="keyword">&#32;const</emphasis>
+106 <emphasis role="keyword">&#32;&#32;&#32;&#32;</emphasis>{&#32;<emphasis role="keywordflow">return</emphasis>&#32;_M_b;&#32;}
+107 
+108 &#32;&#32;&#32;&#32;<emphasis role="keyword">friend</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>
+109 &#32;&#32;&#32;&#32;operator==(<emphasis role="keyword">const</emphasis>&#32;param_type&amp;&#32;__p1,&#32;<emphasis role="keyword">const</emphasis>&#32;param_type&amp;&#32;__p2)
+110 &#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;__p1._M_a&#32;==&#32;__p2._M_a&#32;&amp;&amp;&#32;__p1._M_b&#32;==&#32;__p2._M_b;&#32;}
+111 
+112 &#32;&#32;&#32;&#32;<emphasis role="keyword">friend</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>
+113 &#32;&#32;&#32;&#32;operator!=(<emphasis role="keyword">const</emphasis>&#32;param_type&amp;&#32;__p1,&#32;<emphasis role="keyword">const</emphasis>&#32;param_type&amp;&#32;__p2)
+114 &#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;!(__p1&#32;==&#32;__p2);&#32;}
+115 
+116 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">private</emphasis>:
+117 &#32;&#32;&#32;&#32;_IntType&#32;_M_a;
+118 &#32;&#32;&#32;&#32;_IntType&#32;_M_b;
+119 &#32;&#32;&#32;&#32;&#32;&#32;};
+120 
+121 &#32;&#32;&#32;&#32;<emphasis role="keyword">public</emphasis>:
+125 &#32;&#32;&#32;&#32;&#32;&#32;uniform_int_distribution()&#32;:&#32;uniform_int_distribution(0)&#32;{&#32;}
+126 
+130 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">explicit</emphasis>
+131 &#32;&#32;&#32;&#32;&#32;&#32;uniform_int_distribution(_IntType&#32;__a,
+132 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_IntType&#32;__b
+133 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;=&#32;__gnu_cxx::__int_traits&lt;_IntType&gt;::__max)
+134 &#32;&#32;&#32;&#32;&#32;&#32;:&#32;_M_param(__a,&#32;__b)
+135 &#32;&#32;&#32;&#32;&#32;&#32;{&#32;}
+136 
+137 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">explicit</emphasis>
+138 &#32;&#32;&#32;&#32;&#32;&#32;uniform_int_distribution(<emphasis role="keyword">const</emphasis>&#32;param_type&amp;&#32;__p)
+139 &#32;&#32;&#32;&#32;&#32;&#32;:&#32;_M_param(__p)
+140 &#32;&#32;&#32;&#32;&#32;&#32;{&#32;}
+141 
+147 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+148 &#32;&#32;&#32;&#32;&#32;&#32;reset()&#32;{&#32;}
+149 
+150 &#32;&#32;&#32;&#32;&#32;&#32;result_type
+151 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1ac8729153468b5dcf13f971b21d84d4e5">a</link>()<emphasis role="keyword">&#32;const</emphasis>
+152 <emphasis role="keyword">&#32;&#32;&#32;&#32;&#32;&#32;</emphasis>{&#32;<emphasis role="keywordflow">return</emphasis>&#32;_M_param.a();&#32;}
+153 
+154 &#32;&#32;&#32;&#32;&#32;&#32;result_type
+155 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a6eba317e3cf44d6d26c04a5a8f197dcb">b</link>()<emphasis role="keyword">&#32;const</emphasis>
+156 <emphasis role="keyword">&#32;&#32;&#32;&#32;&#32;&#32;</emphasis>{&#32;<emphasis role="keywordflow">return</emphasis>&#32;_M_param.b();&#32;}
+157 
+161 &#32;&#32;&#32;&#32;&#32;&#32;param_type
+162 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a630cfbd3157b61ef7097600d4b7885b7">param</link>()<emphasis role="keyword">&#32;const</emphasis>
+163 <emphasis role="keyword">&#32;&#32;&#32;&#32;&#32;&#32;</emphasis>{&#32;<emphasis role="keywordflow">return</emphasis>&#32;_M_param;&#32;}
+164 
+169 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+170 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a630cfbd3157b61ef7097600d4b7885b7">param</link>(<emphasis role="keyword">const</emphasis>&#32;param_type&amp;&#32;__param)
+171 &#32;&#32;&#32;&#32;&#32;&#32;{&#32;_M_param&#32;=&#32;__param;&#32;}
+172 
+176 &#32;&#32;&#32;&#32;&#32;&#32;result_type
+177 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_toml_8hpp_1aef6fbc596e7e69a80f14c34a2b786a14">min</link>()<emphasis role="keyword">&#32;const</emphasis>
+178 <emphasis role="keyword">&#32;&#32;&#32;&#32;&#32;&#32;</emphasis>{&#32;<emphasis role="keywordflow">return</emphasis>&#32;this-&gt;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1ac8729153468b5dcf13f971b21d84d4e5">a</link>();&#32;}
+179 
+183 &#32;&#32;&#32;&#32;&#32;&#32;result_type
+184 &#32;&#32;&#32;&#32;&#32;&#32;max()<emphasis role="keyword">&#32;const</emphasis>
+185 <emphasis role="keyword">&#32;&#32;&#32;&#32;&#32;&#32;</emphasis>{&#32;<emphasis role="keywordflow">return</emphasis>&#32;this-&gt;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a6eba317e3cf44d6d26c04a5a8f197dcb">b</link>();&#32;}
+186 
+190 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_UniformRandomBitGenerator&gt;
+191 &#32;&#32;&#32;&#32;result_type
+192 &#32;&#32;&#32;&#32;operator()(_UniformRandomBitGenerator&amp;&#32;__urng)
+193 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;this-&gt;operator()(__urng,&#32;_M_param);&#32;}
+194 
+195 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_UniformRandomBitGenerator&gt;
+196 &#32;&#32;&#32;&#32;result_type
+197 &#32;&#32;&#32;&#32;operator()(_UniformRandomBitGenerator&amp;&#32;__urng,
+198 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;param_type&amp;&#32;__p);
+199 
+200 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_ForwardIterator,
+201 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;_UniformRandomBitGenerator&gt;
+202 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+203 &#32;&#32;&#32;&#32;__generate(_ForwardIterator&#32;__f,&#32;_ForwardIterator&#32;__t,
+204 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_UniformRandomBitGenerator&amp;&#32;__urng)
+205 &#32;&#32;&#32;&#32;{&#32;this-&gt;__generate(__f,&#32;__t,&#32;__urng,&#32;_M_param);&#32;}
+206 
+207 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_ForwardIterator,
+208 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;_UniformRandomBitGenerator&gt;
+209 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+210 &#32;&#32;&#32;&#32;__generate(_ForwardIterator&#32;__f,&#32;_ForwardIterator&#32;__t,
+211 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_UniformRandomBitGenerator&amp;&#32;__urng,
+212 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;param_type&amp;&#32;__p)
+213 &#32;&#32;&#32;&#32;{&#32;this-&gt;__generate_impl(__f,&#32;__t,&#32;__urng,&#32;__p);&#32;}
+214 
+215 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_UniformRandomBitGenerator&gt;
+216 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+217 &#32;&#32;&#32;&#32;__generate(result_type*&#32;__f,&#32;result_type*&#32;__t,
+218 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_UniformRandomBitGenerator&amp;&#32;__urng,
+219 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;param_type&amp;&#32;__p)
+220 &#32;&#32;&#32;&#32;{&#32;this-&gt;__generate_impl(__f,&#32;__t,&#32;__urng,&#32;__p);&#32;}
+221 
+226 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">friend</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>
+227 &#32;&#32;&#32;&#32;&#32;&#32;operator==(<emphasis role="keyword">const</emphasis>&#32;uniform_int_distribution&amp;&#32;__d1,
+228 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;uniform_int_distribution&amp;&#32;__d2)
+229 &#32;&#32;&#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;__d1._M_param&#32;==&#32;__d2._M_param;&#32;}
+230 
+231 &#32;&#32;&#32;&#32;<emphasis role="keyword">private</emphasis>:
+232 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_ForwardIterator,
+233 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;_UniformRandomBitGenerator&gt;
+234 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+235 &#32;&#32;&#32;&#32;__generate_impl(_ForwardIterator&#32;__f,&#32;_ForwardIterator&#32;__t,
+236 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_UniformRandomBitGenerator&amp;&#32;__urng,
+237 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;param_type&amp;&#32;__p);
+238 
+239 &#32;&#32;&#32;&#32;&#32;&#32;param_type&#32;_M_param;
+240 
+241 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Lemire&apos;s&#32;nearly&#32;divisionless&#32;algorithm.</emphasis>
+242 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Returns&#32;an&#32;unbiased&#32;random&#32;number&#32;from&#32;__g&#32;downscaled&#32;to&#32;[0,__range)</emphasis>
+243 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;using&#32;an&#32;unsigned&#32;type&#32;_Wp&#32;twice&#32;as&#32;wide&#32;as&#32;unsigned&#32;type&#32;_Up.</emphasis>
+244 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Wp,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Urbg,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Up&gt;
+245 &#32;&#32;&#32;&#32;<emphasis role="keyword">static</emphasis>&#32;_Up
+246 &#32;&#32;&#32;&#32;_S_nd(_Urbg&amp;&#32;__g,&#32;_Up&#32;__range)
+247 &#32;&#32;&#32;&#32;{
+248 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">using&#32;</emphasis>_Up_traits&#32;=&#32;__gnu_cxx::__int_traits&lt;_Up&gt;;
+249 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">using&#32;</emphasis>_Wp_traits&#32;=&#32;__gnu_cxx::__int_traits&lt;_Wp&gt;;
+250 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">static_assert</emphasis>(!_Up_traits::__is_signed,&#32;<emphasis role="stringliteral">&quot;U&#32;must&#32;be&#32;unsigned&quot;</emphasis>);
+251 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">static_assert</emphasis>(!_Wp_traits::__is_signed,&#32;<emphasis role="stringliteral">&quot;W&#32;must&#32;be&#32;unsigned&quot;</emphasis>);
+252 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">static_assert</emphasis>(_Wp_traits::__digits&#32;==&#32;(2&#32;*&#32;_Up_traits::__digits),
+253 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="stringliteral">&quot;W&#32;must&#32;be&#32;twice&#32;as&#32;wide&#32;as&#32;U&quot;</emphasis>);
+254 
+255 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;reference:&#32;Fast&#32;Random&#32;Integer&#32;Generation&#32;in&#32;an&#32;Interval</emphasis>
+256 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;ACM&#32;Transactions&#32;on&#32;Modeling&#32;and&#32;Computer&#32;Simulation&#32;29&#32;(1),&#32;2019</emphasis>
+257 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;https://arxiv.org/abs/1805.10941</emphasis>
+258 &#32;&#32;&#32;&#32;&#32;&#32;_Wp&#32;__product&#32;=&#32;_Wp(__g())&#32;*&#32;_Wp(__range);
+259 &#32;&#32;&#32;&#32;&#32;&#32;_Up&#32;__low&#32;=&#32;_Up(__product);
+260 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__low&#32;&lt;&#32;__range)
+261 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+262 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_Up&#32;__threshold&#32;=&#32;-__range&#32;%&#32;__range;
+263 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">while</emphasis>&#32;(__low&#32;&lt;&#32;__threshold)
+264 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+265 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__product&#32;=&#32;_Wp(__g())&#32;*&#32;_Wp(__range);
+266 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__low&#32;=&#32;_Up(__product);
+267 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+268 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+269 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__product&#32;&gt;&gt;&#32;_Up_traits::__digits;
+270 &#32;&#32;&#32;&#32;}
+271 &#32;&#32;&#32;&#32;};
+272 
+273 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_IntType&gt;
+274 &#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_UniformRandomBitGenerator&gt;
+275 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;uniform_int_distribution&lt;_IntType&gt;::result_type
+276 &#32;&#32;&#32;&#32;&#32;&#32;uniform_int_distribution&lt;_IntType&gt;::
+277 &#32;&#32;&#32;&#32;&#32;&#32;operator()(_UniformRandomBitGenerator&amp;&#32;__urng,
+278 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;param_type&amp;&#32;__param)
+279 &#32;&#32;&#32;&#32;&#32;&#32;{
+280 &#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">typename</emphasis>&#32;_UniformRandomBitGenerator::result_type&#32;_Gresult_type;
+281 &#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">typename</emphasis>&#32;make_unsigned&lt;result_type&gt;::type&#32;__utype;
+282 &#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">typename</emphasis>&#32;common_type&lt;_Gresult_type,&#32;__utype&gt;::type&#32;__uctype;
+283 
+284 &#32;&#32;&#32;&#32;<emphasis role="keyword">constexpr</emphasis>&#32;__uctype&#32;__urngmin&#32;=&#32;_UniformRandomBitGenerator::min();
+285 &#32;&#32;&#32;&#32;<emphasis role="keyword">constexpr</emphasis>&#32;__uctype&#32;__urngmax&#32;=&#32;_UniformRandomBitGenerator::max();
+286 &#32;&#32;&#32;&#32;<emphasis role="keyword">static_assert</emphasis>(&#32;__urngmin&#32;&lt;&#32;__urngmax,
+287 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="stringliteral">&quot;Uniform&#32;random&#32;bit&#32;generator&#32;must&#32;define&#32;min()&#32;&lt;&#32;max()&quot;</emphasis>);
+288 &#32;&#32;&#32;&#32;<emphasis role="keyword">constexpr</emphasis>&#32;__uctype&#32;__urngrange&#32;=&#32;__urngmax&#32;-&#32;__urngmin;
+289 
+290 &#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;__uctype&#32;__urange
+291 &#32;&#32;&#32;&#32;&#32;&#32;=&#32;__uctype(__param.b())&#32;-&#32;__uctype(__param.a());
+292 
+293 &#32;&#32;&#32;&#32;__uctype&#32;__ret;
+294 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__urngrange&#32;&gt;&#32;__urange)
+295 &#32;&#32;&#32;&#32;&#32;&#32;{
+296 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;downscaling</emphasis>
+297 
+298 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;__uctype&#32;__uerange&#32;=&#32;__urange&#32;+&#32;1;&#32;<emphasis role="comment">//&#32;__urange&#32;can&#32;be&#32;zero</emphasis>
+299 
+300 <emphasis role="preprocessor">#if&#32;defined&#32;__UINT64_TYPE__&#32;&amp;&amp;&#32;defined&#32;__UINT32_TYPE__</emphasis>
+301 <emphasis role="preprocessor">#if&#32;__SIZEOF_INT128__</emphasis>
+302 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;_GLIBCXX17_CONSTEXPR&#32;(__urngrange&#32;==&#32;__UINT64_MAX__)
+303 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+304 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;__urng&#32;produces&#32;values&#32;that&#32;use&#32;exactly&#32;64-bits,</emphasis>
+305 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;so&#32;use&#32;128-bit&#32;integers&#32;to&#32;downscale&#32;to&#32;desired&#32;range.</emphasis>
+306 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__UINT64_TYPE__&#32;__u64erange&#32;=&#32;__uerange;
+307 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__ret&#32;=&#32;__extension__&#32;_S_nd&lt;unsigned&#32;__int128&gt;(__urng,
+308 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__u64erange);
+309 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+310 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>
+311 <emphasis role="preprocessor">#endif</emphasis>
+312 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;_GLIBCXX17_CONSTEXPR&#32;(__urngrange&#32;==&#32;__UINT32_MAX__)
+313 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+314 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;__urng&#32;produces&#32;values&#32;that&#32;use&#32;exactly&#32;32-bits,</emphasis>
+315 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;so&#32;use&#32;64-bit&#32;integers&#32;to&#32;downscale&#32;to&#32;desired&#32;range.</emphasis>
+316 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__UINT32_TYPE__&#32;__u32erange&#32;=&#32;__uerange;
+317 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__ret&#32;=&#32;_S_nd&lt;__UINT64_TYPE__&gt;(__urng,&#32;__u32erange);
+318 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+319 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>
+320 <emphasis role="preprocessor">#endif</emphasis>
+321 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+322 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;fallback&#32;case&#32;(2&#32;divisions)</emphasis>
+323 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;__uctype&#32;__scaling&#32;=&#32;__urngrange&#32;/&#32;__uerange;
+324 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;__uctype&#32;__past&#32;=&#32;__uerange&#32;*&#32;__scaling;
+325 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">do</emphasis>
+326 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__ret&#32;=&#32;__uctype(__urng())&#32;-&#32;__urngmin;
+327 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">while</emphasis>&#32;(__ret&#32;&gt;=&#32;__past);
+328 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__ret&#32;/=&#32;__scaling;
+329 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+330 &#32;&#32;&#32;&#32;&#32;&#32;}
+331 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__urngrange&#32;&lt;&#32;__urange)
+332 &#32;&#32;&#32;&#32;&#32;&#32;{
+333 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;upscaling</emphasis>
+334 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">/*</emphasis>
+335 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;Note&#32;that&#32;every&#32;value&#32;in&#32;[0,&#32;urange]</emphasis>
+336 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;can&#32;be&#32;written&#32;uniquely&#32;as</emphasis>
+337 <emphasis role="comment"></emphasis>
+338 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;(urngrange&#32;+&#32;1)&#32;*&#32;high&#32;+&#32;low</emphasis>
+339 <emphasis role="comment"></emphasis>
+340 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;where</emphasis>
+341 <emphasis role="comment"></emphasis>
+342 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;high&#32;in&#32;[0,&#32;urange&#32;/&#32;(urngrange&#32;+&#32;1)]</emphasis>
+343 <emphasis role="comment"></emphasis>
+344 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;and</emphasis>
+345 <emphasis role="comment"></emphasis>
+346 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;low&#32;in&#32;[0,&#32;urngrange].</emphasis>
+347 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;*/</emphasis>
+348 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__uctype&#32;<link linkend="__classes_2lib_2include_2xmmintrin_8h_1ad56bf6b8c22ee698e455f99196a1fe12">__tmp</link>;&#32;<emphasis role="comment">//&#32;wraparound&#32;control</emphasis>
+349 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">do</emphasis>
+350 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+351 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;__uctype&#32;__uerngrange&#32;=&#32;__urngrange&#32;+&#32;1;
+352 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2xmmintrin_8h_1ad56bf6b8c22ee698e455f99196a1fe12">__tmp</link>&#32;=&#32;(__uerngrange&#32;*&#32;operator()
+353 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;(__urng,&#32;param_type(0,&#32;__urange&#32;/&#32;__uerngrange)));
+354 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__ret&#32;=&#32;<link linkend="__classes_2lib_2include_2xmmintrin_8h_1ad56bf6b8c22ee698e455f99196a1fe12">__tmp</link>&#32;+&#32;(__uctype(__urng())&#32;-&#32;__urngmin);
+355 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+356 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">while</emphasis>&#32;(__ret&#32;&gt;&#32;__urange&#32;||&#32;__ret&#32;&lt;&#32;<link linkend="__classes_2lib_2include_2xmmintrin_8h_1ad56bf6b8c22ee698e455f99196a1fe12">__tmp</link>);
+357 &#32;&#32;&#32;&#32;&#32;&#32;}
+358 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>
+359 &#32;&#32;&#32;&#32;&#32;&#32;__ret&#32;=&#32;__uctype(__urng())&#32;-&#32;__urngmin;
+360 
+361 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__ret&#32;+&#32;__param.a();
+362 &#32;&#32;&#32;&#32;&#32;&#32;}
+363 
+364 
+365 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_IntType&gt;
+366 &#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_ForwardIterator,
+367 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;_UniformRandomBitGenerator&gt;
+368 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+369 &#32;&#32;&#32;&#32;&#32;&#32;uniform_int_distribution&lt;_IntType&gt;::
+370 &#32;&#32;&#32;&#32;&#32;&#32;__generate_impl(_ForwardIterator&#32;__f,&#32;_ForwardIterator&#32;__t,
+371 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_UniformRandomBitGenerator&amp;&#32;__urng,
+372 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;param_type&amp;&#32;__param)
+373 &#32;&#32;&#32;&#32;&#32;&#32;{
+374 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2bits_2concept__check_8h_1ad4d65553da008b4ea233b534b21d4009">__glibcxx_function_requires</link>(_ForwardIteratorConcept&lt;_ForwardIterator&gt;)
+375 &#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">typename</emphasis>&#32;_UniformRandomBitGenerator::result_type&#32;_Gresult_type;
+376 &#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">typename</emphasis>&#32;make_unsigned&lt;result_type&gt;::type&#32;__utype;
+377 &#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">typename</emphasis>&#32;common_type&lt;_Gresult_type,&#32;__utype&gt;::type&#32;__uctype;
+378 
+379 &#32;&#32;&#32;&#32;<emphasis role="keyword">static_assert</emphasis>(&#32;__urng.min()&#32;&lt;&#32;__urng.max(),
+380 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="stringliteral">&quot;Uniform&#32;random&#32;bit&#32;generator&#32;must&#32;define&#32;min()&#32;&lt;&#32;max()&quot;</emphasis>);
+381 
+382 &#32;&#32;&#32;&#32;<emphasis role="keyword">constexpr</emphasis>&#32;__uctype&#32;__urngmin&#32;=&#32;__urng.min();
+383 &#32;&#32;&#32;&#32;<emphasis role="keyword">constexpr</emphasis>&#32;__uctype&#32;__urngmax&#32;=&#32;__urng.max();
+384 &#32;&#32;&#32;&#32;<emphasis role="keyword">constexpr</emphasis>&#32;__uctype&#32;__urngrange&#32;=&#32;__urngmax&#32;-&#32;__urngmin;
+385 &#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;__uctype&#32;__urange
+386 &#32;&#32;&#32;&#32;&#32;&#32;=&#32;__uctype(__param.b())&#32;-&#32;__uctype(__param.a());
+387 
+388 &#32;&#32;&#32;&#32;__uctype&#32;__ret;
+389 
+390 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__urngrange&#32;&gt;&#32;__urange)
+391 &#32;&#32;&#32;&#32;&#32;&#32;{
+392 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__detail::_Power_of_2(__urngrange&#32;+&#32;1)
+393 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&amp;&amp;&#32;__detail::_Power_of_2(__urange&#32;+&#32;1))
+394 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+395 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">while</emphasis>&#32;(__f&#32;!=&#32;__t)
+396 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+397 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__ret&#32;=&#32;__uctype(__urng())&#32;-&#32;__urngmin;
+398 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;*__f++&#32;=&#32;(__ret&#32;&amp;&#32;__urange)&#32;+&#32;__param.a();
+399 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+400 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+401 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>
+402 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+403 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;downscaling</emphasis>
+404 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;__uctype&#32;__uerange&#32;=&#32;__urange&#32;+&#32;1;&#32;<emphasis role="comment">//&#32;__urange&#32;can&#32;be&#32;zero</emphasis>
+405 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;__uctype&#32;__scaling&#32;=&#32;__urngrange&#32;/&#32;__uerange;
+406 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;__uctype&#32;__past&#32;=&#32;__uerange&#32;*&#32;__scaling;
+407 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">while</emphasis>&#32;(__f&#32;!=&#32;__t)
+408 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+409 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">do</emphasis>
+410 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__ret&#32;=&#32;__uctype(__urng())&#32;-&#32;__urngmin;
+411 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">while</emphasis>&#32;(__ret&#32;&gt;=&#32;__past);
+412 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;*__f++&#32;=&#32;__ret&#32;/&#32;__scaling&#32;+&#32;__param.a();
+413 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+414 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+415 &#32;&#32;&#32;&#32;&#32;&#32;}
+416 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__urngrange&#32;&lt;&#32;__urange)
+417 &#32;&#32;&#32;&#32;&#32;&#32;{
+418 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;upscaling</emphasis>
+419 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">/*</emphasis>
+420 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;Note&#32;that&#32;every&#32;value&#32;in&#32;[0,&#32;urange]</emphasis>
+421 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;can&#32;be&#32;written&#32;uniquely&#32;as</emphasis>
+422 <emphasis role="comment"></emphasis>
+423 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;(urngrange&#32;+&#32;1)&#32;*&#32;high&#32;+&#32;low</emphasis>
+424 <emphasis role="comment"></emphasis>
+425 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;where</emphasis>
+426 <emphasis role="comment"></emphasis>
+427 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;high&#32;in&#32;[0,&#32;urange&#32;/&#32;(urngrange&#32;+&#32;1)]</emphasis>
+428 <emphasis role="comment"></emphasis>
+429 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;and</emphasis>
+430 <emphasis role="comment"></emphasis>
+431 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;low&#32;in&#32;[0,&#32;urngrange].</emphasis>
+432 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;*/</emphasis>
+433 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__uctype&#32;<link linkend="__classes_2lib_2include_2xmmintrin_8h_1ad56bf6b8c22ee698e455f99196a1fe12">__tmp</link>;&#32;<emphasis role="comment">//&#32;wraparound&#32;control</emphasis>
+434 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">while</emphasis>&#32;(__f&#32;!=&#32;__t)
+435 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+436 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">do</emphasis>
+437 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+438 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">constexpr</emphasis>&#32;__uctype&#32;__uerngrange&#32;=&#32;__urngrange&#32;+&#32;1;
+439 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2xmmintrin_8h_1ad56bf6b8c22ee698e455f99196a1fe12">__tmp</link>&#32;=&#32;(__uerngrange&#32;*&#32;operator()
+440 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;(__urng,&#32;param_type(0,&#32;__urange&#32;/&#32;__uerngrange)));
+441 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__ret&#32;=&#32;<link linkend="__classes_2lib_2include_2xmmintrin_8h_1ad56bf6b8c22ee698e455f99196a1fe12">__tmp</link>&#32;+&#32;(__uctype(__urng())&#32;-&#32;__urngmin);
+442 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+443 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">while</emphasis>&#32;(__ret&#32;&gt;&#32;__urange&#32;||&#32;__ret&#32;&lt;&#32;<link linkend="__classes_2lib_2include_2xmmintrin_8h_1ad56bf6b8c22ee698e455f99196a1fe12">__tmp</link>);
+444 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;*__f++&#32;=&#32;__ret;
+445 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+446 &#32;&#32;&#32;&#32;&#32;&#32;}
+447 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>
+448 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">while</emphasis>&#32;(__f&#32;!=&#32;__t)
+449 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;*__f++&#32;=&#32;__uctype(__urng())&#32;-&#32;__urngmin&#32;+&#32;__param.a();
+450 &#32;&#32;&#32;&#32;&#32;&#32;}
+451 
+452 &#32;&#32;<emphasis role="comment">//&#32;operator!=&#32;and&#32;operator&lt;&lt;&#32;and&#32;operator&gt;&gt;&#32;are&#32;defined&#32;in&#32;&lt;bits/random.h&gt;</emphasis>
+453 
+454 _GLIBCXX_END_NAMESPACE_VERSION
+455 }&#32;<emphasis role="comment">//&#32;namespace&#32;std</emphasis>
+456 
+457 <emphasis role="preprocessor">#endif</emphasis>
+</programlisting></section>

@@ -1,0 +1,926 @@
+\doxysection{shared\+\_\+ptr.\+h}
+\hypertarget{_old_2_classes_2lib_2include_2c_09_09_2bits_2shared__ptr_8h_source}{}\label{_old_2_classes_2lib_2include_2c_09_09_2bits_2shared__ptr_8h_source}\index{C:/Users/HP/Documents/GitHub/Minero-\/Game/Old/Classes/lib/include/c++/bits/shared\_ptr.h@{C:/Users/HP/Documents/GitHub/Minero-\/Game/Old/Classes/lib/include/c++/bits/shared\_ptr.h}}
+\mbox{\hyperlink{_old_2_classes_2lib_2include_2c_09_09_2bits_2shared__ptr_8h}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{comment}{//\ shared\_ptr\ and\ weak\_ptr\ implementation\ -\/*-\/\ C++\ -\/*-\/}}
+\DoxyCodeLine{00002\ }
+\DoxyCodeLine{00003\ \textcolor{comment}{//\ Copyright\ (C)\ 2007-\/2022\ Free\ Software\ Foundation,\ Inc.}}
+\DoxyCodeLine{00004\ \textcolor{comment}{//}}
+\DoxyCodeLine{00005\ \textcolor{comment}{//\ This\ file\ is\ part\ of\ the\ GNU\ ISO\ C++\ Library.\ \ This\ library\ is\ free}}
+\DoxyCodeLine{00006\ \textcolor{comment}{//\ software;\ you\ can\ redistribute\ it\ and/or\ modify\ it\ under\ the}}
+\DoxyCodeLine{00007\ \textcolor{comment}{//\ terms\ of\ the\ GNU\ General\ Public\ License\ as\ published\ by\ the}}
+\DoxyCodeLine{00008\ \textcolor{comment}{//\ Free\ Software\ Foundation;\ either\ version\ 3,\ or\ (at\ your\ option)}}
+\DoxyCodeLine{00009\ \textcolor{comment}{//\ any\ later\ version.}}
+\DoxyCodeLine{00010\ }
+\DoxyCodeLine{00011\ \textcolor{comment}{//\ This\ library\ is\ distributed\ in\ the\ hope\ that\ it\ will\ be\ useful,}}
+\DoxyCodeLine{00012\ \textcolor{comment}{//\ but\ WITHOUT\ ANY\ WARRANTY;\ without\ even\ the\ implied\ warranty\ of}}
+\DoxyCodeLine{00013\ \textcolor{comment}{//\ MERCHANTABILITY\ or\ FITNESS\ FOR\ A\ PARTICULAR\ PURPOSE.\ \ See\ the}}
+\DoxyCodeLine{00014\ \textcolor{comment}{//\ GNU\ General\ Public\ License\ for\ more\ details.}}
+\DoxyCodeLine{00015\ }
+\DoxyCodeLine{00016\ \textcolor{comment}{//\ Under\ Section\ 7\ of\ GPL\ version\ 3,\ you\ are\ granted\ additional}}
+\DoxyCodeLine{00017\ \textcolor{comment}{//\ permissions\ described\ in\ the\ GCC\ Runtime\ Library\ Exception,\ version}}
+\DoxyCodeLine{00018\ \textcolor{comment}{//\ 3.1,\ as\ published\ by\ the\ Free\ Software\ Foundation.}}
+\DoxyCodeLine{00019\ }
+\DoxyCodeLine{00020\ \textcolor{comment}{//\ You\ should\ have\ received\ a\ copy\ of\ the\ GNU\ General\ Public\ License\ and}}
+\DoxyCodeLine{00021\ \textcolor{comment}{//\ a\ copy\ of\ the\ GCC\ Runtime\ Library\ Exception\ along\ with\ this\ program;}}
+\DoxyCodeLine{00022\ \textcolor{comment}{//\ see\ the\ files\ COPYING3\ and\ COPYING.RUNTIME\ respectively.\ \ If\ not,\ see}}
+\DoxyCodeLine{00023\ \textcolor{comment}{//\ <http://www.gnu.org/licenses/>.}}
+\DoxyCodeLine{00024\ }
+\DoxyCodeLine{00025\ \textcolor{comment}{//\ GCC\ Note:\ Based\ on\ files\ from\ version\ 1.32.0\ of\ the\ Boost\ library.}}
+\DoxyCodeLine{00026\ }
+\DoxyCodeLine{00027\ \textcolor{comment}{//\ \ shared\_count.hpp}}
+\DoxyCodeLine{00028\ \textcolor{comment}{//\ \ Copyright\ (c)\ 2001,\ 2002,\ 2003\ Peter\ Dimov\ and\ Multi\ Media\ Ltd.}}
+\DoxyCodeLine{00029\ }
+\DoxyCodeLine{00030\ \textcolor{comment}{//\ \ shared\_ptr.hpp}}
+\DoxyCodeLine{00031\ \textcolor{comment}{//\ \ Copyright\ (C)\ 1998,\ 1999\ Greg\ Colvin\ and\ Beman\ Dawes.}}
+\DoxyCodeLine{00032\ \textcolor{comment}{//\ \ Copyright\ (C)\ 2001,\ 2002,\ 2003\ Peter\ Dimov}}
+\DoxyCodeLine{00033\ }
+\DoxyCodeLine{00034\ \textcolor{comment}{//\ \ weak\_ptr.hpp}}
+\DoxyCodeLine{00035\ \textcolor{comment}{//\ \ Copyright\ (C)\ 2001,\ 2002,\ 2003\ Peter\ Dimov}}
+\DoxyCodeLine{00036\ }
+\DoxyCodeLine{00037\ \textcolor{comment}{//\ \ enable\_shared\_from\_this.hpp}}
+\DoxyCodeLine{00038\ \textcolor{comment}{//\ \ Copyright\ (C)\ 2002\ Peter\ Dimov}}
+\DoxyCodeLine{00039\ }
+\DoxyCodeLine{00040\ \textcolor{comment}{//\ Distributed\ under\ the\ Boost\ Software\ License,\ Version\ 1.0.\ (See}}
+\DoxyCodeLine{00041\ \textcolor{comment}{//\ accompanying\ file\ LICENSE\_1\_0.txt\ or\ copy\ at}}
+\DoxyCodeLine{00042\ \textcolor{comment}{//\ http://www.boost.org/LICENSE\_1\_0.txt)}}
+\DoxyCodeLine{00043\ }
+\DoxyCodeLine{00049\ \textcolor{preprocessor}{\#ifndef\ \_SHARED\_PTR\_H}}
+\DoxyCodeLine{00050\ \textcolor{preprocessor}{\#define\ \_SHARED\_PTR\_H\ 1}}
+\DoxyCodeLine{00051\ }
+\DoxyCodeLine{00052\ \textcolor{preprocessor}{\#include\ <iosfwd>}\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ std::basic\_ostream}}
+\DoxyCodeLine{00053\ \textcolor{preprocessor}{\#include\ <bits/shared\_ptr\_base.h>}}
+\DoxyCodeLine{00054\ }
+\DoxyCodeLine{00055\ \textcolor{keyword}{namespace\ }\mbox{\hyperlink{namespacestd}{std}}\ \mbox{\hyperlink{_classes_2lib_2include_2c_09_09_2x86__64-w64-mingw32_2bits_2c_09_09config_8h_a44377df0d3503f0b3d9ab316dd8ddf8b}{\_GLIBCXX\_VISIBILITY}}(default)}
+\DoxyCodeLine{00056\ \{}
+\DoxyCodeLine{00057\ \_GLIBCXX\_BEGIN\_NAMESPACE\_VERSION}
+\DoxyCodeLine{00058\ }
+\DoxyCodeLine{00064\ \ \ \textcolor{comment}{//\ 20.7.2.2.11\ shared\_ptr\ I/O}}
+\DoxyCodeLine{00065\ }
+\DoxyCodeLine{00068\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Ch,\ \textcolor{keyword}{typename}\ \_Tr,\ \textcolor{keyword}{typename}\ \_Tp,\ \_Lock\_policy\ \_Lp>}
+\DoxyCodeLine{00069\ \ \ \ \ \textcolor{keyword}{inline}\ std::basic\_ostream<\_Ch,\ \_Tr>\&}
+\DoxyCodeLine{00070\ \ \ \ \ \mbox{\hyperlink{forward__declarations_8h_ade7e3bc03b39cb3b5684a4c302832e3c}{operator<<}}(std::basic\_ostream<\_Ch,\ \_Tr>\&\ \_\_os,}
+\DoxyCodeLine{00071\ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \_\_shared\_ptr<\_Tp,\ \_Lp>\&\ \_\_p)}
+\DoxyCodeLine{00072\ \ \ \ \ \{}
+\DoxyCodeLine{00073\ \ \ \ \ \ \ \_\_os\ <<\ \_\_p.get();}
+\DoxyCodeLine{00074\ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \_\_os;}
+\DoxyCodeLine{00075\ \ \ \ \ \}}
+\DoxyCodeLine{00076\ }
+\DoxyCodeLine{00077\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Del,\ \textcolor{keyword}{typename}\ \_Tp,\ \_Lock\_policy\ \_Lp>}
+\DoxyCodeLine{00078\ \ \ \ \ \textcolor{keyword}{inline}\ \_Del*}
+\DoxyCodeLine{00079\ \ \ \ \ get\_deleter(\textcolor{keyword}{const}\ \_\_shared\_ptr<\_Tp,\ \_Lp>\&\ \_\_p)\ \textcolor{keyword}{noexcept}}
+\DoxyCodeLine{00080\ \ \ \ \ \{}
+\DoxyCodeLine{00081\ \textcolor{preprocessor}{\#if\ \_\_cpp\_rtti}}
+\DoxyCodeLine{00082\ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{static\_cast<}\_Del*\textcolor{keyword}{>}(\_\_p.\_M\_get\_deleter(\textcolor{keyword}{typeid}(\_Del)));}
+\DoxyCodeLine{00083\ \textcolor{preprocessor}{\#else}}
+\DoxyCodeLine{00084\ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ 0;}
+\DoxyCodeLine{00085\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00086\ \ \ \ \ \}}
+\DoxyCodeLine{00087\ }
+\DoxyCodeLine{00089\ }
+\DoxyCodeLine{00092\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Del,\ \textcolor{keyword}{typename}\ \_Tp>}
+\DoxyCodeLine{00093\ \ \ \ \ \textcolor{keyword}{inline}\ \_Del*}
+\DoxyCodeLine{00094\ \ \ \ \ get\_deleter(\textcolor{keyword}{const}\ shared\_ptr<\_Tp>\&\ \_\_p)\ \textcolor{keyword}{noexcept}}
+\DoxyCodeLine{00095\ \ \ \ \ \{}
+\DoxyCodeLine{00096\ \textcolor{preprocessor}{\#if\ \_\_cpp\_rtti}}
+\DoxyCodeLine{00097\ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{static\_cast<}\_Del*\textcolor{keyword}{>}(\_\_p.\_M\_get\_deleter(\textcolor{keyword}{typeid}(\_Del)));}
+\DoxyCodeLine{00098\ \textcolor{preprocessor}{\#else}}
+\DoxyCodeLine{00099\ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ 0;}
+\DoxyCodeLine{00100\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00101\ \ \ \ \ \}}
+\DoxyCodeLine{00102\ }
+\DoxyCodeLine{00104\ }
+\DoxyCodeLine{00105\ \ \ \textcolor{comment}{//\ Constraint\ for\ overloads\ taking\ non-\/array\ types.}}
+\DoxyCodeLine{00106\ \textcolor{preprocessor}{\#if\ \_\_cpp\_concepts\ \&\&\ \_\_cpp\_lib\_type\_trait\_variable\_templates}}
+\DoxyCodeLine{00107\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Tp>}
+\DoxyCodeLine{00108\ \ \ \ \ \textcolor{keyword}{requires}\ (!is\_array\_v<\_Tp>)}
+\DoxyCodeLine{00109\ \ \ \ \ \textcolor{keyword}{using}\ \_NonArray\ =\ \_Tp;}
+\DoxyCodeLine{00110\ \textcolor{preprocessor}{\#else}}
+\DoxyCodeLine{00111\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Tp>}
+\DoxyCodeLine{00112\ \ \ \ \ \textcolor{keyword}{using\ }\_NonArray\ =\ \_\_enable\_if\_t<!is\_array<\_Tp>::value,\ \_Tp>;}
+\DoxyCodeLine{00113\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00114\ }
+\DoxyCodeLine{00115\ \textcolor{preprocessor}{\#if\ \_\_cpp\_lib\_shared\_ptr\_arrays\ >=\ 201707L}}
+\DoxyCodeLine{00116\ \ \ \textcolor{comment}{//\ Constraint\ for\ overloads\ taking\ array\ types\ with\ unknown\ bound,\ U[].}}
+\DoxyCodeLine{00117\ \textcolor{preprocessor}{\#if\ \_\_cpp\_concepts}}
+\DoxyCodeLine{00118\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Tp>}
+\DoxyCodeLine{00119\ \ \ \ \ \textcolor{keyword}{requires}\ is\_array\_v<\_Tp>\ \&\&\ (extent\_v<\_Tp>\ ==\ 0)}
+\DoxyCodeLine{00120\ \ \ \ \ \textcolor{keyword}{using}\ \_UnboundedArray\ =\ \_Tp;}
+\DoxyCodeLine{00121\ \textcolor{preprocessor}{\#else}}
+\DoxyCodeLine{00122\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Tp>}
+\DoxyCodeLine{00123\ \ \ \ \ \textcolor{keyword}{using\ }\_UnboundedArray}
+\DoxyCodeLine{00124\ \ \ \ \ \ \ =\ \_\_enable\_if\_t<\_\_is\_array\_unknown\_bounds<\_Tp>::value,\ \_Tp>;}
+\DoxyCodeLine{00125\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00126\ }
+\DoxyCodeLine{00127\ \ \ \textcolor{comment}{//\ Constraint\ for\ overloads\ taking\ array\ types\ with\ known\ bound,\ U[N].}}
+\DoxyCodeLine{00128\ \textcolor{preprocessor}{\#if\ \_\_cpp\_concepts}}
+\DoxyCodeLine{00129\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Tp>}
+\DoxyCodeLine{00130\ \ \ \ \ \textcolor{keyword}{requires}\ (extent\_v<\_Tp>\ !=\ 0)}
+\DoxyCodeLine{00131\ \ \ \ \ \textcolor{keyword}{using}\ \_BoundedArray\ =\ \_Tp;}
+\DoxyCodeLine{00132\ \textcolor{preprocessor}{\#else}}
+\DoxyCodeLine{00133\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Tp>}
+\DoxyCodeLine{00134\ \ \ \ \ \textcolor{keyword}{using\ }\_BoundedArray}
+\DoxyCodeLine{00135\ \ \ \ \ \ \ =\ \_\_enable\_if\_t<\_\_is\_array\_known\_bounds<\_Tp>::value,\ \_Tp>;}
+\DoxyCodeLine{00136\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00137\ }
+\DoxyCodeLine{00138\ \textcolor{preprocessor}{\#if\ \_\_cpp\_lib\_smart\_ptr\_for\_overwrite}}
+\DoxyCodeLine{00139\ \ \ \textcolor{comment}{//\ Constraint\ for\ overloads\ taking\ either\ non-\/array\ or\ bounded\ array,\ U[N].}}
+\DoxyCodeLine{00140\ \textcolor{preprocessor}{\#if\ \_\_cpp\_concepts}}
+\DoxyCodeLine{00141\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Tp>}
+\DoxyCodeLine{00142\ \ \ \ \ \textcolor{keyword}{requires}\ (!is\_array\_v<\_Tp>)\ ||\ (extent\_v<\_Tp>\ !=\ 0)}
+\DoxyCodeLine{00143\ \ \ \ \ \textcolor{keyword}{using\ }\_NotUnboundedArray\ =\ \_Tp;}
+\DoxyCodeLine{00144\ \textcolor{preprocessor}{\#else}}
+\DoxyCodeLine{00145\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Tp>}
+\DoxyCodeLine{00146\ \ \ \ \ \textcolor{keyword}{using\ }\_NotUnboundedArray}
+\DoxyCodeLine{00147\ \ \ \ \ \ \ =\ \_\_enable\_if\_t<!\_\_is\_array\_unknown\_bounds<\_Tp>::value,\ \_Tp>;}
+\DoxyCodeLine{00148\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00149\ \textcolor{preprocessor}{\#endif\ }\textcolor{comment}{//\ smart\_ptr\_for\_overwrite}}
+\DoxyCodeLine{00150\ \textcolor{preprocessor}{\#endif\ }\textcolor{comment}{//\ shared\_ptr\_arrays}}
+\DoxyCodeLine{00151\ }
+\DoxyCodeLine{00153\ }
+\DoxyCodeLine{00174\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Tp>}
+\DoxyCodeLine{00175\ \ \ \ \ \textcolor{keyword}{class\ }shared\_ptr\ :\ \textcolor{keyword}{public}\ \_\_shared\_ptr<\_Tp>}
+\DoxyCodeLine{00176\ \ \ \ \ \{}
+\DoxyCodeLine{00177\ \ \ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}...\ \_Args>}
+\DoxyCodeLine{00178\ \ \ \ \ \textcolor{keyword}{using\ }\_Constructible\ =\ \textcolor{keyword}{typename}\ enable\_if<}
+\DoxyCodeLine{00179\ \ \ \ \ \ \ is\_constructible<\_\_shared\_ptr<\_Tp>,\ \_Args...>\mbox{\hyperlink{classvalue}{::value}}}
+\DoxyCodeLine{00180\ \ \ \ \ >\mbox{\hyperlink{_classes_2_gameobj_8h_a890efa53b3d7deeeced6f3a0d6653ed3}{::type}};}
+\DoxyCodeLine{00181\ }
+\DoxyCodeLine{00182\ \ \ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Arg>}
+\DoxyCodeLine{00183\ \ \ \ \ \textcolor{keyword}{using\ }\_Assignable\ =\ \textcolor{keyword}{typename}\ enable\_if<}
+\DoxyCodeLine{00184\ \ \ \ \ \ \ is\_assignable<\_\_shared\_ptr<\_Tp>\&,\ \_Arg>\mbox{\hyperlink{classvalue}{::value}},\ shared\_ptr\&}
+\DoxyCodeLine{00185\ \ \ \ \ >\mbox{\hyperlink{_classes_2_gameobj_8h_a890efa53b3d7deeeced6f3a0d6653ed3}{::type}};}
+\DoxyCodeLine{00186\ }
+\DoxyCodeLine{00187\ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00188\ }
+\DoxyCodeLine{00190\ \ \ \ \ \ \ \textcolor{keyword}{using\ }element\_type\ =\ \textcolor{keyword}{typename}\ \_\_shared\_ptr<\_Tp>::element\_type;}
+\DoxyCodeLine{00191\ }
+\DoxyCodeLine{00192\ \textcolor{preprocessor}{\#if\ \_\_cplusplus\ >=\ 201703L}}
+\DoxyCodeLine{00193\ \textcolor{preprocessor}{\#\ define\ \_\_cpp\_lib\_shared\_ptr\_weak\_type\ 201606L}}
+\DoxyCodeLine{00196\ \ \ \ \ \ \ \textcolor{keyword}{using\ }weak\_type\ =\ weak\_ptr<\_Tp>;}
+\DoxyCodeLine{00197\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00202\ \ \ \ \ \ \ \textcolor{keyword}{constexpr}\ shared\_ptr()\ noexcept\ :\ \_\_shared\_ptr<\_Tp>()\ \{\ \}}
+\DoxyCodeLine{00203\ }
+\DoxyCodeLine{00204\ \ \ \ \ \ \ shared\_ptr(\textcolor{keyword}{const}\ shared\_ptr\&)\ \textcolor{keyword}{noexcept}\ =\ \textcolor{keywordflow}{default};\ }
+\DoxyCodeLine{00205\ }
+\DoxyCodeLine{00212\ \ \ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Yp,\ \textcolor{keyword}{typename}\ =\ \_Constructible<\_Yp*>>}
+\DoxyCodeLine{00213\ \ \ \ \ \textcolor{keyword}{explicit}}
+\DoxyCodeLine{00214\ \ \ \ \ shared\_ptr(\_Yp*\ \_\_p)\ :\ \_\_shared\_ptr<\_Tp>(\_\_p)\ \{\ \}}
+\DoxyCodeLine{00215\ }
+\DoxyCodeLine{00229\ \ \ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Yp,\ \textcolor{keyword}{typename}\ \_Deleter,}
+\DoxyCodeLine{00230\ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{typename}\ =\ \_Constructible<\_Yp*,\ \_Deleter>>}
+\DoxyCodeLine{00231\ \ \ \ \ shared\_ptr(\_Yp*\ \_\_p,\ \_Deleter\ \_\_d)}
+\DoxyCodeLine{00232\ \ \ \ \ \ \ \ \ :\ \_\_shared\_ptr<\_Tp>(\_\_p,\ \mbox{\hyperlink{namespacestd}{std}}::\mbox{\hyperlink{namespacestd_ac7095819f6a8da64d69b1ee3029c52be}{move}}(\_\_d))\ \{\ \}}
+\DoxyCodeLine{00233\ }
+\DoxyCodeLine{00247\ \ \ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Deleter>}
+\DoxyCodeLine{00248\ \ \ \ \ shared\_ptr(nullptr\_t\ \_\_p,\ \_Deleter\ \_\_d)}
+\DoxyCodeLine{00249\ \ \ \ \ \ \ \ \ :\ \_\_shared\_ptr<\_Tp>(\_\_p,\ \mbox{\hyperlink{namespacestd}{std}}::\mbox{\hyperlink{namespacestd_ac7095819f6a8da64d69b1ee3029c52be}{move}}(\_\_d))\ \{\ \}}
+\DoxyCodeLine{00250\ }
+\DoxyCodeLine{00266\ \ \ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Yp,\ \textcolor{keyword}{typename}\ \_Deleter,\ \textcolor{keyword}{typename}\ \_Alloc,}
+\DoxyCodeLine{00267\ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{typename}\ =\ \_Constructible<\_Yp*,\ \_Deleter,\ \_Alloc>>}
+\DoxyCodeLine{00268\ \ \ \ \ shared\_ptr(\_Yp*\ \_\_p,\ \_Deleter\ \_\_d,\ \_Alloc\ \_\_a)}
+\DoxyCodeLine{00269\ \ \ \ \ :\ \_\_shared\_ptr<\_Tp>(\_\_p,\ \mbox{\hyperlink{namespacestd}{std}}::\mbox{\hyperlink{namespacestd_ac7095819f6a8da64d69b1ee3029c52be}{move}}(\_\_d),\ \mbox{\hyperlink{namespacestd}{std}}::\mbox{\hyperlink{namespacestd_ac7095819f6a8da64d69b1ee3029c52be}{move}}(\_\_a))\ \{\ \}}
+\DoxyCodeLine{00270\ }
+\DoxyCodeLine{00286\ \ \ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Deleter,\ \textcolor{keyword}{typename}\ \_Alloc>}
+\DoxyCodeLine{00287\ \ \ \ \ shared\_ptr(nullptr\_t\ \_\_p,\ \_Deleter\ \_\_d,\ \_Alloc\ \_\_a)}
+\DoxyCodeLine{00288\ \ \ \ \ :\ \_\_shared\_ptr<\_Tp>(\_\_p,\ \mbox{\hyperlink{namespacestd}{std}}::\mbox{\hyperlink{namespacestd_ac7095819f6a8da64d69b1ee3029c52be}{move}}(\_\_d),\ \mbox{\hyperlink{namespacestd}{std}}::\mbox{\hyperlink{namespacestd_ac7095819f6a8da64d69b1ee3029c52be}{move}}(\_\_a))\ \{\ \}}
+\DoxyCodeLine{00289\ }
+\DoxyCodeLine{00290\ \ \ \ \ \ \ \textcolor{comment}{//\ Aliasing\ constructor}}
+\DoxyCodeLine{00291\ }
+\DoxyCodeLine{00310\ \ \ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Yp>}
+\DoxyCodeLine{00311\ \ \ \ \ shared\_ptr(\textcolor{keyword}{const}\ shared\_ptr<\_Yp>\&\ \_\_r,\ element\_type*\ \_\_p)\ noexcept}
+\DoxyCodeLine{00312\ \ \ \ \ :\ \_\_shared\_ptr<\_Tp>(\_\_r,\ \_\_p)\ \{\ \}}
+\DoxyCodeLine{00313\ }
+\DoxyCodeLine{00314\ \textcolor{preprocessor}{\#if\ \_\_cplusplus\ >\ 201703L}}
+\DoxyCodeLine{00315\ \ \ \ \ \ \ \textcolor{comment}{//\ \_GLIBCXX\_RESOLVE\_LIB\_DEFECTS}}
+\DoxyCodeLine{00316\ \ \ \ \ \ \ \textcolor{comment}{//\ 2996.\ Missing\ rvalue\ overloads\ for\ shared\_ptr\ operations}}
+\DoxyCodeLine{00338\ \ \ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Yp>}
+\DoxyCodeLine{00339\ \ \ \ \ shared\_ptr(shared\_ptr<\_Yp>\&\&\ \_\_r,\ element\_type*\ \_\_p)\ noexcept}
+\DoxyCodeLine{00340\ \ \ \ \ :\ \_\_shared\_ptr<\_Tp>(\mbox{\hyperlink{namespacestd_ac7095819f6a8da64d69b1ee3029c52be}{std::move}}(\_\_r),\ \_\_p)\ \{\ \}}
+\DoxyCodeLine{00341\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00349\ \ \ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Yp,}
+\DoxyCodeLine{00350\ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{typename}\ =\ \_Constructible<const\ shared\_ptr<\_Yp>\&>>}
+\DoxyCodeLine{00351\ \ \ \ \ shared\_ptr(\textcolor{keyword}{const}\ shared\_ptr<\_Yp>\&\ \_\_r)\ noexcept}
+\DoxyCodeLine{00352\ \ \ \ \ \ \ \ \ :\ \_\_shared\_ptr<\_Tp>(\_\_r)\ \{\ \}}
+\DoxyCodeLine{00353\ }
+\DoxyCodeLine{00359\ \ \ \ \ \ \ shared\_ptr(shared\_ptr\&\&\ \_\_r)\ noexcept}
+\DoxyCodeLine{00360\ \ \ \ \ \ \ :\ \_\_shared\_ptr<\_Tp>(\mbox{\hyperlink{namespacestd_ac7095819f6a8da64d69b1ee3029c52be}{std::move}}(\_\_r))\ \{\ \}}
+\DoxyCodeLine{00361\ }
+\DoxyCodeLine{00367\ \ \ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Yp,\ \textcolor{keyword}{typename}\ =\ \_Constructible<shared\_ptr<\_Yp>>>}
+\DoxyCodeLine{00368\ \ \ \ \ shared\_ptr(shared\_ptr<\_Yp>\&\&\ \_\_r)\ noexcept}
+\DoxyCodeLine{00369\ \ \ \ \ :\ \_\_shared\_ptr<\_Tp>(\mbox{\hyperlink{namespacestd_ac7095819f6a8da64d69b1ee3029c52be}{std::move}}(\_\_r))\ \{\ \}}
+\DoxyCodeLine{00370\ }
+\DoxyCodeLine{00379\ \ \ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Yp,\ \textcolor{keyword}{typename}\ =\ \_Constructible<const\ weak\_ptr<\_Yp>\&>>}
+\DoxyCodeLine{00380\ \ \ \ \ \textcolor{keyword}{explicit}\ shared\_ptr(\textcolor{keyword}{const}\ weak\_ptr<\_Yp>\&\ \_\_r)}
+\DoxyCodeLine{00381\ \ \ \ \ :\ \_\_shared\_ptr<\_Tp>(\_\_r)\ \{\ \}}
+\DoxyCodeLine{00382\ }
+\DoxyCodeLine{00383\ \textcolor{preprocessor}{\#if\ \_GLIBCXX\_USE\_DEPRECATED}}
+\DoxyCodeLine{00384\ \textcolor{preprocessor}{\#pragma\ GCC\ diagnostic\ push}}
+\DoxyCodeLine{00385\ \textcolor{preprocessor}{\#pragma\ GCC\ diagnostic\ ignored\ "{}-\/Wdeprecated-\/declarations"{}}}
+\DoxyCodeLine{00386\ \ \ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Yp,\ \textcolor{keyword}{typename}\ =\ \_Constructible<auto\_ptr<\_Yp>>>}
+\DoxyCodeLine{00387\ \ \ \ \ shared\_ptr(auto\_ptr<\_Yp>\&\&\ \_\_r);}
+\DoxyCodeLine{00388\ \textcolor{preprocessor}{\#pragma\ GCC\ diagnostic\ pop}}
+\DoxyCodeLine{00389\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00390\ }
+\DoxyCodeLine{00391\ \ \ \ \ \ \ \textcolor{comment}{//\ \_GLIBCXX\_RESOLVE\_LIB\_DEFECTS}}
+\DoxyCodeLine{00392\ \ \ \ \ \ \ \textcolor{comment}{//\ 2399.\ shared\_ptr's\ constructor\ from\ unique\_ptr\ should\ be\ constrained}}
+\DoxyCodeLine{00393\ \ \ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Yp,\ \textcolor{keyword}{typename}\ \_Del,}
+\DoxyCodeLine{00394\ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{typename}\ =\ \_Constructible<unique\_ptr<\_Yp,\ \_Del>>>}
+\DoxyCodeLine{00395\ \ \ \ \ shared\_ptr(unique\_ptr<\_Yp,\ \_Del>\&\&\ \_\_r)}
+\DoxyCodeLine{00396\ \ \ \ \ :\ \_\_shared\_ptr<\_Tp>(\mbox{\hyperlink{namespacestd}{std}}::\mbox{\hyperlink{namespacestd_ac7095819f6a8da64d69b1ee3029c52be}{move}}(\_\_r))\ \{\ \}}
+\DoxyCodeLine{00397\ }
+\DoxyCodeLine{00398\ \textcolor{preprocessor}{\#if\ \_\_cplusplus\ <=\ 201402L\ \&\&\ \_GLIBCXX\_USE\_DEPRECATED}}
+\DoxyCodeLine{00399\ \ \ \ \ \ \ \textcolor{comment}{//\ This\ non-\/standard\ constructor\ exists\ to\ support\ conversions\ that}}
+\DoxyCodeLine{00400\ \ \ \ \ \ \ \textcolor{comment}{//\ were\ possible\ in\ C++11\ and\ C++14\ but\ are\ ill-\/formed\ in\ C++17.}}
+\DoxyCodeLine{00401\ \ \ \ \ \ \ \textcolor{comment}{//\ If\ an\ exception\ is\ thrown\ this\ constructor\ has\ no\ effect.}}
+\DoxyCodeLine{00402\ \ \ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Yp,\ \textcolor{keyword}{typename}\ \_Del,}
+\DoxyCodeLine{00403\ \ \ \ \ \ \ \ \ \_Constructible<unique\_ptr<\_Yp,\ \_Del>,\ \_\_sp\_array\_delete>*\ =\ 0>}
+\DoxyCodeLine{00404\ \ \ \ \ shared\_ptr(unique\_ptr<\_Yp,\ \_Del>\&\&\ \_\_r)}
+\DoxyCodeLine{00405\ \ \ \ \ :\ \_\_shared\_ptr<\_Tp>(\mbox{\hyperlink{namespacestd}{std}}::\mbox{\hyperlink{namespacestd_ac7095819f6a8da64d69b1ee3029c52be}{move}}(\_\_r),\ \_\_sp\_array\_delete())\ \{\ \}}
+\DoxyCodeLine{00406\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00407\ }
+\DoxyCodeLine{00412\ \ \ \ \ \ \ \textcolor{keyword}{constexpr}\ shared\_ptr(nullptr\_t)\ noexcept\ :\ shared\_ptr()\ \{\ \}}
+\DoxyCodeLine{00413\ }
+\DoxyCodeLine{00414\ \ \ \ \ \ \ shared\_ptr\&\ operator=(\textcolor{keyword}{const}\ shared\_ptr\&)\ \textcolor{keyword}{noexcept}\ =\ \textcolor{keywordflow}{default};}
+\DoxyCodeLine{00415\ }
+\DoxyCodeLine{00416\ \ \ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Yp>}
+\DoxyCodeLine{00417\ \ \ \ \ \_Assignable<const\ shared\_ptr<\_Yp>\&>}
+\DoxyCodeLine{00418\ \ \ \ \ operator=(\textcolor{keyword}{const}\ shared\_ptr<\_Yp>\&\ \_\_r)\ \textcolor{keyword}{noexcept}}
+\DoxyCodeLine{00419\ \ \ \ \ \{}
+\DoxyCodeLine{00420\ \ \ \ \ \ \ this-\/>\_\_shared\_ptr<\_Tp>::operator=(\_\_r);}
+\DoxyCodeLine{00421\ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ *\textcolor{keyword}{this};}
+\DoxyCodeLine{00422\ \ \ \ \ \}}
+\DoxyCodeLine{00423\ }
+\DoxyCodeLine{00424\ \textcolor{preprocessor}{\#if\ \_GLIBCXX\_USE\_DEPRECATED}}
+\DoxyCodeLine{00425\ \textcolor{preprocessor}{\#pragma\ GCC\ diagnostic\ push}}
+\DoxyCodeLine{00426\ \textcolor{preprocessor}{\#pragma\ GCC\ diagnostic\ ignored\ "{}-\/Wdeprecated-\/declarations"{}}}
+\DoxyCodeLine{00427\ \ \ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Yp>}
+\DoxyCodeLine{00428\ \ \ \ \ \_Assignable<auto\_ptr<\_Yp>>}
+\DoxyCodeLine{00429\ \ \ \ \ operator=(auto\_ptr<\_Yp>\&\&\ \_\_r)}
+\DoxyCodeLine{00430\ \ \ \ \ \{}
+\DoxyCodeLine{00431\ \ \ \ \ \ \ this-\/>\_\_shared\_ptr<\_Tp>::operator=(\mbox{\hyperlink{namespacestd_ac7095819f6a8da64d69b1ee3029c52be}{std::move}}(\_\_r));}
+\DoxyCodeLine{00432\ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ *\textcolor{keyword}{this};}
+\DoxyCodeLine{00433\ \ \ \ \ \}}
+\DoxyCodeLine{00434\ \textcolor{preprocessor}{\#pragma\ GCC\ diagnostic\ pop}}
+\DoxyCodeLine{00435\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00436\ }
+\DoxyCodeLine{00437\ \ \ \ \ \ \ shared\_ptr\&}
+\DoxyCodeLine{00438\ \ \ \ \ \ \ operator=(shared\_ptr\&\&\ \_\_r)\ \textcolor{keyword}{noexcept}}
+\DoxyCodeLine{00439\ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00440\ \ \ \ \ this-\/>\_\_shared\_ptr<\_Tp>::operator=(\mbox{\hyperlink{namespacestd_ac7095819f6a8da64d69b1ee3029c52be}{std::move}}(\_\_r));}
+\DoxyCodeLine{00441\ \ \ \ \ \textcolor{keywordflow}{return}\ *\textcolor{keyword}{this};}
+\DoxyCodeLine{00442\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00443\ }
+\DoxyCodeLine{00444\ \ \ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{class}\ \_Yp>}
+\DoxyCodeLine{00445\ \ \ \ \ \_Assignable<shared\_ptr<\_Yp>>}
+\DoxyCodeLine{00446\ \ \ \ \ operator=(shared\_ptr<\_Yp>\&\&\ \_\_r)\ \textcolor{keyword}{noexcept}}
+\DoxyCodeLine{00447\ \ \ \ \ \{}
+\DoxyCodeLine{00448\ \ \ \ \ \ \ this-\/>\_\_shared\_ptr<\_Tp>::operator=(\mbox{\hyperlink{namespacestd_ac7095819f6a8da64d69b1ee3029c52be}{std::move}}(\_\_r));}
+\DoxyCodeLine{00449\ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ *\textcolor{keyword}{this};}
+\DoxyCodeLine{00450\ \ \ \ \ \}}
+\DoxyCodeLine{00451\ }
+\DoxyCodeLine{00452\ \ \ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Yp,\ \textcolor{keyword}{typename}\ \_Del>}
+\DoxyCodeLine{00453\ \ \ \ \ \_Assignable<unique\_ptr<\_Yp,\ \_Del>>}
+\DoxyCodeLine{00454\ \ \ \ \ operator=(unique\_ptr<\_Yp,\ \_Del>\&\&\ \_\_r)}
+\DoxyCodeLine{00455\ \ \ \ \ \{}
+\DoxyCodeLine{00456\ \ \ \ \ \ \ this-\/>\_\_shared\_ptr<\_Tp>::operator=(\mbox{\hyperlink{namespacestd_ac7095819f6a8da64d69b1ee3029c52be}{std::move}}(\_\_r));}
+\DoxyCodeLine{00457\ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ *\textcolor{keyword}{this};}
+\DoxyCodeLine{00458\ \ \ \ \ \}}
+\DoxyCodeLine{00459\ }
+\DoxyCodeLine{00460\ \ \ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00461\ \ \ \ \ \ \ \textcolor{comment}{//\ This\ constructor\ is\ non-\/standard,\ it\ is\ used\ by\ allocate\_shared.}}
+\DoxyCodeLine{00462\ \ \ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Alloc,\ \textcolor{keyword}{typename}...\ \_Args>}
+\DoxyCodeLine{00463\ \ \ \ \ shared\_ptr(\_Sp\_alloc\_shared\_tag<\_Alloc>\ \_\_tag,\ \_Args\&\&...\ \_\_args)}
+\DoxyCodeLine{00464\ \ \ \ \ :\ \_\_shared\_ptr<\_Tp>(\_\_tag,\ \mbox{\hyperlink{namespacestd}{std}}::forward<\_Args>(\_\_args)...)}
+\DoxyCodeLine{00465\ \ \ \ \ \{\ \}}
+\DoxyCodeLine{00466\ }
+\DoxyCodeLine{00467\ \ \ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Yp,\ \textcolor{keyword}{typename}\ \_Alloc,\ \textcolor{keyword}{typename}...\ \_Args>}
+\DoxyCodeLine{00468\ \ \ \ \ \textcolor{keyword}{friend}\ shared\_ptr<\_NonArray<\_Yp>>}
+\DoxyCodeLine{00469\ \ \ \ \ allocate\_shared(\textcolor{keyword}{const}\ \_Alloc\&,\ \_Args\&\&...);}
+\DoxyCodeLine{00470\ }
+\DoxyCodeLine{00471\ \ \ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Yp,\ \textcolor{keyword}{typename}...\ \_Args>}
+\DoxyCodeLine{00472\ \ \ \ \ \textcolor{keyword}{friend}\ shared\_ptr<\_NonArray<\_Yp>>}
+\DoxyCodeLine{00473\ \ \ \ \ make\_shared(\_Args\&\&...);}
+\DoxyCodeLine{00474\ }
+\DoxyCodeLine{00475\ \textcolor{preprocessor}{\#if\ \_\_cpp\_lib\_shared\_ptr\_arrays\ >=\ 201707L}}
+\DoxyCodeLine{00476\ \ \ \ \ \ \ \textcolor{comment}{//\ This\ constructor\ is\ non-\/standard,\ it\ is\ used\ by\ allocate\_shared<T[]>.}}
+\DoxyCodeLine{00477\ \ \ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Alloc,\ \textcolor{keyword}{typename}\ \_Init\ =\ const\ remove\_extent\_t<\_Tp>*>}
+\DoxyCodeLine{00478\ \ \ \ \ shared\_ptr(\textcolor{keyword}{const}\ \_Sp\_counted\_array\_base<\_Alloc>\&\ \_\_a,}
+\DoxyCodeLine{00479\ \ \ \ \ \ \ \ \ \ \ \ \_Init\ \_\_init\ =\ \textcolor{keyword}{nullptr})}
+\DoxyCodeLine{00480\ \ \ \ \ :\ \_\_shared\_ptr<\_Tp>(\_\_a,\ \_\_init)}
+\DoxyCodeLine{00481\ \ \ \ \ \{\ \}}
+\DoxyCodeLine{00482\ }
+\DoxyCodeLine{00483\ \ \ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Yp,\ \textcolor{keyword}{typename}\ \_Alloc>}
+\DoxyCodeLine{00484\ \ \ \ \ \textcolor{keyword}{friend}\ shared\_ptr<\_UnboundedArray<\_Yp>>}
+\DoxyCodeLine{00485\ \ \ \ \ allocate\_shared(\textcolor{keyword}{const}\ \_Alloc\&,\ \textcolor{keywordtype}{size\_t});}
+\DoxyCodeLine{00486\ }
+\DoxyCodeLine{00487\ \ \ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Yp>}
+\DoxyCodeLine{00488\ \ \ \ \ \textcolor{keyword}{friend}\ shared\_ptr<\_UnboundedArray<\_Yp>>}
+\DoxyCodeLine{00489\ \ \ \ \ make\_shared(\textcolor{keywordtype}{size\_t});}
+\DoxyCodeLine{00490\ }
+\DoxyCodeLine{00491\ \ \ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Yp,\ \textcolor{keyword}{typename}\ \_Alloc>}
+\DoxyCodeLine{00492\ \ \ \ \ \textcolor{keyword}{friend}\ shared\_ptr<\_UnboundedArray<\_Yp>>}
+\DoxyCodeLine{00493\ \ \ \ \ allocate\_shared(\textcolor{keyword}{const}\ \_Alloc\&,\ \textcolor{keywordtype}{size\_t},\ \textcolor{keyword}{const}\ remove\_extent\_t<\_Yp>\&);}
+\DoxyCodeLine{00494\ }
+\DoxyCodeLine{00495\ \ \ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Yp>}
+\DoxyCodeLine{00496\ \ \ \ \ \textcolor{keyword}{friend}\ shared\_ptr<\_UnboundedArray<\_Yp>>}
+\DoxyCodeLine{00497\ \ \ \ \ make\_shared(\textcolor{keywordtype}{size\_t},\ \textcolor{keyword}{const}\ remove\_extent\_t<\_Yp>\&);}
+\DoxyCodeLine{00498\ }
+\DoxyCodeLine{00499\ \ \ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Yp,\ \textcolor{keyword}{typename}\ \_Alloc>}
+\DoxyCodeLine{00500\ \ \ \ \ \textcolor{keyword}{friend}\ shared\_ptr<\_BoundedArray<\_Yp>>}
+\DoxyCodeLine{00501\ \ \ \ \ allocate\_shared(\textcolor{keyword}{const}\ \_Alloc\&);}
+\DoxyCodeLine{00502\ }
+\DoxyCodeLine{00503\ \ \ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Yp>}
+\DoxyCodeLine{00504\ \ \ \ \ \textcolor{keyword}{friend}\ shared\_ptr<\_BoundedArray<\_Yp>>}
+\DoxyCodeLine{00505\ \ \ \ \ make\_shared();}
+\DoxyCodeLine{00506\ }
+\DoxyCodeLine{00507\ \ \ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Yp,\ \textcolor{keyword}{typename}\ \_Alloc>}
+\DoxyCodeLine{00508\ \ \ \ \ \textcolor{keyword}{friend}\ shared\_ptr<\_BoundedArray<\_Yp>>}
+\DoxyCodeLine{00509\ \ \ \ \ allocate\_shared(\textcolor{keyword}{const}\ \_Alloc\&,\ \textcolor{keyword}{const}\ remove\_extent\_t<\_Yp>\&);}
+\DoxyCodeLine{00510\ }
+\DoxyCodeLine{00511\ \ \ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Yp>}
+\DoxyCodeLine{00512\ \ \ \ \ \textcolor{keyword}{friend}\ shared\_ptr<\_BoundedArray<\_Yp>>}
+\DoxyCodeLine{00513\ \ \ \ \ make\_shared(\textcolor{keyword}{const}\ remove\_extent\_t<\_Yp>\&);}
+\DoxyCodeLine{00514\ }
+\DoxyCodeLine{00515\ \textcolor{preprocessor}{\#if\ \_\_cpp\_lib\_smart\_ptr\_for\_overwrite}}
+\DoxyCodeLine{00516\ \ \ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Yp,\ \textcolor{keyword}{typename}\ \_Alloc>}
+\DoxyCodeLine{00517\ \ \ \ \ \textcolor{keyword}{friend}\ shared\_ptr<\_NotUnboundedArray<\_Yp>>}
+\DoxyCodeLine{00518\ \ \ \ \ allocate\_shared\_for\_overwrite(\textcolor{keyword}{const}\ \_Alloc\&);}
+\DoxyCodeLine{00519\ }
+\DoxyCodeLine{00520\ \ \ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Yp>}
+\DoxyCodeLine{00521\ \ \ \ \ \textcolor{keyword}{friend}\ shared\_ptr<\_NotUnboundedArray<\_Yp>>}
+\DoxyCodeLine{00522\ \ \ \ \ make\_shared\_for\_overwrite();}
+\DoxyCodeLine{00523\ }
+\DoxyCodeLine{00524\ \ \ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Yp,\ \textcolor{keyword}{typename}\ \_Alloc>}
+\DoxyCodeLine{00525\ \ \ \ \ \textcolor{keyword}{friend}\ shared\_ptr<\_UnboundedArray<\_Yp>>}
+\DoxyCodeLine{00526\ \ \ \ \ allocate\_shared\_for\_overwrite(\textcolor{keyword}{const}\ \_Alloc\&,\ \textcolor{keywordtype}{size\_t});}
+\DoxyCodeLine{00527\ }
+\DoxyCodeLine{00528\ \ \ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Yp>}
+\DoxyCodeLine{00529\ \ \ \ \ \textcolor{keyword}{friend}\ shared\_ptr<\_UnboundedArray<\_Yp>>}
+\DoxyCodeLine{00530\ \ \ \ \ make\_shared\_for\_overwrite(\textcolor{keywordtype}{size\_t});}
+\DoxyCodeLine{00531\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00532\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00533\ }
+\DoxyCodeLine{00534\ \ \ \ \ \ \ \textcolor{comment}{//\ This\ constructor\ is\ non-\/standard,\ it\ is\ used\ by\ weak\_ptr::lock().}}
+\DoxyCodeLine{00535\ \ \ \ \ \ \ shared\_ptr(\textcolor{keyword}{const}\ weak\_ptr<\_Tp>\&\ \_\_r,\ std::nothrow\_t)\ noexcept}
+\DoxyCodeLine{00536\ \ \ \ \ \ \ :\ \_\_shared\_ptr<\_Tp>(\_\_r,\ std::nothrow)\ \{\ \}}
+\DoxyCodeLine{00537\ }
+\DoxyCodeLine{00538\ \ \ \ \ \ \ \textcolor{keyword}{friend}\ \textcolor{keyword}{class\ }weak\_ptr<\_Tp>;}
+\DoxyCodeLine{00539\ \ \ \ \ \};}
+\DoxyCodeLine{00540\ }
+\DoxyCodeLine{00541\ \textcolor{preprocessor}{\#if\ \_\_cpp\_deduction\_guides\ >=\ 201606}}
+\DoxyCodeLine{00542\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Tp>}
+\DoxyCodeLine{00543\ \ \ \ \ shared\_ptr(weak\_ptr<\_Tp>)\ -\/>\ \ shared\_ptr<\_Tp>;}
+\DoxyCodeLine{00544\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Tp,\ \textcolor{keyword}{typename}\ \_Del>}
+\DoxyCodeLine{00545\ \ \ \ \ shared\_ptr(unique\_ptr<\_Tp,\ \_Del>)\ -\/>\ \ shared\_ptr<\_Tp>;}
+\DoxyCodeLine{00546\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00547\ }
+\DoxyCodeLine{00548\ \ \ \textcolor{comment}{//\ 20.7.2.2.7\ shared\_ptr\ comparisons}}
+\DoxyCodeLine{00549\ }
+\DoxyCodeLine{00551\ }
+\DoxyCodeLine{00553\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Tp,\ \textcolor{keyword}{typename}\ \_Up>}
+\DoxyCodeLine{00554\ \ \ \ \ \mbox{\hyperlink{_classes_2lib_2include_2c_09_09_2x86__64-w64-mingw32_2bits_2c_09_09config_8h_a56bc959ca1311889bcd1c5abb178ab59}{\_GLIBCXX\_NODISCARD}}\ \textcolor{keyword}{inline}\ \textcolor{keywordtype}{bool}}
+\DoxyCodeLine{00555\ \ \ \ \ \mbox{\hyperlink{namespacenlohmann_aaf11d1e42c5a671e7cd362ab0a182de1}{operator==}}(\textcolor{keyword}{const}\ shared\_ptr<\_Tp>\&\ \_\_a,\ \textcolor{keyword}{const}\ shared\_ptr<\_Up>\&\ \_\_b)\ \textcolor{keyword}{noexcept}}
+\DoxyCodeLine{00556\ \ \ \ \ \{\ \textcolor{keywordflow}{return}\ \_\_a.get()\ ==\ \_\_b.get();\ \}}
+\DoxyCodeLine{00557\ }
+\DoxyCodeLine{00559\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Tp>}
+\DoxyCodeLine{00560\ \ \ \ \ \mbox{\hyperlink{_classes_2lib_2include_2c_09_09_2x86__64-w64-mingw32_2bits_2c_09_09config_8h_a56bc959ca1311889bcd1c5abb178ab59}{\_GLIBCXX\_NODISCARD}}\ \textcolor{keyword}{inline}\ \textcolor{keywordtype}{bool}}
+\DoxyCodeLine{00561\ \ \ \ \ \mbox{\hyperlink{namespacenlohmann_aaf11d1e42c5a671e7cd362ab0a182de1}{operator==}}(\textcolor{keyword}{const}\ shared\_ptr<\_Tp>\&\ \_\_a,\ nullptr\_t)\ \textcolor{keyword}{noexcept}}
+\DoxyCodeLine{00562\ \ \ \ \ \{\ \textcolor{keywordflow}{return}\ !\_\_a;\ \}}
+\DoxyCodeLine{00563\ }
+\DoxyCodeLine{00564\ \textcolor{preprocessor}{\#ifdef\ \_\_cpp\_lib\_three\_way\_comparison}}
+\DoxyCodeLine{00565\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Tp,\ \textcolor{keyword}{typename}\ \_Up>}
+\DoxyCodeLine{00566\ \ \ \ \ \textcolor{keyword}{inline}\ strong\_ordering}
+\DoxyCodeLine{00567\ \ \ \ \ operator<=>(\textcolor{keyword}{const}\ shared\_ptr<\_Tp>\&\ \_\_a,}
+\DoxyCodeLine{00568\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ shared\_ptr<\_Up>\&\ \_\_b)\ \textcolor{keyword}{noexcept}}
+\DoxyCodeLine{00569\ \ \ \ \ \{\ \textcolor{keywordflow}{return}\ compare\_three\_way()(\_\_a.get(),\ \_\_b.get());\ \}}
+\DoxyCodeLine{00570\ }
+\DoxyCodeLine{00571\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Tp>}
+\DoxyCodeLine{00572\ \ \ \ \ \textcolor{keyword}{inline}\ strong\_ordering}
+\DoxyCodeLine{00573\ \ \ \ \ operator<=>(\textcolor{keyword}{const}\ shared\_ptr<\_Tp>\&\ \_\_a,\ nullptr\_t)\ \textcolor{keyword}{noexcept}}
+\DoxyCodeLine{00574\ \ \ \ \ \{}
+\DoxyCodeLine{00575\ \ \ \ \ \ \ \textcolor{keyword}{using\ }\mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2glad_8h_aca2093d4756bde9a55b94e9ff8d9c623}{pointer}}\ =\ \textcolor{keyword}{typename}\ shared\_ptr<\_Tp>::element\_type*;}
+\DoxyCodeLine{00576\ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ compare\_three\_way()(\_\_a.get(),\ \textcolor{keyword}{static\_cast<}\mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2glad_8h_aca2093d4756bde9a55b94e9ff8d9c623}{pointer}}\textcolor{keyword}{>}(\textcolor{keyword}{nullptr}));}
+\DoxyCodeLine{00577\ \ \ \ \ \}}
+\DoxyCodeLine{00578\ \textcolor{preprocessor}{\#else}}
+\DoxyCodeLine{00580\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Tp>}
+\DoxyCodeLine{00581\ \ \ \ \ \mbox{\hyperlink{_classes_2lib_2include_2c_09_09_2x86__64-w64-mingw32_2bits_2c_09_09config_8h_a56bc959ca1311889bcd1c5abb178ab59}{\_GLIBCXX\_NODISCARD}}\ \textcolor{keyword}{inline}\ \textcolor{keywordtype}{bool}}
+\DoxyCodeLine{00582\ \ \ \ \ \mbox{\hyperlink{namespacenlohmann_aaf11d1e42c5a671e7cd362ab0a182de1}{operator==}}(nullptr\_t,\ \textcolor{keyword}{const}\ shared\_ptr<\_Tp>\&\ \_\_a)\ \textcolor{keyword}{noexcept}}
+\DoxyCodeLine{00583\ \ \ \ \ \{\ \textcolor{keywordflow}{return}\ !\_\_a;\ \}}
+\DoxyCodeLine{00584\ }
+\DoxyCodeLine{00586\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Tp,\ \textcolor{keyword}{typename}\ \_Up>}
+\DoxyCodeLine{00587\ \ \ \ \ \mbox{\hyperlink{_classes_2lib_2include_2c_09_09_2x86__64-w64-mingw32_2bits_2c_09_09config_8h_a56bc959ca1311889bcd1c5abb178ab59}{\_GLIBCXX\_NODISCARD}}\ \textcolor{keyword}{inline}\ \textcolor{keywordtype}{bool}}
+\DoxyCodeLine{00588\ \ \ \ \ \mbox{\hyperlink{namespacenlohmann_aa9fe6e8e15f1b1b242d291e7703f1b8d}{operator!=}}(\textcolor{keyword}{const}\ shared\_ptr<\_Tp>\&\ \_\_a,\ \textcolor{keyword}{const}\ shared\_ptr<\_Up>\&\ \_\_b)\ \textcolor{keyword}{noexcept}}
+\DoxyCodeLine{00589\ \ \ \ \ \{\ \textcolor{keywordflow}{return}\ \_\_a.get()\ !=\ \_\_b.get();\ \}}
+\DoxyCodeLine{00590\ }
+\DoxyCodeLine{00592\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Tp>}
+\DoxyCodeLine{00593\ \ \ \ \ \mbox{\hyperlink{_classes_2lib_2include_2c_09_09_2x86__64-w64-mingw32_2bits_2c_09_09config_8h_a56bc959ca1311889bcd1c5abb178ab59}{\_GLIBCXX\_NODISCARD}}\ \textcolor{keyword}{inline}\ \textcolor{keywordtype}{bool}}
+\DoxyCodeLine{00594\ \ \ \ \ \mbox{\hyperlink{namespacenlohmann_aa9fe6e8e15f1b1b242d291e7703f1b8d}{operator!=}}(\textcolor{keyword}{const}\ shared\_ptr<\_Tp>\&\ \_\_a,\ nullptr\_t)\ \textcolor{keyword}{noexcept}}
+\DoxyCodeLine{00595\ \ \ \ \ \{\ \textcolor{keywordflow}{return}\ (\textcolor{keywordtype}{bool})\_\_a;\ \}}
+\DoxyCodeLine{00596\ }
+\DoxyCodeLine{00598\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Tp>}
+\DoxyCodeLine{00599\ \ \ \ \ \mbox{\hyperlink{_classes_2lib_2include_2c_09_09_2x86__64-w64-mingw32_2bits_2c_09_09config_8h_a56bc959ca1311889bcd1c5abb178ab59}{\_GLIBCXX\_NODISCARD}}\ \textcolor{keyword}{inline}\ \textcolor{keywordtype}{bool}}
+\DoxyCodeLine{00600\ \ \ \ \ \mbox{\hyperlink{namespacenlohmann_aa9fe6e8e15f1b1b242d291e7703f1b8d}{operator!=}}(nullptr\_t,\ \textcolor{keyword}{const}\ shared\_ptr<\_Tp>\&\ \_\_a)\ \textcolor{keyword}{noexcept}}
+\DoxyCodeLine{00601\ \ \ \ \ \{\ \textcolor{keywordflow}{return}\ (\textcolor{keywordtype}{bool})\_\_a;\ \}}
+\DoxyCodeLine{00602\ }
+\DoxyCodeLine{00604\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Tp,\ \textcolor{keyword}{typename}\ \_Up>}
+\DoxyCodeLine{00605\ \ \ \ \ \mbox{\hyperlink{_classes_2lib_2include_2c_09_09_2x86__64-w64-mingw32_2bits_2c_09_09config_8h_a56bc959ca1311889bcd1c5abb178ab59}{\_GLIBCXX\_NODISCARD}}\ \textcolor{keyword}{inline}\ \textcolor{keywordtype}{bool}}
+\DoxyCodeLine{00606\ \ \ \ \ \mbox{\hyperlink{namespacenlohmann_1_1detail_a09169efff3bd1771fff29bd92cea19e0}{operator<}}(\textcolor{keyword}{const}\ shared\_ptr<\_Tp>\&\ \_\_a,\ \textcolor{keyword}{const}\ shared\_ptr<\_Up>\&\ \_\_b)\ \textcolor{keyword}{noexcept}}
+\DoxyCodeLine{00607\ \ \ \ \ \{}
+\DoxyCodeLine{00608\ \ \ \ \ \ \ \textcolor{keyword}{using\ }\_Tp\_elt\ =\ \textcolor{keyword}{typename}\ shared\_ptr<\_Tp>::element\_type;}
+\DoxyCodeLine{00609\ \ \ \ \ \ \ \textcolor{keyword}{using\ }\_Up\_elt\ =\ \textcolor{keyword}{typename}\ shared\_ptr<\_Up>::element\_type;}
+\DoxyCodeLine{00610\ \ \ \ \ \ \ \textcolor{keyword}{using\ }\_Vp\ =\ \textcolor{keyword}{typename}\ common\_type<\_Tp\_elt*,\ \_Up\_elt*>::type;}
+\DoxyCodeLine{00611\ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ less<\_Vp>()(\_\_a.get(),\ \_\_b.get());}
+\DoxyCodeLine{00612\ \ \ \ \ \}}
+\DoxyCodeLine{00613\ }
+\DoxyCodeLine{00615\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Tp>}
+\DoxyCodeLine{00616\ \ \ \ \ \mbox{\hyperlink{_classes_2lib_2include_2c_09_09_2x86__64-w64-mingw32_2bits_2c_09_09config_8h_a56bc959ca1311889bcd1c5abb178ab59}{\_GLIBCXX\_NODISCARD}}\ \textcolor{keyword}{inline}\ \textcolor{keywordtype}{bool}}
+\DoxyCodeLine{00617\ \ \ \ \ \mbox{\hyperlink{namespacenlohmann_1_1detail_a09169efff3bd1771fff29bd92cea19e0}{operator<}}(\textcolor{keyword}{const}\ shared\_ptr<\_Tp>\&\ \_\_a,\ nullptr\_t)\ \textcolor{keyword}{noexcept}}
+\DoxyCodeLine{00618\ \ \ \ \ \{}
+\DoxyCodeLine{00619\ \ \ \ \ \ \ \textcolor{keyword}{using\ }\_Tp\_elt\ =\ \textcolor{keyword}{typename}\ shared\_ptr<\_Tp>::element\_type;}
+\DoxyCodeLine{00620\ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ less<\_Tp\_elt*>()(\_\_a.get(),\ \textcolor{keyword}{nullptr});}
+\DoxyCodeLine{00621\ \ \ \ \ \}}
+\DoxyCodeLine{00622\ }
+\DoxyCodeLine{00624\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Tp>}
+\DoxyCodeLine{00625\ \ \ \ \ \mbox{\hyperlink{_classes_2lib_2include_2c_09_09_2x86__64-w64-mingw32_2bits_2c_09_09config_8h_a56bc959ca1311889bcd1c5abb178ab59}{\_GLIBCXX\_NODISCARD}}\ \textcolor{keyword}{inline}\ \textcolor{keywordtype}{bool}}
+\DoxyCodeLine{00626\ \ \ \ \ \mbox{\hyperlink{namespacenlohmann_1_1detail_a09169efff3bd1771fff29bd92cea19e0}{operator<}}(nullptr\_t,\ \textcolor{keyword}{const}\ shared\_ptr<\_Tp>\&\ \_\_a)\ \textcolor{keyword}{noexcept}}
+\DoxyCodeLine{00627\ \ \ \ \ \{}
+\DoxyCodeLine{00628\ \ \ \ \ \ \ \textcolor{keyword}{using\ }\_Tp\_elt\ =\ \textcolor{keyword}{typename}\ shared\_ptr<\_Tp>::element\_type;}
+\DoxyCodeLine{00629\ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ less<\_Tp\_elt*>()(\textcolor{keyword}{nullptr},\ \_\_a.get());}
+\DoxyCodeLine{00630\ \ \ \ \ \}}
+\DoxyCodeLine{00631\ }
+\DoxyCodeLine{00633\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Tp,\ \textcolor{keyword}{typename}\ \_Up>}
+\DoxyCodeLine{00634\ \ \ \ \ \mbox{\hyperlink{_classes_2lib_2include_2c_09_09_2x86__64-w64-mingw32_2bits_2c_09_09config_8h_a56bc959ca1311889bcd1c5abb178ab59}{\_GLIBCXX\_NODISCARD}}\ \textcolor{keyword}{inline}\ \textcolor{keywordtype}{bool}}
+\DoxyCodeLine{00635\ \ \ \ \ operator<=(\textcolor{keyword}{const}\ shared\_ptr<\_Tp>\&\ \_\_a,\ \textcolor{keyword}{const}\ shared\_ptr<\_Up>\&\ \_\_b)\ \textcolor{keyword}{noexcept}}
+\DoxyCodeLine{00636\ \ \ \ \ \{\ \textcolor{keywordflow}{return}\ !(\_\_b\ <\ \_\_a);\ \}}
+\DoxyCodeLine{00637\ }
+\DoxyCodeLine{00639\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Tp>}
+\DoxyCodeLine{00640\ \ \ \ \ \mbox{\hyperlink{_classes_2lib_2include_2c_09_09_2x86__64-w64-mingw32_2bits_2c_09_09config_8h_a56bc959ca1311889bcd1c5abb178ab59}{\_GLIBCXX\_NODISCARD}}\ \textcolor{keyword}{inline}\ \textcolor{keywordtype}{bool}}
+\DoxyCodeLine{00641\ \ \ \ \ operator<=(\textcolor{keyword}{const}\ shared\_ptr<\_Tp>\&\ \_\_a,\ nullptr\_t)\ \textcolor{keyword}{noexcept}}
+\DoxyCodeLine{00642\ \ \ \ \ \{\ \textcolor{keywordflow}{return}\ !(\textcolor{keyword}{nullptr}\ <\ \_\_a);\ \}}
+\DoxyCodeLine{00643\ }
+\DoxyCodeLine{00645\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Tp>}
+\DoxyCodeLine{00646\ \ \ \ \ \mbox{\hyperlink{_classes_2lib_2include_2c_09_09_2x86__64-w64-mingw32_2bits_2c_09_09config_8h_a56bc959ca1311889bcd1c5abb178ab59}{\_GLIBCXX\_NODISCARD}}\ \textcolor{keyword}{inline}\ \textcolor{keywordtype}{bool}}
+\DoxyCodeLine{00647\ \ \ \ \ operator<=(nullptr\_t,\ \textcolor{keyword}{const}\ shared\_ptr<\_Tp>\&\ \_\_a)\ \textcolor{keyword}{noexcept}}
+\DoxyCodeLine{00648\ \ \ \ \ \{\ \textcolor{keywordflow}{return}\ !(\_\_a\ <\ \textcolor{keyword}{nullptr});\ \}}
+\DoxyCodeLine{00649\ }
+\DoxyCodeLine{00651\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Tp,\ \textcolor{keyword}{typename}\ \_Up>}
+\DoxyCodeLine{00652\ \ \ \ \ \mbox{\hyperlink{_classes_2lib_2include_2c_09_09_2x86__64-w64-mingw32_2bits_2c_09_09config_8h_a56bc959ca1311889bcd1c5abb178ab59}{\_GLIBCXX\_NODISCARD}}\ \textcolor{keyword}{inline}\ \textcolor{keywordtype}{bool}}
+\DoxyCodeLine{00653\ \ \ \ \ operator>(\textcolor{keyword}{const}\ shared\_ptr<\_Tp>\&\ \_\_a,\ \textcolor{keyword}{const}\ shared\_ptr<\_Up>\&\ \_\_b)\ \textcolor{keyword}{noexcept}}
+\DoxyCodeLine{00654\ \ \ \ \ \{\ \textcolor{keywordflow}{return}\ (\_\_b\ <\ \_\_a);\ \}}
+\DoxyCodeLine{00655\ }
+\DoxyCodeLine{00657\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Tp>}
+\DoxyCodeLine{00658\ \ \ \ \ \mbox{\hyperlink{_classes_2lib_2include_2c_09_09_2x86__64-w64-mingw32_2bits_2c_09_09config_8h_a56bc959ca1311889bcd1c5abb178ab59}{\_GLIBCXX\_NODISCARD}}\ \textcolor{keyword}{inline}\ \textcolor{keywordtype}{bool}}
+\DoxyCodeLine{00659\ \ \ \ \ operator>(\textcolor{keyword}{const}\ shared\_ptr<\_Tp>\&\ \_\_a,\ nullptr\_t)\ \textcolor{keyword}{noexcept}}
+\DoxyCodeLine{00660\ \ \ \ \ \{\ \textcolor{keywordflow}{return}\ \textcolor{keyword}{nullptr}\ <\ \_\_a;\ \}}
+\DoxyCodeLine{00661\ }
+\DoxyCodeLine{00663\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Tp>}
+\DoxyCodeLine{00664\ \ \ \ \ \mbox{\hyperlink{_classes_2lib_2include_2c_09_09_2x86__64-w64-mingw32_2bits_2c_09_09config_8h_a56bc959ca1311889bcd1c5abb178ab59}{\_GLIBCXX\_NODISCARD}}\ \textcolor{keyword}{inline}\ \textcolor{keywordtype}{bool}}
+\DoxyCodeLine{00665\ \ \ \ \ operator>(nullptr\_t,\ \textcolor{keyword}{const}\ shared\_ptr<\_Tp>\&\ \_\_a)\ \textcolor{keyword}{noexcept}}
+\DoxyCodeLine{00666\ \ \ \ \ \{\ \textcolor{keywordflow}{return}\ \_\_a\ <\ \textcolor{keyword}{nullptr};\ \}}
+\DoxyCodeLine{00667\ }
+\DoxyCodeLine{00669\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Tp,\ \textcolor{keyword}{typename}\ \_Up>}
+\DoxyCodeLine{00670\ \ \ \ \ \mbox{\hyperlink{_classes_2lib_2include_2c_09_09_2x86__64-w64-mingw32_2bits_2c_09_09config_8h_a56bc959ca1311889bcd1c5abb178ab59}{\_GLIBCXX\_NODISCARD}}\ \textcolor{keyword}{inline}\ \textcolor{keywordtype}{bool}}
+\DoxyCodeLine{00671\ \ \ \ \ operator>=(\textcolor{keyword}{const}\ shared\_ptr<\_Tp>\&\ \_\_a,\ \textcolor{keyword}{const}\ shared\_ptr<\_Up>\&\ \_\_b)\ \textcolor{keyword}{noexcept}}
+\DoxyCodeLine{00672\ \ \ \ \ \{\ \textcolor{keywordflow}{return}\ !(\_\_a\ <\ \_\_b);\ \}}
+\DoxyCodeLine{00673\ }
+\DoxyCodeLine{00675\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Tp>}
+\DoxyCodeLine{00676\ \ \ \ \ \mbox{\hyperlink{_classes_2lib_2include_2c_09_09_2x86__64-w64-mingw32_2bits_2c_09_09config_8h_a56bc959ca1311889bcd1c5abb178ab59}{\_GLIBCXX\_NODISCARD}}\ \textcolor{keyword}{inline}\ \textcolor{keywordtype}{bool}}
+\DoxyCodeLine{00677\ \ \ \ \ operator>=(\textcolor{keyword}{const}\ shared\_ptr<\_Tp>\&\ \_\_a,\ nullptr\_t)\ \textcolor{keyword}{noexcept}}
+\DoxyCodeLine{00678\ \ \ \ \ \{\ \textcolor{keywordflow}{return}\ !(\_\_a\ <\ \textcolor{keyword}{nullptr});\ \}}
+\DoxyCodeLine{00679\ }
+\DoxyCodeLine{00681\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Tp>}
+\DoxyCodeLine{00682\ \ \ \ \ \mbox{\hyperlink{_classes_2lib_2include_2c_09_09_2x86__64-w64-mingw32_2bits_2c_09_09config_8h_a56bc959ca1311889bcd1c5abb178ab59}{\_GLIBCXX\_NODISCARD}}\ \textcolor{keyword}{inline}\ \textcolor{keywordtype}{bool}}
+\DoxyCodeLine{00683\ \ \ \ \ operator>=(nullptr\_t,\ \textcolor{keyword}{const}\ shared\_ptr<\_Tp>\&\ \_\_a)\ \textcolor{keyword}{noexcept}}
+\DoxyCodeLine{00684\ \ \ \ \ \{\ \textcolor{keywordflow}{return}\ !(\textcolor{keyword}{nullptr}\ <\ \_\_a);\ \}}
+\DoxyCodeLine{00685\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00686\ }
+\DoxyCodeLine{00687\ \ \ \textcolor{comment}{//\ 20.7.2.2.8\ shared\_ptr\ specialized\ algorithms.}}
+\DoxyCodeLine{00688\ }
+\DoxyCodeLine{00690\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Tp>}
+\DoxyCodeLine{00691\ \ \ \ \ \textcolor{keyword}{inline}\ \textcolor{keywordtype}{void}}
+\DoxyCodeLine{00692\ \ \ \ \ \mbox{\hyperlink{namespacestd_a3ece115a1c8ed9020a20f1d0b70efda8}{swap}}(shared\_ptr<\_Tp>\&\ \_\_a,\ shared\_ptr<\_Tp>\&\ \_\_b)\ \textcolor{keyword}{noexcept}}
+\DoxyCodeLine{00693\ \ \ \ \ \{\ \_\_a.swap(\_\_b);\ \}}
+\DoxyCodeLine{00694\ }
+\DoxyCodeLine{00695\ \ \ \textcolor{comment}{//\ 20.7.2.2.9\ shared\_ptr\ casts.}}
+\DoxyCodeLine{00696\ }
+\DoxyCodeLine{00698\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Tp,\ \textcolor{keyword}{typename}\ \_Up>}
+\DoxyCodeLine{00699\ \ \ \ \ \textcolor{keyword}{inline}\ shared\_ptr<\_Tp>}
+\DoxyCodeLine{00700\ \ \ \ \ static\_pointer\_cast(\textcolor{keyword}{const}\ shared\_ptr<\_Up>\&\ \_\_r)\ \textcolor{keyword}{noexcept}}
+\DoxyCodeLine{00701\ \ \ \ \ \{}
+\DoxyCodeLine{00702\ \ \ \ \ \ \ \textcolor{keyword}{using\ }\_Sp\ =\ shared\_ptr<\_Tp>;}
+\DoxyCodeLine{00703\ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \_Sp(\_\_r,\ \textcolor{keyword}{static\_cast<}typename\ \_Sp::element\_type*\textcolor{keyword}{>}(\_\_r.get()));}
+\DoxyCodeLine{00704\ \ \ \ \ \}}
+\DoxyCodeLine{00705\ }
+\DoxyCodeLine{00707\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Tp,\ \textcolor{keyword}{typename}\ \_Up>}
+\DoxyCodeLine{00708\ \ \ \ \ \textcolor{keyword}{inline}\ shared\_ptr<\_Tp>}
+\DoxyCodeLine{00709\ \ \ \ \ const\_pointer\_cast(\textcolor{keyword}{const}\ shared\_ptr<\_Up>\&\ \_\_r)\ \textcolor{keyword}{noexcept}}
+\DoxyCodeLine{00710\ \ \ \ \ \{}
+\DoxyCodeLine{00711\ \ \ \ \ \ \ \textcolor{keyword}{using\ }\_Sp\ =\ shared\_ptr<\_Tp>;}
+\DoxyCodeLine{00712\ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \_Sp(\_\_r,\ \textcolor{keyword}{const\_cast<}typename\ \_Sp::element\_type*\textcolor{keyword}{>}(\_\_r.get()));}
+\DoxyCodeLine{00713\ \ \ \ \ \}}
+\DoxyCodeLine{00714\ }
+\DoxyCodeLine{00716\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Tp,\ \textcolor{keyword}{typename}\ \_Up>}
+\DoxyCodeLine{00717\ \ \ \ \ \textcolor{keyword}{inline}\ shared\_ptr<\_Tp>}
+\DoxyCodeLine{00718\ \ \ \ \ dynamic\_pointer\_cast(\textcolor{keyword}{const}\ shared\_ptr<\_Up>\&\ \_\_r)\ \textcolor{keyword}{noexcept}}
+\DoxyCodeLine{00719\ \ \ \ \ \{}
+\DoxyCodeLine{00720\ \ \ \ \ \ \ \textcolor{keyword}{using\ }\_Sp\ =\ shared\_ptr<\_Tp>;}
+\DoxyCodeLine{00721\ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\textcolor{keyword}{auto}*\ \_\_p\ =\ \textcolor{keyword}{dynamic\_cast<}typename\ \_Sp::element\_type*\textcolor{keyword}{>}(\_\_r.get()))}
+\DoxyCodeLine{00722\ \ \ \ \ \textcolor{keywordflow}{return}\ \_Sp(\_\_r,\ \_\_p);}
+\DoxyCodeLine{00723\ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \_Sp();}
+\DoxyCodeLine{00724\ \ \ \ \ \}}
+\DoxyCodeLine{00725\ }
+\DoxyCodeLine{00726\ \textcolor{preprocessor}{\#if\ \_\_cplusplus\ >=\ 201703L}}
+\DoxyCodeLine{00729\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Tp,\ \textcolor{keyword}{typename}\ \_Up>}
+\DoxyCodeLine{00730\ \ \ \ \ \textcolor{keyword}{inline}\ shared\_ptr<\_Tp>}
+\DoxyCodeLine{00731\ \ \ \ \ reinterpret\_pointer\_cast(\textcolor{keyword}{const}\ shared\_ptr<\_Up>\&\ \_\_r)\ \textcolor{keyword}{noexcept}}
+\DoxyCodeLine{00732\ \ \ \ \ \{}
+\DoxyCodeLine{00733\ \ \ \ \ \ \ \textcolor{keyword}{using\ }\_Sp\ =\ shared\_ptr<\_Tp>;}
+\DoxyCodeLine{00734\ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \_Sp(\_\_r,\ \textcolor{keyword}{reinterpret\_cast<}typename\ \_Sp::element\_type*\textcolor{keyword}{>}(\_\_r.get()));}
+\DoxyCodeLine{00735\ \ \ \ \ \}}
+\DoxyCodeLine{00736\ }
+\DoxyCodeLine{00737\ \textcolor{preprocessor}{\#if\ \_\_cplusplus\ >\ 201703L}}
+\DoxyCodeLine{00738\ \ \ \textcolor{comment}{//\ \_GLIBCXX\_RESOLVE\_LIB\_DEFECTS}}
+\DoxyCodeLine{00739\ \ \ \textcolor{comment}{//\ 2996.\ Missing\ rvalue\ overloads\ for\ shared\_ptr\ operations}}
+\DoxyCodeLine{00740\ }
+\DoxyCodeLine{00743\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Tp,\ \textcolor{keyword}{typename}\ \_Up>}
+\DoxyCodeLine{00744\ \ \ \ \ \textcolor{keyword}{inline}\ shared\_ptr<\_Tp>}
+\DoxyCodeLine{00745\ \ \ \ \ static\_pointer\_cast(shared\_ptr<\_Up>\&\&\ \_\_r)\ \textcolor{keyword}{noexcept}}
+\DoxyCodeLine{00746\ \ \ \ \ \{}
+\DoxyCodeLine{00747\ \ \ \ \ \ \ \textcolor{keyword}{using\ }\_Sp\ =\ shared\_ptr<\_Tp>;}
+\DoxyCodeLine{00748\ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \_Sp(\mbox{\hyperlink{namespacestd_ac7095819f6a8da64d69b1ee3029c52be}{std::move}}(\_\_r),}
+\DoxyCodeLine{00749\ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{static\_cast<}typename\ \_Sp::element\_type*\textcolor{keyword}{>}(\_\_r.get()));}
+\DoxyCodeLine{00750\ \ \ \ \ \}}
+\DoxyCodeLine{00751\ }
+\DoxyCodeLine{00754\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Tp,\ \textcolor{keyword}{typename}\ \_Up>}
+\DoxyCodeLine{00755\ \ \ \ \ \textcolor{keyword}{inline}\ shared\_ptr<\_Tp>}
+\DoxyCodeLine{00756\ \ \ \ \ const\_pointer\_cast(shared\_ptr<\_Up>\&\&\ \_\_r)\ \textcolor{keyword}{noexcept}}
+\DoxyCodeLine{00757\ \ \ \ \ \{}
+\DoxyCodeLine{00758\ \ \ \ \ \ \ \textcolor{keyword}{using\ }\_Sp\ =\ shared\_ptr<\_Tp>;}
+\DoxyCodeLine{00759\ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \_Sp(\mbox{\hyperlink{namespacestd_ac7095819f6a8da64d69b1ee3029c52be}{std::move}}(\_\_r),}
+\DoxyCodeLine{00760\ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const\_cast<}typename\ \_Sp::element\_type*\textcolor{keyword}{>}(\_\_r.get()));}
+\DoxyCodeLine{00761\ \ \ \ \ \}}
+\DoxyCodeLine{00762\ }
+\DoxyCodeLine{00765\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Tp,\ \textcolor{keyword}{typename}\ \_Up>}
+\DoxyCodeLine{00766\ \ \ \ \ \textcolor{keyword}{inline}\ shared\_ptr<\_Tp>}
+\DoxyCodeLine{00767\ \ \ \ \ dynamic\_pointer\_cast(shared\_ptr<\_Up>\&\&\ \_\_r)\ \textcolor{keyword}{noexcept}}
+\DoxyCodeLine{00768\ \ \ \ \ \{}
+\DoxyCodeLine{00769\ \ \ \ \ \ \ \textcolor{keyword}{using\ }\_Sp\ =\ shared\_ptr<\_Tp>;}
+\DoxyCodeLine{00770\ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\textcolor{keyword}{auto}*\ \_\_p\ =\ \textcolor{keyword}{dynamic\_cast<}typename\ \_Sp::element\_type*\textcolor{keyword}{>}(\_\_r.get()))}
+\DoxyCodeLine{00771\ \ \ \ \ \textcolor{keywordflow}{return}\ \_Sp(\mbox{\hyperlink{namespacestd_ac7095819f6a8da64d69b1ee3029c52be}{std::move}}(\_\_r),\ \_\_p);}
+\DoxyCodeLine{00772\ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \_Sp();}
+\DoxyCodeLine{00773\ \ \ \ \ \}}
+\DoxyCodeLine{00774\ }
+\DoxyCodeLine{00777\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Tp,\ \textcolor{keyword}{typename}\ \_Up>}
+\DoxyCodeLine{00778\ \ \ \ \ \textcolor{keyword}{inline}\ shared\_ptr<\_Tp>}
+\DoxyCodeLine{00779\ \ \ \ \ reinterpret\_pointer\_cast(shared\_ptr<\_Up>\&\&\ \_\_r)\ \textcolor{keyword}{noexcept}}
+\DoxyCodeLine{00780\ \ \ \ \ \{}
+\DoxyCodeLine{00781\ \ \ \ \ \ \ \textcolor{keyword}{using\ }\_Sp\ =\ shared\_ptr<\_Tp>;}
+\DoxyCodeLine{00782\ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \_Sp(\mbox{\hyperlink{namespacestd_ac7095819f6a8da64d69b1ee3029c52be}{std::move}}(\_\_r),}
+\DoxyCodeLine{00783\ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{reinterpret\_cast<}typename\ \_Sp::element\_type*\textcolor{keyword}{>}(\_\_r.get()));}
+\DoxyCodeLine{00784\ \ \ \ \ \}}
+\DoxyCodeLine{00785\ \textcolor{preprocessor}{\#endif\ }\textcolor{comment}{//\ C++20}}
+\DoxyCodeLine{00786\ \textcolor{preprocessor}{\#endif\ }\textcolor{comment}{//\ C++17}}
+\DoxyCodeLine{00787\ }
+\DoxyCodeLine{00789\ }
+\DoxyCodeLine{00810\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Tp>}
+\DoxyCodeLine{00811\ \ \ \ \ \textcolor{keyword}{class\ }weak\_ptr\ :\ \textcolor{keyword}{public}\ \_\_weak\_ptr<\_Tp>}
+\DoxyCodeLine{00812\ \ \ \ \ \{}
+\DoxyCodeLine{00813\ \ \ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Arg>}
+\DoxyCodeLine{00814\ \ \ \ \ \textcolor{keyword}{using\ }\_Constructible\ =\ \textcolor{keyword}{typename}\ enable\_if<}
+\DoxyCodeLine{00815\ \ \ \ \ \ \ is\_constructible<\_\_weak\_ptr<\_Tp>,\ \_Arg>\mbox{\hyperlink{classvalue}{::value}}}
+\DoxyCodeLine{00816\ \ \ \ \ >\mbox{\hyperlink{_classes_2_gameobj_8h_a890efa53b3d7deeeced6f3a0d6653ed3}{::type}};}
+\DoxyCodeLine{00817\ }
+\DoxyCodeLine{00818\ \ \ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Arg>}
+\DoxyCodeLine{00819\ \ \ \ \ \textcolor{keyword}{using\ }\_Assignable\ =\ \textcolor{keyword}{typename}\ enable\_if<}
+\DoxyCodeLine{00820\ \ \ \ \ \ \ is\_assignable<\_\_weak\_ptr<\_Tp>\&,\ \_Arg>\mbox{\hyperlink{classvalue}{::value}},\ weak\_ptr\&}
+\DoxyCodeLine{00821\ \ \ \ \ >\mbox{\hyperlink{_classes_2_gameobj_8h_a890efa53b3d7deeeced6f3a0d6653ed3}{::type}};}
+\DoxyCodeLine{00822\ }
+\DoxyCodeLine{00823\ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00824\ \ \ \ \ \ \ \textcolor{keyword}{constexpr}\ weak\_ptr()\ noexcept\ =\ default;}
+\DoxyCodeLine{00825\ }
+\DoxyCodeLine{00826\ \ \ \ \ \ \ template<typename\ \_Yp,}
+\DoxyCodeLine{00827\ \ \ \ \ \ \ \ \ \ \ \ typename\ =\ \_Constructible<const\ shared\_ptr<\_Yp>\&>>}
+\DoxyCodeLine{00828\ \ \ \ \ weak\_ptr(const\ shared\_ptr<\_Yp>\&\ \_\_r)\ noexcept}
+\DoxyCodeLine{00829\ \ \ \ \ :\ \_\_weak\_ptr<\_Tp>(\_\_r)\ \{\ \}}
+\DoxyCodeLine{00830\ }
+\DoxyCodeLine{00831\ \ \ \ \ \ \ weak\_ptr(\textcolor{keyword}{const}\ weak\_ptr\&)\ \textcolor{keyword}{noexcept}\ =\ \textcolor{keywordflow}{default};}
+\DoxyCodeLine{00832\ }
+\DoxyCodeLine{00833\ \ \ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Yp,\ \textcolor{keyword}{typename}\ =\ \_Constructible<const\ weak\_ptr<\_Yp>\&>>}
+\DoxyCodeLine{00834\ \ \ \ \ weak\_ptr(\textcolor{keyword}{const}\ weak\_ptr<\_Yp>\&\ \_\_r)\ noexcept}
+\DoxyCodeLine{00835\ \ \ \ \ :\ \_\_weak\_ptr<\_Tp>(\_\_r)\ \{\ \}}
+\DoxyCodeLine{00836\ }
+\DoxyCodeLine{00837\ \ \ \ \ \ \ weak\_ptr(weak\_ptr\&\&)\ noexcept\ =\ default;}
+\DoxyCodeLine{00838\ }
+\DoxyCodeLine{00839\ \ \ \ \ \ \ template<typename\ \_Yp,\ typename\ =\ \_Constructible<weak\_ptr<\_Yp>>>}
+\DoxyCodeLine{00840\ \ \ \ \ weak\_ptr(weak\_ptr<\_Yp>\&\&\ \_\_r)\ noexcept}
+\DoxyCodeLine{00841\ \ \ \ \ :\ \_\_weak\_ptr<\_Tp>(\mbox{\hyperlink{namespacestd}{std}}::move(\_\_r))\ \{\ \}}
+\DoxyCodeLine{00842\ }
+\DoxyCodeLine{00843\ \ \ \ \ \ \ weak\_ptr\&}
+\DoxyCodeLine{00844\ \ \ \ \ \ \ operator=(\textcolor{keyword}{const}\ weak\_ptr\&\ \_\_r)\ \textcolor{keyword}{noexcept}\ =\ \textcolor{keywordflow}{default};}
+\DoxyCodeLine{00845\ }
+\DoxyCodeLine{00846\ \ \ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Yp>}
+\DoxyCodeLine{00847\ \ \ \ \ \_Assignable<const\ weak\_ptr<\_Yp>\&>}
+\DoxyCodeLine{00848\ \ \ \ \ operator=(\textcolor{keyword}{const}\ weak\_ptr<\_Yp>\&\ \_\_r)\ \textcolor{keyword}{noexcept}}
+\DoxyCodeLine{00849\ \ \ \ \ \{}
+\DoxyCodeLine{00850\ \ \ \ \ \ \ this-\/>\_\_weak\_ptr<\_Tp>::operator=(\_\_r);}
+\DoxyCodeLine{00851\ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ *\textcolor{keyword}{this};}
+\DoxyCodeLine{00852\ \ \ \ \ \}}
+\DoxyCodeLine{00853\ }
+\DoxyCodeLine{00854\ \ \ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Yp>}
+\DoxyCodeLine{00855\ \ \ \ \ \_Assignable<const\ shared\_ptr<\_Yp>\&>}
+\DoxyCodeLine{00856\ \ \ \ \ operator=(\textcolor{keyword}{const}\ shared\_ptr<\_Yp>\&\ \_\_r)\ \textcolor{keyword}{noexcept}}
+\DoxyCodeLine{00857\ \ \ \ \ \{}
+\DoxyCodeLine{00858\ \ \ \ \ \ \ this-\/>\_\_weak\_ptr<\_Tp>::operator=(\_\_r);}
+\DoxyCodeLine{00859\ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ *\textcolor{keyword}{this};}
+\DoxyCodeLine{00860\ \ \ \ \ \}}
+\DoxyCodeLine{00861\ }
+\DoxyCodeLine{00862\ \ \ \ \ \ \ weak\_ptr\&}
+\DoxyCodeLine{00863\ \ \ \ \ \ \ operator=(weak\_ptr\&\&\ \_\_r)\ \textcolor{keyword}{noexcept}\ =\ \textcolor{keywordflow}{default};}
+\DoxyCodeLine{00864\ }
+\DoxyCodeLine{00865\ \ \ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Yp>}
+\DoxyCodeLine{00866\ \ \ \ \ \_Assignable<weak\_ptr<\_Yp>>}
+\DoxyCodeLine{00867\ \ \ \ \ operator=(weak\_ptr<\_Yp>\&\&\ \_\_r)\ \textcolor{keyword}{noexcept}}
+\DoxyCodeLine{00868\ \ \ \ \ \{}
+\DoxyCodeLine{00869\ \ \ \ \ \ \ this-\/>\_\_weak\_ptr<\_Tp>::operator=(\mbox{\hyperlink{namespacestd_ac7095819f6a8da64d69b1ee3029c52be}{std::move}}(\_\_r));}
+\DoxyCodeLine{00870\ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ *\textcolor{keyword}{this};}
+\DoxyCodeLine{00871\ \ \ \ \ \}}
+\DoxyCodeLine{00872\ }
+\DoxyCodeLine{00873\ \ \ \ \ \ \ shared\_ptr<\_Tp>}
+\DoxyCodeLine{00874\ \ \ \ \ \ \ lock()\ const\ noexcept}
+\DoxyCodeLine{00875\ \ \ \ \ \ \ \{\ \textcolor{keywordflow}{return}\ shared\_ptr<\_Tp>(*\textcolor{keyword}{this},\ std::nothrow);\ \}}
+\DoxyCodeLine{00876\ \ \ \ \ \};}
+\DoxyCodeLine{00877\ }
+\DoxyCodeLine{00878\ \textcolor{preprocessor}{\#if\ \_\_cpp\_deduction\_guides\ >=\ 201606}}
+\DoxyCodeLine{00879\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Tp>}
+\DoxyCodeLine{00880\ \ \ \ \ weak\_ptr(shared\_ptr<\_Tp>)\ -\/>\ \ weak\_ptr<\_Tp>;}
+\DoxyCodeLine{00881\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00882\ }
+\DoxyCodeLine{00883\ \ \ \textcolor{comment}{//\ 20.7.2.3.6\ weak\_ptr\ specialized\ algorithms.}}
+\DoxyCodeLine{00886\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Tp>}
+\DoxyCodeLine{00887\ \ \ \ \ \textcolor{keyword}{inline}\ \textcolor{keywordtype}{void}}
+\DoxyCodeLine{00888\ \ \ \ \ \mbox{\hyperlink{namespacestd_a3ece115a1c8ed9020a20f1d0b70efda8}{swap}}(weak\_ptr<\_Tp>\&\ \_\_a,\ weak\_ptr<\_Tp>\&\ \_\_b)\ \textcolor{keyword}{noexcept}}
+\DoxyCodeLine{00889\ \ \ \ \ \{\ \_\_a.swap(\_\_b);\ \}}
+\DoxyCodeLine{00890\ }
+\DoxyCodeLine{00891\ }
+\DoxyCodeLine{00893\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Tp\ =\ \textcolor{keywordtype}{void}>}
+\DoxyCodeLine{00894\ \ \ \ \ \textcolor{keyword}{struct\ }owner\_less;}
+\DoxyCodeLine{00895\ }
+\DoxyCodeLine{00897\ \ \ \textcolor{keyword}{template}<>}
+\DoxyCodeLine{00898\ \ \ \ \ \textcolor{keyword}{struct\ }owner\_less<\mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_a0f7193911e632cd84da4082d5c628fe3}{void}}>\ :\ \_Sp\_owner\_less<void,\ void>}
+\DoxyCodeLine{00899\ \ \ \ \ \{\ \};}
+\DoxyCodeLine{00900\ }
+\DoxyCodeLine{00902\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Tp>}
+\DoxyCodeLine{00903\ \ \ \ \ \textcolor{keyword}{struct\ }owner\_less<shared\_ptr<\_Tp>>}
+\DoxyCodeLine{00904\ \ \ \ \ :\ \textcolor{keyword}{public}\ \_Sp\_owner\_less<shared\_ptr<\_Tp>,\ weak\_ptr<\_Tp>>}
+\DoxyCodeLine{00905\ \ \ \ \ \{\ \};}
+\DoxyCodeLine{00906\ }
+\DoxyCodeLine{00908\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Tp>}
+\DoxyCodeLine{00909\ \ \ \ \ \textcolor{keyword}{struct\ }owner\_less<weak\_ptr<\_Tp>>}
+\DoxyCodeLine{00910\ \ \ \ \ :\ \textcolor{keyword}{public}\ \_Sp\_owner\_less<weak\_ptr<\_Tp>,\ shared\_ptr<\_Tp>>}
+\DoxyCodeLine{00911\ \ \ \ \ \{\ \};}
+\DoxyCodeLine{00912\ }
+\DoxyCodeLine{00918\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Tp>}
+\DoxyCodeLine{00919\ \ \ \ \ \textcolor{keyword}{class\ }enable\_shared\_from\_this}
+\DoxyCodeLine{00920\ \ \ \ \ \{}
+\DoxyCodeLine{00921\ \ \ \ \ \textcolor{keyword}{protected}:}
+\DoxyCodeLine{00922\ \ \ \ \ \ \ \textcolor{keyword}{constexpr}\ enable\_shared\_from\_this()\ noexcept\ \{\ \}}
+\DoxyCodeLine{00923\ }
+\DoxyCodeLine{00924\ \ \ \ \ \ \ enable\_shared\_from\_this(\textcolor{keyword}{const}\ enable\_shared\_from\_this\&)\ \textcolor{keyword}{noexcept}\ \{\ \}}
+\DoxyCodeLine{00925\ }
+\DoxyCodeLine{00926\ \ \ \ \ \ \ enable\_shared\_from\_this\&}
+\DoxyCodeLine{00927\ \ \ \ \ \ \ operator=(\textcolor{keyword}{const}\ enable\_shared\_from\_this\&)\ \textcolor{keyword}{noexcept}}
+\DoxyCodeLine{00928\ \ \ \ \ \ \ \{\ \textcolor{keywordflow}{return}\ *\textcolor{keyword}{this};\ \}}
+\DoxyCodeLine{00929\ }
+\DoxyCodeLine{00930\ \ \ \ \ \ \ \string~enable\_shared\_from\_this()\ \{\ \}}
+\DoxyCodeLine{00931\ }
+\DoxyCodeLine{00932\ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00933\ \ \ \ \ \ \ shared\_ptr<\_Tp>}
+\DoxyCodeLine{00934\ \ \ \ \ \ \ shared\_from\_this()}
+\DoxyCodeLine{00935\ \ \ \ \ \ \ \{\ \textcolor{keywordflow}{return}\ shared\_ptr<\_Tp>(this-\/>\_M\_weak\_this);\ \}}
+\DoxyCodeLine{00936\ }
+\DoxyCodeLine{00937\ \ \ \ \ \ \ shared\_ptr<const\ \_Tp>}
+\DoxyCodeLine{00938\ \ \ \ \ \ \ shared\_from\_this()\textcolor{keyword}{\ const}}
+\DoxyCodeLine{00939\ \textcolor{keyword}{\ \ \ \ \ \ }\{\ \textcolor{keywordflow}{return}\ shared\_ptr<const\ \_Tp>(this-\/>\_M\_weak\_this);\ \}}
+\DoxyCodeLine{00940\ }
+\DoxyCodeLine{00941\ \textcolor{preprocessor}{\#if\ \_\_cplusplus\ >\ 201402L\ ||\ !defined(\_\_STRICT\_ANSI\_\_)\ }\textcolor{comment}{//\ c++1z\ or\ gnu++11}}
+\DoxyCodeLine{00942\ \textcolor{preprocessor}{\#define\ \_\_cpp\_lib\_enable\_shared\_from\_this\ 201603L}}
+\DoxyCodeLine{00947\ \ \ \ \ \ \ weak\_ptr<\_Tp>}
+\DoxyCodeLine{00948\ \ \ \ \ \ \ weak\_from\_this()\ noexcept}
+\DoxyCodeLine{00949\ \ \ \ \ \ \ \{\ \textcolor{keywordflow}{return}\ this-\/>\_M\_weak\_this;\ \}}
+\DoxyCodeLine{00950\ }
+\DoxyCodeLine{00951\ \ \ \ \ \ \ weak\_ptr<const\ \_Tp>}
+\DoxyCodeLine{00952\ \ \ \ \ \ \ weak\_from\_this()\ const\ noexcept}
+\DoxyCodeLine{00953\ \ \ \ \ \ \ \{\ \textcolor{keywordflow}{return}\ this-\/>\_M\_weak\_this;\ \}}
+\DoxyCodeLine{00955\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00956\ }
+\DoxyCodeLine{00957\ \ \ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00958\ \ \ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Tp1>}
+\DoxyCodeLine{00959\ \ \ \ \ \textcolor{keywordtype}{void}}
+\DoxyCodeLine{00960\ \ \ \ \ \_M\_weak\_assign(\_Tp1*\ \_\_p,\ \textcolor{keyword}{const}\ \_\_shared\_count<>\&\ \_\_n)\ \textcolor{keyword}{const}\ \textcolor{keyword}{noexcept}}
+\DoxyCodeLine{00961\ \ \ \ \ \{\ \_M\_weak\_this.\_M\_assign(\_\_p,\ \_\_n);\ \}}
+\DoxyCodeLine{00962\ }
+\DoxyCodeLine{00963\ \ \ \ \ \ \ \textcolor{comment}{//\ Found\ by\ ADL\ when\ this\ is\ an\ associated\ class.}}
+\DoxyCodeLine{00964\ \ \ \ \ \ \ \textcolor{keyword}{friend}\ \textcolor{keyword}{const}\ enable\_shared\_from\_this*}
+\DoxyCodeLine{00965\ \ \ \ \ \ \ \_\_enable\_shared\_from\_this\_base(\textcolor{keyword}{const}\ \_\_shared\_count<>\&,}
+\DoxyCodeLine{00966\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ enable\_shared\_from\_this*\ \_\_p)}
+\DoxyCodeLine{00967\ \ \ \ \ \ \ \{\ \textcolor{keywordflow}{return}\ \_\_p;\ \}}
+\DoxyCodeLine{00968\ }
+\DoxyCodeLine{00969\ \ \ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename},\ \_Lock\_policy>}
+\DoxyCodeLine{00970\ \ \ \ \ \textcolor{keyword}{friend}\ \textcolor{keyword}{class\ }\_\_shared\_ptr;}
+\DoxyCodeLine{00971\ }
+\DoxyCodeLine{00972\ \ \ \ \ \ \ \textcolor{keyword}{mutable}\ weak\_ptr<\_Tp>\ \ \_M\_weak\_this;}
+\DoxyCodeLine{00973\ \ \ \ \ \};}
+\DoxyCodeLine{00974\ }
+\DoxyCodeLine{00976\ }
+\DoxyCodeLine{00988\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Tp,\ \textcolor{keyword}{typename}\ \_Alloc,\ \textcolor{keyword}{typename}...\ \_Args>}
+\DoxyCodeLine{00989\ \ \ \ \ \textcolor{keyword}{inline}\ shared\_ptr<\_NonArray<\_Tp>>}
+\DoxyCodeLine{00990\ \ \ \ \ allocate\_shared(\textcolor{keyword}{const}\ \_Alloc\&\ \_\_a,\ \_Args\&\&...\ \_\_args)}
+\DoxyCodeLine{00991\ \ \ \ \ \{}
+\DoxyCodeLine{00992\ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ shared\_ptr<\_Tp>(\_Sp\_alloc\_shared\_tag<\_Alloc>\{\_\_a\},}
+\DoxyCodeLine{00993\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::forward<\_Args>(\_\_args)...);}
+\DoxyCodeLine{00994\ \ \ \ \ \}}
+\DoxyCodeLine{00995\ }
+\DoxyCodeLine{01003\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Tp,\ \textcolor{keyword}{typename}...\ \_Args>}
+\DoxyCodeLine{01004\ \ \ \ \ \textcolor{keyword}{inline}\ shared\_ptr<\_NonArray<\_Tp>>}
+\DoxyCodeLine{01005\ \ \ \ \ make\_shared(\_Args\&\&...\ \_\_args)}
+\DoxyCodeLine{01006\ \ \ \ \ \{}
+\DoxyCodeLine{01007\ \ \ \ \ \ \ \textcolor{keyword}{using\ }\_Alloc\ =\ allocator<void>;}
+\DoxyCodeLine{01008\ \ \ \ \ \ \ \_Alloc\ \_\_a;}
+\DoxyCodeLine{01009\ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ shared\_ptr<\_Tp>(\_Sp\_alloc\_shared\_tag<\_Alloc>\{\_\_a\},}
+\DoxyCodeLine{01010\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::forward<\_Args>(\_\_args)...);}
+\DoxyCodeLine{01011\ \ \ \ \ \}}
+\DoxyCodeLine{01012\ }
+\DoxyCodeLine{01013\ \textcolor{preprocessor}{\#if\ \_\_cpp\_lib\_shared\_ptr\_arrays\ >=\ 201707L}}
+\DoxyCodeLine{01015\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Tp,\ \textcolor{keyword}{typename}\ \_Alloc\ =\ allocator<\textcolor{keywordtype}{void}>>}
+\DoxyCodeLine{01016\ \ \ \ \ \textcolor{keyword}{auto}}
+\DoxyCodeLine{01017\ \ \ \ \ \_\_make\_shared\_arr\_tag(\textcolor{keywordtype}{size\_t}\ \_\_n,\ \textcolor{keyword}{const}\ \_Alloc\&\ \_\_a\ =\ \_Alloc())\ noexcept}
+\DoxyCodeLine{01018\ \ \ \ \ \{}
+\DoxyCodeLine{01019\ \ \ \ \ \ \ \textcolor{keyword}{using\ }\_Up\ =\ remove\_all\_extents\_t<\_Tp>;}
+\DoxyCodeLine{01020\ \ \ \ \ \ \ \textcolor{keyword}{using\ }\_UpAlloc\ =\ \_\_alloc\_rebind<\_Alloc,\ \_Up>;}
+\DoxyCodeLine{01021\ \ \ \ \ \ \ \textcolor{keywordtype}{size\_t}\ \_\_s\ =\ \textcolor{keyword}{sizeof}(remove\_extent\_t<\_Tp>)\ /\ \textcolor{keyword}{sizeof}(\_Up);}
+\DoxyCodeLine{01022\ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\_\_builtin\_mul\_overflow(\_\_s,\ \_\_n,\ \&\_\_n))}
+\DoxyCodeLine{01023\ \ \ \ \ std::\_\_throw\_bad\_array\_new\_length();}
+\DoxyCodeLine{01024\ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \_Sp\_counted\_array\_base<\_UpAlloc>\{\_UpAlloc(\_\_a),\ \_\_n\};}
+\DoxyCodeLine{01025\ \ \ \ \ \}}
+\DoxyCodeLine{01027\ }
+\DoxyCodeLine{01028\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Tp,\ \textcolor{keyword}{typename}\ \_Alloc>}
+\DoxyCodeLine{01029\ \ \ \ \ \textcolor{keyword}{inline}\ shared\_ptr<\_UnboundedArray<\_Tp>>}
+\DoxyCodeLine{01030\ \ \ \ \ allocate\_shared(\textcolor{keyword}{const}\ \_Alloc\&\ \_\_a,\ \textcolor{keywordtype}{size\_t}\ \_\_n)}
+\DoxyCodeLine{01031\ \ \ \ \ \{}
+\DoxyCodeLine{01032\ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ shared\_ptr<\_Tp>(std::\_\_make\_shared\_arr\_tag<\_Tp>(\_\_n,\ \_\_a));}
+\DoxyCodeLine{01033\ \ \ \ \ \}}
+\DoxyCodeLine{01034\ }
+\DoxyCodeLine{01035\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Tp>}
+\DoxyCodeLine{01036\ \ \ \ \ \textcolor{keyword}{inline}\ shared\_ptr<\_UnboundedArray<\_Tp>>}
+\DoxyCodeLine{01037\ \ \ \ \ make\_shared(\textcolor{keywordtype}{size\_t}\ \_\_n)}
+\DoxyCodeLine{01038\ \ \ \ \ \{}
+\DoxyCodeLine{01039\ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ shared\_ptr<\_Tp>(std::\_\_make\_shared\_arr\_tag<\_Tp>(\_\_n));}
+\DoxyCodeLine{01040\ \ \ \ \ \}}
+\DoxyCodeLine{01041\ }
+\DoxyCodeLine{01042\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Tp,\ \textcolor{keyword}{typename}\ \_Alloc>}
+\DoxyCodeLine{01043\ \ \ \ \ \textcolor{keyword}{inline}\ shared\_ptr<\_UnboundedArray<\_Tp>>}
+\DoxyCodeLine{01044\ \ \ \ \ allocate\_shared(\textcolor{keyword}{const}\ \_Alloc\&\ \_\_a,\ \textcolor{keywordtype}{size\_t}\ \_\_n,}
+\DoxyCodeLine{01045\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ remove\_extent\_t<\_Tp>\&\ \_\_u)}
+\DoxyCodeLine{01046\ \ \ \ \ \{}
+\DoxyCodeLine{01047\ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ shared\_ptr<\_Tp>(std::\_\_make\_shared\_arr\_tag<\_Tp>(\_\_n,\ \_\_a),}
+\DoxyCodeLine{01048\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::\_\_addressof(\_\_u));}
+\DoxyCodeLine{01049\ \ \ \ \ \}}
+\DoxyCodeLine{01050\ }
+\DoxyCodeLine{01051\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Tp>}
+\DoxyCodeLine{01052\ \ \ \ \ \textcolor{keyword}{inline}\ shared\_ptr<\_UnboundedArray<\_Tp>>}
+\DoxyCodeLine{01053\ \ \ \ \ make\_shared(\textcolor{keywordtype}{size\_t}\ \_\_n,\ \textcolor{keyword}{const}\ remove\_extent\_t<\_Tp>\&\ \_\_u)}
+\DoxyCodeLine{01054\ \ \ \ \ \{}
+\DoxyCodeLine{01055\ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ shared\_ptr<\_Tp>(std::\_\_make\_shared\_arr\_tag<\_Tp>(\_\_n),}
+\DoxyCodeLine{01056\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::\_\_addressof(\_\_u));}
+\DoxyCodeLine{01057\ \ \ \ \ \}}
+\DoxyCodeLine{01058\ }
+\DoxyCodeLine{01060\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Tp,\ \textcolor{keyword}{typename}\ \_Alloc\ =\ allocator<\textcolor{keywordtype}{void}>>}
+\DoxyCodeLine{01061\ \ \ \ \ \textcolor{keyword}{auto}}
+\DoxyCodeLine{01062\ \ \ \ \ \_\_make\_shared\_arrN\_tag(\textcolor{keyword}{const}\ \_Alloc\&\ \_\_a\ =\ \_Alloc())\ noexcept}
+\DoxyCodeLine{01063\ \ \ \ \ \{}
+\DoxyCodeLine{01064\ \ \ \ \ \ \ \textcolor{keyword}{using\ }\_Up\ =\ remove\_all\_extents\_t<\_Tp>;}
+\DoxyCodeLine{01065\ \ \ \ \ \ \ \textcolor{keyword}{using\ }\_UpAlloc\ =\ \_\_alloc\_rebind<\_Alloc,\ \_Up>;}
+\DoxyCodeLine{01066\ \ \ \ \ \ \ \textcolor{keywordtype}{size\_t}\ \_\_n\ =\ \textcolor{keyword}{sizeof}(\_Tp)\ /\ \textcolor{keyword}{sizeof}(\_Up);}
+\DoxyCodeLine{01067\ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \_Sp\_counted\_array\_base<\_UpAlloc>\{\_UpAlloc(\_\_a),\ \_\_n\};}
+\DoxyCodeLine{01068\ \ \ \ \ \}}
+\DoxyCodeLine{01070\ }
+\DoxyCodeLine{01071\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Tp,\ \textcolor{keyword}{typename}\ \_Alloc>}
+\DoxyCodeLine{01072\ \ \ \ \ \textcolor{keyword}{inline}\ shared\_ptr<\_BoundedArray<\_Tp>>}
+\DoxyCodeLine{01073\ \ \ \ \ allocate\_shared(\textcolor{keyword}{const}\ \_Alloc\&\ \_\_a)}
+\DoxyCodeLine{01074\ \ \ \ \ \{}
+\DoxyCodeLine{01075\ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ shared\_ptr<\_Tp>(std::\_\_make\_shared\_arrN\_tag<\_Tp>(\_\_a));}
+\DoxyCodeLine{01076\ \ \ \ \ \}}
+\DoxyCodeLine{01077\ }
+\DoxyCodeLine{01078\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Tp>}
+\DoxyCodeLine{01079\ \ \ \ \ \textcolor{keyword}{inline}\ shared\_ptr<\_BoundedArray<\_Tp>>}
+\DoxyCodeLine{01080\ \ \ \ \ make\_shared()}
+\DoxyCodeLine{01081\ \ \ \ \ \{}
+\DoxyCodeLine{01082\ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ shared\_ptr<\_Tp>(std::\_\_make\_shared\_arrN\_tag<\_Tp>());}
+\DoxyCodeLine{01083\ \ \ \ \ \}}
+\DoxyCodeLine{01084\ }
+\DoxyCodeLine{01085\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Tp,\ \textcolor{keyword}{typename}\ \_Alloc>}
+\DoxyCodeLine{01086\ \ \ \ \ \textcolor{keyword}{inline}\ shared\_ptr<\_BoundedArray<\_Tp>>}
+\DoxyCodeLine{01087\ \ \ \ \ allocate\_shared(\textcolor{keyword}{const}\ \_Alloc\&\ \_\_a,\ \textcolor{keyword}{const}\ remove\_extent\_t<\_Tp>\&\ \_\_u)}
+\DoxyCodeLine{01088\ \ \ \ \ \{}
+\DoxyCodeLine{01089\ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ shared\_ptr<\_Tp>(std::\_\_make\_shared\_arrN\_tag<\_Tp>(\_\_a),}
+\DoxyCodeLine{01090\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::\_\_addressof(\_\_u));}
+\DoxyCodeLine{01091\ \ \ \ \ \}}
+\DoxyCodeLine{01092\ }
+\DoxyCodeLine{01093\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Tp>}
+\DoxyCodeLine{01094\ \ \ \ \ \textcolor{keyword}{inline}\ shared\_ptr<\_BoundedArray<\_Tp>>}
+\DoxyCodeLine{01095\ \ \ \ \ make\_shared(\textcolor{keyword}{const}\ remove\_extent\_t<\_Tp>\&\ \_\_u)}
+\DoxyCodeLine{01096\ \ \ \ \ \{}
+\DoxyCodeLine{01097\ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ shared\_ptr<\_Tp>(std::\_\_make\_shared\_arrN\_tag<\_Tp>(),}
+\DoxyCodeLine{01098\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::\_\_addressof(\_\_u));}
+\DoxyCodeLine{01099\ \ \ \ \ \}}
+\DoxyCodeLine{01100\ }
+\DoxyCodeLine{01101\ \textcolor{preprocessor}{\#if\ \_\_cpp\_lib\_smart\_ptr\_for\_overwrite}}
+\DoxyCodeLine{01102\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Tp,\ \textcolor{keyword}{typename}\ \_Alloc>}
+\DoxyCodeLine{01103\ \ \ \ \ \textcolor{keyword}{inline}\ shared\_ptr<\_NotUnboundedArray<\_Tp>>}
+\DoxyCodeLine{01104\ \ \ \ \ allocate\_shared\_for\_overwrite(\textcolor{keyword}{const}\ \_Alloc\&\ \_\_a)}
+\DoxyCodeLine{01105\ \ \ \ \ \{}
+\DoxyCodeLine{01106\ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keyword}{constexpr}\ (is\_array\_v<\_Tp>)}
+\DoxyCodeLine{01107\ \ \ \ \ \textcolor{keywordflow}{return}\ shared\_ptr<\_Tp>(std::\_\_make\_shared\_arrN\_tag<\_Tp>(\_\_a),}
+\DoxyCodeLine{01108\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_Sp\_overwrite\_tag\{\});}
+\DoxyCodeLine{01109\ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{01110\ \ \ \ \ \{}
+\DoxyCodeLine{01111\ \ \ \ \ \ \ \textcolor{comment}{//\ Rebind\ the\ allocator\ to\ \_Sp\_overwrite\_tag,\ so\ that\ the}}
+\DoxyCodeLine{01112\ \ \ \ \ \ \ \textcolor{comment}{//\ relevant\ \_Sp\_counted\_ptr\_inplace\ specialization\ is\ used.}}
+\DoxyCodeLine{01113\ \ \ \ \ \ \ \textcolor{keyword}{using\ }\_Alloc2\ =\ \_\_alloc\_rebind<\_Alloc,\ \_Sp\_overwrite\_tag>;}
+\DoxyCodeLine{01114\ \ \ \ \ \ \ \_Alloc2\ \_\_a2\ =\ \_\_a;}
+\DoxyCodeLine{01115\ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ shared\_ptr<\_Tp>(\_Sp\_alloc\_shared\_tag<\_Alloc2>\{\_\_a2\});}
+\DoxyCodeLine{01116\ \ \ \ \ \}}
+\DoxyCodeLine{01117\ \ \ \ \ \}}
+\DoxyCodeLine{01118\ }
+\DoxyCodeLine{01119\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Tp>}
+\DoxyCodeLine{01120\ \ \ \ \ \textcolor{keyword}{inline}\ shared\_ptr<\_NotUnboundedArray<\_Tp>>}
+\DoxyCodeLine{01121\ \ \ \ \ make\_shared\_for\_overwrite()}
+\DoxyCodeLine{01122\ \ \ \ \ \{}
+\DoxyCodeLine{01123\ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keyword}{constexpr}\ (is\_array\_v<\_Tp>)}
+\DoxyCodeLine{01124\ \ \ \ \ \textcolor{keywordflow}{return}\ shared\_ptr<\_Tp>(std::\_\_make\_shared\_arrN\_tag<\_Tp>(),}
+\DoxyCodeLine{01125\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_Sp\_overwrite\_tag\{\});}
+\DoxyCodeLine{01126\ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{01127\ \ \ \ \ \{}
+\DoxyCodeLine{01128\ \ \ \ \ \ \ \textcolor{keyword}{using\ }\_Alloc\ =\ allocator<\_Sp\_overwrite\_tag>;}
+\DoxyCodeLine{01129\ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ shared\_ptr<\_Tp>(\_Sp\_alloc\_shared\_tag<\_Alloc>\{\{\}\});}
+\DoxyCodeLine{01130\ \ \ \ \ \}}
+\DoxyCodeLine{01131\ \ \ \ \ \}}
+\DoxyCodeLine{01132\ }
+\DoxyCodeLine{01133\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Tp,\ \textcolor{keyword}{typename}\ \_Alloc>}
+\DoxyCodeLine{01134\ \ \ \ \ \textcolor{keyword}{inline}\ shared\_ptr<\_UnboundedArray<\_Tp>>}
+\DoxyCodeLine{01135\ \ \ \ \ allocate\_shared\_for\_overwrite(\textcolor{keyword}{const}\ \_Alloc\&\ \_\_a,\ \textcolor{keywordtype}{size\_t}\ \_\_n)}
+\DoxyCodeLine{01136\ \ \ \ \ \{}
+\DoxyCodeLine{01137\ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ shared\_ptr<\_Tp>(std::\_\_make\_shared\_arr\_tag<\_Tp>(\_\_n,\ \_\_a),}
+\DoxyCodeLine{01138\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_Sp\_overwrite\_tag\{\});}
+\DoxyCodeLine{01139\ \ \ \ \ \}}
+\DoxyCodeLine{01140\ }
+\DoxyCodeLine{01141\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Tp>}
+\DoxyCodeLine{01142\ \ \ \ \ \textcolor{keyword}{inline}\ shared\_ptr<\_UnboundedArray<\_Tp>>}
+\DoxyCodeLine{01143\ \ \ \ \ make\_shared\_for\_overwrite(\textcolor{keywordtype}{size\_t}\ \_\_n)}
+\DoxyCodeLine{01144\ \ \ \ \ \{}
+\DoxyCodeLine{01145\ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ shared\_ptr<\_Tp>(std::\_\_make\_shared\_arr\_tag<\_Tp>(\_\_n),}
+\DoxyCodeLine{01146\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_Sp\_overwrite\_tag\{\});}
+\DoxyCodeLine{01147\ \ \ \ \ \}}
+\DoxyCodeLine{01148\ \textcolor{preprocessor}{\#endif\ }\textcolor{comment}{//\ smart\_ptr\_for\_overwrite}}
+\DoxyCodeLine{01149\ \textcolor{preprocessor}{\#endif\ }\textcolor{comment}{//\ shared\_ptr\_arrays}}
+\DoxyCodeLine{01150\ }
+\DoxyCodeLine{01152\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Tp>}
+\DoxyCodeLine{01153\ \ \ \ \ \textcolor{keyword}{struct\ }hash<shared\_ptr<\_Tp>>}
+\DoxyCodeLine{01154\ \ \ \ \ :\ \textcolor{keyword}{public}\ \_\_hash\_base<size\_t,\ shared\_ptr<\_Tp>>}
+\DoxyCodeLine{01155\ \ \ \ \ \{}
+\DoxyCodeLine{01156\ \ \ \ \ \ \ \textcolor{keywordtype}{size\_t}}
+\DoxyCodeLine{01157\ \ \ \ \ \ \ operator()(\textcolor{keyword}{const}\ shared\_ptr<\_Tp>\&\ \_\_s)\ \textcolor{keyword}{const}\ \textcolor{keyword}{noexcept}}
+\DoxyCodeLine{01158\ \ \ \ \ \ \ \{}
+\DoxyCodeLine{01159\ \ \ \ \ \textcolor{keywordflow}{return}\ std::hash<typename\ shared\_ptr<\_Tp>::element\_type*>()(\_\_s.get());}
+\DoxyCodeLine{01160\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{01161\ \ \ \ \ \};}
+\DoxyCodeLine{01162\ }
+\DoxyCodeLine{01165\ }
+\DoxyCodeLine{01166\ \textcolor{preprocessor}{\#if\ \_\_cplusplus\ >=\ 201703L}}
+\DoxyCodeLine{01167\ \ \ \textcolor{keyword}{namespace\ }\_\_detail::\_\_variant}
+\DoxyCodeLine{01168\ \ \ \{}
+\DoxyCodeLine{01169\ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}>\ \textcolor{keyword}{struct\ }\_Never\_valueless\_alt;\ \textcolor{comment}{//\ see\ <variant>}}
+\DoxyCodeLine{01170\ }
+\DoxyCodeLine{01171\ \ \ \ \ \textcolor{comment}{//\ Provide\ the\ strong\ exception-\/safety\ guarantee\ when\ emplacing\ a}}
+\DoxyCodeLine{01172\ \ \ \ \ \textcolor{comment}{//\ shared\_ptr\ into\ a\ variant.}}
+\DoxyCodeLine{01173\ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Tp>}
+\DoxyCodeLine{01174\ \ \ \ \ \ \ \textcolor{keyword}{struct\ }\_Never\_valueless\_alt<\mbox{\hyperlink{namespacestd}{std}}::shared\_ptr<\_Tp>>}
+\DoxyCodeLine{01175\ \ \ \ \ \ \ :\ std::true\_type}
+\DoxyCodeLine{01176\ \ \ \ \ \ \ \{\ \};}
+\DoxyCodeLine{01177\ }
+\DoxyCodeLine{01178\ \ \ \ \ \textcolor{comment}{//\ Provide\ the\ strong\ exception-\/safety\ guarantee\ when\ emplacing\ a}}
+\DoxyCodeLine{01179\ \ \ \ \ \textcolor{comment}{//\ weak\_ptr\ into\ a\ variant.}}
+\DoxyCodeLine{01180\ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Tp>}
+\DoxyCodeLine{01181\ \ \ \ \ \ \ \textcolor{keyword}{struct\ }\_Never\_valueless\_alt<\mbox{\hyperlink{namespacestd}{std}}::weak\_ptr<\_Tp>>}
+\DoxyCodeLine{01182\ \ \ \ \ \ \ :\ std::true\_type}
+\DoxyCodeLine{01183\ \ \ \ \ \ \ \{\ \};}
+\DoxyCodeLine{01184\ \ \ \}\ \ \textcolor{comment}{//\ namespace\ \_\_detail::\_\_variant}}
+\DoxyCodeLine{01185\ \textcolor{preprocessor}{\#endif\ }\textcolor{comment}{//\ C++17}}
+\DoxyCodeLine{01186\ }
+\DoxyCodeLine{01187\ \_GLIBCXX\_END\_NAMESPACE\_VERSION}
+\DoxyCodeLine{01188\ \}\ \textcolor{comment}{//\ namespace}}
+\DoxyCodeLine{01189\ }
+\DoxyCodeLine{01190\ \textcolor{preprocessor}{\#endif\ }\textcolor{comment}{//\ \_SHARED\_PTR\_H}}
+
+\end{DoxyCode}

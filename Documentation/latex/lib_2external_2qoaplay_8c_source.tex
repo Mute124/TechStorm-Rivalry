@@ -1,0 +1,284 @@
+\doxysection{qoaplay.\+c}
+\hypertarget{lib_2external_2qoaplay_8c_source}{}\label{lib_2external_2qoaplay_8c_source}\index{C:/Users/HP/Documents/GitHub/Minero-\/Game/lib/external/qoaplay.c@{C:/Users/HP/Documents/GitHub/Minero-\/Game/lib/external/qoaplay.c}}
+\mbox{\hyperlink{lib_2external_2qoaplay_8c}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{comment}{/*******************************************************************************************}}
+\DoxyCodeLine{00002\ \textcolor{comment}{*}}
+\DoxyCodeLine{00003\ \textcolor{comment}{*\ \ \ qoaplay\ -\/\ QOA\ stream\ playing\ helper\ functions}}
+\DoxyCodeLine{00004\ \textcolor{comment}{*}}
+\DoxyCodeLine{00005\ \textcolor{comment}{*\ \ \ qoaplay\ is\ a\ tiny\ abstraction\ to\ read\ and\ decode\ a\ QOA\ file\ "{}on\ the\ fly"{}.}}
+\DoxyCodeLine{00006\ \textcolor{comment}{*\ \ \ It\ reads\ and\ decodes\ one\ frame\ at\ a\ time\ with\ minimal\ memory\ requirements.}}
+\DoxyCodeLine{00007\ \textcolor{comment}{*\ \ \ qoaplay\ also\ provides\ some\ functions\ to\ seek\ to\ a\ specific\ frame.}}
+\DoxyCodeLine{00008\ \textcolor{comment}{*}}
+\DoxyCodeLine{00009\ \textcolor{comment}{*\ \ \ LICENSE:\ MIT\ License}}
+\DoxyCodeLine{00010\ \textcolor{comment}{*}}
+\DoxyCodeLine{00011\ \textcolor{comment}{*\ \ \ Copyright\ (c)\ 2023\ Dominic\ Szablewski\ (@phoboslab),\ reviewed\ by\ Ramon\ Santamaria\ (@raysan5)}}
+\DoxyCodeLine{00012\ \textcolor{comment}{*}}
+\DoxyCodeLine{00013\ \textcolor{comment}{*\ \ \ Permission\ is\ hereby\ granted,\ free\ of\ charge,\ to\ any\ person\ obtaining\ a\ copy}}
+\DoxyCodeLine{00014\ \textcolor{comment}{*\ \ \ of\ this\ software\ and\ associated\ documentation\ files\ (the\ "{}Software"{}),\ to\ deal}}
+\DoxyCodeLine{00015\ \textcolor{comment}{*\ \ \ in\ the\ Software\ without\ restriction,\ including\ without\ limitation\ the\ rights}}
+\DoxyCodeLine{00016\ \textcolor{comment}{*\ \ \ to\ use,\ copy,\ modify,\ merge,\ publish,\ distribute,\ sublicense,\ and/or\ sell}}
+\DoxyCodeLine{00017\ \textcolor{comment}{*\ \ \ copies\ of\ the\ Software,\ and\ to\ permit\ persons\ to\ whom\ the\ Software\ is}}
+\DoxyCodeLine{00018\ \textcolor{comment}{*\ \ \ furnished\ to\ do\ so,\ subject\ to\ the\ following\ conditions:}}
+\DoxyCodeLine{00019\ \textcolor{comment}{*}}
+\DoxyCodeLine{00020\ \textcolor{comment}{*\ \ \ The\ above\ copyright\ notice\ and\ this\ permission\ notice\ shall\ be\ included\ in\ all}}
+\DoxyCodeLine{00021\ \textcolor{comment}{*\ \ \ copies\ or\ substantial\ portions\ of\ the\ Software.}}
+\DoxyCodeLine{00022\ \textcolor{comment}{*}}
+\DoxyCodeLine{00023\ \textcolor{comment}{*\ \ \ THE\ SOFTWARE\ IS\ PROVIDED\ "{}AS\ IS"{},\ WITHOUT\ WARRANTY\ OF\ ANY\ KIND,\ EXPRESS\ OR}}
+\DoxyCodeLine{00024\ \textcolor{comment}{*\ \ \ IMPLIED,\ INCLUDING\ BUT\ NOT\ LIMITED\ TO\ THE\ WARRANTIES\ OF\ MERCHANTABILITY,}}
+\DoxyCodeLine{00025\ \textcolor{comment}{*\ \ \ FITNESS\ FOR\ A\ PARTICULAR\ PURPOSE\ AND\ NONINFRINGEMENT.\ IN\ NO\ EVENT\ SHALL\ THE}}
+\DoxyCodeLine{00026\ \textcolor{comment}{*\ \ \ AUTHORS\ OR\ COPYRIGHT\ HOLDERS\ BE\ LIABLE\ FOR\ ANY\ CLAIM,\ DAMAGES\ OR\ OTHER}}
+\DoxyCodeLine{00027\ \textcolor{comment}{*\ \ \ LIABILITY,\ WHETHER\ IN\ AN\ ACTION\ OF\ CONTRACT,\ TORT\ OR\ OTHERWISE,\ ARISING\ FROM,}}
+\DoxyCodeLine{00028\ \textcolor{comment}{*\ \ \ OUT\ OF\ OR\ IN\ CONNECTION\ WITH\ THE\ SOFTWARE\ OR\ THE\ USE\ OR\ OTHER\ DEALINGS\ IN\ THE}}
+\DoxyCodeLine{00029\ \textcolor{comment}{*\ \ \ SOFTWARE.}}
+\DoxyCodeLine{00030\ \textcolor{comment}{*}}
+\DoxyCodeLine{00031\ \textcolor{comment}{**********************************************************************************************/}}
+\DoxyCodeLine{00032\ }
+\DoxyCodeLine{00033\ \textcolor{comment}{//-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/}}
+\DoxyCodeLine{00034\ \textcolor{comment}{//\ Types\ and\ Structures\ Definition}}
+\DoxyCodeLine{00035\ \textcolor{comment}{//-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/}}
+\DoxyCodeLine{00036\ \textcolor{comment}{//\ QOA\ streaming\ data\ descriptor}}
+\DoxyCodeLine{00037\ \textcolor{keyword}{typedef}\ \textcolor{keyword}{struct\ }\{}
+\DoxyCodeLine{00038\ \ \ \ \ \mbox{\hyperlink{structqoa__desc}{qoa\_desc}}\ info;\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ QOA\ descriptor\ data}}
+\DoxyCodeLine{00039\ \ \ \ \ }
+\DoxyCodeLine{00040\ \ \ \ \ FILE\ *\mbox{\hyperlink{namespaceversion_aee8dac8d4699e20bfc999959504928c0}{file}};\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ QOA\ file\ to\ read,\ if\ NULL,\ using\ memory\ buffer\ -\/>\ file\_data}}
+\DoxyCodeLine{00041\ \ \ \ \ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{char}\ *file\_data;\ \ \ \ \ \ \ \textcolor{comment}{//\ QOA\ file\ data\ on\ memory}}
+\DoxyCodeLine{00042\ \ \ \ \ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ file\_data\_size;\ \ \ \ \textcolor{comment}{//\ QOA\ file\ data\ on\ memory\ size}}
+\DoxyCodeLine{00043\ \ \ \ \ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ file\_data\_offset;\ \ \textcolor{comment}{//\ QOA\ file\ data\ on\ memory\ offset\ for\ next\ read}}
+\DoxyCodeLine{00044\ }
+\DoxyCodeLine{00045\ \ \ \ \ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ first\_frame\_pos;\ \ \ \textcolor{comment}{//\ First\ frame\ position\ (after\ QOA\ header,\ required\ for\ offset)}}
+\DoxyCodeLine{00046\ \ \ \ \ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ sample\_position;\ \ \ \textcolor{comment}{//\ Current\ streaming\ sample\ position}}
+\DoxyCodeLine{00047\ }
+\DoxyCodeLine{00048\ \ \ \ \ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{char}\ *\mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_a7bd7b5e409950ac3449c78baf3205f4b}{buffer}};\ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ Buffer\ used\ to\ read\ samples\ from\ file/memory\ (used\ on\ decoding)}}
+\DoxyCodeLine{00049\ \ \ \ \ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ buffer\_len;\ \ \ \ \ \ \ \ \textcolor{comment}{//\ Buffer\ length\ to\ read\ samples\ for\ streaming}}
+\DoxyCodeLine{00050\ }
+\DoxyCodeLine{00051\ \ \ \ \ \textcolor{keywordtype}{short}\ *sample\_data;\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ Sample\ data\ decoded}}
+\DoxyCodeLine{00052\ \ \ \ \ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ sample\_data\_len;\ \ \ \textcolor{comment}{//\ Sample\ data\ decoded\ length}}
+\DoxyCodeLine{00053\ \ \ \ \ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ sample\_data\_pos;\ \ \ \textcolor{comment}{//\ Sample\ data\ decoded\ position}}
+\DoxyCodeLine{00054\ }
+\DoxyCodeLine{00055\ \}\ \mbox{\hyperlink{structqoaplay__desc}{qoaplay\_desc}};}
+\DoxyCodeLine{00056\ }
+\DoxyCodeLine{00057\ \textcolor{comment}{//-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/}}
+\DoxyCodeLine{00058\ \textcolor{comment}{//\ Module\ Functions\ Declaration}}
+\DoxyCodeLine{00059\ \textcolor{comment}{//-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/}}
+\DoxyCodeLine{00060\ }
+\DoxyCodeLine{00061\ \textcolor{preprocessor}{\#if\ defined(\_\_cplusplus)}}
+\DoxyCodeLine{00062\ \textcolor{keyword}{extern}\ \textcolor{stringliteral}{"{}C"{}}\ \{\ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ Prevents\ name\ mangling\ of\ functions}}
+\DoxyCodeLine{00063\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00064\ }
+\DoxyCodeLine{00065\ \mbox{\hyperlink{structqoaplay__desc}{qoaplay\_desc}}\ *\mbox{\hyperlink{_classes_2lib_2external_2qoaplay_8c_ac8e818b2ceecfc9a246359dfb6433bfa}{qoaplay\_open}}(\textcolor{keywordtype}{char}\ *\mbox{\hyperlink{classpath}{path}});}
+\DoxyCodeLine{00066\ \mbox{\hyperlink{structqoaplay__desc}{qoaplay\_desc}}\ *\mbox{\hyperlink{_classes_2lib_2external_2qoaplay_8c_a5706372454aa832d0bf26b5d9cb272ba}{qoaplay\_open\_memory}}(\textcolor{keyword}{const}\ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{char}\ *\mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_a89ce72163394e6aef63b551a8806e93f}{data}},\ \textcolor{keywordtype}{int}\ data\_size);}
+\DoxyCodeLine{00067\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{_classes_2lib_2external_2qoaplay_8c_abffb0a8739958636a12e80769f759e29}{qoaplay\_close}}(\mbox{\hyperlink{structqoaplay__desc}{qoaplay\_desc}}\ *qoa\_ctx);}
+\DoxyCodeLine{00068\ }
+\DoxyCodeLine{00069\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{_classes_2lib_2external_2qoaplay_8c_a768b1530651d1357e115e8d26eac531e}{qoaplay\_rewind}}(\mbox{\hyperlink{structqoaplay__desc}{qoaplay\_desc}}\ *qoa\_ctx);}
+\DoxyCodeLine{00070\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{_classes_2lib_2external_2qoaplay_8c_ad60046fbcb155737028b46d8d950541c}{qoaplay\_seek\_frame}}(\mbox{\hyperlink{structqoaplay__desc}{qoaplay\_desc}}\ *qoa\_ctx,\ \textcolor{keywordtype}{int}\ frame);}
+\DoxyCodeLine{00071\ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ \mbox{\hyperlink{_classes_2lib_2external_2qoaplay_8c_a94b31091dbcba40116eb7ff8bde126af}{qoaplay\_decode}}(\mbox{\hyperlink{structqoaplay__desc}{qoaplay\_desc}}\ *qoa\_ctx,\ \textcolor{keywordtype}{float}\ *sample\_data,\ \textcolor{keywordtype}{int}\ num\_samples);}
+\DoxyCodeLine{00072\ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ \mbox{\hyperlink{_classes_2lib_2external_2qoaplay_8c_a85b5bd3db9253543d9807d2342fe4e6b}{qoaplay\_decode\_frame}}(\mbox{\hyperlink{structqoaplay__desc}{qoaplay\_desc}}\ *qoa\_ctx);}
+\DoxyCodeLine{00073\ \textcolor{keywordtype}{double}\ \mbox{\hyperlink{_classes_2lib_2external_2qoaplay_8c_a8f6d89b49394ec95078a2eea96b17911}{qoaplay\_get\_duration}}(\mbox{\hyperlink{structqoaplay__desc}{qoaplay\_desc}}\ *qoa\_ctx);}
+\DoxyCodeLine{00074\ \textcolor{keywordtype}{double}\ \mbox{\hyperlink{_classes_2lib_2external_2qoaplay_8c_a2393ca03473008cb02bc47e1c0ba09f3}{qoaplay\_get\_time}}(\mbox{\hyperlink{structqoaplay__desc}{qoaplay\_desc}}\ *qoa\_ctx);}
+\DoxyCodeLine{00075\ \textcolor{keywordtype}{int}\ \mbox{\hyperlink{_classes_2lib_2external_2qoaplay_8c_addb3b54f785e0f5f34e2f69fd0980754}{qoaplay\_get\_frame}}(\mbox{\hyperlink{structqoaplay__desc}{qoaplay\_desc}}\ *qoa\_ctx);}
+\DoxyCodeLine{00076\ }
+\DoxyCodeLine{00077\ \textcolor{preprocessor}{\#if\ defined(\_\_cplusplus)}}
+\DoxyCodeLine{00078\ \}\ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ Prevents\ name\ mangling\ of\ functions}}
+\DoxyCodeLine{00079\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00080\ }
+\DoxyCodeLine{00081\ \textcolor{comment}{//-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/}}
+\DoxyCodeLine{00082\ \textcolor{comment}{//\ Module\ Functions\ Definition}}
+\DoxyCodeLine{00083\ \textcolor{comment}{//-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/}}
+\DoxyCodeLine{00084\ }
+\DoxyCodeLine{00085\ \textcolor{comment}{//\ Open\ QOA\ file,\ keep\ FILE\ pointer\ to\ keep\ reading\ from\ file}}
+\DoxyCodeLine{00086\ \mbox{\hyperlink{structqoaplay__desc}{qoaplay\_desc}}\ *\mbox{\hyperlink{_classes_2lib_2external_2qoaplay_8c_ac8e818b2ceecfc9a246359dfb6433bfa}{qoaplay\_open}}(\textcolor{keywordtype}{char}\ *\mbox{\hyperlink{classpath}{path}})}
+\DoxyCodeLine{00087\ \{}
+\DoxyCodeLine{00088\ \ \ \ \ FILE\ *file\ =\ fopen(\mbox{\hyperlink{classpath}{path}},\ \textcolor{stringliteral}{"{}rb"{}});}
+\DoxyCodeLine{00089\ \ \ \ \ \textcolor{keywordflow}{if}\ (!file)\ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{_classes_2lib_2external_2miniaudio_8h_a070d2ce7b6bb7e5c05602aa8c308d0c4}{NULL}};}
+\DoxyCodeLine{00090\ }
+\DoxyCodeLine{00091\ \ \ \ \ \textcolor{comment}{//\ Read\ and\ decode\ the\ file\ header}}
+\DoxyCodeLine{00092\ \ \ \ \ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{char}\ header[\mbox{\hyperlink{_classes_2lib_2external_2qoa_8h_a8700d92239b99ae61f6de4ea139849dc}{QOA\_MIN\_FILESIZE}}];}
+\DoxyCodeLine{00093\ \ \ \ \ \textcolor{keywordtype}{int}\ read\ =\ fread(header,\ \mbox{\hyperlink{_classes_2lib_2external_2qoa_8h_a8700d92239b99ae61f6de4ea139849dc}{QOA\_MIN\_FILESIZE}},\ 1,\ file);}
+\DoxyCodeLine{00094\ \ \ \ \ \textcolor{keywordflow}{if}\ (!read)\ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{_classes_2lib_2external_2miniaudio_8h_a070d2ce7b6bb7e5c05602aa8c308d0c4}{NULL}};}
+\DoxyCodeLine{00095\ }
+\DoxyCodeLine{00096\ \ \ \ \ \mbox{\hyperlink{structqoa__desc}{qoa\_desc}}\ qoa;}
+\DoxyCodeLine{00097\ \ \ \ \ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ first\_frame\_pos\ =\ \mbox{\hyperlink{_classes_2lib_2external_2qoa_8h_a3e623d05c427eb1ed8b76ca8c36b04f6}{qoa\_decode\_header}}(header,\ \mbox{\hyperlink{_classes_2lib_2external_2qoa_8h_a8700d92239b99ae61f6de4ea139849dc}{QOA\_MIN\_FILESIZE}},\ \&qoa);}
+\DoxyCodeLine{00098\ \ \ \ \ \textcolor{keywordflow}{if}\ (!first\_frame\_pos)\ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{_classes_2lib_2external_2miniaudio_8h_a070d2ce7b6bb7e5c05602aa8c308d0c4}{NULL}};}
+\DoxyCodeLine{00099\ }
+\DoxyCodeLine{00100\ \ \ \ \ \textcolor{comment}{//\ Rewind\ the\ file\ back\ to\ beginning\ of\ the\ first\ frame}}
+\DoxyCodeLine{00101\ \ \ \ \ fseek(file,\ first\_frame\_pos,\ SEEK\_SET);}
+\DoxyCodeLine{00102\ }
+\DoxyCodeLine{00103\ \ \ \ \ \textcolor{comment}{//\ Allocate\ one\ chunk\ of\ memory\ for\ the\ qoaplay\_desc\ struct}}
+\DoxyCodeLine{00104\ \ \ \ \ \textcolor{comment}{//\ +\ the\ sample\ data\ for\ one\ frame}}
+\DoxyCodeLine{00105\ \ \ \ \ \textcolor{comment}{//\ +\ a\ buffer\ to\ hold\ one\ frame\ of\ encoded\ data}}
+\DoxyCodeLine{00106\ \ \ \ \ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ buffer\_size\ =\ \mbox{\hyperlink{_classes_2lib_2external_2qoa_8h_a000231eba8a5ce040596c7dbb16a36df}{qoa\_max\_frame\_size}}(\&qoa);}
+\DoxyCodeLine{00107\ \ \ \ \ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ sample\_data\_size\ =\ qoa.\mbox{\hyperlink{structqoa__desc_a33e92402e0008fd44a71f5393a0d07b0}{channels}}*\mbox{\hyperlink{_classes_2lib_2external_2qoa_8h_a5117261d786f17ca3b4b938f5955b9ad}{QOA\_FRAME\_LEN}}*\textcolor{keyword}{sizeof}(short)*2;}
+\DoxyCodeLine{00108\ \ \ \ \ \mbox{\hyperlink{structqoaplay__desc}{qoaplay\_desc}}\ *qoa\_ctx\ =\ \mbox{\hyperlink{_classes_2lib_2raudio_8c_a4f99e79065c8f72acef86805e80ed032}{QOA\_MALLOC}}(\textcolor{keyword}{sizeof}(\mbox{\hyperlink{structqoaplay__desc}{qoaplay\_desc}})\ +\ buffer\_size\ +\ sample\_data\_size);}
+\DoxyCodeLine{00109\ \ \ \ \ memset(qoa\_ctx,\ 0,\ \textcolor{keyword}{sizeof}(\mbox{\hyperlink{structqoaplay__desc}{qoaplay\_desc}}));}
+\DoxyCodeLine{00110\ \ \ \ \ }
+\DoxyCodeLine{00111\ \ \ \ \ qoa\_ctx-\/>file\ =\ file;}
+\DoxyCodeLine{00112\ \ \ \ \ qoa\_ctx-\/>file\_data\ =\ \mbox{\hyperlink{_classes_2lib_2external_2miniaudio_8h_a070d2ce7b6bb7e5c05602aa8c308d0c4}{NULL}};}
+\DoxyCodeLine{00113\ \ \ \ \ qoa\_ctx-\/>file\_data\_size\ =\ 0;}
+\DoxyCodeLine{00114\ \ \ \ \ qoa\_ctx-\/>file\_data\_offset\ =\ 0;}
+\DoxyCodeLine{00115\ \ \ \ \ qoa\_ctx-\/>first\_frame\_pos\ =\ first\_frame\_pos;}
+\DoxyCodeLine{00116\ }
+\DoxyCodeLine{00117\ \ \ \ \ \textcolor{comment}{//\ Setup\ data\ pointers\ to\ previously\ allocated\ data}}
+\DoxyCodeLine{00118\ \ \ \ \ qoa\_ctx-\/>buffer\ =\ ((\textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{char}\ *)qoa\_ctx)\ +\ \textcolor{keyword}{sizeof}(\mbox{\hyperlink{structqoaplay__desc}{qoaplay\_desc}});}
+\DoxyCodeLine{00119\ \ \ \ \ qoa\_ctx-\/>sample\_data\ =\ (\textcolor{keywordtype}{short}\ *)(((\textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{char}\ *)qoa\_ctx)\ +\ \textcolor{keyword}{sizeof}(\mbox{\hyperlink{structqoaplay__desc}{qoaplay\_desc}})\ +\ buffer\_size);}
+\DoxyCodeLine{00120\ }
+\DoxyCodeLine{00121\ \ \ \ \ qoa\_ctx-\/>info.channels\ =\ qoa.\mbox{\hyperlink{structqoa__desc_a33e92402e0008fd44a71f5393a0d07b0}{channels}};}
+\DoxyCodeLine{00122\ \ \ \ \ qoa\_ctx-\/>info.samplerate\ =\ qoa.\mbox{\hyperlink{structqoa__desc_ad5d475ca7fcfef58fadce55d488c6f1a}{samplerate}};}
+\DoxyCodeLine{00123\ \ \ \ \ qoa\_ctx-\/>info.samples\ =\ qoa.\mbox{\hyperlink{structqoa__desc_a631e1e164d8a7b1ee966577d903cb41a}{samples}};}
+\DoxyCodeLine{00124\ }
+\DoxyCodeLine{00125\ \ \ \ \ \textcolor{keywordflow}{return}\ qoa\_ctx;}
+\DoxyCodeLine{00126\ \}}
+\DoxyCodeLine{00127\ }
+\DoxyCodeLine{00128\ \textcolor{comment}{//\ Open\ QOA\ file\ from\ memory,\ no\ FILE\ pointer\ required}}
+\DoxyCodeLine{00129\ \mbox{\hyperlink{structqoaplay__desc}{qoaplay\_desc}}\ *\mbox{\hyperlink{_classes_2lib_2external_2qoaplay_8c_a5706372454aa832d0bf26b5d9cb272ba}{qoaplay\_open\_memory}}(\textcolor{keyword}{const}\ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{char}\ *\mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_a89ce72163394e6aef63b551a8806e93f}{data}},\ \textcolor{keywordtype}{int}\ data\_size)}
+\DoxyCodeLine{00130\ \{}
+\DoxyCodeLine{00131\ \ \ \ \ \textcolor{comment}{//\ Read\ and\ decode\ the\ file\ header}}
+\DoxyCodeLine{00132\ \ \ \ \ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{char}\ header[\mbox{\hyperlink{_classes_2lib_2external_2qoa_8h_a8700d92239b99ae61f6de4ea139849dc}{QOA\_MIN\_FILESIZE}}];}
+\DoxyCodeLine{00133\ \ \ \ \ memcpy(header,\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_a89ce72163394e6aef63b551a8806e93f}{data}},\ \mbox{\hyperlink{_classes_2lib_2external_2qoa_8h_a8700d92239b99ae61f6de4ea139849dc}{QOA\_MIN\_FILESIZE}});}
+\DoxyCodeLine{00134\ }
+\DoxyCodeLine{00135\ \ \ \ \ \mbox{\hyperlink{structqoa__desc}{qoa\_desc}}\ qoa;}
+\DoxyCodeLine{00136\ \ \ \ \ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ first\_frame\_pos\ =\ \mbox{\hyperlink{_classes_2lib_2external_2qoa_8h_a3e623d05c427eb1ed8b76ca8c36b04f6}{qoa\_decode\_header}}(header,\ \mbox{\hyperlink{_classes_2lib_2external_2qoa_8h_a8700d92239b99ae61f6de4ea139849dc}{QOA\_MIN\_FILESIZE}},\ \&qoa);}
+\DoxyCodeLine{00137\ \ \ \ \ \textcolor{keywordflow}{if}\ (!first\_frame\_pos)\ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{_classes_2lib_2external_2miniaudio_8h_a070d2ce7b6bb7e5c05602aa8c308d0c4}{NULL}};}
+\DoxyCodeLine{00138\ }
+\DoxyCodeLine{00139\ \ \ \ \ \textcolor{comment}{//\ Allocate\ one\ chunk\ of\ memory\ for\ the\ qoaplay\_desc\ struct}}
+\DoxyCodeLine{00140\ \ \ \ \ \textcolor{comment}{//\ +\ the\ sample\ data\ for\ one\ frame}}
+\DoxyCodeLine{00141\ \ \ \ \ \textcolor{comment}{//\ +\ a\ buffer\ to\ hold\ one\ frame\ of\ encoded\ data}}
+\DoxyCodeLine{00142\ \ \ \ \ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ buffer\_size\ =\ \mbox{\hyperlink{_classes_2lib_2external_2qoa_8h_a000231eba8a5ce040596c7dbb16a36df}{qoa\_max\_frame\_size}}(\&qoa);}
+\DoxyCodeLine{00143\ \ \ \ \ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ sample\_data\_size\ =\ qoa.\mbox{\hyperlink{structqoa__desc_a33e92402e0008fd44a71f5393a0d07b0}{channels}}*\mbox{\hyperlink{_classes_2lib_2external_2qoa_8h_a5117261d786f17ca3b4b938f5955b9ad}{QOA\_FRAME\_LEN}}*\textcolor{keyword}{sizeof}(short)*2;}
+\DoxyCodeLine{00144\ \ \ \ \ \mbox{\hyperlink{structqoaplay__desc}{qoaplay\_desc}}\ *qoa\_ctx\ =\ \mbox{\hyperlink{_classes_2lib_2raudio_8c_a4f99e79065c8f72acef86805e80ed032}{QOA\_MALLOC}}(\textcolor{keyword}{sizeof}(\mbox{\hyperlink{structqoaplay__desc}{qoaplay\_desc}})\ +\ buffer\_size\ +\ sample\_data\_size);}
+\DoxyCodeLine{00145\ \ \ \ \ memset(qoa\_ctx,\ 0,\ \textcolor{keyword}{sizeof}(\mbox{\hyperlink{structqoaplay__desc}{qoaplay\_desc}}));}
+\DoxyCodeLine{00146\ }
+\DoxyCodeLine{00147\ \ \ \ \ qoa\_ctx-\/>file\ =\ \mbox{\hyperlink{_classes_2lib_2external_2miniaudio_8h_a070d2ce7b6bb7e5c05602aa8c308d0c4}{NULL}};}
+\DoxyCodeLine{00148\ }
+\DoxyCodeLine{00149\ \ \ \ \ \textcolor{comment}{//\ Keep\ a\ copy\ of\ file\ data\ provided\ to\ be\ managed\ internally}}
+\DoxyCodeLine{00150\ \ \ \ \ qoa\_ctx-\/>file\_data\ =\ (\textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{char}\ *)\mbox{\hyperlink{_classes_2lib_2raudio_8c_a4f99e79065c8f72acef86805e80ed032}{QOA\_MALLOC}}(data\_size);}
+\DoxyCodeLine{00151\ \ \ \ \ memcpy(qoa\_ctx-\/>file\_data,\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_a89ce72163394e6aef63b551a8806e93f}{data}},\ data\_size);}
+\DoxyCodeLine{00152\ \ \ \ \ qoa\_ctx-\/>file\_data\_size\ =\ data\_size;}
+\DoxyCodeLine{00153\ \ \ \ \ qoa\_ctx-\/>file\_data\_offset\ =\ 0;}
+\DoxyCodeLine{00154\ \ \ \ \ qoa\_ctx-\/>first\_frame\_pos\ =\ first\_frame\_pos;}
+\DoxyCodeLine{00155\ }
+\DoxyCodeLine{00156\ \ \ \ \ \textcolor{comment}{//\ Setup\ data\ pointers\ to\ previously\ allocated\ data}}
+\DoxyCodeLine{00157\ \ \ \ \ qoa\_ctx-\/>buffer\ =\ ((\textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{char}\ *)qoa\_ctx)\ +\ \textcolor{keyword}{sizeof}(\mbox{\hyperlink{structqoaplay__desc}{qoaplay\_desc}});}
+\DoxyCodeLine{00158\ \ \ \ \ qoa\_ctx-\/>sample\_data\ =\ (\textcolor{keywordtype}{short}\ *)(((\textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{char}\ *)qoa\_ctx)\ +\ \textcolor{keyword}{sizeof}(\mbox{\hyperlink{structqoaplay__desc}{qoaplay\_desc}})\ +\ buffer\_size);}
+\DoxyCodeLine{00159\ }
+\DoxyCodeLine{00160\ \ \ \ \ qoa\_ctx-\/>info.channels\ =\ qoa.\mbox{\hyperlink{structqoa__desc_a33e92402e0008fd44a71f5393a0d07b0}{channels}};}
+\DoxyCodeLine{00161\ \ \ \ \ qoa\_ctx-\/>info.samplerate\ =\ qoa.\mbox{\hyperlink{structqoa__desc_ad5d475ca7fcfef58fadce55d488c6f1a}{samplerate}};}
+\DoxyCodeLine{00162\ \ \ \ \ qoa\_ctx-\/>info.samples\ =\ qoa.\mbox{\hyperlink{structqoa__desc_a631e1e164d8a7b1ee966577d903cb41a}{samples}};}
+\DoxyCodeLine{00163\ }
+\DoxyCodeLine{00164\ \ \ \ \ \textcolor{keywordflow}{return}\ qoa\_ctx;}
+\DoxyCodeLine{00165\ \}}
+\DoxyCodeLine{00166\ }
+\DoxyCodeLine{00167\ \textcolor{comment}{//\ Close\ QOA\ file\ (if\ open)\ and\ free\ internal\ memory}}
+\DoxyCodeLine{00168\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{_classes_2lib_2external_2qoaplay_8c_abffb0a8739958636a12e80769f759e29}{qoaplay\_close}}(\mbox{\hyperlink{structqoaplay__desc}{qoaplay\_desc}}\ *qoa\_ctx)}
+\DoxyCodeLine{00169\ \{}
+\DoxyCodeLine{00170\ \ \ \ \ \textcolor{keywordflow}{if}\ (qoa\_ctx-\/>\mbox{\hyperlink{structqoaplay__desc_ac15adccfefd239e1e6041d0a4e74a79a}{file}})\ fclose(qoa\_ctx-\/>\mbox{\hyperlink{structqoaplay__desc_ac15adccfefd239e1e6041d0a4e74a79a}{file}});}
+\DoxyCodeLine{00171\ }
+\DoxyCodeLine{00172\ \ \ \ \ \textcolor{keywordflow}{if}\ ((qoa\_ctx-\/>\mbox{\hyperlink{structqoaplay__desc_a6aec57729f1c5a5c0d3097784185761e}{file\_data}})\ \&\&\ (qoa\_ctx-\/>\mbox{\hyperlink{structqoaplay__desc_af62f79d2997b3d4d4f7df13f2ca7ebd2}{file\_data\_size}}\ >\ 0))}
+\DoxyCodeLine{00173\ \ \ \ \ \{}
+\DoxyCodeLine{00174\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{_classes_2lib_2raudio_8c_a10458f6c1910a6eddd51ea08a9592499}{QOA\_FREE}}(qoa\_ctx-\/>\mbox{\hyperlink{structqoaplay__desc_a6aec57729f1c5a5c0d3097784185761e}{file\_data}});}
+\DoxyCodeLine{00175\ \ \ \ \ \ \ \ \ qoa\_ctx-\/>\mbox{\hyperlink{structqoaplay__desc_af62f79d2997b3d4d4f7df13f2ca7ebd2}{file\_data\_size}}\ =\ 0;}
+\DoxyCodeLine{00176\ \ \ \ \ \}}
+\DoxyCodeLine{00177\ }
+\DoxyCodeLine{00178\ \ \ \ \ \mbox{\hyperlink{_classes_2lib_2raudio_8c_a10458f6c1910a6eddd51ea08a9592499}{QOA\_FREE}}(qoa\_ctx);}
+\DoxyCodeLine{00179\ \}}
+\DoxyCodeLine{00180\ }
+\DoxyCodeLine{00181\ \textcolor{comment}{//\ Decode\ one\ frame\ from\ QOA\ data}}
+\DoxyCodeLine{00182\ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ \mbox{\hyperlink{_classes_2lib_2external_2qoaplay_8c_a85b5bd3db9253543d9807d2342fe4e6b}{qoaplay\_decode\_frame}}(\mbox{\hyperlink{structqoaplay__desc}{qoaplay\_desc}}\ *qoa\_ctx)}
+\DoxyCodeLine{00183\ \{}
+\DoxyCodeLine{00184\ \ \ \ \ \textcolor{keywordflow}{if}\ (qoa\_ctx-\/>\mbox{\hyperlink{structqoaplay__desc_ac15adccfefd239e1e6041d0a4e74a79a}{file}})\ qoa\_ctx-\/>\mbox{\hyperlink{structqoaplay__desc_a9b2104aa863dc79d3b404f53b8b4a94e}{buffer\_len}}\ =\ fread(qoa\_ctx-\/>\mbox{\hyperlink{structqoaplay__desc_a55879c04837abc6df1befeb5ad610059}{buffer}},\ 1,\ \mbox{\hyperlink{_classes_2lib_2external_2qoa_8h_a000231eba8a5ce040596c7dbb16a36df}{qoa\_max\_frame\_size}}(\&qoa\_ctx-\/>\mbox{\hyperlink{structqoaplay__desc_a373eb2eba00659b0df567778b5f22bad}{info}}),\ qoa\_ctx-\/>\mbox{\hyperlink{structqoaplay__desc_ac15adccfefd239e1e6041d0a4e74a79a}{file}});}
+\DoxyCodeLine{00185\ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{00186\ \ \ \ \ \{}
+\DoxyCodeLine{00187\ \ \ \ \ \ \ \ \ qoa\_ctx-\/>\mbox{\hyperlink{structqoaplay__desc_a9b2104aa863dc79d3b404f53b8b4a94e}{buffer\_len}}\ =\ \mbox{\hyperlink{_classes_2lib_2external_2qoa_8h_a000231eba8a5ce040596c7dbb16a36df}{qoa\_max\_frame\_size}}(\&qoa\_ctx-\/>\mbox{\hyperlink{structqoaplay__desc_a373eb2eba00659b0df567778b5f22bad}{info}});}
+\DoxyCodeLine{00188\ \ \ \ \ \ \ \ \ memcpy(qoa\_ctx-\/>\mbox{\hyperlink{structqoaplay__desc_a55879c04837abc6df1befeb5ad610059}{buffer}},\ qoa\_ctx-\/>\mbox{\hyperlink{structqoaplay__desc_a6aec57729f1c5a5c0d3097784185761e}{file\_data}}\ +\ qoa\_ctx-\/>\mbox{\hyperlink{structqoaplay__desc_a2884c93f6dae433c29aedf2278e314e0}{file\_data\_offset}},\ qoa\_ctx-\/>\mbox{\hyperlink{structqoaplay__desc_a9b2104aa863dc79d3b404f53b8b4a94e}{buffer\_len}});}
+\DoxyCodeLine{00189\ \ \ \ \ \ \ \ \ qoa\_ctx-\/>\mbox{\hyperlink{structqoaplay__desc_a2884c93f6dae433c29aedf2278e314e0}{file\_data\_offset}}\ +=\ qoa\_ctx-\/>\mbox{\hyperlink{structqoaplay__desc_a9b2104aa863dc79d3b404f53b8b4a94e}{buffer\_len}};}
+\DoxyCodeLine{00190\ \ \ \ \ \}}
+\DoxyCodeLine{00191\ }
+\DoxyCodeLine{00192\ \ \ \ \ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ frame\_len;}
+\DoxyCodeLine{00193\ \ \ \ \ \mbox{\hyperlink{_classes_2lib_2external_2qoa_8h_ab24537aedf9ace4efe796acc5ba32208}{qoa\_decode\_frame}}(qoa\_ctx-\/>\mbox{\hyperlink{structqoaplay__desc_a55879c04837abc6df1befeb5ad610059}{buffer}},\ qoa\_ctx-\/>\mbox{\hyperlink{structqoaplay__desc_a9b2104aa863dc79d3b404f53b8b4a94e}{buffer\_len}},\ \&qoa\_ctx-\/>\mbox{\hyperlink{structqoaplay__desc_a373eb2eba00659b0df567778b5f22bad}{info}},\ qoa\_ctx-\/>\mbox{\hyperlink{structqoaplay__desc_a80fe74e20ecf3071e84e22a155bae04a}{sample\_data}},\ \&frame\_len);}
+\DoxyCodeLine{00194\ \ \ \ \ qoa\_ctx-\/>\mbox{\hyperlink{structqoaplay__desc_a523dced73b05d030b1aa49f9b2648391}{sample\_data\_pos}}\ =\ 0;}
+\DoxyCodeLine{00195\ \ \ \ \ qoa\_ctx-\/>\mbox{\hyperlink{structqoaplay__desc_a6096570dae72447a367d298938c13daf}{sample\_data\_len}}\ =\ frame\_len;}
+\DoxyCodeLine{00196\ }
+\DoxyCodeLine{00197\ \ \ \ \ \textcolor{keywordflow}{return}\ frame\_len;}
+\DoxyCodeLine{00198\ \}}
+\DoxyCodeLine{00199\ }
+\DoxyCodeLine{00200\ \textcolor{comment}{//\ Rewind\ QOA\ file\ or\ memory\ pointer\ to\ beginning}}
+\DoxyCodeLine{00201\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{_classes_2lib_2external_2qoaplay_8c_a768b1530651d1357e115e8d26eac531e}{qoaplay\_rewind}}(\mbox{\hyperlink{structqoaplay__desc}{qoaplay\_desc}}\ *qoa\_ctx)}
+\DoxyCodeLine{00202\ \{}
+\DoxyCodeLine{00203\ \ \ \ \ \textcolor{keywordflow}{if}\ (qoa\_ctx-\/>\mbox{\hyperlink{structqoaplay__desc_ac15adccfefd239e1e6041d0a4e74a79a}{file}})\ fseek(qoa\_ctx-\/>\mbox{\hyperlink{structqoaplay__desc_ac15adccfefd239e1e6041d0a4e74a79a}{file}},\ qoa\_ctx-\/>\mbox{\hyperlink{structqoaplay__desc_afc301fd4c432051169d1d153bbffb670}{first\_frame\_pos}},\ SEEK\_SET);}
+\DoxyCodeLine{00204\ \ \ \ \ \textcolor{keywordflow}{else}\ qoa\_ctx-\/>\mbox{\hyperlink{structqoaplay__desc_a2884c93f6dae433c29aedf2278e314e0}{file\_data\_offset}}\ =\ 0;}
+\DoxyCodeLine{00205\ }
+\DoxyCodeLine{00206\ \ \ \ \ qoa\_ctx-\/>\mbox{\hyperlink{structqoaplay__desc_ae758ba151a1b91eee72385af039ef298}{sample\_position}}\ =\ 0;}
+\DoxyCodeLine{00207\ \ \ \ \ qoa\_ctx-\/>\mbox{\hyperlink{structqoaplay__desc_a6096570dae72447a367d298938c13daf}{sample\_data\_len}}\ =\ 0;}
+\DoxyCodeLine{00208\ \ \ \ \ qoa\_ctx-\/>\mbox{\hyperlink{structqoaplay__desc_a523dced73b05d030b1aa49f9b2648391}{sample\_data\_pos}}\ =\ 0;}
+\DoxyCodeLine{00209\ \}}
+\DoxyCodeLine{00210\ }
+\DoxyCodeLine{00211\ \textcolor{comment}{//\ Decode\ required\ QOA\ frames}}
+\DoxyCodeLine{00212\ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ \mbox{\hyperlink{_classes_2lib_2external_2qoaplay_8c_a94b31091dbcba40116eb7ff8bde126af}{qoaplay\_decode}}(\mbox{\hyperlink{structqoaplay__desc}{qoaplay\_desc}}\ *qoa\_ctx,\ \textcolor{keywordtype}{float}\ *sample\_data,\ \textcolor{keywordtype}{int}\ num\_samples)}
+\DoxyCodeLine{00213\ \{}
+\DoxyCodeLine{00214\ \ \ \ \ \textcolor{keywordtype}{int}\ src\_index\ =\ qoa\_ctx-\/>\mbox{\hyperlink{structqoaplay__desc_a523dced73b05d030b1aa49f9b2648391}{sample\_data\_pos}}*qoa\_ctx-\/>\mbox{\hyperlink{structqoaplay__desc_a373eb2eba00659b0df567778b5f22bad}{info}}.\mbox{\hyperlink{structqoa__desc_a33e92402e0008fd44a71f5393a0d07b0}{channels}};}
+\DoxyCodeLine{00215\ \ \ \ \ \textcolor{keywordtype}{int}\ dst\_index\ =\ 0;}
+\DoxyCodeLine{00216\ }
+\DoxyCodeLine{00217\ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{int}\ i\ =\ 0;\ i\ <\ num\_samples;\ i++)}
+\DoxyCodeLine{00218\ \ \ \ \ \{}
+\DoxyCodeLine{00219\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ Do\ we\ have\ to\ decode\ more\ samples?}}
+\DoxyCodeLine{00220\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (qoa\_ctx-\/>\mbox{\hyperlink{structqoaplay__desc_a6096570dae72447a367d298938c13daf}{sample\_data\_len}}\ -\/\ qoa\_ctx-\/>\mbox{\hyperlink{structqoaplay__desc_a523dced73b05d030b1aa49f9b2648391}{sample\_data\_pos}}\ ==\ 0)}
+\DoxyCodeLine{00221\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00222\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (!\mbox{\hyperlink{_classes_2lib_2external_2qoaplay_8c_a85b5bd3db9253543d9807d2342fe4e6b}{qoaplay\_decode\_frame}}(qoa\_ctx))}
+\DoxyCodeLine{00223\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00224\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ Loop\ to\ the\ beginning}}
+\DoxyCodeLine{00225\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{_classes_2lib_2external_2qoaplay_8c_a768b1530651d1357e115e8d26eac531e}{qoaplay\_rewind}}(qoa\_ctx);}
+\DoxyCodeLine{00226\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{_classes_2lib_2external_2qoaplay_8c_a85b5bd3db9253543d9807d2342fe4e6b}{qoaplay\_decode\_frame}}(qoa\_ctx);}
+\DoxyCodeLine{00227\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00228\ }
+\DoxyCodeLine{00229\ \ \ \ \ \ \ \ \ \ \ \ \ src\_index\ =\ 0;}
+\DoxyCodeLine{00230\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00231\ }
+\DoxyCodeLine{00232\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ Normalize\ to\ -\/1..1\ floats\ and\ write\ to\ dest}}
+\DoxyCodeLine{00233\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{int}\ c\ =\ 0;\ c\ <\ qoa\_ctx-\/>\mbox{\hyperlink{structqoaplay__desc_a373eb2eba00659b0df567778b5f22bad}{info}}.\mbox{\hyperlink{structqoa__desc_a33e92402e0008fd44a71f5393a0d07b0}{channels}};\ c++)}
+\DoxyCodeLine{00234\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00235\ \ \ \ \ \ \ \ \ \ \ \ \ sample\_data[dst\_index++]\ =\ qoa\_ctx-\/>\mbox{\hyperlink{structqoaplay__desc_a80fe74e20ecf3071e84e22a155bae04a}{sample\_data}}[src\_index++]/32768.0;}
+\DoxyCodeLine{00236\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00237\ }
+\DoxyCodeLine{00238\ \ \ \ \ \ \ \ \ qoa\_ctx-\/>\mbox{\hyperlink{structqoaplay__desc_a523dced73b05d030b1aa49f9b2648391}{sample\_data\_pos}}++;}
+\DoxyCodeLine{00239\ \ \ \ \ \ \ \ \ qoa\_ctx-\/>\mbox{\hyperlink{structqoaplay__desc_ae758ba151a1b91eee72385af039ef298}{sample\_position}}++;}
+\DoxyCodeLine{00240\ \ \ \ \ \}}
+\DoxyCodeLine{00241\ }
+\DoxyCodeLine{00242\ \ \ \ \ \textcolor{keywordflow}{return}\ num\_samples;}
+\DoxyCodeLine{00243\ \}}
+\DoxyCodeLine{00244\ }
+\DoxyCodeLine{00245\ \textcolor{comment}{//\ Get\ QOA\ total\ time\ duration\ in\ seconds}}
+\DoxyCodeLine{00246\ \textcolor{keywordtype}{double}\ \mbox{\hyperlink{_classes_2lib_2external_2qoaplay_8c_a8f6d89b49394ec95078a2eea96b17911}{qoaplay\_get\_duration}}(\mbox{\hyperlink{structqoaplay__desc}{qoaplay\_desc}}\ *qoa\_ctx)}
+\DoxyCodeLine{00247\ \{}
+\DoxyCodeLine{00248\ \ \ \ \ \textcolor{keywordflow}{return}\ (\textcolor{keywordtype}{double})qoa\_ctx-\/>\mbox{\hyperlink{structqoaplay__desc_a373eb2eba00659b0df567778b5f22bad}{info}}.\mbox{\hyperlink{structqoa__desc_a631e1e164d8a7b1ee966577d903cb41a}{samples}}/(double)qoa\_ctx-\/>\mbox{\hyperlink{structqoaplay__desc_a373eb2eba00659b0df567778b5f22bad}{info}}.\mbox{\hyperlink{structqoa__desc_ad5d475ca7fcfef58fadce55d488c6f1a}{samplerate}};}
+\DoxyCodeLine{00249\ \}}
+\DoxyCodeLine{00250\ }
+\DoxyCodeLine{00251\ \textcolor{comment}{//\ Get\ QOA\ current\ time\ position\ in\ seconds}}
+\DoxyCodeLine{00252\ \textcolor{keywordtype}{double}\ \mbox{\hyperlink{_classes_2lib_2external_2qoaplay_8c_a2393ca03473008cb02bc47e1c0ba09f3}{qoaplay\_get\_time}}(\mbox{\hyperlink{structqoaplay__desc}{qoaplay\_desc}}\ *qoa\_ctx)}
+\DoxyCodeLine{00253\ \{}
+\DoxyCodeLine{00254\ \ \ \ \ \textcolor{keywordflow}{return}\ (\textcolor{keywordtype}{double})qoa\_ctx-\/>\mbox{\hyperlink{structqoaplay__desc_ae758ba151a1b91eee72385af039ef298}{sample\_position}}/(double)qoa\_ctx-\/>\mbox{\hyperlink{structqoaplay__desc_a373eb2eba00659b0df567778b5f22bad}{info}}.\mbox{\hyperlink{structqoa__desc_ad5d475ca7fcfef58fadce55d488c6f1a}{samplerate}};}
+\DoxyCodeLine{00255\ \}}
+\DoxyCodeLine{00256\ }
+\DoxyCodeLine{00257\ \textcolor{comment}{//\ Get\ QOA\ current\ audio\ frame}}
+\DoxyCodeLine{00258\ \textcolor{keywordtype}{int}\ \mbox{\hyperlink{_classes_2lib_2external_2qoaplay_8c_addb3b54f785e0f5f34e2f69fd0980754}{qoaplay\_get\_frame}}(\mbox{\hyperlink{structqoaplay__desc}{qoaplay\_desc}}\ *qoa\_ctx)}
+\DoxyCodeLine{00259\ \{}
+\DoxyCodeLine{00260\ \ \ \ \ \textcolor{keywordflow}{return}\ qoa\_ctx-\/>\mbox{\hyperlink{structqoaplay__desc_ae758ba151a1b91eee72385af039ef298}{sample\_position}}/\mbox{\hyperlink{_classes_2lib_2external_2qoa_8h_a5117261d786f17ca3b4b938f5955b9ad}{QOA\_FRAME\_LEN}};}
+\DoxyCodeLine{00261\ \}}
+\DoxyCodeLine{00262\ }
+\DoxyCodeLine{00263\ \textcolor{comment}{//\ Seek\ QOA\ audio\ frame}}
+\DoxyCodeLine{00264\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{_classes_2lib_2external_2qoaplay_8c_ad60046fbcb155737028b46d8d950541c}{qoaplay\_seek\_frame}}(\mbox{\hyperlink{structqoaplay__desc}{qoaplay\_desc}}\ *qoa\_ctx,\ \textcolor{keywordtype}{int}\ frame)}
+\DoxyCodeLine{00265\ \{}
+\DoxyCodeLine{00266\ \ \ \ \ \textcolor{keywordflow}{if}\ (frame\ <\ 0)\ frame\ =\ 0;}
+\DoxyCodeLine{00267\ }
+\DoxyCodeLine{00268\ \ \ \ \ \textcolor{keywordflow}{if}\ (frame\ >\ qoa\_ctx-\/>\mbox{\hyperlink{structqoaplay__desc_a373eb2eba00659b0df567778b5f22bad}{info}}.\mbox{\hyperlink{structqoa__desc_a631e1e164d8a7b1ee966577d903cb41a}{samples}}/\mbox{\hyperlink{_classes_2lib_2external_2qoa_8h_a5117261d786f17ca3b4b938f5955b9ad}{QOA\_FRAME\_LEN}})\ frame\ =\ qoa\_ctx-\/>\mbox{\hyperlink{structqoaplay__desc_a373eb2eba00659b0df567778b5f22bad}{info}}.\mbox{\hyperlink{structqoa__desc_a631e1e164d8a7b1ee966577d903cb41a}{samples}}/\mbox{\hyperlink{_classes_2lib_2external_2qoa_8h_a5117261d786f17ca3b4b938f5955b9ad}{QOA\_FRAME\_LEN}};}
+\DoxyCodeLine{00269\ }
+\DoxyCodeLine{00270\ \ \ \ \ qoa\_ctx-\/>\mbox{\hyperlink{structqoaplay__desc_ae758ba151a1b91eee72385af039ef298}{sample\_position}}\ =\ frame*\mbox{\hyperlink{_classes_2lib_2external_2qoa_8h_a5117261d786f17ca3b4b938f5955b9ad}{QOA\_FRAME\_LEN}};}
+\DoxyCodeLine{00271\ \ \ \ \ qoa\_ctx-\/>\mbox{\hyperlink{structqoaplay__desc_a6096570dae72447a367d298938c13daf}{sample\_data\_len}}\ =\ 0;}
+\DoxyCodeLine{00272\ \ \ \ \ qoa\_ctx-\/>\mbox{\hyperlink{structqoaplay__desc_a523dced73b05d030b1aa49f9b2648391}{sample\_data\_pos}}\ =\ 0;}
+\DoxyCodeLine{00273\ }
+\DoxyCodeLine{00274\ \ \ \ \ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_ae60229696c2ec17c9e00af4899bf738e}{offset}}\ =\ qoa\_ctx-\/>\mbox{\hyperlink{structqoaplay__desc_afc301fd4c432051169d1d153bbffb670}{first\_frame\_pos}}\ +\ frame*\mbox{\hyperlink{_classes_2lib_2external_2qoa_8h_a000231eba8a5ce040596c7dbb16a36df}{qoa\_max\_frame\_size}}(\&qoa\_ctx-\/>\mbox{\hyperlink{structqoaplay__desc_a373eb2eba00659b0df567778b5f22bad}{info}});}
+\DoxyCodeLine{00275\ }
+\DoxyCodeLine{00276\ \ \ \ \ \textcolor{keywordflow}{if}\ (qoa\_ctx-\/>\mbox{\hyperlink{structqoaplay__desc_ac15adccfefd239e1e6041d0a4e74a79a}{file}})\ fseek(qoa\_ctx-\/>\mbox{\hyperlink{structqoaplay__desc_ac15adccfefd239e1e6041d0a4e74a79a}{file}},\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_ae60229696c2ec17c9e00af4899bf738e}{offset}},\ SEEK\_SET);}
+\DoxyCodeLine{00277\ \ \ \ \ \textcolor{keywordflow}{else}\ qoa\_ctx-\/>\mbox{\hyperlink{structqoaplay__desc_a2884c93f6dae433c29aedf2278e314e0}{file\_data\_offset}}\ =\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_ae60229696c2ec17c9e00af4899bf738e}{offset}};}
+\DoxyCodeLine{00278\ \}}
+
+\end{DoxyCode}

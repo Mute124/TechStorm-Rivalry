@@ -1,0 +1,154 @@
+\doxysection{quicksort.\+h}
+\hypertarget{_classes_2lib_2include_2c_09_09_2parallel_2quicksort_8h_source}{}\label{_classes_2lib_2include_2c_09_09_2parallel_2quicksort_8h_source}\index{C:/Users/HP/Documents/GitHub/Minero-\/Game/Classes/lib/include/c++/parallel/quicksort.h@{C:/Users/HP/Documents/GitHub/Minero-\/Game/Classes/lib/include/c++/parallel/quicksort.h}}
+\mbox{\hyperlink{_classes_2lib_2include_2c_09_09_2parallel_2quicksort_8h}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{comment}{//\ -\/*-\/\ C++\ -\/*-\/}}
+\DoxyCodeLine{00002\ }
+\DoxyCodeLine{00003\ \textcolor{comment}{//\ Copyright\ (C)\ 2007-\/2022\ Free\ Software\ Foundation,\ Inc.}}
+\DoxyCodeLine{00004\ \textcolor{comment}{//}}
+\DoxyCodeLine{00005\ \textcolor{comment}{//\ This\ file\ is\ part\ of\ the\ GNU\ ISO\ C++\ Library.\ \ This\ library\ is\ free}}
+\DoxyCodeLine{00006\ \textcolor{comment}{//\ software;\ you\ can\ redistribute\ it\ and/or\ modify\ it\ under\ the\ terms}}
+\DoxyCodeLine{00007\ \textcolor{comment}{//\ of\ the\ GNU\ General\ Public\ License\ as\ published\ by\ the\ Free\ Software}}
+\DoxyCodeLine{00008\ \textcolor{comment}{//\ Foundation;\ either\ version\ 3,\ or\ (at\ your\ option)\ any\ later}}
+\DoxyCodeLine{00009\ \textcolor{comment}{//\ version.}}
+\DoxyCodeLine{00010\ }
+\DoxyCodeLine{00011\ \textcolor{comment}{//\ This\ library\ is\ distributed\ in\ the\ hope\ that\ it\ will\ be\ useful,\ but}}
+\DoxyCodeLine{00012\ \textcolor{comment}{//\ WITHOUT\ ANY\ WARRANTY;\ without\ even\ the\ implied\ warranty\ of}}
+\DoxyCodeLine{00013\ \textcolor{comment}{//\ MERCHANTABILITY\ or\ FITNESS\ FOR\ A\ PARTICULAR\ PURPOSE.\ \ See\ the\ GNU}}
+\DoxyCodeLine{00014\ \textcolor{comment}{//\ General\ Public\ License\ for\ more\ details.}}
+\DoxyCodeLine{00015\ }
+\DoxyCodeLine{00016\ \textcolor{comment}{//\ Under\ Section\ 7\ of\ GPL\ version\ 3,\ you\ are\ granted\ additional}}
+\DoxyCodeLine{00017\ \textcolor{comment}{//\ permissions\ described\ in\ the\ GCC\ Runtime\ Library\ Exception,\ version}}
+\DoxyCodeLine{00018\ \textcolor{comment}{//\ 3.1,\ as\ published\ by\ the\ Free\ Software\ Foundation.}}
+\DoxyCodeLine{00019\ }
+\DoxyCodeLine{00020\ \textcolor{comment}{//\ You\ should\ have\ received\ a\ copy\ of\ the\ GNU\ General\ Public\ License\ and}}
+\DoxyCodeLine{00021\ \textcolor{comment}{//\ a\ copy\ of\ the\ GCC\ Runtime\ Library\ Exception\ along\ with\ this\ program;}}
+\DoxyCodeLine{00022\ \textcolor{comment}{//\ see\ the\ files\ COPYING3\ and\ COPYING.RUNTIME\ respectively.\ \ If\ not,\ see}}
+\DoxyCodeLine{00023\ \textcolor{comment}{//\ <http://www.gnu.org/licenses/>.}}
+\DoxyCodeLine{00024\ }
+\DoxyCodeLine{00030\ \textcolor{comment}{//\ Written\ by\ Johannes\ Singler.}}
+\DoxyCodeLine{00031\ }
+\DoxyCodeLine{00032\ \textcolor{preprocessor}{\#ifndef\ \_GLIBCXX\_PARALLEL\_QUICKSORT\_H}}
+\DoxyCodeLine{00033\ \textcolor{preprocessor}{\#define\ \_GLIBCXX\_PARALLEL\_QUICKSORT\_H\ 1}}
+\DoxyCodeLine{00034\ }
+\DoxyCodeLine{00035\ \textcolor{preprocessor}{\#include\ <parallel/parallel.h>}}
+\DoxyCodeLine{00036\ \textcolor{preprocessor}{\#include\ <parallel/partition.h>}}
+\DoxyCodeLine{00037\ }
+\DoxyCodeLine{00038\ \textcolor{keyword}{namespace\ }\mbox{\hyperlink{namespace____gnu__parallel}{\_\_gnu\_parallel}}}
+\DoxyCodeLine{00039\ \{}
+\DoxyCodeLine{00049\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_RAIter,\ \textcolor{keyword}{typename}\ \_Compare>}
+\DoxyCodeLine{00050\ \ \ \ \ \textcolor{keyword}{typename}\ std::iterator\_traits<\_RAIter>::difference\_type}
+\DoxyCodeLine{00051\ \ \ \ \ \mbox{\hyperlink{namespace____gnu__parallel_a67cbf5b9027d7c9c4f80f80ba104cf99}{\_\_parallel\_sort\_qs\_divide}}(\_RAIter\ \_\_begin,\ \_RAIter\ \_\_end,}
+\DoxyCodeLine{00052\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_Compare\ \_\_comp,\ \textcolor{keyword}{typename}\ std::iterator\_traits}
+\DoxyCodeLine{00053\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ <\_RAIter>::difference\_type\ \_\_pivot\_rank,}
+\DoxyCodeLine{00054\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{typename}\ std::iterator\_traits}
+\DoxyCodeLine{00055\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ <\_RAIter>::difference\_type}
+\DoxyCodeLine{00056\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_\_num\_samples,\ \mbox{\hyperlink{namespace____gnu__parallel_a05e502e51bfc3233671730f74a44dc6a}{\_ThreadIndex}}\ \_\_num\_threads)}
+\DoxyCodeLine{00057\ \ \ \ \ \{}
+\DoxyCodeLine{00058\ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ std::iterator\_traits<\_RAIter>\ \_TraitsType;}
+\DoxyCodeLine{00059\ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ \textcolor{keyword}{typename}\ \_TraitsType::value\_type\ \_ValueType;}
+\DoxyCodeLine{00060\ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ \textcolor{keyword}{typename}\ \_TraitsType::difference\_type\ \_DifferenceType;}
+\DoxyCodeLine{00061\ }
+\DoxyCodeLine{00062\ \ \ \ \ \ \ \_DifferenceType\ \_\_n\ =\ \_\_end\ -\/\ \_\_begin;}
+\DoxyCodeLine{00063\ \ \ \ \ \ \ \_\_num\_samples\ =\ std::min(\_\_num\_samples,\ \_\_n);}
+\DoxyCodeLine{00064\ }
+\DoxyCodeLine{00065\ \ \ \ \ \ \ \textcolor{comment}{//\ Allocate\ uninitialized,\ to\ avoid\ default\ constructor.}}
+\DoxyCodeLine{00066\ \ \ \ \ \ \ \_ValueType*\ \_\_samples\ =\ \textcolor{keyword}{static\_cast<}\_ValueType*\textcolor{keyword}{>}}
+\DoxyCodeLine{00067\ \ \ \ \ (::operator\ \textcolor{keyword}{new}(\_\_num\_samples\ *\ \textcolor{keyword}{sizeof}(\_ValueType)));}
+\DoxyCodeLine{00068\ }
+\DoxyCodeLine{00069\ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\_DifferenceType\ \_\_s\ =\ 0;\ \_\_s\ <\ \_\_num\_samples;\ ++\_\_s)}
+\DoxyCodeLine{00070\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00071\ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{long}\ \textcolor{keywordtype}{long}\ \_\_index\ =\ \textcolor{keyword}{static\_cast<}\textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{long}\ \textcolor{keywordtype}{long}\textcolor{keyword}{>}}
+\DoxyCodeLine{00072\ \ \ \ \ \ \ \ \ (\_\_s)\ *\ \_\_n\ /\ \_\_num\_samples;}
+\DoxyCodeLine{00073\ \ \ \ \ \ \ \ \ \ \ ::new(\&(\_\_samples[\_\_s]))\ \_ValueType(\_\_begin[\_\_index]);}
+\DoxyCodeLine{00074\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00075\ }
+\DoxyCodeLine{00076\ \ \ \ \ \ \ \mbox{\hyperlink{namespacestd_a73a397864aa701b5bd48fae555f4f935}{\_\_gnu\_sequential::sort}}(\_\_samples,\ \_\_samples\ +\ \_\_num\_samples,\ \_\_comp);}
+\DoxyCodeLine{00077\ }
+\DoxyCodeLine{00078\ \ \ \ \ \ \ \_ValueType\&\ \_\_pivot\ =\ \_\_samples[\_\_pivot\_rank\ *\ \_\_num\_samples\ /\ \_\_n];}
+\DoxyCodeLine{00079\ }
+\DoxyCodeLine{00080\ \ \ \ \ \ \ \mbox{\hyperlink{class____gnu__parallel_1_1____binder2nd}{\_\_gnu\_parallel::\_\_binder2nd<\_Compare,\ \_ValueType,\ \_ValueType,\ bool>}}}
+\DoxyCodeLine{00081\ \ \ \ \ \ \ \ \ \_\_pred(\_\_comp,\ \_\_pivot);}
+\DoxyCodeLine{00082\ \ \ \ \ \ \ \_DifferenceType\ \_\_split\ =\ \mbox{\hyperlink{namespace____gnu__parallel_ac870af1d69405f2f53cd7a96e1d92348}{\_\_parallel\_partition}}(\_\_begin,\ \_\_end,}
+\DoxyCodeLine{00083\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_\_pred,\ \_\_num\_threads);}
+\DoxyCodeLine{00084\ }
+\DoxyCodeLine{00085\ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\_DifferenceType\ \_\_s\ =\ 0;\ \_\_s\ <\ \_\_num\_samples;\ ++\_\_s)}
+\DoxyCodeLine{00086\ \ \ \ \ \_\_samples[\_\_s].\string~\_ValueType();}
+\DoxyCodeLine{00087\ \ \ \ \ \ \ ::operator\ \textcolor{keyword}{delete}(\_\_samples);}
+\DoxyCodeLine{00088\ }
+\DoxyCodeLine{00089\ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \_\_split;}
+\DoxyCodeLine{00090\ \ \ \ \ \}}
+\DoxyCodeLine{00091\ }
+\DoxyCodeLine{00099\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_RAIter,\ \textcolor{keyword}{typename}\ \_Compare>}
+\DoxyCodeLine{00100\ \ \ \ \ \textcolor{keywordtype}{void}}
+\DoxyCodeLine{00101\ \ \ \ \ \mbox{\hyperlink{namespace____gnu__parallel_a06c506308856b684737d24944a93a42e}{\_\_parallel\_sort\_qs\_conquer}}(\_RAIter\ \_\_begin,\ \_RAIter\ \_\_end,}
+\DoxyCodeLine{00102\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_Compare\ \_\_comp,}
+\DoxyCodeLine{00103\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace____gnu__parallel_a05e502e51bfc3233671730f74a44dc6a}{\_ThreadIndex}}\ \_\_num\_threads)}
+\DoxyCodeLine{00104\ \ \ \ \ \{}
+\DoxyCodeLine{00105\ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ std::iterator\_traits<\_RAIter>\ \_TraitsType;}
+\DoxyCodeLine{00106\ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ \textcolor{keyword}{typename}\ \_TraitsType::value\_type\ \_ValueType;}
+\DoxyCodeLine{00107\ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ \textcolor{keyword}{typename}\ \_TraitsType::difference\_type\ \_DifferenceType;}
+\DoxyCodeLine{00108\ }
+\DoxyCodeLine{00109\ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\_\_num\_threads\ <=\ 1)}
+\DoxyCodeLine{00110\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00111\ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespacestd_a73a397864aa701b5bd48fae555f4f935}{\_\_gnu\_sequential::sort}}(\_\_begin,\ \_\_end,\ \_\_comp);}
+\DoxyCodeLine{00112\ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return};}
+\DoxyCodeLine{00113\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00114\ }
+\DoxyCodeLine{00115\ \ \ \ \ \ \ \_DifferenceType\ \_\_n\ =\ \_\_end\ -\/\ \_\_begin,\ \_\_pivot\_rank;}
+\DoxyCodeLine{00116\ }
+\DoxyCodeLine{00117\ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\_\_n\ <=\ 1)}
+\DoxyCodeLine{00118\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return};}
+\DoxyCodeLine{00119\ }
+\DoxyCodeLine{00120\ \ \ \ \ \ \ \mbox{\hyperlink{namespace____gnu__parallel_a05e502e51bfc3233671730f74a44dc6a}{\_ThreadIndex}}\ \_\_num\_threads\_left;}
+\DoxyCodeLine{00121\ }
+\DoxyCodeLine{00122\ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ ((\_\_num\_threads\ \%\ 2)\ ==\ 1)}
+\DoxyCodeLine{00123\ \ \ \ \ \ \ \ \ \_\_num\_threads\_left\ =\ \_\_num\_threads\ /\ 2\ +\ 1;}
+\DoxyCodeLine{00124\ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{00125\ \ \ \ \ \ \ \ \ \_\_num\_threads\_left\ =\ \_\_num\_threads\ /\ 2;}
+\DoxyCodeLine{00126\ }
+\DoxyCodeLine{00127\ \ \ \ \ \ \ \_\_pivot\_rank\ =\ \_\_n\ *\ \_\_num\_threads\_left\ /\ \_\_num\_threads;}
+\DoxyCodeLine{00128\ }
+\DoxyCodeLine{00129\ \ \ \ \ \ \ \_DifferenceType\ \_\_split\ =\ \mbox{\hyperlink{namespace____gnu__parallel_a67cbf5b9027d7c9c4f80f80ba104cf99}{\_\_parallel\_sort\_qs\_divide}}}
+\DoxyCodeLine{00130\ \ \ \ \ (\_\_begin,\ \_\_end,\ \_\_comp,\ \_\_pivot\_rank,}
+\DoxyCodeLine{00131\ \ \ \ \ \ \mbox{\hyperlink{struct____gnu__parallel_1_1___settings_adf11d9453707f1145a9e221ab7630bd3}{\_Settings::get}}().sort\_qs\_num\_samples\_preset,\ \_\_num\_threads);}
+\DoxyCodeLine{00132\ }
+\DoxyCodeLine{00133\ \textcolor{preprocessor}{\#pragma\ omp\ parallel\ sections\ num\_threads(2)}}
+\DoxyCodeLine{00134\ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00135\ \textcolor{preprocessor}{\#pragma\ omp\ section}}
+\DoxyCodeLine{00136\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace____gnu__parallel_a06c506308856b684737d24944a93a42e}{\_\_parallel\_sort\_qs\_conquer}}(\_\_begin,\ \_\_begin\ +\ \_\_split,}
+\DoxyCodeLine{00137\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_\_comp,\ \_\_num\_threads\_left);}
+\DoxyCodeLine{00138\ \textcolor{preprocessor}{\#pragma\ omp\ section}}
+\DoxyCodeLine{00139\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace____gnu__parallel_a06c506308856b684737d24944a93a42e}{\_\_parallel\_sort\_qs\_conquer}}(\_\_begin\ +\ \_\_split,\ \_\_end,}
+\DoxyCodeLine{00140\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_\_comp,\ \_\_num\_threads\ -\/\ \_\_num\_threads\_left);}
+\DoxyCodeLine{00141\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00142\ \ \ \ \ \}}
+\DoxyCodeLine{00143\ }
+\DoxyCodeLine{00144\ }
+\DoxyCodeLine{00152\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_RAIter,\ \textcolor{keyword}{typename}\ \_Compare>}
+\DoxyCodeLine{00153\ \ \ \ \ \textcolor{keywordtype}{void}}
+\DoxyCodeLine{00154\ \ \ \ \ \mbox{\hyperlink{namespace____gnu__parallel_ac416a1c7e347b429bbf7a8fb17e847b2}{\_\_parallel\_sort\_qs}}(\_RAIter\ \_\_begin,\ \_RAIter\ \_\_end,}
+\DoxyCodeLine{00155\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_Compare\ \_\_comp,}
+\DoxyCodeLine{00156\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace____gnu__parallel_a05e502e51bfc3233671730f74a44dc6a}{\_ThreadIndex}}\ \_\_num\_threads)}
+\DoxyCodeLine{00157\ \ \ \ \ \{}
+\DoxyCodeLine{00158\ \ \ \ \ \ \ \mbox{\hyperlink{_classes_2lib_2include_2c_09_09_2parallel_2compiletime__settings_8h_a77fb93c9cecec331ccee755972695128}{\_GLIBCXX\_CALL}}(\_\_n)}
+\DoxyCodeLine{00159\ }
+\DoxyCodeLine{00160\ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ std::iterator\_traits<\_RAIter>\ \_TraitsType;}
+\DoxyCodeLine{00161\ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ \textcolor{keyword}{typename}\ \_TraitsType::value\_type\ \_ValueType;}
+\DoxyCodeLine{00162\ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ \textcolor{keyword}{typename}\ \_TraitsType::difference\_type\ \_DifferenceType;}
+\DoxyCodeLine{00163\ }
+\DoxyCodeLine{00164\ \ \ \ \ \ \ \_DifferenceType\ \_\_n\ =\ \_\_end\ -\/\ \_\_begin;}
+\DoxyCodeLine{00165\ }
+\DoxyCodeLine{00166\ \ \ \ \ \ \ \textcolor{comment}{//\ At\ least\ one\ element\ per\ processor.}}
+\DoxyCodeLine{00167\ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\_\_num\_threads\ >\ \_\_n)}
+\DoxyCodeLine{00168\ \ \ \ \ \ \ \ \ \_\_num\_threads\ =\ \textcolor{keyword}{static\_cast<}\mbox{\hyperlink{namespace____gnu__parallel_a05e502e51bfc3233671730f74a44dc6a}{\_ThreadIndex}}\textcolor{keyword}{>}(\_\_n);}
+\DoxyCodeLine{00169\ }
+\DoxyCodeLine{00170\ \ \ \ \ \ \ \mbox{\hyperlink{namespace____gnu__parallel_a06c506308856b684737d24944a93a42e}{\_\_parallel\_sort\_qs\_conquer}}(}
+\DoxyCodeLine{00171\ \ \ \ \ \ \ \ \ \_\_begin,\ \_\_begin\ +\ \_\_n,\ \_\_comp,\ \_\_num\_threads);}
+\DoxyCodeLine{00172\ \ \ \ \ \}}
+\DoxyCodeLine{00173\ }
+\DoxyCodeLine{00174\ \}\ \textcolor{comment}{//namespace\ \_\_gnu\_parallel}}
+\DoxyCodeLine{00175\ }
+\DoxyCodeLine{00176\ \textcolor{preprocessor}{\#endif\ }\textcolor{comment}{/*\ \_GLIBCXX\_PARALLEL\_QUICKSORT\_H\ */}\textcolor{preprocessor}{}}
+
+\end{DoxyCode}

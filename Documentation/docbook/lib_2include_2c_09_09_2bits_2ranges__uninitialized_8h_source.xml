@@ -1,0 +1,574 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<section xmlns="http://docbook.org/ns/docbook" version="5.0" xmlns:xlink="http://www.w3.org/1999/xlink" xml:id="_lib_2include_2c_09_09_2bits_2ranges__uninitialized_8h_source" xml:lang="en-US">
+<title>ranges_uninitialized.h</title>
+<indexterm><primary>C:/Users/HP/Documents/GitHub/Minero-Game/lib/include/c++/bits/ranges_uninitialized.h</primary></indexterm>
+Go to the documentation of this file.<programlisting linenumbering="unnumbered">1 <emphasis role="comment">//&#32;Raw&#32;memory&#32;manipulators&#32;-*-&#32;C++&#32;-*-</emphasis>
+2 
+3 <emphasis role="comment">//&#32;Copyright&#32;(C)&#32;2020-2022&#32;Free&#32;Software&#32;Foundation,&#32;Inc.</emphasis>
+4 <emphasis role="comment">//</emphasis>
+5 <emphasis role="comment">//&#32;This&#32;file&#32;is&#32;part&#32;of&#32;the&#32;GNU&#32;ISO&#32;C++&#32;Library.&#32;&#32;This&#32;library&#32;is&#32;free</emphasis>
+6 <emphasis role="comment">//&#32;software;&#32;you&#32;can&#32;redistribute&#32;it&#32;and/or&#32;modify&#32;it&#32;under&#32;the</emphasis>
+7 <emphasis role="comment">//&#32;terms&#32;of&#32;the&#32;GNU&#32;General&#32;Public&#32;License&#32;as&#32;published&#32;by&#32;the</emphasis>
+8 <emphasis role="comment">//&#32;Free&#32;Software&#32;Foundation;&#32;either&#32;version&#32;3,&#32;or&#32;(at&#32;your&#32;option)</emphasis>
+9 <emphasis role="comment">//&#32;any&#32;later&#32;version.</emphasis>
+10 
+11 <emphasis role="comment">//&#32;This&#32;library&#32;is&#32;distributed&#32;in&#32;the&#32;hope&#32;that&#32;it&#32;will&#32;be&#32;useful,</emphasis>
+12 <emphasis role="comment">//&#32;but&#32;WITHOUT&#32;ANY&#32;WARRANTY;&#32;without&#32;even&#32;the&#32;implied&#32;warranty&#32;of</emphasis>
+13 <emphasis role="comment">//&#32;MERCHANTABILITY&#32;or&#32;FITNESS&#32;FOR&#32;A&#32;PARTICULAR&#32;PURPOSE.&#32;&#32;See&#32;the</emphasis>
+14 <emphasis role="comment">//&#32;GNU&#32;General&#32;Public&#32;License&#32;for&#32;more&#32;details.</emphasis>
+15 
+16 <emphasis role="comment">//&#32;Under&#32;Section&#32;7&#32;of&#32;GPL&#32;version&#32;3,&#32;you&#32;are&#32;granted&#32;additional</emphasis>
+17 <emphasis role="comment">//&#32;permissions&#32;described&#32;in&#32;the&#32;GCC&#32;Runtime&#32;Library&#32;Exception,&#32;version</emphasis>
+18 <emphasis role="comment">//&#32;3.1,&#32;as&#32;published&#32;by&#32;the&#32;Free&#32;Software&#32;Foundation.</emphasis>
+19 
+20 <emphasis role="comment">//&#32;You&#32;should&#32;have&#32;received&#32;a&#32;copy&#32;of&#32;the&#32;GNU&#32;General&#32;Public&#32;License&#32;and</emphasis>
+21 <emphasis role="comment">//&#32;a&#32;copy&#32;of&#32;the&#32;GCC&#32;Runtime&#32;Library&#32;Exception&#32;along&#32;with&#32;this&#32;program;</emphasis>
+22 <emphasis role="comment">//&#32;see&#32;the&#32;files&#32;COPYING3&#32;and&#32;COPYING.RUNTIME&#32;respectively.&#32;&#32;If&#32;not,&#32;see</emphasis>
+23 <emphasis role="comment">//&#32;&lt;http://www.gnu.org/licenses/&gt;.</emphasis>
+24 
+30 <emphasis role="preprocessor">#ifndef&#32;_RANGES_UNINITIALIZED_H</emphasis>
+31 <emphasis role="preprocessor">#define&#32;_RANGES_UNINITIALIZED_H&#32;1</emphasis>
+32 
+33 <emphasis role="preprocessor">#if&#32;__cplusplus&#32;&gt;&#32;201703L</emphasis>
+34 <emphasis role="preprocessor">#if&#32;__cpp_lib_concepts</emphasis>
+35 
+36 <emphasis role="preprocessor">#include&#32;&lt;bits/ranges_algobase.h&gt;</emphasis>
+37 
+38 <emphasis role="keyword">namespace&#32;</emphasis><link linkend="_namespacestd">std</link>&#32;<link linkend="__classes_2lib_2include_2c_09_09_2x86__64-w64-mingw32_2bits_2c_09_09config_8h_1a44377df0d3503f0b3d9ab316dd8ddf8b">_GLIBCXX_VISIBILITY</link>(default)
+39 {
+40 _GLIBCXX_BEGIN_NAMESPACE_VERSION
+41 <emphasis role="keyword">namespace&#32;</emphasis>ranges
+42 {
+43 &#32;&#32;<emphasis role="keyword">namespace&#32;</emphasis>__detail
+44 &#32;&#32;{
+45 &#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+46 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">constexpr</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>*
+47 &#32;&#32;&#32;&#32;&#32;&#32;__voidify(_Tp&amp;&#32;__obj)&#32;<emphasis role="keyword">noexcept</emphasis>
+48 &#32;&#32;&#32;&#32;&#32;&#32;{
+49 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<emphasis role="keyword">const_cast&lt;</emphasis><emphasis role="keywordtype">void</emphasis>*<emphasis role="keyword">&gt;</emphasis>
+50 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;(<emphasis role="keyword">static_cast&lt;</emphasis><emphasis role="keyword">const&#32;</emphasis><emphasis role="keyword">volatile&#32;</emphasis><emphasis role="keywordtype">void</emphasis>*<emphasis role="keyword">&gt;</emphasis>(std::__addressof(__obj)));
+51 &#32;&#32;&#32;&#32;&#32;&#32;}
+52 
+53 &#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Iter&gt;
+54 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">concept&#32;</emphasis>__nothrow_input_iterator
+55 &#32;&#32;&#32;&#32;=&#32;(input_iterator&lt;_Iter&gt;
+56 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&amp;&amp;&#32;is_lvalue_reference_v&lt;iter_reference_t&lt;_Iter&gt;&gt;
+57 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&amp;&amp;&#32;same_as&lt;remove_cvref_t&lt;iter_reference_t&lt;_Iter&gt;&gt;,
+58 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;iter_value_t&lt;_Iter&gt;&gt;);
+59 
+60 &#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Sent,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Iter&gt;
+61 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">concept&#32;</emphasis>__nothrow_sentinel&#32;=&#32;sentinel_for&lt;_Sent,&#32;_Iter&gt;;
+62 
+63 &#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Range&gt;
+64 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">concept&#32;</emphasis>__nothrow_input_range
+65 &#32;&#32;&#32;&#32;=&#32;(<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a7b8ad0b27a927682837f95528fa454f5">range&lt;_Range&gt;</link>
+66 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&amp;&amp;&#32;__nothrow_input_iterator&lt;iterator_t&lt;_Range&gt;&gt;
+67 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&amp;&amp;&#32;__nothrow_sentinel&lt;sentinel_t&lt;_Range&gt;,&#32;iterator_t&lt;_Range&gt;&gt;);
+68 
+69 &#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Iter&gt;
+70 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">concept&#32;</emphasis>__nothrow_forward_iterator
+71 &#32;&#32;&#32;&#32;=&#32;(__nothrow_input_iterator&lt;_Iter&gt;
+72 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&amp;&amp;&#32;forward_iterator&lt;_Iter&gt;
+73 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&amp;&amp;&#32;__nothrow_sentinel&lt;_Iter,&#32;_Iter&gt;);
+74 
+75 &#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Range&gt;
+76 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">concept&#32;</emphasis>__nothrow_forward_range
+77 &#32;&#32;&#32;&#32;=&#32;(__nothrow_input_range&lt;_Range&gt;
+78 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&amp;&amp;&#32;__nothrow_forward_iterator&lt;iterator_t&lt;_Range&gt;&gt;);
+79 &#32;&#32;}&#32;<emphasis role="comment">//&#32;namespace&#32;__detail</emphasis>
+80 
+81 &#32;&#32;<emphasis role="keyword">struct&#32;</emphasis>__destroy_fn
+82 &#32;&#32;{
+83 &#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;__detail::__nothrow_input_iterator&#32;_Iter,
+84 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__detail::__nothrow_sentinel&lt;_Iter&gt;&#32;_Sent&gt;
+85 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">requires</emphasis>&#32;destructible&lt;iter_value_t&lt;_Iter&gt;&gt;
+86 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">constexpr</emphasis>&#32;_Iter
+87 &#32;&#32;&#32;&#32;&#32;&#32;operator()(_Iter&#32;__first,&#32;_Sent&#32;__last)&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keyword">noexcept</emphasis>;
+88 
+89 &#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;__detail::__nothrow_input_range&#32;_Range&gt;
+90 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">requires</emphasis>&#32;destructible&lt;range_value_t&lt;_Range&gt;&gt;
+91 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">constexpr</emphasis>&#32;borrowed_iterator_t&lt;_Range&gt;
+92 &#32;&#32;&#32;&#32;&#32;&#32;operator()(_Range&amp;&amp;&#32;__r)&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keyword">noexcept</emphasis>;
+93 &#32;&#32;};
+94 
+95 &#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keyword">constexpr</emphasis>&#32;__destroy_fn&#32;<link linkend="_namespacestd_1a9d87212966db1577458d10be75ce7131">destroy</link>{};
+96 
+97 &#32;&#32;<emphasis role="keyword">namespace&#32;</emphasis>__detail
+98 &#32;&#32;{
+99 &#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Iter&gt;
+100 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">requires</emphasis>&#32;destructible&lt;iter_value_t&lt;_Iter&gt;&gt;
+101 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">struct&#32;</emphasis>_DestroyGuard
+102 &#32;&#32;&#32;&#32;&#32;&#32;{
+103 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">private</emphasis>:
+104 &#32;&#32;&#32;&#32;_Iter&#32;_M_first;
+105 &#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;_Iter*&#32;_M_cur;
+106 
+107 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">public</emphasis>:
+108 &#32;&#32;&#32;&#32;<emphasis role="keyword">explicit</emphasis>
+109 &#32;&#32;&#32;&#32;_DestroyGuard(<emphasis role="keyword">const</emphasis>&#32;_Iter&amp;&#32;__iter)
+110 &#32;&#32;&#32;&#32;&#32;&#32;:&#32;_M_first(__iter),&#32;_M_cur(<link linkend="_namespacestd">std</link>::__addressof(__iter))
+111 &#32;&#32;&#32;&#32;{&#32;}
+112 
+113 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+114 &#32;&#32;&#32;&#32;release()&#32;noexcept
+115 &#32;&#32;&#32;&#32;{&#32;_M_cur&#32;=&#32;<emphasis role="keyword">nullptr</emphasis>;&#32;}
+116 
+117 &#32;&#32;&#32;&#32;~_DestroyGuard()
+118 &#32;&#32;&#32;&#32;{
+119 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(_M_cur&#32;!=&#32;<emphasis role="keyword">nullptr</emphasis>)
+120 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;ranges::destroy(<link linkend="_namespacestd_1ac7095819f6a8da64d69b1ee3029c52be">std::move</link>(_M_first),&#32;*_M_cur);
+121 &#32;&#32;&#32;&#32;}
+122 &#32;&#32;&#32;&#32;&#32;&#32;};
+123 
+124 &#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Iter&gt;
+125 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">requires</emphasis>&#32;destructible&lt;iter_value_t&lt;_Iter&gt;&gt;
+126 &#32;&#32;&#32;&#32;&amp;&amp;&#32;is_trivially_destructible_v&lt;iter_value_t&lt;_Iter&gt;&gt;
+127 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">struct&#32;</emphasis>_DestroyGuard&lt;_Iter&gt;
+128 &#32;&#32;&#32;&#32;&#32;&#32;{
+129 &#32;&#32;&#32;&#32;<emphasis role="keyword">explicit</emphasis>
+130 &#32;&#32;&#32;&#32;_DestroyGuard(<emphasis role="keyword">const</emphasis>&#32;_Iter&amp;)
+131 &#32;&#32;&#32;&#32;{&#32;}
+132 
+133 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+134 &#32;&#32;&#32;&#32;release()&#32;noexcept
+135 &#32;&#32;&#32;&#32;{&#32;}
+136 &#32;&#32;&#32;&#32;&#32;&#32;};
+137 &#32;&#32;}&#32;<emphasis role="comment">//&#32;namespace&#32;__detail</emphasis>
+138 
+139 &#32;&#32;<emphasis role="keyword">struct&#32;</emphasis>__uninitialized_default_construct_fn
+140 &#32;&#32;{
+141 &#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;__detail::__nothrow_forward_iterator&#32;_Iter,
+142 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__detail::__nothrow_sentinel&lt;_Iter&gt;&#32;_Sent&gt;
+143 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">requires</emphasis>&#32;default_initializable&lt;iter_value_t&lt;_Iter&gt;&gt;
+144 &#32;&#32;&#32;&#32;&#32;&#32;_Iter
+145 &#32;&#32;&#32;&#32;&#32;&#32;operator()(_Iter&#32;__first,&#32;_Sent&#32;__last)<emphasis role="keyword">&#32;const</emphasis>
+146 <emphasis role="keyword">&#32;&#32;&#32;&#32;&#32;&#32;</emphasis>{
+147 &#32;&#32;&#32;&#32;<emphasis role="keyword">using&#32;</emphasis>_ValueType&#32;=&#32;remove_reference_t&lt;iter_reference_t&lt;_Iter&gt;&gt;;
+148 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;<emphasis role="keyword">constexpr</emphasis>&#32;(is_trivially_default_constructible_v&lt;_ValueType&gt;)
+149 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;ranges::next(__first,&#32;__last);
+150 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>
+151 &#32;&#32;&#32;&#32;&#32;&#32;{
+152 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">auto</emphasis>&#32;__guard&#32;=&#32;__detail::_DestroyGuard(__first);
+153 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(;&#32;__first&#32;!=&#32;__last;&#32;++__first)
+154 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;::new&#32;(__detail::__voidify(*__first))&#32;_ValueType;
+155 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__guard.release();
+156 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__first;
+157 &#32;&#32;&#32;&#32;&#32;&#32;}
+158 &#32;&#32;&#32;&#32;&#32;&#32;}
+159 
+160 &#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;__detail::__nothrow_forward_range&#32;_Range&gt;
+161 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">requires</emphasis>&#32;default_initializable&lt;range_value_t&lt;_Range&gt;&gt;
+162 &#32;&#32;&#32;&#32;&#32;&#32;borrowed_iterator_t&lt;_Range&gt;
+163 &#32;&#32;&#32;&#32;&#32;&#32;operator()(_Range&amp;&amp;&#32;__r)<emphasis role="keyword">&#32;const</emphasis>
+164 <emphasis role="keyword">&#32;&#32;&#32;&#32;&#32;&#32;</emphasis>{
+165 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;(*<emphasis role="keyword">this</emphasis>)(ranges::begin(__r),&#32;ranges::end(__r));
+166 &#32;&#32;&#32;&#32;&#32;&#32;}
+167 &#32;&#32;};
+168 
+169 &#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keyword">constexpr</emphasis>&#32;__uninitialized_default_construct_fn
+170 &#32;&#32;&#32;&#32;<link linkend="_namespacestd_1ad2a13bc06282fe96b24e2246025bc8a9">uninitialized_default_construct</link>{};
+171 
+172 &#32;&#32;<emphasis role="keyword">struct&#32;</emphasis>__uninitialized_default_construct_n_fn
+173 &#32;&#32;{
+174 &#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;__detail::__nothrow_forward_iterator&#32;_Iter&gt;
+175 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">requires</emphasis>&#32;default_initializable&lt;iter_value_t&lt;_Iter&gt;&gt;
+176 &#32;&#32;&#32;&#32;&#32;&#32;_Iter
+177 &#32;&#32;&#32;&#32;&#32;&#32;operator()(_Iter&#32;__first,&#32;iter_difference_t&lt;_Iter&gt;&#32;__n)<emphasis role="keyword">&#32;const</emphasis>
+178 <emphasis role="keyword">&#32;&#32;&#32;&#32;&#32;&#32;</emphasis>{
+179 &#32;&#32;&#32;&#32;<emphasis role="keyword">using&#32;</emphasis>_ValueType&#32;=&#32;remove_reference_t&lt;iter_reference_t&lt;_Iter&gt;&gt;;
+180 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;<emphasis role="keyword">constexpr</emphasis>&#32;(is_trivially_default_constructible_v&lt;_ValueType&gt;)
+181 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;ranges::next(__first,&#32;__n);
+182 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>
+183 &#32;&#32;&#32;&#32;&#32;&#32;{
+184 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">auto</emphasis>&#32;__guard&#32;=&#32;__detail::_DestroyGuard(__first);
+185 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(;&#32;__n&#32;&gt;&#32;0;&#32;++__first,&#32;(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a0f7193911e632cd84da4082d5c628fe3">void</link>)&#32;--__n)
+186 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;::new&#32;(__detail::__voidify(*__first))&#32;_ValueType;
+187 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__guard.release();
+188 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__first;
+189 &#32;&#32;&#32;&#32;&#32;&#32;}
+190 &#32;&#32;&#32;&#32;&#32;&#32;}
+191 &#32;&#32;};
+192 
+193 &#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keyword">constexpr</emphasis>&#32;__uninitialized_default_construct_n_fn
+194 &#32;&#32;&#32;&#32;<link linkend="_namespacestd_1acf95338aa12ecf2e9d44b3195412bfac">uninitialized_default_construct_n</link>;
+195 
+196 &#32;&#32;<emphasis role="keyword">struct&#32;</emphasis>__uninitialized_value_construct_fn
+197 &#32;&#32;{
+198 &#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;__detail::__nothrow_forward_iterator&#32;_Iter,
+199 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__detail::__nothrow_sentinel&lt;_Iter&gt;&#32;_Sent&gt;
+200 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">requires</emphasis>&#32;default_initializable&lt;iter_value_t&lt;_Iter&gt;&gt;
+201 &#32;&#32;&#32;&#32;&#32;&#32;_Iter
+202 &#32;&#32;&#32;&#32;&#32;&#32;operator()(_Iter&#32;__first,&#32;_Sent&#32;__last)<emphasis role="keyword">&#32;const</emphasis>
+203 <emphasis role="keyword">&#32;&#32;&#32;&#32;&#32;&#32;</emphasis>{
+204 &#32;&#32;&#32;&#32;<emphasis role="keyword">using&#32;</emphasis>_ValueType&#32;=&#32;remove_reference_t&lt;iter_reference_t&lt;_Iter&gt;&gt;;
+205 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;<emphasis role="keyword">constexpr</emphasis>&#32;(is_trivial_v&lt;_ValueType&gt;
+206 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&amp;&amp;&#32;is_copy_assignable_v&lt;_ValueType&gt;)
+207 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;ranges::fill(__first,&#32;__last,&#32;_ValueType());
+208 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>
+209 &#32;&#32;&#32;&#32;&#32;&#32;{
+210 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">auto</emphasis>&#32;__guard&#32;=&#32;__detail::_DestroyGuard(__first);
+211 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(;&#32;__first&#32;!=&#32;__last;&#32;++__first)
+212 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;::new&#32;(__detail::__voidify(*__first))&#32;_ValueType();
+213 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__guard.release();
+214 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__first;
+215 &#32;&#32;&#32;&#32;&#32;&#32;}
+216 &#32;&#32;&#32;&#32;&#32;&#32;}
+217 
+218 &#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;__detail::__nothrow_forward_range&#32;_Range&gt;
+219 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">requires</emphasis>&#32;default_initializable&lt;range_value_t&lt;_Range&gt;&gt;
+220 &#32;&#32;&#32;&#32;&#32;&#32;borrowed_iterator_t&lt;_Range&gt;
+221 &#32;&#32;&#32;&#32;&#32;&#32;operator()(_Range&amp;&amp;&#32;__r)<emphasis role="keyword">&#32;const</emphasis>
+222 <emphasis role="keyword">&#32;&#32;&#32;&#32;&#32;&#32;</emphasis>{
+223 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;(*<emphasis role="keyword">this</emphasis>)(ranges::begin(__r),&#32;ranges::end(__r));
+224 &#32;&#32;&#32;&#32;&#32;&#32;}
+225 &#32;&#32;};
+226 
+227 &#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keyword">constexpr</emphasis>&#32;__uninitialized_value_construct_fn
+228 &#32;&#32;&#32;&#32;<link linkend="_namespacestd_1a08ede7ab702bb5649a587b656f0e0c2c">uninitialized_value_construct</link>{};
+229 
+230 &#32;&#32;<emphasis role="keyword">struct&#32;</emphasis>__uninitialized_value_construct_n_fn
+231 &#32;&#32;{
+232 &#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;__detail::__nothrow_forward_iterator&#32;_Iter&gt;
+233 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">requires</emphasis>&#32;default_initializable&lt;iter_value_t&lt;_Iter&gt;&gt;
+234 &#32;&#32;&#32;&#32;&#32;&#32;_Iter
+235 &#32;&#32;&#32;&#32;&#32;&#32;operator()(_Iter&#32;__first,&#32;iter_difference_t&lt;_Iter&gt;&#32;__n)<emphasis role="keyword">&#32;const</emphasis>
+236 <emphasis role="keyword">&#32;&#32;&#32;&#32;&#32;&#32;</emphasis>{
+237 &#32;&#32;&#32;&#32;<emphasis role="keyword">using&#32;</emphasis>_ValueType&#32;=&#32;remove_reference_t&lt;iter_reference_t&lt;_Iter&gt;&gt;;
+238 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;<emphasis role="keyword">constexpr</emphasis>&#32;(is_trivial_v&lt;_ValueType&gt;
+239 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&amp;&amp;&#32;is_copy_assignable_v&lt;_ValueType&gt;)
+240 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;ranges::fill_n(__first,&#32;__n,&#32;_ValueType());
+241 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>
+242 &#32;&#32;&#32;&#32;&#32;&#32;{
+243 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">auto</emphasis>&#32;__guard&#32;=&#32;__detail::_DestroyGuard(__first);
+244 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(;&#32;__n&#32;&gt;&#32;0;&#32;++__first,&#32;(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a0f7193911e632cd84da4082d5c628fe3">void</link>)&#32;--__n)
+245 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;::new&#32;(__detail::__voidify(*__first))&#32;_ValueType();
+246 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__guard.release();
+247 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__first;
+248 &#32;&#32;&#32;&#32;&#32;&#32;}
+249 &#32;&#32;&#32;&#32;&#32;&#32;}
+250 &#32;&#32;};
+251 
+252 &#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keyword">constexpr</emphasis>&#32;__uninitialized_value_construct_n_fn
+253 &#32;&#32;&#32;&#32;<link linkend="_namespacestd_1ab737a726156b3474897e2283525b46aa">uninitialized_value_construct_n</link>;
+254 
+255 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Iter,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Out&gt;
+256 &#32;&#32;&#32;&#32;<emphasis role="keyword">using&#32;</emphasis>uninitialized_copy_result&#32;=&#32;in_out_result&lt;_Iter,&#32;_Out&gt;;
+257 
+258 &#32;&#32;<emphasis role="keyword">struct&#32;</emphasis>__uninitialized_copy_fn
+259 &#32;&#32;{
+260 &#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;input_iterator&#32;_Iter,&#32;sentinel_for&lt;_Iter&gt;&#32;_ISent,
+261 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__detail::__nothrow_forward_iterator&#32;_Out,
+262 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__detail::__nothrow_sentinel&lt;_Out&gt;&#32;_OSent&gt;
+263 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">requires</emphasis>&#32;constructible_from&lt;iter_value_t&lt;_Out&gt;,&#32;iter_reference_t&lt;_Iter&gt;&gt;
+264 &#32;&#32;&#32;&#32;&#32;&#32;uninitialized_copy_result&lt;_Iter,&#32;_Out&gt;
+265 &#32;&#32;&#32;&#32;&#32;&#32;operator()(_Iter&#32;__ifirst,&#32;_ISent&#32;__ilast,
+266 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_Out&#32;__ofirst,&#32;_OSent&#32;__olast)<emphasis role="keyword">&#32;const</emphasis>
+267 <emphasis role="keyword">&#32;&#32;&#32;&#32;&#32;&#32;</emphasis>{
+268 &#32;&#32;&#32;&#32;<emphasis role="keyword">using&#32;</emphasis>_OutType&#32;=&#32;remove_reference_t&lt;iter_reference_t&lt;_Out&gt;&gt;;
+269 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;<emphasis role="keyword">constexpr</emphasis>&#32;(sized_sentinel_for&lt;_ISent,&#32;_Iter&gt;
+270 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&amp;&amp;&#32;sized_sentinel_for&lt;_OSent,&#32;_Out&gt;
+271 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&amp;&amp;&#32;is_trivial_v&lt;_OutType&gt;
+272 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&amp;&amp;&#32;is_nothrow_assignable_v&lt;_OutType&amp;,
+273 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;iter_reference_t&lt;_Iter&gt;&gt;)
+274 &#32;&#32;&#32;&#32;&#32;&#32;{
+275 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">auto</emphasis>&#32;__d1&#32;=&#32;__ilast&#32;-&#32;__ifirst;
+276 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">auto</emphasis>&#32;__d2&#32;=&#32;__olast&#32;-&#32;__ofirst;
+277 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;ranges::copy_n(<link linkend="_namespacestd_1ac7095819f6a8da64d69b1ee3029c52be">std::move</link>(__ifirst),&#32;std::min(__d1,&#32;__d2),
+278 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__ofirst);
+279 &#32;&#32;&#32;&#32;&#32;&#32;}
+280 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>
+281 &#32;&#32;&#32;&#32;&#32;&#32;{
+282 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">auto</emphasis>&#32;__guard&#32;=&#32;__detail::_DestroyGuard(__ofirst);
+283 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(;&#32;__ifirst&#32;!=&#32;__ilast&#32;&amp;&amp;&#32;__ofirst&#32;!=&#32;__olast;
+284 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;++__ofirst,&#32;(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a0f7193911e632cd84da4082d5c628fe3">void</link>)++__ifirst)
+285 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;::new&#32;(__detail::__voidify(*__ofirst))&#32;_OutType(*__ifirst);
+286 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__guard.release();
+287 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;{<link linkend="_namespacestd_1ac7095819f6a8da64d69b1ee3029c52be">std::move</link>(__ifirst),&#32;__ofirst};
+288 &#32;&#32;&#32;&#32;&#32;&#32;}
+289 &#32;&#32;&#32;&#32;&#32;&#32;}
+290 
+291 &#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;input_range&#32;_IRange,&#32;__detail::__nothrow_forward_range&#32;_ORange&gt;
+292 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">requires</emphasis>&#32;constructible_from&lt;range_value_t&lt;_ORange&gt;,
+293 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;range_reference_t&lt;_IRange&gt;&gt;
+294 &#32;&#32;&#32;&#32;&#32;&#32;uninitialized_copy_result&lt;borrowed_iterator_t&lt;_IRange&gt;,
+295 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;borrowed_iterator_t&lt;_ORange&gt;&gt;
+296 &#32;&#32;&#32;&#32;&#32;&#32;operator()(_IRange&amp;&amp;&#32;__inr,&#32;_ORange&amp;&amp;&#32;__outr)<emphasis role="keyword">&#32;const</emphasis>
+297 <emphasis role="keyword">&#32;&#32;&#32;&#32;&#32;&#32;</emphasis>{
+298 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;(*<emphasis role="keyword">this</emphasis>)(ranges::begin(__inr),&#32;ranges::end(__inr),
+299 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;ranges::begin(__outr),&#32;ranges::end(__outr));
+300 &#32;&#32;&#32;&#32;&#32;&#32;}
+301 &#32;&#32;};
+302 
+303 &#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keyword">constexpr</emphasis>&#32;__uninitialized_copy_fn&#32;<link linkend="_namespacestd_1ae8f76360bfad6375b33b57235ca96d97">uninitialized_copy</link>{};
+304 
+305 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Iter,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Out&gt;
+306 &#32;&#32;&#32;&#32;<emphasis role="keyword">using&#32;</emphasis>uninitialized_copy_n_result&#32;=&#32;in_out_result&lt;_Iter,&#32;_Out&gt;;
+307 
+308 &#32;&#32;<emphasis role="keyword">struct&#32;</emphasis>__uninitialized_copy_n_fn
+309 &#32;&#32;{
+310 &#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;input_iterator&#32;_Iter,&#32;__detail::__nothrow_forward_iterator&#32;_Out,
+311 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__detail::__nothrow_sentinel&lt;_Out&gt;&#32;_Sent&gt;
+312 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">requires</emphasis>&#32;constructible_from&lt;iter_value_t&lt;_Out&gt;,&#32;iter_reference_t&lt;_Iter&gt;&gt;
+313 &#32;&#32;&#32;&#32;&#32;&#32;uninitialized_copy_n_result&lt;_Iter,&#32;_Out&gt;
+314 &#32;&#32;&#32;&#32;&#32;&#32;operator()(_Iter&#32;__ifirst,&#32;iter_difference_t&lt;_Iter&gt;&#32;__n,
+315 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_Out&#32;__ofirst,&#32;_Sent&#32;__olast)<emphasis role="keyword">&#32;const</emphasis>
+316 <emphasis role="keyword">&#32;&#32;&#32;&#32;&#32;&#32;</emphasis>{
+317 &#32;&#32;&#32;&#32;<emphasis role="keyword">using&#32;</emphasis>_OutType&#32;=&#32;remove_reference_t&lt;iter_reference_t&lt;_Out&gt;&gt;;
+318 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;<emphasis role="keyword">constexpr</emphasis>&#32;(sized_sentinel_for&lt;_Sent,&#32;_Out&gt;
+319 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&amp;&amp;&#32;is_trivial_v&lt;_OutType&gt;
+320 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&amp;&amp;&#32;is_nothrow_assignable_v&lt;_OutType&amp;,
+321 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;iter_reference_t&lt;_Iter&gt;&gt;)
+322 &#32;&#32;&#32;&#32;&#32;&#32;{
+323 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">auto</emphasis>&#32;__d&#32;=&#32;__olast&#32;-&#32;__ofirst;
+324 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;ranges::copy_n(<link linkend="_namespacestd_1ac7095819f6a8da64d69b1ee3029c52be">std::move</link>(__ifirst),&#32;std::min(__n,&#32;__d),
+325 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__ofirst);
+326 &#32;&#32;&#32;&#32;&#32;&#32;}
+327 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>
+328 &#32;&#32;&#32;&#32;&#32;&#32;{
+329 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">auto</emphasis>&#32;__guard&#32;=&#32;__detail::_DestroyGuard(__ofirst);
+330 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(;&#32;__n&#32;&gt;&#32;0&#32;&amp;&amp;&#32;__ofirst&#32;!=&#32;__olast;
+331 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;++__ofirst,&#32;(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a0f7193911e632cd84da4082d5c628fe3">void</link>)++__ifirst,&#32;(<emphasis role="keywordtype">void</emphasis>)--__n)
+332 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;::new&#32;(__detail::__voidify(*__ofirst))&#32;_OutType(*__ifirst);
+333 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__guard.release();
+334 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;{<link linkend="_namespacestd_1ac7095819f6a8da64d69b1ee3029c52be">std::move</link>(__ifirst),&#32;__ofirst};
+335 &#32;&#32;&#32;&#32;&#32;&#32;}
+336 &#32;&#32;&#32;&#32;&#32;&#32;}
+337 &#32;&#32;};
+338 
+339 &#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keyword">constexpr</emphasis>&#32;__uninitialized_copy_n_fn&#32;<link linkend="_namespacestd_1a05e4bc318c0d5f2efb68a9ea6c55739b">uninitialized_copy_n</link>{};
+340 
+341 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Iter,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Out&gt;
+342 &#32;&#32;&#32;&#32;<emphasis role="keyword">using&#32;</emphasis>uninitialized_move_result&#32;=&#32;in_out_result&lt;_Iter,&#32;_Out&gt;;
+343 
+344 &#32;&#32;<emphasis role="keyword">struct&#32;</emphasis>__uninitialized_move_fn
+345 &#32;&#32;{
+346 &#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;input_iterator&#32;_Iter,&#32;sentinel_for&lt;_Iter&gt;&#32;_ISent,
+347 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__detail::__nothrow_forward_iterator&#32;_Out,
+348 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__detail::__nothrow_sentinel&lt;_Out&gt;&#32;_OSent&gt;
+349 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">requires</emphasis>&#32;constructible_from&lt;iter_value_t&lt;_Out&gt;,
+350 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;iter_rvalue_reference_t&lt;_Iter&gt;&gt;
+351 &#32;&#32;&#32;&#32;&#32;&#32;uninitialized_move_result&lt;_Iter,&#32;_Out&gt;
+352 &#32;&#32;&#32;&#32;&#32;&#32;operator()(_Iter&#32;__ifirst,&#32;_ISent&#32;__ilast,
+353 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_Out&#32;__ofirst,&#32;_OSent&#32;__olast)<emphasis role="keyword">&#32;const</emphasis>
+354 <emphasis role="keyword">&#32;&#32;&#32;&#32;&#32;&#32;</emphasis>{
+355 &#32;&#32;&#32;&#32;<emphasis role="keyword">using&#32;</emphasis>_OutType&#32;=&#32;remove_reference_t&lt;iter_reference_t&lt;_Out&gt;&gt;;
+356 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;<emphasis role="keyword">constexpr</emphasis>&#32;(sized_sentinel_for&lt;_ISent,&#32;_Iter&gt;
+357 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&amp;&amp;&#32;sized_sentinel_for&lt;_OSent,&#32;_Out&gt;
+358 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&amp;&amp;&#32;is_trivial_v&lt;_OutType&gt;
+359 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&amp;&amp;&#32;is_nothrow_assignable_v&lt;_OutType&amp;,
+360 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;iter_rvalue_reference_t&lt;_Iter&gt;&gt;)
+361 &#32;&#32;&#32;&#32;&#32;&#32;{
+362 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">auto</emphasis>&#32;__d1&#32;=&#32;__ilast&#32;-&#32;__ifirst;
+363 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">auto</emphasis>&#32;__d2&#32;=&#32;__olast&#32;-&#32;__ofirst;
+364 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">auto</emphasis>&#32;[__in,&#32;__out]
+365 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;=&#32;ranges::copy_n(std::make_move_iterator(<link linkend="_namespacestd_1ac7095819f6a8da64d69b1ee3029c52be">std::move</link>(__ifirst)),
+366 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;std::min(__d1,&#32;__d2),&#32;__ofirst);
+367 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;{<link linkend="_namespacestd_1ac7095819f6a8da64d69b1ee3029c52be">std::move</link>(__in).base(),&#32;__out};
+368 &#32;&#32;&#32;&#32;&#32;&#32;}
+369 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>
+370 &#32;&#32;&#32;&#32;&#32;&#32;{
+371 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">auto</emphasis>&#32;__guard&#32;=&#32;__detail::_DestroyGuard(__ofirst);
+372 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(;&#32;__ifirst&#32;!=&#32;__ilast&#32;&amp;&amp;&#32;__ofirst&#32;!=&#32;__olast;
+373 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;++__ofirst,&#32;(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a0f7193911e632cd84da4082d5c628fe3">void</link>)++__ifirst)
+374 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;::new&#32;(__detail::__voidify(*__ofirst))
+375 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_OutType(ranges::iter_move(__ifirst));
+376 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__guard.release();
+377 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;{<link linkend="_namespacestd_1ac7095819f6a8da64d69b1ee3029c52be">std::move</link>(__ifirst),&#32;__ofirst};
+378 &#32;&#32;&#32;&#32;&#32;&#32;}
+379 &#32;&#32;&#32;&#32;&#32;&#32;}
+380 
+381 &#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;input_range&#32;_IRange,&#32;__detail::__nothrow_forward_range&#32;_ORange&gt;
+382 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">requires</emphasis>&#32;constructible_from&lt;range_value_t&lt;_ORange&gt;,
+383 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;range_rvalue_reference_t&lt;_IRange&gt;&gt;
+384 &#32;&#32;&#32;&#32;&#32;&#32;uninitialized_move_result&lt;borrowed_iterator_t&lt;_IRange&gt;,
+385 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;borrowed_iterator_t&lt;_ORange&gt;&gt;
+386 &#32;&#32;&#32;&#32;&#32;&#32;operator()(_IRange&amp;&amp;&#32;__inr,&#32;_ORange&amp;&amp;&#32;__outr)<emphasis role="keyword">&#32;const</emphasis>
+387 <emphasis role="keyword">&#32;&#32;&#32;&#32;&#32;&#32;</emphasis>{
+388 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;(*<emphasis role="keyword">this</emphasis>)(ranges::begin(__inr),&#32;ranges::end(__inr),
+389 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;ranges::begin(__outr),&#32;ranges::end(__outr));
+390 &#32;&#32;&#32;&#32;&#32;&#32;}
+391 &#32;&#32;};
+392 
+393 &#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keyword">constexpr</emphasis>&#32;__uninitialized_move_fn&#32;<link linkend="_namespacestd_1affe72b3822ef701f99b9ba1a6c953aed">uninitialized_move</link>{};
+394 
+395 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Iter,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Out&gt;
+396 &#32;&#32;&#32;&#32;<emphasis role="keyword">using&#32;</emphasis>uninitialized_move_n_result&#32;=&#32;in_out_result&lt;_Iter,&#32;_Out&gt;;
+397 
+398 &#32;&#32;<emphasis role="keyword">struct&#32;</emphasis>__uninitialized_move_n_fn
+399 &#32;&#32;{
+400 &#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;input_iterator&#32;_Iter,&#32;__detail::__nothrow_forward_iterator&#32;_Out,
+401 &#32;&#32;&#32;&#32;&#32;&#32;__detail::__nothrow_sentinel&lt;_Out&gt;&#32;_Sent&gt;
+402 &#32;&#32;&#32;&#32;<emphasis role="keyword">requires</emphasis>&#32;constructible_from&lt;iter_value_t&lt;_Out&gt;,
+403 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;iter_rvalue_reference_t&lt;_Iter&gt;&gt;
+404 &#32;&#32;&#32;&#32;&#32;&#32;uninitialized_move_n_result&lt;_Iter,&#32;_Out&gt;
+405 &#32;&#32;&#32;&#32;&#32;&#32;operator()(_Iter&#32;__ifirst,&#32;iter_difference_t&lt;_Iter&gt;&#32;__n,
+406 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_Out&#32;__ofirst,&#32;_Sent&#32;__olast)<emphasis role="keyword">&#32;const</emphasis>
+407 <emphasis role="keyword">&#32;&#32;&#32;&#32;&#32;&#32;</emphasis>{
+408 &#32;&#32;&#32;&#32;<emphasis role="keyword">using&#32;</emphasis>_OutType&#32;=&#32;remove_reference_t&lt;iter_reference_t&lt;_Out&gt;&gt;;
+409 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;<emphasis role="keyword">constexpr</emphasis>&#32;(sized_sentinel_for&lt;_Sent,&#32;_Out&gt;
+410 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&amp;&amp;&#32;is_trivial_v&lt;_OutType&gt;
+411 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&amp;&amp;&#32;is_nothrow_assignable_v&lt;_OutType&amp;,
+412 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;iter_rvalue_reference_t&lt;_Iter&gt;&gt;)
+413 &#32;&#32;&#32;&#32;&#32;&#32;{
+414 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">auto</emphasis>&#32;__d&#32;=&#32;__olast&#32;-&#32;__ofirst;
+415 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">auto</emphasis>&#32;[__in,&#32;__out]
+416 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;=&#32;ranges::copy_n(std::make_move_iterator(<link linkend="_namespacestd_1ac7095819f6a8da64d69b1ee3029c52be">std::move</link>(__ifirst)),
+417 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;std::min(__n,&#32;__d),&#32;__ofirst);
+418 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;{<link linkend="_namespacestd_1ac7095819f6a8da64d69b1ee3029c52be">std::move</link>(__in).base(),&#32;__out};
+419 &#32;&#32;&#32;&#32;&#32;&#32;}
+420 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>
+421 &#32;&#32;&#32;&#32;&#32;&#32;{
+422 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">auto</emphasis>&#32;__guard&#32;=&#32;__detail::_DestroyGuard(__ofirst);
+423 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(;&#32;__n&#32;&gt;&#32;0&#32;&amp;&amp;&#32;__ofirst&#32;!=&#32;__olast;
+424 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;++__ofirst,&#32;(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a0f7193911e632cd84da4082d5c628fe3">void</link>)++__ifirst,&#32;(<emphasis role="keywordtype">void</emphasis>)--__n)
+425 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;::new&#32;(__detail::__voidify(*__ofirst))
+426 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_OutType(ranges::iter_move(__ifirst));
+427 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__guard.release();
+428 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;{<link linkend="_namespacestd_1ac7095819f6a8da64d69b1ee3029c52be">std::move</link>(__ifirst),&#32;__ofirst};
+429 &#32;&#32;&#32;&#32;&#32;&#32;}
+430 &#32;&#32;&#32;&#32;&#32;&#32;}
+431 &#32;&#32;};
+432 
+433 &#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keyword">constexpr</emphasis>&#32;__uninitialized_move_n_fn&#32;<link linkend="_namespacestd_1ab613a9e189675f990f49fa9de211d509">uninitialized_move_n</link>{};
+434 
+435 &#32;&#32;<emphasis role="keyword">struct&#32;</emphasis>__uninitialized_fill_fn
+436 &#32;&#32;{
+437 &#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;__detail::__nothrow_forward_iterator&#32;_Iter,
+438 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__detail::__nothrow_sentinel&lt;_Iter&gt;&#32;_Sent,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+439 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">requires</emphasis>&#32;constructible_from&lt;iter_value_t&lt;_Iter&gt;,&#32;<emphasis role="keyword">const</emphasis>&#32;_Tp&amp;&gt;
+440 &#32;&#32;&#32;&#32;&#32;&#32;_Iter
+441 &#32;&#32;&#32;&#32;&#32;&#32;operator()(_Iter&#32;__first,&#32;_Sent&#32;__last,&#32;<emphasis role="keyword">const</emphasis>&#32;_Tp&amp;&#32;__x)<emphasis role="keyword">&#32;const</emphasis>
+442 <emphasis role="keyword">&#32;&#32;&#32;&#32;&#32;&#32;</emphasis>{
+443 &#32;&#32;&#32;&#32;<emphasis role="keyword">using&#32;</emphasis>_ValueType&#32;=&#32;remove_reference_t&lt;iter_reference_t&lt;_Iter&gt;&gt;;
+444 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;<emphasis role="keyword">constexpr</emphasis>&#32;(is_trivial_v&lt;_ValueType&gt;
+445 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&amp;&amp;&#32;is_nothrow_assignable_v&lt;_ValueType&amp;,&#32;const&#32;_Tp&amp;&gt;)
+446 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;ranges::fill(__first,&#32;__last,&#32;__x);
+447 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>
+448 &#32;&#32;&#32;&#32;&#32;&#32;{
+449 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">auto</emphasis>&#32;__guard&#32;=&#32;__detail::_DestroyGuard(__first);
+450 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(;&#32;__first&#32;!=&#32;__last;&#32;++__first)
+451 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;::new&#32;(__detail::__voidify(*__first))&#32;_ValueType(__x);
+452 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__guard.release();
+453 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__first;
+454 &#32;&#32;&#32;&#32;&#32;&#32;}
+455 &#32;&#32;&#32;&#32;&#32;&#32;}
+456 
+457 &#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;__detail::__nothrow_forward_range&#32;_Range,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+458 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">requires</emphasis>&#32;constructible_from&lt;range_value_t&lt;_Range&gt;,&#32;<emphasis role="keyword">const</emphasis>&#32;_Tp&amp;&gt;
+459 &#32;&#32;&#32;&#32;&#32;&#32;borrowed_iterator_t&lt;_Range&gt;
+460 &#32;&#32;&#32;&#32;&#32;&#32;operator()(_Range&amp;&amp;&#32;__r,&#32;<emphasis role="keyword">const</emphasis>&#32;_Tp&amp;&#32;__x)<emphasis role="keyword">&#32;const</emphasis>
+461 <emphasis role="keyword">&#32;&#32;&#32;&#32;&#32;&#32;</emphasis>{
+462 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;(*<emphasis role="keyword">this</emphasis>)(ranges::begin(__r),&#32;ranges::end(__r),&#32;__x);
+463 &#32;&#32;&#32;&#32;&#32;&#32;}
+464 &#32;&#32;};
+465 
+466 &#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keyword">constexpr</emphasis>&#32;__uninitialized_fill_fn&#32;<link linkend="_namespacestd_1a10e163c934df1d0793031027dd113f45">uninitialized_fill</link>{};
+467 
+468 &#32;&#32;<emphasis role="keyword">struct&#32;</emphasis>__uninitialized_fill_n_fn
+469 &#32;&#32;{
+470 &#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;__detail::__nothrow_forward_iterator&#32;_Iter,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+471 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">requires</emphasis>&#32;constructible_from&lt;iter_value_t&lt;_Iter&gt;,&#32;<emphasis role="keyword">const</emphasis>&#32;_Tp&amp;&gt;
+472 &#32;&#32;&#32;&#32;&#32;&#32;_Iter
+473 &#32;&#32;&#32;&#32;&#32;&#32;operator()(_Iter&#32;__first,&#32;iter_difference_t&lt;_Iter&gt;&#32;__n,
+474 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;_Tp&amp;&#32;__x)<emphasis role="keyword">&#32;const</emphasis>
+475 <emphasis role="keyword">&#32;&#32;&#32;&#32;&#32;&#32;</emphasis>{
+476 &#32;&#32;&#32;&#32;<emphasis role="keyword">using&#32;</emphasis>_ValueType&#32;=&#32;remove_reference_t&lt;iter_reference_t&lt;_Iter&gt;&gt;;
+477 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;<emphasis role="keyword">constexpr</emphasis>&#32;(is_trivial_v&lt;_ValueType&gt;
+478 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&amp;&amp;&#32;is_nothrow_assignable_v&lt;_ValueType&amp;,&#32;const&#32;_Tp&amp;&gt;)
+479 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;ranges::fill_n(__first,&#32;__n,&#32;__x);
+480 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>
+481 &#32;&#32;&#32;&#32;&#32;&#32;{
+482 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">auto</emphasis>&#32;__guard&#32;=&#32;__detail::_DestroyGuard(__first);
+483 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(;&#32;__n&#32;&gt;&#32;0;&#32;++__first,&#32;(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a0f7193911e632cd84da4082d5c628fe3">void</link>)--__n)
+484 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;::new&#32;(__detail::__voidify(*__first))&#32;_ValueType(__x);
+485 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__guard.release();
+486 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__first;
+487 &#32;&#32;&#32;&#32;&#32;&#32;}
+488 &#32;&#32;&#32;&#32;&#32;&#32;}
+489 &#32;&#32;};
+490 
+491 &#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keyword">constexpr</emphasis>&#32;__uninitialized_fill_n_fn&#32;<link linkend="_namespacestd_1a53c0988739169fa73adec7bc92953ee2">uninitialized_fill_n</link>{};
+492 
+493 &#32;&#32;<emphasis role="keyword">struct&#32;</emphasis>__construct_at_fn
+494 &#32;&#32;{
+495 &#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp,&#32;<emphasis role="keyword">typename</emphasis>...&#32;_Args&gt;
+496 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">requires</emphasis>&#32;<emphasis role="keyword">requires</emphasis>&#32;{
+497 &#32;&#32;&#32;&#32;::new&#32;(std::declval&lt;void*&gt;())&#32;_Tp(<link linkend="_namespacestd">std</link>::declval&lt;_Args&gt;()...);
+498 &#32;&#32;&#32;&#32;&#32;&#32;}
+499 &#32;&#32;&#32;&#32;&#32;&#32;constexpr&#32;_Tp*
+500 &#32;&#32;&#32;&#32;&#32;&#32;operator()(_Tp*&#32;__location,&#32;_Args&amp;&amp;...&#32;__args)&#32;const
+501 &#32;&#32;&#32;&#32;&#32;&#32;noexcept(noexcept(<link linkend="_namespacestd">std</link>::construct_at(__location,
+502 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_namespacestd">std</link>::forward&lt;_Args&gt;(__args)...)))
+503 &#32;&#32;&#32;&#32;&#32;&#32;{
+504 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;std::construct_at(__location,
+505 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;std::forward&lt;_Args&gt;(__args)...);
+506 &#32;&#32;&#32;&#32;&#32;&#32;}
+507 &#32;&#32;};
+508 
+509 &#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keyword">constexpr</emphasis>&#32;__construct_at_fn&#32;construct_at{};
+510 
+511 &#32;&#32;<emphasis role="keyword">struct&#32;</emphasis>__destroy_at_fn
+512 &#32;&#32;{
+513 &#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;destructible&#32;_Tp&gt;
+514 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">constexpr</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>
+515 &#32;&#32;&#32;&#32;&#32;&#32;operator()(_Tp*&#32;__location)&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keyword">noexcept</emphasis>
+516 &#32;&#32;&#32;&#32;&#32;&#32;{
+517 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;<emphasis role="keyword">constexpr</emphasis>&#32;(is_array_v&lt;_Tp&gt;)
+518 &#32;&#32;&#32;&#32;&#32;&#32;ranges::destroy(ranges::begin(*__location),&#32;ranges::end(*__location));
+519 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>
+520 &#32;&#32;&#32;&#32;&#32;&#32;__location-&gt;~_Tp();
+521 &#32;&#32;&#32;&#32;&#32;&#32;}
+522 &#32;&#32;};
+523 
+524 &#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keyword">constexpr</emphasis>&#32;__destroy_at_fn&#32;destroy_at{};
+525 
+526 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;__detail::__nothrow_input_iterator&#32;_Iter,
+527 &#32;&#32;&#32;&#32;&#32;&#32;&#32;__detail::__nothrow_sentinel&lt;_Iter&gt;&#32;_Sent&gt;
+528 &#32;&#32;&#32;&#32;<emphasis role="keyword">requires</emphasis>&#32;destructible&lt;iter_value_t&lt;_Iter&gt;&gt;
+529 &#32;&#32;&#32;&#32;<emphasis role="keyword">constexpr</emphasis>&#32;_Iter
+530 &#32;&#32;&#32;&#32;__destroy_fn::operator()(_Iter&#32;__first,&#32;_Sent&#32;__last)&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keyword">noexcept</emphasis>
+531 &#32;&#32;&#32;&#32;{
+532 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;<emphasis role="keyword">constexpr</emphasis>&#32;(is_trivially_destructible_v&lt;iter_value_t&lt;_Iter&gt;&gt;)
+533 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;ranges::next(<link linkend="_namespacestd_1ac7095819f6a8da64d69b1ee3029c52be">std::move</link>(__first),&#32;__last);
+534 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>
+535 &#32;&#32;&#32;&#32;{
+536 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(;&#32;__first&#32;!=&#32;__last;&#32;++__first)
+537 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;ranges::destroy_at(std::__addressof(*__first));
+538 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__first;
+539 &#32;&#32;&#32;&#32;}
+540 &#32;&#32;&#32;&#32;}
+541 
+542 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;__detail::__nothrow_input_range&#32;_Range&gt;
+543 &#32;&#32;&#32;&#32;<emphasis role="keyword">requires</emphasis>&#32;destructible&lt;range_value_t&lt;_Range&gt;&gt;
+544 &#32;&#32;&#32;&#32;<emphasis role="keyword">constexpr</emphasis>&#32;borrowed_iterator_t&lt;_Range&gt;
+545 &#32;&#32;&#32;&#32;__destroy_fn::operator()(_Range&amp;&amp;&#32;__r)&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keyword">noexcept</emphasis>
+546 &#32;&#32;&#32;&#32;{
+547 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;(*<emphasis role="keyword">this</emphasis>)(ranges::begin(__r),&#32;ranges::end(__r));
+548 &#32;&#32;&#32;&#32;}
+549 
+550 &#32;&#32;<emphasis role="keyword">struct&#32;</emphasis>__destroy_n_fn
+551 &#32;&#32;{
+552 &#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;__detail::__nothrow_input_iterator&#32;_Iter&gt;
+553 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">requires</emphasis>&#32;destructible&lt;iter_value_t&lt;_Iter&gt;&gt;
+554 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">constexpr</emphasis>&#32;_Iter
+555 &#32;&#32;&#32;&#32;&#32;&#32;operator()(_Iter&#32;__first,&#32;iter_difference_t&lt;_Iter&gt;&#32;__n)&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keyword">noexcept</emphasis>
+556 &#32;&#32;&#32;&#32;&#32;&#32;{
+557 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;<emphasis role="keyword">constexpr</emphasis>&#32;(is_trivially_destructible_v&lt;iter_value_t&lt;_Iter&gt;&gt;)
+558 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;ranges::next(<link linkend="_namespacestd_1ac7095819f6a8da64d69b1ee3029c52be">std::move</link>(__first),&#32;__n);
+559 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>
+560 &#32;&#32;&#32;&#32;&#32;&#32;{
+561 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(;&#32;__n&#32;&gt;&#32;0;&#32;++__first,&#32;(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a0f7193911e632cd84da4082d5c628fe3">void</link>)--__n)
+562 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;ranges::destroy_at(std::__addressof(*__first));
+563 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__first;
+564 &#32;&#32;&#32;&#32;&#32;&#32;}
+565 &#32;&#32;&#32;&#32;&#32;&#32;}
+566 &#32;&#32;};
+567 
+568 &#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keyword">constexpr</emphasis>&#32;__destroy_n_fn&#32;<link linkend="_namespacestd_1a8f834ac1395ecb3ee484e6dcdbd8998c">destroy_n</link>{};
+569 }
+570 _GLIBCXX_END_NAMESPACE_VERSION
+571 }&#32;<emphasis role="comment">//&#32;namespace&#32;std</emphasis>
+572 <emphasis role="preprocessor">#endif&#32;</emphasis><emphasis role="comment">//&#32;concepts</emphasis>
+573 <emphasis role="preprocessor">#endif&#32;</emphasis><emphasis role="comment">//&#32;C++20</emphasis>
+574 <emphasis role="preprocessor">#endif&#32;</emphasis><emphasis role="comment">//&#32;_RANGES_UNINITIALIZED_H</emphasis>
+</programlisting></section>

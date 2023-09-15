@@ -1,0 +1,453 @@
+\doxysection{atomic\+\_\+timed\+\_\+wait.\+h}
+\hypertarget{_classes_2lib_2include_2c_09_09_2bits_2atomic__timed__wait_8h_source}{}\label{_classes_2lib_2include_2c_09_09_2bits_2atomic__timed__wait_8h_source}\index{C:/Users/HP/Documents/GitHub/Minero-\/Game/Classes/lib/include/c++/bits/atomic\_timed\_wait.h@{C:/Users/HP/Documents/GitHub/Minero-\/Game/Classes/lib/include/c++/bits/atomic\_timed\_wait.h}}
+\mbox{\hyperlink{_classes_2lib_2include_2c_09_09_2bits_2atomic__timed__wait_8h}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{comment}{//\ -\/*-\/\ C++\ -\/*-\/\ header.}}
+\DoxyCodeLine{00002\ }
+\DoxyCodeLine{00003\ \textcolor{comment}{//\ Copyright\ (C)\ 2020-\/2022\ Free\ Software\ Foundation,\ Inc.}}
+\DoxyCodeLine{00004\ \textcolor{comment}{//}}
+\DoxyCodeLine{00005\ \textcolor{comment}{//\ This\ file\ is\ part\ of\ the\ GNU\ ISO\ C++\ Library.\ \ This\ library\ is\ free}}
+\DoxyCodeLine{00006\ \textcolor{comment}{//\ software;\ you\ can\ redistribute\ it\ and/or\ modify\ it\ under\ the}}
+\DoxyCodeLine{00007\ \textcolor{comment}{//\ terms\ of\ the\ GNU\ General\ Public\ License\ as\ published\ by\ the}}
+\DoxyCodeLine{00008\ \textcolor{comment}{//\ Free\ Software\ Foundation;\ either\ version\ 3,\ or\ (at\ your\ option)}}
+\DoxyCodeLine{00009\ \textcolor{comment}{//\ any\ later\ version.}}
+\DoxyCodeLine{00010\ }
+\DoxyCodeLine{00011\ \textcolor{comment}{//\ This\ library\ is\ distributed\ in\ the\ hope\ that\ it\ will\ be\ useful,}}
+\DoxyCodeLine{00012\ \textcolor{comment}{//\ but\ WITHOUT\ ANY\ WARRANTY;\ without\ even\ the\ implied\ warranty\ of}}
+\DoxyCodeLine{00013\ \textcolor{comment}{//\ MERCHANTABILITY\ or\ FITNESS\ FOR\ A\ PARTICULAR\ PURPOSE.\ \ See\ the}}
+\DoxyCodeLine{00014\ \textcolor{comment}{//\ GNU\ General\ Public\ License\ for\ more\ details.}}
+\DoxyCodeLine{00015\ }
+\DoxyCodeLine{00016\ \textcolor{comment}{//\ Under\ Section\ 7\ of\ GPL\ version\ 3,\ you\ are\ granted\ additional}}
+\DoxyCodeLine{00017\ \textcolor{comment}{//\ permissions\ described\ in\ the\ GCC\ Runtime\ Library\ Exception,\ version}}
+\DoxyCodeLine{00018\ \textcolor{comment}{//\ 3.1,\ as\ published\ by\ the\ Free\ Software\ Foundation.}}
+\DoxyCodeLine{00019\ }
+\DoxyCodeLine{00020\ \textcolor{comment}{//\ You\ should\ have\ received\ a\ copy\ of\ the\ GNU\ General\ Public\ License\ and}}
+\DoxyCodeLine{00021\ \textcolor{comment}{//\ a\ copy\ of\ the\ GCC\ Runtime\ Library\ Exception\ along\ with\ this\ program;}}
+\DoxyCodeLine{00022\ \textcolor{comment}{//\ see\ the\ files\ COPYING3\ and\ COPYING.RUNTIME\ respectively.\ \ If\ not,\ see}}
+\DoxyCodeLine{00023\ \textcolor{comment}{//\ <http://www.gnu.org/licenses/>.}}
+\DoxyCodeLine{00024\ }
+\DoxyCodeLine{00030\ \textcolor{preprocessor}{\#ifndef\ \_GLIBCXX\_ATOMIC\_TIMED\_WAIT\_H}}
+\DoxyCodeLine{00031\ \textcolor{preprocessor}{\#define\ \_GLIBCXX\_ATOMIC\_TIMED\_WAIT\_H\ 1}}
+\DoxyCodeLine{00032\ }
+\DoxyCodeLine{00033\ \textcolor{preprocessor}{\#pragma\ GCC\ system\_header}}
+\DoxyCodeLine{00034\ }
+\DoxyCodeLine{00035\ \textcolor{preprocessor}{\#include\ <bits/atomic\_wait.h>}}
+\DoxyCodeLine{00036\ }
+\DoxyCodeLine{00037\ \textcolor{preprocessor}{\#if\ \_\_cpp\_lib\_atomic\_wait}}
+\DoxyCodeLine{00038\ \textcolor{preprocessor}{\#include\ <bits/functional\_hash.h>}}
+\DoxyCodeLine{00039\ \textcolor{preprocessor}{\#include\ <bits/this\_thread\_sleep.h>}}
+\DoxyCodeLine{00040\ \textcolor{preprocessor}{\#include\ <bits/chrono.h>}}
+\DoxyCodeLine{00041\ }
+\DoxyCodeLine{00042\ \textcolor{preprocessor}{\#ifdef\ \_GLIBCXX\_HAVE\_LINUX\_FUTEX}}
+\DoxyCodeLine{00043\ \textcolor{preprocessor}{\#include\ <sys/time.h>}}
+\DoxyCodeLine{00044\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00045\ }
+\DoxyCodeLine{00046\ \textcolor{keyword}{namespace\ }\mbox{\hyperlink{namespacestd}{std}}\ \mbox{\hyperlink{_classes_2lib_2include_2c_09_09_2x86__64-w64-mingw32_2bits_2c_09_09config_8h_a44377df0d3503f0b3d9ab316dd8ddf8b}{\_GLIBCXX\_VISIBILITY}}(default)}
+\DoxyCodeLine{00047\ \{}
+\DoxyCodeLine{00048\ \_GLIBCXX\_BEGIN\_NAMESPACE\_VERSION}
+\DoxyCodeLine{00049\ }
+\DoxyCodeLine{00050\ \ \ \textcolor{keyword}{namespace\ }\_\_detail}
+\DoxyCodeLine{00051\ \ \ \{}
+\DoxyCodeLine{00052\ \ \ \ \ \textcolor{keyword}{using\ }\_\_wait\_clock\_t\ =\ chrono::steady\_clock;}
+\DoxyCodeLine{00053\ }
+\DoxyCodeLine{00054\ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Clock,\ \textcolor{keyword}{typename}\ \_Dur>}
+\DoxyCodeLine{00055\ \ \ \ \ \ \ \_\_wait\_clock\_t::time\_point}
+\DoxyCodeLine{00056\ \ \ \ \ \ \ \_\_to\_wait\_clock(\textcolor{keyword}{const}\ chrono::time\_point<\_Clock,\ \_Dur>\&\ \_\_atime)\ \textcolor{keyword}{noexcept}}
+\DoxyCodeLine{00057\ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00058\ \ \ \ \ \textcolor{keyword}{const}\ \textcolor{keyword}{typename}\ \_Clock::time\_point\ \_\_c\_entry\ =\ \_Clock::now();}
+\DoxyCodeLine{00059\ \ \ \ \ \textcolor{keyword}{const}\ \_\_wait\_clock\_t::time\_point\ \_\_w\_entry\ =\ \_\_wait\_clock\_t::now();}
+\DoxyCodeLine{00060\ \ \ \ \ \textcolor{keyword}{const}\ \textcolor{keyword}{auto}\ \_\_delta\ =\ \_\_atime\ -\/\ \_\_c\_entry;}
+\DoxyCodeLine{00061\ \ \ \ \ \textcolor{keyword}{using\ }\_\_w\_dur\ =\ \textcolor{keyword}{typename}\ \_\_wait\_clock\_t::duration;}
+\DoxyCodeLine{00062\ \ \ \ \ \textcolor{keywordflow}{return}\ \_\_w\_entry\ +\ chrono::ceil<\_\_w\_dur>(\_\_delta);}
+\DoxyCodeLine{00063\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00064\ }
+\DoxyCodeLine{00065\ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Dur>}
+\DoxyCodeLine{00066\ \ \ \ \ \ \ \_\_wait\_clock\_t::time\_point}
+\DoxyCodeLine{00067\ \ \ \ \ \ \ \_\_to\_wait\_clock(\textcolor{keyword}{const}\ chrono::time\_point<\_\_wait\_clock\_t,}
+\DoxyCodeLine{00068\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_Dur>\&\ \_\_atime)\ \textcolor{keyword}{noexcept}}
+\DoxyCodeLine{00069\ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00070\ \ \ \ \ \textcolor{keyword}{using\ }\_\_w\_dur\ =\ \textcolor{keyword}{typename}\ \_\_wait\_clock\_t::duration;}
+\DoxyCodeLine{00071\ \ \ \ \ \textcolor{keywordflow}{return}\ chrono::ceil<\_\_w\_dur>(\_\_atime);}
+\DoxyCodeLine{00072\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00073\ }
+\DoxyCodeLine{00074\ \textcolor{preprocessor}{\#ifdef\ \_GLIBCXX\_HAVE\_LINUX\_FUTEX}}
+\DoxyCodeLine{00075\ \textcolor{preprocessor}{\#define\ \_GLIBCXX\_HAVE\_PLATFORM\_TIMED\_WAIT}}
+\DoxyCodeLine{00076\ \ \ \ \ \textcolor{comment}{//\ returns\ true\ if\ wait\ ended\ before\ timeout}}
+\DoxyCodeLine{00077\ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Dur>}
+\DoxyCodeLine{00078\ \ \ \ \ \ \ \textcolor{keywordtype}{bool}}
+\DoxyCodeLine{00079\ \ \ \ \ \ \ \_\_platform\_wait\_until\_impl(\textcolor{keyword}{const}\ \_\_platform\_wait\_t*\ \_\_addr,}
+\DoxyCodeLine{00080\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_\_platform\_wait\_t\ \_\_old,}
+\DoxyCodeLine{00081\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ chrono::time\_point<\_\_wait\_clock\_t,\ \_Dur>\&}
+\DoxyCodeLine{00082\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_\_atime)\ \textcolor{keyword}{noexcept}}
+\DoxyCodeLine{00083\ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00084\ \ \ \ \ \textcolor{keyword}{auto}\ \_\_s\ =\ chrono::time\_point\_cast<chrono::seconds>(\_\_atime);}
+\DoxyCodeLine{00085\ \ \ \ \ \textcolor{keyword}{auto}\ \_\_ns\ =\ chrono::duration\_cast<chrono::nanoseconds>(\_\_atime\ -\/\ \_\_s);}
+\DoxyCodeLine{00086\ }
+\DoxyCodeLine{00087\ \ \ \ \ \textcolor{keyword}{struct\ }timespec\ \_\_rt\ =}
+\DoxyCodeLine{00088\ \ \ \ \ \{}
+\DoxyCodeLine{00089\ \ \ \ \ \ \ \textcolor{keyword}{static\_cast<}std::time\_t\textcolor{keyword}{>}(\_\_s.time\_since\_epoch().count()),}
+\DoxyCodeLine{00090\ \ \ \ \ \ \ \textcolor{keyword}{static\_cast<}\textcolor{keywordtype}{long}\textcolor{keyword}{>}(\_\_ns.count())}
+\DoxyCodeLine{00091\ \ \ \ \ \};}
+\DoxyCodeLine{00092\ }
+\DoxyCodeLine{00093\ \ \ \ \ \textcolor{keyword}{auto}\ \_\_e\ =\ syscall\ (SYS\_futex,\ \_\_addr,}
+\DoxyCodeLine{00094\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{static\_cast<}\textcolor{keywordtype}{int}\textcolor{keyword}{>}(\_\_futex\_wait\_flags::}
+\DoxyCodeLine{00095\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_\_wait\_bitset\_private),}
+\DoxyCodeLine{00096\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_\_old,\ \&\_\_rt,\ nullptr,}
+\DoxyCodeLine{00097\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ static\_cast<int>(\_\_futex\_wait\_flags::}
+\DoxyCodeLine{00098\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_\_bitset\_match\_any));}
+\DoxyCodeLine{00099\ }
+\DoxyCodeLine{00100\ \ \ \ \ \textcolor{keywordflow}{if}\ (\_\_e)}
+\DoxyCodeLine{00101\ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00102\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (errno\ ==\ \mbox{\hyperlink{_classes_2lib_2pthread_8h_a597718e59a8fc9c4d4ab63f5a34e28b1}{ETIMEDOUT}})}
+\DoxyCodeLine{00103\ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{00104\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (errno\ !=\ EINTR\ \&\&\ errno\ !=\ EAGAIN)}
+\DoxyCodeLine{00105\ \ \ \ \ \ \ \ \ \ \ \_\_throw\_system\_error(errno);}
+\DoxyCodeLine{00106\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00107\ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{00108\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00109\ }
+\DoxyCodeLine{00110\ \ \ \ \ \textcolor{comment}{//\ returns\ true\ if\ wait\ ended\ before\ timeout}}
+\DoxyCodeLine{00111\ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Clock,\ \textcolor{keyword}{typename}\ \_Dur>}
+\DoxyCodeLine{00112\ \ \ \ \ \ \ \textcolor{keywordtype}{bool}}
+\DoxyCodeLine{00113\ \ \ \ \ \ \ \_\_platform\_wait\_until(\textcolor{keyword}{const}\ \_\_platform\_wait\_t*\ \_\_addr,\ \_\_platform\_wait\_t\ \_\_old,}
+\DoxyCodeLine{00114\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ chrono::time\_point<\_Clock,\ \_Dur>\&\ \_\_atime)}
+\DoxyCodeLine{00115\ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00116\ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keyword}{constexpr}\ (is\_same\_v<\_\_wait\_clock\_t,\ \_Clock>)}
+\DoxyCodeLine{00117\ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00118\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \_\_platform\_wait\_until\_impl(\_\_addr,\ \_\_old,\ \_\_atime);}
+\DoxyCodeLine{00119\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00120\ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{00121\ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00122\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (!\_\_platform\_wait\_until\_impl(\_\_addr,\ \_\_old,}
+\DoxyCodeLine{00123\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_\_to\_wait\_clock(\_\_atime)))}
+\DoxyCodeLine{00124\ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00125\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ We\ got\ a\ timeout\ when\ measured\ against\ \_\_clock\_t\ but}}
+\DoxyCodeLine{00126\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ we\ need\ to\ check\ against\ the\ caller-\/supplied\ clock}}
+\DoxyCodeLine{00127\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ to\ tell\ whether\ we\ should\ return\ a\ timeout.}}
+\DoxyCodeLine{00128\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\_Clock::now()\ <\ \_\_atime)}
+\DoxyCodeLine{00129\ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{00130\ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00131\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{00132\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00133\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00134\ \textcolor{preprocessor}{\#else}}
+\DoxyCodeLine{00135\ \textcolor{comment}{//\ define\ \_GLIBCXX\_HAVE\_PLATFORM\_TIMED\_WAIT\ and\ implement\ \_\_platform\_wait\_until()}}
+\DoxyCodeLine{00136\ \textcolor{comment}{//\ if\ there\ is\ a\ more\ efficient\ primitive\ supported\ by\ the\ platform}}
+\DoxyCodeLine{00137\ \textcolor{comment}{//\ (e.g.\ \_\_ulock\_wait())which\ is\ better\ than\ pthread\_cond\_clockwait}}
+\DoxyCodeLine{00138\ \textcolor{preprocessor}{\#endif\ }\textcolor{comment}{//\ !\ PLATFORM\_TIMED\_WAIT}}
+\DoxyCodeLine{00139\ }
+\DoxyCodeLine{00140\ \textcolor{preprocessor}{\#ifdef\ \_GLIBCXX\_HAS\_GTHREADS}}
+\DoxyCodeLine{00141\ \ \ \ \ \textcolor{comment}{//\ Returns\ true\ if\ wait\ ended\ before\ timeout.}}
+\DoxyCodeLine{00142\ \ \ \ \ \textcolor{comment}{//\ \_Clock\ must\ be\ either\ steady\_clock\ or\ system\_clock.}}
+\DoxyCodeLine{00143\ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Clock,\ \textcolor{keyword}{typename}\ \_Dur>}
+\DoxyCodeLine{00144\ \ \ \ \ \ \ \textcolor{keywordtype}{bool}}
+\DoxyCodeLine{00145\ \ \ \ \ \ \ \_\_cond\_wait\_until\_impl(\_\_condvar\&\ \_\_cv,\ mutex\&\ \_\_mx,}
+\DoxyCodeLine{00146\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ chrono::time\_point<\_Clock,\ \_Dur>\&\ \_\_atime)}
+\DoxyCodeLine{00147\ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00148\ \ \ \ \ \textcolor{keyword}{static\_assert}(std::\_\_is\_one\_of<\_Clock,\ chrono::steady\_clock,}
+\DoxyCodeLine{00149\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ chrono::system\_clock>\mbox{\hyperlink{classvalue}{::value}});}
+\DoxyCodeLine{00150\ }
+\DoxyCodeLine{00151\ \ \ \ \ \textcolor{keyword}{auto}\ \_\_s\ =\ chrono::time\_point\_cast<chrono::seconds>(\_\_atime);}
+\DoxyCodeLine{00152\ \ \ \ \ \textcolor{keyword}{auto}\ \_\_ns\ =\ chrono::duration\_cast<chrono::nanoseconds>(\_\_atime\ -\/\ \_\_s);}
+\DoxyCodeLine{00153\ }
+\DoxyCodeLine{00154\ \ \ \ \ \mbox{\hyperlink{_classes_2lib_2include_2c_09_09_2x86__64-w64-mingw32_2bits_2gthr-default_8h_af7819bed58b3ca9c8a995141339d8a3c}{\_\_gthread\_time\_t}}\ \_\_ts\ =}
+\DoxyCodeLine{00155\ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00156\ \ \ \ \ \ \ \ \ \textcolor{keyword}{static\_cast<}std::time\_t\textcolor{keyword}{>}(\_\_s.time\_since\_epoch().count()),}
+\DoxyCodeLine{00157\ \ \ \ \ \ \ \ \ \textcolor{keyword}{static\_cast<}\textcolor{keywordtype}{long}\textcolor{keyword}{>}(\_\_ns.count())}
+\DoxyCodeLine{00158\ \ \ \ \ \ \ \};}
+\DoxyCodeLine{00159\ }
+\DoxyCodeLine{00160\ \textcolor{preprocessor}{\#ifdef\ \_GLIBCXX\_USE\_PTHREAD\_COND\_CLOCKWAIT}}
+\DoxyCodeLine{00161\ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keyword}{constexpr}\ (is\_same\_v<chrono::steady\_clock,\ \_Clock>)}
+\DoxyCodeLine{00162\ \ \ \ \ \ \ \_\_cv.wait\_until(\_\_mx,\ \mbox{\hyperlink{_classes_2lib_2pthread__time_8h_a6fb83f5e91e704391ff796553d5e0f46}{CLOCK\_MONOTONIC}},\ \_\_ts);}
+\DoxyCodeLine{00163\ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{00164\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00165\ \ \ \ \ \ \ \_\_cv.wait\_until(\_\_mx,\ \_\_ts);}
+\DoxyCodeLine{00166\ \ \ \ \ \textcolor{keywordflow}{return}\ \_Clock::now()\ <\ \_\_atime;}
+\DoxyCodeLine{00167\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00168\ }
+\DoxyCodeLine{00169\ \ \ \ \ \textcolor{comment}{//\ returns\ true\ if\ wait\ ended\ before\ timeout}}
+\DoxyCodeLine{00170\ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Clock,\ \textcolor{keyword}{typename}\ \_Dur>}
+\DoxyCodeLine{00171\ \ \ \ \ \ \ \textcolor{keywordtype}{bool}}
+\DoxyCodeLine{00172\ \ \ \ \ \ \ \_\_cond\_wait\_until(\_\_condvar\&\ \_\_cv,\ mutex\&\ \_\_mx,}
+\DoxyCodeLine{00173\ \ \ \ \ \ \ \textcolor{keyword}{const}\ chrono::time\_point<\_Clock,\ \_Dur>\&\ \_\_atime)}
+\DoxyCodeLine{00174\ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00175\ \textcolor{preprocessor}{\#ifdef\ \_GLIBCXX\_USE\_PTHREAD\_COND\_CLOCKWAIT}}
+\DoxyCodeLine{00176\ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keyword}{constexpr}\ (is\_same\_v<\_Clock,\ chrono::steady\_clock>)}
+\DoxyCodeLine{00177\ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \_\_detail::\_\_cond\_wait\_until\_impl(\_\_cv,\ \_\_mx,\ \_\_atime);}
+\DoxyCodeLine{00178\ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{00179\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00180\ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keyword}{constexpr}\ (is\_same\_v<\_Clock,\ chrono::system\_clock>)}
+\DoxyCodeLine{00181\ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \_\_detail::\_\_cond\_wait\_until\_impl(\_\_cv,\ \_\_mx,\ \_\_atime);}
+\DoxyCodeLine{00182\ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{00183\ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00184\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\_\_cond\_wait\_until\_impl(\_\_cv,\ \_\_mx,}
+\DoxyCodeLine{00185\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_\_to\_wait\_clock(\_\_atime)))}
+\DoxyCodeLine{00186\ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00187\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ We\ got\ a\ timeout\ when\ measured\ against\ \_\_clock\_t\ but}}
+\DoxyCodeLine{00188\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ we\ need\ to\ check\ against\ the\ caller-\/supplied\ clock}}
+\DoxyCodeLine{00189\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ to\ tell\ whether\ we\ should\ return\ a\ timeout.}}
+\DoxyCodeLine{00190\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\_Clock::now()\ <\ \_\_atime)}
+\DoxyCodeLine{00191\ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{00192\ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00193\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{00194\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00195\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00196\ \textcolor{preprocessor}{\#endif\ }\textcolor{comment}{//\ \_GLIBCXX\_HAS\_GTHREADS}}
+\DoxyCodeLine{00197\ }
+\DoxyCodeLine{00198\ \ \ \ \ \textcolor{keyword}{struct\ }\_\_timed\_waiter\_pool\ :\ \_\_waiter\_pool\_base}
+\DoxyCodeLine{00199\ \ \ \ \ \{}
+\DoxyCodeLine{00200\ \ \ \ \ \ \ \textcolor{comment}{//\ returns\ true\ if\ wait\ ended\ before\ timeout}}
+\DoxyCodeLine{00201\ \ \ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Clock,\ \textcolor{keyword}{typename}\ \_Dur>}
+\DoxyCodeLine{00202\ \ \ \ \ \textcolor{keywordtype}{bool}}
+\DoxyCodeLine{00203\ \ \ \ \ \_M\_do\_wait\_until(\_\_platform\_wait\_t*\ \_\_addr,\ \_\_platform\_wait\_t\ \_\_old,}
+\DoxyCodeLine{00204\ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ chrono::time\_point<\_Clock,\ \_Dur>\&\ \_\_atime)}
+\DoxyCodeLine{00205\ \ \ \ \ \{}
+\DoxyCodeLine{00206\ \textcolor{preprocessor}{\#ifdef\ \_GLIBCXX\_HAVE\_PLATFORM\_TIMED\_WAIT}}
+\DoxyCodeLine{00207\ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \_\_platform\_wait\_until(\_\_addr,\ \_\_old,\ \_\_atime);}
+\DoxyCodeLine{00208\ \textcolor{preprocessor}{\#else}}
+\DoxyCodeLine{00209\ \ \ \ \ \ \ \_\_platform\_wait\_t\ \mbox{\hyperlink{_classes_2lib_2include_2stdatomic_8h_a15181bfd16829c92971879064b9d8dbb}{\_\_val}};}
+\DoxyCodeLine{00210\ \ \ \ \ \ \ \_\_atomic\_load(\_\_addr,\ \&\mbox{\hyperlink{_classes_2lib_2include_2stdatomic_8h_a15181bfd16829c92971879064b9d8dbb}{\_\_val}},\ \_\_ATOMIC\_RELAXED);}
+\DoxyCodeLine{00211\ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{_classes_2lib_2include_2stdatomic_8h_a15181bfd16829c92971879064b9d8dbb}{\_\_val}}\ ==\ \_\_old)}
+\DoxyCodeLine{00212\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00213\ \ \ \ \ \ \ \ \ \ \ lock\_guard<mutex>\ \_\_l(\_M\_mtx);}
+\DoxyCodeLine{00214\ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \_\_cond\_wait\_until(\_M\_cv,\ \_M\_mtx,\ \_\_atime);}
+\DoxyCodeLine{00215\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00216\ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{00217\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{00218\ \textcolor{preprocessor}{\#endif\ }\textcolor{comment}{//\ \_GLIBCXX\_HAVE\_PLATFORM\_TIMED\_WAIT}}
+\DoxyCodeLine{00219\ \ \ \ \ \}}
+\DoxyCodeLine{00220\ \ \ \ \ \};}
+\DoxyCodeLine{00221\ }
+\DoxyCodeLine{00222\ \ \ \ \ \textcolor{keyword}{struct\ }\_\_timed\_backoff\_spin\_policy}
+\DoxyCodeLine{00223\ \ \ \ \ \{}
+\DoxyCodeLine{00224\ \ \ \ \ \ \ \_\_wait\_clock\_t::time\_point\ \_M\_deadline;}
+\DoxyCodeLine{00225\ \ \ \ \ \ \ \_\_wait\_clock\_t::time\_point\ \_M\_t0;}
+\DoxyCodeLine{00226\ }
+\DoxyCodeLine{00227\ \ \ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Clock,\ \textcolor{keyword}{typename}\ \_Dur>}
+\DoxyCodeLine{00228\ \ \ \ \ \_\_timed\_backoff\_spin\_policy(chrono::time\_point<\_Clock,\ \_Dur>}
+\DoxyCodeLine{00229\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_\_deadline\ =\ \_Clock::time\_point::max(),}
+\DoxyCodeLine{00230\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ chrono::time\_point<\_Clock,\ \_Dur>}
+\DoxyCodeLine{00231\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_\_t0\ =\ \_Clock::now())\ noexcept}
+\DoxyCodeLine{00232\ \ \ \ \ \ \ :\ \_M\_deadline(\_\_to\_wait\_clock(\_\_deadline))}
+\DoxyCodeLine{00233\ \ \ \ \ \ \ ,\ \_M\_t0(\_\_to\_wait\_clock(\_\_t0))}
+\DoxyCodeLine{00234\ \ \ \ \ \{\ \}}
+\DoxyCodeLine{00235\ }
+\DoxyCodeLine{00236\ \ \ \ \ \ \ \textcolor{keywordtype}{bool}}
+\DoxyCodeLine{00237\ \ \ \ \ \ \ operator()()\ const\ noexcept}
+\DoxyCodeLine{00238\ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00239\ \ \ \ \ \textcolor{keyword}{using\ namespace\ }literals::chrono\_literals;}
+\DoxyCodeLine{00240\ \ \ \ \ \textcolor{keyword}{auto}\ \_\_now\ =\ \_\_wait\_clock\_t::now();}
+\DoxyCodeLine{00241\ \ \ \ \ \textcolor{keywordflow}{if}\ (\_M\_deadline\ <=\ \_\_now)}
+\DoxyCodeLine{00242\ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{00243\ }
+\DoxyCodeLine{00244\ \ \ \ \ \textcolor{comment}{//\ FIXME:\ this\_thread::sleep\_for\ not\ available\ \#ifdef\ \_GLIBCXX\_NO\_SLEEP}}
+\DoxyCodeLine{00245\ }
+\DoxyCodeLine{00246\ \ \ \ \ \textcolor{keyword}{auto}\ \_\_elapsed\ =\ \_\_now\ -\/\ \_M\_t0;}
+\DoxyCodeLine{00247\ \ \ \ \ \textcolor{keywordflow}{if}\ (\_\_elapsed\ >\ 128ms)}
+\DoxyCodeLine{00248\ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00249\ \ \ \ \ \ \ \ \ this\_thread::sleep\_for(64ms);}
+\DoxyCodeLine{00250\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00251\ \ \ \ \ \textcolor{keywordflow}{else}\ \textcolor{keywordflow}{if}\ (\_\_elapsed\ >\ 64us)}
+\DoxyCodeLine{00252\ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00253\ \ \ \ \ \ \ \ \ this\_thread::sleep\_for(\_\_elapsed\ /\ 2);}
+\DoxyCodeLine{00254\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00255\ \ \ \ \ \textcolor{keywordflow}{else}\ \textcolor{keywordflow}{if}\ (\_\_elapsed\ >\ 4us)}
+\DoxyCodeLine{00256\ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00257\ \ \ \ \ \ \ \ \ \_\_thread\_yield();}
+\DoxyCodeLine{00258\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00259\ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{00260\ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{00261\ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{00262\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00263\ \ \ \ \ \};}
+\DoxyCodeLine{00264\ }
+\DoxyCodeLine{00265\ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_EntersWait>}
+\DoxyCodeLine{00266\ \ \ \ \ \ \ \textcolor{keyword}{struct\ }\_\_timed\_waiter\ :\ \_\_waiter\_base<\_\_timed\_waiter\_pool>}
+\DoxyCodeLine{00267\ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00268\ \ \ \ \ \textcolor{keyword}{using\ }\_\_base\_type\ =\ \_\_waiter\_base<\_\_timed\_waiter\_pool>;}
+\DoxyCodeLine{00269\ }
+\DoxyCodeLine{00270\ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Tp>}
+\DoxyCodeLine{00271\ \ \ \ \ \ \ \_\_timed\_waiter(\textcolor{keyword}{const}\ \_Tp*\ \_\_addr)\ noexcept}
+\DoxyCodeLine{00272\ \ \ \ \ \ \ :\ \_\_base\_type(\_\_addr)}
+\DoxyCodeLine{00273\ \ \ \ \ \{}
+\DoxyCodeLine{00274\ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keyword}{constexpr}\ (\_EntersWait::value)}
+\DoxyCodeLine{00275\ \ \ \ \ \ \ \ \ \_M\_w.\_M\_enter\_wait();}
+\DoxyCodeLine{00276\ \ \ \ \ \}}
+\DoxyCodeLine{00277\ }
+\DoxyCodeLine{00278\ \ \ \ \ \string~\_\_timed\_waiter()}
+\DoxyCodeLine{00279\ \ \ \ \ \{}
+\DoxyCodeLine{00280\ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keyword}{constexpr}\ (\_EntersWait::value)}
+\DoxyCodeLine{00281\ \ \ \ \ \ \ \ \ \_M\_w.\_M\_leave\_wait();}
+\DoxyCodeLine{00282\ \ \ \ \ \}}
+\DoxyCodeLine{00283\ }
+\DoxyCodeLine{00284\ \ \ \ \ \textcolor{comment}{//\ returns\ true\ if\ wait\ ended\ before\ timeout}}
+\DoxyCodeLine{00285\ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Tp,\ \textcolor{keyword}{typename}\ \_ValFn,}
+\DoxyCodeLine{00286\ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{typename}\ \_Clock,\ \textcolor{keyword}{typename}\ \_Dur>}
+\DoxyCodeLine{00287\ \ \ \ \ \ \ \textcolor{keywordtype}{bool}}
+\DoxyCodeLine{00288\ \ \ \ \ \ \ \_M\_do\_wait\_until\_v(\_Tp\ \_\_old,\ \_ValFn\ \_\_vfn,}
+\DoxyCodeLine{00289\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ chrono::time\_point<\_Clock,\ \_Dur>\&}
+\DoxyCodeLine{00290\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_\_atime)\ \textcolor{keyword}{noexcept}}
+\DoxyCodeLine{00291\ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00292\ \ \ \ \ \ \ \ \ \_\_platform\_wait\_t\ \mbox{\hyperlink{_classes_2lib_2include_2stdatomic_8h_a15181bfd16829c92971879064b9d8dbb}{\_\_val}};}
+\DoxyCodeLine{00293\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\_M\_do\_spin(\_\_old,\ \mbox{\hyperlink{namespacestd_ac7095819f6a8da64d69b1ee3029c52be}{std::move}}(\_\_vfn),\ \mbox{\hyperlink{_classes_2lib_2include_2stdatomic_8h_a15181bfd16829c92971879064b9d8dbb}{\_\_val}},}
+\DoxyCodeLine{00294\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_\_timed\_backoff\_spin\_policy(\_\_atime)))}
+\DoxyCodeLine{00295\ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{00296\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \_\_base\_type::\_M\_w.\_M\_do\_wait\_until(\_\_base\_type::\_M\_addr,\ \mbox{\hyperlink{_classes_2lib_2include_2stdatomic_8h_a15181bfd16829c92971879064b9d8dbb}{\_\_val}},\ \_\_atime);}
+\DoxyCodeLine{00297\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00298\ }
+\DoxyCodeLine{00299\ \ \ \ \ \textcolor{comment}{//\ returns\ true\ if\ wait\ ended\ before\ timeout}}
+\DoxyCodeLine{00300\ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Pred,}
+\DoxyCodeLine{00301\ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{typename}\ \_Clock,\ \textcolor{keyword}{typename}\ \_Dur>}
+\DoxyCodeLine{00302\ \ \ \ \ \ \ \textcolor{keywordtype}{bool}}
+\DoxyCodeLine{00303\ \ \ \ \ \ \ \_M\_do\_wait\_until(\_Pred\ \_\_pred,\ \_\_platform\_wait\_t\ \mbox{\hyperlink{_classes_2lib_2include_2stdatomic_8h_a15181bfd16829c92971879064b9d8dbb}{\_\_val}},}
+\DoxyCodeLine{00304\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ chrono::time\_point<\_Clock,\ \_Dur>\&}
+\DoxyCodeLine{00305\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_\_atime)\ \textcolor{keyword}{noexcept}}
+\DoxyCodeLine{00306\ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00307\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keyword}{auto}\ \_\_now\ =\ \_Clock::now();\ \_\_now\ <\ \_\_atime;}
+\DoxyCodeLine{00308\ \ \ \ \ \ \ \ \ \ \ \_\_now\ =\ \_Clock::now())}
+\DoxyCodeLine{00309\ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00310\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\_\_base\_type::\_M\_w.\_M\_do\_wait\_until(}
+\DoxyCodeLine{00311\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_\_base\_type::\_M\_addr,\ \mbox{\hyperlink{_classes_2lib_2include_2stdatomic_8h_a15181bfd16829c92971879064b9d8dbb}{\_\_val}},\ \_\_atime)}
+\DoxyCodeLine{00312\ \ \ \ \ \ \ \ \ \ \ \ \ \&\&\ \_\_pred())}
+\DoxyCodeLine{00313\ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{00314\ }
+\DoxyCodeLine{00315\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\_\_base\_type::\_M\_do\_spin(\_\_pred,\ \mbox{\hyperlink{_classes_2lib_2include_2stdatomic_8h_a15181bfd16829c92971879064b9d8dbb}{\_\_val}},}
+\DoxyCodeLine{00316\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_\_timed\_backoff\_spin\_policy(\_\_atime,\ \_\_now)))}
+\DoxyCodeLine{00317\ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{00318\ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00319\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{00320\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00321\ }
+\DoxyCodeLine{00322\ \ \ \ \ \textcolor{comment}{//\ returns\ true\ if\ wait\ ended\ before\ timeout}}
+\DoxyCodeLine{00323\ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Pred,}
+\DoxyCodeLine{00324\ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{typename}\ \_Clock,\ \textcolor{keyword}{typename}\ \_Dur>}
+\DoxyCodeLine{00325\ \ \ \ \ \ \ \textcolor{keywordtype}{bool}}
+\DoxyCodeLine{00326\ \ \ \ \ \ \ \_M\_do\_wait\_until(\_Pred\ \_\_pred,}
+\DoxyCodeLine{00327\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ chrono::time\_point<\_Clock,\ \_Dur>\&}
+\DoxyCodeLine{00328\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_\_atime)\ \textcolor{keyword}{noexcept}}
+\DoxyCodeLine{00329\ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00330\ \ \ \ \ \ \ \ \ \_\_platform\_wait\_t\ \mbox{\hyperlink{_classes_2lib_2include_2stdatomic_8h_a15181bfd16829c92971879064b9d8dbb}{\_\_val}};}
+\DoxyCodeLine{00331\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\_\_base\_type::\_M\_do\_spin(\_\_pred,\ \mbox{\hyperlink{_classes_2lib_2include_2stdatomic_8h_a15181bfd16829c92971879064b9d8dbb}{\_\_val}},}
+\DoxyCodeLine{00332\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_\_timed\_backoff\_spin\_policy(\_\_atime)))}
+\DoxyCodeLine{00333\ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{00334\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \_M\_do\_wait\_until(\_\_pred,\ \mbox{\hyperlink{_classes_2lib_2include_2stdatomic_8h_a15181bfd16829c92971879064b9d8dbb}{\_\_val}},\ \_\_atime);}
+\DoxyCodeLine{00335\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00336\ }
+\DoxyCodeLine{00337\ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Tp,\ \textcolor{keyword}{typename}\ \_ValFn,}
+\DoxyCodeLine{00338\ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{typename}\ \_Rep,\ \textcolor{keyword}{typename}\ \_Period>}
+\DoxyCodeLine{00339\ \ \ \ \ \ \ \textcolor{keywordtype}{bool}}
+\DoxyCodeLine{00340\ \ \ \ \ \ \ \_M\_do\_wait\_for\_v(\_Tp\ \_\_old,\ \_ValFn\ \_\_vfn,}
+\DoxyCodeLine{00341\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ chrono::duration<\_Rep,\ \_Period>\&}
+\DoxyCodeLine{00342\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_\_rtime)\ \textcolor{keyword}{noexcept}}
+\DoxyCodeLine{00343\ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00344\ \ \ \ \ \ \ \ \ \_\_platform\_wait\_t\ \mbox{\hyperlink{_classes_2lib_2include_2stdatomic_8h_a15181bfd16829c92971879064b9d8dbb}{\_\_val}};}
+\DoxyCodeLine{00345\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\_M\_do\_spin\_v(\_\_old,\ \mbox{\hyperlink{namespacestd_ac7095819f6a8da64d69b1ee3029c52be}{std::move}}(\_\_vfn),\ \mbox{\hyperlink{_classes_2lib_2include_2stdatomic_8h_a15181bfd16829c92971879064b9d8dbb}{\_\_val}}))}
+\DoxyCodeLine{00346\ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{00347\ }
+\DoxyCodeLine{00348\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (!\_\_rtime.count())}
+\DoxyCodeLine{00349\ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};\ \textcolor{comment}{//\ no\ rtime\ supplied,\ and\ spin\ did\ not\ acquire}}
+\DoxyCodeLine{00350\ }
+\DoxyCodeLine{00351\ \ \ \ \ \ \ \ \ \textcolor{keyword}{auto}\ \_\_reltime\ =\ chrono::ceil<\_\_wait\_clock\_t::duration>(\_\_rtime);}
+\DoxyCodeLine{00352\ }
+\DoxyCodeLine{00353\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \_\_base\_type::\_M\_w.\_M\_do\_wait\_until(}
+\DoxyCodeLine{00354\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_\_base\_type::\_M\_addr,}
+\DoxyCodeLine{00355\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{_classes_2lib_2include_2stdatomic_8h_a15181bfd16829c92971879064b9d8dbb}{\_\_val}},}
+\DoxyCodeLine{00356\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ chrono::steady\_clock::now()\ +\ \_\_reltime);}
+\DoxyCodeLine{00357\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00358\ }
+\DoxyCodeLine{00359\ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Pred,}
+\DoxyCodeLine{00360\ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{typename}\ \_Rep,\ \textcolor{keyword}{typename}\ \_Period>}
+\DoxyCodeLine{00361\ \ \ \ \ \ \ \textcolor{keywordtype}{bool}}
+\DoxyCodeLine{00362\ \ \ \ \ \ \ \_M\_do\_wait\_for(\_Pred\ \_\_pred,}
+\DoxyCodeLine{00363\ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ chrono::duration<\_Rep,\ \_Period>\&\ \_\_rtime)\ \textcolor{keyword}{noexcept}}
+\DoxyCodeLine{00364\ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00365\ \ \ \ \ \ \ \ \ \_\_platform\_wait\_t\ \mbox{\hyperlink{_classes_2lib_2include_2stdatomic_8h_a15181bfd16829c92971879064b9d8dbb}{\_\_val}};}
+\DoxyCodeLine{00366\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\_\_base\_type::\_M\_do\_spin(\_\_pred,\ \mbox{\hyperlink{_classes_2lib_2include_2stdatomic_8h_a15181bfd16829c92971879064b9d8dbb}{\_\_val}}))}
+\DoxyCodeLine{00367\ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{00368\ }
+\DoxyCodeLine{00369\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (!\_\_rtime.count())}
+\DoxyCodeLine{00370\ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};\ \textcolor{comment}{//\ no\ rtime\ supplied,\ and\ spin\ did\ not\ acquire}}
+\DoxyCodeLine{00371\ }
+\DoxyCodeLine{00372\ \ \ \ \ \ \ \ \ \textcolor{keyword}{auto}\ \_\_reltime\ =\ chrono::ceil<\_\_wait\_clock\_t::duration>(\_\_rtime);}
+\DoxyCodeLine{00373\ }
+\DoxyCodeLine{00374\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \_M\_do\_wait\_until(\_\_pred,\ \mbox{\hyperlink{_classes_2lib_2include_2stdatomic_8h_a15181bfd16829c92971879064b9d8dbb}{\_\_val}},}
+\DoxyCodeLine{00375\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ chrono::steady\_clock::now()\ +\ \_\_reltime);}
+\DoxyCodeLine{00376\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00377\ \ \ \ \ \ \ \};}
+\DoxyCodeLine{00378\ }
+\DoxyCodeLine{00379\ \ \ \ \ \textcolor{keyword}{using\ }\_\_enters\_timed\_wait\ =\ \_\_timed\_waiter<std::true\_type>;}
+\DoxyCodeLine{00380\ \ \ \ \ \textcolor{keyword}{using\ }\_\_bare\_timed\_wait\ =\ \_\_timed\_waiter<std::false\_type>;}
+\DoxyCodeLine{00381\ \ \ \}\ \textcolor{comment}{//\ namespace\ \_\_detail}}
+\DoxyCodeLine{00382\ }
+\DoxyCodeLine{00383\ \ \ \textcolor{comment}{//\ returns\ true\ if\ wait\ ended\ before\ timeout}}
+\DoxyCodeLine{00384\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Tp,\ \textcolor{keyword}{typename}\ \_ValFn,}
+\DoxyCodeLine{00385\ \ \ \ \ \ \ \ \textcolor{keyword}{typename}\ \_Clock,\ \textcolor{keyword}{typename}\ \_Dur>}
+\DoxyCodeLine{00386\ \ \ \ \ \textcolor{keywordtype}{bool}}
+\DoxyCodeLine{00387\ \ \ \ \ \_\_atomic\_wait\_address\_until\_v(\textcolor{keyword}{const}\ \_Tp*\ \_\_addr,\ \_Tp\&\&\ \_\_old,\ \_ValFn\&\&\ \_\_vfn,}
+\DoxyCodeLine{00388\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ chrono::time\_point<\_Clock,\ \_Dur>\&}
+\DoxyCodeLine{00389\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_\_atime)\ \textcolor{keyword}{noexcept}}
+\DoxyCodeLine{00390\ \ \ \ \ \{}
+\DoxyCodeLine{00391\ \ \ \ \ \ \ \_\_detail::\_\_enters\_timed\_wait\ \_\_w\{\_\_addr\};}
+\DoxyCodeLine{00392\ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \_\_w.\_M\_do\_wait\_until\_v(\_\_old,\ \_\_vfn,\ \_\_atime);}
+\DoxyCodeLine{00393\ \ \ \ \ \}}
+\DoxyCodeLine{00394\ }
+\DoxyCodeLine{00395\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Tp,\ \textcolor{keyword}{typename}\ \_Pred,}
+\DoxyCodeLine{00396\ \ \ \ \ \ \ \ \textcolor{keyword}{typename}\ \_Clock,\ \textcolor{keyword}{typename}\ \_Dur>}
+\DoxyCodeLine{00397\ \ \ \ \ \textcolor{keywordtype}{bool}}
+\DoxyCodeLine{00398\ \ \ \ \ \_\_atomic\_wait\_address\_until(\textcolor{keyword}{const}\ \_Tp*\ \_\_addr,\ \_Pred\ \_\_pred,}
+\DoxyCodeLine{00399\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ chrono::time\_point<\_Clock,\ \_Dur>\&}
+\DoxyCodeLine{00400\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_\_atime)\ \textcolor{keyword}{noexcept}}
+\DoxyCodeLine{00401\ \ \ \ \ \{}
+\DoxyCodeLine{00402\ \ \ \ \ \ \ \_\_detail::\_\_enters\_timed\_wait\ \_\_w\{\_\_addr\};}
+\DoxyCodeLine{00403\ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \_\_w.\_M\_do\_wait\_until(\_\_pred,\ \_\_atime);}
+\DoxyCodeLine{00404\ \ \ \ \ \}}
+\DoxyCodeLine{00405\ }
+\DoxyCodeLine{00406\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Pred,}
+\DoxyCodeLine{00407\ \ \ \ \ \ \ \ \textcolor{keyword}{typename}\ \_Clock,\ \textcolor{keyword}{typename}\ \_Dur>}
+\DoxyCodeLine{00408\ \ \ \ \ \textcolor{keywordtype}{bool}}
+\DoxyCodeLine{00409\ \ \ \ \ \_\_atomic\_wait\_address\_until\_bare(\textcolor{keyword}{const}\ \_\_detail::\_\_platform\_wait\_t*\ \_\_addr,}
+\DoxyCodeLine{00410\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_Pred\ \_\_pred,}
+\DoxyCodeLine{00411\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ chrono::time\_point<\_Clock,\ \_Dur>\&}
+\DoxyCodeLine{00412\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_\_atime)\ \textcolor{keyword}{noexcept}}
+\DoxyCodeLine{00413\ \ \ \ \ \{}
+\DoxyCodeLine{00414\ \ \ \ \ \ \ \_\_detail::\_\_bare\_timed\_wait\ \_\_w\{\_\_addr\};}
+\DoxyCodeLine{00415\ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \_\_w.\_M\_do\_wait\_until(\_\_pred,\ \_\_atime);}
+\DoxyCodeLine{00416\ \ \ \ \ \}}
+\DoxyCodeLine{00417\ }
+\DoxyCodeLine{00418\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Tp,\ \textcolor{keyword}{typename}\ \_ValFn,}
+\DoxyCodeLine{00419\ \ \ \ \ \ \ \ \textcolor{keyword}{typename}\ \_Rep,\ \textcolor{keyword}{typename}\ \_Period>}
+\DoxyCodeLine{00420\ \ \ \ \ \textcolor{keywordtype}{bool}}
+\DoxyCodeLine{00421\ \ \ \ \ \_\_atomic\_wait\_address\_for\_v(\textcolor{keyword}{const}\ \_Tp*\ \_\_addr,\ \_Tp\&\&\ \_\_old,\ \_ValFn\&\&\ \_\_vfn,}
+\DoxyCodeLine{00422\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ chrono::duration<\_Rep,\ \_Period>\&\ \_\_rtime)\ \textcolor{keyword}{noexcept}}
+\DoxyCodeLine{00423\ \ \ \ \ \{}
+\DoxyCodeLine{00424\ \ \ \ \ \ \ \_\_detail::\_\_enters\_timed\_wait\ \_\_w\{\_\_addr\};}
+\DoxyCodeLine{00425\ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \_\_w.\_M\_do\_wait\_for\_v(\_\_old,\ \_\_vfn,\ \_\_rtime);}
+\DoxyCodeLine{00426\ \ \ \ \ \}}
+\DoxyCodeLine{00427\ }
+\DoxyCodeLine{00428\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Tp,\ \textcolor{keyword}{typename}\ \_Pred,}
+\DoxyCodeLine{00429\ \ \ \ \ \ \ \ \textcolor{keyword}{typename}\ \_Rep,\ \textcolor{keyword}{typename}\ \_Period>}
+\DoxyCodeLine{00430\ \ \ \ \ \textcolor{keywordtype}{bool}}
+\DoxyCodeLine{00431\ \ \ \ \ \_\_atomic\_wait\_address\_for(\textcolor{keyword}{const}\ \_Tp*\ \_\_addr,\ \_Pred\ \_\_pred,}
+\DoxyCodeLine{00432\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ chrono::duration<\_Rep,\ \_Period>\&\ \_\_rtime)\ \textcolor{keyword}{noexcept}}
+\DoxyCodeLine{00433\ \ \ \ \ \{}
+\DoxyCodeLine{00434\ }
+\DoxyCodeLine{00435\ \ \ \ \ \ \ \_\_detail::\_\_enters\_timed\_wait\ \_\_w\{\_\_addr\};}
+\DoxyCodeLine{00436\ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \_\_w.\_M\_do\_wait\_for(\_\_pred,\ \_\_rtime);}
+\DoxyCodeLine{00437\ \ \ \ \ \}}
+\DoxyCodeLine{00438\ }
+\DoxyCodeLine{00439\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Pred,}
+\DoxyCodeLine{00440\ \ \ \ \ \ \ \ \textcolor{keyword}{typename}\ \_Rep,\ \textcolor{keyword}{typename}\ \_Period>}
+\DoxyCodeLine{00441\ \ \ \ \ \textcolor{keywordtype}{bool}}
+\DoxyCodeLine{00442\ \ \ \ \ \_\_atomic\_wait\_address\_for\_bare(\textcolor{keyword}{const}\ \_\_detail::\_\_platform\_wait\_t*\ \_\_addr,}
+\DoxyCodeLine{00443\ \ \ \ \ \ \ \ \ \ \ \ \ \_Pred\ \_\_pred,}
+\DoxyCodeLine{00444\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ chrono::duration<\_Rep,\ \_Period>\&\ \_\_rtime)\ \textcolor{keyword}{noexcept}}
+\DoxyCodeLine{00445\ \ \ \ \ \{}
+\DoxyCodeLine{00446\ \ \ \ \ \ \ \_\_detail::\_\_bare\_timed\_wait\ \_\_w\{\_\_addr\};}
+\DoxyCodeLine{00447\ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \_\_w.\_M\_do\_wait\_for(\_\_pred,\ \_\_rtime);}
+\DoxyCodeLine{00448\ \ \ \ \ \}}
+\DoxyCodeLine{00449\ \_GLIBCXX\_END\_NAMESPACE\_VERSION}
+\DoxyCodeLine{00450\ \}\ \textcolor{comment}{//\ namespace\ std}}
+\DoxyCodeLine{00451\ \textcolor{preprocessor}{\#endif\ }\textcolor{comment}{//\ \_\_cpp\_lib\_atomic\_wait}}
+\DoxyCodeLine{00452\ \textcolor{preprocessor}{\#endif\ }\textcolor{comment}{//\ \_GLIBCXX\_ATOMIC\_TIMED\_WAIT\_H}}
+
+\end{DoxyCode}

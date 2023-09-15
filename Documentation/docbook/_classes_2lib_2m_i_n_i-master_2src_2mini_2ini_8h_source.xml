@@ -1,0 +1,789 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<section xmlns="http://docbook.org/ns/docbook" version="5.0" xmlns:xlink="http://www.w3.org/1999/xlink" xml:id="__classes_2lib_2m_i_n_i-master_2src_2mini_2ini_8h_source" xml:lang="en-US">
+<title>ini.h</title>
+<indexterm><primary>C:/Users/HP/Documents/GitHub/Minero-Game/Classes/lib/mINI-master/src/mini/ini.h</primary></indexterm>
+Go to the documentation of this file.<programlisting linenumbering="unnumbered">1 <emphasis role="comment">/*</emphasis>
+2 <emphasis role="comment">&#32;*&#32;The&#32;MIT&#32;License&#32;(MIT)</emphasis>
+3 <emphasis role="comment">&#32;*&#32;Copyright&#32;(c)&#32;2018&#32;Danijel&#32;Durakovic</emphasis>
+4 <emphasis role="comment">&#32;*</emphasis>
+5 <emphasis role="comment">&#32;*&#32;Permission&#32;is&#32;hereby&#32;granted,&#32;free&#32;of&#32;charge,&#32;to&#32;any&#32;person&#32;obtaining&#32;a&#32;copy&#32;of</emphasis>
+6 <emphasis role="comment">&#32;*&#32;this&#32;software&#32;and&#32;associated&#32;documentation&#32;files&#32;(the&#32;&quot;Software&quot;),&#32;to&#32;deal&#32;in</emphasis>
+7 <emphasis role="comment">&#32;*&#32;the&#32;Software&#32;without&#32;restriction,&#32;including&#32;without&#32;limitation&#32;the&#32;rights&#32;to</emphasis>
+8 <emphasis role="comment">&#32;*&#32;use,&#32;copy,&#32;modify,&#32;merge,&#32;publish,&#32;distribute,&#32;sublicense,&#32;and/or&#32;sell&#32;copies</emphasis>
+9 <emphasis role="comment">&#32;*&#32;of&#32;the&#32;Software,&#32;and&#32;to&#32;permit&#32;persons&#32;to&#32;whom&#32;the&#32;Software&#32;is&#32;furnished&#32;to&#32;do</emphasis>
+10 <emphasis role="comment">&#32;*&#32;so,&#32;subject&#32;to&#32;the&#32;following&#32;conditions:</emphasis>
+11 <emphasis role="comment">&#32;*</emphasis>
+12 <emphasis role="comment">&#32;*&#32;The&#32;above&#32;copyright&#32;notice&#32;and&#32;this&#32;permission&#32;notice&#32;shall&#32;be&#32;included&#32;in&#32;all</emphasis>
+13 <emphasis role="comment">&#32;*&#32;copies&#32;or&#32;substantial&#32;portions&#32;of&#32;the&#32;Software.</emphasis>
+14 <emphasis role="comment">&#32;*</emphasis>
+15 <emphasis role="comment">&#32;*&#32;THE&#32;SOFTWARE&#32;IS&#32;PROVIDED&#32;&quot;AS&#32;IS&quot;,&#32;WITHOUT&#32;WARRANTY&#32;OF&#32;ANY&#32;KIND,&#32;EXPRESS&#32;OR</emphasis>
+16 <emphasis role="comment">&#32;*&#32;IMPLIED,&#32;INCLUDING&#32;BUT&#32;NOT&#32;LIMITED&#32;TO&#32;THE&#32;WARRANTIES&#32;OF&#32;MERCHANTABILITY,&#32;FITNESS</emphasis>
+17 <emphasis role="comment">&#32;*&#32;FOR&#32;A&#32;PARTICULAR&#32;PURPOSE&#32;AND&#32;NONINFRINGEMENT.&#32;IN&#32;NO&#32;EVENT&#32;SHALL&#32;THE&#32;AUTHORS&#32;OR</emphasis>
+18 <emphasis role="comment">&#32;*&#32;COPYRIGHT&#32;HOLDERS&#32;BE&#32;LIABLE&#32;FOR&#32;ANY&#32;CLAIM,&#32;DAMAGES&#32;OR&#32;OTHER&#32;LIABILITY,&#32;WHETHER</emphasis>
+19 <emphasis role="comment">&#32;*&#32;IN&#32;AN&#32;ACTION&#32;OF&#32;CONTRACT,&#32;TORT&#32;OR&#32;OTHERWISE,&#32;ARISING&#32;FROM,&#32;OUT&#32;OF&#32;OR&#32;IN</emphasis>
+20 <emphasis role="comment">&#32;*&#32;CONNECTION&#32;WITH&#32;THE&#32;SOFTWARE&#32;OR&#32;THE&#32;USE&#32;OR&#32;OTHER&#32;DEALINGS&#32;IN&#32;THE&#32;SOFTWARE.</emphasis>
+21 <emphasis role="comment">&#32;*</emphasis>
+22 <emphasis role="comment">&#32;*/</emphasis>
+23 
+25 <emphasis role="comment">//</emphasis>
+26 <emphasis role="comment">//&#32;&#32;/mINI/&#32;v0.9.14</emphasis>
+27 <emphasis role="comment">//&#32;&#32;An&#32;INI&#32;file&#32;reader&#32;and&#32;writer&#32;for&#32;the&#32;modern&#32;age.</emphasis>
+28 <emphasis role="comment">//</emphasis>
+30 <emphasis role="comment">//</emphasis>
+31 <emphasis role="comment">//&#32;&#32;A&#32;tiny&#32;utility&#32;library&#32;for&#32;manipulating&#32;INI&#32;files&#32;with&#32;a&#32;straightforward</emphasis>
+32 <emphasis role="comment">//&#32;&#32;API&#32;and&#32;a&#32;minimal&#32;footprint.&#32;It&#32;conforms&#32;to&#32;the&#32;(somewhat)&#32;standard&#32;INI</emphasis>
+33 <emphasis role="comment">//&#32;&#32;format&#32;-&#32;sections&#32;and&#32;keys&#32;are&#32;case&#32;insensitive&#32;and&#32;all&#32;leading&#32;and</emphasis>
+34 <emphasis role="comment">//&#32;&#32;trailing&#32;whitespace&#32;is&#32;ignored.&#32;Comments&#32;are&#32;lines&#32;that&#32;begin&#32;with&#32;a</emphasis>
+35 <emphasis role="comment">//&#32;&#32;semicolon.&#32;Trailing&#32;comments&#32;are&#32;allowed&#32;on&#32;section&#32;lines.</emphasis>
+36 <emphasis role="comment">//</emphasis>
+37 <emphasis role="comment">//&#32;&#32;Files&#32;are&#32;read&#32;on&#32;demand,&#32;upon&#32;which&#32;data&#32;is&#32;kept&#32;in&#32;memory&#32;and&#32;the&#32;file</emphasis>
+38 <emphasis role="comment">//&#32;&#32;is&#32;closed.&#32;This&#32;utility&#32;supports&#32;lazy&#32;writing,&#32;which&#32;only&#32;writes&#32;changes</emphasis>
+39 <emphasis role="comment">//&#32;&#32;and&#32;updates&#32;to&#32;a&#32;file&#32;and&#32;preserves&#32;custom&#32;formatting&#32;and&#32;comments.&#32;A&#32;lazy</emphasis>
+40 <emphasis role="comment">//&#32;&#32;write&#32;invoked&#32;by&#32;a&#32;write()&#32;call&#32;will&#32;read&#32;the&#32;output&#32;file,&#32;find&#32;what</emphasis>
+41 <emphasis role="comment">//&#32;&#32;changes&#32;have&#32;been&#32;made&#32;and&#32;update&#32;the&#32;file&#32;accordingly.&#32;If&#32;you&#32;only&#32;need&#32;to</emphasis>
+42 <emphasis role="comment">//&#32;&#32;generate&#32;files,&#32;use&#32;generate()&#32;instead.&#32;Section&#32;and&#32;key&#32;order&#32;is&#32;preserved</emphasis>
+43 <emphasis role="comment">//&#32;&#32;on&#32;read,&#32;write&#32;and&#32;insert.</emphasis>
+44 <emphasis role="comment">//</emphasis>
+46 <emphasis role="comment">//</emphasis>
+47 <emphasis role="comment">//&#32;&#32;/*&#32;BASIC&#32;USAGE&#32;EXAMPLE:&#32;*/</emphasis>
+48 <emphasis role="comment">//</emphasis>
+49 <emphasis role="comment">//&#32;&#32;/*&#32;read&#32;from&#32;file&#32;*/</emphasis>
+50 <emphasis role="comment">//&#32;&#32;mINI::INIFile&#32;file(&quot;myfile.ini&quot;);</emphasis>
+51 <emphasis role="comment">//&#32;&#32;mINI::INIStructure&#32;ini;</emphasis>
+52 <emphasis role="comment">//&#32;&#32;file.read(ini);</emphasis>
+53 <emphasis role="comment">//</emphasis>
+54 <emphasis role="comment">//&#32;&#32;/*&#32;read&#32;value;&#32;gets&#32;a&#32;reference&#32;to&#32;actual&#32;value&#32;in&#32;the&#32;structure.</emphasis>
+55 <emphasis role="comment">//&#32;&#32;&#32;&#32;&#32;if&#32;key&#32;or&#32;section&#32;don&apos;t&#32;exist,&#32;a&#32;new&#32;empty&#32;value&#32;will&#32;be&#32;created&#32;*/</emphasis>
+56 <emphasis role="comment">//&#32;&#32;std::string&amp;&#32;value&#32;=&#32;ini[&quot;section&quot;][&quot;key&quot;];</emphasis>
+57 <emphasis role="comment">//</emphasis>
+58 <emphasis role="comment">//&#32;&#32;/*&#32;read&#32;value&#32;safely;&#32;gets&#32;a&#32;copy&#32;of&#32;value&#32;in&#32;the&#32;structure.</emphasis>
+59 <emphasis role="comment">//&#32;&#32;&#32;&#32;&#32;does&#32;not&#32;alter&#32;the&#32;structure&#32;*/</emphasis>
+60 <emphasis role="comment">//&#32;&#32;std::string&#32;value&#32;=&#32;ini.get(&quot;section&quot;).get(&quot;key&quot;);</emphasis>
+61 <emphasis role="comment">//</emphasis>
+62 <emphasis role="comment">//&#32;&#32;/*&#32;set&#32;or&#32;update&#32;values&#32;*/</emphasis>
+63 <emphasis role="comment">//&#32;&#32;ini[&quot;section&quot;][&quot;key&quot;]&#32;=&#32;&quot;value&quot;;</emphasis>
+64 <emphasis role="comment">//</emphasis>
+65 <emphasis role="comment">//&#32;&#32;/*&#32;set&#32;multiple&#32;values&#32;*/</emphasis>
+66 <emphasis role="comment">//&#32;&#32;ini[&quot;section2&quot;].set({</emphasis>
+67 <emphasis role="comment">//&#32;&#32;&#32;&#32;&#32;&#32;{&quot;key1&quot;,&#32;&quot;value1&quot;},</emphasis>
+68 <emphasis role="comment">//&#32;&#32;&#32;&#32;&#32;&#32;{&quot;key2&quot;,&#32;&quot;value2&quot;}</emphasis>
+69 <emphasis role="comment">//&#32;&#32;});</emphasis>
+70 <emphasis role="comment">//</emphasis>
+71 <emphasis role="comment">//&#32;&#32;/*&#32;write&#32;updates&#32;back&#32;to&#32;file,&#32;preserving&#32;comments&#32;and&#32;formatting&#32;*/</emphasis>
+72 <emphasis role="comment">//&#32;&#32;file.write(ini);</emphasis>
+73 <emphasis role="comment">//</emphasis>
+74 <emphasis role="comment">//&#32;&#32;/*&#32;or&#32;generate&#32;a&#32;file&#32;(overwrites&#32;the&#32;original)&#32;*/</emphasis>
+75 <emphasis role="comment">//&#32;&#32;file.generate(ini);</emphasis>
+76 <emphasis role="comment">//</emphasis>
+78 <emphasis role="comment">//</emphasis>
+79 <emphasis role="comment">//&#32;&#32;Long&#32;live&#32;the&#32;INI&#32;file!!!</emphasis>
+80 <emphasis role="comment">//</emphasis>
+82 
+83 <emphasis role="preprocessor">#ifndef&#32;MINI_INI_H_</emphasis>
+84 <emphasis role="preprocessor">#define&#32;MINI_INI_H_</emphasis>
+85 
+86 <emphasis role="preprocessor">#include&#32;&lt;string&gt;</emphasis>
+87 <emphasis role="preprocessor">#include&#32;&lt;sstream&gt;</emphasis>
+88 <emphasis role="preprocessor">#include&#32;&lt;algorithm&gt;</emphasis>
+89 <emphasis role="preprocessor">#include&#32;&lt;utility&gt;</emphasis>
+90 <emphasis role="preprocessor">#include&#32;&lt;unordered_map&gt;</emphasis>
+91 <emphasis role="preprocessor">#include&#32;&lt;vector&gt;</emphasis>
+92 <emphasis role="preprocessor">#include&#32;&lt;memory&gt;</emphasis>
+93 <emphasis role="preprocessor">#include&#32;&lt;fstream&gt;</emphasis>
+94 <emphasis role="preprocessor">#include&#32;&lt;sys/stat.h&gt;</emphasis>
+95 <emphasis role="preprocessor">#include&#32;&lt;cctype&gt;</emphasis>
+96 
+97 <emphasis role="keyword">namespace&#32;</emphasis><link linkend="_namespacem_i_n_i">mINI</link>
+98 {
+99 &#32;&#32;&#32;&#32;<emphasis role="keyword">namespace&#32;</emphasis>INIStringUtil
+100 &#32;&#32;&#32;&#32;{
+101 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>*&#32;<emphasis role="keyword">const</emphasis>&#32;<link linkend="_namespacem_i_n_i_1_1_i_n_i_string_util_1a17b56072f0dee9da8bacd6a347bee5cd">whitespaceDelimiters</link>&#32;=&#32;<emphasis role="stringliteral">&quot;&#32;\t\n\r\f\v&quot;</emphasis>;
+102 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>&#32;<link linkend="_namespacem_i_n_i_1_1_i_n_i_string_util_1adcbaf06b60e9bed7a2f8d48f45c1a615">trim</link>(std::string&amp;&#32;str)
+103 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+104 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;str.erase(str.find_last_not_of(<link linkend="_namespacem_i_n_i_1_1_i_n_i_string_util_1a17b56072f0dee9da8bacd6a347bee5cd">whitespaceDelimiters</link>)&#32;+&#32;1);
+105 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;str.erase(0,&#32;str.find_first_not_of(<link linkend="_namespacem_i_n_i_1_1_i_n_i_string_util_1a17b56072f0dee9da8bacd6a347bee5cd">whitespaceDelimiters</link>));
+106 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+107 <emphasis role="preprocessor">#ifndef&#32;MINI_CASE_SENSITIVE</emphasis>
+108 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>&#32;<link linkend="_namespacem_i_n_i_1_1_i_n_i_string_util_1aab66a8d081db7826eeea906cfd567281">toLower</link>(std::string&amp;&#32;str)
+109 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+110 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_namespacestd_1a83797c5677d80005911de218c819adab">std::transform</link>(str.begin(),&#32;str.end(),&#32;str.begin(),&#32;[](<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>&#32;c)&#32;{
+111 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;return&#32;static_cast&lt;char&gt;(std::tolower(c));
+112 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;});
+113 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+114 <emphasis role="preprocessor">#endif</emphasis>
+115 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>&#32;<link linkend="_namespacem_i_n_i_1_1_i_n_i_string_util_1a7e002cc156d2377c091de83634e9063f">replace</link>(std::string&amp;&#32;str,&#32;std::string&#32;<emphasis role="keyword">const</emphasis>&amp;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1ac8729153468b5dcf13f971b21d84d4e5">a</link>,&#32;std::string&#32;<emphasis role="keyword">const</emphasis>&amp;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a6eba317e3cf44d6d26c04a5a8f197dcb">b</link>)
+116 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+117 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(!<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1ac8729153468b5dcf13f971b21d84d4e5">a</link>.empty())
+118 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+119 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;std::size_t&#32;pos&#32;=&#32;0;
+120 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">while</emphasis>&#32;((pos&#32;=&#32;str.find(<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1ac8729153468b5dcf13f971b21d84d4e5">a</link>,&#32;pos))&#32;!=&#32;std::string::npos)
+121 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+122 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;str.replace(pos,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1ac8729153468b5dcf13f971b21d84d4e5">a</link>.size(),&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a6eba317e3cf44d6d26c04a5a8f197dcb">b</link>);
+123 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;pos&#32;+=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a6eba317e3cf44d6d26c04a5a8f197dcb">b</link>.size();
+124 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+125 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+126 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+127 <emphasis role="preprocessor">#ifdef&#32;_WIN32</emphasis>
+128 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>*&#32;<emphasis role="keyword">const</emphasis>&#32;<link linkend="_namespacem_i_n_i_1_1_i_n_i_string_util_1aa858bebf97541c7693112af6eb7ef5b4">endl</link>&#32;=&#32;<emphasis role="stringliteral">&quot;\r\n&quot;</emphasis>;
+129 <emphasis role="preprocessor">#else</emphasis>
+130 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>*&#32;<emphasis role="keyword">const</emphasis>&#32;<link linkend="_namespacem_i_n_i_1_1_i_n_i_string_util_1aa858bebf97541c7693112af6eb7ef5b4">endl</link>&#32;=&#32;<emphasis role="stringliteral">&quot;\n&quot;</emphasis>;
+131 <emphasis role="preprocessor">#endif</emphasis>
+132 &#32;&#32;&#32;&#32;}
+133 
+134 &#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;T&gt;
+135 &#32;&#32;&#32;&#32;<emphasis role="keyword">class&#32;</emphasis><link linkend="_classm_i_n_i_1_1_i_n_i_map">INIMap</link>
+136 &#32;&#32;&#32;&#32;{
+137 &#32;&#32;&#32;&#32;<emphasis role="keyword">private</emphasis>:
+138 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">using&#32;</emphasis>T_DataIndexMap&#32;=&#32;std::unordered_map&lt;std::string,&#32;std::size_t&gt;;
+139 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">using&#32;</emphasis>T_DataItem&#32;=&#32;std::pair&lt;std::string,&#32;T&gt;;
+140 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">using&#32;</emphasis>T_DataContainer&#32;=&#32;std::vector&lt;T_DataItem&gt;;
+141 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">using&#32;</emphasis>T_MultiArgs&#32;=&#32;<emphasis role="keyword">typename</emphasis>&#32;std::vector&lt;std::pair&lt;std::string,&#32;T&gt;&gt;;
+142 
+143 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;T_DataIndexMap&#32;dataIndexMap;
+144 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;T_DataContainer&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a89ce72163394e6aef63b551a8806e93f">data</link>;
+145 
+146 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;std::size_t&#32;setEmpty(std::string&amp;&#32;key)
+147 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+148 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;std::size_t&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a57f14e05b1900f16a2da82ade47d0c6d">index</link>&#32;=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a89ce72163394e6aef63b551a8806e93f">data</link>.<link linkend="_classm_i_n_i_1_1_i_n_i_map_1afbfa4c9a30218b05aff20032f74fefca">size</link>();
+149 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;dataIndexMap[key]&#32;=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a57f14e05b1900f16a2da82ade47d0c6d">index</link>;
+150 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a89ce72163394e6aef63b551a8806e93f">data</link>.emplace_back(key,&#32;T());
+151 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a57f14e05b1900f16a2da82ade47d0c6d">index</link>;
+152 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+153 
+154 &#32;&#32;&#32;&#32;<emphasis role="keyword">public</emphasis>:
+155 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">using&#32;</emphasis><link linkend="_classm_i_n_i_1_1_i_n_i_map_1a038bd69fd4b5014d167b6221ef964cc6">const_iterator</link>&#32;=&#32;<emphasis role="keyword">typename</emphasis>&#32;T_DataContainer::const_iterator;
+156 
+157 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_classm_i_n_i_1_1_i_n_i_map_1ab652b40f2b9fa7c7289d9755525fcaeb">INIMap</link>()&#32;{&#32;}
+158 
+159 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_classm_i_n_i_1_1_i_n_i_map_1af13fda075f8603eaf72715991d02a744">INIMap</link>(<link linkend="_classm_i_n_i_1_1_i_n_i_map">INIMap</link>&#32;<emphasis role="keyword">const</emphasis>&amp;&#32;other)
+160 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+161 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;std::size_t&#32;data_size&#32;=&#32;other.data.size();
+162 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(std::size_t&#32;i&#32;=&#32;0;&#32;i&#32;&lt;&#32;data_size;&#32;++i)
+163 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+164 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">auto</emphasis>&#32;<emphasis role="keyword">const</emphasis>&amp;&#32;key&#32;=&#32;other.data[i].first;
+165 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">auto</emphasis>&#32;<emphasis role="keyword">const</emphasis>&amp;&#32;obj&#32;=&#32;other.data[i].second;
+166 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a89ce72163394e6aef63b551a8806e93f">data</link>.emplace_back(key,&#32;obj);
+167 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+168 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;dataIndexMap&#32;=&#32;T_DataIndexMap(other.dataIndexMap);
+169 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+170 
+171 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;T&amp;&#32;<link linkend="_classm_i_n_i_1_1_i_n_i_map_1abc5f37ef14321ad4b227646b29255139">operator[]</link>(std::string&#32;key)
+172 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+173 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_namespacem_i_n_i_1_1_i_n_i_string_util_1adcbaf06b60e9bed7a2f8d48f45c1a615">INIStringUtil::trim</link>(key);
+174 <emphasis role="preprocessor">#ifndef&#32;MINI_CASE_SENSITIVE</emphasis>
+175 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_namespacem_i_n_i_1_1_i_n_i_string_util_1aab66a8d081db7826eeea906cfd567281">INIStringUtil::toLower</link>(key);
+176 <emphasis role="preprocessor">#endif</emphasis>
+177 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">auto</emphasis>&#32;it&#32;=&#32;dataIndexMap.find(key);
+178 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">bool</emphasis>&#32;hasIt&#32;=&#32;(it&#32;!=&#32;dataIndexMap.end());
+179 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;std::size_t&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a57f14e05b1900f16a2da82ade47d0c6d">index</link>&#32;=&#32;(hasIt)&#32;?&#32;it-&gt;second&#32;:&#32;setEmpty(key);
+180 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a89ce72163394e6aef63b551a8806e93f">data</link>[<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a57f14e05b1900f16a2da82ade47d0c6d">index</link>].second;
+181 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+182 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;T&#32;<link linkend="_classm_i_n_i_1_1_i_n_i_map_1a03713f77edbfee3e32fc2da9d57c7911">get</link>(std::string&#32;key)<emphasis role="keyword">&#32;const</emphasis>
+183 <emphasis role="keyword">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;</emphasis>{
+184 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_namespacem_i_n_i_1_1_i_n_i_string_util_1adcbaf06b60e9bed7a2f8d48f45c1a615">INIStringUtil::trim</link>(key);
+185 <emphasis role="preprocessor">#ifndef&#32;MINI_CASE_SENSITIVE</emphasis>
+186 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_namespacem_i_n_i_1_1_i_n_i_string_util_1aab66a8d081db7826eeea906cfd567281">INIStringUtil::toLower</link>(key);
+187 <emphasis role="preprocessor">#endif</emphasis>
+188 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">auto</emphasis>&#32;it&#32;=&#32;dataIndexMap.find(key);
+189 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(it&#32;==&#32;dataIndexMap.end())
+190 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+191 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;T();
+192 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+193 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;T(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a89ce72163394e6aef63b551a8806e93f">data</link>[it-&gt;second].second);
+194 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+195 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">bool</emphasis>&#32;<link linkend="_classm_i_n_i_1_1_i_n_i_map_1a9403e3ff093497a548eee31d16136c4a">has</link>(std::string&#32;key)<emphasis role="keyword">&#32;const</emphasis>
+196 <emphasis role="keyword">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;</emphasis>{
+197 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_namespacem_i_n_i_1_1_i_n_i_string_util_1adcbaf06b60e9bed7a2f8d48f45c1a615">INIStringUtil::trim</link>(key);
+198 <emphasis role="preprocessor">#ifndef&#32;MINI_CASE_SENSITIVE</emphasis>
+199 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_namespacem_i_n_i_1_1_i_n_i_string_util_1aab66a8d081db7826eeea906cfd567281">INIStringUtil::toLower</link>(key);
+200 <emphasis role="preprocessor">#endif</emphasis>
+201 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;(dataIndexMap.count(key)&#32;==&#32;1);
+202 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+203 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>&#32;<link linkend="_classm_i_n_i_1_1_i_n_i_map_1ac6a42d8dc2610b55b7e7849d2008954f">set</link>(std::string&#32;key,&#32;T&#32;obj)
+204 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+205 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_namespacem_i_n_i_1_1_i_n_i_string_util_1adcbaf06b60e9bed7a2f8d48f45c1a615">INIStringUtil::trim</link>(key);
+206 <emphasis role="preprocessor">#ifndef&#32;MINI_CASE_SENSITIVE</emphasis>
+207 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_namespacem_i_n_i_1_1_i_n_i_string_util_1aab66a8d081db7826eeea906cfd567281">INIStringUtil::toLower</link>(key);
+208 <emphasis role="preprocessor">#endif</emphasis>
+209 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">auto</emphasis>&#32;it&#32;=&#32;dataIndexMap.find(key);
+210 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(it&#32;!=&#32;dataIndexMap.end())
+211 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+212 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a89ce72163394e6aef63b551a8806e93f">data</link>[it-&gt;second].second&#32;=&#32;obj;
+213 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+214 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>
+215 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+216 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;dataIndexMap[key]&#32;=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a89ce72163394e6aef63b551a8806e93f">data</link>.size();
+217 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a89ce72163394e6aef63b551a8806e93f">data</link>.emplace_back(key,&#32;obj);
+218 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+219 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+220 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>&#32;<link linkend="_classm_i_n_i_1_1_i_n_i_map_1a06fc697987cf1990b6cb5e78b4afafb5">set</link>(T_MultiArgs&#32;<emphasis role="keyword">const</emphasis>&amp;&#32;multiArgs)
+221 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+222 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(<emphasis role="keyword">auto</emphasis>&#32;<emphasis role="keyword">const</emphasis>&amp;&#32;it&#32;:&#32;multiArgs)
+223 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+224 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">auto</emphasis>&#32;<emphasis role="keyword">const</emphasis>&amp;&#32;key&#32;=&#32;it.first;
+225 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">auto</emphasis>&#32;<emphasis role="keyword">const</emphasis>&amp;&#32;obj&#32;=&#32;it.second;
+226 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1aeff0e04220766bdd67e3a38ffa302e1c">set</link>(key,&#32;obj);
+227 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+228 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+229 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">bool</emphasis>&#32;<link linkend="_classm_i_n_i_1_1_i_n_i_map_1ab71316b8d144eaa86bf263e7bcae201f">remove</link>(std::string&#32;key)
+230 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+231 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_namespacem_i_n_i_1_1_i_n_i_string_util_1adcbaf06b60e9bed7a2f8d48f45c1a615">INIStringUtil::trim</link>(key);
+232 <emphasis role="preprocessor">#ifndef&#32;MINI_CASE_SENSITIVE</emphasis>
+233 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_namespacem_i_n_i_1_1_i_n_i_string_util_1aab66a8d081db7826eeea906cfd567281">INIStringUtil::toLower</link>(key);
+234 <emphasis role="preprocessor">#endif</emphasis>
+235 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">auto</emphasis>&#32;it&#32;=&#32;dataIndexMap.find(key);
+236 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(it&#32;!=&#32;dataIndexMap.end())
+237 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+238 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;std::size_t&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a57f14e05b1900f16a2da82ade47d0c6d">index</link>&#32;=&#32;it-&gt;second;
+239 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a89ce72163394e6aef63b551a8806e93f">data</link>.erase(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a89ce72163394e6aef63b551a8806e93f">data</link>.begin()&#32;+&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a57f14e05b1900f16a2da82ade47d0c6d">index</link>);
+240 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;dataIndexMap.erase(it);
+241 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(<emphasis role="keyword">auto</emphasis>&amp;&#32;it2&#32;:&#32;dataIndexMap)
+242 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+243 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">auto</emphasis>&amp;&#32;vi&#32;=&#32;it2.second;
+244 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(vi&#32;&gt;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a57f14e05b1900f16a2da82ade47d0c6d">index</link>)
+245 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+246 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;vi--;
+247 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+248 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+249 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<emphasis role="keyword">true</emphasis>;
+250 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+251 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<emphasis role="keyword">false</emphasis>;
+252 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+253 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>&#32;<link linkend="_classm_i_n_i_1_1_i_n_i_map_1af0b1251e710882fbdb5bced08a4fe341">clear</link>()
+254 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+255 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a89ce72163394e6aef63b551a8806e93f">data</link>.clear();
+256 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;dataIndexMap.clear();
+257 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+258 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;std::size_t&#32;<link linkend="_classm_i_n_i_1_1_i_n_i_map_1afbfa4c9a30218b05aff20032f74fefca">size</link>()<emphasis role="keyword">&#32;const</emphasis>
+259 <emphasis role="keyword">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;</emphasis>{
+260 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a89ce72163394e6aef63b551a8806e93f">data</link>.size();
+261 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+262 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_classm_i_n_i_1_1_i_n_i_map_1a038bd69fd4b5014d167b6221ef964cc6">const_iterator</link>&#32;<link linkend="_classm_i_n_i_1_1_i_n_i_map_1a558596a7a8fd4b523ba33f9a40d7ebc9">begin</link>()<emphasis role="keyword">&#32;const&#32;</emphasis>{&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a89ce72163394e6aef63b551a8806e93f">data</link>.begin();&#32;}
+263 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_classm_i_n_i_1_1_i_n_i_map_1a038bd69fd4b5014d167b6221ef964cc6">const_iterator</link>&#32;<link linkend="_classm_i_n_i_1_1_i_n_i_map_1a1ed4163625857f0dd513368ef54869d5">end</link>()<emphasis role="keyword">&#32;const&#32;</emphasis>{&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a89ce72163394e6aef63b551a8806e93f">data</link>.end();&#32;}
+264 &#32;&#32;&#32;&#32;};
+265 
+266 &#32;&#32;&#32;&#32;<emphasis role="keyword">using&#32;</emphasis><link linkend="_classm_i_n_i_1_1_i_n_i_map">INIStructure</link>&#32;=&#32;<link linkend="_classm_i_n_i_1_1_i_n_i_map">INIMap&lt;INIMap&lt;std::string&gt;</link>&gt;;
+267 
+268 &#32;&#32;&#32;&#32;<emphasis role="keyword">namespace&#32;</emphasis>INIParser
+269 &#32;&#32;&#32;&#32;{
+270 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">using&#32;</emphasis><link linkend="_namespacem_i_n_i_1_1_i_n_i_parser_1ac637b67ba48ff411c11764c84a468acd">T_ParseValues</link>&#32;=&#32;std::pair&lt;std::string,&#32;std::string&gt;;
+271 
+272 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">enum&#32;class</emphasis>&#32;<link linkend="_namespacem_i_n_i_1_1_i_n_i_parser_1a933476e35f3fe30f8739e9326eccba60">PDataType</link>&#32;:&#32;<emphasis role="keywordtype">char</emphasis>
+273 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+274 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_namespacem_i_n_i_1_1_i_n_i_parser_1a933476e35f3fe30f8739e9326eccba60ae9a2376147f4752a74a9967fcc8c633e">PDATA_NONE</link>,
+275 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_namespacem_i_n_i_1_1_i_n_i_parser_1a933476e35f3fe30f8739e9326eccba60a6ca9814d1ea90f8a4b819a50a4505203">PDATA_COMMENT</link>,
+276 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_namespacem_i_n_i_1_1_i_n_i_parser_1a933476e35f3fe30f8739e9326eccba60ac266f8ea940bb562878bc3a77617a09b">PDATA_SECTION</link>,
+277 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_namespacem_i_n_i_1_1_i_n_i_parser_1a933476e35f3fe30f8739e9326eccba60a48c6c7a65cdc60ab89b719ce050d63ff">PDATA_KEYVALUE</link>,
+278 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_namespacem_i_n_i_1_1_i_n_i_parser_1a933476e35f3fe30f8739e9326eccba60af55e49a2f30a72b396dd360596e72e9f">PDATA_UNKNOWN</link>
+279 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;};
+280 
+281 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<link linkend="_namespacem_i_n_i_1_1_i_n_i_parser_1a933476e35f3fe30f8739e9326eccba60">PDataType</link>&#32;<link linkend="_namespacem_i_n_i_1_1_i_n_i_parser_1a35c71b789896a8d02f6ca9a8b08824b6">parseLine</link>(std::string&#32;line,&#32;<link linkend="_namespacem_i_n_i_1_1_i_n_i_parser_1ac637b67ba48ff411c11764c84a468acd">T_ParseValues</link>&amp;&#32;parseData)
+282 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+283 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;parseData.first.<link linkend="_classm_i_n_i_1_1_i_n_i_map_1af0b1251e710882fbdb5bced08a4fe341">clear</link>();
+284 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;parseData.second.clear();
+285 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_namespacem_i_n_i_1_1_i_n_i_string_util_1adcbaf06b60e9bed7a2f8d48f45c1a615">INIStringUtil::trim</link>(line);
+286 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(line.empty())
+287 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+288 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="_namespacem_i_n_i_1_1_i_n_i_parser_1a933476e35f3fe30f8739e9326eccba60ae9a2376147f4752a74a9967fcc8c633e">PDataType::PDATA_NONE</link>;
+289 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+290 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">char</emphasis>&#32;firstCharacter&#32;=&#32;line[0];
+291 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(firstCharacter&#32;==&#32;<emphasis role="charliteral">&apos;;&apos;</emphasis>)
+292 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+293 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="_namespacem_i_n_i_1_1_i_n_i_parser_1a933476e35f3fe30f8739e9326eccba60a6ca9814d1ea90f8a4b819a50a4505203">PDataType::PDATA_COMMENT</link>;
+294 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+295 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(firstCharacter&#32;==&#32;<emphasis role="charliteral">&apos;[&apos;</emphasis>)
+296 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+297 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">auto</emphasis>&#32;commentAt&#32;=&#32;line.find_first_of(<emphasis role="charliteral">&apos;;&apos;</emphasis>);
+298 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(commentAt&#32;!=&#32;std::string::npos)
+299 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+300 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;line&#32;=&#32;line.substr(0,&#32;commentAt);
+301 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+302 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">auto</emphasis>&#32;closingBracketAt&#32;=&#32;line.find_last_of(<emphasis role="charliteral">&apos;]&apos;</emphasis>);
+303 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(closingBracketAt&#32;!=&#32;std::string::npos)
+304 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+305 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">auto</emphasis>&#32;section&#32;=&#32;line.substr(1,&#32;closingBracketAt&#32;-&#32;1);
+306 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_namespacem_i_n_i_1_1_i_n_i_string_util_1adcbaf06b60e9bed7a2f8d48f45c1a615">INIStringUtil::trim</link>(section);
+307 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;parseData.first&#32;=&#32;section;
+308 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="_namespacem_i_n_i_1_1_i_n_i_parser_1a933476e35f3fe30f8739e9326eccba60ac266f8ea940bb562878bc3a77617a09b">PDataType::PDATA_SECTION</link>;
+309 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+310 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+311 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">auto</emphasis>&#32;lineNorm&#32;=&#32;line;
+312 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_namespacem_i_n_i_1_1_i_n_i_string_util_1a7e002cc156d2377c091de83634e9063f">INIStringUtil::replace</link>(lineNorm,&#32;<emphasis role="stringliteral">&quot;\\=&quot;</emphasis>,&#32;<emphasis role="stringliteral">&quot;&#32;&#32;&quot;</emphasis>);
+313 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">auto</emphasis>&#32;equalsAt&#32;=&#32;lineNorm.find_first_of(<emphasis role="charliteral">&apos;=&apos;</emphasis>);
+314 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(equalsAt&#32;!=&#32;std::string::npos)
+315 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+316 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">auto</emphasis>&#32;key&#32;=&#32;line.substr(0,&#32;equalsAt);
+317 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_namespacem_i_n_i_1_1_i_n_i_string_util_1adcbaf06b60e9bed7a2f8d48f45c1a615">INIStringUtil::trim</link>(key);
+318 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_namespacem_i_n_i_1_1_i_n_i_string_util_1a7e002cc156d2377c091de83634e9063f">INIStringUtil::replace</link>(key,&#32;<emphasis role="stringliteral">&quot;\\=&quot;</emphasis>,&#32;<emphasis role="stringliteral">&quot;=&quot;</emphasis>);
+319 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">auto</emphasis>&#32;<link linkend="_classvalue">value</link>&#32;=&#32;line.substr(equalsAt&#32;+&#32;1);
+320 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_namespacem_i_n_i_1_1_i_n_i_string_util_1adcbaf06b60e9bed7a2f8d48f45c1a615">INIStringUtil::trim</link>(<link linkend="_classvalue">value</link>);
+321 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;parseData.first&#32;=&#32;key;
+322 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;parseData.second&#32;=&#32;<link linkend="_classvalue">value</link>;
+323 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="_namespacem_i_n_i_1_1_i_n_i_parser_1a933476e35f3fe30f8739e9326eccba60a48c6c7a65cdc60ab89b719ce050d63ff">PDataType::PDATA_KEYVALUE</link>;
+324 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+325 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="_namespacem_i_n_i_1_1_i_n_i_parser_1a933476e35f3fe30f8739e9326eccba60af55e49a2f30a72b396dd360596e72e9f">PDataType::PDATA_UNKNOWN</link>;
+326 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+327 &#32;&#32;&#32;&#32;}
+328 
+329 &#32;&#32;&#32;&#32;<emphasis role="keyword">class&#32;</emphasis><link linkend="_classm_i_n_i_1_1_i_n_i_reader">INIReader</link>
+330 &#32;&#32;&#32;&#32;{
+331 &#32;&#32;&#32;&#32;<emphasis role="keyword">public</emphasis>:
+332 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">using&#32;</emphasis><link linkend="_classm_i_n_i_1_1_i_n_i_reader_1ab2561d08dbf2694aed7eaa5aa4181b4c">T_LineData</link>&#32;=&#32;std::vector&lt;std::string&gt;;
+333 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">using&#32;</emphasis><link linkend="_classm_i_n_i_1_1_i_n_i_reader_1ac797e3f4dd2bec006bc827e70f8a5373">T_LineDataPtr</link>&#32;=&#32;std::shared_ptr&lt;T_LineData&gt;;
+334 
+335 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">bool</emphasis>&#32;<link linkend="_classm_i_n_i_1_1_i_n_i_reader_1ab1d440967ddda5be8cefc33016681da7">isBOM</link>&#32;=&#32;<emphasis role="keyword">false</emphasis>;
+336 
+337 &#32;&#32;&#32;&#32;<emphasis role="keyword">private</emphasis>:
+338 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;std::ifstream&#32;fileReadStream;
+339 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_classm_i_n_i_1_1_i_n_i_reader_1ac797e3f4dd2bec006bc827e70f8a5373">T_LineDataPtr</link>&#32;lineData;
+340 
+341 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_classm_i_n_i_1_1_i_n_i_reader_1ab2561d08dbf2694aed7eaa5aa4181b4c">T_LineData</link>&#32;readFile()
+342 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+343 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;fileReadStream.seekg(0,&#32;std::ios::end);
+344 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;std::size_t&#32;fileSize&#32;=&#32;<emphasis role="keyword">static_cast&lt;</emphasis>std::size_t<emphasis role="keyword">&gt;</emphasis>(fileReadStream.tellg());
+345 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;fileReadStream.seekg(0,&#32;std::ios::beg);
+346 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(fileSize&#32;&gt;=&#32;3)&#32;{
+347 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>&#32;header[3]&#32;=&#32;{
+348 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">static_cast&lt;</emphasis><emphasis role="keywordtype">char</emphasis><emphasis role="keyword">&gt;</emphasis>(fileReadStream.get()),
+349 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">static_cast&lt;</emphasis><emphasis role="keywordtype">char</emphasis><emphasis role="keyword">&gt;</emphasis>(fileReadStream.get()),
+350 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">static_cast&lt;</emphasis><emphasis role="keywordtype">char</emphasis><emphasis role="keyword">&gt;</emphasis>(fileReadStream.get())
+351 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;};
+352 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_classm_i_n_i_1_1_i_n_i_reader_1ab1d440967ddda5be8cefc33016681da7">isBOM</link>&#32;=&#32;(
+353 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;header[0]&#32;==&#32;<emphasis role="keyword">static_cast&lt;</emphasis><emphasis role="keywordtype">char</emphasis><emphasis role="keyword">&gt;</emphasis>(0xEF)&#32;&amp;&amp;
+354 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;header[1]&#32;==&#32;<emphasis role="keyword">static_cast&lt;</emphasis><emphasis role="keywordtype">char</emphasis><emphasis role="keyword">&gt;</emphasis>(0xBB)&#32;&amp;&amp;
+355 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;header[2]&#32;==&#32;<emphasis role="keyword">static_cast&lt;</emphasis><emphasis role="keywordtype">char</emphasis><emphasis role="keyword">&gt;</emphasis>(0xBF)
+356 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;);
+357 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+358 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>&#32;{
+359 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_classm_i_n_i_1_1_i_n_i_reader_1ab1d440967ddda5be8cefc33016681da7">isBOM</link>&#32;=&#32;<emphasis role="keyword">false</emphasis>;
+360 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+361 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;std::string&#32;fileContents;
+362 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;fileContents.resize(fileSize);
+363 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;fileReadStream.seekg(<link linkend="_classm_i_n_i_1_1_i_n_i_reader_1ab1d440967ddda5be8cefc33016681da7">isBOM</link>&#32;?&#32;3&#32;:&#32;0,&#32;std::ios::beg);
+364 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;fileReadStream.read(&amp;fileContents[0],&#32;fileSize);
+365 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;fileReadStream.close();
+366 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_classm_i_n_i_1_1_i_n_i_reader_1ab2561d08dbf2694aed7eaa5aa4181b4c">T_LineData</link>&#32;output;
+367 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(fileSize&#32;==&#32;0)
+368 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+369 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;output;
+370 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+371 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;std::string&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a7bd7b5e409950ac3449c78baf3205f4b">buffer</link>;
+372 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a7bd7b5e409950ac3449c78baf3205f4b">buffer</link>.reserve(50);
+373 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(std::size_t&#32;i&#32;=&#32;0;&#32;i&#32;&lt;&#32;fileSize;&#32;++i)
+374 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+375 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">char</emphasis>&amp;&#32;c&#32;=&#32;fileContents[i];
+376 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(c&#32;==&#32;<emphasis role="charliteral">&apos;\n&apos;</emphasis>)
+377 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+378 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;output.emplace_back(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a7bd7b5e409950ac3449c78baf3205f4b">buffer</link>);
+379 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a7bd7b5e409950ac3449c78baf3205f4b">buffer</link>.clear();
+380 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">continue</emphasis>;
+381 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+382 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(c&#32;!=&#32;<emphasis role="charliteral">&apos;\0&apos;</emphasis>&#32;&amp;&amp;&#32;c&#32;!=&#32;<emphasis role="charliteral">&apos;\r&apos;</emphasis>)
+383 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+384 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a7bd7b5e409950ac3449c78baf3205f4b">buffer</link>&#32;+=&#32;c;
+385 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+386 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+387 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;output.emplace_back(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a7bd7b5e409950ac3449c78baf3205f4b">buffer</link>);
+388 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;output;
+389 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+390 
+391 &#32;&#32;&#32;&#32;<emphasis role="keyword">public</emphasis>:
+392 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_classm_i_n_i_1_1_i_n_i_reader_1aa1d5afdd6d06f650652c1bc7fd374bde">INIReader</link>(std::string&#32;<emphasis role="keyword">const</emphasis>&amp;&#32;<link linkend="__classes_2lib_2m_i_n_i-master_2tests_2testhuge_8cpp_1a42a21beb8018ac623f4d09db1343b9cf">filename</link>,&#32;<emphasis role="keywordtype">bool</emphasis>&#32;keepLineData&#32;=&#32;<emphasis role="keyword">false</emphasis>)
+393 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+394 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;fileReadStream.open(<link linkend="__classes_2lib_2m_i_n_i-master_2tests_2testhuge_8cpp_1a42a21beb8018ac623f4d09db1343b9cf">filename</link>,&#32;std::ios::in&#32;|&#32;std::ios::binary);
+395 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(keepLineData)
+396 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+397 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;lineData&#32;=&#32;std::make_shared&lt;T_LineData&gt;();
+398 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+399 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+400 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_classm_i_n_i_1_1_i_n_i_reader_1a499ca38d2f37e1f4bc38669c0a6e536e">~INIReader</link>()&#32;{&#32;}
+401 
+402 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">bool</emphasis>&#32;<link linkend="_classm_i_n_i_1_1_i_n_i_reader_1a4cb3bf02943c31380cb8fbfb7834a844">operator&gt;&gt;</link>(<link linkend="_classm_i_n_i_1_1_i_n_i_map">INIStructure</link>&amp;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a89ce72163394e6aef63b551a8806e93f">data</link>)
+403 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+404 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(!fileReadStream.is_open())
+405 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+406 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<emphasis role="keyword">false</emphasis>;
+407 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+408 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_classm_i_n_i_1_1_i_n_i_reader_1ab2561d08dbf2694aed7eaa5aa4181b4c">T_LineData</link>&#32;fileLines&#32;=&#32;readFile();
+409 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;std::string&#32;section;
+410 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">bool</emphasis>&#32;inSection&#32;=&#32;<emphasis role="keyword">false</emphasis>;
+411 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_namespacem_i_n_i_1_1_i_n_i_parser_1ac637b67ba48ff411c11764c84a468acd">INIParser::T_ParseValues</link>&#32;parseData;
+412 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(<emphasis role="keyword">auto</emphasis>&#32;<emphasis role="keyword">const</emphasis>&amp;&#32;line&#32;:&#32;fileLines)
+413 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+414 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">auto</emphasis>&#32;parseResult&#32;=&#32;<link linkend="_namespacem_i_n_i_1_1_i_n_i_parser_1a35c71b789896a8d02f6ca9a8b08824b6">INIParser::parseLine</link>(line,&#32;parseData);
+415 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(parseResult&#32;==&#32;<link linkend="_namespacem_i_n_i_1_1_i_n_i_parser_1a933476e35f3fe30f8739e9326eccba60ac266f8ea940bb562878bc3a77617a09b">INIParser::PDataType::PDATA_SECTION</link>)
+416 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+417 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;inSection&#32;=&#32;<emphasis role="keyword">true</emphasis>;
+418 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a89ce72163394e6aef63b551a8806e93f">data</link>[section&#32;=&#32;parseData.first];
+419 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+420 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>&#32;<emphasis role="keywordflow">if</emphasis>&#32;(inSection&#32;&amp;&amp;&#32;parseResult&#32;==&#32;<link linkend="_namespacem_i_n_i_1_1_i_n_i_parser_1a933476e35f3fe30f8739e9326eccba60a48c6c7a65cdc60ab89b719ce050d63ff">INIParser::PDataType::PDATA_KEYVALUE</link>)
+421 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+422 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">auto</emphasis>&#32;<emphasis role="keyword">const</emphasis>&amp;&#32;key&#32;=&#32;parseData.first;
+423 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">auto</emphasis>&#32;<emphasis role="keyword">const</emphasis>&amp;&#32;<link linkend="_classvalue">value</link>&#32;=&#32;parseData.second;
+424 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a89ce72163394e6aef63b551a8806e93f">data</link>[section][key]&#32;=&#32;<link linkend="_classvalue">value</link>;
+425 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+426 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(lineData&#32;&amp;&amp;&#32;parseResult&#32;!=&#32;<link linkend="_namespacem_i_n_i_1_1_i_n_i_parser_1a933476e35f3fe30f8739e9326eccba60af55e49a2f30a72b396dd360596e72e9f">INIParser::PDataType::PDATA_UNKNOWN</link>)
+427 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+428 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(parseResult&#32;==&#32;<link linkend="_namespacem_i_n_i_1_1_i_n_i_parser_1a933476e35f3fe30f8739e9326eccba60a48c6c7a65cdc60ab89b719ce050d63ff">INIParser::PDataType::PDATA_KEYVALUE</link>&#32;&amp;&amp;&#32;!inSection)
+429 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+430 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">continue</emphasis>;
+431 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+432 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;lineData-&gt;emplace_back(line);
+433 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+434 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+435 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<emphasis role="keyword">true</emphasis>;
+436 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+437 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_classm_i_n_i_1_1_i_n_i_reader_1ac797e3f4dd2bec006bc827e70f8a5373">T_LineDataPtr</link>&#32;<link linkend="_classm_i_n_i_1_1_i_n_i_reader_1a81a93e1857a329b7dc34dd4bc1d58c20">getLines</link>()
+438 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+439 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;lineData;
+440 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+441 &#32;&#32;&#32;&#32;};
+442 
+443 &#32;&#32;&#32;&#32;<emphasis role="keyword">class&#32;</emphasis><link linkend="_classm_i_n_i_1_1_i_n_i_generator">INIGenerator</link>
+444 &#32;&#32;&#32;&#32;{
+445 &#32;&#32;&#32;&#32;<emphasis role="keyword">private</emphasis>:
+446 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;std::ofstream&#32;fileWriteStream;
+447 
+448 &#32;&#32;&#32;&#32;<emphasis role="keyword">public</emphasis>:
+449 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">bool</emphasis>&#32;<link linkend="_classm_i_n_i_1_1_i_n_i_generator_1a1563799d9d19c7494da9e42a00b54b76">prettyPrint</link>&#32;=&#32;<emphasis role="keyword">false</emphasis>;
+450 
+451 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_classm_i_n_i_1_1_i_n_i_generator_1a5309198f525fb830f31a2ffe865bdd77">INIGenerator</link>(std::string&#32;<emphasis role="keyword">const</emphasis>&amp;&#32;<link linkend="__classes_2lib_2m_i_n_i-master_2tests_2testhuge_8cpp_1a42a21beb8018ac623f4d09db1343b9cf">filename</link>)
+452 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+453 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;fileWriteStream.open(<link linkend="__classes_2lib_2m_i_n_i-master_2tests_2testhuge_8cpp_1a42a21beb8018ac623f4d09db1343b9cf">filename</link>,&#32;std::ios::out&#32;|&#32;std::ios::binary);
+454 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+455 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_classm_i_n_i_1_1_i_n_i_generator_1afa8fd7f92b93e304347d3ec9a3588437">~INIGenerator</link>()&#32;{&#32;}
+456 
+457 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">bool</emphasis>&#32;<link linkend="_classm_i_n_i_1_1_i_n_i_generator_1a4467dcc252494ea342221a45e826d2e1">operator&lt;&lt;</link>(<link linkend="_classm_i_n_i_1_1_i_n_i_map">INIStructure</link>&#32;<emphasis role="keyword">const</emphasis>&amp;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a89ce72163394e6aef63b551a8806e93f">data</link>)
+458 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+459 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(!fileWriteStream.is_open())
+460 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+461 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<emphasis role="keyword">false</emphasis>;
+462 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+463 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(!<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a89ce72163394e6aef63b551a8806e93f">data</link>.size())
+464 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+465 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<emphasis role="keyword">true</emphasis>;
+466 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+467 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">auto</emphasis>&#32;it&#32;=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a89ce72163394e6aef63b551a8806e93f">data</link>.begin();
+468 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(;;)
+469 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+470 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">auto</emphasis>&#32;<emphasis role="keyword">const</emphasis>&amp;&#32;section&#32;=&#32;it-&gt;first;
+471 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">auto</emphasis>&#32;<emphasis role="keyword">const</emphasis>&amp;&#32;collection&#32;=&#32;it-&gt;second;
+472 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;fileWriteStream
+473 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&lt;&lt;&#32;<emphasis role="stringliteral">&quot;[&quot;</emphasis>
+474 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&lt;&lt;&#32;section
+475 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&lt;&lt;&#32;<emphasis role="stringliteral">&quot;]&quot;</emphasis>;
+476 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(collection.size())
+477 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+478 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;fileWriteStream&#32;&lt;&lt;&#32;<link linkend="_namespacem_i_n_i_1_1_i_n_i_string_util_1aa858bebf97541c7693112af6eb7ef5b4">INIStringUtil::endl</link>;
+479 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">auto</emphasis>&#32;it2&#32;=&#32;collection.begin();
+480 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(;;)
+481 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+482 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">auto</emphasis>&#32;key&#32;=&#32;it2-&gt;first;
+483 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_namespacem_i_n_i_1_1_i_n_i_string_util_1a7e002cc156d2377c091de83634e9063f">INIStringUtil::replace</link>(key,&#32;<emphasis role="stringliteral">&quot;=&quot;</emphasis>,&#32;<emphasis role="stringliteral">&quot;\\=&quot;</emphasis>);
+484 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">auto</emphasis>&#32;<link linkend="_classvalue">value</link>&#32;=&#32;it2-&gt;second;
+485 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_namespacem_i_n_i_1_1_i_n_i_string_util_1adcbaf06b60e9bed7a2f8d48f45c1a615">INIStringUtil::trim</link>(<link linkend="_classvalue">value</link>);
+486 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;fileWriteStream
+487 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&lt;&lt;&#32;key
+488 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&lt;&lt;&#32;((<link linkend="_classm_i_n_i_1_1_i_n_i_generator_1a1563799d9d19c7494da9e42a00b54b76">prettyPrint</link>)&#32;?&#32;<emphasis role="stringliteral">&quot;&#32;=&#32;&quot;</emphasis>&#32;:&#32;<emphasis role="stringliteral">&quot;=&quot;</emphasis>)
+489 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&lt;&lt;&#32;<link linkend="_classvalue">value</link>;
+490 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(++it2&#32;==&#32;collection.end())
+491 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+492 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">break</emphasis>;
+493 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+494 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;fileWriteStream&#32;&lt;&lt;&#32;<link linkend="_namespacem_i_n_i_1_1_i_n_i_string_util_1aa858bebf97541c7693112af6eb7ef5b4">INIStringUtil::endl</link>;
+495 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+496 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+497 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(++it&#32;==&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a89ce72163394e6aef63b551a8806e93f">data</link>.end())
+498 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+499 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">break</emphasis>;
+500 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+501 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;fileWriteStream&#32;&lt;&lt;&#32;<link linkend="_namespacem_i_n_i_1_1_i_n_i_string_util_1aa858bebf97541c7693112af6eb7ef5b4">INIStringUtil::endl</link>;
+502 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(<link linkend="_classm_i_n_i_1_1_i_n_i_generator_1a1563799d9d19c7494da9e42a00b54b76">prettyPrint</link>)
+503 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+504 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;fileWriteStream&#32;&lt;&lt;&#32;<link linkend="_namespacem_i_n_i_1_1_i_n_i_string_util_1aa858bebf97541c7693112af6eb7ef5b4">INIStringUtil::endl</link>;
+505 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+506 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+507 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<emphasis role="keyword">true</emphasis>;
+508 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+509 &#32;&#32;&#32;&#32;};
+510 
+511 &#32;&#32;&#32;&#32;<emphasis role="keyword">class&#32;</emphasis><link linkend="_classm_i_n_i_1_1_i_n_i_writer">INIWriter</link>
+512 &#32;&#32;&#32;&#32;{
+513 &#32;&#32;&#32;&#32;<emphasis role="keyword">private</emphasis>:
+514 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">using&#32;</emphasis>T_LineData&#32;=&#32;std::vector&lt;std::string&gt;;
+515 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">using&#32;</emphasis>T_LineDataPtr&#32;=&#32;std::shared_ptr&lt;T_LineData&gt;;
+516 
+517 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;std::string&#32;filename;
+518 
+519 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;T_LineData&#32;getLazyOutput(T_LineDataPtr&#32;<emphasis role="keyword">const</emphasis>&amp;&#32;lineData,&#32;<link linkend="_classm_i_n_i_1_1_i_n_i_map">INIStructure</link>&amp;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a89ce72163394e6aef63b551a8806e93f">data</link>,&#32;<link linkend="_classm_i_n_i_1_1_i_n_i_map">INIStructure</link>&amp;&#32;original)
+520 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+521 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;T_LineData&#32;output;
+522 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_namespacem_i_n_i_1_1_i_n_i_parser_1ac637b67ba48ff411c11764c84a468acd">INIParser::T_ParseValues</link>&#32;parseData;
+523 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;std::string&#32;sectionCurrent;
+524 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">bool</emphasis>&#32;parsingSection&#32;=&#32;<emphasis role="keyword">false</emphasis>;
+525 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">bool</emphasis>&#32;continueToNextSection&#32;=&#32;<emphasis role="keyword">false</emphasis>;
+526 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">bool</emphasis>&#32;discardNextEmpty&#32;=&#32;<emphasis role="keyword">false</emphasis>;
+527 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">bool</emphasis>&#32;writeNewKeys&#32;=&#32;<emphasis role="keyword">false</emphasis>;
+528 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;std::size_t&#32;lastKeyLine&#32;=&#32;0;
+529 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(<emphasis role="keyword">auto</emphasis>&#32;line&#32;=&#32;lineData-&gt;begin();&#32;line&#32;!=&#32;lineData-&gt;end();&#32;++line)
+530 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+531 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(!writeNewKeys)
+532 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+533 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">auto</emphasis>&#32;parseResult&#32;=&#32;<link linkend="_namespacem_i_n_i_1_1_i_n_i_parser_1a35c71b789896a8d02f6ca9a8b08824b6">INIParser::parseLine</link>(*line,&#32;parseData);
+534 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(parseResult&#32;==&#32;<link linkend="_namespacem_i_n_i_1_1_i_n_i_parser_1a933476e35f3fe30f8739e9326eccba60ac266f8ea940bb562878bc3a77617a09b">INIParser::PDataType::PDATA_SECTION</link>)
+535 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+536 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(parsingSection)
+537 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+538 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;writeNewKeys&#32;=&#32;<emphasis role="keyword">true</emphasis>;
+539 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;parsingSection&#32;=&#32;<emphasis role="keyword">false</emphasis>;
+540 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;--line;
+541 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">continue</emphasis>;
+542 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+543 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;sectionCurrent&#32;=&#32;parseData.first;
+544 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a89ce72163394e6aef63b551a8806e93f">data</link>.has(sectionCurrent))
+545 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+546 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;parsingSection&#32;=&#32;<emphasis role="keyword">true</emphasis>;
+547 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;continueToNextSection&#32;=&#32;<emphasis role="keyword">false</emphasis>;
+548 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;discardNextEmpty&#32;=&#32;<emphasis role="keyword">false</emphasis>;
+549 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;output.emplace_back(*line);
+550 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;lastKeyLine&#32;=&#32;output.size();
+551 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+552 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>
+553 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+554 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;continueToNextSection&#32;=&#32;<emphasis role="keyword">true</emphasis>;
+555 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;discardNextEmpty&#32;=&#32;<emphasis role="keyword">true</emphasis>;
+556 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">continue</emphasis>;
+557 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+558 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+559 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>&#32;<emphasis role="keywordflow">if</emphasis>&#32;(parseResult&#32;==&#32;<link linkend="_namespacem_i_n_i_1_1_i_n_i_parser_1a933476e35f3fe30f8739e9326eccba60a48c6c7a65cdc60ab89b719ce050d63ff">INIParser::PDataType::PDATA_KEYVALUE</link>)
+560 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+561 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(continueToNextSection)
+562 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+563 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">continue</emphasis>;
+564 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+565 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a89ce72163394e6aef63b551a8806e93f">data</link>.has(sectionCurrent))
+566 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+567 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">auto</emphasis>&amp;&#32;collection&#32;=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a89ce72163394e6aef63b551a8806e93f">data</link>[sectionCurrent];
+568 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">auto</emphasis>&#32;<emphasis role="keyword">const</emphasis>&amp;&#32;key&#32;=&#32;parseData.first;
+569 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">auto</emphasis>&#32;<emphasis role="keyword">const</emphasis>&amp;&#32;<link linkend="_classvalue">value</link>&#32;=&#32;parseData.second;
+570 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(collection.has(key))
+571 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+572 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">auto</emphasis>&#32;outputValue&#32;=&#32;collection[key];
+573 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(<link linkend="_classvalue">value</link>&#32;==&#32;outputValue)
+574 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+575 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;output.emplace_back(*line);
+576 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+577 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>
+578 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+579 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_namespacem_i_n_i_1_1_i_n_i_string_util_1adcbaf06b60e9bed7a2f8d48f45c1a615">INIStringUtil::trim</link>(outputValue);
+580 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">auto</emphasis>&#32;lineNorm&#32;=&#32;*line;
+581 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_namespacem_i_n_i_1_1_i_n_i_string_util_1a7e002cc156d2377c091de83634e9063f">INIStringUtil::replace</link>(lineNorm,&#32;<emphasis role="stringliteral">&quot;\\=&quot;</emphasis>,&#32;<emphasis role="stringliteral">&quot;&#32;&#32;&quot;</emphasis>);
+582 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">auto</emphasis>&#32;equalsAt&#32;=&#32;lineNorm.find_first_of(<emphasis role="charliteral">&apos;=&apos;</emphasis>);
+583 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">auto</emphasis>&#32;valueAt&#32;=&#32;lineNorm.find_first_not_of(
+584 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_namespacem_i_n_i_1_1_i_n_i_string_util_1a17b56072f0dee9da8bacd6a347bee5cd">INIStringUtil::whitespaceDelimiters</link>,
+585 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;equalsAt&#32;+&#32;1
+586 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;);
+587 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;std::string&#32;outputLine&#32;=&#32;line-&gt;substr(0,&#32;valueAt);
+588 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(<link linkend="_classm_i_n_i_1_1_i_n_i_writer_1a0ba92158dd3eaaf671252accfedab8b1">prettyPrint</link>&#32;&amp;&amp;&#32;equalsAt&#32;+&#32;1&#32;==&#32;valueAt)
+589 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+590 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;outputLine&#32;+=&#32;<emphasis role="stringliteral">&quot;&#32;&quot;</emphasis>;
+591 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+592 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;outputLine&#32;+=&#32;outputValue;
+593 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;output.emplace_back(outputLine);
+594 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+595 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;lastKeyLine&#32;=&#32;output.size();
+596 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+597 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+598 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+599 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>
+600 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+601 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(discardNextEmpty&#32;&amp;&amp;&#32;line-&gt;empty())
+602 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+603 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;discardNextEmpty&#32;=&#32;<emphasis role="keyword">false</emphasis>;
+604 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+605 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>&#32;<emphasis role="keywordflow">if</emphasis>&#32;(parseResult&#32;!=&#32;<link linkend="_namespacem_i_n_i_1_1_i_n_i_parser_1a933476e35f3fe30f8739e9326eccba60af55e49a2f30a72b396dd360596e72e9f">INIParser::PDataType::PDATA_UNKNOWN</link>)
+606 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+607 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;output.emplace_back(*line);
+608 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+609 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+610 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+611 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(writeNewKeys&#32;||&#32;std::next(line)&#32;==&#32;lineData-&gt;end())
+612 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+613 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;T_LineData&#32;linesToAdd;
+614 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a89ce72163394e6aef63b551a8806e93f">data</link>.has(sectionCurrent)&#32;&amp;&amp;&#32;original.<link linkend="_classm_i_n_i_1_1_i_n_i_map_1a9403e3ff093497a548eee31d16136c4a">has</link>(sectionCurrent))
+615 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+616 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">auto</emphasis>&#32;<emphasis role="keyword">const</emphasis>&amp;&#32;collection&#32;=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a89ce72163394e6aef63b551a8806e93f">data</link>[sectionCurrent];
+617 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">auto</emphasis>&#32;<emphasis role="keyword">const</emphasis>&amp;&#32;collectionOriginal&#32;=&#32;original[sectionCurrent];
+618 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(<emphasis role="keyword">auto</emphasis>&#32;<emphasis role="keyword">const</emphasis>&amp;&#32;it&#32;:&#32;collection)
+619 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+620 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">auto</emphasis>&#32;key&#32;=&#32;it.first;
+621 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(collectionOriginal.has(key))
+622 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+623 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">continue</emphasis>;
+624 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+625 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">auto</emphasis>&#32;<link linkend="_classvalue">value</link>&#32;=&#32;it.second;
+626 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_namespacem_i_n_i_1_1_i_n_i_string_util_1a7e002cc156d2377c091de83634e9063f">INIStringUtil::replace</link>(key,&#32;<emphasis role="stringliteral">&quot;=&quot;</emphasis>,&#32;<emphasis role="stringliteral">&quot;\\=&quot;</emphasis>);
+627 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_namespacem_i_n_i_1_1_i_n_i_string_util_1adcbaf06b60e9bed7a2f8d48f45c1a615">INIStringUtil::trim</link>(<link linkend="_classvalue">value</link>);
+628 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;linesToAdd.emplace_back(
+629 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;key&#32;+&#32;((<link linkend="_classm_i_n_i_1_1_i_n_i_writer_1a0ba92158dd3eaaf671252accfedab8b1">prettyPrint</link>)&#32;?&#32;<emphasis role="stringliteral">&quot;&#32;=&#32;&quot;</emphasis>&#32;:&#32;<emphasis role="stringliteral">&quot;=&quot;</emphasis>)&#32;+&#32;<link linkend="_classvalue">value</link>
+630 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;);
+631 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+632 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+633 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(!linesToAdd.empty())
+634 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+635 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;output.insert(
+636 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;output.begin()&#32;+&#32;lastKeyLine,
+637 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;linesToAdd.begin(),
+638 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;linesToAdd.end()
+639 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;);
+640 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+641 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(writeNewKeys)
+642 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+643 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;writeNewKeys&#32;=&#32;<emphasis role="keyword">false</emphasis>;
+644 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;--line;
+645 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+646 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+647 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+648 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(<emphasis role="keyword">auto</emphasis>&#32;<emphasis role="keyword">const</emphasis>&amp;&#32;it&#32;:&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a89ce72163394e6aef63b551a8806e93f">data</link>)
+649 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+650 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">auto</emphasis>&#32;<emphasis role="keyword">const</emphasis>&amp;&#32;section&#32;=&#32;it.first;
+651 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(original.<link linkend="_classm_i_n_i_1_1_i_n_i_map_1a9403e3ff093497a548eee31d16136c4a">has</link>(section))
+652 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+653 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">continue</emphasis>;
+654 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+655 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(<link linkend="_classm_i_n_i_1_1_i_n_i_writer_1a0ba92158dd3eaaf671252accfedab8b1">prettyPrint</link>&#32;&amp;&amp;&#32;output.size()&#32;&gt;&#32;0&#32;&amp;&amp;&#32;!output.back().empty())
+656 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+657 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;output.emplace_back();
+658 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+659 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;output.emplace_back(<emphasis role="stringliteral">&quot;[&quot;</emphasis>&#32;+&#32;section&#32;+&#32;<emphasis role="stringliteral">&quot;]&quot;</emphasis>);
+660 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">auto</emphasis>&#32;<emphasis role="keyword">const</emphasis>&amp;&#32;collection&#32;=&#32;it.second;
+661 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(<emphasis role="keyword">auto</emphasis>&#32;<emphasis role="keyword">const</emphasis>&amp;&#32;it2&#32;:&#32;collection)
+662 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+663 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">auto</emphasis>&#32;key&#32;=&#32;it2.first;
+664 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">auto</emphasis>&#32;<link linkend="_classvalue">value</link>&#32;=&#32;it2.second;
+665 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_namespacem_i_n_i_1_1_i_n_i_string_util_1a7e002cc156d2377c091de83634e9063f">INIStringUtil::replace</link>(key,&#32;<emphasis role="stringliteral">&quot;=&quot;</emphasis>,&#32;<emphasis role="stringliteral">&quot;\\=&quot;</emphasis>);
+666 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_namespacem_i_n_i_1_1_i_n_i_string_util_1adcbaf06b60e9bed7a2f8d48f45c1a615">INIStringUtil::trim</link>(<link linkend="_classvalue">value</link>);
+667 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;output.emplace_back(
+668 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;key&#32;+&#32;((<link linkend="_classm_i_n_i_1_1_i_n_i_writer_1a0ba92158dd3eaaf671252accfedab8b1">prettyPrint</link>)&#32;?&#32;<emphasis role="stringliteral">&quot;&#32;=&#32;&quot;</emphasis>&#32;:&#32;<emphasis role="stringliteral">&quot;=&quot;</emphasis>)&#32;+&#32;<link linkend="_classvalue">value</link>
+669 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;);
+670 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+671 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+672 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;output;
+673 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+674 
+675 &#32;&#32;&#32;&#32;<emphasis role="keyword">public</emphasis>:
+676 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">bool</emphasis>&#32;<link linkend="_classm_i_n_i_1_1_i_n_i_writer_1a0ba92158dd3eaaf671252accfedab8b1">prettyPrint</link>&#32;=&#32;<emphasis role="keyword">false</emphasis>;
+677 
+678 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_classm_i_n_i_1_1_i_n_i_writer_1a95f74b4a1a94dc1d40cd553416fa1a36">INIWriter</link>(std::string&#32;<emphasis role="keyword">const</emphasis>&amp;&#32;filename)
+679 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;:&#32;<link linkend="__classes_2lib_2m_i_n_i-master_2tests_2testhuge_8cpp_1a42a21beb8018ac623f4d09db1343b9cf">filename</link>(<link linkend="__classes_2lib_2m_i_n_i-master_2tests_2testhuge_8cpp_1a42a21beb8018ac623f4d09db1343b9cf">filename</link>)
+680 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+681 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+682 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_classm_i_n_i_1_1_i_n_i_writer_1ac97bfad742420e82a722fdd1e725a0f0">~INIWriter</link>()&#32;{&#32;}
+683 
+684 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">bool</emphasis>&#32;<link linkend="_classm_i_n_i_1_1_i_n_i_writer_1a7183dcd6388af073deb84afd80f1c0c1">operator&lt;&lt;</link>(<link linkend="_classm_i_n_i_1_1_i_n_i_map">INIStructure</link>&amp;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a89ce72163394e6aef63b551a8806e93f">data</link>)
+685 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+686 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">struct&#32;</emphasis>stat&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1ad8a8baf08bc0399738960c9259571911">buf</link>;
+687 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">bool</emphasis>&#32;fileExists&#32;=&#32;(stat(<link linkend="__classes_2lib_2m_i_n_i-master_2tests_2testhuge_8cpp_1a42a21beb8018ac623f4d09db1343b9cf">filename</link>.c_str(),&#32;&amp;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1ad8a8baf08bc0399738960c9259571911">buf</link>)&#32;==&#32;0);
+688 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(!fileExists)
+689 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+690 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_classm_i_n_i_1_1_i_n_i_generator">INIGenerator</link>&#32;generator(<link linkend="__classes_2lib_2m_i_n_i-master_2tests_2testhuge_8cpp_1a42a21beb8018ac623f4d09db1343b9cf">filename</link>);
+691 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;generator.<link linkend="_classm_i_n_i_1_1_i_n_i_generator_1a1563799d9d19c7494da9e42a00b54b76">prettyPrint</link>&#32;=&#32;<link linkend="_classm_i_n_i_1_1_i_n_i_writer_1a0ba92158dd3eaaf671252accfedab8b1">prettyPrint</link>;
+692 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;generator&#32;&lt;&lt;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a89ce72163394e6aef63b551a8806e93f">data</link>;
+693 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+694 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_classm_i_n_i_1_1_i_n_i_map">INIStructure</link>&#32;originalData;
+695 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;T_LineDataPtr&#32;lineData;
+696 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">bool</emphasis>&#32;readSuccess&#32;=&#32;<emphasis role="keyword">false</emphasis>;
+697 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">bool</emphasis>&#32;fileIsBOM&#32;=&#32;<emphasis role="keyword">false</emphasis>;
+698 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+699 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_classm_i_n_i_1_1_i_n_i_reader">INIReader</link>&#32;reader(<link linkend="__classes_2lib_2m_i_n_i-master_2tests_2testhuge_8cpp_1a42a21beb8018ac623f4d09db1343b9cf">filename</link>,&#32;<emphasis role="keyword">true</emphasis>);
+700 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;((readSuccess&#32;=&#32;reader&#32;&gt;&gt;&#32;originalData))
+701 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+702 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;lineData&#32;=&#32;reader.<link linkend="_classm_i_n_i_1_1_i_n_i_reader_1a81a93e1857a329b7dc34dd4bc1d58c20">getLines</link>();
+703 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;fileIsBOM&#32;=&#32;reader.<link linkend="_classm_i_n_i_1_1_i_n_i_reader_1ab1d440967ddda5be8cefc33016681da7">isBOM</link>;
+704 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+705 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+706 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(!readSuccess)
+707 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+708 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<emphasis role="keyword">false</emphasis>;
+709 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+710 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;T_LineData&#32;output&#32;=&#32;getLazyOutput(lineData,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a89ce72163394e6aef63b551a8806e93f">data</link>,&#32;originalData);
+711 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;std::ofstream&#32;fileWriteStream(<link linkend="__classes_2lib_2m_i_n_i-master_2tests_2testhuge_8cpp_1a42a21beb8018ac623f4d09db1343b9cf">filename</link>,&#32;std::ios::out&#32;|&#32;std::ios::binary);
+712 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(fileWriteStream.is_open())
+713 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+714 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(fileIsBOM)&#32;{
+715 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>&#32;utf8_BOM[3]&#32;=&#32;{
+716 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">static_cast&lt;</emphasis><emphasis role="keywordtype">char</emphasis><emphasis role="keyword">&gt;</emphasis>(0xEF),
+717 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">static_cast&lt;</emphasis><emphasis role="keywordtype">char</emphasis><emphasis role="keyword">&gt;</emphasis>(0xBB),
+718 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">static_cast&lt;</emphasis><emphasis role="keywordtype">char</emphasis><emphasis role="keyword">&gt;</emphasis>(0xBF)
+719 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;};
+720 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;fileWriteStream.write(utf8_BOM,&#32;3);
+721 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+722 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(output.size())
+723 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+724 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">auto</emphasis>&#32;line&#32;=&#32;output.begin();
+725 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(;;)
+726 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+727 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;fileWriteStream&#32;&lt;&lt;&#32;*line;
+728 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(++line&#32;==&#32;output.end())
+729 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+730 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">break</emphasis>;
+731 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+732 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;fileWriteStream&#32;&lt;&lt;&#32;<link linkend="_namespacem_i_n_i_1_1_i_n_i_string_util_1aa858bebf97541c7693112af6eb7ef5b4">INIStringUtil::endl</link>;
+733 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+734 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+735 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<emphasis role="keyword">true</emphasis>;
+736 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+737 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<emphasis role="keyword">false</emphasis>;
+738 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+739 &#32;&#32;&#32;&#32;};
+740 
+741 &#32;&#32;&#32;&#32;<emphasis role="keyword">class&#32;</emphasis><link linkend="_classm_i_n_i_1_1_i_n_i_file">INIFile</link>
+742 &#32;&#32;&#32;&#32;{
+743 &#32;&#32;&#32;&#32;<emphasis role="keyword">private</emphasis>:
+744 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;std::string&#32;filename;
+745 
+746 &#32;&#32;&#32;&#32;<emphasis role="keyword">public</emphasis>:
+747 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_classm_i_n_i_1_1_i_n_i_file_1accb7131afe758da273e7296122d0e278">INIFile</link>(std::string&#32;<emphasis role="keyword">const</emphasis>&amp;&#32;filename)
+748 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;:&#32;<link linkend="__classes_2lib_2m_i_n_i-master_2tests_2testhuge_8cpp_1a42a21beb8018ac623f4d09db1343b9cf">filename</link>(<link linkend="__classes_2lib_2m_i_n_i-master_2tests_2testhuge_8cpp_1a42a21beb8018ac623f4d09db1343b9cf">filename</link>)
+749 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{&#32;}
+750 
+751 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_classm_i_n_i_1_1_i_n_i_file_1ab38dae0780c8e1a3e46f9f88a88c29ec">~INIFile</link>()&#32;{&#32;}
+752 
+753 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">bool</emphasis>&#32;<link linkend="_classm_i_n_i_1_1_i_n_i_file_1a0ead9063903c7a465b38d9d772fb0df7">read</link>(<link linkend="_classm_i_n_i_1_1_i_n_i_map">INIStructure</link>&amp;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a89ce72163394e6aef63b551a8806e93f">data</link>)<emphasis role="keyword">&#32;const</emphasis>
+754 <emphasis role="keyword">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;</emphasis>{
+755 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a89ce72163394e6aef63b551a8806e93f">data</link>.size())
+756 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+757 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a89ce72163394e6aef63b551a8806e93f">data</link>.clear();
+758 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+759 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(<link linkend="__classes_2lib_2m_i_n_i-master_2tests_2testhuge_8cpp_1a42a21beb8018ac623f4d09db1343b9cf">filename</link>.empty())
+760 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+761 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<emphasis role="keyword">false</emphasis>;
+762 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+763 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_classm_i_n_i_1_1_i_n_i_reader">INIReader</link>&#32;reader(<link linkend="__classes_2lib_2m_i_n_i-master_2tests_2testhuge_8cpp_1a42a21beb8018ac623f4d09db1343b9cf">filename</link>);
+764 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;reader&#32;&gt;&gt;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a89ce72163394e6aef63b551a8806e93f">data</link>;
+765 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+766 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">bool</emphasis>&#32;<link linkend="_classm_i_n_i_1_1_i_n_i_file_1a4d5be7c70113c62f31515464e35876e4">generate</link>(<link linkend="_classm_i_n_i_1_1_i_n_i_map">INIStructure</link>&#32;<emphasis role="keyword">const</emphasis>&amp;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a89ce72163394e6aef63b551a8806e93f">data</link>,&#32;<emphasis role="keywordtype">bool</emphasis>&#32;pretty&#32;=&#32;<emphasis role="keyword">false</emphasis>)<emphasis role="keyword">&#32;const</emphasis>
+767 <emphasis role="keyword">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;</emphasis>{
+768 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(<link linkend="__classes_2lib_2m_i_n_i-master_2tests_2testhuge_8cpp_1a42a21beb8018ac623f4d09db1343b9cf">filename</link>.empty())
+769 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+770 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<emphasis role="keyword">false</emphasis>;
+771 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+772 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_classm_i_n_i_1_1_i_n_i_generator">INIGenerator</link>&#32;generator(<link linkend="__classes_2lib_2m_i_n_i-master_2tests_2testhuge_8cpp_1a42a21beb8018ac623f4d09db1343b9cf">filename</link>);
+773 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;generator.<link linkend="_classm_i_n_i_1_1_i_n_i_generator_1a1563799d9d19c7494da9e42a00b54b76">prettyPrint</link>&#32;=&#32;pretty;
+774 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;generator&#32;&lt;&lt;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a89ce72163394e6aef63b551a8806e93f">data</link>;
+775 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+776 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">bool</emphasis>&#32;<link linkend="_classm_i_n_i_1_1_i_n_i_file_1ad69199d7e6aa3ff8cb78478f0cdc6422">write</link>(<link linkend="_classm_i_n_i_1_1_i_n_i_map">INIStructure</link>&amp;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a89ce72163394e6aef63b551a8806e93f">data</link>,&#32;<emphasis role="keywordtype">bool</emphasis>&#32;pretty&#32;=&#32;<emphasis role="keyword">false</emphasis>)<emphasis role="keyword">&#32;const</emphasis>
+777 <emphasis role="keyword">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;</emphasis>{
+778 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(<link linkend="__classes_2lib_2m_i_n_i-master_2tests_2testhuge_8cpp_1a42a21beb8018ac623f4d09db1343b9cf">filename</link>.empty())
+779 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+780 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<emphasis role="keyword">false</emphasis>;
+781 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+782 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_classm_i_n_i_1_1_i_n_i_writer">INIWriter</link>&#32;writer(<link linkend="__classes_2lib_2m_i_n_i-master_2tests_2testhuge_8cpp_1a42a21beb8018ac623f4d09db1343b9cf">filename</link>);
+783 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;writer.<link linkend="_classm_i_n_i_1_1_i_n_i_writer_1a0ba92158dd3eaaf671252accfedab8b1">prettyPrint</link>&#32;=&#32;pretty;
+784 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;writer&#32;&lt;&lt;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a89ce72163394e6aef63b551a8806e93f">data</link>;
+785 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+786 &#32;&#32;&#32;&#32;};
+787 }
+788 
+789 <emphasis role="preprocessor">#endif&#32;</emphasis><emphasis role="comment">//&#32;MINI_INI_H_</emphasis>
+</programlisting></section>

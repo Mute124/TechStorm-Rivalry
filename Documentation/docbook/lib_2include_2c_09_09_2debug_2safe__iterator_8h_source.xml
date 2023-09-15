@@ -1,0 +1,889 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<section xmlns="http://docbook.org/ns/docbook" version="5.0" xmlns:xlink="http://www.w3.org/1999/xlink" xml:id="_lib_2include_2c_09_09_2debug_2safe__iterator_8h_source" xml:lang="en-US">
+<title>safe_iterator.h</title>
+<indexterm><primary>C:/Users/HP/Documents/GitHub/Minero-Game/lib/include/c++/debug/safe_iterator.h</primary></indexterm>
+Go to the documentation of this file.<programlisting linenumbering="unnumbered">1 <emphasis role="comment">//&#32;Safe&#32;iterator&#32;implementation&#32;&#32;-*-&#32;C++&#32;-*-</emphasis>
+2 
+3 <emphasis role="comment">//&#32;Copyright&#32;(C)&#32;2003-2022&#32;Free&#32;Software&#32;Foundation,&#32;Inc.</emphasis>
+4 <emphasis role="comment">//</emphasis>
+5 <emphasis role="comment">//&#32;This&#32;file&#32;is&#32;part&#32;of&#32;the&#32;GNU&#32;ISO&#32;C++&#32;Library.&#32;&#32;This&#32;library&#32;is&#32;free</emphasis>
+6 <emphasis role="comment">//&#32;software;&#32;you&#32;can&#32;redistribute&#32;it&#32;and/or&#32;modify&#32;it&#32;under&#32;the</emphasis>
+7 <emphasis role="comment">//&#32;terms&#32;of&#32;the&#32;GNU&#32;General&#32;Public&#32;License&#32;as&#32;published&#32;by&#32;the</emphasis>
+8 <emphasis role="comment">//&#32;Free&#32;Software&#32;Foundation;&#32;either&#32;version&#32;3,&#32;or&#32;(at&#32;your&#32;option)</emphasis>
+9 <emphasis role="comment">//&#32;any&#32;later&#32;version.</emphasis>
+10 
+11 <emphasis role="comment">//&#32;This&#32;library&#32;is&#32;distributed&#32;in&#32;the&#32;hope&#32;that&#32;it&#32;will&#32;be&#32;useful,</emphasis>
+12 <emphasis role="comment">//&#32;but&#32;WITHOUT&#32;ANY&#32;WARRANTY;&#32;without&#32;even&#32;the&#32;implied&#32;warranty&#32;of</emphasis>
+13 <emphasis role="comment">//&#32;MERCHANTABILITY&#32;or&#32;FITNESS&#32;FOR&#32;A&#32;PARTICULAR&#32;PURPOSE.&#32;&#32;See&#32;the</emphasis>
+14 <emphasis role="comment">//&#32;GNU&#32;General&#32;Public&#32;License&#32;for&#32;more&#32;details.</emphasis>
+15 
+16 <emphasis role="comment">//&#32;Under&#32;Section&#32;7&#32;of&#32;GPL&#32;version&#32;3,&#32;you&#32;are&#32;granted&#32;additional</emphasis>
+17 <emphasis role="comment">//&#32;permissions&#32;described&#32;in&#32;the&#32;GCC&#32;Runtime&#32;Library&#32;Exception,&#32;version</emphasis>
+18 <emphasis role="comment">//&#32;3.1,&#32;as&#32;published&#32;by&#32;the&#32;Free&#32;Software&#32;Foundation.</emphasis>
+19 
+20 <emphasis role="comment">//&#32;You&#32;should&#32;have&#32;received&#32;a&#32;copy&#32;of&#32;the&#32;GNU&#32;General&#32;Public&#32;License&#32;and</emphasis>
+21 <emphasis role="comment">//&#32;a&#32;copy&#32;of&#32;the&#32;GCC&#32;Runtime&#32;Library&#32;Exception&#32;along&#32;with&#32;this&#32;program;</emphasis>
+22 <emphasis role="comment">//&#32;see&#32;the&#32;files&#32;COPYING3&#32;and&#32;COPYING.RUNTIME&#32;respectively.&#32;&#32;If&#32;not,&#32;see</emphasis>
+23 <emphasis role="comment">//&#32;&lt;http://www.gnu.org/licenses/&gt;.</emphasis>
+24 
+29 <emphasis role="preprocessor">#ifndef&#32;_GLIBCXX_DEBUG_SAFE_ITERATOR_H</emphasis>
+30 <emphasis role="preprocessor">#define&#32;_GLIBCXX_DEBUG_SAFE_ITERATOR_H&#32;1</emphasis>
+31 
+32 <emphasis role="preprocessor">#include&#32;&lt;debug/assertions.h&gt;</emphasis>
+33 <emphasis role="preprocessor">#include&#32;&lt;debug/macros.h&gt;</emphasis>
+34 <emphasis role="preprocessor">#include&#32;&lt;debug/functions.h&gt;</emphasis>
+35 <emphasis role="preprocessor">#include&#32;&lt;debug/safe_base.h&gt;</emphasis>
+36 <emphasis role="preprocessor">#include&#32;&lt;bits/stl_pair.h&gt;</emphasis>
+37 <emphasis role="preprocessor">#include&#32;&lt;ext/type_traits.h&gt;</emphasis>
+38 <emphasis role="preprocessor">#if&#32;__cplusplus&#32;&gt;&#32;201703L</emphasis>
+39 <emphasis role="preprocessor">#&#32;include&#32;&lt;compare&gt;</emphasis>
+40 <emphasis role="preprocessor">#endif</emphasis>
+41 
+42 <emphasis role="preprocessor">#define&#32;_GLIBCXX_DEBUG_VERIFY_OPERANDS(_Lhs,&#32;_Rhs,&#32;_BadMsgId,&#32;_DiffMsgId)&#32;\</emphasis>
+43 <emphasis role="preprocessor">&#32;&#32;_GLIBCXX_DEBUG_VERIFY(!_Lhs._M_singular()&#32;&amp;&amp;&#32;!_Rhs._M_singular()&#32;&#32;\</emphasis>
+44 <emphasis role="preprocessor">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;||&#32;(_Lhs.base()&#32;==&#32;_Iterator()&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;\</emphasis>
+45 <emphasis role="preprocessor">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&amp;&amp;&#32;_Rhs.base()&#32;==&#32;_Iterator()),&#32;&#32;&#32;&#32;&#32;\</emphasis>
+46 <emphasis role="preprocessor">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_M_message(_BadMsgId)&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;\</emphasis>
+47 <emphasis role="preprocessor">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;._M_iterator(_Lhs,&#32;#_Lhs)&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;\</emphasis>
+48 <emphasis role="preprocessor">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;._M_iterator(_Rhs,&#32;#_Rhs));&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;\</emphasis>
+49 <emphasis role="preprocessor">&#32;&#32;_GLIBCXX_DEBUG_VERIFY(_Lhs._M_can_compare(_Rhs),&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;\</emphasis>
+50 <emphasis role="preprocessor">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_M_message(_DiffMsgId)&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;\</emphasis>
+51 <emphasis role="preprocessor">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;._M_iterator(_Lhs,&#32;#_Lhs)&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;\</emphasis>
+52 <emphasis role="preprocessor">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;._M_iterator(_Rhs,&#32;#_Rhs))</emphasis>
+53 
+54 <emphasis role="preprocessor">#define&#32;_GLIBCXX_DEBUG_VERIFY_EQ_OPERANDS(_Lhs,&#32;_Rhs)&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;\</emphasis>
+55 <emphasis role="preprocessor">&#32;&#32;_GLIBCXX_DEBUG_VERIFY_OPERANDS(_Lhs,&#32;_Rhs,&#32;__msg_iter_compare_bad,&#32;&#32;&#32;&#32;\</emphasis>
+56 <emphasis role="preprocessor">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__msg_compare_different)</emphasis>
+57 
+58 <emphasis role="preprocessor">#define&#32;_GLIBCXX_DEBUG_VERIFY_REL_OPERANDS(_Lhs,&#32;_Rhs)&#32;&#32;&#32;&#32;&#32;&#32;\</emphasis>
+59 <emphasis role="preprocessor">&#32;&#32;_GLIBCXX_DEBUG_VERIFY_OPERANDS(_Lhs,&#32;_Rhs,&#32;__msg_iter_order_bad,&#32;&#32;\</emphasis>
+60 <emphasis role="preprocessor">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__msg_order_different)</emphasis>
+61 
+62 <emphasis role="preprocessor">#define&#32;_GLIBCXX_DEBUG_VERIFY_DIST_OPERANDS(_Lhs,&#32;_Rhs)&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;\</emphasis>
+63 <emphasis role="preprocessor">&#32;&#32;_GLIBCXX_DEBUG_VERIFY_OPERANDS(_Lhs,&#32;_Rhs,&#32;__msg_distance_bad,&#32;&#32;&#32;&#32;\</emphasis>
+64 <emphasis role="preprocessor">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__msg_distance_different)</emphasis>
+65 
+66 <emphasis role="keyword">namespace&#32;</emphasis><link linkend="_namespace____gnu__debug">__gnu_debug</link>
+67 {
+71 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Sequence&gt;
+72 &#32;&#32;&#32;&#32;<emphasis role="keyword">struct&#32;</emphasis><link linkend="_struct____gnu__debug_1_1___before_begin_helper">_BeforeBeginHelper</link>
+73 &#32;&#32;&#32;&#32;{
+74 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Iterator,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Category&gt;
+75 &#32;&#32;&#32;&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>
+76 &#32;&#32;&#32;&#32;<link linkend="_struct____gnu__debug_1_1___before_begin_helper_1a67d9eb6fff1f4678afcd07c005dfdec9">_S_Is</link>(<emphasis role="keyword">const</emphasis>&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator">_Safe_iterator&lt;_Iterator, _Sequence, _Category&gt;</link>&amp;)
+77 &#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;<emphasis role="keyword">false</emphasis>;&#32;}
+78 
+79 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Iterator,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Category&gt;
+80 &#32;&#32;&#32;&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>
+81 &#32;&#32;&#32;&#32;<link linkend="_struct____gnu__debug_1_1___before_begin_helper_1a569e1e7eff6dd9bd485adcfff8e12520">_S_Is_Beginnest</link>(<emphasis role="keyword">const</emphasis>&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator">_Safe_iterator&lt;_Iterator, _Sequence, _Category&gt;</link>&amp;&#32;__it)
+82 &#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;__it.<link linkend="_class____gnu__debug_1_1___safe__iterator_1a8ab2bd3cab984cb85cd02f1d61ce9931">base</link>()&#32;==&#32;__it.<link linkend="_class____gnu__debug_1_1___safe__iterator_1a11704a65f7bb3df9b8cf2e63745d8d66">_M_get_sequence</link>()-&gt;_M_base().begin();&#32;}
+83 &#32;&#32;&#32;&#32;};
+84 
+86 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Sequence&gt;
+87 &#32;&#32;&#32;&#32;<emphasis role="keyword">struct&#32;</emphasis><link linkend="_struct____gnu__debug_1_1___sequence__traits">_Sequence_traits</link>
+88 &#32;&#32;&#32;&#32;{
+89 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<link linkend="_struct____gnu__debug_1_1___distance__traits">_Distance_traits&lt;typename _Sequence::iterator&gt;</link>&#32;<link linkend="_struct____gnu__debug_1_1___sequence__traits_1ae9a1b0b13dc441a3767b220c69b1dacd">_DistTraits</link>;
+90 
+91 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keyword">typename</emphasis>&#32;<link linkend="_struct____gnu__debug_1_1___distance__traits_1a233783a24e495312304a160308fb74f9">_DistTraits::__type</link>
+92 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_struct____gnu__debug_1_1___sequence__traits_1a4b6923db824a9f3836f1779bf038273b">_S_size</link>(<emphasis role="keyword">const</emphasis>&#32;_Sequence&amp;&#32;__seq)
+93 &#32;&#32;&#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;std::make_pair(__seq.size(),&#32;<link linkend="_namespace____gnu__debug_1a3817879cb58c2db9f22712a634ef0b92a6bb923ab69abbb98dd5ce928818ed7d6">__dp_exact</link>);&#32;}
+94 &#32;&#32;&#32;&#32;};
+95 
+112 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Iterator,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Sequence,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Category
+113 &#32;&#32;&#32;&#32;&#32;&#32;&#32;=&#32;<emphasis role="keyword">typename</emphasis>&#32;std::iterator_traits&lt;_Iterator&gt;::iterator_category&gt;
+114 &#32;&#32;&#32;&#32;<emphasis role="keyword">class&#32;</emphasis>_Safe_iterator
+115 &#32;&#32;&#32;&#32;:&#32;<emphasis role="keyword">private</emphasis>&#32;_Iterator,
+116 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">public</emphasis>&#32;_Safe_iterator_base
+117 &#32;&#32;&#32;&#32;{
+118 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;_Iterator&#32;_Iter_base;
+119 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator__base_1a3e6e1cb37b5585e5ee3b254bbd7d5cbb">_Safe_iterator_base</link>&#32;_Safe_base;
+120 
+121 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;std::iterator_traits&lt;_Iterator&gt;&#32;_Traits;
+122 
+123 &#32;&#32;&#32;&#32;<emphasis role="keyword">protected</emphasis>:
+124 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;std::__are_same&lt;<emphasis role="keyword">typename</emphasis>&#32;_Sequence::_Base::const_iterator,
+125 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_Iterator&gt;&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator_1ae2141f1bd85bd010b1b132172ff49f49">_IsConstant</link>;
+126 
+127 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">typename</emphasis>&#32;__gnu_cxx::__conditional_type&lt;
+128 &#32;&#32;&#32;&#32;_IsConstant::__value,
+129 &#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;_Sequence::_Base::iterator,
+130 &#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;_Sequence::_Base::const_iterator&gt;::__type&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator_1aa2f8eddbb9601e97e3e4d2e75006fc98">_OtherIterator</link>;
+131 
+132 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">struct&#32;</emphasis><link linkend="_struct____gnu__debug_1_1___safe__iterator_1_1___attach__single">_Attach_single</link>
+133 &#32;&#32;&#32;&#32;&#32;&#32;{&#32;};
+134 
+135 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator_1a71ecf6d5f10f591b08be04bfdf5684f7">_Safe_iterator</link>(_Iterator&#32;__i,&#32;<link linkend="_class____gnu__debug_1_1___safe__sequence__base">_Safe_sequence_base</link>*&#32;__seq,&#32;<link linkend="_struct____gnu__debug_1_1___safe__iterator_1_1___attach__single">_Attach_single</link>)
+136 &#32;&#32;&#32;&#32;&#32;&#32;_GLIBCXX_NOEXCEPT
+137 &#32;&#32;&#32;&#32;&#32;&#32;:&#32;_Iter_base(__i)
+138 &#32;&#32;&#32;&#32;&#32;&#32;{&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator_1a3b20ef089474f666775bd1f1a865c392">_M_attach_single</link>(__seq);&#32;}
+139 
+140 &#32;&#32;&#32;&#32;<emphasis role="keyword">public</emphasis>:
+141 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;_Iterator&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator_1a0bb334e63c3292865e9ff2f608eee3a8">iterator_type</link>;
+142 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">typename</emphasis>&#32;_Traits::iterator_category&#32;&#32;&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator_1ab82f8e58d17b5a378922c33adbea9661">iterator_category</link>;
+143 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">typename</emphasis>&#32;_Traits::value_type&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator_1a3ca0810e8158c07034be3fe7326d7a12">value_type</link>;
+144 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">typename</emphasis>&#32;_Traits::difference_type&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator_1a30a9b5cb458330240b532d8a5f599c89">difference_type</link>;
+145 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">typename</emphasis>&#32;_Traits::reference&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator_1a74c630f93b916c3300078eb55060b26c">reference</link>;
+146 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">typename</emphasis>&#32;_Traits::pointer&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator_1a1ced368ec0276fbb159f477e9d457fce">pointer</link>;
+147 
+148 <emphasis role="preprocessor">#if&#32;__cplusplus&#32;&gt;&#32;201703L&#32;&amp;&amp;&#32;__cpp_lib_concepts</emphasis>
+149 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">using&#32;</emphasis>iterator_concept&#32;=&#32;std::__detail::__iter_concept&lt;_Iterator&gt;;
+150 <emphasis role="preprocessor">#endif</emphasis>
+151 
+153 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator_1a9c152e7a0e9b12c9bf6d9db309fff72b">_Safe_iterator</link>()&#32;_GLIBCXX_NOEXCEPT&#32;:&#32;_Iter_base()&#32;{&#32;}
+154 
+162 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator_1af80c8adce05a44a11776092f029b0645">_Safe_iterator</link>(_Iterator&#32;__i,&#32;<emphasis role="keyword">const</emphasis>&#32;<link linkend="_class____gnu__debug_1_1___safe__sequence__base">_Safe_sequence_base</link>*&#32;__seq)
+163 &#32;&#32;&#32;&#32;&#32;&#32;_GLIBCXX_NOEXCEPT
+164 &#32;&#32;&#32;&#32;&#32;&#32;:&#32;_Iter_base(__i),&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator__base">_Safe_base</link>(__seq,&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator_1aebecd16df3b101fbb55d205714f5f74c">_S_constant</link>())
+165 &#32;&#32;&#32;&#32;&#32;&#32;{
+166 &#32;&#32;&#32;&#32;<link linkend="_lib_2include_2c_09_09_2debug_2macros_8h_1abc21d6cf6063d6d47494b08a8f1ba3be">_GLIBCXX_DEBUG_VERIFY</link>(!this-&gt;<link linkend="_class____gnu__debug_1_1___safe__iterator__base_1aefb17f520b7e88212cf86e552d440858">_M_singular</link>(),
+167 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_M_message(<link linkend="_namespace____gnu__debug_1aeb7af2ed24147dfab032febcea3f4fb3a1830abbf7091b2cea1fd12b704dae8e4">__msg_init_singular</link>)
+168 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;._M_iterator(*<emphasis role="keyword">this</emphasis>,&#32;<emphasis role="stringliteral">&quot;this&quot;</emphasis>));
+169 &#32;&#32;&#32;&#32;&#32;&#32;}
+170 
+174 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator_1af7595c1b79ad6fd9c6330085e0b07cf9">_Safe_iterator</link>(<emphasis role="keyword">const</emphasis>&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator">_Safe_iterator</link>&amp;&#32;__x)&#32;_GLIBCXX_NOEXCEPT
+175 &#32;&#32;&#32;&#32;&#32;&#32;:&#32;_Iter_base(__x.base()),&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator__base">_Safe_base</link>()
+176 &#32;&#32;&#32;&#32;&#32;&#32;{
+177 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;_GLIBCXX_RESOLVE_LIB_DEFECTS</emphasis>
+178 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;DR&#32;408.&#32;Is&#32;vector&lt;reverse_iterator&lt;char*&gt;&#32;&gt;&#32;forbidden?</emphasis>
+179 &#32;&#32;&#32;&#32;<link linkend="_lib_2include_2c_09_09_2debug_2macros_8h_1abc21d6cf6063d6d47494b08a8f1ba3be">_GLIBCXX_DEBUG_VERIFY</link>(!__x._M_singular()
+180 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;||&#32;__x.base()&#32;==&#32;_Iterator(),
+181 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_M_message(<link linkend="_namespace____gnu__debug_1aeb7af2ed24147dfab032febcea3f4fb3ab36653416c99ac987a9a1b65a44e086a">__msg_init_copy_singular</link>)
+182 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;._M_iterator(*<emphasis role="keyword">this</emphasis>,&#32;<emphasis role="stringliteral">&quot;this&quot;</emphasis>)
+183 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;._M_iterator(__x,&#32;<emphasis role="stringliteral">&quot;other&quot;</emphasis>));
+184 &#32;&#32;&#32;&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator_1ad58fb2d0ddcf50022427bdee797690e9">_M_attach</link>(__x._M_sequence);
+185 &#32;&#32;&#32;&#32;&#32;&#32;}
+186 
+187 <emphasis role="preprocessor">#if&#32;__cplusplus&#32;&gt;=&#32;201103L</emphasis>
+192 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator_1a9c152e7a0e9b12c9bf6d9db309fff72b">_Safe_iterator</link>(<link linkend="_class____gnu__debug_1_1___safe__iterator">_Safe_iterator</link>&amp;&amp;&#32;__x)&#32;noexcept
+193 &#32;&#32;&#32;&#32;&#32;&#32;:&#32;_Iter_base()
+194 &#32;&#32;&#32;&#32;&#32;&#32;{
+195 &#32;&#32;&#32;&#32;<link linkend="_lib_2include_2c_09_09_2debug_2macros_8h_1abc21d6cf6063d6d47494b08a8f1ba3be">_GLIBCXX_DEBUG_VERIFY</link>(!__x._M_singular()
+196 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;||&#32;__x.base()&#32;==&#32;_Iterator(),
+197 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_M_message(<link linkend="_namespace____gnu__debug_1aeb7af2ed24147dfab032febcea3f4fb3ab36653416c99ac987a9a1b65a44e086a">__msg_init_copy_singular</link>)
+198 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;._M_iterator(*<emphasis role="keyword">this</emphasis>,&#32;<emphasis role="stringliteral">&quot;this&quot;</emphasis>)
+199 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;._M_iterator(__x,&#32;<emphasis role="stringliteral">&quot;other&quot;</emphasis>));
+200 &#32;&#32;&#32;&#32;<link linkend="_class____gnu__debug_1_1___safe__sequence__base">_Safe_sequence_base</link>*&#32;__seq&#32;=&#32;__x._M_sequence;
+201 &#32;&#32;&#32;&#32;__x._M_detach();
+202 &#32;&#32;&#32;&#32;<link linkend="_namespacestd_1a3ece115a1c8ed9020a20f1d0b70efda8">std::swap</link>(<link linkend="_class____gnu__debug_1_1___safe__iterator_1a8ab2bd3cab984cb85cd02f1d61ce9931">base</link>(),&#32;__x.base());
+203 &#32;&#32;&#32;&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator_1ad58fb2d0ddcf50022427bdee797690e9">_M_attach</link>(__seq);
+204 &#32;&#32;&#32;&#32;&#32;&#32;}
+205 <emphasis role="preprocessor">#endif</emphasis>
+206 
+211 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_MutableIterator&gt;
+212 &#32;&#32;&#32;&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator_1aa19b46fc4451b021905e0e4f0d173b58">_Safe_iterator</link>(
+213 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator">_Safe_iterator</link>&lt;_MutableIterator,&#32;_Sequence,
+214 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;__gnu_cxx::__enable_if&lt;_IsConstant::__value&#32;&amp;&amp;
+215 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;std::__are_same&lt;_MutableIterator,&#32;_OtherIterator&gt;::__value,
+216 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_Category&gt;::__type&gt;&amp;&#32;__x)
+217 &#32;&#32;&#32;&#32;_GLIBCXX_NOEXCEPT
+218 &#32;&#32;&#32;&#32;:&#32;_Iter_base(__x.base())
+219 &#32;&#32;&#32;&#32;{
+220 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;_GLIBCXX_RESOLVE_LIB_DEFECTS</emphasis>
+221 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;DR&#32;408.&#32;Is&#32;vector&lt;reverse_iterator&lt;char*&gt;&#32;&gt;&#32;forbidden?</emphasis>
+222 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_lib_2include_2c_09_09_2debug_2macros_8h_1abc21d6cf6063d6d47494b08a8f1ba3be">_GLIBCXX_DEBUG_VERIFY</link>(!__x._M_singular()
+223 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;||&#32;__x.base()&#32;==&#32;_MutableIterator(),
+224 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_M_message(<link linkend="_namespace____gnu__debug_1aeb7af2ed24147dfab032febcea3f4fb3aced19637a4b5997b67de04678475bf4f">__msg_init_const_singular</link>)
+225 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;._M_iterator(*<emphasis role="keyword">this</emphasis>,&#32;<emphasis role="stringliteral">&quot;this&quot;</emphasis>)
+226 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;._M_iterator(__x,&#32;<emphasis role="stringliteral">&quot;other&quot;</emphasis>));
+227 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator_1ad58fb2d0ddcf50022427bdee797690e9">_M_attach</link>(__x._M_sequence);
+228 &#32;&#32;&#32;&#32;}
+229 
+233 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator">_Safe_iterator</link>&amp;
+234 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator_1acbd0220fdddeff06c0a1c8581a81c856">operator=</link>(<emphasis role="keyword">const</emphasis>&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator">_Safe_iterator</link>&amp;&#32;__x)&#32;_GLIBCXX_NOEXCEPT
+235 &#32;&#32;&#32;&#32;&#32;&#32;{
+236 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;_GLIBCXX_RESOLVE_LIB_DEFECTS</emphasis>
+237 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;DR&#32;408.&#32;Is&#32;vector&lt;reverse_iterator&lt;char*&gt;&#32;&gt;&#32;forbidden?</emphasis>
+238 &#32;&#32;&#32;&#32;<link linkend="_lib_2include_2c_09_09_2debug_2macros_8h_1abc21d6cf6063d6d47494b08a8f1ba3be">_GLIBCXX_DEBUG_VERIFY</link>(!__x._M_singular()
+239 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;||&#32;__x.base()&#32;==&#32;_Iterator(),
+240 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_M_message(<link linkend="_namespace____gnu__debug_1aeb7af2ed24147dfab032febcea3f4fb3ab497e4ecc78f9352d54013317523ef0b">__msg_copy_singular</link>)
+241 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;._M_iterator(*<emphasis role="keyword">this</emphasis>,&#32;<emphasis role="stringliteral">&quot;this&quot;</emphasis>)
+242 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;._M_iterator(__x,&#32;<emphasis role="stringliteral">&quot;other&quot;</emphasis>));
+243 
+244 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(this-&gt;<link linkend="_class____gnu__debug_1_1___safe__iterator__base_1ad7ffe137fed29c851275dc5a9ddf06c1">_M_sequence</link>&#32;&amp;&amp;&#32;this-&gt;<link linkend="_class____gnu__debug_1_1___safe__iterator__base_1ad7ffe137fed29c851275dc5a9ddf06c1">_M_sequence</link>&#32;==&#32;__x._M_sequence)
+245 &#32;&#32;&#32;&#32;&#32;&#32;{
+246 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__gnu_cxx::__scoped_lock&#32;__l(this-&gt;<link linkend="_class____gnu__debug_1_1___safe__iterator__base_1a394cc3f97fe4fb1c7d4378faa0b02877">_M_get_mutex</link>());
+247 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator_1a8ab2bd3cab984cb85cd02f1d61ce9931">base</link>()&#32;=&#32;__x.base();
+248 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator__base_1ad07568d7660eb8b85493b548d10c637a">_M_version</link>&#32;=&#32;__x._M_sequence-&gt;_M_version;
+249 &#32;&#32;&#32;&#32;&#32;&#32;}
+250 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>
+251 &#32;&#32;&#32;&#32;&#32;&#32;{
+252 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator__base_1a8deb31273aaf1912a5540ae046581c54">_M_detach</link>();
+253 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator_1a8ab2bd3cab984cb85cd02f1d61ce9931">base</link>()&#32;=&#32;__x.base();
+254 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator_1ad58fb2d0ddcf50022427bdee797690e9">_M_attach</link>(__x._M_sequence);
+255 &#32;&#32;&#32;&#32;&#32;&#32;}
+256 
+257 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;*<emphasis role="keyword">this</emphasis>;
+258 &#32;&#32;&#32;&#32;&#32;&#32;}
+259 
+260 <emphasis role="preprocessor">#if&#32;__cplusplus&#32;&gt;=&#32;201103L</emphasis>
+265 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator">_Safe_iterator</link>&amp;
+266 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator_1acbd0220fdddeff06c0a1c8581a81c856">operator=</link>(<link linkend="_class____gnu__debug_1_1___safe__iterator">_Safe_iterator</link>&amp;&amp;&#32;__x)&#32;<emphasis role="keyword">noexcept</emphasis>
+267 &#32;&#32;&#32;&#32;&#32;&#32;{
+268 &#32;&#32;&#32;&#32;<link linkend="_lib_2include_2c_09_09_2debug_2macros_8h_1abc21d6cf6063d6d47494b08a8f1ba3be">_GLIBCXX_DEBUG_VERIFY</link>(!__x._M_singular()
+269 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;||&#32;__x.base()&#32;==&#32;_Iterator(),
+270 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_M_message(<link linkend="_namespace____gnu__debug_1aeb7af2ed24147dfab032febcea3f4fb3ab497e4ecc78f9352d54013317523ef0b">__msg_copy_singular</link>)
+271 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;._M_iterator(*<emphasis role="keyword">this</emphasis>,&#32;<emphasis role="stringliteral">&quot;this&quot;</emphasis>)
+272 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;._M_iterator(__x,&#32;<emphasis role="stringliteral">&quot;other&quot;</emphasis>));
+273 
+274 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(std::__addressof(__x)&#32;==&#32;<emphasis role="keyword">this</emphasis>)
+275 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;*<emphasis role="keyword">this</emphasis>;
+276 
+277 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(this-&gt;<link linkend="_class____gnu__debug_1_1___safe__iterator__base_1ad7ffe137fed29c851275dc5a9ddf06c1">_M_sequence</link>&#32;&amp;&amp;&#32;this-&gt;<link linkend="_class____gnu__debug_1_1___safe__iterator__base_1ad7ffe137fed29c851275dc5a9ddf06c1">_M_sequence</link>&#32;==&#32;__x._M_sequence)
+278 &#32;&#32;&#32;&#32;&#32;&#32;{
+279 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__gnu_cxx::__scoped_lock&#32;__l(this-&gt;<link linkend="_class____gnu__debug_1_1___safe__iterator__base_1a394cc3f97fe4fb1c7d4378faa0b02877">_M_get_mutex</link>());
+280 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator_1a8ab2bd3cab984cb85cd02f1d61ce9931">base</link>()&#32;=&#32;__x.base();
+281 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator__base_1ad07568d7660eb8b85493b548d10c637a">_M_version</link>&#32;=&#32;__x._M_sequence-&gt;_M_version;
+282 &#32;&#32;&#32;&#32;&#32;&#32;}
+283 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>
+284 &#32;&#32;&#32;&#32;&#32;&#32;{
+285 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator__base_1a8deb31273aaf1912a5540ae046581c54">_M_detach</link>();
+286 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator_1a8ab2bd3cab984cb85cd02f1d61ce9931">base</link>()&#32;=&#32;__x.base();
+287 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator_1ad58fb2d0ddcf50022427bdee797690e9">_M_attach</link>(__x._M_sequence);
+288 &#32;&#32;&#32;&#32;&#32;&#32;}
+289 
+290 &#32;&#32;&#32;&#32;__x._M_detach();
+291 &#32;&#32;&#32;&#32;__x.base()&#32;=&#32;_Iterator();
+292 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;*<emphasis role="keyword">this</emphasis>;
+293 &#32;&#32;&#32;&#32;&#32;&#32;}
+294 <emphasis role="preprocessor">#endif</emphasis>
+295 
+300 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2x86__64-w64-mingw32_2bits_2c_09_09config_8h_1a56bc959ca1311889bcd1c5abb178ab59">_GLIBCXX_NODISCARD</link>
+301 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator_1a74c630f93b916c3300078eb55060b26c">reference</link>
+302 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator_1a49475214180c9591e286ba45636d2447">operator*</link>()&#32;const&#32;_GLIBCXX_NOEXCEPT
+303 &#32;&#32;&#32;&#32;&#32;&#32;{
+304 &#32;&#32;&#32;&#32;<link linkend="_lib_2include_2c_09_09_2debug_2macros_8h_1abc21d6cf6063d6d47494b08a8f1ba3be">_GLIBCXX_DEBUG_VERIFY</link>(this-&gt;<link linkend="_class____gnu__debug_1_1___safe__iterator_1a1653d02083343be4ddbd662070eec301">_M_dereferenceable</link>(),
+305 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_M_message(<link linkend="_namespace____gnu__debug_1aeb7af2ed24147dfab032febcea3f4fb3a96da60345178d10f27431c4c2fed1ad8">__msg_bad_deref</link>)
+306 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;._M_iterator(*<emphasis role="keyword">this</emphasis>,&#32;<emphasis role="stringliteral">&quot;this&quot;</emphasis>));
+307 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;*<link linkend="_class____gnu__debug_1_1___safe__iterator_1a8ab2bd3cab984cb85cd02f1d61ce9931">base</link>();
+308 &#32;&#32;&#32;&#32;&#32;&#32;}
+309 
+314 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2x86__64-w64-mingw32_2bits_2c_09_09config_8h_1a56bc959ca1311889bcd1c5abb178ab59">_GLIBCXX_NODISCARD</link>
+315 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1aca2093d4756bde9a55b94e9ff8d9c623">pointer</link>
+316 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator_1aaf4e403a90c0f4c19fa0d3386e541638">operator-&gt;</link>()&#32;const&#32;_GLIBCXX_NOEXCEPT
+317 &#32;&#32;&#32;&#32;&#32;&#32;{
+318 &#32;&#32;&#32;&#32;<link linkend="_lib_2include_2c_09_09_2debug_2macros_8h_1abc21d6cf6063d6d47494b08a8f1ba3be">_GLIBCXX_DEBUG_VERIFY</link>(this-&gt;<link linkend="_class____gnu__debug_1_1___safe__iterator_1a1653d02083343be4ddbd662070eec301">_M_dereferenceable</link>(),
+319 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_M_message(<link linkend="_namespace____gnu__debug_1aeb7af2ed24147dfab032febcea3f4fb3a96da60345178d10f27431c4c2fed1ad8">__msg_bad_deref</link>)
+320 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;._M_iterator(*<emphasis role="keyword">this</emphasis>,&#32;<emphasis role="stringliteral">&quot;this&quot;</emphasis>));
+321 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator_1a8ab2bd3cab984cb85cd02f1d61ce9931">base</link>().operator-&gt;();
+322 &#32;&#32;&#32;&#32;&#32;&#32;}
+323 
+324 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;------&#32;Input&#32;iterator&#32;requirements&#32;------</emphasis>
+329 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator">_Safe_iterator</link>&amp;
+330 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator_1a604aa250fdd3301544a77e49bd3021f0">operator++</link>()&#32;_GLIBCXX_NOEXCEPT
+331 &#32;&#32;&#32;&#32;&#32;&#32;{
+332 &#32;&#32;&#32;&#32;<link linkend="_lib_2include_2c_09_09_2debug_2macros_8h_1abc21d6cf6063d6d47494b08a8f1ba3be">_GLIBCXX_DEBUG_VERIFY</link>(this-&gt;<link linkend="_class____gnu__debug_1_1___safe__iterator_1a046fd9f196da5476ba014a3ed33316f6">_M_incrementable</link>(),
+333 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_M_message(<link linkend="_namespace____gnu__debug_1aeb7af2ed24147dfab032febcea3f4fb3a23cb8dacb530f6e6d3535a0d7c370d10">__msg_bad_inc</link>)
+334 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;._M_iterator(*<emphasis role="keyword">this</emphasis>,&#32;<emphasis role="stringliteral">&quot;this&quot;</emphasis>));
+335 &#32;&#32;&#32;&#32;__gnu_cxx::__scoped_lock&#32;__l(this-&gt;<link linkend="_class____gnu__debug_1_1___safe__iterator__base_1a394cc3f97fe4fb1c7d4378faa0b02877">_M_get_mutex</link>());
+336 &#32;&#32;&#32;&#32;++<link linkend="_class____gnu__debug_1_1___safe__iterator_1a8ab2bd3cab984cb85cd02f1d61ce9931">base</link>();
+337 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;*<emphasis role="keyword">this</emphasis>;
+338 &#32;&#32;&#32;&#32;&#32;&#32;}
+339 
+344 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator">_Safe_iterator</link>
+345 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator_1afcab5e513c8f51d1603094b906f2a5b7">operator++</link>(<emphasis role="keywordtype">int</emphasis>)&#32;_GLIBCXX_NOEXCEPT
+346 &#32;&#32;&#32;&#32;&#32;&#32;{
+347 &#32;&#32;&#32;&#32;<link linkend="_lib_2include_2c_09_09_2debug_2macros_8h_1abc21d6cf6063d6d47494b08a8f1ba3be">_GLIBCXX_DEBUG_VERIFY</link>(this-&gt;<link linkend="_class____gnu__debug_1_1___safe__iterator_1a046fd9f196da5476ba014a3ed33316f6">_M_incrementable</link>(),
+348 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_M_message(<link linkend="_namespace____gnu__debug_1aeb7af2ed24147dfab032febcea3f4fb3a23cb8dacb530f6e6d3535a0d7c370d10">__msg_bad_inc</link>)
+349 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;._M_iterator(*<emphasis role="keyword">this</emphasis>,&#32;<emphasis role="stringliteral">&quot;this&quot;</emphasis>));
+350 &#32;&#32;&#32;&#32;__gnu_cxx::__scoped_lock&#32;__l(this-&gt;<link linkend="_class____gnu__debug_1_1___safe__iterator__base_1a394cc3f97fe4fb1c7d4378faa0b02877">_M_get_mutex</link>());
+351 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator_1a9c152e7a0e9b12c9bf6d9db309fff72b">_Safe_iterator</link>(<link linkend="_class____gnu__debug_1_1___safe__iterator_1a8ab2bd3cab984cb85cd02f1d61ce9931">base</link>()++,&#32;this-&gt;<link linkend="_class____gnu__debug_1_1___safe__iterator__base_1ad7ffe137fed29c851275dc5a9ddf06c1">_M_sequence</link>,&#32;<link linkend="_struct____gnu__debug_1_1___safe__iterator_1_1___attach__single">_Attach_single</link>());
+352 &#32;&#32;&#32;&#32;&#32;&#32;}
+353 
+354 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;------&#32;Utilities&#32;------</emphasis>
+355 
+357 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">static</emphasis>&#32;_GLIBCXX_CONSTEXPR&#32;<emphasis role="keywordtype">bool</emphasis>
+358 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator_1aebecd16df3b101fbb55d205714f5f74c">_S_constant</link>()
+359 &#32;&#32;&#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;_IsConstant::__value;&#32;}
+360 
+364 &#32;&#32;&#32;&#32;&#32;&#32;_Iterator&amp;
+365 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator_1a8ab2bd3cab984cb85cd02f1d61ce9931">base</link>()&#32;_GLIBCXX_NOEXCEPT&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;*<emphasis role="keyword">this</emphasis>;&#32;}
+366 
+367 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;_Iterator&amp;
+368 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator_1a512e3878e5fb2411995fcd86fe64a11b">base</link>()&#32;const&#32;_GLIBCXX_NOEXCEPT&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;*<emphasis role="keyword">this</emphasis>;&#32;}
+369 
+374 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">operator</emphasis>&#32;_Iterator()&#32;const&#32;_GLIBCXX_NOEXCEPT&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;*<emphasis role="keyword">this</emphasis>;&#32;}
+375 
+377 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+378 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator_1ad58fb2d0ddcf50022427bdee797690e9">_M_attach</link>(<link linkend="_class____gnu__debug_1_1___safe__sequence__base">_Safe_sequence_base</link>*&#32;__seq)
+379 &#32;&#32;&#32;&#32;&#32;&#32;{&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator__base_1a51809843192abdf6415ec0342fb0fdb9">_Safe_base::_M_attach</link>(__seq,&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator_1aebecd16df3b101fbb55d205714f5f74c">_S_constant</link>());&#32;}
+380 
+382 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+383 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator_1a3b20ef089474f666775bd1f1a865c392">_M_attach_single</link>(<link linkend="_class____gnu__debug_1_1___safe__sequence__base">_Safe_sequence_base</link>*&#32;__seq)
+384 &#32;&#32;&#32;&#32;&#32;&#32;{&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator__base_1a45148b9f8f44371fedfd62f39827a18b">_Safe_base::_M_attach_single</link>(__seq,&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator_1aebecd16df3b101fbb55d205714f5f74c">_S_constant</link>());&#32;}
+385 
+387 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">bool</emphasis>
+388 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator_1a1653d02083343be4ddbd662070eec301">_M_dereferenceable</link>()<emphasis role="keyword">&#32;const</emphasis>
+389 <emphasis role="keyword">&#32;&#32;&#32;&#32;&#32;&#32;</emphasis>{&#32;<emphasis role="keywordflow">return</emphasis>&#32;!this-&gt;<link linkend="_class____gnu__debug_1_1___safe__iterator__base_1aefb17f520b7e88212cf86e552d440858">_M_singular</link>()&#32;&amp;&amp;&#32;!<link linkend="_class____gnu__debug_1_1___safe__iterator_1ac5c54eb2babadef8f12760583730dd85">_M_is_end</link>()&#32;&amp;&amp;&#32;!<link linkend="_class____gnu__debug_1_1___safe__iterator_1ae2340dafeccff234ffc0138e2aa23230">_M_is_before_begin</link>();&#32;}
+390 
+392 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">bool</emphasis>
+393 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator_1a5fa0f26e5d046377ffccb409f2944833">_M_before_dereferenceable</link>()<emphasis role="keyword">&#32;const</emphasis>
+394 <emphasis role="keyword">&#32;&#32;&#32;&#32;&#32;&#32;</emphasis>{
+395 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(this-&gt;<link linkend="_class____gnu__debug_1_1___safe__iterator_1a046fd9f196da5476ba014a3ed33316f6">_M_incrementable</link>())
+396 &#32;&#32;&#32;&#32;{
+397 &#32;&#32;&#32;&#32;&#32;&#32;_Iterator&#32;<link linkend="_namespace____gnu__debug_1a462d3f2cc5cb94a7cb98e035cd61b763">__base</link>&#32;=&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator_1a8ab2bd3cab984cb85cd02f1d61ce9931">base</link>();
+398 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;++<link linkend="_namespace____gnu__debug_1a462d3f2cc5cb94a7cb98e035cd61b763">__base</link>&#32;!=&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator_1a11704a65f7bb3df9b8cf2e63745d8d66">_M_get_sequence</link>()-&gt;_M_base().end();
+399 &#32;&#32;&#32;&#32;}
+400 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<emphasis role="keyword">false</emphasis>;
+401 &#32;&#32;&#32;&#32;&#32;&#32;}
+402 
+404 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">bool</emphasis>
+405 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator_1a046fd9f196da5476ba014a3ed33316f6">_M_incrementable</link>()<emphasis role="keyword">&#32;const</emphasis>
+406 <emphasis role="keyword">&#32;&#32;&#32;&#32;&#32;&#32;</emphasis>{&#32;<emphasis role="keywordflow">return</emphasis>&#32;!this-&gt;<link linkend="_class____gnu__debug_1_1___safe__iterator__base_1aefb17f520b7e88212cf86e552d440858">_M_singular</link>()&#32;&amp;&amp;&#32;!<link linkend="_class____gnu__debug_1_1___safe__iterator_1ac5c54eb2babadef8f12760583730dd85">_M_is_end</link>();&#32;}
+407 
+408 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Can&#32;we&#32;advance&#32;the&#32;iterator&#32;@p&#32;__n&#32;steps&#32;(@p&#32;__n&#32;may&#32;be&#32;negative)</emphasis>
+409 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">bool</emphasis>
+410 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator_1a4c52f7fc0caab7e9923ae59d5353c05d">_M_can_advance</link>(difference_type&#32;__n,&#32;<emphasis role="keywordtype">bool</emphasis>&#32;__strict&#32;=&#32;<emphasis role="keyword">false</emphasis>)&#32;<emphasis role="keyword">const</emphasis>;
+411 
+412 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Can&#32;we&#32;advance&#32;the&#32;iterator&#32;using&#32;@p&#32;__dist&#32;in&#32;@p&#32;__way&#32;direction.</emphasis>
+413 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Diff&gt;
+414 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">bool</emphasis>
+415 &#32;&#32;&#32;&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator_1a61b0d14c3b13f7a1989796596ef0e8c5">_M_can_advance</link>(<emphasis role="keyword">const</emphasis>&#32;std::pair&lt;_Diff,&#32;_Distance_precision&gt;&amp;&#32;__dist,
+416 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;__way)&#32;<emphasis role="keyword">const</emphasis>;
+417 
+418 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Is&#32;the&#32;iterator&#32;range&#32;[*this,&#32;__rhs)&#32;valid?</emphasis>
+419 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">bool</emphasis>
+420 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator_1a5499070e50573f63e76f4333fa156166">_M_valid_range</link>(<emphasis role="keyword">const</emphasis>&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator">_Safe_iterator</link>&amp;&#32;__rhs,
+421 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;std::pair&lt;difference_type,&#32;_Distance_precision&gt;&amp;&#32;__dist,
+422 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">bool</emphasis>&#32;__check_dereferenceable&#32;=&#32;<emphasis role="keyword">true</emphasis>)&#32;<emphasis role="keyword">const</emphasis>;
+423 
+424 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;The&#32;sequence&#32;this&#32;iterator&#32;references.</emphasis>
+425 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;__gnu_cxx::__conditional_type&lt;
+426 &#32;&#32;&#32;&#32;_IsConstant::__value,&#32;<emphasis role="keyword">const</emphasis>&#32;_Sequence*,&#32;_Sequence*&gt;::__type
+427 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator_1a11704a65f7bb3df9b8cf2e63745d8d66">_M_get_sequence</link>()<emphasis role="keyword">&#32;const</emphasis>
+428 <emphasis role="keyword">&#32;&#32;&#32;&#32;&#32;&#32;</emphasis>{&#32;<emphasis role="keywordflow">return</emphasis>&#32;<emphasis role="keyword">static_cast&lt;</emphasis>_Sequence*<emphasis role="keyword">&gt;</emphasis>(<link linkend="_class____gnu__debug_1_1___safe__iterator__base_1ad7ffe137fed29c851275dc5a9ddf06c1">_M_sequence</link>);&#32;}
+429 
+430 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Get&#32;distance&#32;to&#32;__rhs.</emphasis>
+431 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;<link linkend="_struct____gnu__debug_1_1___distance__traits_1a233783a24e495312304a160308fb74f9">_Distance_traits&lt;_Iterator&gt;::__type</link>
+432 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator_1a130167f02144c108f212d17375b21e88">_M_get_distance_to</link>(<emphasis role="keyword">const</emphasis>&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator">_Safe_iterator</link>&amp;&#32;__rhs)&#32;<emphasis role="keyword">const</emphasis>;
+433 
+434 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Get&#32;distance&#32;from&#32;sequence&#32;begin&#32;up&#32;to&#32;*this.</emphasis>
+435 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;<link linkend="_struct____gnu__debug_1_1___distance__traits_1a233783a24e495312304a160308fb74f9">_Distance_traits&lt;_Iterator&gt;::__type</link>
+436 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator_1a9f313f1664dac97493435fb4ebbdde49">_M_get_distance_from_begin</link>()&#32;<emphasis role="keyword">const</emphasis>;
+437 
+438 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Get&#32;distance&#32;from&#32;*this&#32;to&#32;sequence&#32;end.</emphasis>
+439 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;<link linkend="_struct____gnu__debug_1_1___distance__traits_1a233783a24e495312304a160308fb74f9">_Distance_traits&lt;_Iterator&gt;::__type</link>
+440 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator_1a7e1d9cbcbb61e6410dc8054e1a52b3c4">_M_get_distance_to_end</link>()&#32;<emphasis role="keyword">const</emphasis>;
+441 
+443 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">bool</emphasis>
+444 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator_1a8b74400462adbb5068c2df54871d10cb">_M_is_begin</link>()<emphasis role="keyword">&#32;const</emphasis>
+445 <emphasis role="keyword">&#32;&#32;&#32;&#32;&#32;&#32;</emphasis>{&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator_1a8ab2bd3cab984cb85cd02f1d61ce9931">base</link>()&#32;==&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator_1a11704a65f7bb3df9b8cf2e63745d8d66">_M_get_sequence</link>()-&gt;_M_base().begin();&#32;}
+446 
+448 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">bool</emphasis>
+449 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator_1ac5c54eb2babadef8f12760583730dd85">_M_is_end</link>()<emphasis role="keyword">&#32;const</emphasis>
+450 <emphasis role="keyword">&#32;&#32;&#32;&#32;&#32;&#32;</emphasis>{&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator_1a8ab2bd3cab984cb85cd02f1d61ce9931">base</link>()&#32;==&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator_1a11704a65f7bb3df9b8cf2e63745d8d66">_M_get_sequence</link>()-&gt;_M_base().end();&#32;}
+451 
+454 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">bool</emphasis>
+455 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator_1ae2340dafeccff234ffc0138e2aa23230">_M_is_before_begin</link>()<emphasis role="keyword">&#32;const</emphasis>
+456 <emphasis role="keyword">&#32;&#32;&#32;&#32;&#32;&#32;</emphasis>{&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="_struct____gnu__debug_1_1___before_begin_helper_1a67d9eb6fff1f4678afcd07c005dfdec9">_BeforeBeginHelper&lt;_Sequence&gt;::_S_Is</link>(*<emphasis role="keyword">this</emphasis>);&#32;}
+457 
+460 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">bool</emphasis>
+461 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator_1a8150f9d08a7b921758b2e1b59263c733">_M_is_beginnest</link>()<emphasis role="keyword">&#32;const</emphasis>
+462 <emphasis role="keyword">&#32;&#32;&#32;&#32;&#32;&#32;</emphasis>{&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="_struct____gnu__debug_1_1___before_begin_helper_1a569e1e7eff6dd9bd485adcfff8e12520">_BeforeBeginHelper&lt;_Sequence&gt;::_S_Is_Beginnest</link>(*<emphasis role="keyword">this</emphasis>);&#32;}
+463 
+464 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;------&#32;Operators&#32;------</emphasis>
+465 
+466 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator">_Safe_iterator&lt;_Iterator, _Sequence, iterator_category&gt;</link>&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator_1a9f230bfabecb6d267f489c4019ef6676">_Self</link>;
+467 
+468 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2x86__64-w64-mingw32_2bits_2c_09_09config_8h_1a56bc959ca1311889bcd1c5abb178ab59">_GLIBCXX_NODISCARD</link>
+469 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">friend</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>
+470 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator_1ad500fd94587168096c3b8a83574a8f24">operator==</link>(<emphasis role="keyword">const</emphasis>&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator">_Self</link>&amp;&#32;__lhs,&#32;<emphasis role="keyword">const</emphasis>&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator">_Self</link>&amp;&#32;__rhs)&#32;_GLIBCXX_NOEXCEPT
+471 &#32;&#32;&#32;&#32;&#32;&#32;{
+472 &#32;&#32;&#32;&#32;<link linkend="_lib_2include_2c_09_09_2debug_2safe__iterator_8h_1a5f9b740ed01e2be440ff6537dee8b61f">_GLIBCXX_DEBUG_VERIFY_EQ_OPERANDS</link>(__lhs,&#32;__rhs);
+473 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__lhs.base()&#32;==&#32;__rhs.base();
+474 &#32;&#32;&#32;&#32;&#32;&#32;}
+475 
+476 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_IteR&gt;
+477 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2x86__64-w64-mingw32_2bits_2c_09_09config_8h_1a56bc959ca1311889bcd1c5abb178ab59">_GLIBCXX_NODISCARD</link>
+478 &#32;&#32;&#32;&#32;<emphasis role="keyword">friend</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>
+479 &#32;&#32;&#32;&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator_1aa9091d86384ab61fce673a90612375bc">operator==</link>(<emphasis role="keyword">const</emphasis>&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator">_Self</link>&amp;&#32;__lhs,
+480 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator">_Safe_iterator&lt;_IteR, _Sequence, iterator_category&gt;</link>&amp;&#32;__rhs)
+481 &#32;&#32;&#32;&#32;_GLIBCXX_NOEXCEPT
+482 &#32;&#32;&#32;&#32;{
+483 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_lib_2include_2c_09_09_2debug_2safe__iterator_8h_1a5f9b740ed01e2be440ff6537dee8b61f">_GLIBCXX_DEBUG_VERIFY_EQ_OPERANDS</link>(__lhs,&#32;__rhs);
+484 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__lhs.base()&#32;==&#32;__rhs.base();
+485 &#32;&#32;&#32;&#32;}
+486 
+487 <emphasis role="preprocessor">#if&#32;!&#32;__cpp_lib_three_way_comparison</emphasis>
+488 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2x86__64-w64-mingw32_2bits_2c_09_09config_8h_1a56bc959ca1311889bcd1c5abb178ab59">_GLIBCXX_NODISCARD</link>
+489 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">friend</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>
+490 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator_1a951b6d0df625c6d73039aaf568826a4a">operator!=</link>(<emphasis role="keyword">const</emphasis>&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator">_Self</link>&amp;&#32;__lhs,&#32;<emphasis role="keyword">const</emphasis>&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator">_Self</link>&amp;&#32;__rhs)&#32;_GLIBCXX_NOEXCEPT
+491 &#32;&#32;&#32;&#32;&#32;&#32;{
+492 &#32;&#32;&#32;&#32;<link linkend="_lib_2include_2c_09_09_2debug_2safe__iterator_8h_1a5f9b740ed01e2be440ff6537dee8b61f">_GLIBCXX_DEBUG_VERIFY_EQ_OPERANDS</link>(__lhs,&#32;__rhs);
+493 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__lhs.base()&#32;!=&#32;__rhs.base();
+494 &#32;&#32;&#32;&#32;&#32;&#32;}
+495 
+496 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_IteR&gt;
+497 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2x86__64-w64-mingw32_2bits_2c_09_09config_8h_1a56bc959ca1311889bcd1c5abb178ab59">_GLIBCXX_NODISCARD</link>
+498 &#32;&#32;&#32;&#32;<emphasis role="keyword">friend</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>
+499 &#32;&#32;&#32;&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator_1a3e79e001f10a2c49b768a3a40ee6bcbe">operator!=</link>(<emphasis role="keyword">const</emphasis>&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator">_Self</link>&amp;&#32;__lhs,
+500 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator">_Safe_iterator&lt;_IteR, _Sequence, iterator_category&gt;</link>&amp;&#32;__rhs)
+501 &#32;&#32;&#32;&#32;_GLIBCXX_NOEXCEPT
+502 &#32;&#32;&#32;&#32;{
+503 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_lib_2include_2c_09_09_2debug_2safe__iterator_8h_1a5f9b740ed01e2be440ff6537dee8b61f">_GLIBCXX_DEBUG_VERIFY_EQ_OPERANDS</link>(__lhs,&#32;__rhs);
+504 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__lhs.base()&#32;!=&#32;__rhs.base();
+505 &#32;&#32;&#32;&#32;}
+506 <emphasis role="preprocessor">#endif&#32;</emphasis><emphasis role="comment">//&#32;three-way&#32;comparison</emphasis>
+507 &#32;&#32;&#32;&#32;};
+508 
+509 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Iterator,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Sequence&gt;
+510 &#32;&#32;&#32;&#32;<emphasis role="keyword">class&#32;</emphasis><link linkend="_class____gnu__debug_1_1___safe__iterator">_Safe_iterator</link>&lt;_Iterator,&#32;_Sequence,&#32;<link linkend="_namespacestd">std</link>::bidirectional_iterator_tag&gt;
+511 &#32;&#32;&#32;&#32;:&#32;<emphasis role="keyword">public</emphasis>&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator">_Safe_iterator</link>&lt;_Iterator,&#32;_Sequence,&#32;std::forward_iterator_tag&gt;
+512 &#32;&#32;&#32;&#32;{
+513 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator">_Safe_iterator</link>&lt;_Iterator,&#32;_Sequence,
+514 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;std::forward_iterator_tag&gt;&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator">_Safe_base</link>;
+515 
+516 &#32;&#32;&#32;&#32;<emphasis role="keyword">protected</emphasis>:
+517 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">typename</emphasis>&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator_1aa2f8eddbb9601e97e3e4d2e75006fc98">_Safe_base::_OtherIterator</link>&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator_3_01___iterator_00_01___sequence_00_01std_1_1bidirectional__iterator__tag_01_4_1abbc01844c825362c3ed7b45b36858211">_OtherIterator</link>;
+518 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">typename</emphasis>&#32;_Safe_base::_Attach_single&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator_3_01___iterator_00_01___sequence_00_01std_1_1bidirectional__iterator__tag_01_4_1a91a686b2f0f6b3f1364e1d37b1a20b22">_Attach_single</link>;
+519 
+520 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator_3_01___iterator_00_01___sequence_00_01std_1_1bidirectional__iterator__tag_01_4_1ad10eaf532f15db6889dd038f1c74dde7">_Safe_iterator</link>(_Iterator&#32;__i,&#32;<link linkend="_class____gnu__debug_1_1___safe__sequence__base">_Safe_sequence_base</link>*&#32;__seq,&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator_3_01___iterator_00_01___sequence_00_01std_1_1bidirectional__iterator__tag_01_4_1a91a686b2f0f6b3f1364e1d37b1a20b22">_Attach_single</link>)
+521 &#32;&#32;&#32;&#32;&#32;&#32;_GLIBCXX_NOEXCEPT
+522 &#32;&#32;&#32;&#32;&#32;&#32;:&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator">_Safe_base</link>(__i,&#32;__seq,&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator_3_01___iterator_00_01___sequence_00_01std_1_1bidirectional__iterator__tag_01_4_1a91a686b2f0f6b3f1364e1d37b1a20b22">_Attach_single</link>())
+523 &#32;&#32;&#32;&#32;&#32;&#32;{&#32;}
+524 
+525 &#32;&#32;&#32;&#32;<emphasis role="keyword">public</emphasis>:
+527 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator_3_01___iterator_00_01___sequence_00_01std_1_1bidirectional__iterator__tag_01_4_1a3a3a5cc69b2e1e4c50e33daaa8689604">_Safe_iterator</link>()&#32;_GLIBCXX_NOEXCEPT&#32;{&#32;}
+528 
+536 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator_3_01___iterator_00_01___sequence_00_01std_1_1bidirectional__iterator__tag_01_4_1a037d25edc49ed6168a1092d6b3157bdf">_Safe_iterator</link>(_Iterator&#32;__i,&#32;<emphasis role="keyword">const</emphasis>&#32;<link linkend="_class____gnu__debug_1_1___safe__sequence__base">_Safe_sequence_base</link>*&#32;__seq)
+537 &#32;&#32;&#32;&#32;&#32;&#32;_GLIBCXX_NOEXCEPT
+538 &#32;&#32;&#32;&#32;&#32;&#32;:&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator">_Safe_base</link>(__i,&#32;__seq)
+539 &#32;&#32;&#32;&#32;&#32;&#32;{&#32;}
+540 
+544 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator_3_01___iterator_00_01___sequence_00_01std_1_1bidirectional__iterator__tag_01_4_1a47d3374fdff94b8780c3b708fbc59b31">_Safe_iterator</link>(<emphasis role="keyword">const</emphasis>&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator">_Safe_iterator</link>&amp;&#32;__x)&#32;_GLIBCXX_NOEXCEPT
+545 &#32;&#32;&#32;&#32;&#32;&#32;:&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator">_Safe_base</link>(__x)
+546 &#32;&#32;&#32;&#32;&#32;&#32;{&#32;}
+547 
+548 <emphasis role="preprocessor">#if&#32;__cplusplus&#32;&gt;=&#32;201103L</emphasis>
+550 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator_1a9c152e7a0e9b12c9bf6d9db309fff72b">_Safe_iterator</link>(<link linkend="_class____gnu__debug_1_1___safe__iterator">_Safe_iterator</link>&amp;&amp;)&#32;=&#32;<emphasis role="keywordflow">default</emphasis>;
+551 <emphasis role="preprocessor">#endif</emphasis>
+552 
+557 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_MutableIterator&gt;
+558 &#32;&#32;&#32;&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator_3_01___iterator_00_01___sequence_00_01std_1_1bidirectional__iterator__tag_01_4_1a0d635b5b496022278e946dd102e1c334">_Safe_iterator</link>(
+559 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator">_Safe_iterator</link>&lt;_MutableIterator,&#32;_Sequence,
+560 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;__gnu_cxx::__enable_if&lt;_Safe_base::_IsConstant::__value&#32;&amp;&amp;
+561 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;std::__are_same&lt;_MutableIterator,&#32;_OtherIterator&gt;::__value,
+562 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;std::bidirectional_iterator_tag&gt;::__type&gt;&amp;&#32;__x)
+563 &#32;&#32;&#32;&#32;_GLIBCXX_NOEXCEPT
+564 &#32;&#32;&#32;&#32;:&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator">_Safe_base</link>(__x)
+565 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{&#32;}
+566 
+567 <emphasis role="preprocessor">#if&#32;__cplusplus&#32;&gt;=&#32;201103L</emphasis>
+569 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator">_Safe_iterator</link>&amp;
+570 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator_1acbd0220fdddeff06c0a1c8581a81c856">operator=</link>(<emphasis role="keyword">const</emphasis>&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator">_Safe_iterator</link>&amp;)&#32;=&#32;<emphasis role="keywordflow">default</emphasis>;
+571 
+573 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator">_Safe_iterator</link>&amp;
+574 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator_1acbd0220fdddeff06c0a1c8581a81c856">operator=</link>(<link linkend="_class____gnu__debug_1_1___safe__iterator">_Safe_iterator</link>&amp;&amp;)&#32;=&#32;<emphasis role="keywordflow">default</emphasis>;
+575 <emphasis role="preprocessor">#else</emphasis>
+577 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator">_Safe_iterator</link>&amp;
+578 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator_3_01___iterator_00_01___sequence_00_01std_1_1bidirectional__iterator__tag_01_4_1a5c975e7983a98b3e0ce2573b79b08af7">operator=</link>(<emphasis role="keyword">const</emphasis>&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator">_Safe_iterator</link>&amp;&#32;__x)
+579 &#32;&#32;&#32;&#32;&#32;&#32;{
+580 &#32;&#32;&#32;&#32;_Safe_base::operator=(__x);
+581 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;*<emphasis role="keyword">this</emphasis>;
+582 &#32;&#32;&#32;&#32;&#32;&#32;}
+583 <emphasis role="preprocessor">#endif</emphasis>
+584 
+585 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;------&#32;Input&#32;iterator&#32;requirements&#32;------</emphasis>
+590 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator">_Safe_iterator</link>&amp;
+591 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator_3_01___iterator_00_01___sequence_00_01std_1_1bidirectional__iterator__tag_01_4_1a251ba70c245471b93e1c440f093a9cd5">operator++</link>()&#32;_GLIBCXX_NOEXCEPT
+592 &#32;&#32;&#32;&#32;&#32;&#32;{
+593 &#32;&#32;&#32;&#32;_Safe_base::operator++();
+594 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;*<emphasis role="keyword">this</emphasis>;
+595 &#32;&#32;&#32;&#32;&#32;&#32;}
+596 
+601 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator">_Safe_iterator</link>
+602 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator_3_01___iterator_00_01___sequence_00_01std_1_1bidirectional__iterator__tag_01_4_1aa380eff611c872f236277e43e4eedf7b">operator++</link>(<emphasis role="keywordtype">int</emphasis>)&#32;_GLIBCXX_NOEXCEPT
+603 &#32;&#32;&#32;&#32;&#32;&#32;{
+604 &#32;&#32;&#32;&#32;<link linkend="_lib_2include_2c_09_09_2debug_2macros_8h_1abc21d6cf6063d6d47494b08a8f1ba3be">_GLIBCXX_DEBUG_VERIFY</link>(this-&gt;<link linkend="_class____gnu__debug_1_1___safe__iterator_1a046fd9f196da5476ba014a3ed33316f6">_M_incrementable</link>(),
+605 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_M_message(<link linkend="_namespace____gnu__debug_1aeb7af2ed24147dfab032febcea3f4fb3a23cb8dacb530f6e6d3535a0d7c370d10">__msg_bad_inc</link>)
+606 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;._M_iterator(*<emphasis role="keyword">this</emphasis>,&#32;<emphasis role="stringliteral">&quot;this&quot;</emphasis>));
+607 &#32;&#32;&#32;&#32;__gnu_cxx::__scoped_lock&#32;__l(this-&gt;<link linkend="_class____gnu__debug_1_1___safe__iterator__base_1a394cc3f97fe4fb1c7d4378faa0b02877">_M_get_mutex</link>());
+608 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator_1a9c152e7a0e9b12c9bf6d9db309fff72b">_Safe_iterator</link>(this-&gt;<link linkend="_class____gnu__debug_1_1___safe__iterator_1a8ab2bd3cab984cb85cd02f1d61ce9931">base</link>()++,&#32;this-&gt;<link linkend="_class____gnu__debug_1_1___safe__iterator__base_1ad7ffe137fed29c851275dc5a9ddf06c1">_M_sequence</link>,
+609 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_Attach_single());
+610 &#32;&#32;&#32;&#32;&#32;&#32;}
+611 
+612 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;------&#32;Bidirectional&#32;iterator&#32;requirements&#32;------</emphasis>
+617 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator">_Safe_iterator</link>&amp;
+618 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator_3_01___iterator_00_01___sequence_00_01std_1_1bidirectional__iterator__tag_01_4_1aa071d99ce70ab4fa90ac8992489d2b88">operator--</link>()&#32;_GLIBCXX_NOEXCEPT
+619 &#32;&#32;&#32;&#32;&#32;&#32;{
+620 &#32;&#32;&#32;&#32;<link linkend="_lib_2include_2c_09_09_2debug_2macros_8h_1abc21d6cf6063d6d47494b08a8f1ba3be">_GLIBCXX_DEBUG_VERIFY</link>(this-&gt;_M_decrementable(),
+621 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_M_message(<link linkend="_namespace____gnu__debug_1aeb7af2ed24147dfab032febcea3f4fb3a7f0d6ef257b8e2b8219df1cc6dcd8178">__msg_bad_dec</link>)
+622 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;._M_iterator(*<emphasis role="keyword">this</emphasis>,&#32;<emphasis role="stringliteral">&quot;this&quot;</emphasis>));
+623 &#32;&#32;&#32;&#32;__gnu_cxx::__scoped_lock&#32;__l(this-&gt;<link linkend="_class____gnu__debug_1_1___safe__iterator__base_1a394cc3f97fe4fb1c7d4378faa0b02877">_M_get_mutex</link>());
+624 &#32;&#32;&#32;&#32;--this-&gt;<link linkend="_class____gnu__debug_1_1___safe__iterator_1a8ab2bd3cab984cb85cd02f1d61ce9931">base</link>();
+625 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;*<emphasis role="keyword">this</emphasis>;
+626 &#32;&#32;&#32;&#32;&#32;&#32;}
+627 
+632 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator">_Safe_iterator</link>
+633 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator_3_01___iterator_00_01___sequence_00_01std_1_1bidirectional__iterator__tag_01_4_1a116df69aba5b5e6182942243df25b698">operator--</link>(<emphasis role="keywordtype">int</emphasis>)&#32;_GLIBCXX_NOEXCEPT
+634 &#32;&#32;&#32;&#32;&#32;&#32;{
+635 &#32;&#32;&#32;&#32;<link linkend="_lib_2include_2c_09_09_2debug_2macros_8h_1abc21d6cf6063d6d47494b08a8f1ba3be">_GLIBCXX_DEBUG_VERIFY</link>(this-&gt;_M_decrementable(),
+636 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_M_message(<link linkend="_namespace____gnu__debug_1aeb7af2ed24147dfab032febcea3f4fb3a7f0d6ef257b8e2b8219df1cc6dcd8178">__msg_bad_dec</link>)
+637 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;._M_iterator(*<emphasis role="keyword">this</emphasis>,&#32;<emphasis role="stringliteral">&quot;this&quot;</emphasis>));
+638 &#32;&#32;&#32;&#32;__gnu_cxx::__scoped_lock&#32;__l(this-&gt;<link linkend="_class____gnu__debug_1_1___safe__iterator__base_1a394cc3f97fe4fb1c7d4378faa0b02877">_M_get_mutex</link>());
+639 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator_1a9c152e7a0e9b12c9bf6d9db309fff72b">_Safe_iterator</link>(this-&gt;<link linkend="_class____gnu__debug_1_1___safe__iterator_1a8ab2bd3cab984cb85cd02f1d61ce9931">base</link>()--,&#32;this-&gt;<link linkend="_class____gnu__debug_1_1___safe__iterator__base_1ad7ffe137fed29c851275dc5a9ddf06c1">_M_sequence</link>,
+640 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_Attach_single());
+641 &#32;&#32;&#32;&#32;&#32;&#32;}
+642 
+643 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;------&#32;Utilities&#32;------</emphasis>
+644 
+645 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Is&#32;the&#32;iterator&#32;decrementable?</emphasis>
+646 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">bool</emphasis>
+647 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator_3_01___iterator_00_01___sequence_00_01std_1_1bidirectional__iterator__tag_01_4_1aee45ca57597d27fb0ebcaa342709efe5">_M_decrementable</link>()<emphasis role="keyword">&#32;const</emphasis>
+648 <emphasis role="keyword">&#32;&#32;&#32;&#32;&#32;&#32;</emphasis>{&#32;<emphasis role="keywordflow">return</emphasis>&#32;!this-&gt;<link linkend="_class____gnu__debug_1_1___safe__iterator__base_1aefb17f520b7e88212cf86e552d440858">_M_singular</link>()&#32;&amp;&amp;&#32;!this-&gt;<link linkend="_class____gnu__debug_1_1___safe__iterator_1a8b74400462adbb5068c2df54871d10cb">_M_is_begin</link>();&#32;}
+649 &#32;&#32;&#32;&#32;};
+650 
+651 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Iterator,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Sequence&gt;
+652 &#32;&#32;&#32;&#32;<emphasis role="keyword">class&#32;</emphasis><link linkend="_class____gnu__debug_1_1___safe__iterator">_Safe_iterator</link>&lt;_Iterator,&#32;_Sequence,&#32;<link linkend="_namespacestd">std</link>::random_access_iterator_tag&gt;
+653 &#32;&#32;&#32;&#32;:&#32;<emphasis role="keyword">public</emphasis>&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator">_Safe_iterator</link>&lt;_Iterator,&#32;_Sequence,
+654 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;std::bidirectional_iterator_tag&gt;
+655 &#32;&#32;&#32;&#32;{
+656 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator">_Safe_iterator</link>&lt;_Iterator,&#32;_Sequence,
+657 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;std::bidirectional_iterator_tag&gt;&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator_3_01___iterator_00_01___sequence_00_01std_1_1bidirectional__iterator__tag_01_4">_Safe_base</link>;
+658 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">typename</emphasis>&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator_3_01___iterator_00_01___sequence_00_01std_1_1bidirectional__iterator__tag_01_4_1abbc01844c825362c3ed7b45b36858211">_Safe_base::_OtherIterator</link>&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator_1aa2f8eddbb9601e97e3e4d2e75006fc98">_OtherIterator</link>;
+659 
+660 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">typename</emphasis>&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator">_Safe_base::_Self</link>&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator_1a9f230bfabecb6d267f489c4019ef6676">_Self</link>;
+661 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator">_Safe_iterator</link>&lt;<link linkend="_class____gnu__debug_1_1___safe__iterator_1aa2f8eddbb9601e97e3e4d2e75006fc98">_OtherIterator</link>,&#32;_Sequence,
+662 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;std::random_access_iterator_tag&gt;&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator">_OtherSelf</link>;
+663 
+664 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">typename</emphasis>&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator_3_01___iterator_00_01___sequence_00_01std_1_1bidirectional__iterator__tag_01_4_1a91a686b2f0f6b3f1364e1d37b1a20b22">_Safe_base::_Attach_single</link>&#32;_Attach_single;
+665 
+666 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator_1a9c152e7a0e9b12c9bf6d9db309fff72b">_Safe_iterator</link>(_Iterator&#32;__i,&#32;<link linkend="_class____gnu__debug_1_1___safe__sequence__base">_Safe_sequence_base</link>*&#32;__seq,&#32;_Attach_single)
+667 &#32;&#32;&#32;&#32;&#32;&#32;_GLIBCXX_NOEXCEPT
+668 &#32;&#32;&#32;&#32;&#32;&#32;:&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator_3_01___iterator_00_01___sequence_00_01std_1_1bidirectional__iterator__tag_01_4">_Safe_base</link>(__i,&#32;__seq,&#32;_Attach_single())
+669 &#32;&#32;&#32;&#32;&#32;&#32;{&#32;}
+670 
+671 &#32;&#32;&#32;&#32;<emphasis role="keyword">public</emphasis>:
+672 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">typename</emphasis>&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator_1a30a9b5cb458330240b532d8a5f599c89">_Safe_base::difference_type</link>&#32;&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator_3_01___iterator_00_01___sequence_00_01std_1_1random__access__iterator__tag_01_4_1aabad5d3da6b0d17e62fe496c2bf6deb3">difference_type</link>;
+673 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">typename</emphasis>&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator_1a74c630f93b916c3300078eb55060b26c">_Safe_base::reference</link>&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator_3_01___iterator_00_01___sequence_00_01std_1_1random__access__iterator__tag_01_4_1acbf075b3079a43c375ac91c6072fa990">reference</link>;
+674 
+676 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator_3_01___iterator_00_01___sequence_00_01std_1_1random__access__iterator__tag_01_4_1a549176be59266e4f428241e3daaead13">_Safe_iterator</link>()&#32;_GLIBCXX_NOEXCEPT&#32;{&#32;}
+677 
+685 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator_3_01___iterator_00_01___sequence_00_01std_1_1random__access__iterator__tag_01_4_1ae8165016ceafe14d758de5ada4a3604b">_Safe_iterator</link>(_Iterator&#32;__i,&#32;<emphasis role="keyword">const</emphasis>&#32;<link linkend="_class____gnu__debug_1_1___safe__sequence__base">_Safe_sequence_base</link>*&#32;__seq)
+686 &#32;&#32;&#32;&#32;&#32;&#32;_GLIBCXX_NOEXCEPT
+687 &#32;&#32;&#32;&#32;&#32;&#32;:&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator_3_01___iterator_00_01___sequence_00_01std_1_1bidirectional__iterator__tag_01_4">_Safe_base</link>(__i,&#32;__seq)
+688 &#32;&#32;&#32;&#32;&#32;&#32;{&#32;}
+689 
+693 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator_3_01___iterator_00_01___sequence_00_01std_1_1random__access__iterator__tag_01_4_1ac9f1559f0cd73b5acf025e989e7975e5">_Safe_iterator</link>(<emphasis role="keyword">const</emphasis>&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator">_Safe_iterator</link>&amp;&#32;__x)&#32;_GLIBCXX_NOEXCEPT
+694 &#32;&#32;&#32;&#32;&#32;&#32;:&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator_3_01___iterator_00_01___sequence_00_01std_1_1bidirectional__iterator__tag_01_4">_Safe_base</link>(__x)
+695 &#32;&#32;&#32;&#32;&#32;&#32;{&#32;}
+696 
+697 <emphasis role="preprocessor">#if&#32;__cplusplus&#32;&gt;=&#32;201103L</emphasis>
+699 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator_1a9c152e7a0e9b12c9bf6d9db309fff72b">_Safe_iterator</link>(<link linkend="_class____gnu__debug_1_1___safe__iterator">_Safe_iterator</link>&amp;&amp;)&#32;=&#32;<emphasis role="keywordflow">default</emphasis>;
+700 <emphasis role="preprocessor">#endif</emphasis>
+701 
+706 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_MutableIterator&gt;
+707 &#32;&#32;&#32;&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator_3_01___iterator_00_01___sequence_00_01std_1_1random__access__iterator__tag_01_4_1af4044fce3a0f649e6d28f5fe0873617c">_Safe_iterator</link>(
+708 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator">_Safe_iterator</link>&lt;_MutableIterator,&#32;_Sequence,
+709 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;__gnu_cxx::__enable_if&lt;_Safe_base::_IsConstant::__value&#32;&amp;&amp;
+710 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;std::__are_same&lt;_MutableIterator,&#32;_OtherIterator&gt;::__value,
+711 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;std::random_access_iterator_tag&gt;::__type&gt;&amp;&#32;__x)
+712 &#32;&#32;&#32;&#32;_GLIBCXX_NOEXCEPT
+713 &#32;&#32;&#32;&#32;:&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator_3_01___iterator_00_01___sequence_00_01std_1_1bidirectional__iterator__tag_01_4">_Safe_base</link>(__x)
+714 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{&#32;}
+715 
+716 <emphasis role="preprocessor">#if&#32;__cplusplus&#32;&gt;=&#32;201103L</emphasis>
+718 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator">_Safe_iterator</link>&amp;
+719 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator_1acbd0220fdddeff06c0a1c8581a81c856">operator=</link>(<emphasis role="keyword">const</emphasis>&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator">_Safe_iterator</link>&amp;)&#32;=&#32;<emphasis role="keywordflow">default</emphasis>;
+720 
+722 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator">_Safe_iterator</link>&amp;
+723 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator_1acbd0220fdddeff06c0a1c8581a81c856">operator=</link>(<link linkend="_class____gnu__debug_1_1___safe__iterator">_Safe_iterator</link>&amp;&amp;)&#32;=&#32;<emphasis role="keywordflow">default</emphasis>;
+724 <emphasis role="preprocessor">#else</emphasis>
+726 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator">_Safe_iterator</link>&amp;
+727 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator_3_01___iterator_00_01___sequence_00_01std_1_1random__access__iterator__tag_01_4_1ac15c0f760f4b0ac52ff27e8355f2c077">operator=</link>(<emphasis role="keyword">const</emphasis>&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator">_Safe_iterator</link>&amp;&#32;__x)
+728 &#32;&#32;&#32;&#32;&#32;&#32;{
+729 &#32;&#32;&#32;&#32;_Safe_base::operator=(__x);
+730 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;*<emphasis role="keyword">this</emphasis>;
+731 &#32;&#32;&#32;&#32;&#32;&#32;}
+732 <emphasis role="preprocessor">#endif</emphasis>
+733 
+734 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Is&#32;the&#32;iterator&#32;range&#32;[*this,&#32;__rhs)&#32;valid?</emphasis>
+735 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">bool</emphasis>
+736 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator_3_01___iterator_00_01___sequence_00_01std_1_1random__access__iterator__tag_01_4_1ab716c96baaaf2db36f3bb2d89518a011">_M_valid_range</link>(<emphasis role="keyword">const</emphasis>&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator">_Safe_iterator</link>&amp;&#32;__rhs,
+737 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;std::pair&lt;<link linkend="_class____gnu__debug_1_1___safe__iterator_3_01___iterator_00_01___sequence_00_01std_1_1random__access__iterator__tag_01_4_1aabad5d3da6b0d17e62fe496c2bf6deb3">difference_type</link>,
+738 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_namespace____gnu__debug_1a3817879cb58c2db9f22712a634ef0b92">_Distance_precision</link>&gt;&amp;&#32;__dist)&#32;<emphasis role="keyword">const</emphasis>;
+739 
+740 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;------&#32;Input&#32;iterator&#32;requirements&#32;------</emphasis>
+745 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator">_Safe_iterator</link>&amp;
+746 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator_3_01___iterator_00_01___sequence_00_01std_1_1random__access__iterator__tag_01_4_1ae8ba924dfbb93c1d8dd3b7c4844d6e0b">operator++</link>()&#32;_GLIBCXX_NOEXCEPT
+747 &#32;&#32;&#32;&#32;&#32;&#32;{
+748 &#32;&#32;&#32;&#32;_Safe_base::operator++();
+749 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;*<emphasis role="keyword">this</emphasis>;
+750 &#32;&#32;&#32;&#32;&#32;&#32;}
+751 
+756 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator">_Safe_iterator</link>
+757 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator_3_01___iterator_00_01___sequence_00_01std_1_1random__access__iterator__tag_01_4_1a61358f097d8d36a1ae2de73f37c4c607">operator++</link>(<emphasis role="keywordtype">int</emphasis>)&#32;_GLIBCXX_NOEXCEPT
+758 &#32;&#32;&#32;&#32;&#32;&#32;{
+759 &#32;&#32;&#32;&#32;<link linkend="_lib_2include_2c_09_09_2debug_2macros_8h_1abc21d6cf6063d6d47494b08a8f1ba3be">_GLIBCXX_DEBUG_VERIFY</link>(this-&gt;<link linkend="_class____gnu__debug_1_1___safe__iterator_1a046fd9f196da5476ba014a3ed33316f6">_M_incrementable</link>(),
+760 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_M_message(<link linkend="_namespace____gnu__debug_1aeb7af2ed24147dfab032febcea3f4fb3a23cb8dacb530f6e6d3535a0d7c370d10">__msg_bad_inc</link>)
+761 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;._M_iterator(*<emphasis role="keyword">this</emphasis>,&#32;<emphasis role="stringliteral">&quot;this&quot;</emphasis>));
+762 &#32;&#32;&#32;&#32;__gnu_cxx::__scoped_lock&#32;__l(this-&gt;<link linkend="_class____gnu__debug_1_1___safe__iterator__base_1a394cc3f97fe4fb1c7d4378faa0b02877">_M_get_mutex</link>());
+763 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator_1a9c152e7a0e9b12c9bf6d9db309fff72b">_Safe_iterator</link>(this-&gt;<link linkend="_class____gnu__debug_1_1___safe__iterator_1a8ab2bd3cab984cb85cd02f1d61ce9931">base</link>()++,&#32;this-&gt;<link linkend="_class____gnu__debug_1_1___safe__iterator__base_1ad7ffe137fed29c851275dc5a9ddf06c1">_M_sequence</link>,
+764 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_Attach_single());
+765 &#32;&#32;&#32;&#32;&#32;&#32;}
+766 
+767 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;------&#32;Bidirectional&#32;iterator&#32;requirements&#32;------</emphasis>
+772 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator">_Safe_iterator</link>&amp;
+773 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator_3_01___iterator_00_01___sequence_00_01std_1_1random__access__iterator__tag_01_4_1abbaeccd7c1872680dc7978421566cfd3">operator--</link>()&#32;_GLIBCXX_NOEXCEPT
+774 &#32;&#32;&#32;&#32;&#32;&#32;{
+775 &#32;&#32;&#32;&#32;_Safe_base::operator--();
+776 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;*<emphasis role="keyword">this</emphasis>;
+777 &#32;&#32;&#32;&#32;&#32;&#32;}
+778 
+783 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator">_Safe_iterator</link>
+784 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator_3_01___iterator_00_01___sequence_00_01std_1_1random__access__iterator__tag_01_4_1a544aad819b4c547a2c201e68038f80db">operator--</link>(<emphasis role="keywordtype">int</emphasis>)&#32;_GLIBCXX_NOEXCEPT
+785 &#32;&#32;&#32;&#32;&#32;&#32;{
+786 &#32;&#32;&#32;&#32;<link linkend="_lib_2include_2c_09_09_2debug_2macros_8h_1abc21d6cf6063d6d47494b08a8f1ba3be">_GLIBCXX_DEBUG_VERIFY</link>(this-&gt;_M_decrementable(),
+787 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_M_message(<link linkend="_namespace____gnu__debug_1aeb7af2ed24147dfab032febcea3f4fb3a7f0d6ef257b8e2b8219df1cc6dcd8178">__msg_bad_dec</link>)
+788 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;._M_iterator(*<emphasis role="keyword">this</emphasis>,&#32;<emphasis role="stringliteral">&quot;this&quot;</emphasis>));
+789 &#32;&#32;&#32;&#32;__gnu_cxx::__scoped_lock&#32;__l(this-&gt;<link linkend="_class____gnu__debug_1_1___safe__iterator__base_1a394cc3f97fe4fb1c7d4378faa0b02877">_M_get_mutex</link>());
+790 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator_1a9c152e7a0e9b12c9bf6d9db309fff72b">_Safe_iterator</link>(this-&gt;<link linkend="_class____gnu__debug_1_1___safe__iterator_1a8ab2bd3cab984cb85cd02f1d61ce9931">base</link>()--,&#32;this-&gt;<link linkend="_class____gnu__debug_1_1___safe__iterator__base_1ad7ffe137fed29c851275dc5a9ddf06c1">_M_sequence</link>,
+791 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_Attach_single());
+792 &#32;&#32;&#32;&#32;&#32;&#32;}
+793 
+794 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;------&#32;Random&#32;access&#32;iterator&#32;requirements&#32;------</emphasis>
+795 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2x86__64-w64-mingw32_2bits_2c_09_09config_8h_1a56bc959ca1311889bcd1c5abb178ab59">_GLIBCXX_NODISCARD</link>
+796 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator_1a74c630f93b916c3300078eb55060b26c">reference</link>
+797 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator_3_01___iterator_00_01___sequence_00_01std_1_1random__access__iterator__tag_01_4_1a876e67da480d687ecd0f1b4f9bb132d1">operator[]</link>(<link linkend="_class____gnu__debug_1_1___safe__iterator_3_01___iterator_00_01___sequence_00_01std_1_1random__access__iterator__tag_01_4_1aabad5d3da6b0d17e62fe496c2bf6deb3">difference_type</link>&#32;__n)&#32;<emphasis role="keyword">const</emphasis>&#32;_GLIBCXX_NOEXCEPT
+798 &#32;&#32;&#32;&#32;&#32;&#32;{
+799 &#32;&#32;&#32;&#32;<link linkend="_lib_2include_2c_09_09_2debug_2macros_8h_1abc21d6cf6063d6d47494b08a8f1ba3be">_GLIBCXX_DEBUG_VERIFY</link>(this-&gt;<link linkend="_class____gnu__debug_1_1___safe__iterator_1a4c52f7fc0caab7e9923ae59d5353c05d">_M_can_advance</link>(__n)
+800 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&amp;&amp;&#32;this-&gt;<link linkend="_class____gnu__debug_1_1___safe__iterator_1a4c52f7fc0caab7e9923ae59d5353c05d">_M_can_advance</link>(__n&#32;+&#32;1),
+801 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_M_message(<link linkend="_namespace____gnu__debug_1aeb7af2ed24147dfab032febcea3f4fb3a8afc98714277e023cbb9e559c16b6aae">__msg_iter_subscript_oob</link>)
+802 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;._M_iterator(*this)._M_integer(__n));
+803 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;this-&gt;<link linkend="_class____gnu__debug_1_1___safe__iterator_1a8ab2bd3cab984cb85cd02f1d61ce9931">base</link>()[__n];
+804 &#32;&#32;&#32;&#32;&#32;&#32;}
+805 
+806 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator">_Safe_iterator</link>&amp;
+807 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator_3_01___iterator_00_01___sequence_00_01std_1_1random__access__iterator__tag_01_4_1aea1eb386d7d39779cf371eb3fcfd2d2a">operator+=</link>(<link linkend="_class____gnu__debug_1_1___safe__iterator_3_01___iterator_00_01___sequence_00_01std_1_1random__access__iterator__tag_01_4_1aabad5d3da6b0d17e62fe496c2bf6deb3">difference_type</link>&#32;__n)&#32;_GLIBCXX_NOEXCEPT
+808 &#32;&#32;&#32;&#32;&#32;&#32;{
+809 &#32;&#32;&#32;&#32;<link linkend="_lib_2include_2c_09_09_2debug_2macros_8h_1abc21d6cf6063d6d47494b08a8f1ba3be">_GLIBCXX_DEBUG_VERIFY</link>(this-&gt;<link linkend="_class____gnu__debug_1_1___safe__iterator_1a4c52f7fc0caab7e9923ae59d5353c05d">_M_can_advance</link>(__n),
+810 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_M_message(<link linkend="_namespace____gnu__debug_1aeb7af2ed24147dfab032febcea3f4fb3a544f5f23dd909ccc44a41beabdd92eb6">__msg_advance_oob</link>)
+811 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;._M_iterator(*this)._M_integer(__n));
+812 &#32;&#32;&#32;&#32;__gnu_cxx::__scoped_lock&#32;__l(this-&gt;<link linkend="_class____gnu__debug_1_1___safe__iterator__base_1a394cc3f97fe4fb1c7d4378faa0b02877">_M_get_mutex</link>());
+813 &#32;&#32;&#32;&#32;this-&gt;<link linkend="_class____gnu__debug_1_1___safe__iterator_1a8ab2bd3cab984cb85cd02f1d61ce9931">base</link>()&#32;+=&#32;__n;
+814 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;*<emphasis role="keyword">this</emphasis>;
+815 &#32;&#32;&#32;&#32;&#32;&#32;}
+816 
+817 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator">_Safe_iterator</link>&amp;
+818 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator_3_01___iterator_00_01___sequence_00_01std_1_1random__access__iterator__tag_01_4_1a3a0cba478fccc596d52e63b646858d4f">operator-=</link>(<link linkend="_class____gnu__debug_1_1___safe__iterator_3_01___iterator_00_01___sequence_00_01std_1_1random__access__iterator__tag_01_4_1aabad5d3da6b0d17e62fe496c2bf6deb3">difference_type</link>&#32;__n)&#32;_GLIBCXX_NOEXCEPT
+819 &#32;&#32;&#32;&#32;&#32;&#32;{
+820 &#32;&#32;&#32;&#32;<link linkend="_lib_2include_2c_09_09_2debug_2macros_8h_1abc21d6cf6063d6d47494b08a8f1ba3be">_GLIBCXX_DEBUG_VERIFY</link>(this-&gt;<link linkend="_class____gnu__debug_1_1___safe__iterator_1a4c52f7fc0caab7e9923ae59d5353c05d">_M_can_advance</link>(-__n),
+821 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_M_message(<link linkend="_namespace____gnu__debug_1aeb7af2ed24147dfab032febcea3f4fb3abbf0c6aedc5be341338701bab5eac165">__msg_retreat_oob</link>)
+822 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;._M_iterator(*this)._M_integer(__n));
+823 &#32;&#32;&#32;&#32;__gnu_cxx::__scoped_lock&#32;__l(this-&gt;<link linkend="_class____gnu__debug_1_1___safe__iterator__base_1a394cc3f97fe4fb1c7d4378faa0b02877">_M_get_mutex</link>());
+824 &#32;&#32;&#32;&#32;this-&gt;<link linkend="_class____gnu__debug_1_1___safe__iterator_1a8ab2bd3cab984cb85cd02f1d61ce9931">base</link>()&#32;-=&#32;__n;
+825 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;*<emphasis role="keyword">this</emphasis>;
+826 &#32;&#32;&#32;&#32;&#32;&#32;}
+827 
+828 <emphasis role="preprocessor">#if&#32;__cpp_lib_three_way_comparison</emphasis>
+829 &#32;&#32;&#32;&#32;&#32;&#32;[[nodiscard]]
+830 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">friend</emphasis>&#32;<emphasis role="keyword">auto</emphasis>
+831 &#32;&#32;&#32;&#32;&#32;&#32;operator&lt;=&gt;(<emphasis role="keyword">const</emphasis>&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator_1a9f230bfabecb6d267f489c4019ef6676">_Self</link>&amp;&#32;__lhs,&#32;<emphasis role="keyword">const</emphasis>&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator_1a9f230bfabecb6d267f489c4019ef6676">_Self</link>&amp;&#32;__rhs)&#32;<emphasis role="keyword">noexcept</emphasis>
+832 &#32;&#32;&#32;&#32;&#32;&#32;{
+833 &#32;&#32;&#32;&#32;<link linkend="_lib_2include_2c_09_09_2debug_2safe__iterator_8h_1a5f9971fcdfcc9d479877489583464ff0">_GLIBCXX_DEBUG_VERIFY_REL_OPERANDS</link>(__lhs,&#32;__rhs);
+834 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__lhs.base()&#32;&lt;=&gt;&#32;__rhs.base();
+835 &#32;&#32;&#32;&#32;&#32;&#32;}
+836 
+837 &#32;&#32;&#32;&#32;&#32;&#32;[[nodiscard]]
+838 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">friend</emphasis>&#32;<emphasis role="keyword">auto</emphasis>
+839 &#32;&#32;&#32;&#32;&#32;&#32;operator&lt;=&gt;(<emphasis role="keyword">const</emphasis>&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator_1a9f230bfabecb6d267f489c4019ef6676">_Self</link>&amp;&#32;__lhs,&#32;<emphasis role="keyword">const</emphasis>&#32;_OtherSelf&amp;&#32;__rhs)&#32;<emphasis role="keyword">noexcept</emphasis>
+840 &#32;&#32;&#32;&#32;&#32;&#32;{
+841 &#32;&#32;&#32;&#32;<link linkend="_lib_2include_2c_09_09_2debug_2safe__iterator_8h_1a5f9971fcdfcc9d479877489583464ff0">_GLIBCXX_DEBUG_VERIFY_REL_OPERANDS</link>(__lhs,&#32;__rhs);
+842 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__lhs.base()&#32;&lt;=&gt;&#32;__rhs.base();
+843 &#32;&#32;&#32;&#32;&#32;&#32;}
+844 <emphasis role="preprocessor">#else</emphasis>
+845 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2x86__64-w64-mingw32_2bits_2c_09_09config_8h_1a56bc959ca1311889bcd1c5abb178ab59">_GLIBCXX_NODISCARD</link>
+846 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">friend</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>
+847 &#32;&#32;&#32;&#32;&#32;&#32;operator&lt;(<emphasis role="keyword">const</emphasis>&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator">_Self</link>&amp;&#32;__lhs,&#32;<emphasis role="keyword">const</emphasis>&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator">_Self</link>&amp;&#32;__rhs)&#32;_GLIBCXX_NOEXCEPT
+848 &#32;&#32;&#32;&#32;&#32;&#32;{
+849 &#32;&#32;&#32;&#32;<link linkend="_lib_2include_2c_09_09_2debug_2safe__iterator_8h_1a5f9971fcdfcc9d479877489583464ff0">_GLIBCXX_DEBUG_VERIFY_REL_OPERANDS</link>(__lhs,&#32;__rhs);
+850 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__lhs.base()&#32;&lt;&#32;__rhs.base();
+851 &#32;&#32;&#32;&#32;&#32;&#32;}
+852 
+853 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2x86__64-w64-mingw32_2bits_2c_09_09config_8h_1a56bc959ca1311889bcd1c5abb178ab59">_GLIBCXX_NODISCARD</link>
+854 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">friend</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>
+855 &#32;&#32;&#32;&#32;&#32;&#32;operator&lt;(<emphasis role="keyword">const</emphasis>&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator">_Self</link>&amp;&#32;__lhs,&#32;<emphasis role="keyword">const</emphasis>&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator">_OtherSelf</link>&amp;&#32;__rhs)&#32;_GLIBCXX_NOEXCEPT
+856 &#32;&#32;&#32;&#32;&#32;&#32;{
+857 &#32;&#32;&#32;&#32;<link linkend="_lib_2include_2c_09_09_2debug_2safe__iterator_8h_1a5f9971fcdfcc9d479877489583464ff0">_GLIBCXX_DEBUG_VERIFY_REL_OPERANDS</link>(__lhs,&#32;__rhs);
+858 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__lhs.base()&#32;&lt;&#32;__rhs.base();
+859 &#32;&#32;&#32;&#32;&#32;&#32;}
+860 
+861 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2x86__64-w64-mingw32_2bits_2c_09_09config_8h_1a56bc959ca1311889bcd1c5abb178ab59">_GLIBCXX_NODISCARD</link>
+862 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">friend</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>
+863 &#32;&#32;&#32;&#32;&#32;&#32;operator&lt;=(<emphasis role="keyword">const</emphasis>&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator">_Self</link>&amp;&#32;__lhs,&#32;<emphasis role="keyword">const</emphasis>&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator">_Self</link>&amp;&#32;__rhs)&#32;_GLIBCXX_NOEXCEPT
+864 &#32;&#32;&#32;&#32;&#32;&#32;{
+865 &#32;&#32;&#32;&#32;<link linkend="_lib_2include_2c_09_09_2debug_2safe__iterator_8h_1a5f9971fcdfcc9d479877489583464ff0">_GLIBCXX_DEBUG_VERIFY_REL_OPERANDS</link>(__lhs,&#32;__rhs);
+866 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__lhs.base()&#32;&lt;=&#32;__rhs.base();
+867 &#32;&#32;&#32;&#32;&#32;&#32;}
+868 
+869 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2x86__64-w64-mingw32_2bits_2c_09_09config_8h_1a56bc959ca1311889bcd1c5abb178ab59">_GLIBCXX_NODISCARD</link>
+870 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">friend</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>
+871 &#32;&#32;&#32;&#32;&#32;&#32;operator&lt;=(<emphasis role="keyword">const</emphasis>&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator">_Self</link>&amp;&#32;__lhs,&#32;<emphasis role="keyword">const</emphasis>&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator">_OtherSelf</link>&amp;&#32;__rhs)&#32;_GLIBCXX_NOEXCEPT
+872 &#32;&#32;&#32;&#32;&#32;&#32;{
+873 &#32;&#32;&#32;&#32;<link linkend="_lib_2include_2c_09_09_2debug_2safe__iterator_8h_1a5f9971fcdfcc9d479877489583464ff0">_GLIBCXX_DEBUG_VERIFY_REL_OPERANDS</link>(__lhs,&#32;__rhs);
+874 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__lhs.base()&#32;&lt;=&#32;__rhs.base();
+875 &#32;&#32;&#32;&#32;&#32;&#32;}
+876 
+877 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2x86__64-w64-mingw32_2bits_2c_09_09config_8h_1a56bc959ca1311889bcd1c5abb178ab59">_GLIBCXX_NODISCARD</link>
+878 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">friend</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>
+879 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator_3_01___iterator_00_01___sequence_00_01std_1_1random__access__iterator__tag_01_4_1a224108d4ee45fc59721f7f9df090f545">operator&gt;</link>(<emphasis role="keyword">const</emphasis>&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator">_Self</link>&amp;&#32;__lhs,&#32;<emphasis role="keyword">const</emphasis>&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator">_Self</link>&amp;&#32;__rhs)&#32;_GLIBCXX_NOEXCEPT
+880 &#32;&#32;&#32;&#32;&#32;&#32;{
+881 &#32;&#32;&#32;&#32;<link linkend="_lib_2include_2c_09_09_2debug_2safe__iterator_8h_1a5f9971fcdfcc9d479877489583464ff0">_GLIBCXX_DEBUG_VERIFY_REL_OPERANDS</link>(__lhs,&#32;__rhs);
+882 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__lhs.base()&#32;&gt;&#32;__rhs.base();
+883 &#32;&#32;&#32;&#32;&#32;&#32;}
+884 
+885 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2x86__64-w64-mingw32_2bits_2c_09_09config_8h_1a56bc959ca1311889bcd1c5abb178ab59">_GLIBCXX_NODISCARD</link>
+886 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">friend</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>
+887 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator_3_01___iterator_00_01___sequence_00_01std_1_1random__access__iterator__tag_01_4_1a584c2a2c4c710ec497774f3fcb182ca6">operator&gt;</link>(<emphasis role="keyword">const</emphasis>&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator">_Self</link>&amp;&#32;__lhs,&#32;<emphasis role="keyword">const</emphasis>&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator">_OtherSelf</link>&amp;&#32;__rhs)&#32;_GLIBCXX_NOEXCEPT
+888 &#32;&#32;&#32;&#32;&#32;&#32;{
+889 &#32;&#32;&#32;&#32;<link linkend="_lib_2include_2c_09_09_2debug_2safe__iterator_8h_1a5f9971fcdfcc9d479877489583464ff0">_GLIBCXX_DEBUG_VERIFY_REL_OPERANDS</link>(__lhs,&#32;__rhs);
+890 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__lhs.base()&#32;&gt;&#32;__rhs.base();
+891 &#32;&#32;&#32;&#32;&#32;&#32;}
+892 
+893 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2x86__64-w64-mingw32_2bits_2c_09_09config_8h_1a56bc959ca1311889bcd1c5abb178ab59">_GLIBCXX_NODISCARD</link>
+894 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">friend</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>
+895 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator_3_01___iterator_00_01___sequence_00_01std_1_1random__access__iterator__tag_01_4_1aee22f5b74952f59a2ab3ecdc3d9ed2b4">operator&gt;=</link>(<emphasis role="keyword">const</emphasis>&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator">_Self</link>&amp;&#32;__lhs,&#32;<emphasis role="keyword">const</emphasis>&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator">_Self</link>&amp;&#32;__rhs)&#32;_GLIBCXX_NOEXCEPT
+896 &#32;&#32;&#32;&#32;&#32;&#32;{
+897 &#32;&#32;&#32;&#32;<link linkend="_lib_2include_2c_09_09_2debug_2safe__iterator_8h_1a5f9971fcdfcc9d479877489583464ff0">_GLIBCXX_DEBUG_VERIFY_REL_OPERANDS</link>(__lhs,&#32;__rhs);
+898 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__lhs.base()&#32;&gt;=&#32;__rhs.base();
+899 &#32;&#32;&#32;&#32;&#32;&#32;}
+900 
+901 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2x86__64-w64-mingw32_2bits_2c_09_09config_8h_1a56bc959ca1311889bcd1c5abb178ab59">_GLIBCXX_NODISCARD</link>
+902 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">friend</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>
+903 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator_3_01___iterator_00_01___sequence_00_01std_1_1random__access__iterator__tag_01_4_1a07898326047fad24919f9d7c6b16b268">operator&gt;=</link>(<emphasis role="keyword">const</emphasis>&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator">_Self</link>&amp;&#32;__lhs,&#32;<emphasis role="keyword">const</emphasis>&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator">_OtherSelf</link>&amp;&#32;__rhs)&#32;_GLIBCXX_NOEXCEPT
+904 &#32;&#32;&#32;&#32;&#32;&#32;{
+905 &#32;&#32;&#32;&#32;<link linkend="_lib_2include_2c_09_09_2debug_2safe__iterator_8h_1a5f9971fcdfcc9d479877489583464ff0">_GLIBCXX_DEBUG_VERIFY_REL_OPERANDS</link>(__lhs,&#32;__rhs);
+906 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__lhs.base()&#32;&gt;=&#32;__rhs.base();
+907 &#32;&#32;&#32;&#32;&#32;&#32;}
+908 <emphasis role="preprocessor">#endif&#32;</emphasis><emphasis role="comment">//&#32;three-way&#32;comparison</emphasis>
+909 
+910 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;_GLIBCXX_RESOLVE_LIB_DEFECTS</emphasis>
+911 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;According&#32;to&#32;the&#32;resolution&#32;of&#32;DR179&#32;not&#32;only&#32;the&#32;various&#32;comparison</emphasis>
+912 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;operators&#32;but&#32;also&#32;operator-&#32;must&#32;accept&#32;mixed&#32;iterator/const_iterator</emphasis>
+913 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;parameters.</emphasis>
+914 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2x86__64-w64-mingw32_2bits_2c_09_09config_8h_1a56bc959ca1311889bcd1c5abb178ab59">_GLIBCXX_NODISCARD</link>
+915 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">friend</emphasis>&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator_1a30a9b5cb458330240b532d8a5f599c89">difference_type</link>
+916 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator_3_01___iterator_00_01___sequence_00_01std_1_1random__access__iterator__tag_01_4_1abb3993a997b04a70622599bff30b91d3">operator-</link>(<emphasis role="keyword">const</emphasis>&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator">_Self</link>&amp;&#32;__lhs,&#32;<emphasis role="keyword">const</emphasis>&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator">_OtherSelf</link>&amp;&#32;__rhs)&#32;_GLIBCXX_NOEXCEPT
+917 &#32;&#32;&#32;&#32;&#32;&#32;{
+918 &#32;&#32;&#32;&#32;<link linkend="_lib_2include_2c_09_09_2debug_2safe__iterator_8h_1a1ecd6176016346d51e48877a82b55e1a">_GLIBCXX_DEBUG_VERIFY_DIST_OPERANDS</link>(__lhs,&#32;__rhs);
+919 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__lhs.base()&#32;-&#32;__rhs.base();
+920 &#32;&#32;&#32;&#32;&#32;&#32;}
+921 
+922 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2x86__64-w64-mingw32_2bits_2c_09_09config_8h_1a56bc959ca1311889bcd1c5abb178ab59">_GLIBCXX_NODISCARD</link>
+923 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">friend</emphasis>&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator_1a30a9b5cb458330240b532d8a5f599c89">difference_type</link>
+924 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator_3_01___iterator_00_01___sequence_00_01std_1_1random__access__iterator__tag_01_4_1a01b5938a1e5b923f92d3118efa12bc06">operator-</link>(<emphasis role="keyword">const</emphasis>&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator">_Self</link>&amp;&#32;__lhs,&#32;<emphasis role="keyword">const</emphasis>&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator">_Self</link>&amp;&#32;__rhs)&#32;_GLIBCXX_NOEXCEPT
+925 &#32;&#32;&#32;&#32;&#32;&#32;{
+926 &#32;&#32;&#32;&#32;<link linkend="_lib_2include_2c_09_09_2debug_2safe__iterator_8h_1a1ecd6176016346d51e48877a82b55e1a">_GLIBCXX_DEBUG_VERIFY_DIST_OPERANDS</link>(__lhs,&#32;__rhs);
+927 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__lhs.base()&#32;-&#32;__rhs.base();
+928 &#32;&#32;&#32;&#32;&#32;&#32;}
+929 
+930 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2x86__64-w64-mingw32_2bits_2c_09_09config_8h_1a56bc959ca1311889bcd1c5abb178ab59">_GLIBCXX_NODISCARD</link>
+931 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">friend</emphasis>&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator_1a9f230bfabecb6d267f489c4019ef6676">_Self</link>
+932 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator_3_01___iterator_00_01___sequence_00_01std_1_1random__access__iterator__tag_01_4_1a789ac28c3a3fda811f5e511d7d796862">operator+</link>(<emphasis role="keyword">const</emphasis>&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator">_Self</link>&amp;&#32;__x,&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator_3_01___iterator_00_01___sequence_00_01std_1_1random__access__iterator__tag_01_4_1aabad5d3da6b0d17e62fe496c2bf6deb3">difference_type</link>&#32;__n)&#32;_GLIBCXX_NOEXCEPT
+933 &#32;&#32;&#32;&#32;&#32;&#32;{
+934 &#32;&#32;&#32;&#32;<link linkend="_lib_2include_2c_09_09_2debug_2macros_8h_1abc21d6cf6063d6d47494b08a8f1ba3be">_GLIBCXX_DEBUG_VERIFY</link>(__x._M_can_advance(__n),
+935 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_M_message(<link linkend="_namespace____gnu__debug_1aeb7af2ed24147dfab032febcea3f4fb3a544f5f23dd909ccc44a41beabdd92eb6">__msg_advance_oob</link>)
+936 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;._M_iterator(__x)._M_integer(__n));
+937 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator_1a9c152e7a0e9b12c9bf6d9db309fff72b">_Safe_iterator</link>(__x.base()&#32;+&#32;__n,&#32;__x._M_sequence);
+938 &#32;&#32;&#32;&#32;&#32;&#32;}
+939 
+940 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2x86__64-w64-mingw32_2bits_2c_09_09config_8h_1a56bc959ca1311889bcd1c5abb178ab59">_GLIBCXX_NODISCARD</link>
+941 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">friend</emphasis>&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator_1a9f230bfabecb6d267f489c4019ef6676">_Self</link>
+942 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator_3_01___iterator_00_01___sequence_00_01std_1_1random__access__iterator__tag_01_4_1a553fe8f8cd764e41fa520b0ac585df11">operator+</link>(<link linkend="_class____gnu__debug_1_1___safe__iterator_3_01___iterator_00_01___sequence_00_01std_1_1random__access__iterator__tag_01_4_1aabad5d3da6b0d17e62fe496c2bf6deb3">difference_type</link>&#32;__n,&#32;<emphasis role="keyword">const</emphasis>&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator">_Self</link>&amp;&#32;__x)&#32;_GLIBCXX_NOEXCEPT
+943 &#32;&#32;&#32;&#32;&#32;&#32;{
+944 &#32;&#32;&#32;&#32;<link linkend="_lib_2include_2c_09_09_2debug_2macros_8h_1abc21d6cf6063d6d47494b08a8f1ba3be">_GLIBCXX_DEBUG_VERIFY</link>(__x._M_can_advance(__n),
+945 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_M_message(<link linkend="_namespace____gnu__debug_1aeb7af2ed24147dfab032febcea3f4fb3a544f5f23dd909ccc44a41beabdd92eb6">__msg_advance_oob</link>)
+946 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;._M_iterator(__x)._M_integer(__n));
+947 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator_1a9c152e7a0e9b12c9bf6d9db309fff72b">_Safe_iterator</link>(__n&#32;+&#32;__x.base(),&#32;__x._M_sequence);
+948 &#32;&#32;&#32;&#32;&#32;&#32;}
+949 
+950 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2x86__64-w64-mingw32_2bits_2c_09_09config_8h_1a56bc959ca1311889bcd1c5abb178ab59">_GLIBCXX_NODISCARD</link>
+951 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">friend</emphasis>&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator_1a9f230bfabecb6d267f489c4019ef6676">_Self</link>
+952 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator_3_01___iterator_00_01___sequence_00_01std_1_1random__access__iterator__tag_01_4_1a5e018cc5b7c7334f65302a555f2b7841">operator-</link>(<emphasis role="keyword">const</emphasis>&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator">_Self</link>&amp;&#32;__x,&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator_3_01___iterator_00_01___sequence_00_01std_1_1random__access__iterator__tag_01_4_1aabad5d3da6b0d17e62fe496c2bf6deb3">difference_type</link>&#32;__n)&#32;_GLIBCXX_NOEXCEPT
+953 &#32;&#32;&#32;&#32;&#32;&#32;{
+954 &#32;&#32;&#32;&#32;<link linkend="_lib_2include_2c_09_09_2debug_2macros_8h_1abc21d6cf6063d6d47494b08a8f1ba3be">_GLIBCXX_DEBUG_VERIFY</link>(__x._M_can_advance(-__n),
+955 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_M_message(<link linkend="_namespace____gnu__debug_1aeb7af2ed24147dfab032febcea3f4fb3abbf0c6aedc5be341338701bab5eac165">__msg_retreat_oob</link>)
+956 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;._M_iterator(__x)._M_integer(__n));
+957 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator_1a9c152e7a0e9b12c9bf6d9db309fff72b">_Safe_iterator</link>(__x.base()&#32;-&#32;__n,&#32;__x._M_sequence);
+958 &#32;&#32;&#32;&#32;&#32;&#32;}
+959 &#32;&#32;&#32;&#32;};
+960 
+962 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Iterator,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Sequence,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Category&gt;
+963 &#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>
+964 &#32;&#32;&#32;&#32;<link linkend="_namespace____gnu__debug_1a9572a31ecdf84000cb4a07f30b49fc7a">__valid_range</link>(<emphasis role="keyword">const</emphasis>&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator">_Safe_iterator</link>&lt;_Iterator,&#32;_Sequence,
+965 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_Category&gt;&amp;&#32;__first,
+966 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator">_Safe_iterator</link>&lt;_Iterator,&#32;_Sequence,
+967 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_Category&gt;&amp;&#32;__last,
+968 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;<link linkend="_struct____gnu__debug_1_1___distance__traits_1a233783a24e495312304a160308fb74f9">_Distance_traits&lt;_Iterator&gt;::__type</link>&amp;&#32;__dist)
+969 &#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;__first._M_valid_range(__last,&#32;__dist);&#32;}
+970 
+971 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Iterator,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Sequence,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Category&gt;
+972 &#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>
+973 &#32;&#32;&#32;&#32;<link linkend="_namespace____gnu__debug_1a9572a31ecdf84000cb4a07f30b49fc7a">__valid_range</link>(<emphasis role="keyword">const</emphasis>&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator">_Safe_iterator</link>&lt;_Iterator,&#32;_Sequence,
+974 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_Category&gt;&amp;&#32;__first,
+975 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator">_Safe_iterator</link>&lt;_Iterator,&#32;_Sequence,
+976 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_Category&gt;&amp;&#32;__last)
+977 &#32;&#32;&#32;&#32;{
+978 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;<link linkend="_struct____gnu__debug_1_1___distance__traits_1a233783a24e495312304a160308fb74f9">_Distance_traits&lt;_Iterator&gt;::__type</link>&#32;__dist;
+979 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__first._M_valid_range(__last,&#32;__dist);
+980 &#32;&#32;&#32;&#32;}
+981 
+982 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Iterator,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Sequence,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Category,
+983 &#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;_Size&gt;
+984 &#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>
+985 &#32;&#32;&#32;&#32;<link linkend="_namespace____gnu__debug_1a346c18cccaed1159bff97f607e2f9214">__can_advance</link>(<emphasis role="keyword">const</emphasis>&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator">_Safe_iterator&lt;_Iterator, _Sequence, _Category&gt;</link>&amp;&#32;__it,
+986 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_Size&#32;__n)
+987 &#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;__it._M_can_advance(__n);&#32;}
+988 
+989 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Iterator,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Sequence,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Category,
+990 &#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;_Diff&gt;
+991 &#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>
+992 &#32;&#32;&#32;&#32;<link linkend="_namespace____gnu__debug_1a346c18cccaed1159bff97f607e2f9214">__can_advance</link>(<emphasis role="keyword">const</emphasis>&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator">_Safe_iterator&lt;_Iterator, _Sequence, _Category&gt;</link>&amp;&#32;__it,
+993 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;std::pair&lt;_Diff,&#32;_Distance_precision&gt;&amp;&#32;__dist,
+994 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;__way)
+995 &#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;__it._M_can_advance(__dist,&#32;__way);&#32;}
+996 
+997 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Iterator,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Sequence&gt;
+998 &#32;&#32;&#32;&#32;_Iterator
+999 &#32;&#32;&#32;&#32;<link linkend="_namespace____gnu__debug_1a462d3f2cc5cb94a7cb98e035cd61b763">__base</link>(<emphasis role="keyword">const</emphasis>&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator">_Safe_iterator</link>&lt;_Iterator,&#32;_Sequence,
+1000 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;std::random_access_iterator_tag&gt;&amp;&#32;__it)
+1001 &#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;__it.base();&#32;}
+1002 
+1003 <emphasis role="preprocessor">#if&#32;__cplusplus&#32;&lt;&#32;201103L</emphasis>
+1004 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Iterator,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Sequence&gt;
+1005 &#32;&#32;&#32;&#32;<emphasis role="keyword">struct&#32;</emphasis><link linkend="_struct____gnu__debug_1_1___unsafe__type">_Unsafe_type</link>&lt;<link linkend="_class____gnu__debug_1_1___safe__iterator">_Safe_iterator</link>&lt;_Iterator,&#32;_Sequence&gt;&#32;&gt;
+1006 &#32;&#32;&#32;&#32;{&#32;<emphasis role="keyword">typedef</emphasis>&#32;_Iterator&#32;<link linkend="_struct____gnu__debug_1_1___unsafe__type_3_01___safe__iterator_3_01___iterator_00_01___sequence_01_4_01_4_1ad043c25ff20038d5622f867adf798b24">_Type</link>;&#32;};
+1007 <emphasis role="preprocessor">#endif</emphasis>
+1008 
+1009 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Iterator,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Sequence&gt;
+1010 &#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;_Iterator
+1011 &#32;&#32;&#32;&#32;<link linkend="_namespace____gnu__debug_1a93a80d764483413811a41139bb6ee4ac">__unsafe</link>(<emphasis role="keyword">const</emphasis>&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator">_Safe_iterator&lt;_Iterator, _Sequence&gt;</link>&amp;&#32;__it)
+1012 &#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;__it.base();&#32;}
+1013 
+1014 }&#32;<emphasis role="comment">//&#32;namespace&#32;__gnu_debug</emphasis>
+1015 
+1016 <emphasis role="preprocessor">#if&#32;__cplusplus&#32;&gt;=&#32;201103L&#32;&amp;&amp;&#32;__cplusplus&#32;&lt;=&#32;201703L</emphasis>
+1017 <emphasis role="keyword">namespace&#32;</emphasis><link linkend="_namespacestd">std</link>&#32;<link linkend="__classes_2lib_2include_2c_09_09_2x86__64-w64-mingw32_2bits_2c_09_09config_8h_1a44377df0d3503f0b3d9ab316dd8ddf8b">_GLIBCXX_VISIBILITY</link>(default)
+1018 {
+1019 _GLIBCXX_BEGIN_NAMESPACE_VERSION
+1020 
+1021 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Iterator,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Container,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Sequence&gt;
+1022 &#32;&#32;&#32;&#32;<emphasis role="keyword">constexpr</emphasis>&#32;<emphasis role="keyword">auto</emphasis>
+1023 &#32;&#32;&#32;&#32;__to_address(<emphasis role="keyword">const</emphasis>&#32;<link linkend="_class____gnu__debug_1_1___safe__iterator">__gnu_debug::_Safe_iterator</link>&lt;
+1024 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__gnu_cxx::__normal_iterator&lt;_Iterator,&#32;_Container&gt;,
+1025 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_Sequence&gt;&amp;&#32;__it)&#32;<emphasis role="keyword">noexcept</emphasis>
+1026 &#32;&#32;&#32;&#32;-&gt;&#32;<emphasis role="keyword">decltype</emphasis>(std::__to_address(__it.base().base()))
+1027 &#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;std::__to_address(__it.base().base());&#32;}
+1028 
+1029 _GLIBCXX_END_NAMESPACE_VERSION
+1030 }
+1031 <emphasis role="preprocessor">#endif</emphasis>
+1032 
+1033 <emphasis role="preprocessor">#undef&#32;_GLIBCXX_DEBUG_VERIFY_DIST_OPERANDS</emphasis>
+1034 <emphasis role="preprocessor">#undef&#32;_GLIBCXX_DEBUG_VERIFY_REL_OPERANDS</emphasis>
+1035 <emphasis role="preprocessor">#undef&#32;_GLIBCXX_DEBUG_VERIFY_EQ_OPERANDS</emphasis>
+1036 <emphasis role="preprocessor">#undef&#32;_GLIBCXX_DEBUG_VERIFY_OPERANDS</emphasis>
+1037 
+1038 <emphasis role="preprocessor">#include&#32;&lt;debug/safe_iterator.tcc&gt;</emphasis>
+1039 
+1040 <emphasis role="preprocessor">#endif</emphasis>
+</programlisting></section>

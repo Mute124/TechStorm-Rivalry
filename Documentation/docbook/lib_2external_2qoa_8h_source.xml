@@ -1,0 +1,665 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<section xmlns="http://docbook.org/ns/docbook" version="5.0" xmlns:xlink="http://www.w3.org/1999/xlink" xml:id="_lib_2external_2qoa_8h_source" xml:lang="en-US">
+<title>qoa.h</title>
+<indexterm><primary>C:/Users/HP/Documents/GitHub/Minero-Game/lib/external/qoa.h</primary></indexterm>
+Go to the documentation of this file.<programlisting linenumbering="unnumbered">1 <emphasis role="comment">/*</emphasis>
+2 <emphasis role="comment"></emphasis>
+3 <emphasis role="comment">Copyright&#32;(c)&#32;2023,&#32;Dominic&#32;Szablewski&#32;-&#32;https://phoboslab.org</emphasis>
+4 <emphasis role="comment">SPDX-License-Identifier:&#32;MIT</emphasis>
+5 <emphasis role="comment"></emphasis>
+6 <emphasis role="comment">QOA&#32;-&#32;The&#32;&quot;Quite&#32;OK&#32;Audio&quot;&#32;format&#32;for&#32;fast,&#32;lossy&#32;audio&#32;compression</emphasis>
+7 <emphasis role="comment"></emphasis>
+8 <emphasis role="comment"></emphasis>
+9 <emphasis role="comment">--&#32;Data&#32;Format</emphasis>
+10 <emphasis role="comment"></emphasis>
+11 <emphasis role="comment">A&#32;QOA&#32;file&#32;has&#32;an&#32;8&#32;byte&#32;file&#32;header,&#32;followed&#32;by&#32;a&#32;number&#32;of&#32;frames.&#32;Each&#32;frame&#32;</emphasis>
+12 <emphasis role="comment">consists&#32;of&#32;an&#32;8&#32;byte&#32;frame&#32;header,&#32;the&#32;current&#32;8&#32;byte&#32;en-/decoder&#32;state&#32;per</emphasis>
+13 <emphasis role="comment">channel&#32;and&#32;256&#32;slices&#32;per&#32;channel.&#32;Each&#32;slice&#32;is&#32;8&#32;bytes&#32;wide&#32;and&#32;encodes&#32;20&#32;</emphasis>
+14 <emphasis role="comment">samples&#32;of&#32;audio&#32;data.</emphasis>
+15 <emphasis role="comment"></emphasis>
+16 <emphasis role="comment">Note&#32;that&#32;the&#32;last&#32;frame&#32;of&#32;a&#32;file&#32;may&#32;contain&#32;less&#32;than&#32;256&#32;slices&#32;per&#32;channel.</emphasis>
+17 <emphasis role="comment">The&#32;last&#32;slice&#32;(per&#32;channel)&#32;in&#32;the&#32;last&#32;frame&#32;may&#32;contain&#32;less&#32;20&#32;samples,&#32;but</emphasis>
+18 <emphasis role="comment">the&#32;slice&#32;will&#32;still&#32;be&#32;8&#32;bytes&#32;wide,&#32;with&#32;the&#32;unused&#32;samples&#32;zeroed&#32;out.</emphasis>
+19 <emphasis role="comment"></emphasis>
+20 <emphasis role="comment">The&#32;samplerate&#32;and&#32;number&#32;of&#32;channels&#32;is&#32;only&#32;stated&#32;in&#32;the&#32;frame&#32;headers,&#32;but</emphasis>
+21 <emphasis role="comment">not&#32;in&#32;the&#32;file&#32;header.&#32;A&#32;decoder&#32;may&#32;peek&#32;into&#32;the&#32;first&#32;frame&#32;of&#32;the&#32;file&#32;to&#32;</emphasis>
+22 <emphasis role="comment">find&#32;these&#32;values.</emphasis>
+23 <emphasis role="comment"></emphasis>
+24 <emphasis role="comment">In&#32;a&#32;valid&#32;QOA&#32;file&#32;all&#32;frames&#32;have&#32;the&#32;same&#32;number&#32;of&#32;channels&#32;and&#32;the&#32;same</emphasis>
+25 <emphasis role="comment">samplerate.&#32;These&#32;restrictions&#32;may&#32;be&#32;relaxed&#32;for&#32;streaming.&#32;This&#32;remains&#32;to&#32;</emphasis>
+26 <emphasis role="comment">be&#32;decided.</emphasis>
+27 <emphasis role="comment"></emphasis>
+28 <emphasis role="comment">All&#32;values&#32;in&#32;a&#32;QOA&#32;file&#32;are&#32;BIG&#32;ENDIAN.&#32;Luckily,&#32;EVERYTHING&#32;in&#32;a&#32;QOA&#32;file,</emphasis>
+29 <emphasis role="comment">including&#32;the&#32;headers,&#32;is&#32;64&#32;bit&#32;aligned,&#32;so&#32;it&apos;s&#32;possible&#32;to&#32;read&#32;files&#32;with&#32;</emphasis>
+30 <emphasis role="comment">just&#32;a&#32;read_u64()&#32;that&#32;does&#32;the&#32;byte&#32;swapping&#32;if&#32;necessary.</emphasis>
+31 <emphasis role="comment"></emphasis>
+32 <emphasis role="comment">In&#32;pseudocode,&#32;the&#32;file&#32;layout&#32;is&#32;as&#32;follows:</emphasis>
+33 <emphasis role="comment"></emphasis>
+34 <emphasis role="comment">struct&#32;{</emphasis>
+35 <emphasis role="comment">&#32;&#32;&#32;&#32;struct&#32;{</emphasis>
+36 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;char&#32;&#32;&#32;&#32;&#32;magic[4];&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;//&#32;magic&#32;bytes&#32;&apos;qoaf&apos;</emphasis>
+37 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;uint32_t&#32;samples;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;//&#32;number&#32;of&#32;samples&#32;per&#32;channel&#32;in&#32;this&#32;file</emphasis>
+38 <emphasis role="comment">&#32;&#32;&#32;&#32;}&#32;file_header;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;//&#32;=&#32;64&#32;bits</emphasis>
+39 <emphasis role="comment"></emphasis>
+40 <emphasis role="comment">&#32;&#32;&#32;&#32;struct&#32;{</emphasis>
+41 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;struct&#32;{</emphasis>
+42 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;uint8_t&#32;&#32;num_channels;&#32;//&#32;number&#32;of&#32;channels</emphasis>
+43 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;uint24_t&#32;samplerate;&#32;&#32;&#32;//&#32;samplerate&#32;in&#32;hz</emphasis>
+44 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;uint16_t&#32;fsamples;&#32;&#32;&#32;&#32;&#32;//&#32;sample&#32;count&#32;per&#32;channel&#32;in&#32;this&#32;frame</emphasis>
+45 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;uint16_t&#32;fsize;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;//&#32;frame&#32;size&#32;(including&#32;the&#32;frame&#32;header)</emphasis>
+46 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}&#32;frame_header;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;//&#32;=&#32;64&#32;bits</emphasis>
+47 <emphasis role="comment"></emphasis>
+48 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;struct&#32;{</emphasis>
+49 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;int16_t&#32;history[4];&#32;&#32;&#32;&#32;//&#32;=&#32;64&#32;bits</emphasis>
+50 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;int16_t&#32;weights[4];&#32;&#32;&#32;&#32;//&#32;=&#32;64&#32;bits</emphasis>
+51 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}&#32;lms_state[num_channels];&#32;</emphasis>
+52 <emphasis role="comment"></emphasis>
+53 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;qoa_slice_t&#32;slices[256][num_channels];&#32;//&#32;=&#32;64&#32;bits&#32;each</emphasis>
+54 <emphasis role="comment">&#32;&#32;&#32;&#32;}&#32;frames[samples&#32;*&#32;channels&#32;/&#32;qoa_max_framesize()];</emphasis>
+55 <emphasis role="comment">}&#32;qoa_file;</emphasis>
+56 <emphasis role="comment"></emphasis>
+57 <emphasis role="comment">Wheras&#32;the&#32;64bit&#32;qoa_slice_t&#32;is&#32;defined&#32;as&#32;follows:</emphasis>
+58 <emphasis role="comment"></emphasis>
+59 <emphasis role="comment">.-&#32;QOA_SLICE&#32;--&#32;64&#32;bits,&#32;20&#32;samples&#32;--------------------------/&#32;&#32;/------------.</emphasis>
+60 <emphasis role="comment">|&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;Byte[0]&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;|&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;Byte[1]&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;|&#32;&#32;Byte[2]&#32;&#32;\&#32;&#32;\&#32;&#32;Byte[7]&#32;&#32;&#32;|</emphasis>
+61 <emphasis role="comment">|&#32;7&#32;&#32;6&#32;&#32;5&#32;&#32;4&#32;&#32;3&#32;&#32;2&#32;&#32;1&#32;&#32;0&#32;|&#32;7&#32;&#32;6&#32;&#32;5&#32;&#32;4&#32;&#32;3&#32;&#32;2&#32;&#32;1&#32;&#32;0&#32;|&#32;7&#32;&#32;6&#32;&#32;5&#32;&#32;&#32;/&#32;&#32;/&#32;&#32;&#32;&#32;2&#32;&#32;1&#32;&#32;0&#32;|</emphasis>
+62 <emphasis role="comment">|------------+--------+--------+--------+---------+---------+-\&#32;&#32;\--+---------|</emphasis>
+63 <emphasis role="comment">|&#32;&#32;sf_index&#32;&#32;|&#32;&#32;r00&#32;&#32;&#32;|&#32;&#32;&#32;r01&#32;&#32;|&#32;&#32;&#32;r02&#32;&#32;|&#32;&#32;r03&#32;&#32;&#32;&#32;|&#32;&#32;&#32;r04&#32;&#32;&#32;|&#32;/&#32;&#32;/&#32;&#32;|&#32;&#32;&#32;r19&#32;&#32;&#32;|</emphasis>
+64 <emphasis role="comment">`-------------------------------------------------------------\&#32;&#32;\------------`</emphasis>
+65 <emphasis role="comment"></emphasis>
+66 <emphasis role="comment">`sf_index`&#32;defines&#32;the&#32;scalefactor&#32;to&#32;use&#32;for&#32;this&#32;slice&#32;as&#32;an&#32;index&#32;into&#32;the</emphasis>
+67 <emphasis role="comment">qoa_scalefactor_tab[16]</emphasis>
+68 <emphasis role="comment"></emphasis>
+69 <emphasis role="comment">`r00`--`r19`&#32;are&#32;the&#32;residuals&#32;for&#32;the&#32;individual&#32;samples,&#32;divided&#32;by&#32;the</emphasis>
+70 <emphasis role="comment">scalefactor&#32;and&#32;quantized&#32;by&#32;the&#32;qoa_quant_tab[].</emphasis>
+71 <emphasis role="comment"></emphasis>
+72 <emphasis role="comment">In&#32;the&#32;decoder,&#32;a&#32;prediction&#32;of&#32;the&#32;next&#32;sample&#32;is&#32;computed&#32;by&#32;multiplying&#32;the&#32;</emphasis>
+73 <emphasis role="comment">state&#32;(the&#32;last&#32;four&#32;output&#32;samples)&#32;with&#32;the&#32;predictor.&#32;The&#32;residual&#32;from&#32;the&#32;</emphasis>
+74 <emphasis role="comment">slice&#32;is&#32;then&#32;dequantized&#32;using&#32;the&#32;qoa_dequant_tab[]&#32;and&#32;added&#32;to&#32;the&#32;</emphasis>
+75 <emphasis role="comment">prediction.&#32;The&#32;result&#32;is&#32;clamped&#32;to&#32;int16&#32;to&#32;form&#32;the&#32;final&#32;output&#32;sample.</emphasis>
+76 <emphasis role="comment"></emphasis>
+77 <emphasis role="comment">*/</emphasis>
+78 
+79 
+80 
+81 <emphasis role="comment">/*&#32;-----------------------------------------------------------------------------</emphasis>
+82 <emphasis role="comment">&#32;&#32;&#32;&#32;Header&#32;-&#32;Public&#32;functions&#32;*/</emphasis>
+83 
+84 <emphasis role="preprocessor">#ifndef&#32;QOA_H</emphasis>
+85 <emphasis role="preprocessor">#define&#32;QOA_H</emphasis>
+86 
+87 <emphasis role="preprocessor">#ifdef&#32;__cplusplus</emphasis>
+88 <emphasis role="keyword">extern</emphasis>&#32;<emphasis role="stringliteral">&quot;C&quot;</emphasis>&#32;{
+89 <emphasis role="preprocessor">#endif</emphasis>
+90 
+91 <emphasis role="preprocessor">#define&#32;QOA_MIN_FILESIZE&#32;16</emphasis>
+92 <emphasis role="preprocessor">#define&#32;QOA_MAX_CHANNELS&#32;8</emphasis>
+93 
+94 <emphasis role="preprocessor">#define&#32;QOA_SLICE_LEN&#32;20</emphasis>
+95 <emphasis role="preprocessor">#define&#32;QOA_SLICES_PER_FRAME&#32;256</emphasis>
+96 <emphasis role="preprocessor">#define&#32;QOA_FRAME_LEN&#32;(QOA_SLICES_PER_FRAME&#32;*&#32;QOA_SLICE_LEN)</emphasis>
+97 <emphasis role="preprocessor">#define&#32;QOA_LMS_LEN&#32;4</emphasis>
+98 <emphasis role="preprocessor">#define&#32;QOA_MAGIC&#32;0x716f6166&#32;</emphasis><emphasis role="comment">/*&#32;&apos;qoaf&apos;&#32;*/</emphasis><emphasis role="preprocessor"></emphasis>
+99 
+100 <emphasis role="preprocessor">#define&#32;QOA_FRAME_SIZE(channels,&#32;slices)&#32;\</emphasis>
+101 <emphasis role="preprocessor">&#32;&#32;&#32;&#32;(8&#32;+&#32;QOA_LMS_LEN&#32;*&#32;4&#32;*&#32;channels&#32;+&#32;8&#32;*&#32;slices&#32;*&#32;channels)</emphasis>
+102 
+103 <emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">struct&#32;</emphasis>{
+104 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;history[<link linkend="__classes_2lib_2external_2qoa_8h_1abaa086b0fe99726af23dfd3b7e3fa499">QOA_LMS_LEN</link>];
+105 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;weights[<link linkend="__classes_2lib_2external_2qoa_8h_1abaa086b0fe99726af23dfd3b7e3fa499">QOA_LMS_LEN</link>];
+106 }&#32;<link linkend="_structqoa__lms__t">qoa_lms_t</link>;
+107 
+108 <emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">struct&#32;</emphasis>{
+109 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;channels;
+110 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;samplerate;
+111 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1aba70cd077c2c52c15358c231c6d293aa">samples</link>;
+112 &#32;&#32;&#32;&#32;<link linkend="_structqoa__lms__t">qoa_lms_t</link>&#32;lms[<link linkend="__classes_2lib_2external_2qoa_8h_1a6a1ea9336c21d7de8db36a5aac89e320">QOA_MAX_CHANNELS</link>];
+113 <emphasis role="preprocessor">&#32;&#32;&#32;&#32;#ifdef&#32;QOA_RECORD_TOTAL_ERROR</emphasis>
+114 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">double</emphasis>&#32;<link linkend="__classes_2lib_2glm_2test_2core_2core__func__integer__bit__count_8cpp_1ab34dedbf30a51859090cbab92fa60edb">error</link>;
+115 <emphasis role="preprocessor">&#32;&#32;&#32;&#32;#endif</emphasis>
+116 }&#32;<link linkend="_structqoa__desc">qoa_desc</link>;
+117 
+118 <emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2external_2qoa_8h_1a5f8811e1ae7b22f82a4d7fadd0a04f75">qoa_encode_header</link>(<link linkend="_structqoa__desc">qoa_desc</link>&#32;*qoa,&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>&#32;*bytes);
+119 <emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2external_2qoa_8h_1a3938043cda7fb5b1c50614d55bdb5b8c">qoa_encode_frame</link>(<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">short</emphasis>&#32;*sample_data,&#32;<link linkend="_structqoa__desc">qoa_desc</link>&#32;*qoa,&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;frame_len,&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>&#32;*bytes);
+120 <emphasis role="keywordtype">void</emphasis>&#32;*<link linkend="__classes_2lib_2external_2qoa_8h_1ab956d022df26af9b453cf2d1484917e5">qoa_encode</link>(<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">short</emphasis>&#32;*sample_data,&#32;<link linkend="_structqoa__desc">qoa_desc</link>&#32;*qoa,&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;*out_len);
+121 
+122 <emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2external_2qoa_8h_1a000231eba8a5ce040596c7dbb16a36df">qoa_max_frame_size</link>(<link linkend="_structqoa__desc">qoa_desc</link>&#32;*qoa);
+123 <emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2external_2qoa_8h_1a3e623d05c427eb1ed8b76ca8c36b04f6">qoa_decode_header</link>(<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>&#32;*bytes,&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a3d1e3edfcf61ca2d831883e1afbad89e">size</link>,&#32;<link linkend="_structqoa__desc">qoa_desc</link>&#32;*qoa);
+124 <emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2external_2qoa_8h_1ab24537aedf9ace4efe796acc5ba32208">qoa_decode_frame</link>(<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>&#32;*bytes,&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a3d1e3edfcf61ca2d831883e1afbad89e">size</link>,&#32;<link linkend="_structqoa__desc">qoa_desc</link>&#32;*qoa,&#32;<emphasis role="keywordtype">short</emphasis>&#32;*sample_data,&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;*frame_len);
+125 <emphasis role="keywordtype">short</emphasis>&#32;*<link linkend="__classes_2lib_2external_2qoa_8h_1aa6cdde6612dc54bcc6db683c550b712d">qoa_decode</link>(<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>&#32;*bytes,&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a3d1e3edfcf61ca2d831883e1afbad89e">size</link>,&#32;<link linkend="_structqoa__desc">qoa_desc</link>&#32;*file);
+126 
+127 <emphasis role="preprocessor">#ifndef&#32;QOA_NO_STDIO</emphasis>
+128 
+129 <emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2external_2qoa_8h_1ad7c7fb3280e07faf230acd73d5ac296d">qoa_write</link>(<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>&#32;*<link linkend="__classes_2lib_2m_i_n_i-master_2tests_2testhuge_8cpp_1a42a21beb8018ac623f4d09db1343b9cf">filename</link>,&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">short</emphasis>&#32;*sample_data,&#32;<link linkend="_structqoa__desc">qoa_desc</link>&#32;*qoa);
+130 <emphasis role="keywordtype">void</emphasis>&#32;*<link linkend="__classes_2lib_2external_2qoa_8h_1aa2ec86b27718cd9bf0e89ea90e90e6e1">qoa_read</link>(<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>&#32;*<link linkend="__classes_2lib_2m_i_n_i-master_2tests_2testhuge_8cpp_1a42a21beb8018ac623f4d09db1343b9cf">filename</link>,&#32;<link linkend="_structqoa__desc">qoa_desc</link>&#32;*qoa);
+131 
+132 <emphasis role="preprocessor">#endif&#32;</emphasis><emphasis role="comment">/*&#32;QOA_NO_STDIO&#32;*/</emphasis><emphasis role="preprocessor"></emphasis>
+133 
+134 
+135 <emphasis role="preprocessor">#ifdef&#32;__cplusplus</emphasis>
+136 }
+137 <emphasis role="preprocessor">#endif</emphasis>
+138 <emphasis role="preprocessor">#endif&#32;</emphasis><emphasis role="comment">/*&#32;QOA_H&#32;*/</emphasis><emphasis role="preprocessor"></emphasis>
+139 
+140 
+141 <emphasis role="comment">/*&#32;-----------------------------------------------------------------------------</emphasis>
+142 <emphasis role="comment">&#32;&#32;&#32;&#32;Implementation&#32;*/</emphasis>
+143 
+144 <emphasis role="preprocessor">#ifdef&#32;QOA_IMPLEMENTATION</emphasis>
+145 <emphasis role="preprocessor">#include&#32;&lt;stdlib.h&gt;</emphasis>
+146 
+147 <emphasis role="preprocessor">#ifndef&#32;QOA_MALLOC</emphasis>
+148 <emphasis role="preprocessor">&#32;&#32;&#32;&#32;#define&#32;QOA_MALLOC(sz)&#32;malloc(sz)</emphasis>
+149 <emphasis role="preprocessor">&#32;&#32;&#32;&#32;#define&#32;QOA_FREE(p)&#32;free(p)</emphasis>
+150 <emphasis role="preprocessor">#endif</emphasis>
+151 
+152 <emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">long</emphasis>&#32;<emphasis role="keywordtype">long</emphasis>&#32;qoa_uint64_t;
+153 
+154 
+155 <emphasis role="comment">/*&#32;The&#32;quant_tab&#32;provides&#32;an&#32;index&#32;into&#32;the&#32;dequant_tab&#32;for&#32;residuals&#32;in&#32;the</emphasis>
+156 <emphasis role="comment">range&#32;of&#32;-8&#32;..&#32;8.&#32;It&#32;maps&#32;this&#32;range&#32;to&#32;just&#32;3bits&#32;and&#32;becomes&#32;less&#32;accurate&#32;at&#32;</emphasis>
+157 <emphasis role="comment">the&#32;higher&#32;end.&#32;Note&#32;that&#32;the&#32;residual&#32;zero&#32;is&#32;identical&#32;to&#32;the&#32;lowest&#32;positive&#32;</emphasis>
+158 <emphasis role="comment">value.&#32;This&#32;is&#32;mostly&#32;fine,&#32;since&#32;the&#32;qoa_div()&#32;function&#32;always&#32;rounds&#32;away&#32;</emphasis>
+159 <emphasis role="comment">from&#32;zero.&#32;*/</emphasis>
+160 
+161 <emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;qoa_quant_tab[17]&#32;=&#32;{
+162 &#32;&#32;&#32;&#32;7,&#32;7,&#32;7,&#32;5,&#32;5,&#32;3,&#32;3,&#32;1,&#32;<emphasis role="comment">/*&#32;-8..-1&#32;*/</emphasis>
+163 &#32;&#32;&#32;&#32;0,&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">/*&#32;&#32;0&#32;&#32;&#32;&#32;&#32;*/</emphasis>
+164 &#32;&#32;&#32;&#32;0,&#32;2,&#32;2,&#32;4,&#32;4,&#32;6,&#32;6,&#32;6&#32;&#32;<emphasis role="comment">/*&#32;&#32;1..&#32;8&#32;*/</emphasis>
+165 };
+166 
+167 
+168 <emphasis role="comment">/*&#32;We&#32;have&#32;16&#32;different&#32;scalefactors.&#32;Like&#32;the&#32;quantized&#32;residuals&#32;these&#32;become</emphasis>
+169 <emphasis role="comment">less&#32;accurate&#32;at&#32;the&#32;higher&#32;end.&#32;In&#32;theory,&#32;the&#32;highest&#32;scalefactor&#32;that&#32;we</emphasis>
+170 <emphasis role="comment">would&#32;need&#32;to&#32;encode&#32;the&#32;highest&#32;16bit&#32;residual&#32;is&#32;(2**16)/8&#32;=&#32;8192.&#32;However&#32;we</emphasis>
+171 <emphasis role="comment">rely&#32;on&#32;the&#32;LMS&#32;filter&#32;to&#32;predict&#32;samples&#32;accurately&#32;enough&#32;that&#32;a&#32;maximum&#32;</emphasis>
+172 <emphasis role="comment">residual&#32;of&#32;one&#32;quarter&#32;of&#32;the&#32;16&#32;bit&#32;range&#32;is&#32;high&#32;sufficient.&#32;I.e.&#32;with&#32;the&#32;</emphasis>
+173 <emphasis role="comment">scalefactor&#32;2048&#32;times&#32;the&#32;quant&#32;range&#32;of&#32;8&#32;we&#32;can&#32;encode&#32;residuals&#32;up&#32;to&#32;2**14.</emphasis>
+174 <emphasis role="comment"></emphasis>
+175 <emphasis role="comment">The&#32;scalefactor&#32;values&#32;are&#32;computed&#32;as:</emphasis>
+176 <emphasis role="comment">scalefactor_tab[s]&#32;&lt;-&#32;round(pow(s&#32;+&#32;1,&#32;2.75))&#32;*/</emphasis>
+177 
+178 <emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;qoa_scalefactor_tab[16]&#32;=&#32;{
+179 &#32;&#32;&#32;&#32;1,&#32;7,&#32;21,&#32;45,&#32;84,&#32;138,&#32;211,&#32;304,&#32;421,&#32;562,&#32;731,&#32;928,&#32;1157,&#32;1419,&#32;1715,&#32;2048
+180 };
+181 
+182 
+183 <emphasis role="comment">/*&#32;The&#32;reciprocal_tab&#32;maps&#32;each&#32;of&#32;the&#32;16&#32;scalefactors&#32;to&#32;their&#32;rounded&#32;</emphasis>
+184 <emphasis role="comment">reciprocals&#32;1/scalefactor.&#32;This&#32;allows&#32;us&#32;to&#32;calculate&#32;the&#32;scaled&#32;residuals&#32;in&#32;</emphasis>
+185 <emphasis role="comment">the&#32;encoder&#32;with&#32;just&#32;one&#32;multiplication&#32;instead&#32;of&#32;an&#32;expensive&#32;division.&#32;We&#32;</emphasis>
+186 <emphasis role="comment">do&#32;this&#32;in&#32;.16&#32;fixed&#32;point&#32;with&#32;integers,&#32;instead&#32;of&#32;floats.</emphasis>
+187 <emphasis role="comment"></emphasis>
+188 <emphasis role="comment">The&#32;reciprocal_tab&#32;is&#32;computed&#32;as:</emphasis>
+189 <emphasis role="comment">reciprocal_tab[s]&#32;&lt;-&#32;((1&lt;&lt;16)&#32;+&#32;scalefactor_tab[s]&#32;-&#32;1)&#32;/&#32;scalefactor_tab[s]&#32;*/</emphasis>
+190 
+191 <emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;qoa_reciprocal_tab[16]&#32;=&#32;{
+192 &#32;&#32;&#32;&#32;65536,&#32;9363,&#32;3121,&#32;1457,&#32;781,&#32;475,&#32;311,&#32;216,&#32;156,&#32;117,&#32;90,&#32;71,&#32;57,&#32;47,&#32;39,&#32;32
+193 };
+194 
+195 
+196 <emphasis role="comment">/*&#32;The&#32;dequant_tab&#32;maps&#32;each&#32;of&#32;the&#32;scalefactors&#32;and&#32;quantized&#32;residuals&#32;to&#32;</emphasis>
+197 <emphasis role="comment">their&#32;unscaled&#32;&amp;&#32;dequantized&#32;version.</emphasis>
+198 <emphasis role="comment"></emphasis>
+199 <emphasis role="comment">Since&#32;qoa_div&#32;rounds&#32;away&#32;from&#32;the&#32;zero,&#32;the&#32;smallest&#32;entries&#32;are&#32;mapped&#32;to&#32;3/4</emphasis>
+200 <emphasis role="comment">instead&#32;of&#32;1.&#32;The&#32;dequant_tab&#32;assumes&#32;the&#32;following&#32;dequantized&#32;values&#32;for&#32;each&#32;</emphasis>
+201 <emphasis role="comment">of&#32;the&#32;quant_tab&#32;indices&#32;and&#32;is&#32;computed&#32;as:</emphasis>
+202 <emphasis role="comment">float&#32;dqt[8]&#32;=&#32;{0.75,&#32;-0.75,&#32;2.5,&#32;-2.5,&#32;4.5,&#32;-4.5,&#32;7,&#32;-7};</emphasis>
+203 <emphasis role="comment">dequant_tab[s][q]&#32;&lt;-&#32;round(scalefactor_tab[s]&#32;*&#32;dqt[q])&#32;*/</emphasis>
+204 
+205 <emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;qoa_dequant_tab[16][8]&#32;=&#32;{
+206 &#32;&#32;&#32;&#32;{&#32;&#32;&#32;1,&#32;&#32;&#32;&#32;-1,&#32;&#32;&#32;&#32;3,&#32;&#32;&#32;&#32;-3,&#32;&#32;&#32;&#32;5,&#32;&#32;&#32;&#32;-5,&#32;&#32;&#32;&#32;&#32;7,&#32;&#32;&#32;&#32;&#32;-7},
+207 &#32;&#32;&#32;&#32;{&#32;&#32;&#32;5,&#32;&#32;&#32;&#32;-5,&#32;&#32;&#32;18,&#32;&#32;&#32;-18,&#32;&#32;&#32;32,&#32;&#32;&#32;-32,&#32;&#32;&#32;&#32;49,&#32;&#32;&#32;&#32;-49},
+208 &#32;&#32;&#32;&#32;{&#32;&#32;16,&#32;&#32;&#32;-16,&#32;&#32;&#32;53,&#32;&#32;&#32;-53,&#32;&#32;&#32;95,&#32;&#32;&#32;-95,&#32;&#32;&#32;147,&#32;&#32;&#32;-147},
+209 &#32;&#32;&#32;&#32;{&#32;&#32;34,&#32;&#32;&#32;-34,&#32;&#32;113,&#32;&#32;-113,&#32;&#32;203,&#32;&#32;-203,&#32;&#32;&#32;315,&#32;&#32;&#32;-315},
+210 &#32;&#32;&#32;&#32;{&#32;&#32;63,&#32;&#32;&#32;-63,&#32;&#32;210,&#32;&#32;-210,&#32;&#32;378,&#32;&#32;-378,&#32;&#32;&#32;588,&#32;&#32;&#32;-588},
+211 &#32;&#32;&#32;&#32;{&#32;104,&#32;&#32;-104,&#32;&#32;345,&#32;&#32;-345,&#32;&#32;621,&#32;&#32;-621,&#32;&#32;&#32;966,&#32;&#32;&#32;-966},
+212 &#32;&#32;&#32;&#32;{&#32;158,&#32;&#32;-158,&#32;&#32;528,&#32;&#32;-528,&#32;&#32;950,&#32;&#32;-950,&#32;&#32;1477,&#32;&#32;-1477},
+213 &#32;&#32;&#32;&#32;{&#32;228,&#32;&#32;-228,&#32;&#32;760,&#32;&#32;-760,&#32;1368,&#32;-1368,&#32;&#32;2128,&#32;&#32;-2128},
+214 &#32;&#32;&#32;&#32;{&#32;316,&#32;&#32;-316,&#32;1053,&#32;-1053,&#32;1895,&#32;-1895,&#32;&#32;2947,&#32;&#32;-2947},
+215 &#32;&#32;&#32;&#32;{&#32;422,&#32;&#32;-422,&#32;1405,&#32;-1405,&#32;2529,&#32;-2529,&#32;&#32;3934,&#32;&#32;-3934},
+216 &#32;&#32;&#32;&#32;{&#32;548,&#32;&#32;-548,&#32;1828,&#32;-1828,&#32;3290,&#32;-3290,&#32;&#32;5117,&#32;&#32;-5117},
+217 &#32;&#32;&#32;&#32;{&#32;696,&#32;&#32;-696,&#32;2320,&#32;-2320,&#32;4176,&#32;-4176,&#32;&#32;6496,&#32;&#32;-6496},
+218 &#32;&#32;&#32;&#32;{&#32;868,&#32;&#32;-868,&#32;2893,&#32;-2893,&#32;5207,&#32;-5207,&#32;&#32;8099,&#32;&#32;-8099},
+219 &#32;&#32;&#32;&#32;{1064,&#32;-1064,&#32;3548,&#32;-3548,&#32;6386,&#32;-6386,&#32;&#32;9933,&#32;&#32;-9933},
+220 &#32;&#32;&#32;&#32;{1286,&#32;-1286,&#32;4288,&#32;-4288,&#32;7718,&#32;-7718,&#32;12005,&#32;-12005},
+221 &#32;&#32;&#32;&#32;{1536,&#32;-1536,&#32;5120,&#32;-5120,&#32;9216,&#32;-9216,&#32;14336,&#32;-14336},
+222 };
+223 
+224 
+225 <emphasis role="comment">/*&#32;The&#32;Least&#32;Mean&#32;Squares&#32;Filter&#32;is&#32;the&#32;heart&#32;of&#32;QOA.&#32;It&#32;predicts&#32;the&#32;next</emphasis>
+226 <emphasis role="comment">sample&#32;based&#32;on&#32;the&#32;previous&#32;4&#32;reconstructed&#32;samples.&#32;It&#32;does&#32;so&#32;by&#32;continuously</emphasis>
+227 <emphasis role="comment">adjusting&#32;4&#32;weights&#32;based&#32;on&#32;the&#32;residual&#32;of&#32;the&#32;previous&#32;prediction.</emphasis>
+228 <emphasis role="comment"></emphasis>
+229 <emphasis role="comment">The&#32;next&#32;sample&#32;is&#32;predicted&#32;as&#32;the&#32;sum&#32;of&#32;(weight[i]&#32;*&#32;history[i]).</emphasis>
+230 <emphasis role="comment"></emphasis>
+231 <emphasis role="comment">The&#32;adjustment&#32;of&#32;the&#32;weights&#32;is&#32;done&#32;with&#32;a&#32;&quot;Sign-Sign-LMS&quot;&#32;that&#32;adds&#32;or</emphasis>
+232 <emphasis role="comment">subtracts&#32;the&#32;residual&#32;to&#32;each&#32;weight,&#32;based&#32;on&#32;the&#32;corresponding&#32;sample&#32;from&#32;</emphasis>
+233 <emphasis role="comment">the&#32;history.&#32;This,&#32;surprisingly,&#32;is&#32;sufficient&#32;to&#32;get&#32;worthwhile&#32;predictions.</emphasis>
+234 <emphasis role="comment"></emphasis>
+235 <emphasis role="comment">This&#32;is&#32;all&#32;done&#32;with&#32;fixed&#32;point&#32;integers.&#32;Hence&#32;the&#32;right-shifts&#32;when&#32;updating</emphasis>
+236 <emphasis role="comment">the&#32;weights&#32;and&#32;calculating&#32;the&#32;prediction.&#32;*/</emphasis>
+237 
+238 <emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;qoa_lms_predict(<link linkend="_structqoa__lms__t">qoa_lms_t</link>&#32;*lms)&#32;{
+239 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;prediction&#32;=&#32;0;
+240 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(<emphasis role="keywordtype">int</emphasis>&#32;i&#32;=&#32;0;&#32;i&#32;&lt;&#32;<link linkend="__classes_2lib_2external_2qoa_8h_1abaa086b0fe99726af23dfd3b7e3fa499">QOA_LMS_LEN</link>;&#32;i++)&#32;{
+241 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;prediction&#32;+=&#32;lms-&gt;<link linkend="_structqoa__lms__t_1a086f7ad0f8998f503676e69a733e3a97">weights</link>[i]&#32;*&#32;lms-&gt;<link linkend="_structqoa__lms__t_1aae536c16534305aefca6c00405b3625d">history</link>[i];
+242 &#32;&#32;&#32;&#32;}
+243 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;prediction&#32;&gt;&gt;&#32;13;
+244 }
+245 
+246 <emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>&#32;qoa_lms_update(<link linkend="_structqoa__lms__t">qoa_lms_t</link>&#32;*lms,&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="_structsample">sample</link>,&#32;<emphasis role="keywordtype">int</emphasis>&#32;residual)&#32;{
+247 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;delta&#32;=&#32;residual&#32;&gt;&gt;&#32;4;
+248 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(<emphasis role="keywordtype">int</emphasis>&#32;i&#32;=&#32;0;&#32;i&#32;&lt;&#32;<link linkend="__classes_2lib_2external_2qoa_8h_1abaa086b0fe99726af23dfd3b7e3fa499">QOA_LMS_LEN</link>;&#32;i++)&#32;{
+249 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;lms-&gt;<link linkend="_structqoa__lms__t_1a086f7ad0f8998f503676e69a733e3a97">weights</link>[i]&#32;+=&#32;lms-&gt;<link linkend="_structqoa__lms__t_1aae536c16534305aefca6c00405b3625d">history</link>[i]&#32;&lt;&#32;0&#32;?&#32;-delta&#32;:&#32;delta;
+250 &#32;&#32;&#32;&#32;}
+251 
+252 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(<emphasis role="keywordtype">int</emphasis>&#32;i&#32;=&#32;0;&#32;i&#32;&lt;&#32;<link linkend="__classes_2lib_2external_2qoa_8h_1abaa086b0fe99726af23dfd3b7e3fa499">QOA_LMS_LEN</link>-1;&#32;i++)&#32;{
+253 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;lms-&gt;<link linkend="_structqoa__lms__t_1aae536c16534305aefca6c00405b3625d">history</link>[i]&#32;=&#32;lms-&gt;<link linkend="_structqoa__lms__t_1aae536c16534305aefca6c00405b3625d">history</link>[i+1];
+254 &#32;&#32;&#32;&#32;}
+255 &#32;&#32;&#32;&#32;lms-&gt;<link linkend="_structqoa__lms__t_1aae536c16534305aefca6c00405b3625d">history</link>[<link linkend="__classes_2lib_2external_2qoa_8h_1abaa086b0fe99726af23dfd3b7e3fa499">QOA_LMS_LEN</link>-1]&#32;=&#32;<link linkend="_structsample">sample</link>;
+256 }
+257 
+258 
+259 <emphasis role="comment">/*&#32;qoa_div()&#32;implements&#32;a&#32;rounding&#32;division,&#32;but&#32;avoids&#32;rounding&#32;to&#32;zero&#32;for&#32;</emphasis>
+260 <emphasis role="comment">small&#32;numbers.&#32;E.g.&#32;0.1&#32;will&#32;be&#32;rounded&#32;to&#32;1.&#32;Note&#32;that&#32;0&#32;itself&#32;still&#32;</emphasis>
+261 <emphasis role="comment">returns&#32;as&#32;0,&#32;which&#32;is&#32;handled&#32;in&#32;the&#32;qoa_quant_tab[].</emphasis>
+262 <emphasis role="comment">qoa_div()&#32;takes&#32;an&#32;index&#32;into&#32;the&#32;.16&#32;fixed&#32;point&#32;qoa_reciprocal_tab&#32;as&#32;an</emphasis>
+263 <emphasis role="comment">argument,&#32;so&#32;it&#32;can&#32;do&#32;the&#32;division&#32;with&#32;a&#32;cheaper&#32;integer&#32;multiplication.&#32;*/</emphasis>
+264 
+265 <emphasis role="keyword">static</emphasis>&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;qoa_div(<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a14cfbe2fc2234f5504618905b69d1e06">v</link>,&#32;<emphasis role="keywordtype">int</emphasis>&#32;scalefactor)&#32;{
+266 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;reciprocal&#32;=&#32;qoa_reciprocal_tab[scalefactor];
+267 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;n&#32;=&#32;(<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a14cfbe2fc2234f5504618905b69d1e06">v</link>&#32;*&#32;reciprocal&#32;+&#32;(1&#32;&lt;&lt;&#32;15))&#32;&gt;&gt;&#32;16;
+268 &#32;&#32;&#32;&#32;n&#32;=&#32;n&#32;+&#32;((<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a14cfbe2fc2234f5504618905b69d1e06">v</link>&#32;&gt;&#32;0)&#32;-&#32;(<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a14cfbe2fc2234f5504618905b69d1e06">v</link>&#32;&lt;&#32;0))&#32;-&#32;((n&#32;&gt;&#32;0)&#32;-&#32;(n&#32;&lt;&#32;0));&#32;<emphasis role="comment">/*&#32;round&#32;away&#32;from&#32;0&#32;*/</emphasis>
+269 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;n;
+270 }
+271 
+272 <emphasis role="keyword">static</emphasis>&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;qoa_clamp(<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a14cfbe2fc2234f5504618905b69d1e06">v</link>,&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="_toml_8hpp_1aef6fbc596e7e69a80f14c34a2b786a14">min</link>,&#32;<emphasis role="keywordtype">int</emphasis>&#32;max)&#32;{
+273 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;(<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a14cfbe2fc2234f5504618905b69d1e06">v</link>&#32;&lt;&#32;<link linkend="_toml_8hpp_1aef6fbc596e7e69a80f14c34a2b786a14">min</link>)&#32;?&#32;<link linkend="_toml_8hpp_1aef6fbc596e7e69a80f14c34a2b786a14">min</link>&#32;:&#32;(<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a14cfbe2fc2234f5504618905b69d1e06">v</link>&#32;&gt;&#32;<link linkend="_group__core__func__common_1gae02d42887fc5570451f880e3c624b9ac">max</link>)&#32;?&#32;max&#32;:&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a14cfbe2fc2234f5504618905b69d1e06">v</link>;
+274 }
+275 
+276 <emphasis role="keyword">static</emphasis>&#32;<emphasis role="keyword">inline</emphasis>&#32;qoa_uint64_t&#32;qoa_read_u64(<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>&#32;*bytes,&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;*p)&#32;{
+277 &#32;&#32;&#32;&#32;bytes&#32;+=&#32;*p;
+278 &#32;&#32;&#32;&#32;*p&#32;+=&#32;8;
+279 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;
+280 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;((qoa_uint64_t)(bytes[0])&#32;&lt;&lt;&#32;56)&#32;|&#32;((qoa_uint64_t)(bytes[1])&#32;&lt;&lt;&#32;48)&#32;|
+281 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;((qoa_uint64_t)(bytes[2])&#32;&lt;&lt;&#32;40)&#32;|&#32;((qoa_uint64_t)(bytes[3])&#32;&lt;&lt;&#32;32)&#32;|
+282 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;((qoa_uint64_t)(bytes[4])&#32;&lt;&lt;&#32;24)&#32;|&#32;((qoa_uint64_t)(bytes[5])&#32;&lt;&lt;&#32;16)&#32;|
+283 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;((qoa_uint64_t)(bytes[6])&#32;&lt;&lt;&#32;&#32;8)&#32;|&#32;((qoa_uint64_t)(bytes[7])&#32;&lt;&lt;&#32;&#32;0);
+284 }
+285 
+286 <emphasis role="keyword">static</emphasis>&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>&#32;qoa_write_u64(qoa_uint64_t&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a14cfbe2fc2234f5504618905b69d1e06">v</link>,&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>&#32;*bytes,&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;*p)&#32;{
+287 &#32;&#32;&#32;&#32;bytes&#32;+=&#32;*p;
+288 &#32;&#32;&#32;&#32;*p&#32;+=&#32;8;
+289 &#32;&#32;&#32;&#32;bytes[0]&#32;=&#32;(<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a14cfbe2fc2234f5504618905b69d1e06">v</link>&#32;&gt;&gt;&#32;56)&#32;&amp;&#32;0xff;
+290 &#32;&#32;&#32;&#32;bytes[1]&#32;=&#32;(<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a14cfbe2fc2234f5504618905b69d1e06">v</link>&#32;&gt;&gt;&#32;48)&#32;&amp;&#32;0xff;
+291 &#32;&#32;&#32;&#32;bytes[2]&#32;=&#32;(<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a14cfbe2fc2234f5504618905b69d1e06">v</link>&#32;&gt;&gt;&#32;40)&#32;&amp;&#32;0xff;
+292 &#32;&#32;&#32;&#32;bytes[3]&#32;=&#32;(<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a14cfbe2fc2234f5504618905b69d1e06">v</link>&#32;&gt;&gt;&#32;32)&#32;&amp;&#32;0xff;
+293 &#32;&#32;&#32;&#32;bytes[4]&#32;=&#32;(<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a14cfbe2fc2234f5504618905b69d1e06">v</link>&#32;&gt;&gt;&#32;24)&#32;&amp;&#32;0xff;
+294 &#32;&#32;&#32;&#32;bytes[5]&#32;=&#32;(<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a14cfbe2fc2234f5504618905b69d1e06">v</link>&#32;&gt;&gt;&#32;16)&#32;&amp;&#32;0xff;
+295 &#32;&#32;&#32;&#32;bytes[6]&#32;=&#32;(<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a14cfbe2fc2234f5504618905b69d1e06">v</link>&#32;&gt;&gt;&#32;&#32;8)&#32;&amp;&#32;0xff;
+296 &#32;&#32;&#32;&#32;bytes[7]&#32;=&#32;(<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a14cfbe2fc2234f5504618905b69d1e06">v</link>&#32;&gt;&gt;&#32;&#32;0)&#32;&amp;&#32;0xff;
+297 }
+298 
+299 
+300 <emphasis role="comment">/*&#32;-----------------------------------------------------------------------------</emphasis>
+301 <emphasis role="comment">&#32;&#32;&#32;&#32;Encoder&#32;*/</emphasis>
+302 
+303 <emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2external_2qoa_8h_1a5f8811e1ae7b22f82a4d7fadd0a04f75">qoa_encode_header</link>(<link linkend="_structqoa__desc">qoa_desc</link>&#32;*qoa,&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>&#32;*bytes)&#32;{
+304 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;p&#32;=&#32;0;
+305 &#32;&#32;&#32;&#32;qoa_write_u64(((qoa_uint64_t)<link linkend="__classes_2lib_2external_2qoa_8h_1a9f5f9bf1ff8ed002a0356391cf971f99">QOA_MAGIC</link>&#32;&lt;&lt;&#32;32)&#32;|&#32;qoa-&gt;<link linkend="_structqoa__desc_1a631e1e164d8a7b1ee966577d903cb41a">samples</link>,&#32;bytes,&#32;&amp;p);
+306 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;p;
+307 }
+308 
+309 <emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2external_2qoa_8h_1a3938043cda7fb5b1c50614d55bdb5b8c">qoa_encode_frame</link>(<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">short</emphasis>&#32;*sample_data,&#32;<link linkend="_structqoa__desc">qoa_desc</link>&#32;*qoa,&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;frame_len,&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>&#32;*bytes)&#32;{
+310 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;channels&#32;=&#32;qoa-&gt;<link linkend="_structqoa__desc_1a33e92402e0008fd44a71f5393a0d07b0">channels</link>;
+311 
+312 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;p&#32;=&#32;0;
+313 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;slices&#32;=&#32;(frame_len&#32;+&#32;<link linkend="__classes_2lib_2external_2qoa_8h_1adf18113c750bfc97ae5b412522920b89">QOA_SLICE_LEN</link>&#32;-&#32;1)&#32;/&#32;<link linkend="__classes_2lib_2external_2qoa_8h_1adf18113c750bfc97ae5b412522920b89">QOA_SLICE_LEN</link>;
+314 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;frame_size&#32;=&#32;<link linkend="__classes_2lib_2external_2qoa_8h_1a505b6cd6d453b08569bf60c7530cb9b2">QOA_FRAME_SIZE</link>(channels,&#32;slices);
+315 
+316 &#32;&#32;&#32;&#32;<emphasis role="comment">/*&#32;Write&#32;the&#32;frame&#32;header&#32;*/</emphasis>
+317 &#32;&#32;&#32;&#32;qoa_write_u64((
+318 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;(qoa_uint64_t)qoa-&gt;<link linkend="_structqoa__desc_1a33e92402e0008fd44a71f5393a0d07b0">channels</link>&#32;&#32;&#32;&lt;&lt;&#32;56&#32;|
+319 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;(qoa_uint64_t)qoa-&gt;<link linkend="_structqoa__desc_1ad5d475ca7fcfef58fadce55d488c6f1a">samplerate</link>&#32;&lt;&lt;&#32;32&#32;|
+320 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;(qoa_uint64_t)frame_len&#32;&#32;&#32;&#32;&#32;&#32;&#32;&lt;&lt;&#32;16&#32;|
+321 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;(qoa_uint64_t)frame_size
+322 &#32;&#32;&#32;&#32;),&#32;bytes,&#32;&amp;p);
+323 
+324 &#32;&#32;&#32;&#32;<emphasis role="comment">/*&#32;Write&#32;the&#32;current&#32;LMS&#32;state&#32;*/</emphasis>
+325 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(<emphasis role="keywordtype">int</emphasis>&#32;c&#32;=&#32;0;&#32;c&#32;&lt;&#32;channels;&#32;c++)&#32;{
+326 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;qoa_uint64_t&#32;weights&#32;=&#32;0;
+327 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;qoa_uint64_t&#32;history&#32;=&#32;0;
+328 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(<emphasis role="keywordtype">int</emphasis>&#32;i&#32;=&#32;0;&#32;i&#32;&lt;&#32;<link linkend="__classes_2lib_2external_2qoa_8h_1abaa086b0fe99726af23dfd3b7e3fa499">QOA_LMS_LEN</link>;&#32;i++)&#32;{
+329 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;history&#32;=&#32;(history&#32;&lt;&lt;&#32;16)&#32;|&#32;(qoa-&gt;<link linkend="_structqoa__desc_1a8620e714b73593e9a95a7e9d11ec8eea">lms</link>[c].<link linkend="_structqoa__lms__t_1aae536c16534305aefca6c00405b3625d">history</link>[i]&#32;&amp;&#32;0xffff);
+330 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;weights&#32;=&#32;(weights&#32;&lt;&lt;&#32;16)&#32;|&#32;(qoa-&gt;<link linkend="_structqoa__desc_1a8620e714b73593e9a95a7e9d11ec8eea">lms</link>[c].<link linkend="_structqoa__lms__t_1a086f7ad0f8998f503676e69a733e3a97">weights</link>[i]&#32;&amp;&#32;0xffff);
+331 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+332 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;qoa_write_u64(history,&#32;bytes,&#32;&amp;p);
+333 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;qoa_write_u64(weights,&#32;bytes,&#32;&amp;p);
+334 &#32;&#32;&#32;&#32;}
+335 
+336 &#32;&#32;&#32;&#32;<emphasis role="comment">/*&#32;We&#32;encode&#32;all&#32;samples&#32;with&#32;the&#32;channels&#32;interleaved&#32;on&#32;a&#32;slice&#32;level.</emphasis>
+337 <emphasis role="comment">&#32;&#32;&#32;&#32;E.g.&#32;for&#32;stereo:&#32;(ch-0,&#32;slice&#32;0),&#32;(ch&#32;1,&#32;slice&#32;0),&#32;(ch&#32;0,&#32;slice&#32;1),&#32;...*/</emphasis>
+338 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(<emphasis role="keywordtype">int</emphasis>&#32;sample_index&#32;=&#32;0;&#32;sample_index&#32;&lt;&#32;frame_len;&#32;sample_index&#32;+=&#32;<link linkend="__classes_2lib_2external_2qoa_8h_1adf18113c750bfc97ae5b412522920b89">QOA_SLICE_LEN</link>)&#32;{
+339 
+340 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(<emphasis role="keywordtype">int</emphasis>&#32;c&#32;=&#32;0;&#32;c&#32;&lt;&#32;channels;&#32;c++)&#32;{
+341 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;slice_len&#32;=&#32;qoa_clamp(<link linkend="__classes_2lib_2external_2qoa_8h_1adf18113c750bfc97ae5b412522920b89">QOA_SLICE_LEN</link>,&#32;0,&#32;frame_len&#32;-&#32;sample_index);
+342 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;slice_start&#32;=&#32;sample_index&#32;*&#32;channels&#32;+&#32;c;
+343 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;slice_end&#32;=&#32;(sample_index&#32;+&#32;slice_len)&#32;*&#32;channels&#32;+&#32;c;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;
+344 
+345 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">/*&#32;Brute&#32;for&#32;search&#32;for&#32;the&#32;best&#32;scalefactor.&#32;Just&#32;go&#32;through&#32;all</emphasis>
+346 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;16&#32;scalefactors,&#32;encode&#32;all&#32;samples&#32;for&#32;the&#32;current&#32;slice&#32;and&#32;</emphasis>
+347 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;meassure&#32;the&#32;total&#32;squared&#32;error.&#32;*/</emphasis>
+348 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;qoa_uint64_t&#32;best_error&#32;=&#32;-1;
+349 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;qoa_uint64_t&#32;best_slice;
+350 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_structqoa__lms__t">qoa_lms_t</link>&#32;best_lms;
+351 
+352 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(<emphasis role="keywordtype">int</emphasis>&#32;scalefactor&#32;=&#32;0;&#32;scalefactor&#32;&lt;&#32;16;&#32;scalefactor++)&#32;{
+353 
+354 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">/*&#32;We&#32;have&#32;to&#32;reset&#32;the&#32;LMS&#32;state&#32;to&#32;the&#32;last&#32;known&#32;good&#32;one</emphasis>
+355 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;before&#32;trying&#32;each&#32;scalefactor,&#32;as&#32;each&#32;pass&#32;updates&#32;the&#32;LMS</emphasis>
+356 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;state&#32;when&#32;encoding.&#32;*/</emphasis>
+357 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_structqoa__lms__t">qoa_lms_t</link>&#32;lms&#32;=&#32;qoa-&gt;<link linkend="_structqoa__desc_1a8620e714b73593e9a95a7e9d11ec8eea">lms</link>[c];
+358 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;qoa_uint64_t&#32;slice&#32;=&#32;scalefactor;
+359 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;qoa_uint64_t&#32;current_error&#32;=&#32;0;
+360 
+361 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(<emphasis role="keywordtype">int</emphasis>&#32;si&#32;=&#32;slice_start;&#32;si&#32;&lt;&#32;slice_end;&#32;si&#32;+=&#32;channels)&#32;{
+362 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="_structsample">sample</link>&#32;=&#32;sample_data[si];
+363 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;predicted&#32;=&#32;qoa_lms_predict(&amp;lms);
+364 
+365 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;residual&#32;=&#32;<link linkend="_structsample">sample</link>&#32;-&#32;predicted;
+366 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;scaled&#32;=&#32;qoa_div(residual,&#32;scalefactor);
+367 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;clamped&#32;=&#32;qoa_clamp(scaled,&#32;-8,&#32;8);
+368 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;quantized&#32;=&#32;qoa_quant_tab[clamped&#32;+&#32;8];
+369 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;dequantized&#32;=&#32;qoa_dequant_tab[scalefactor][quantized];
+370 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;reconstructed&#32;=&#32;qoa_clamp(predicted&#32;+&#32;dequantized,&#32;-32768,&#32;32767);
+371 
+372 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">long</emphasis>&#32;<emphasis role="keywordtype">long</emphasis>&#32;<link linkend="__classes_2lib_2glm_2test_2core_2core__func__integer__bit__count_8cpp_1ab34dedbf30a51859090cbab92fa60edb">error</link>&#32;=&#32;(<link linkend="_structsample">sample</link>&#32;-&#32;reconstructed);
+373 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;current_error&#32;+=&#32;<link linkend="__classes_2lib_2glm_2test_2core_2core__func__integer__bit__count_8cpp_1ab34dedbf30a51859090cbab92fa60edb">error</link>&#32;*&#32;<link linkend="__classes_2lib_2glm_2test_2core_2core__func__integer__bit__count_8cpp_1ab34dedbf30a51859090cbab92fa60edb">error</link>;
+374 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(current_error&#32;&gt;&#32;best_error)&#32;{
+375 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">break</emphasis>;
+376 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+377 
+378 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;qoa_lms_update(&amp;lms,&#32;reconstructed,&#32;dequantized);
+379 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;slice&#32;=&#32;(slice&#32;&lt;&lt;&#32;3)&#32;|&#32;quantized;
+380 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+381 
+382 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(current_error&#32;&lt;&#32;best_error)&#32;{
+383 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;best_error&#32;=&#32;current_error;
+384 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;best_slice&#32;=&#32;slice;
+385 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;best_lms&#32;=&#32;lms;
+386 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+387 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+388 
+389 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;qoa-&gt;<link linkend="_structqoa__desc_1a8620e714b73593e9a95a7e9d11ec8eea">lms</link>[c]&#32;=&#32;best_lms;
+390 <emphasis role="preprocessor">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;#ifdef&#32;QOA_RECORD_TOTAL_ERROR</emphasis>
+391 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;qoa-&gt;error&#32;+=&#32;best_error;
+392 <emphasis role="preprocessor">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;#endif</emphasis>
+393 
+394 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">/*&#32;If&#32;this&#32;slice&#32;was&#32;shorter&#32;than&#32;QOA_SLICE_LEN,&#32;we&#32;have&#32;to&#32;left-</emphasis>
+395 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;shift&#32;all&#32;encoded&#32;data,&#32;to&#32;ensure&#32;the&#32;rightmost&#32;bits&#32;are&#32;the&#32;empty</emphasis>
+396 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;ones.&#32;This&#32;should&#32;only&#32;happen&#32;in&#32;the&#32;last&#32;frame&#32;of&#32;a&#32;file&#32;as&#32;all</emphasis>
+397 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;slices&#32;are&#32;completely&#32;filled&#32;otherwise.&#32;*/</emphasis>
+398 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;best_slice&#32;&lt;&lt;=&#32;(<link linkend="__classes_2lib_2external_2qoa_8h_1adf18113c750bfc97ae5b412522920b89">QOA_SLICE_LEN</link>&#32;-&#32;slice_len)&#32;*&#32;3;
+399 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;qoa_write_u64(best_slice,&#32;bytes,&#32;&amp;p);
+400 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+401 &#32;&#32;&#32;&#32;}
+402 &#32;&#32;&#32;&#32;
+403 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;p;
+404 }
+405 
+406 <emphasis role="keywordtype">void</emphasis>&#32;*<link linkend="__classes_2lib_2external_2qoa_8h_1ab956d022df26af9b453cf2d1484917e5">qoa_encode</link>(<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">short</emphasis>&#32;*sample_data,&#32;<link linkend="_structqoa__desc">qoa_desc</link>&#32;*qoa,&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;*out_len)&#32;{
+407 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(
+408 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;qoa-&gt;<link linkend="_structqoa__desc_1a631e1e164d8a7b1ee966577d903cb41a">samples</link>&#32;==&#32;0&#32;||&#32;
+409 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;qoa-&gt;<link linkend="_structqoa__desc_1ad5d475ca7fcfef58fadce55d488c6f1a">samplerate</link>&#32;==&#32;0&#32;||&#32;qoa-&gt;<link linkend="_structqoa__desc_1ad5d475ca7fcfef58fadce55d488c6f1a">samplerate</link>&#32;&gt;&#32;0xffffff&#32;||
+410 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;qoa-&gt;<link linkend="_structqoa__desc_1a33e92402e0008fd44a71f5393a0d07b0">channels</link>&#32;==&#32;0&#32;||&#32;qoa-&gt;<link linkend="_structqoa__desc_1a33e92402e0008fd44a71f5393a0d07b0">channels</link>&#32;&gt;&#32;<link linkend="__classes_2lib_2external_2qoa_8h_1a6a1ea9336c21d7de8db36a5aac89e320">QOA_MAX_CHANNELS</link>
+411 &#32;&#32;&#32;&#32;)&#32;{
+412 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>;
+413 &#32;&#32;&#32;&#32;}
+414 
+415 &#32;&#32;&#32;&#32;<emphasis role="comment">/*&#32;Calculate&#32;the&#32;encoded&#32;size&#32;and&#32;allocate&#32;*/</emphasis>
+416 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;num_frames&#32;=&#32;(qoa-&gt;<link linkend="_structqoa__desc_1a631e1e164d8a7b1ee966577d903cb41a">samples</link>&#32;+&#32;<link linkend="__classes_2lib_2external_2qoa_8h_1a5117261d786f17ca3b4b938f5955b9ad">QOA_FRAME_LEN</link>-1)&#32;/&#32;<link linkend="__classes_2lib_2external_2qoa_8h_1a5117261d786f17ca3b4b938f5955b9ad">QOA_FRAME_LEN</link>;
+417 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;num_slices&#32;=&#32;(qoa-&gt;<link linkend="_structqoa__desc_1a631e1e164d8a7b1ee966577d903cb41a">samples</link>&#32;+&#32;<link linkend="__classes_2lib_2external_2qoa_8h_1adf18113c750bfc97ae5b412522920b89">QOA_SLICE_LEN</link>-1)&#32;/&#32;<link linkend="__classes_2lib_2external_2qoa_8h_1adf18113c750bfc97ae5b412522920b89">QOA_SLICE_LEN</link>;
+418 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;encoded_size&#32;=&#32;8&#32;+&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">/*&#32;8&#32;byte&#32;file&#32;header&#32;*/</emphasis>
+419 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;num_frames&#32;*&#32;8&#32;+&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">/*&#32;8&#32;byte&#32;frame&#32;headers&#32;*/</emphasis>
+420 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;num_frames&#32;*&#32;<link linkend="__classes_2lib_2external_2qoa_8h_1abaa086b0fe99726af23dfd3b7e3fa499">QOA_LMS_LEN</link>&#32;*&#32;4&#32;*&#32;qoa-&gt;<link linkend="_structqoa__desc_1a33e92402e0008fd44a71f5393a0d07b0">channels</link>&#32;+&#32;<emphasis role="comment">/*&#32;4&#32;*&#32;4&#32;bytes&#32;lms&#32;state&#32;per&#32;channel&#32;*/</emphasis>
+421 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;num_slices&#32;*&#32;8&#32;*&#32;qoa-&gt;<link linkend="_structqoa__desc_1a33e92402e0008fd44a71f5393a0d07b0">channels</link>;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">/*&#32;8&#32;byte&#32;slices&#32;*/</emphasis>
+422 
+423 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>&#32;*bytes&#32;=&#32;<link linkend="__classes_2lib_2raudio_8c_1a4f99e79065c8f72acef86805e80ed032">QOA_MALLOC</link>(encoded_size);
+424 
+425 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(<emphasis role="keywordtype">int</emphasis>&#32;c&#32;=&#32;0;&#32;c&#32;&lt;&#32;qoa-&gt;<link linkend="_structqoa__desc_1a33e92402e0008fd44a71f5393a0d07b0">channels</link>;&#32;c++)&#32;{
+426 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">/*&#32;Set&#32;the&#32;initial&#32;LMS&#32;weights&#32;to&#32;{0,&#32;0,&#32;-1,&#32;2}.&#32;This&#32;helps&#32;with&#32;the&#32;</emphasis>
+427 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;prediction&#32;of&#32;the&#32;first&#32;few&#32;ms&#32;of&#32;a&#32;file.&#32;*/</emphasis>
+428 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;qoa-&gt;<link linkend="_structqoa__desc_1a8620e714b73593e9a95a7e9d11ec8eea">lms</link>[c].<link linkend="_structqoa__lms__t_1a086f7ad0f8998f503676e69a733e3a97">weights</link>[0]&#32;=&#32;0;
+429 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;qoa-&gt;<link linkend="_structqoa__desc_1a8620e714b73593e9a95a7e9d11ec8eea">lms</link>[c].<link linkend="_structqoa__lms__t_1a086f7ad0f8998f503676e69a733e3a97">weights</link>[1]&#32;=&#32;0;
+430 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;qoa-&gt;<link linkend="_structqoa__desc_1a8620e714b73593e9a95a7e9d11ec8eea">lms</link>[c].<link linkend="_structqoa__lms__t_1a086f7ad0f8998f503676e69a733e3a97">weights</link>[2]&#32;=&#32;-(1&lt;&lt;13);
+431 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;qoa-&gt;<link linkend="_structqoa__desc_1a8620e714b73593e9a95a7e9d11ec8eea">lms</link>[c].<link linkend="_structqoa__lms__t_1a086f7ad0f8998f503676e69a733e3a97">weights</link>[3]&#32;=&#32;&#32;(1&lt;&lt;14);
+432 
+433 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">/*&#32;Explicitly&#32;set&#32;the&#32;history&#32;samples&#32;to&#32;0,&#32;as&#32;we&#32;might&#32;have&#32;some</emphasis>
+434 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;garbage&#32;in&#32;there.&#32;*/</emphasis>
+435 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(<emphasis role="keywordtype">int</emphasis>&#32;i&#32;=&#32;0;&#32;i&#32;&lt;&#32;<link linkend="__classes_2lib_2external_2qoa_8h_1abaa086b0fe99726af23dfd3b7e3fa499">QOA_LMS_LEN</link>;&#32;i++)&#32;{
+436 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;qoa-&gt;<link linkend="_structqoa__desc_1a8620e714b73593e9a95a7e9d11ec8eea">lms</link>[c].<link linkend="_structqoa__lms__t_1aae536c16534305aefca6c00405b3625d">history</link>[i]&#32;=&#32;0;
+437 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+438 &#32;&#32;&#32;&#32;}
+439 
+440 
+441 &#32;&#32;&#32;&#32;<emphasis role="comment">/*&#32;Encode&#32;the&#32;header&#32;and&#32;go&#32;through&#32;all&#32;frames&#32;*/</emphasis>
+442 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;p&#32;=&#32;<link linkend="__classes_2lib_2external_2qoa_8h_1a5f8811e1ae7b22f82a4d7fadd0a04f75">qoa_encode_header</link>(qoa,&#32;bytes);
+443 <emphasis role="preprocessor">&#32;&#32;&#32;&#32;#ifdef&#32;QOA_RECORD_TOTAL_ERROR</emphasis>
+444 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;qoa-&gt;error&#32;=&#32;0;
+445 <emphasis role="preprocessor">&#32;&#32;&#32;&#32;#endif</emphasis>
+446 
+447 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;frame_len&#32;=&#32;<link linkend="__classes_2lib_2external_2qoa_8h_1a5117261d786f17ca3b4b938f5955b9ad">QOA_FRAME_LEN</link>;
+448 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(<emphasis role="keywordtype">int</emphasis>&#32;sample_index&#32;=&#32;0;&#32;sample_index&#32;&lt;&#32;qoa-&gt;<link linkend="_structqoa__desc_1a631e1e164d8a7b1ee966577d903cb41a">samples</link>;&#32;sample_index&#32;+=&#32;frame_len)&#32;{
+449 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;frame_len&#32;=&#32;qoa_clamp(<link linkend="__classes_2lib_2external_2qoa_8h_1a5117261d786f17ca3b4b938f5955b9ad">QOA_FRAME_LEN</link>,&#32;0,&#32;qoa-&gt;<link linkend="_structqoa__desc_1a631e1e164d8a7b1ee966577d903cb41a">samples</link>&#32;-&#32;sample_index);&#32;&#32;&#32;&#32;&#32;&#32;&#32;
+450 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">short</emphasis>&#32;*frame_samples&#32;=&#32;sample_data&#32;+&#32;sample_index&#32;*&#32;qoa-&gt;<link linkend="_structqoa__desc_1a33e92402e0008fd44a71f5393a0d07b0">channels</link>;
+451 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;frame_size&#32;=&#32;<link linkend="__classes_2lib_2external_2qoa_8h_1a3938043cda7fb5b1c50614d55bdb5b8c">qoa_encode_frame</link>(frame_samples,&#32;qoa,&#32;frame_len,&#32;bytes&#32;+&#32;p);
+452 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;p&#32;+=&#32;frame_size;
+453 &#32;&#32;&#32;&#32;}
+454 
+455 &#32;&#32;&#32;&#32;*out_len&#32;=&#32;p;
+456 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;bytes;
+457 }
+458 
+459 
+460 
+461 <emphasis role="comment">/*&#32;-----------------------------------------------------------------------------</emphasis>
+462 <emphasis role="comment">&#32;&#32;&#32;&#32;Decoder&#32;*/</emphasis>
+463 
+464 <emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2external_2qoa_8h_1a000231eba8a5ce040596c7dbb16a36df">qoa_max_frame_size</link>(<link linkend="_structqoa__desc">qoa_desc</link>&#32;*qoa)&#32;{
+465 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="__classes_2lib_2external_2qoa_8h_1a505b6cd6d453b08569bf60c7530cb9b2">QOA_FRAME_SIZE</link>(qoa-&gt;<link linkend="_structqoa__desc_1a33e92402e0008fd44a71f5393a0d07b0">channels</link>,&#32;<link linkend="__classes_2lib_2external_2qoa_8h_1af60d80e1171869fb25915dc5e61f63d8">QOA_SLICES_PER_FRAME</link>);
+466 }
+467 
+468 <emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2external_2qoa_8h_1a3e623d05c427eb1ed8b76ca8c36b04f6">qoa_decode_header</link>(<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>&#32;*bytes,&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a3d1e3edfcf61ca2d831883e1afbad89e">size</link>,&#32;<link linkend="_structqoa__desc">qoa_desc</link>&#32;*qoa)&#32;{
+469 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;p&#32;=&#32;0;
+470 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a3d1e3edfcf61ca2d831883e1afbad89e">size</link>&#32;&lt;&#32;<link linkend="__classes_2lib_2external_2qoa_8h_1a8700d92239b99ae61f6de4ea139849dc">QOA_MIN_FILESIZE</link>)&#32;{
+471 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;0;
+472 &#32;&#32;&#32;&#32;}
+473 
+474 
+475 &#32;&#32;&#32;&#32;<emphasis role="comment">/*&#32;Read&#32;the&#32;file&#32;header,&#32;verify&#32;the&#32;magic&#32;number&#32;(&apos;qoaf&apos;)&#32;and&#32;read&#32;the&#32;</emphasis>
+476 <emphasis role="comment">&#32;&#32;&#32;&#32;total&#32;number&#32;of&#32;samples.&#32;*/</emphasis>
+477 &#32;&#32;&#32;&#32;qoa_uint64_t&#32;file_header&#32;=&#32;qoa_read_u64(bytes,&#32;&amp;p);
+478 
+479 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;((file_header&#32;&gt;&gt;&#32;32)&#32;!=&#32;<link linkend="__classes_2lib_2external_2qoa_8h_1a9f5f9bf1ff8ed002a0356391cf971f99">QOA_MAGIC</link>)&#32;{
+480 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;0;
+481 &#32;&#32;&#32;&#32;}
+482 
+483 &#32;&#32;&#32;&#32;qoa-&gt;<link linkend="_structqoa__desc_1a631e1e164d8a7b1ee966577d903cb41a">samples</link>&#32;=&#32;file_header&#32;&amp;&#32;0xffffffff;
+484 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(!qoa-&gt;<link linkend="_structqoa__desc_1a631e1e164d8a7b1ee966577d903cb41a">samples</link>)&#32;{
+485 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;0;
+486 &#32;&#32;&#32;&#32;}
+487 
+488 &#32;&#32;&#32;&#32;<emphasis role="comment">/*&#32;Peek&#32;into&#32;the&#32;first&#32;frame&#32;header&#32;to&#32;get&#32;the&#32;number&#32;of&#32;channels&#32;and</emphasis>
+489 <emphasis role="comment">&#32;&#32;&#32;&#32;the&#32;samplerate.&#32;*/</emphasis>
+490 &#32;&#32;&#32;&#32;qoa_uint64_t&#32;frame_header&#32;=&#32;qoa_read_u64(bytes,&#32;&amp;p);
+491 &#32;&#32;&#32;&#32;qoa-&gt;<link linkend="_structqoa__desc_1a33e92402e0008fd44a71f5393a0d07b0">channels</link>&#32;&#32;&#32;=&#32;(frame_header&#32;&gt;&gt;&#32;56)&#32;&amp;&#32;0x0000ff;
+492 &#32;&#32;&#32;&#32;qoa-&gt;<link linkend="_structqoa__desc_1ad5d475ca7fcfef58fadce55d488c6f1a">samplerate</link>&#32;=&#32;(frame_header&#32;&gt;&gt;&#32;32)&#32;&amp;&#32;0xffffff;
+493 
+494 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(qoa-&gt;<link linkend="_structqoa__desc_1a33e92402e0008fd44a71f5393a0d07b0">channels</link>&#32;==&#32;0&#32;||&#32;qoa-&gt;<link linkend="_structqoa__desc_1a631e1e164d8a7b1ee966577d903cb41a">samples</link>&#32;==&#32;0&#32;||&#32;qoa-&gt;<link linkend="_structqoa__desc_1ad5d475ca7fcfef58fadce55d488c6f1a">samplerate</link>&#32;==&#32;0)&#32;{
+495 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;0;
+496 &#32;&#32;&#32;&#32;}
+497 
+498 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;8;
+499 }
+500 
+501 <emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2external_2qoa_8h_1ab24537aedf9ace4efe796acc5ba32208">qoa_decode_frame</link>(<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>&#32;*bytes,&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a3d1e3edfcf61ca2d831883e1afbad89e">size</link>,&#32;<link linkend="_structqoa__desc">qoa_desc</link>&#32;*qoa,&#32;<emphasis role="keywordtype">short</emphasis>&#32;*sample_data,&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;*frame_len)&#32;{
+502 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;p&#32;=&#32;0;
+503 &#32;&#32;&#32;&#32;*frame_len&#32;=&#32;0;
+504 
+505 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(size&#32;&lt;&#32;8&#32;+&#32;QOA_LMS_LEN&#32;*&#32;4&#32;*&#32;qoa-&gt;channels)&#32;{
+506 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;0;
+507 &#32;&#32;&#32;&#32;}
+508 
+509 &#32;&#32;&#32;&#32;<emphasis role="comment">/*&#32;Read&#32;and&#32;verify&#32;the&#32;frame&#32;header&#32;*/</emphasis>
+510 &#32;&#32;&#32;&#32;qoa_uint64_t&#32;frame_header&#32;=&#32;qoa_read_u64(bytes,&#32;&amp;p);
+511 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;channels&#32;&#32;&#32;=&#32;(frame_header&#32;&gt;&gt;&#32;56)&#32;&amp;&#32;0x0000ff;
+512 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;samplerate&#32;=&#32;(frame_header&#32;&gt;&gt;&#32;32)&#32;&amp;&#32;0xffffff;
+513 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1aba70cd077c2c52c15358c231c6d293aa">samples</link>&#32;&#32;&#32;&#32;=&#32;(frame_header&#32;&gt;&gt;&#32;16)&#32;&amp;&#32;0x00ffff;
+514 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;frame_size&#32;=&#32;(frame_header&#32;&#32;&#32;&#32;&#32;&#32;)&#32;&amp;&#32;0x00ffff;
+515 
+516 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;data_size&#32;=&#32;frame_size&#32;-&#32;8&#32;-&#32;<link linkend="__classes_2lib_2external_2qoa_8h_1abaa086b0fe99726af23dfd3b7e3fa499">QOA_LMS_LEN</link>&#32;*&#32;4&#32;*&#32;channels;
+517 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;num_slices&#32;=&#32;data_size&#32;/&#32;8;
+518 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;max_total_samples&#32;=&#32;num_slices&#32;*&#32;<link linkend="__classes_2lib_2external_2qoa_8h_1adf18113c750bfc97ae5b412522920b89">QOA_SLICE_LEN</link>;
+519 
+520 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(
+521 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;channels&#32;!=&#32;qoa-&gt;<link linkend="_structqoa__desc_1a33e92402e0008fd44a71f5393a0d07b0">channels</link>&#32;||&#32;
+522 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;samplerate&#32;!=&#32;qoa-&gt;<link linkend="_structqoa__desc_1ad5d475ca7fcfef58fadce55d488c6f1a">samplerate</link>&#32;||
+523 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;frame_size&#32;&gt;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a3d1e3edfcf61ca2d831883e1afbad89e">size</link>&#32;||
+524 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1aba70cd077c2c52c15358c231c6d293aa">samples</link>&#32;*&#32;channels&#32;&gt;&#32;max_total_samples
+525 &#32;&#32;&#32;&#32;)&#32;{
+526 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;0;
+527 &#32;&#32;&#32;&#32;}
+528 
+529 
+530 &#32;&#32;&#32;&#32;<emphasis role="comment">/*&#32;Read&#32;the&#32;LMS&#32;state:&#32;4&#32;x&#32;2&#32;bytes&#32;history,&#32;4&#32;x&#32;2&#32;bytes&#32;weights&#32;per&#32;channel&#32;*/</emphasis>
+531 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(<emphasis role="keywordtype">int</emphasis>&#32;c&#32;=&#32;0;&#32;c&#32;&lt;&#32;channels;&#32;c++)&#32;{
+532 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;qoa_uint64_t&#32;history&#32;=&#32;qoa_read_u64(bytes,&#32;&amp;p);
+533 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;qoa_uint64_t&#32;weights&#32;=&#32;qoa_read_u64(bytes,&#32;&amp;p);
+534 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(<emphasis role="keywordtype">int</emphasis>&#32;i&#32;=&#32;0;&#32;i&#32;&lt;&#32;<link linkend="__classes_2lib_2external_2qoa_8h_1abaa086b0fe99726af23dfd3b7e3fa499">QOA_LMS_LEN</link>;&#32;i++)&#32;{
+535 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;qoa-&gt;<link linkend="_structqoa__desc_1a8620e714b73593e9a95a7e9d11ec8eea">lms</link>[c].<link linkend="_structqoa__lms__t_1aae536c16534305aefca6c00405b3625d">history</link>[i]&#32;=&#32;((<emphasis role="keywordtype">signed</emphasis>&#32;short)(history&#32;&gt;&gt;&#32;48));
+536 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;history&#32;&lt;&lt;=&#32;16;
+537 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;qoa-&gt;<link linkend="_structqoa__desc_1a8620e714b73593e9a95a7e9d11ec8eea">lms</link>[c].<link linkend="_structqoa__lms__t_1a086f7ad0f8998f503676e69a733e3a97">weights</link>[i]&#32;=&#32;((<emphasis role="keywordtype">signed</emphasis>&#32;short)(weights&#32;&gt;&gt;&#32;48));
+538 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;weights&#32;&lt;&lt;=&#32;16;
+539 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+540 &#32;&#32;&#32;&#32;}
+541 
+542 
+543 &#32;&#32;&#32;&#32;<emphasis role="comment">/*&#32;Decode&#32;all&#32;slices&#32;for&#32;all&#32;channels&#32;in&#32;this&#32;frame&#32;*/</emphasis>
+544 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(<emphasis role="keywordtype">int</emphasis>&#32;sample_index&#32;=&#32;0;&#32;sample_index&#32;&lt;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1aba70cd077c2c52c15358c231c6d293aa">samples</link>;&#32;sample_index&#32;+=&#32;<link linkend="__classes_2lib_2external_2qoa_8h_1adf18113c750bfc97ae5b412522920b89">QOA_SLICE_LEN</link>)&#32;{
+545 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(<emphasis role="keywordtype">int</emphasis>&#32;c&#32;=&#32;0;&#32;c&#32;&lt;&#32;channels;&#32;c++)&#32;{
+546 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;qoa_uint64_t&#32;slice&#32;=&#32;qoa_read_u64(bytes,&#32;&amp;p);
+547 
+548 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;scalefactor&#32;=&#32;(slice&#32;&gt;&gt;&#32;60)&#32;&amp;&#32;0xf;
+549 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;slice_start&#32;=&#32;sample_index&#32;*&#32;channels&#32;+&#32;c;
+550 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;slice_end&#32;=&#32;qoa_clamp(sample_index&#32;+&#32;<link linkend="__classes_2lib_2external_2qoa_8h_1adf18113c750bfc97ae5b412522920b89">QOA_SLICE_LEN</link>,&#32;0,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1aba70cd077c2c52c15358c231c6d293aa">samples</link>)&#32;*&#32;channels&#32;+&#32;c;
+551 
+552 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(<emphasis role="keywordtype">int</emphasis>&#32;si&#32;=&#32;slice_start;&#32;si&#32;&lt;&#32;slice_end;&#32;si&#32;+=&#32;channels)&#32;{
+553 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;predicted&#32;=&#32;qoa_lms_predict(&amp;qoa-&gt;<link linkend="_structqoa__desc_1a8620e714b73593e9a95a7e9d11ec8eea">lms</link>[c]);
+554 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;quantized&#32;=&#32;(slice&#32;&gt;&gt;&#32;57)&#32;&amp;&#32;0x7;
+555 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;dequantized&#32;=&#32;qoa_dequant_tab[scalefactor][quantized];
+556 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;reconstructed&#32;=&#32;qoa_clamp(predicted&#32;+&#32;dequantized,&#32;-32768,&#32;32767);
+557 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;
+558 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;sample_data[si]&#32;=&#32;reconstructed;
+559 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;slice&#32;&lt;&lt;=&#32;3;
+560 
+561 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;qoa_lms_update(&amp;qoa-&gt;<link linkend="_structqoa__desc_1a8620e714b73593e9a95a7e9d11ec8eea">lms</link>[c],&#32;reconstructed,&#32;dequantized);
+562 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+563 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+564 &#32;&#32;&#32;&#32;}
+565 
+566 &#32;&#32;&#32;&#32;*frame_len&#32;=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1aba70cd077c2c52c15358c231c6d293aa">samples</link>;
+567 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;p;
+568 }
+569 
+570 <emphasis role="keywordtype">short</emphasis>&#32;*<link linkend="__classes_2lib_2external_2qoa_8h_1aa6cdde6612dc54bcc6db683c550b712d">qoa_decode</link>(<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>&#32;*bytes,&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a3d1e3edfcf61ca2d831883e1afbad89e">size</link>,&#32;<link linkend="_structqoa__desc">qoa_desc</link>&#32;*qoa)&#32;{
+571 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;p&#32;=&#32;<link linkend="__classes_2lib_2external_2qoa_8h_1a3e623d05c427eb1ed8b76ca8c36b04f6">qoa_decode_header</link>(bytes,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a3d1e3edfcf61ca2d831883e1afbad89e">size</link>,&#32;qoa);
+572 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(!p)&#32;{
+573 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>;
+574 &#32;&#32;&#32;&#32;}
+575 
+576 &#32;&#32;&#32;&#32;<emphasis role="comment">/*&#32;Calculate&#32;the&#32;required&#32;size&#32;of&#32;the&#32;sample&#32;buffer&#32;and&#32;allocate&#32;*/</emphasis>
+577 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;total_samples&#32;=&#32;qoa-&gt;<link linkend="_structqoa__desc_1a631e1e164d8a7b1ee966577d903cb41a">samples</link>&#32;*&#32;qoa-&gt;<link linkend="_structqoa__desc_1a33e92402e0008fd44a71f5393a0d07b0">channels</link>;
+578 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">short</emphasis>&#32;*sample_data&#32;=&#32;<link linkend="__classes_2lib_2raudio_8c_1a4f99e79065c8f72acef86805e80ed032">QOA_MALLOC</link>(total_samples&#32;*&#32;<emphasis role="keyword">sizeof</emphasis>(<emphasis role="keywordtype">short</emphasis>));
+579 
+580 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;sample_index&#32;=&#32;0;
+581 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;frame_len;
+582 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;frame_size;
+583 
+584 &#32;&#32;&#32;&#32;<emphasis role="comment">/*&#32;Decode&#32;all&#32;frames&#32;*/</emphasis>
+585 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">do</emphasis>&#32;{
+586 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">short</emphasis>&#32;*sample_ptr&#32;=&#32;sample_data&#32;+&#32;sample_index&#32;*&#32;qoa-&gt;<link linkend="_structqoa__desc_1a33e92402e0008fd44a71f5393a0d07b0">channels</link>;
+587 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;frame_size&#32;=&#32;<link linkend="__classes_2lib_2external_2qoa_8h_1ab24537aedf9ace4efe796acc5ba32208">qoa_decode_frame</link>(bytes&#32;+&#32;p,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a3d1e3edfcf61ca2d831883e1afbad89e">size</link>&#32;-&#32;p,&#32;qoa,&#32;sample_ptr,&#32;&amp;frame_len);
+588 
+589 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;p&#32;+=&#32;frame_size;
+590 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;sample_index&#32;+=&#32;frame_len;
+591 &#32;&#32;&#32;&#32;}&#32;<emphasis role="keywordflow">while</emphasis>&#32;(frame_size&#32;&amp;&amp;&#32;sample_index&#32;&lt;&#32;qoa-&gt;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1aba70cd077c2c52c15358c231c6d293aa">samples</link>);
+592 
+593 &#32;&#32;&#32;&#32;qoa-&gt;<link linkend="_structqoa__desc_1a631e1e164d8a7b1ee966577d903cb41a">samples</link>&#32;=&#32;sample_index;
+594 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;sample_data;
+595 }
+596 
+597 
+598 
+599 <emphasis role="comment">/*&#32;-----------------------------------------------------------------------------</emphasis>
+600 <emphasis role="comment">&#32;&#32;&#32;&#32;File&#32;read/write&#32;convenience&#32;functions&#32;*/</emphasis>
+601 
+602 <emphasis role="preprocessor">#ifndef&#32;QOA_NO_STDIO</emphasis>
+603 <emphasis role="preprocessor">#include&#32;&lt;stdio.h&gt;</emphasis>
+604 
+605 <emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2external_2qoa_8h_1ad7c7fb3280e07faf230acd73d5ac296d">qoa_write</link>(<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>&#32;*<link linkend="__classes_2lib_2m_i_n_i-master_2tests_2testhuge_8cpp_1a42a21beb8018ac623f4d09db1343b9cf">filename</link>,&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">short</emphasis>&#32;*sample_data,&#32;<link linkend="_structqoa__desc">qoa_desc</link>&#32;*qoa)&#32;{
+606 &#32;&#32;&#32;&#32;FILE&#32;*<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a0fdda94b8b7e64884690244028f455ba">f</link>&#32;=&#32;fopen(<link linkend="__classes_2lib_2m_i_n_i-master_2tests_2testhuge_8cpp_1a42a21beb8018ac623f4d09db1343b9cf">filename</link>,&#32;<emphasis role="stringliteral">&quot;wb&quot;</emphasis>);
+607 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a3d1e3edfcf61ca2d831883e1afbad89e">size</link>;
+608 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>&#32;*encoded;
+609 
+610 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(!<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a0fdda94b8b7e64884690244028f455ba">f</link>)&#32;{
+611 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;0;
+612 &#32;&#32;&#32;&#32;}
+613 
+614 &#32;&#32;&#32;&#32;encoded&#32;=&#32;<link linkend="__classes_2lib_2external_2qoa_8h_1ab956d022df26af9b453cf2d1484917e5">qoa_encode</link>(sample_data,&#32;qoa,&#32;&amp;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a3d1e3edfcf61ca2d831883e1afbad89e">size</link>);
+615 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(!encoded)&#32;{
+616 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;fclose(<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a0fdda94b8b7e64884690244028f455ba">f</link>);
+617 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;0;
+618 &#32;&#32;&#32;&#32;}
+619 
+620 &#32;&#32;&#32;&#32;fwrite(encoded,&#32;1,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a3d1e3edfcf61ca2d831883e1afbad89e">size</link>,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a0fdda94b8b7e64884690244028f455ba">f</link>);
+621 &#32;&#32;&#32;&#32;fclose(<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a0fdda94b8b7e64884690244028f455ba">f</link>);
+622 
+623 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raudio_8c_1a10458f6c1910a6eddd51ea08a9592499">QOA_FREE</link>(encoded);
+624 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a3d1e3edfcf61ca2d831883e1afbad89e">size</link>;
+625 }
+626 
+627 <emphasis role="keywordtype">void</emphasis>&#32;*<link linkend="__classes_2lib_2external_2qoa_8h_1aa2ec86b27718cd9bf0e89ea90e90e6e1">qoa_read</link>(<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>&#32;*<link linkend="__classes_2lib_2m_i_n_i-master_2tests_2testhuge_8cpp_1a42a21beb8018ac623f4d09db1343b9cf">filename</link>,&#32;<link linkend="_structqoa__desc">qoa_desc</link>&#32;*qoa)&#32;{
+628 &#32;&#32;&#32;&#32;FILE&#32;*<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a0fdda94b8b7e64884690244028f455ba">f</link>&#32;=&#32;fopen(<link linkend="__classes_2lib_2m_i_n_i-master_2tests_2testhuge_8cpp_1a42a21beb8018ac623f4d09db1343b9cf">filename</link>,&#32;<emphasis role="stringliteral">&quot;rb&quot;</emphasis>);
+629 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a3d1e3edfcf61ca2d831883e1afbad89e">size</link>,&#32;bytes_read;
+630 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>&#32;*<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a89ce72163394e6aef63b551a8806e93f">data</link>;
+631 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">short</emphasis>&#32;*sample_data;
+632 
+633 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(!<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a0fdda94b8b7e64884690244028f455ba">f</link>)&#32;{
+634 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>;
+635 &#32;&#32;&#32;&#32;}
+636 
+637 &#32;&#32;&#32;&#32;fseek(<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a0fdda94b8b7e64884690244028f455ba">f</link>,&#32;0,&#32;SEEK_END);
+638 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a3d1e3edfcf61ca2d831883e1afbad89e">size</link>&#32;=&#32;ftell(<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a0fdda94b8b7e64884690244028f455ba">f</link>);
+639 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a3d1e3edfcf61ca2d831883e1afbad89e">size</link>&#32;&lt;=&#32;0)&#32;{
+640 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;fclose(<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a0fdda94b8b7e64884690244028f455ba">f</link>);
+641 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>;
+642 &#32;&#32;&#32;&#32;}
+643 &#32;&#32;&#32;&#32;fseek(<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a0fdda94b8b7e64884690244028f455ba">f</link>,&#32;0,&#32;SEEK_SET);
+644 
+645 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a89ce72163394e6aef63b551a8806e93f">data</link>&#32;=&#32;<link linkend="__classes_2lib_2raudio_8c_1a4f99e79065c8f72acef86805e80ed032">QOA_MALLOC</link>(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a3d1e3edfcf61ca2d831883e1afbad89e">size</link>);
+646 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(!<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a89ce72163394e6aef63b551a8806e93f">data</link>)&#32;{
+647 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;fclose(<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a0fdda94b8b7e64884690244028f455ba">f</link>);
+648 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>;
+649 &#32;&#32;&#32;&#32;}
+650 
+651 &#32;&#32;&#32;&#32;bytes_read&#32;=&#32;fread(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a89ce72163394e6aef63b551a8806e93f">data</link>,&#32;1,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a3d1e3edfcf61ca2d831883e1afbad89e">size</link>,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a0fdda94b8b7e64884690244028f455ba">f</link>);
+652 &#32;&#32;&#32;&#32;fclose(<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a0fdda94b8b7e64884690244028f455ba">f</link>);
+653 
+654 &#32;&#32;&#32;&#32;sample_data&#32;=&#32;<link linkend="__classes_2lib_2external_2qoa_8h_1aa6cdde6612dc54bcc6db683c550b712d">qoa_decode</link>(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a89ce72163394e6aef63b551a8806e93f">data</link>,&#32;bytes_read,&#32;qoa);
+655 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raudio_8c_1a10458f6c1910a6eddd51ea08a9592499">QOA_FREE</link>(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a89ce72163394e6aef63b551a8806e93f">data</link>);
+656 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;sample_data;
+657 }
+658 
+659 <emphasis role="preprocessor">#endif&#32;</emphasis><emphasis role="comment">/*&#32;QOA_NO_STDIO&#32;*/</emphasis><emphasis role="preprocessor"></emphasis>
+660 <emphasis role="preprocessor">#endif&#32;</emphasis><emphasis role="comment">/*&#32;QOA_IMPLEMENTATION&#32;*/</emphasis><emphasis role="preprocessor"></emphasis>
+</programlisting></section>

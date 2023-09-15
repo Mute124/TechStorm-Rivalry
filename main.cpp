@@ -1,72 +1,3 @@
-/*
-    Bugs:
-        Shaders are not fully working. Needs to be fixed
-
-        Start button doesnt show, Main menu temporarily skips until fixed.
-
-    Todo :
-
-      Implement a system so the objects can have multiple shaders
-
-      Add a day night cycle, this can be done using the Ambient color, and using a billboard for the sun
-
-
-    Documentation :
-
-        GamePlay :
-
-            Movement keybinds :
-                Movement : "WASD"
-
-                To look around : Use either arrow keys or your mouse.
-
-                Fly upwards : Space
-
-                Fly Downwards : C or Ctl
-
-            Blocks :
-
-                Break Block : Left Click
-
-                Place Block : Right Click
-
-
-
-
-            Debug :
-                Force Quit : Backspace
-
-                Take Screenshot : F9
-
-                VBOS View : F8
-
-                Display HeightMap : F7
-
-                Fullscreen : F4
-
-                Use Application buffer : F5
-
-                Change Display Resolution : F3
-
-                Lock to 60FPS : F2
-
-                Speed up time :  LShift
-
-                Enable Cursor : Left Alt
-
-                Camera Keybinds :
-
-                    Free : 1
-
-                    First Person : 2
-
-                    Third Person : 3
-
-                    Orbital : 4
-
-                    Change Camera Type (Ortho <-> Perspective ) : P
-*/
-
 // Run Args
 bool SkipMainMenu = true;
 
@@ -146,8 +77,7 @@ bool CheckCollisionRayBox(Ray ray, BoundingBox box, float *outDistance);
 
 // random float between two values
 
-Vector3 positions[WORLD_SIZE] = {0}; // not used right now
-
+Vector3 positions[WORLD_SIZE] = {0}; // not used right now, was used to generate random positions.
 
 Ray ray; // Player View Ray. used for block breaking
 
@@ -156,7 +86,7 @@ Ray ray; // Player View Ray. used for block breaking
 float position = 0.0f; // Circle position
 bool pause = false;    // Pause control flag
 
-int targetFPS = 60; // This is what is used to calculate DeltaTime
+int targetFPS = 60; // This is what is used to calculate DeltaTime and set target fps
 
 int main(void)
 {
@@ -171,9 +101,14 @@ int main(void)
   const int middlex = (screenWidth / 2);
   const int middley = (screenHeight / 2);
 
-  SetConfigFlags(FLAG_MSAA_4X_HINT ); // states the window can be resized and
-                                                             // allows anti-aliasing if available
+  SetConfigFlags(FLAG_MSAA_4X_HINT); // states the window can be resized and
+                                     // allows anti-aliasing if available
   InitWindow(GetScreenWidth(), GetScreenHeight(), "Minero");
+
+  // Setting the window icon
+  Image icon = LoadImage("resources/images/icon.png");
+  ImageFormat(&icon, PIXELFORMAT_UNCOMPRESSED_R8G8B8A8);
+  SetWindowIcon(icon);
 
   ButtonR *mmen_start =
       new ButtonR("start", middlex, middley); // Main start button
@@ -182,43 +117,14 @@ int main(void)
 
   InitAudioDevice(); // starts the audio driver(s).
 
-  DisableEventWaiting();     // Enables the ability for the game to run even if a
-                             // thing is lagging. Like for example if terrain is
-                             // still generating, it wont pause the game.
+  DisableEventWaiting(); // Enables the ability for the game to run even if a
+                         // thing is lagging. Like for example if terrain is
+                         // still generating, it wont pause the game.
+
   SetExitKey(KEY_BACKSPACE); // In event of your fuck up press this.
   // Load skybox model
-  bool HasDone;
-
-  if (SkipMainMenu != true)
-  {
-    Logman::CustomLog(LOG_INFO, "Main loading done, Main menu drawing", NULL);
-
-    // Main menu Loop
-    while (currentScreen == Main && !WindowShouldClose())
-    {
-
-      BeginDrawing();
-
-      ClearBackground(WHITE);
-
-      mmen_start->draw(); // draws the start button
-      EndDrawing();
-
-      // key to go to the game incase button kaput
-      if (IsKeyPressed(KEY_DELETE))
-      {
-        currentScreen = Gameplay;
-      }
-
-      // Main Menu Start Button
-      if (mmen_start->IsClicked())
-      {
-        currentScreen = Gameplay;
-      }
-    }
-  }
-  delete mmen_start;
-  // Define transforms to be uploaded to GPU for instances
+  bool HasDone; // I dont remember what this does...
+                // Define transforms to be uploaded to GPU for instances
 
   // Load postprocessing shader
   // NOTE: Defining 0 (NULL) for vertex shader forces usage of internal default
@@ -258,18 +164,14 @@ int main(void)
   // Adds the player obj to the list of Game objects so it gets freed
   // automatically. Neat aint it :)
   GameObject::PushObject(player);
-  
+
   // Block Initialization
 
   Block *block = new Block(BlockDirt, Vector3Zero(), WHITE,
                            postProcessShader, LoadModel("resources/models/Block.obj"));
   GameObject::PushObject(block);
 
-  int PostViewLoc = GetShaderLocation(postProcessShader, "viewPos");
-
-  // HeightMap *heightmap = new HeightMap(800, 600, 0, 0, 1.0f);
-
-  // Mesh hmap = GenMeshHeightmap(heightmap->GetHeightMap(), Vector3{5.0f, 5.0f, 5.0f});
+  int PostViewLoc = GetShaderLocation(postProcessShader, "viewPos"); // View pos shader location
 
   /*
                                                   Lights
@@ -284,13 +186,6 @@ int main(void)
 
   */
 
-  // Create one light
-
-  // Texture2D texture = LoadTextureFromImage(heightmap->GetHeightMap());
-
-  // Texture2D Base = LoadTextureFromImage(heightmap->GetHeightMap());
-
-  // UnloadTexture(Base);
 
   // Load skybox model
   // skybox creation.
@@ -306,9 +201,9 @@ int main(void)
 
   // since the compiler complains about the references of such, these three vars
   // are for the skybox shaders. They will be deleted after.
-  static int a = 7;
+  static int a = MATERIAL_MAP_CUBEMAP;
   static int b = {useHDR ? 1 : 0};
-  static int c = 0;
+  static int c = NULL;
 
   SetShaderValue(
       skybox.materials[0].shader,
@@ -329,10 +224,10 @@ int main(void)
                  GetShaderLocation(shdrCubemap, "equirectangularMap"), &c,
                  SHADER_UNIFORM_INT);
 
+
   char skyboxFileName[256] = {0};
 
-  Texture2D panorama;
-
+  Texture2D panorama; // Skybox texture.
 
   if (useHDR)
   {
@@ -356,6 +251,7 @@ int main(void)
   }
   else
   {
+    // Load non HDR panorama (cube) texture
     Image img = LoadImage("resources/skybox.png");
     skybox.materials[0].maps[MATERIAL_MAP_CUBEMAP].texture = LoadTextureCubemap(
         img, CUBEMAP_LAYOUT_AUTO_DETECT); // CUBEMAP_LAYOUT_PANORAMA
@@ -371,9 +267,9 @@ int main(void)
 
   // Sun creation
   Sun[0] = CreateLight(LIGHT_DIRECTIONAL, Vector3{50.0f, 50.0f, 50.0f},
-                       Vector3Zero(), WHITE, postProcessShader);
+                       Vector3Zero(), WHITE, postProcessShader); 
   Sun[1] = CreateLight(LIGHT_POINT, Vector3{50.0f, 50.0f, 50.0f}, Vector3Zero(),
-                       WHITE, postProcessShader);
+                       YELLOW, postProcessShader); // Ambient color.
 
   DisableCursor(); // Limit cursor to relative movement inside the window
 
@@ -464,14 +360,44 @@ int main(void)
 
   // GameObject::PushObject(new Plane(postProcessShader, Vector3One(), player));
 
-  //GameObject::PushObject(new WorldFloor(postProcessShader, (Vector3){0.0f, -4.0f, 0.0f}));
+  // GameObject::PushObject(new WorldFloor(postProcessShader, (Vector3){0.0f, -4.0f, 0.0f}));
 
   // RenderTexture2D fbo = FBO::LoadRenderTextureDepthTex(screenWidth, screenHeight);
 
-  
   // All setup goes above!
 
   SetTargetFPS(60);
+  if (SkipMainMenu != true)
+  {
+    // Declare main loading done
+    Logman::CustomLog(LOG_INFO, "Main loading done, Main menu drawing", NULL);
+
+    // Main menu Loop
+    while (currentScreen == Main && !WindowShouldClose())
+    {
+
+      BeginDrawing();
+
+      ClearBackground(WHITE);
+
+      mmen_start->draw(); // draws the start button
+      EndDrawing();
+
+      // key to go to the game incase button kaput
+      if (IsKeyPressed(KEY_DELETE))
+      {
+        currentScreen = Gameplay;
+      }
+
+      // Main Menu Start Button
+      if (mmen_start->IsClicked())
+      {
+        currentScreen = Gameplay;
+      }
+    }
+  }
+  delete mmen_start;
+
   while (!WindowShouldClose())
   {
 
@@ -625,16 +551,18 @@ int main(void)
       }
     }
 
-    if (IsKeyDown(KEY_SPACE)) {
+    if (IsKeyDown(KEY_SPACE))
+    {
       Logman::CustomLog(LOG_TRACE, "What...", 0);
-      //player->SetPosition((Vector3){player->getPosition().x, player->getPosition().y + 1.0f, player->getPosition().z});
+      // player->SetPosition((Vector3){player->getPosition().x, player->getPosition().y + 1.0f, player->getPosition().z});
       UpdateCameraPro(player->getSelfCameraPointer(), Vector3One(), Vector3Zero(), 1.0f);
     }
 
-    if (IsKeyDown(KEY_C)) {
+    if (IsKeyDown(KEY_C))
+    {
       player->SetPosition((Vector3){player->getPosition().x, player->getPosition().y - 0.1f, player->getPosition().z});
     }
-    
+
     //----------------------------------------------------------------------------------
 
     PollInputEvents(); // helps for some reason?
@@ -661,11 +589,11 @@ int main(void)
 
     BeginMode3D(player->getSelfCamera());
 
-      rlDisableBackfaceCulling();
-      rlDisableDepthMask();
-        DrawModel(skybox, (Vector3){0.0f, 0.0f, 0.0f}, 1.0f, WHITE);
-      rlEnableBackfaceCulling();
-      rlEnableDepthMask();
+    rlDisableBackfaceCulling();
+    rlDisableDepthMask();
+    DrawModel(skybox, (Vector3){0.0f, 0.0f, 0.0f}, 1.0f, WHITE);
+    rlEnableBackfaceCulling();
+    rlEnableDepthMask();
 
     DrawModel(terrain, Vector3Zero(), 1.0f, GREEN); // not needed atm, if it isnt for a while, it will get deleted
     //  We are inside the cube, we need to disable backface culling!
@@ -683,13 +611,9 @@ int main(void)
                         ColorAlpha(Sun[i].color, 0.3f));
     }
 
-
-
     // Get the mouse ray based on the current camera position and mouse position
     Vector2 mouse_pos = GetMousePosition();
     ray = GetMouseRay(mouse_pos, player->getSelfCamera());
-
-    
 
     EndMode3D();
     EndShaderMode();

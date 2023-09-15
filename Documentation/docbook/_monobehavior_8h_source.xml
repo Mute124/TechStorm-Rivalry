@@ -1,0 +1,804 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<section xmlns="http://docbook.org/ns/docbook" version="5.0" xmlns:xlink="http://www.w3.org/1999/xlink" xml:id="__monobehavior_8h_source" xml:lang="en-US">
+<title>Monobehavior.h</title>
+<indexterm><primary>C:/Users/HP/Documents/GitHub/Minero-Game/Classes/Monobehavior.h</primary></indexterm>
+Go to the documentation of this file.<programlisting linenumbering="unnumbered">1 <emphasis role="preprocessor">#pragma&#32;once</emphasis>
+2 <emphasis role="preprocessor">#include&#32;&quot;lib/raylib.h&quot;</emphasis>&#32;<emphasis role="comment">//&#32;raylib&#32;framework</emphasis>
+3 <emphasis role="preprocessor">#include&#32;&quot;lib/rlgl.h&quot;</emphasis>
+4 <emphasis role="preprocessor">#include&#32;&lt;stdio.h&gt;</emphasis>
+5 <emphasis role="preprocessor">#include&#32;&lt;stdlib.h&gt;</emphasis>
+6 <emphasis role="preprocessor">#include&#32;&lt;iostream&gt;</emphasis>&#32;&#32;&#32;<emphasis role="comment">//&#32;For&#32;debugging&#32;purposes</emphasis>
+7 <emphasis role="preprocessor">#include&#32;&lt;thread&gt;</emphasis>&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;needed&#32;for&#32;threading</emphasis>
+8 <emphasis role="preprocessor">#include&#32;&lt;vector&gt;</emphasis>&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;needed&#32;for&#32;game&#32;object&#32;list&#32;and&#32;other&#32;things</emphasis>
+9 <emphasis role="preprocessor">#include&#32;&lt;functional&gt;</emphasis>&#32;<emphasis role="comment">//&#32;needed&#32;by&#32;thread&#32;class</emphasis>
+10 
+11 <emphasis role="preprocessor">#ifndef&#32;DEFAULT_NEAR_CULL_DISTANCE</emphasis>
+12 <emphasis role="preprocessor">#define&#32;DEFAULT_NEAR_CULL_DISTANCE&#32;0.01&#32;</emphasis><emphasis role="comment">//&#32;Default&#32;near&#32;cull&#32;distance</emphasis>
+13 <emphasis role="preprocessor">#endif</emphasis>
+14 <emphasis role="preprocessor">#ifndef&#32;DEFAULT_FAR_CULL_DISTANCE</emphasis>
+15 <emphasis role="preprocessor">#define&#32;DEFAULT_FAR_CULL_DISTANCE&#32;50000.0&#32;</emphasis><emphasis role="comment">//&#32;Default&#32;far&#32;cull&#32;distance</emphasis>
+16 <emphasis role="preprocessor">#endif</emphasis>
+17 
+18 <emphasis role="preprocessor">#define&#32;WORLD_SIZE&#32;100&#32;</emphasis><emphasis role="comment">//&#32;This&#32;is&#32;a&#32;global&#32;that&#32;defines&#32;how&#32;large&#32;the&#32;world&#32;will&#32;be.</emphasis>
+19 <emphasis role="preprocessor">#define&#32;BLOCK_SIZE&#32;1&#32;&#32;&#32;</emphasis><emphasis role="comment">//&#32;Default&#32;Block&#32;size.&#32;Changing&#32;this&#32;variable&#32;will&#32;affect&#32;the&#32;size&#32;of&#32;all&#32;blocks.</emphasis>
+20 
+21 <emphasis role="preprocessor">#define&#32;NUM_FRAMES&#32;3&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;</emphasis><emphasis role="comment">//&#32;Number&#32;of&#32;frames&#32;(rectangles)&#32;for&#32;the&#32;button&#32;sprite&#32;texture</emphasis>
+22 <emphasis role="preprocessor">#define&#32;MAP_RESOLUTION&#32;512&#32;&#32;&#32;&#32;</emphasis><emphasis role="comment">//&#32;width&#32;and&#32;height&#32;of&#32;heightmap</emphasis>
+23 <emphasis role="preprocessor">#define&#32;CLIP_SHADERS_COUNT&#32;1&#32;&#32;</emphasis><emphasis role="comment">//&#32;number&#32;of&#32;shaders&#32;that&#32;use&#32;a&#32;clipPlane</emphasis>
+24 <emphasis role="preprocessor">#define&#32;TREE_TEXTURE_COUNT&#32;19&#32;</emphasis><emphasis role="comment">//&#32;number&#32;of&#32;textures&#32;for&#32;a&#32;tree</emphasis>
+25 <emphasis role="preprocessor">#define&#32;TREE_COUNT&#32;8190&#32;&#32;&#32;&#32;&#32;&#32;&#32;</emphasis><emphasis role="comment">//&#32;number&#32;of&#32;tree&#32;billboards</emphasis>
+26 
+27 <emphasis role="preprocessor">#define&#32;MAX_INSTANCES&#32;10000&#32;</emphasis><emphasis role="comment">//&#32;Max&#32;amount&#32;of&#32;objects.</emphasis>
+28 
+29 <emphasis role="preprocessor">#define&#32;MAX_MEMORY_SIZE&#32;1000000</emphasis>
+30 <emphasis role="preprocessor">#define&#32;MAX_WINDOW_TITLE_LENGTH&#32;50</emphasis>
+31 
+32 <emphasis role="comment">//&#32;alternative&#32;cases.&#32;makes&#32;it&#32;so&#32;that&#32;you&#32;dont&#32;have&#32;to&#32;write&#32;as&#32;much&#32;boiler&#32;plate</emphasis>
+33 <emphasis role="preprocessor">#define&#32;FILTER_BILINEAR&#32;TEXTURE_FILTER_BILINEAR</emphasis>
+34 <emphasis role="preprocessor">#define&#32;WRAP_CLAMP&#32;TEXTURE_WRAP_CLAMP</emphasis>
+35 
+36 <emphasis role="preprocessor">#define&#32;UNIFORM_VEC4&#32;SHADER_UNIFORM_VEC4</emphasis>
+37 <emphasis role="preprocessor">#define&#32;UNIFORM_VEC3&#32;SHADER_UNIFORM_VEC3</emphasis>
+38 <emphasis role="preprocessor">#define&#32;UNIFORM_INT&#32;SHADER_UNIFORM_INT</emphasis>
+39 <emphasis role="preprocessor">#define&#32;UNIFORM_FLOAT&#32;SHADER_UNIFORM_FLOAT</emphasis>
+40 <emphasis role="preprocessor">#define&#32;MAP_CUBEMAP&#32;SHADER_LOC_MAP_CUBEMAP</emphasis>
+41 <emphasis role="preprocessor">#define&#32;MAP_IRRADIANCE&#32;SHADER_LOC_MAP_IRRADIANCE</emphasis>
+42 <emphasis role="preprocessor">#define&#32;LOC_VECTOR_VIEW&#32;LOC_VECTOR_VIEW&#32;</emphasis><emphasis role="comment">//&#32;TODO&#32;:&#32;Check&#32;if&#32;this&#32;is&#32;nessisary.</emphasis>
+43 <emphasis role="preprocessor">#define&#32;LOG_WARN&#32;LOG_WARNING&#32;</emphasis><emphasis role="comment">//&#32;just&#32;to&#32;make&#32;typing&#32;easier.</emphasis>
+44 
+45 <emphasis role="comment">//&#32;C/C++&#32;Improvements</emphasis>
+46 <emphasis role="preprocessor">#define&#32;is&#32;==</emphasis>
+47 <emphasis role="preprocessor">#define&#32;equals&#32;==</emphasis>
+48 
+49 <emphasis role="preprocessor">#define&#32;DESPAWN_DISTANCE&#32;1000.0f</emphasis>
+50 
+51 <emphasis role="preprocessor">#define&#32;MAX_SHADERS&#32;10</emphasis>
+52 
+53 <emphasis role="preprocessor">#ifndef&#32;AUTHOR</emphasis>
+54 <emphasis role="preprocessor">#define&#32;AUTHOR&#32;MutedTea</emphasis>
+55 <emphasis role="preprocessor">#endif</emphasis>
+56 
+57 <emphasis role="preprocessor">#ifndef&#32;VERSION</emphasis>
+58 <emphasis role="preprocessor">#define&#32;VERSION&#32;&quot;0.0.1&quot;</emphasis>
+59 <emphasis role="preprocessor">#endif</emphasis>
+60 
+61 <emphasis role="preprocessor">#if&#32;defined(PLATFORM_DESKTOP)</emphasis>
+62 <emphasis role="preprocessor">#define&#32;GLSL_VERSION&#32;330</emphasis>
+63 <emphasis role="preprocessor">#else&#32;</emphasis><emphasis role="comment">//&#32;PLATFORM_RPI,&#32;PLATFORM_ANDROID,&#32;PLATFORM_WEB</emphasis>
+64 <emphasis role="preprocessor">#define&#32;GLSL_VERSION&#32;100</emphasis>
+65 <emphasis role="preprocessor">#endif</emphasis>
+66 
+67 
+68 <emphasis role="preprocessor">#define&#32;GRAVITATIONAL_CONSTANT&#32;9.81f&#32;</emphasis><emphasis role="comment">//&#32;m/s&#32;to&#32;comply&#32;with&#32;standard&#32;science&#32;units,&#32;this&#32;is&#32;basically&#32;the&#32;standard&#32;unit&#32;for&#32;acceleration.</emphasis>
+69 
+70 <emphasis role="comment">//&#32;Plain&#32;structures&#32;in&#32;C++&#32;(without&#32;constructors)&#32;can&#32;be&#32;initialized&#32;with&#32;{&#32;}</emphasis>
+71 <emphasis role="preprocessor">#if&#32;defined(__cplusplus)</emphasis>
+72 <emphasis role="preprocessor">#define&#32;CLITERAL(type)&#32;type</emphasis>
+73 <emphasis role="preprocessor">#else</emphasis>
+74 <emphasis role="preprocessor">#define&#32;CLITERAL(type)&#32;(type)</emphasis>
+75 <emphasis role="preprocessor">#endif</emphasis>
+76 
+77 <emphasis role="keyword">namespace&#32;</emphasis><link linkend="_namespace_global">Global</link>
+78 {
+79 
+80 &#32;&#32;&#32;&#32;<emphasis role="keyword">using&#32;namespace&#32;</emphasis><link linkend="_namespace_global">Global</link>;
+81 
+82 &#32;&#32;&#32;&#32;<emphasis role="keyword">class&#32;</emphasis><link linkend="_class_global_1_1_time">Time</link>
+83 &#32;&#32;&#32;&#32;{
+84 &#32;&#32;&#32;&#32;<emphasis role="keyword">public</emphasis>:
+85 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">double</emphasis>&#32;<link linkend="_class_global_1_1_time_1a54308fba715883a57c2cbcc1a9da0881">GetGameTimeFormatted</link>()
+86 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+87 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;
+88 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;timeCounter;
+89 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+90 
+91 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">double</emphasis>&#32;<link linkend="_class_global_1_1_time_1ab150ebf0a368825fa18abc4bf98cb25b">GetGameTime</link>()
+92 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+93 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="__classes_2lib_2raylib_8h_1ab05c0da19478ba35ee9a13a2a6ac07a7">GetTime</link>();
+94 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+95 
+96 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>&#32;<link linkend="_class_global_1_1_time_1a5b074d347a49a082d1c8e1e38faadf4e">StartClock</link>()
+97 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+98 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;previousTime&#32;=&#32;<link linkend="__classes_2lib_2raylib_8h_1ab05c0da19478ba35ee9a13a2a6ac07a7">GetTime</link>();
+99 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;currentTime&#32;=&#32;0.0;
+100 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;updateDrawTime&#32;=&#32;0.0;
+101 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;waitTime&#32;=&#32;0.0;
+102 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;deltaTime&#32;=&#32;0.0f;
+103 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;timeCounter&#32;=&#32;0.0f;
+104 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;targetFPS&#32;=&#32;<link linkend="__classes_2lib_2raylib_8h_1ad63fca37235220430efe17e3439c7704">GetMonitorRefreshRate</link>(<link linkend="__classes_2lib_2raylib_8h_1a3428d05541269713d96554048c0c1566">GetCurrentMonitor</link>());
+105 
+106 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(targetFPS&#32;==&#32;0)
+107 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+108 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">throw</emphasis>&#32;std::runtime_error(<emphasis role="stringliteral">&quot;Target&#32;FPS&#32;must&#32;be&#32;greater&#32;than&#32;0&quot;</emphasis>);
+109 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+110 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+111 
+112 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>&#32;<link linkend="_class_global_1_1_time_1a58b681269bf4208615012b8c5815828f">Update</link>()
+113 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+114 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;currentTime&#32;=&#32;<link linkend="__classes_2lib_2raylib_8h_1ab05c0da19478ba35ee9a13a2a6ac07a7">GetTime</link>();
+115 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;updateDrawTime&#32;=&#32;currentTime&#32;-&#32;previousTime;
+116 
+117 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(targetFPS&#32;&gt;&#32;0)
+118 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+119 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;waitTime&#32;=&#32;(1.0f&#32;/&#32;<emphasis role="keyword">static_cast&lt;</emphasis><emphasis role="keywordtype">float</emphasis><emphasis role="keyword">&gt;</emphasis>(targetFPS))&#32;-&#32;updateDrawTime;
+120 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(waitTime&#32;&gt;&#32;0.0)
+121 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+122 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_8h_1a130d9a5ac10a20b09c97faff26145e61">WaitTime</link>(waitTime);
+123 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;currentTime&#32;=&#32;<link linkend="__classes_2lib_2raylib_8h_1ab05c0da19478ba35ee9a13a2a6ac07a7">GetTime</link>();
+124 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;deltaTime&#32;=&#32;<emphasis role="keyword">static_cast&lt;</emphasis><emphasis role="keywordtype">float</emphasis><emphasis role="keyword">&gt;</emphasis>(currentTime&#32;-&#32;previousTime);
+125 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+126 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+127 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>
+128 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+129 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;deltaTime&#32;=&#32;<emphasis role="keyword">static_cast&lt;</emphasis><emphasis role="keywordtype">float</emphasis><emphasis role="keyword">&gt;</emphasis>(updateDrawTime);
+130 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+131 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;previousTime&#32;=&#32;currentTime;
+132 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+133 
+134 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">float</emphasis>&#32;<link linkend="_class_global_1_1_time_1a8f4555a9120c22d5cd03878b1cca9f14">DeltaTime</link>()
+135 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+136 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;deltaTime;
+137 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+138 
+139 &#32;&#32;&#32;&#32;<emphasis role="keyword">private</emphasis>:
+140 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">double</emphasis>&#32;previousTime;
+141 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">double</emphasis>&#32;currentTime;
+142 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">double</emphasis>&#32;updateDrawTime;
+143 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">double</emphasis>&#32;waitTime;
+144 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keywordtype">float</emphasis>&#32;deltaTime;
+145 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">float</emphasis>&#32;timeCounter;
+146 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;targetFPS;
+147 &#32;&#32;&#32;&#32;};
+148 &#32;&#32;&#32;&#32;<emphasis role="keyword">class&#32;</emphasis><link linkend="_class_global_1_1_transform">Transform</link>
+149 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+150 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">public</emphasis>:
+158 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>&#32;<link linkend="_class_global_1_1_transform_1af7b9b771aea1326db113dd1d05b7a99a">setRotation</link>(<emphasis role="keywordtype">float</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1ac916c0825494ac3acd4457effd2823d2">x</link>,&#32;<emphasis role="keywordtype">float</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a4f27f1eebce8c31db01bb39fab9ef561">y</link>,&#32;<emphasis role="keywordtype">float</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1ab26e6a0e7d142ed28ac773f12a73f458">z</link>)
+159 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+160 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class_global_1_1_transform_1a83747ecdf3e22bf627b03672228afdfd">rotation</link>.<link linkend="_struct_vector3_1a7e2d3237b29a2f29d7b3d8b2934e35f2">x</link>&#32;=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1ac916c0825494ac3acd4457effd2823d2">x</link>;
+161 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class_global_1_1_transform_1a83747ecdf3e22bf627b03672228afdfd">rotation</link>.<link linkend="_struct_vector3_1a86eb35a9fa2d5a49e7fad66a35fa9c13">y</link>&#32;=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a4f27f1eebce8c31db01bb39fab9ef561">y</link>;
+162 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class_global_1_1_transform_1a83747ecdf3e22bf627b03672228afdfd">rotation</link>.<link linkend="_struct_vector3_1aa8c9461eb24bd2c364258078811a3e9d">z</link>&#32;=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1ab26e6a0e7d142ed28ac773f12a73f458">z</link>;
+163 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+164 
+165 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>&#32;<link linkend="_class_global_1_1_transform_1a559f0feef28ad220e5a3efa35b0c9105">setRotation</link>(<link linkend="_struct_vector3">Vector3</link>&#32;<link linkend="_class_global_1_1_transform_1a83747ecdf3e22bf627b03672228afdfd">rotation</link>)&#32;{
+166 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;this-&gt;rotation&#32;=&#32;<link linkend="_class_global_1_1_transform_1a83747ecdf3e22bf627b03672228afdfd">rotation</link>;
+167 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+168 
+178 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>&#32;<link linkend="_class_global_1_1_transform_1ac8cbce100f7cb72e76da1d3433c06e0b">changeRotation</link>(<emphasis role="keywordtype">float</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1ac916c0825494ac3acd4457effd2823d2">x</link>,&#32;<emphasis role="keywordtype">float</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a4f27f1eebce8c31db01bb39fab9ef561">y</link>,&#32;<emphasis role="keywordtype">float</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1ab26e6a0e7d142ed28ac773f12a73f458">z</link>)
+179 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+180 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class_global_1_1_transform_1a83747ecdf3e22bf627b03672228afdfd">rotation</link>.<link linkend="_struct_vector3_1a7e2d3237b29a2f29d7b3d8b2934e35f2">x</link>&#32;+=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1ac916c0825494ac3acd4457effd2823d2">x</link>;
+181 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class_global_1_1_transform_1a83747ecdf3e22bf627b03672228afdfd">rotation</link>.<link linkend="_struct_vector3_1a86eb35a9fa2d5a49e7fad66a35fa9c13">y</link>&#32;+=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a4f27f1eebce8c31db01bb39fab9ef561">y</link>;
+182 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class_global_1_1_transform_1a83747ecdf3e22bf627b03672228afdfd">rotation</link>.<link linkend="_struct_vector3_1aa8c9461eb24bd2c364258078811a3e9d">z</link>&#32;+=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1ab26e6a0e7d142ed28ac773f12a73f458">z</link>;
+183 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+184 
+194 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>&#32;<link linkend="_class_global_1_1_transform_1a33855c4923c198acc27538d846157849">setPosition</link>(<emphasis role="keywordtype">float</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1ac916c0825494ac3acd4457effd2823d2">x</link>,&#32;<emphasis role="keywordtype">float</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a4f27f1eebce8c31db01bb39fab9ef561">y</link>,&#32;<emphasis role="keywordtype">float</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1ab26e6a0e7d142ed28ac773f12a73f458">z</link>)
+195 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+196 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class_global_1_1_transform_1aee0c7fd2d81f164aaaed3e23251e8e71">position</link>.<link linkend="_struct_vector3_1a7e2d3237b29a2f29d7b3d8b2934e35f2">x</link>&#32;=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1ac916c0825494ac3acd4457effd2823d2">x</link>;
+197 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class_global_1_1_transform_1aee0c7fd2d81f164aaaed3e23251e8e71">position</link>.<link linkend="_struct_vector3_1a86eb35a9fa2d5a49e7fad66a35fa9c13">y</link>&#32;=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a4f27f1eebce8c31db01bb39fab9ef561">y</link>;
+198 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class_global_1_1_transform_1aee0c7fd2d81f164aaaed3e23251e8e71">position</link>.<link linkend="_struct_vector3_1aa8c9461eb24bd2c364258078811a3e9d">z</link>&#32;=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1ab26e6a0e7d142ed28ac773f12a73f458">z</link>;
+199 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+200 
+210 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>&#32;<link linkend="_class_global_1_1_transform_1af27a78c752f670fc62d077a6e0f03523">changePosition</link>(<emphasis role="keywordtype">float</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1ac916c0825494ac3acd4457effd2823d2">x</link>,&#32;<emphasis role="keywordtype">float</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a4f27f1eebce8c31db01bb39fab9ef561">y</link>,&#32;<emphasis role="keywordtype">float</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1ab26e6a0e7d142ed28ac773f12a73f458">z</link>)
+211 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+212 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class_global_1_1_transform_1aee0c7fd2d81f164aaaed3e23251e8e71">position</link>.<link linkend="_struct_vector3_1a7e2d3237b29a2f29d7b3d8b2934e35f2">x</link>&#32;+=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1ac916c0825494ac3acd4457effd2823d2">x</link>;
+213 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class_global_1_1_transform_1aee0c7fd2d81f164aaaed3e23251e8e71">position</link>.<link linkend="_struct_vector3_1a86eb35a9fa2d5a49e7fad66a35fa9c13">y</link>&#32;+=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a4f27f1eebce8c31db01bb39fab9ef561">y</link>;
+214 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class_global_1_1_transform_1aee0c7fd2d81f164aaaed3e23251e8e71">position</link>.<link linkend="_struct_vector3_1aa8c9461eb24bd2c364258078811a3e9d">z</link>&#32;+=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1ab26e6a0e7d142ed28ac773f12a73f458">z</link>;
+215 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+216 
+217 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_struct_vector3">Vector3</link>&#32;<link linkend="_class_global_1_1_transform_1aee0c7fd2d81f164aaaed3e23251e8e71">position</link>;
+218 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_struct_vector3">Vector3</link>&#32;<link linkend="_class_global_1_1_transform_1a83747ecdf3e22bf627b03672228afdfd">rotation</link>;
+219 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_struct_vector3">Vector3</link>&#32;<link linkend="_class_global_1_1_transform_1a7b0393c1e86ecb1b5d659fd540cd6f5b">scale</link>;
+220 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;};
+221 &#32;&#32;&#32;&#32;<emphasis role="keyword">class&#32;</emphasis><link linkend="_class_global_1_1_tag">Tag</link>&#32;{
+222 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">public</emphasis>:
+223 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;std::string&#32;<link linkend="_class_global_1_1_tag_1a3b7e55ead951f4a33c2a4c9ab0aaca8c">Tag</link>;&#32;&#32;
+224 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keyword">inline</emphasis>&#32;std::string&#32;<link linkend="_class_global_1_1_tag_1adc33b4ef5e71ad41a989286382ce007a">Translate</link>(<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>&#32;*tag)&#32;{
+225 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;std::string&#32;temp&#32;=&#32;tag;
+226 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;temp;
+227 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}&#32;&#32;&#32;
+228 &#32;&#32;&#32;&#32;};&#32;&#32;
+229 
+230 &#32;&#32;&#32;&#32;<emphasis role="keyword">class&#32;</emphasis><link linkend="_class_global_1_1_mesh_tools">MeshTools</link>
+231 &#32;&#32;&#32;&#32;{
+232 &#32;&#32;&#32;&#32;<emphasis role="keyword">public</emphasis>:
+233 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">struct</emphasis>
+234 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+235 
+236 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">/*</emphasis>
+237 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;Verticies&#32;Diagram</emphasis>
+238 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;V7&#32;-&#32;-&#32;-&#32;-&#32;-&#32;-v6</emphasis>
+239 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;/&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;/&#32;|</emphasis>
+240 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;V1&#32;-&#32;-&#32;-&#32;-&#32;V2&#32;/&#32;&#32;&#32;&#32;|</emphasis>
+241 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;`&#32;&#32;&#32;&#32;&#32;|&#32;&#32;&#32;&#32;|&#32;&#32;&#32;&#32;&#32;&#32;|&#32;&#32;&#32;&#32;&#32;&#32;|</emphasis>
+242 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;|&#32;&#32;&#32;&#32;v8&#32;-&#32;-&#32;|-&#32;-&#32;-&#32;|</emphasis>
+243 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;|&#32;&#32;&#32;/&#32;&#32;&#32;&#32;&#32;&#32;&#32;|&#32;&#32;&#32;&#32;&#32;&#32;V5</emphasis>
+244 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;|&#32;/&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;|&#32;&#32;&#32;&#32;/</emphasis>
+245 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;V3&#32;-&#32;-&#32;-&#32;-&#32;&#32;V4&#32;/</emphasis>
+246 <emphasis role="comment"></emphasis>
+247 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;*/</emphasis>
+248 
+249 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_struct_vector3">Vector3</link>&#32;<link linkend="_struct_global_1_1_mesh_tools_1_1_cube_verticies_1af041316c6632f585989a528cd899368d">v1</link>;
+250 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_struct_vector3">Vector3</link>&#32;<link linkend="_struct_global_1_1_mesh_tools_1_1_cube_verticies_1af5a576ac96895f973ed9539215ea9163">v2</link>;
+251 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_struct_vector3">Vector3</link>&#32;<link linkend="_struct_global_1_1_mesh_tools_1_1_cube_verticies_1ae84194befce05310ef949f336dc89d5a">v3</link>;
+252 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_struct_vector3">Vector3</link>&#32;<link linkend="_struct_global_1_1_mesh_tools_1_1_cube_verticies_1a75f51c984619dfe232cb852751b42d05">v4</link>;
+253 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_struct_vector3">Vector3</link>&#32;<link linkend="_struct_global_1_1_mesh_tools_1_1_cube_verticies_1a4bc8721929f234194bedcf694739d56d">v5</link>;
+254 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_struct_vector3">Vector3</link>&#32;<link linkend="_struct_global_1_1_mesh_tools_1_1_cube_verticies_1ac608267dae55f3a961d2168b93b6a964">v6</link>;
+255 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_struct_vector3">Vector3</link>&#32;<link linkend="_struct_global_1_1_mesh_tools_1_1_cube_verticies_1ae823d775443376f85034a0e4b0969a69">v7</link>;
+256 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_struct_vector3">Vector3</link>&#32;<link linkend="_struct_global_1_1_mesh_tools_1_1_cube_verticies_1a6467714a7246571543e3328a361fcecf">v8</link>;
+257 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}&#32;<link linkend="_struct_global_1_1_mesh_tools_1_1_cube_verticies">CubeVerticies</link>;
+258 
+259 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">struct</emphasis>
+260 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+261 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_struct_vector3">Vector3</link>&#32;<link linkend="_struct_global_1_1_mesh_tools_1_1_tri_vert_1ab9e2ee01a1ffdafa221ac96f34a68d79">v1</link>;
+262 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_struct_vector3">Vector3</link>&#32;<link linkend="_struct_global_1_1_mesh_tools_1_1_tri_vert_1a1d46b80185b693ebe6a7ccf790b13ba2">v2</link>;
+263 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_struct_vector3">Vector3</link>&#32;<link linkend="_struct_global_1_1_mesh_tools_1_1_tri_vert_1ab729d527832fd04a306f1a6eb7698bbe">v3</link>;
+264 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}&#32;<link linkend="_struct_global_1_1_mesh_tools_1_1_tri_vert">TriVert</link>;
+265 
+271 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">static</emphasis>&#32;<link linkend="_struct_global_1_1_mesh_tools_1_1_cube_verticies">MeshTools::CubeVerticies</link>&#32;<link linkend="_class_global_1_1_mesh_tools_1ac0d7562dc092b102b538692957a7a83a">CVertZero</link>()
+272 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+273 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;(<link linkend="_struct_global_1_1_mesh_tools_1_1_cube_verticies">CubeVerticies</link>){0.0f,&#32;0.0f,&#32;0.0f,&#32;0.0f,&#32;0.0f,&#32;0.0f,&#32;0.0f,&#32;0.0f};
+274 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+275 
+276 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">static</emphasis>&#32;<link linkend="_struct_texture">TextureCubemap</link>&#32;<link linkend="_class_global_1_1_mesh_tools_1abd961f7c3e9be62f8c27ab77518498ae">GenTextureCubemap</link>(<link linkend="_struct_shader">Shader</link>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a57b2a96adb1d51204909a82d861e395e">shader</link>,&#32;<link linkend="_struct_texture2_d">Texture2D</link>&#32;panorama,&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a3d1e3edfcf61ca2d831883e1afbad89e">size</link>,&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a3f8f226b5004bbc9a172e2bbf28ed102">format</link>)
+277 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+278 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_struct_texture">TextureCubemap</link>&#32;cubemap&#32;=&#32;{0};
+279 
+280 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2rlgl_8h_1a520e434888ae1a40f88bbe26eef9a8a1">rlDisableBackfaceCulling</link>();&#32;<emphasis role="comment">//&#32;Disable&#32;backface&#32;culling&#32;to&#32;render&#32;inside&#32;the</emphasis>
+281 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;cube</emphasis>
+282 
+283 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;STEP&#32;1:&#32;Setup&#32;framebuffer</emphasis>
+284 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//------------------------------------------------------------------------------------------</emphasis>
+285 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;rbo&#32;=&#32;<link linkend="__classes_2lib_2raylib_2src_2rlgl_8h_1a942582b89384966719a9d37ea4f0ef46">rlLoadTextureDepth</link>(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a3d1e3edfcf61ca2d831883e1afbad89e">size</link>,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a3d1e3edfcf61ca2d831883e1afbad89e">size</link>,&#32;<emphasis role="keyword">true</emphasis>);
+286 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;cubemap.<link linkend="_struct_texture_1aed42161a5c00b6020c85833401da6da6">id</link>&#32;=&#32;<link linkend="__classes_2lib_2raylib_2src_2rlgl_8h_1a88dfea52841ccf587d36ba1393da4a50">rlLoadTextureCubemap</link>(0,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a3d1e3edfcf61ca2d831883e1afbad89e">size</link>,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a3f8f226b5004bbc9a172e2bbf28ed102">format</link>);
+287 
+288 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;fbo&#32;=&#32;<link linkend="__classes_2lib_2rlgl_8h_1abaadeb5c180a72f743cdd45a4ad0f8d4">rlLoadFramebuffer</link>(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a3d1e3edfcf61ca2d831883e1afbad89e">size</link>,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a3d1e3edfcf61ca2d831883e1afbad89e">size</link>);
+289 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2rlgl_8h_1aa51dbc3edd8f3552e3adda648a4f9802">rlFramebufferAttach</link>(fbo,&#32;rbo,&#32;<link linkend="__classes_2lib_2rlgl_8h_1a0d627ec546512590b921bb3f71f8e1e2abc0611e7ea3591035492fa47e2f45228">RL_ATTACHMENT_DEPTH</link>,&#32;<link linkend="__classes_2lib_2rlgl_8h_1ae8a5439a3a1eeb4f4c64af2ff45fb94dac69123a2c4aa8e113c0b72dcdeb7b62d">RL_ATTACHMENT_RENDERBUFFER</link>,
+290 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;0);
+291 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2rlgl_8h_1aa51dbc3edd8f3552e3adda648a4f9802">rlFramebufferAttach</link>(fbo,&#32;cubemap.<link linkend="_struct_texture_1aed42161a5c00b6020c85833401da6da6">id</link>,&#32;<link linkend="__classes_2lib_2rlgl_8h_1a0d627ec546512590b921bb3f71f8e1e2a134a6bf82ce53b2b1a8e33af71e988fc">RL_ATTACHMENT_COLOR_CHANNEL0</link>,
+292 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2rlgl_8h_1ae8a5439a3a1eeb4f4c64af2ff45fb94dafc000cb9ab63755c325c83c729164b54">RL_ATTACHMENT_CUBEMAP_POSITIVE_X</link>,&#32;0);
+293 
+294 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Check&#32;if&#32;framebuffer&#32;is&#32;complete&#32;with&#32;attachments&#32;(valid)</emphasis>
+295 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(<link linkend="__classes_2lib_2rlgl_8h_1ad6ce16b9fa28fc560b8a0da1c715eed5">rlFramebufferComplete</link>(fbo))
+296 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_8h_1a7c00212b28a73fc28770e22cef8283ff">TraceLog</link>(<link linkend="__classes_2lib_2raylib_8h_1a53d4e0542e6c07e7792510e986785285a6e98ff471e3ce6c4ef2d75c37ee51837">LOG_INFO</link>,&#32;<emphasis role="stringliteral">&quot;FBO:&#32;[ID&#32;%i]&#32;Framebuffer&#32;object&#32;created&#32;successfully&quot;</emphasis>,
+297 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;fbo);
+298 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//------------------------------------------------------------------------------------------</emphasis>
+299 
+300 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;STEP&#32;2:&#32;Draw&#32;to&#32;framebuffer</emphasis>
+301 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//------------------------------------------------------------------------------------------</emphasis>
+302 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;NOTE:&#32;Shader&#32;is&#32;used&#32;to&#32;convert&#32;HDR&#32;equirectangular&#32;environment&#32;map&#32;to</emphasis>
+303 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;cubemap&#32;equivalent&#32;(6&#32;faces)</emphasis>
+304 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2rlgl_8h_1a97b0527a8b1e7effb4d01fcc4de27a5c">rlEnableShader</link>(<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a57b2a96adb1d51204909a82d861e395e">shader</link>.id);
+305 
+306 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Define&#32;projection&#32;matrix&#32;and&#32;send&#32;it&#32;to&#32;shader</emphasis>
+307 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_struct_matrix">Matrix</link>&#32;matFboProjection&#32;=&#32;<link linkend="__classes_2lib_2raylib_2src_2raymath_8h_1ac331e8387b9fa2cc3af821aa03385c81">MatrixPerspective</link>(
+308 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;90.0&#32;*&#32;<link linkend="__classes_2lib_2raylib_8h_1af7e8592d0a634bd3642e9fd508ea8022">DEG2RAD</link>,&#32;1.0,&#32;<link linkend="__classes_2lib_2config_8h_1a17cf429323c197ea6b90a41cc2996468">RL_CULL_DISTANCE_NEAR</link>,&#32;<link linkend="__classes_2lib_2config_8h_1a68f2cb83fd99bdd490bde120b0cbcbf0">RL_CULL_DISTANCE_FAR</link>);
+309 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2rlgl_8h_1a5b6c74c1ea817477c2e3ffb28dcd5235">rlSetUniformMatrix</link>(<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a57b2a96adb1d51204909a82d861e395e">shader</link>.locs[<link linkend="__classes_2lib_2raylib_8h_1a04338a0bace0288b57053da5e53762b4abb104c0d34a5ee09d2b2b816541bc04b">SHADER_LOC_MATRIX_PROJECTION</link>],
+310 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;matFboProjection);
+311 
+312 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Define&#32;view&#32;matrix&#32;for&#32;every&#32;side&#32;of&#32;the&#32;cubemap</emphasis>
+313 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_struct_matrix">Matrix</link>&#32;fboViews[6]&#32;=&#32;{
+314 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2raymath_8h_1aa5e02c87229c2497da3932b0e7340cd9">MatrixLookAt</link>(<link linkend="_struct_vector3">Vector3</link>{0.0f,&#32;0.0f,&#32;0.0f},&#32;<link linkend="_struct_vector3">Vector3</link>{1.0f,&#32;0.0f,&#32;0.0f},
+315 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_struct_vector3">Vector3</link>{0.0f,&#32;-1.0f,&#32;0.0f}),
+316 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2raymath_8h_1aa5e02c87229c2497da3932b0e7340cd9">MatrixLookAt</link>(<link linkend="_struct_vector3">Vector3</link>{0.0f,&#32;0.0f,&#32;0.0f},&#32;<link linkend="_struct_vector3">Vector3</link>{-1.0f,&#32;0.0f,&#32;0.0f},
+317 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_struct_vector3">Vector3</link>{0.0f,&#32;-1.0f,&#32;0.0f}),
+318 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2raymath_8h_1aa5e02c87229c2497da3932b0e7340cd9">MatrixLookAt</link>(<link linkend="_struct_vector3">Vector3</link>{0.0f,&#32;0.0f,&#32;0.0f},&#32;<link linkend="_struct_vector3">Vector3</link>{0.0f,&#32;1.0f,&#32;0.0f},
+319 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_struct_vector3">Vector3</link>{0.0f,&#32;0.0f,&#32;1.0f}),
+320 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2raymath_8h_1aa5e02c87229c2497da3932b0e7340cd9">MatrixLookAt</link>(<link linkend="_struct_vector3">Vector3</link>{0.0f,&#32;0.0f,&#32;0.0f},&#32;<link linkend="_struct_vector3">Vector3</link>{0.0f,&#32;-1.0f,&#32;0.0f},
+321 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_struct_vector3">Vector3</link>{0.0f,&#32;0.0f,&#32;-1.0f}),
+322 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2raymath_8h_1aa5e02c87229c2497da3932b0e7340cd9">MatrixLookAt</link>(<link linkend="_struct_vector3">Vector3</link>{0.0f,&#32;0.0f,&#32;0.0f},&#32;<link linkend="_struct_vector3">Vector3</link>{0.0f,&#32;0.0f,&#32;1.0f},
+323 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_struct_vector3">Vector3</link>{0.0f,&#32;-1.0f,&#32;0.0f}),
+324 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2raymath_8h_1aa5e02c87229c2497da3932b0e7340cd9">MatrixLookAt</link>(<link linkend="_struct_vector3">Vector3</link>{0.0f,&#32;0.0f,&#32;0.0f},&#32;<link linkend="_struct_vector3">Vector3</link>{0.0f,&#32;0.0f,&#32;-1.0f},
+325 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_struct_vector3">Vector3</link>{0.0f,&#32;-1.0f,&#32;0.0f})};
+326 
+327 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2rlgl_8h_1a6bc7f957862cf51f1e414002bb2f2daa">rlViewport</link>(0,&#32;0,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a3d1e3edfcf61ca2d831883e1afbad89e">size</link>,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a3d1e3edfcf61ca2d831883e1afbad89e">size</link>);&#32;<emphasis role="comment">//&#32;Set&#32;viewport&#32;to&#32;current&#32;fbo&#32;dimensions</emphasis>
+328 
+329 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Activate&#32;and&#32;enable&#32;texture&#32;for&#32;drawing&#32;to&#32;cubemap&#32;faces</emphasis>
+330 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2rlgl_8h_1a95339a3e242e716539ac84b057addfcb">rlActiveTextureSlot</link>(0);
+331 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2rlgl_8h_1a2bc666e0e22b25b1844f6018cbc5f962">rlEnableTexture</link>(panorama.<link linkend="_struct_texture2_d_1a2f487036c3c7ea6d7bc061c012764fba">id</link>);
+332 
+333 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(<emphasis role="keywordtype">int</emphasis>&#32;i&#32;=&#32;0;&#32;i&#32;&lt;&#32;6;&#32;i++)
+334 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+335 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Set&#32;the&#32;view&#32;matrix&#32;for&#32;the&#32;current&#32;cube&#32;face</emphasis>
+336 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2rlgl_8h_1a5b6c74c1ea817477c2e3ffb28dcd5235">rlSetUniformMatrix</link>(<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a57b2a96adb1d51204909a82d861e395e">shader</link>.locs[<link linkend="__classes_2lib_2raylib_8h_1a04338a0bace0288b57053da5e53762b4ac70a7a931d032626f57981821fd4441e">SHADER_LOC_MATRIX_VIEW</link>],&#32;fboViews[i]);
+337 
+338 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Select&#32;the&#32;current&#32;cubemap&#32;face&#32;attachment&#32;for&#32;the&#32;fbo</emphasis>
+339 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;WARNING:&#32;This&#32;function&#32;by&#32;default&#32;enables-&gt;attach-&gt;disables&#32;fbo!!!</emphasis>
+340 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2rlgl_8h_1aa51dbc3edd8f3552e3adda648a4f9802">rlFramebufferAttach</link>(fbo,&#32;cubemap.<link linkend="_struct_texture_1aed42161a5c00b6020c85833401da6da6">id</link>,&#32;<link linkend="__classes_2lib_2rlgl_8h_1a0d627ec546512590b921bb3f71f8e1e2a134a6bf82ce53b2b1a8e33af71e988fc">RL_ATTACHMENT_COLOR_CHANNEL0</link>,
+341 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2rlgl_8h_1ae8a5439a3a1eeb4f4c64af2ff45fb94dafc000cb9ab63755c325c83c729164b54">RL_ATTACHMENT_CUBEMAP_POSITIVE_X</link>&#32;+&#32;i,&#32;0);
+342 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2rlgl_8h_1a93c5ef00ad99e88a63ac888f95cf0af7">rlEnableFramebuffer</link>(fbo);
+343 
+344 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Load&#32;and&#32;draw&#32;a&#32;cube,&#32;it&#32;uses&#32;the&#32;current&#32;enabled&#32;texture</emphasis>
+345 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2rlgl_8h_1a151b1e2f282f5f1411952e4b91d1a34e">rlClearScreenBuffers</link>();
+346 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2rlgl_8h_1a503bdfd132e4f0034935c7ed81e35df1">rlLoadDrawCube</link>();
+347 
+348 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;ALTERNATIVE:&#32;Try&#32;to&#32;use&#32;internal&#32;batch&#32;system&#32;to&#32;draw&#32;the&#32;cube&#32;instead&#32;of</emphasis>
+349 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;rlLoadDrawCube&#32;for&#32;some&#32;reason&#32;this&#32;method&#32;does&#32;not&#32;work,&#32;maybe&#32;due&#32;to</emphasis>
+350 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;cube&#32;triangles&#32;definition?&#32;normals&#32;pointing&#32;out?</emphasis>
+351 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;TODO:&#32;Investigate&#32;this&#32;issue...</emphasis>
+352 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;rlSetTexture(panorama.id);&#32;//&#32;WARNING:&#32;It&#32;must&#32;be&#32;called&#32;after&#32;enabling</emphasis>
+353 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;current&#32;framebuffer&#32;if&#32;using&#32;internal&#32;batch&#32;system!</emphasis>
+354 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;rlClearScreenBuffers();</emphasis>
+355 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;DrawCubeV(Vector3Zero(),&#32;Vector3One(),&#32;WHITE);</emphasis>
+356 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;rlDrawRenderBatchActive();</emphasis>
+357 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+358 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//------------------------------------------------------------------------------------------</emphasis>
+359 
+360 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;STEP&#32;3:&#32;Unload&#32;framebuffer&#32;and&#32;reset&#32;state</emphasis>
+361 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//------------------------------------------------------------------------------------------</emphasis>
+362 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2rlgl_8h_1ac230087c3e8b0eb04218c7364c4e64e1">rlDisableShader</link>();&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Unbind&#32;shader</emphasis>
+363 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2rlgl_8h_1a532bbface0899d06f6d74eff34052648">rlDisableTexture</link>();&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Unbind&#32;texture</emphasis>
+364 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2rlgl_8h_1a9bf55d35c503911fbb96130e910c0d1f">rlDisableFramebuffer</link>();&#32;&#32;&#32;<emphasis role="comment">//&#32;Unbind&#32;framebuffer</emphasis>
+365 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2rlgl_8h_1a20cc90bb27ff762c975739394fc99591">rlUnloadFramebuffer</link>(fbo);&#32;<emphasis role="comment">//&#32;Unload&#32;framebuffer&#32;(and&#32;automatically&#32;attached</emphasis>
+366 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;depth&#32;texture/renderbuffer)</emphasis>
+367 
+368 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Reset&#32;viewport&#32;dimensions&#32;to&#32;default</emphasis>
+369 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2rlgl_8h_1a6bc7f957862cf51f1e414002bb2f2daa">rlViewport</link>(0,&#32;0,&#32;<link linkend="__classes_2lib_2rlgl_8h_1a9a77ade5c3d0842c30c17b77ae48661c">rlGetFramebufferWidth</link>(),&#32;<link linkend="__classes_2lib_2rlgl_8h_1a1b602e37872f572df9c00e41e84155a7">rlGetFramebufferHeight</link>());
+370 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2rlgl_8h_1a2ef66f88a65541b00336a76b1662549c">rlEnableBackfaceCulling</link>();
+371 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//------------------------------------------------------------------------------------------</emphasis>
+372 
+373 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;cubemap.<link linkend="_struct_texture_1a06a0246cb31343557c3441c5733349cd">width</link>&#32;=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a3d1e3edfcf61ca2d831883e1afbad89e">size</link>;
+374 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;cubemap.<link linkend="_struct_texture_1ad37c395c65ff8bde86230908027a6fcd">height</link>&#32;=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a3d1e3edfcf61ca2d831883e1afbad89e">size</link>;
+375 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;cubemap.<link linkend="_struct_texture_1a3800e193e0433142dd3f1a52f4c2b92d">mipmaps</link>&#32;=&#32;1;
+376 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;cubemap.<link linkend="_struct_texture_1adebc6a5c8451bedc29a094803d3c0dbb">format</link>&#32;=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a3f8f226b5004bbc9a172e2bbf28ed102">format</link>;
+377 
+378 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;cubemap;
+379 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+380 
+390 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">static</emphasis>&#32;<link linkend="_struct_mesh">Mesh</link>&#32;<link linkend="_class_global_1_1_mesh_tools_1aa7a0a8dd6d86c8d2fa42093626d6fb09">GenMeshCustom</link>(<link linkend="_struct_global_1_1_mesh_tools_1_1_tri_vert">TriVert</link>&#32;verts)
+391 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+392 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_struct_mesh">Mesh</link>&#32;mesh&#32;=&#32;{0};
+393 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;mesh.<link linkend="_struct_mesh_1aee7cdb1ea43963513f2eebaa961d9e93">triangleCount</link>&#32;=&#32;1;
+394 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;mesh.<link linkend="_struct_mesh_1a5405f0a29c7917d794e0966a92dbb270">vertexCount</link>&#32;=&#32;mesh.<link linkend="_struct_mesh_1aee7cdb1ea43963513f2eebaa961d9e93">triangleCount</link>&#32;*&#32;3;
+395 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;mesh.<link linkend="_struct_mesh_1a8cc6bd23ba916dce108dc718211d1ced">vertices</link>&#32;=&#32;(<emphasis role="keywordtype">float</emphasis>&#32;*)<link linkend="__classes_2lib_2raylib_8h_1a8cee11978e51aaece974b27971627762">MemAlloc</link>(mesh.<link linkend="_struct_mesh_1a5405f0a29c7917d794e0966a92dbb270">vertexCount</link>&#32;*&#32;3&#32;*&#32;<emphasis role="keyword">sizeof</emphasis>(<emphasis role="keywordtype">float</emphasis>));&#32;&#32;<emphasis role="comment">//&#32;3&#32;vertices,&#32;3&#32;coordinates&#32;each&#32;(x,&#32;y,&#32;z)</emphasis>
+396 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;mesh.<link linkend="_struct_mesh_1a1ab22d221ac8e240da4cea4e3849df90">texcoords</link>&#32;=&#32;(<emphasis role="keywordtype">float</emphasis>&#32;*)<link linkend="__classes_2lib_2raylib_8h_1a8cee11978e51aaece974b27971627762">MemAlloc</link>(mesh.<link linkend="_struct_mesh_1a5405f0a29c7917d794e0966a92dbb270">vertexCount</link>&#32;*&#32;2&#32;*&#32;<emphasis role="keyword">sizeof</emphasis>(<emphasis role="keywordtype">float</emphasis>));&#32;<emphasis role="comment">//&#32;3&#32;vertices,&#32;2&#32;coordinates&#32;each&#32;(x,&#32;y)</emphasis>
+397 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;mesh.<link linkend="_struct_mesh_1a81d932bb09db4083b1e360f38288143f">normals</link>&#32;=&#32;(<emphasis role="keywordtype">float</emphasis>&#32;*)<link linkend="__classes_2lib_2raylib_8h_1a8cee11978e51aaece974b27971627762">MemAlloc</link>(mesh.<link linkend="_struct_mesh_1a5405f0a29c7917d794e0966a92dbb270">vertexCount</link>&#32;*&#32;3&#32;*&#32;<emphasis role="keyword">sizeof</emphasis>(<emphasis role="keywordtype">float</emphasis>));&#32;&#32;&#32;<emphasis role="comment">//&#32;3&#32;vertices,&#32;3&#32;coordinates&#32;each&#32;(x,&#32;y,&#32;z)</emphasis>
+398 
+399 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Vertex&#32;at&#32;(0,&#32;0,&#32;0)</emphasis>
+400 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;mesh.<link linkend="_struct_mesh_1a8cc6bd23ba916dce108dc718211d1ced">vertices</link>[0]&#32;=&#32;verts.<link linkend="_struct_global_1_1_mesh_tools_1_1_tri_vert_1ab9e2ee01a1ffdafa221ac96f34a68d79">v1</link>.<link linkend="_struct_vector3_1a7e2d3237b29a2f29d7b3d8b2934e35f2">x</link>;
+401 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;mesh.<link linkend="_struct_mesh_1a8cc6bd23ba916dce108dc718211d1ced">vertices</link>[1]&#32;=&#32;verts.<link linkend="_struct_global_1_1_mesh_tools_1_1_tri_vert_1a1d46b80185b693ebe6a7ccf790b13ba2">v2</link>.<link linkend="_struct_vector3_1a7e2d3237b29a2f29d7b3d8b2934e35f2">x</link>;
+402 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;mesh.<link linkend="_struct_mesh_1a8cc6bd23ba916dce108dc718211d1ced">vertices</link>[2]&#32;=&#32;verts.<link linkend="_struct_global_1_1_mesh_tools_1_1_tri_vert_1ab729d527832fd04a306f1a6eb7698bbe">v3</link>.<link linkend="_struct_vector3_1a7e2d3237b29a2f29d7b3d8b2934e35f2">x</link>;
+403 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;mesh.<link linkend="_struct_mesh_1a81d932bb09db4083b1e360f38288143f">normals</link>[0]&#32;=&#32;verts.<link linkend="_struct_global_1_1_mesh_tools_1_1_tri_vert_1ab9e2ee01a1ffdafa221ac96f34a68d79">v1</link>.<link linkend="_struct_vector3_1a7e2d3237b29a2f29d7b3d8b2934e35f2">x</link>;
+404 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;mesh.<link linkend="_struct_mesh_1a81d932bb09db4083b1e360f38288143f">normals</link>[1]&#32;=&#32;verts.<link linkend="_struct_global_1_1_mesh_tools_1_1_tri_vert_1a1d46b80185b693ebe6a7ccf790b13ba2">v2</link>.<link linkend="_struct_vector3_1a7e2d3237b29a2f29d7b3d8b2934e35f2">x</link>;
+405 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;mesh.<link linkend="_struct_mesh_1a81d932bb09db4083b1e360f38288143f">normals</link>[2]&#32;=&#32;verts.<link linkend="_struct_global_1_1_mesh_tools_1_1_tri_vert_1ab729d527832fd04a306f1a6eb7698bbe">v3</link>.<link linkend="_struct_vector3_1a7e2d3237b29a2f29d7b3d8b2934e35f2">x</link>;
+406 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;mesh.<link linkend="_struct_mesh_1a1ab22d221ac8e240da4cea4e3849df90">texcoords</link>[0]&#32;=&#32;0;
+407 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;mesh.<link linkend="_struct_mesh_1a1ab22d221ac8e240da4cea4e3849df90">texcoords</link>[1]&#32;=&#32;0;
+408 
+409 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Vertex&#32;at&#32;(1,&#32;0,&#32;2)</emphasis>
+410 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;mesh.<link linkend="_struct_mesh_1a8cc6bd23ba916dce108dc718211d1ced">vertices</link>[3]&#32;=&#32;verts.<link linkend="_struct_global_1_1_mesh_tools_1_1_tri_vert_1ab9e2ee01a1ffdafa221ac96f34a68d79">v1</link>.<link linkend="_struct_vector3_1a86eb35a9fa2d5a49e7fad66a35fa9c13">y</link>;
+411 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;mesh.<link linkend="_struct_mesh_1a8cc6bd23ba916dce108dc718211d1ced">vertices</link>[4]&#32;=&#32;verts.<link linkend="_struct_global_1_1_mesh_tools_1_1_tri_vert_1a1d46b80185b693ebe6a7ccf790b13ba2">v2</link>.<link linkend="_struct_vector3_1a86eb35a9fa2d5a49e7fad66a35fa9c13">y</link>;
+412 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;mesh.<link linkend="_struct_mesh_1a8cc6bd23ba916dce108dc718211d1ced">vertices</link>[5]&#32;=&#32;verts.<link linkend="_struct_global_1_1_mesh_tools_1_1_tri_vert_1ab729d527832fd04a306f1a6eb7698bbe">v3</link>.<link linkend="_struct_vector3_1a86eb35a9fa2d5a49e7fad66a35fa9c13">y</link>;
+413 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;mesh.<link linkend="_struct_mesh_1a81d932bb09db4083b1e360f38288143f">normals</link>[3]&#32;=&#32;verts.<link linkend="_struct_global_1_1_mesh_tools_1_1_tri_vert_1ab9e2ee01a1ffdafa221ac96f34a68d79">v1</link>.<link linkend="_struct_vector3_1a86eb35a9fa2d5a49e7fad66a35fa9c13">y</link>;
+414 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;mesh.<link linkend="_struct_mesh_1a81d932bb09db4083b1e360f38288143f">normals</link>[4]&#32;=&#32;verts.<link linkend="_struct_global_1_1_mesh_tools_1_1_tri_vert_1a1d46b80185b693ebe6a7ccf790b13ba2">v2</link>.<link linkend="_struct_vector3_1a86eb35a9fa2d5a49e7fad66a35fa9c13">y</link>;
+415 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;mesh.<link linkend="_struct_mesh_1a81d932bb09db4083b1e360f38288143f">normals</link>[5]&#32;=&#32;verts.<link linkend="_struct_global_1_1_mesh_tools_1_1_tri_vert_1ab729d527832fd04a306f1a6eb7698bbe">v3</link>.<link linkend="_struct_vector3_1a86eb35a9fa2d5a49e7fad66a35fa9c13">y</link>;
+416 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;mesh.<link linkend="_struct_mesh_1a1ab22d221ac8e240da4cea4e3849df90">texcoords</link>[2]&#32;=&#32;0.5f;
+417 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;mesh.<link linkend="_struct_mesh_1a1ab22d221ac8e240da4cea4e3849df90">texcoords</link>[3]&#32;=&#32;1.0f;
+418 
+419 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Vertex&#32;at&#32;(2,&#32;0,&#32;0)</emphasis>
+420 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;mesh.<link linkend="_struct_mesh_1a8cc6bd23ba916dce108dc718211d1ced">vertices</link>[6]&#32;=&#32;verts.<link linkend="_struct_global_1_1_mesh_tools_1_1_tri_vert_1ab9e2ee01a1ffdafa221ac96f34a68d79">v1</link>.<link linkend="_struct_vector3_1aa8c9461eb24bd2c364258078811a3e9d">z</link>;
+421 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;mesh.<link linkend="_struct_mesh_1a8cc6bd23ba916dce108dc718211d1ced">vertices</link>[7]&#32;=&#32;verts.<link linkend="_struct_global_1_1_mesh_tools_1_1_tri_vert_1a1d46b80185b693ebe6a7ccf790b13ba2">v2</link>.<link linkend="_struct_vector3_1aa8c9461eb24bd2c364258078811a3e9d">z</link>;
+422 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;mesh.<link linkend="_struct_mesh_1a8cc6bd23ba916dce108dc718211d1ced">vertices</link>[8]&#32;=&#32;verts.<link linkend="_struct_global_1_1_mesh_tools_1_1_tri_vert_1ab729d527832fd04a306f1a6eb7698bbe">v3</link>.<link linkend="_struct_vector3_1aa8c9461eb24bd2c364258078811a3e9d">z</link>;
+423 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;mesh.<link linkend="_struct_mesh_1a81d932bb09db4083b1e360f38288143f">normals</link>[6]&#32;=&#32;verts.<link linkend="_struct_global_1_1_mesh_tools_1_1_tri_vert_1ab729d527832fd04a306f1a6eb7698bbe">v3</link>.<link linkend="_struct_vector3_1aa8c9461eb24bd2c364258078811a3e9d">z</link>;
+424 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;mesh.<link linkend="_struct_mesh_1a81d932bb09db4083b1e360f38288143f">normals</link>[7]&#32;=&#32;verts.<link linkend="_struct_global_1_1_mesh_tools_1_1_tri_vert_1ab729d527832fd04a306f1a6eb7698bbe">v3</link>.<link linkend="_struct_vector3_1aa8c9461eb24bd2c364258078811a3e9d">z</link>;
+425 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;mesh.<link linkend="_struct_mesh_1a81d932bb09db4083b1e360f38288143f">normals</link>[8]&#32;=&#32;verts.<link linkend="_struct_global_1_1_mesh_tools_1_1_tri_vert_1ab729d527832fd04a306f1a6eb7698bbe">v3</link>.<link linkend="_struct_vector3_1aa8c9461eb24bd2c364258078811a3e9d">z</link>;
+426 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;mesh.<link linkend="_struct_mesh_1a1ab22d221ac8e240da4cea4e3849df90">texcoords</link>[4]&#32;=&#32;1;
+427 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;mesh.<link linkend="_struct_mesh_1a1ab22d221ac8e240da4cea4e3849df90">texcoords</link>[5]&#32;=&#32;0;
+428 
+429 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Upload&#32;mesh&#32;data&#32;from&#32;CPU&#32;(RAM)&#32;to&#32;GPU&#32;(VRAM)&#32;memory</emphasis>
+430 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_8h_1a43db261cf17665ad49db64fe83e213ad">UploadMesh</link>(&amp;mesh,&#32;<emphasis role="keyword">false</emphasis>);
+431 
+432 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;mesh;
+433 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+434 
+435 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">/*</emphasis>
+436 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;*/</emphasis>
+437 &#32;&#32;&#32;&#32;};
+438 &#32;&#32;&#32;&#32;<emphasis role="keyword">class&#32;</emphasis><link linkend="_class_global_1_1_math">Math</link>
+439 &#32;&#32;&#32;&#32;{
+440 
+441 &#32;&#32;&#32;&#32;<emphasis role="keyword">private</emphasis>:
+442 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Stores&#32;what&#32;the&#32;last&#32;position&#32;generated&#32;was.</emphasis>
+443 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">float</emphasis>&#32;LastPositiveXPos;
+444 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">float</emphasis>&#32;LastPositiveZPos;
+445 
+446 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">float</emphasis>&#32;LastNegativeXPos;
+447 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">float</emphasis>&#32;LastNegativeZPos;
+448 
+449 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;When&#32;the&#32;game&#32;starts,&#32;it&#32;is&#32;set&#32;to&#32;true&#32;because&#32;it&#32;is.&#32;this&#32;just&#32;is&#32;for&#32;use</emphasis>
+450 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;within&#32;the&#32;terrain&#32;generator.&#32;I&#32;wouldnt&#32;touch.</emphasis>
+451 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>&#32;isInitialX;
+452 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>&#32;isInitialZ;
+453 
+454 &#32;&#32;&#32;&#32;<emphasis role="keyword">public</emphasis>:
+455 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">float</emphasis>&#32;<link linkend="_class_global_1_1_math_1ac0513a944dfbb744f2757f716186f176">randomRange</link>(<emphasis role="keywordtype">float</emphasis>&#32;<link linkend="_toml_8hpp_1aef6fbc596e7e69a80f14c34a2b786a14">min</link>,&#32;<emphasis role="keywordtype">float</emphasis>&#32;max)
+456 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+457 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="_toml_8hpp_1aef6fbc596e7e69a80f14c34a2b786a14">min</link>&#32;+&#32;<emphasis role="keyword">static_cast&lt;</emphasis><emphasis role="keywordtype">float</emphasis><emphasis role="keyword">&gt;</emphasis>(rand())&#32;/
+458 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;(<emphasis role="keyword">static_cast&lt;</emphasis><emphasis role="keywordtype">float</emphasis><emphasis role="keyword">&gt;</emphasis>(RAND_MAX&#32;/&#32;(max&#32;-&#32;<link linkend="_toml_8hpp_1aef6fbc596e7e69a80f14c34a2b786a14">min</link>)));
+459 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+460 
+461 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">/*</emphasis>
+462 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;static&#32;int&#32;DoRoll(int&#32;Num1,&#32;int&#32;Num2)</emphasis>
+463 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{</emphasis>
+464 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;while&#32;(true)</emphasis>
+465 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{</emphasis>
+466 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;int&#32;Roll1&#32;=&#32;GetRandomValue(Num1,&#32;Num1&#32;+&#32;Num2);</emphasis>
+467 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;int&#32;Roll2&#32;=&#32;GetRandomValue(Num1,&#32;Num1&#32;+&#32;Num2);</emphasis>
+468 <emphasis role="comment"></emphasis>
+469 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;if&#32;(Roll1&#32;&gt;&#32;Roll2)</emphasis>
+470 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{</emphasis>
+471 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;return&#32;POSITIVE;</emphasis>
+472 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}</emphasis>
+473 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;else&#32;if&#32;(Roll1&#32;&lt;&#32;Roll2)</emphasis>
+474 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{</emphasis>
+475 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;return&#32;NEGATIVE;</emphasis>
+476 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}</emphasis>
+477 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}</emphasis>
+478 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}</emphasis>
+479 <emphasis role="comment"></emphasis>
+480 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;static&#32;float&#32;createX(float&#32;CubePosX,&#32;ValueFlags&#32;flag)</emphasis>
+481 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{</emphasis>
+482 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;if&#32;(flag&#32;==&#32;POSITIVE)</emphasis>
+483 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{</emphasis>
+484 <emphasis role="comment"></emphasis>
+485 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;if&#32;(isInitialX&#32;==&#32;true)</emphasis>
+486 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{</emphasis>
+487 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;isInitialX&#32;=&#32;false;</emphasis>
+488 <emphasis role="comment"></emphasis>
+489 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;LastPositiveXPos&#32;=&#32;BLOCK_SIZE;</emphasis>
+490 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;CubePosX&#32;=&#32;LastPositiveXPos&#32;+&#32;BLOCK_SIZE;</emphasis>
+491 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;return&#32;CubePosX;</emphasis>
+492 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}</emphasis>
+493 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;else&#32;if&#32;(isInitialX&#32;==&#32;false)</emphasis>
+494 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{</emphasis>
+495 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;CubePosX&#32;=&#32;LastPositiveXPos&#32;+&#32;BLOCK_SIZE;</emphasis>
+496 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;LastPositiveXPos&#32;=&#32;CubePosX;</emphasis>
+497 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;//&#32;adds&#32;together&#32;so&#32;that&#32;way&#32;cubes&#32;dont&#32;spawn&#32;in&#32;the&#32;same&#32;spot</emphasis>
+498 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;return&#32;CubePosX;</emphasis>
+499 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}</emphasis>
+500 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}</emphasis>
+501 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;else&#32;if&#32;(flag&#32;==&#32;NEGATIVE)</emphasis>
+502 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{</emphasis>
+503 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;if&#32;(isInitialX&#32;==&#32;true)</emphasis>
+504 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{</emphasis>
+505 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;isInitialX&#32;=&#32;false;</emphasis>
+506 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;LastNegativeXPos&#32;=&#32;BLOCK_SIZE;</emphasis>
+507 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;CubePosX&#32;=&#32;LastNegativeXPos;</emphasis>
+508 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;return&#32;CubePosX;</emphasis>
+509 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}</emphasis>
+510 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;else&#32;if&#32;(isInitialX&#32;==&#32;false)</emphasis>
+511 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{</emphasis>
+512 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;CubePosX&#32;=&#32;LastNegativeXPos&#32;-&#32;BLOCK_SIZE;</emphasis>
+513 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;LastNegativeXPos&#32;=&#32;CubePosX;</emphasis>
+514 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;//&#32;adds&#32;together&#32;so&#32;that&#32;way&#32;cubes&#32;dont&#32;spawn&#32;in&#32;the&#32;same&#32;spot</emphasis>
+515 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;return&#32;CubePosX;</emphasis>
+516 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}</emphasis>
+517 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}</emphasis>
+518 <emphasis role="comment"></emphasis>
+519 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;return&#32;1;</emphasis>
+520 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}</emphasis>
+521 <emphasis role="comment"></emphasis>
+522 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;static&#32;float&#32;createY(float&#32;CubePosY)</emphasis>
+523 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{</emphasis>
+524 <emphasis role="comment"></emphasis>
+525 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;int&#32;lastY&#32;=&#32;CubePosY;</emphasis>
+526 <emphasis role="comment"></emphasis>
+527 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;int&#32;rollResult&#32;=&#32;DoRoll(lastY,&#32;BLOCK_SIZE);</emphasis>
+528 <emphasis role="comment"></emphasis>
+529 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;if&#32;(rollResult&#32;==&#32;NEGATIVE)</emphasis>
+530 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{</emphasis>
+531 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;int&#32;Y&#32;=&#32;GetRandomValue(lastY,&#32;lastY&#32;-&#32;BLOCK_SIZE);</emphasis>
+532 <emphasis role="comment"></emphasis>
+533 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;//&#32;Testing&#32;Phase</emphasis>
+534 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;if&#32;(Y&#32;==&#32;lastY)</emphasis>
+535 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{</emphasis>
+536 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}</emphasis>
+537 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;else&#32;if&#32;(Y&#32;!=&#32;lastY)</emphasis>
+538 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{</emphasis>
+539 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;CubePosY&#32;=&#32;Y;</emphasis>
+540 <emphasis role="comment"></emphasis>
+541 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;return&#32;CubePosY;</emphasis>
+542 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}</emphasis>
+543 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}</emphasis>
+544 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;else&#32;if&#32;(rollResult&#32;==&#32;POSITIVE)</emphasis>
+545 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{</emphasis>
+546 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;int&#32;Y&#32;=&#32;GetRandomValue(lastY,&#32;lastY&#32;+&#32;BLOCK_SIZE);</emphasis>
+547 <emphasis role="comment"></emphasis>
+548 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;//&#32;Testing&#32;Phase</emphasis>
+549 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;if&#32;(Y&#32;==&#32;lastY)</emphasis>
+550 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{</emphasis>
+551 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}</emphasis>
+552 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;else&#32;if&#32;(Y&#32;!=&#32;lastY)</emphasis>
+553 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{</emphasis>
+554 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;CubePosY&#32;=&#32;Y;</emphasis>
+555 <emphasis role="comment"></emphasis>
+556 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;return&#32;CubePosY;</emphasis>
+557 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}</emphasis>
+558 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}</emphasis>
+559 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;return&#32;1;</emphasis>
+560 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}</emphasis>
+561 <emphasis role="comment"></emphasis>
+562 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;static&#32;float&#32;createZ(float&#32;CubePosZ,&#32;ValueFlags&#32;flag)</emphasis>
+563 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{</emphasis>
+564 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;if&#32;(flag&#32;==&#32;POSITIVE)</emphasis>
+565 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{</emphasis>
+566 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;if&#32;(isInitialZ&#32;==&#32;true)</emphasis>
+567 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{</emphasis>
+568 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;isInitialZ&#32;=&#32;false;</emphasis>
+569 <emphasis role="comment"></emphasis>
+570 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;LastPositiveZPos&#32;=&#32;BLOCK_SIZE;</emphasis>
+571 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;CubePosZ&#32;=&#32;LastPositiveZPos&#32;+&#32;BLOCK_SIZE;</emphasis>
+572 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;return&#32;CubePosZ;</emphasis>
+573 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}</emphasis>
+574 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;else&#32;if&#32;(isInitialZ&#32;==&#32;false)</emphasis>
+575 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{</emphasis>
+576 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;CubePosZ&#32;=&#32;LastPositiveZPos&#32;+&#32;BLOCK_SIZE;</emphasis>
+577 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;LastPositiveZPos&#32;=&#32;CubePosZ;</emphasis>
+578 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;//&#32;adds&#32;together&#32;so&#32;that&#32;way&#32;cubes&#32;dont&#32;spawn&#32;in&#32;the&#32;same&#32;spot</emphasis>
+579 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;return&#32;CubePosZ;</emphasis>
+580 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}</emphasis>
+581 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}</emphasis>
+582 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;else&#32;if&#32;(flag&#32;==&#32;NEGATIVE)</emphasis>
+583 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{</emphasis>
+584 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;if&#32;(isInitialZ&#32;==&#32;true)</emphasis>
+585 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{</emphasis>
+586 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;isInitialZ&#32;=&#32;false;</emphasis>
+587 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;LastNegativeZPos&#32;=&#32;BLOCK_SIZE;</emphasis>
+588 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;CubePosZ&#32;=&#32;LastNegativeZPos;</emphasis>
+589 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;return&#32;CubePosZ;</emphasis>
+590 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}</emphasis>
+591 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;else&#32;if&#32;(isInitialZ&#32;==&#32;false)</emphasis>
+592 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{</emphasis>
+593 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;CubePosZ&#32;=&#32;LastNegativeXPos&#32;-&#32;BLOCK_SIZE;</emphasis>
+594 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;LastNegativeZPos&#32;=&#32;CubePosZ;</emphasis>
+595 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;//&#32;adds&#32;together&#32;so&#32;that&#32;way&#32;cubes&#32;dont&#32;spawn&#32;in&#32;the&#32;same&#32;spot</emphasis>
+596 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;return&#32;CubePosZ;</emphasis>
+597 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}</emphasis>
+598 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}</emphasis>
+599 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;return&#32;1;</emphasis>
+600 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}</emphasis>
+601 <emphasis role="comment"></emphasis>
+602 <emphasis role="comment">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;*/</emphasis>
+603 
+604 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>&#32;<link linkend="_class_global_1_1_math_1ae977ca8f18ed37e3db166207a4143b9f">CheckCollisionRayBox</link>(<link linkend="_struct_ray">Ray</link>&#32;<link linkend="_main_8cpp_1a5fa8a84ba0e7d665477d8e8d2ba14499">ray</link>,&#32;<link linkend="_struct_bounding_box">BoundingBox</link>&#32;box,&#32;<emphasis role="keywordtype">float</emphasis>&#32;*outDistance)
+605 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+606 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Compute&#32;the&#32;inverse&#32;of&#32;the&#32;ray&#32;direction</emphasis>
+607 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_struct_vector3">Vector3</link>&#32;invDir&#32;=&#32;{1.0f&#32;/&#32;<link linkend="_main_8cpp_1a5fa8a84ba0e7d665477d8e8d2ba14499">ray</link>.<link linkend="_struct_ray_1ac502377212f9b63774baf8a3f984d639">direction</link>.<link linkend="_struct_vector3_1a7e2d3237b29a2f29d7b3d8b2934e35f2">x</link>,&#32;1.0f&#32;/&#32;<link linkend="_main_8cpp_1a5fa8a84ba0e7d665477d8e8d2ba14499">ray</link>.<link linkend="_struct_ray_1ac502377212f9b63774baf8a3f984d639">direction</link>.<link linkend="_struct_vector3_1a86eb35a9fa2d5a49e7fad66a35fa9c13">y</link>,
+608 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;1.0f&#32;/&#32;<link linkend="_main_8cpp_1a5fa8a84ba0e7d665477d8e8d2ba14499">ray</link>.<link linkend="_struct_ray_1ac502377212f9b63774baf8a3f984d639">direction</link>.<link linkend="_struct_vector3_1aa8c9461eb24bd2c364258078811a3e9d">z</link>};
+609 
+610 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Compute&#32;the&#32;sign&#32;of&#32;the&#32;inverse&#32;direction</emphasis>
+611 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;signX&#32;=&#32;(invDir.<link linkend="_struct_vector3_1a7e2d3237b29a2f29d7b3d8b2934e35f2">x</link>&#32;&lt;&#32;0.0f)&#32;?&#32;1&#32;:&#32;0;
+612 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;signY&#32;=&#32;(invDir.<link linkend="_struct_vector3_1a86eb35a9fa2d5a49e7fad66a35fa9c13">y</link>&#32;&lt;&#32;0.0f)&#32;?&#32;1&#32;:&#32;0;
+613 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;signZ&#32;=&#32;(invDir.<link linkend="_struct_vector3_1aa8c9461eb24bd2c364258078811a3e9d">z</link>&#32;&lt;&#32;0.0f)&#32;?&#32;1&#32;:&#32;0;
+614 
+615 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Compute&#32;the&#32;min&#32;and&#32;max&#32;values&#32;for&#32;each&#32;axis</emphasis>
+616 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">float</emphasis>&#32;tmin&#32;=&#32;(box.<link linkend="_struct_bounding_box_1ac7b45b824a363742b6daaff2d84d174d">min</link>.<link linkend="_struct_vector3_1a7e2d3237b29a2f29d7b3d8b2934e35f2">x</link>&#32;-&#32;<link linkend="_main_8cpp_1a5fa8a84ba0e7d665477d8e8d2ba14499">ray</link>.<link linkend="_struct_ray_1a8dcf55a86abd8b716a0f4be6900ac51b">position</link>.<link linkend="_struct_vector3_1a7e2d3237b29a2f29d7b3d8b2934e35f2">x</link>)&#32;*&#32;invDir.<link linkend="_struct_vector3_1a7e2d3237b29a2f29d7b3d8b2934e35f2">x</link>;
+617 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">float</emphasis>&#32;tmax&#32;=&#32;(box.<link linkend="_struct_bounding_box_1abdef81843aa2bca50c753aaa00ffe21c">max</link>.<link linkend="_struct_vector3_1a7e2d3237b29a2f29d7b3d8b2934e35f2">x</link>&#32;-&#32;<link linkend="_main_8cpp_1a5fa8a84ba0e7d665477d8e8d2ba14499">ray</link>.<link linkend="_struct_ray_1a8dcf55a86abd8b716a0f4be6900ac51b">position</link>.<link linkend="_struct_vector3_1a7e2d3237b29a2f29d7b3d8b2934e35f2">x</link>)&#32;*&#32;invDir.<link linkend="_struct_vector3_1a7e2d3237b29a2f29d7b3d8b2934e35f2">x</link>;
+618 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">float</emphasis>&#32;tymin&#32;=&#32;(box.<link linkend="_struct_bounding_box_1ac7b45b824a363742b6daaff2d84d174d">min</link>.<link linkend="_struct_vector3_1a86eb35a9fa2d5a49e7fad66a35fa9c13">y</link>&#32;-&#32;<link linkend="_main_8cpp_1a5fa8a84ba0e7d665477d8e8d2ba14499">ray</link>.<link linkend="_struct_ray_1a8dcf55a86abd8b716a0f4be6900ac51b">position</link>.<link linkend="_struct_vector3_1a86eb35a9fa2d5a49e7fad66a35fa9c13">y</link>)&#32;*&#32;invDir.<link linkend="_struct_vector3_1a86eb35a9fa2d5a49e7fad66a35fa9c13">y</link>;
+619 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">float</emphasis>&#32;tymax&#32;=&#32;(box.<link linkend="_struct_bounding_box_1abdef81843aa2bca50c753aaa00ffe21c">max</link>.<link linkend="_struct_vector3_1a86eb35a9fa2d5a49e7fad66a35fa9c13">y</link>&#32;-&#32;<link linkend="_main_8cpp_1a5fa8a84ba0e7d665477d8e8d2ba14499">ray</link>.<link linkend="_struct_ray_1a8dcf55a86abd8b716a0f4be6900ac51b">position</link>.<link linkend="_struct_vector3_1a86eb35a9fa2d5a49e7fad66a35fa9c13">y</link>)&#32;*&#32;invDir.<link linkend="_struct_vector3_1a86eb35a9fa2d5a49e7fad66a35fa9c13">y</link>;
+620 
+621 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Swap&#32;the&#32;min&#32;and&#32;max&#32;values&#32;if&#32;necessary</emphasis>
+622 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(tmin&#32;&gt;&#32;tmax)
+623 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+624 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">float</emphasis>&#32;temp&#32;=&#32;tmin;
+625 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;tmin&#32;=&#32;tmax;
+626 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;tmax&#32;=&#32;temp;
+627 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+628 
+629 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(tymin&#32;&gt;&#32;tymax)
+630 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+631 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">float</emphasis>&#32;temp&#32;=&#32;tymin;
+632 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;tymin&#32;=&#32;tymax;
+633 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;tymax&#32;=&#32;temp;
+634 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+635 
+636 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Check&#32;for&#32;a&#32;miss</emphasis>
+637 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;((tmin&#32;&gt;&#32;tymax)&#32;||&#32;(tymin&#32;&gt;&#32;tmax))
+638 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+639 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<emphasis role="keyword">false</emphasis>;
+640 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+641 
+642 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Compute&#32;the&#32;final&#32;min&#32;and&#32;max&#32;values&#32;for&#32;each&#32;axis</emphasis>
+643 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(tymin&#32;&gt;&#32;tmin)
+644 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+645 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;tmin&#32;=&#32;tymin;
+646 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+647 
+648 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(tymax&#32;&lt;&#32;tmax)
+649 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+650 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;tmax&#32;=&#32;tymax;
+651 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+652 
+653 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">float</emphasis>&#32;tzmin&#32;=&#32;(box.<link linkend="_struct_bounding_box_1ac7b45b824a363742b6daaff2d84d174d">min</link>.<link linkend="_struct_vector3_1aa8c9461eb24bd2c364258078811a3e9d">z</link>&#32;-&#32;<link linkend="_main_8cpp_1a5fa8a84ba0e7d665477d8e8d2ba14499">ray</link>.<link linkend="_struct_ray_1a8dcf55a86abd8b716a0f4be6900ac51b">position</link>.<link linkend="_struct_vector3_1aa8c9461eb24bd2c364258078811a3e9d">z</link>)&#32;*&#32;invDir.<link linkend="_struct_vector3_1aa8c9461eb24bd2c364258078811a3e9d">z</link>;
+654 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">float</emphasis>&#32;tzmax&#32;=&#32;(box.<link linkend="_struct_bounding_box_1abdef81843aa2bca50c753aaa00ffe21c">max</link>.<link linkend="_struct_vector3_1aa8c9461eb24bd2c364258078811a3e9d">z</link>&#32;-&#32;<link linkend="_main_8cpp_1a5fa8a84ba0e7d665477d8e8d2ba14499">ray</link>.<link linkend="_struct_ray_1a8dcf55a86abd8b716a0f4be6900ac51b">position</link>.<link linkend="_struct_vector3_1aa8c9461eb24bd2c364258078811a3e9d">z</link>)&#32;*&#32;invDir.<link linkend="_struct_vector3_1aa8c9461eb24bd2c364258078811a3e9d">z</link>;
+655 
+656 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Swap&#32;the&#32;min&#32;and&#32;max&#32;values&#32;if&#32;necessary</emphasis>
+657 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(tzmin&#32;&gt;&#32;tzmax)
+658 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+659 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">float</emphasis>&#32;temp&#32;=&#32;tzmin;
+660 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;tzmin&#32;=&#32;tzmax;
+661 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;tzmax&#32;=&#32;temp;
+662 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+663 
+664 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Check&#32;for&#32;a&#32;miss</emphasis>
+665 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;((tmin&#32;&gt;&#32;tzmax)&#32;||&#32;(tzmin&#32;&gt;&#32;tmax))
+666 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+667 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<emphasis role="keyword">false</emphasis>;
+668 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+669 
+670 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Compute&#32;the&#32;final&#32;min&#32;and&#32;max&#32;values&#32;for&#32;each&#32;axis</emphasis>
+671 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(tzmin&#32;&gt;&#32;tmin)
+672 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+673 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;tmin&#32;=&#32;tzmin;
+674 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+675 
+676 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(tzmax&#32;&lt;&#32;tmax)
+677 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+678 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;tmax&#32;=&#32;tzmax;
+679 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+680 
+681 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Store&#32;the&#32;distance&#32;to&#32;the&#32;box&#32;in&#32;the&#32;output&#32;variable</emphasis>
+682 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(outDistance)
+683 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+684 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;*outDistance&#32;=&#32;tmin;
+685 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+686 
+687 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;The&#32;ray&#32;intersects&#32;the&#32;box</emphasis>
+688 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<emphasis role="keyword">true</emphasis>;
+689 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+690 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">static</emphasis>&#32;<link linkend="_struct_vector3">Vector3</link>&#32;<link linkend="_class_global_1_1_math_1a05dc47d90fdc7114bea2de9db39fcb18">CameraToWorld</link>(<link linkend="_struct_camera3_d">Camera3D</link>&#32;<link linkend="__classes_2lib_2glm_2test_2cmake_2test__find__glm_8cpp_1a8f389d10179adf56cc907127d615c000">camera</link>)
+691 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+692 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">float</emphasis>&#32;<link linkend="_namespacedistance">distance</link>;
+693 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Calculate&#32;the&#32;ray&#32;from&#32;the&#32;camera&#32;to&#32;the&#32;mouse&#32;position</emphasis>
+694 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_struct_vector2">Vector2</link>&#32;mousePos&#32;=&#32;<link linkend="__classes_2lib_2raylib_8h_1ab9f5c010c30d4652f5d3c26c652a5ab6">GetMousePosition</link>();
+695 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_struct_vector3">Vector3</link>&#32;mousePos3&#32;=&#32;{mousePos.<link linkend="_struct_vector2_1a046bb8d17a876acc49415128dc0502f2">x</link>,&#32;mousePos.<link linkend="_struct_vector2_1a0e07bad05f01ed811b909a2eef97f9e2">y</link>,&#32;0};
+696 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Get&#32;the&#32;direction&#32;vector&#32;of&#32;the&#32;ray</emphasis>
+697 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_struct_vector3">Vector3</link>&#32;rayDirection&#32;=
+698 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2raymath_8h_1ac5fa29124068e3254305bea68ec5da49">Vector3Normalize</link>(<link linkend="__classes_2lib_2raylib_2src_2raymath_8h_1a62a5234e94fb75062e98c4733806fa0f">Vector3Subtract</link>(mousePos3,&#32;<link linkend="__classes_2lib_2glm_2test_2cmake_2test__find__glm_8cpp_1a8f389d10179adf56cc907127d615c000">camera</link>.position));
+699 
+700 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Multiply&#32;the&#32;direction&#32;vector&#32;with&#32;a&#32;scalar&#32;value&#32;to&#32;increase&#32;the&#32;length&#32;of</emphasis>
+701 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;the&#32;ray</emphasis>
+702 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">float</emphasis>&#32;rayLength&#32;=&#32;40.0f;
+703 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;rayDirection&#32;=&#32;<link linkend="__classes_2lib_2raylib_2src_2raymath_8h_1a53cac3c57f3348e00ee8f02ecfd4e16b">Vector3Scale</link>(rayDirection,&#32;rayLength);
+704 
+705 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Create&#32;the&#32;ray&#32;with&#32;the&#32;modified&#32;direction</emphasis>
+706 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_struct_ray">Ray</link>&#32;<link linkend="_main_8cpp_1a5fa8a84ba0e7d665477d8e8d2ba14499">ray</link>&#32;=&#32;{<link linkend="__classes_2lib_2glm_2test_2cmake_2test__find__glm_8cpp_1a8f389d10179adf56cc907127d615c000">camera</link>.position,&#32;rayDirection};
+707 
+708 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Calculate&#32;the&#32;distance&#32;from&#32;the&#32;camera&#32;to&#32;the&#32;ground&#32;plane</emphasis>
+709 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_namespacedistance">distance</link>&#32;=&#32;-(<link linkend="__classes_2lib_2glm_2test_2cmake_2test__find__glm_8cpp_1a8f389d10179adf56cc907127d615c000">camera</link>.position.y&#32;/&#32;<link linkend="_main_8cpp_1a5fa8a84ba0e7d665477d8e8d2ba14499">ray</link>.<link linkend="_struct_ray_1a8dcf55a86abd8b716a0f4be6900ac51b">position</link>.<link linkend="_struct_vector3_1a86eb35a9fa2d5a49e7fad66a35fa9c13">y</link>);
+710 
+711 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Calculate&#32;the&#32;point&#32;where&#32;the&#32;ray&#32;intersects&#32;the&#32;ground&#32;plane</emphasis>
+712 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_struct_vector3">Vector3</link>&#32;groundPoint&#32;=
+713 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2raymath_8h_1a37c5fd6c1eceec5444b159d928383fed">Vector3Add</link>(<link linkend="__classes_2lib_2glm_2test_2cmake_2test__find__glm_8cpp_1a8f389d10179adf56cc907127d615c000">camera</link>.position,&#32;<link linkend="__classes_2lib_2raylib_2src_2raymath_8h_1a53cac3c57f3348e00ee8f02ecfd4e16b">Vector3Scale</link>(<link linkend="_main_8cpp_1a5fa8a84ba0e7d665477d8e8d2ba14499">ray</link>.<link linkend="_struct_ray_1a8dcf55a86abd8b716a0f4be6900ac51b">position</link>,&#32;<link linkend="_namespacedistance">distance</link>));
+714 
+715 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;groundPoint;
+716 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+717 
+718 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">enum</emphasis>
+719 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+720 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class_global_1_1_math_1a2c027a21df9c9c3974a76e3f031e80dca91c385e6334073e4d58a44eeb4a4e7fa">NEGATIVE</link>&#32;=&#32;0,
+721 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class_global_1_1_math_1a2c027a21df9c9c3974a76e3f031e80dca33c058ad93df59d9cec6e18b86669c3e">POSITIVE</link>&#32;=&#32;1
+722 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}&#32;<link linkend="_class_global_1_1_math_1a2c027a21df9c9c3974a76e3f031e80dc">ValueFlags</link>;
+732 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">float</emphasis>&#32;<link linkend="_class_global_1_1_math_1a1c801c46b342d1bc52db72672edb869a">Mean</link>(<emphasis role="keyword">const</emphasis>&#32;std::vector&lt;float&gt;&#32;&amp;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a89ce72163394e6aef63b551a8806e93f">data</link>)
+733 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+734 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">float</emphasis>&#32;<link linkend="__classes_2lib_2glm_2test_2core_2core__func__integer_8cpp_1a937d4dd628a8858b443a399410d2600b">result</link>&#32;=&#32;0.0;
+735 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(<emphasis role="keywordtype">int</emphasis>&#32;i&#32;=&#32;1;&#32;i&#32;&lt;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a89ce72163394e6aef63b551a8806e93f">data</link>.size();&#32;i++)
+736 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+737 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2glm_2test_2core_2core__func__integer_8cpp_1a937d4dd628a8858b443a399410d2600b">result</link>&#32;+=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a89ce72163394e6aef63b551a8806e93f">data</link>[i&#32;-&#32;1]&#32;+&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a89ce72163394e6aef63b551a8806e93f">data</link>[i];
+738 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+739 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="__classes_2lib_2glm_2test_2core_2core__func__integer_8cpp_1a937d4dd628a8858b443a399410d2600b">result</link>&#32;/&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a89ce72163394e6aef63b551a8806e93f">data</link>.size();
+740 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+741 
+751 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">float</emphasis>&#32;<link linkend="_class_global_1_1_math_1a415063093a61930390d706db13efd417">Invert</link>(<emphasis role="keywordtype">float</emphasis>&#32;Value)
+752 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+753 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;-Value;
+754 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+755 
+756 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">static</emphasis>&#32;<link linkend="_struct_vector3">Vector3</link>&#32;<link linkend="_class_global_1_1_math_1ad7d9136265e3b6efd9cd180c8ba07ba3">Vector3Random</link>(<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="_toml_8hpp_1aef6fbc596e7e69a80f14c34a2b786a14">min</link>,&#32;<emphasis role="keywordtype">int</emphasis>&#32;max)
+757 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+758 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;(<link linkend="_struct_vector3">Vector3</link>){<emphasis role="keyword">static_cast&lt;</emphasis><emphasis role="keywordtype">float</emphasis><emphasis role="keyword">&gt;</emphasis>(<link linkend="__classes_2lib_2raylib_8h_1ad79a5d3dd9c701669515f5f3933b6bd4">GetRandomValue</link>(<link linkend="_toml_8hpp_1aef6fbc596e7e69a80f14c34a2b786a14">min</link>,&#32;max)),
+759 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">static_cast&lt;</emphasis><emphasis role="keywordtype">float</emphasis><emphasis role="keyword">&gt;</emphasis>(<link linkend="__classes_2lib_2raylib_8h_1ad79a5d3dd9c701669515f5f3933b6bd4">GetRandomValue</link>(<link linkend="_toml_8hpp_1aef6fbc596e7e69a80f14c34a2b786a14">min</link>,&#32;max)),
+760 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">static_cast&lt;</emphasis><emphasis role="keywordtype">float</emphasis><emphasis role="keyword">&gt;</emphasis>(<link linkend="__classes_2lib_2raylib_8h_1ad79a5d3dd9c701669515f5f3933b6bd4">GetRandomValue</link>(<link linkend="_toml_8hpp_1aef6fbc596e7e69a80f14c34a2b786a14">min</link>,&#32;max))};
+761 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+762 
+763 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;zeros&#32;cube&#32;verticies</emphasis>
+764 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;rounds&#32;vector3</emphasis>
+765 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">static</emphasis>&#32;<link linkend="_struct_vector3">Vector3</link>&#32;<link linkend="_class_global_1_1_math_1a3a6676b242d577bc6a5870d1691e7e38">RoundVec3</link>(<link linkend="_struct_vector3">Vector3</link>&#32;Target)
+766 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+767 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;(<link linkend="_struct_vector3">Vector3</link>){
+768 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;(float)<link linkend="__classes_2lib_2include_2tgmath_8h_1a6ea10f4260b54a61665ead26cb995ba3">round</link>(Target.<link linkend="_struct_vector3_1a7e2d3237b29a2f29d7b3d8b2934e35f2">x</link>),&#32;(float)<link linkend="__classes_2lib_2include_2tgmath_8h_1a6ea10f4260b54a61665ead26cb995ba3">round</link>(Target.<link linkend="_struct_vector3_1a86eb35a9fa2d5a49e7fad66a35fa9c13">y</link>),&#32;(float)<link linkend="__classes_2lib_2include_2tgmath_8h_1a6ea10f4260b54a61665ead26cb995ba3">round</link>(Target.<link linkend="_struct_vector3_1aa8c9461eb24bd2c364258078811a3e9d">z</link>)};
+769 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+770 
+771 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;checks&#32;if&#32;vector3&#32;is&#32;negative</emphasis>
+772 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;returns&#32;vector&#32;on&#32;for&#32;both&#32;positive&#32;and&#32;negative</emphasis>
+773 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">static</emphasis>&#32;<link linkend="_struct_vector3">Vector3</link>&#32;<link linkend="_class_global_1_1_math_1afff5d5a4c96aab078edaac5258eac72a">Vector3MaxPos</link>()
+774 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+775 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;(<link linkend="_struct_vector3">Vector3</link>){<link linkend="__monobehavior_8h_1ad09d43a79456fb527b624510744dae59">WORLD_SIZE</link>,&#32;<link linkend="__monobehavior_8h_1ad09d43a79456fb527b624510744dae59">WORLD_SIZE</link>,&#32;<link linkend="__monobehavior_8h_1ad09d43a79456fb527b624510744dae59">WORLD_SIZE</link>};
+776 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+777 
+778 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;return&#32;the&#32;average&#32;of&#32;a&#32;floating&#32;point&#32;data&#32;set</emphasis>
+779 
+780 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">static</emphasis>&#32;<link linkend="_struct_vector3">Vector3</link>&#32;<link linkend="_class_global_1_1_math_1a86da5b697465f2d6893d091b08e335ce">Vector3RandomControlled</link>(<link linkend="_struct_vector3">Vector3</link>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1ac55adc720a3098c1b454d2a4647f4361">start</link>,&#32;<emphasis role="keywordtype">int</emphasis>&#32;minDeviation,&#32;<emphasis role="keywordtype">int</emphasis>&#32;maxDeviation)
+781 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+782 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_struct_vector3">Vector3</link>&#32;<link linkend="__classes_2lib_2glm_2test_2core_2core__func__integer_8cpp_1a937d4dd628a8858b443a399410d2600b">result</link>&#32;=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1ac55adc720a3098c1b454d2a4647f4361">start</link>;
+783 
+784 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;roll&#32;=&#32;<link linkend="__classes_2lib_2raylib_8h_1ad79a5d3dd9c701669515f5f3933b6bd4">GetRandomValue</link>(1,&#32;3);
+785 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;deviationRoll&#32;=&#32;<link linkend="__classes_2lib_2raylib_8h_1ad79a5d3dd9c701669515f5f3933b6bd4">GetRandomValue</link>(0,&#32;1);
+786 
+787 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(roll&#32;==&#32;1)
+788 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+789 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2glm_2test_2core_2core__func__integer_8cpp_1a937d4dd628a8858b443a399410d2600b">result</link>.x&#32;+=&#32;(float)<link linkend="__classes_2lib_2raylib_8h_1ad79a5d3dd9c701669515f5f3933b6bd4">GetRandomValue</link>(minDeviation,&#32;maxDeviation)&#32;+&#32;minDeviation;
+790 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2glm_2test_2core_2core__func__integer_8cpp_1a937d4dd628a8858b443a399410d2600b">result</link>.y&#32;+=&#32;minDeviation;
+791 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2glm_2test_2core_2core__func__integer_8cpp_1a937d4dd628a8858b443a399410d2600b">result</link>.z&#32;+=&#32;minDeviation;
+792 
+793 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(deviationRoll&#32;==&#32;1)
+794 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+795 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2glm_2test_2core_2core__func__integer_8cpp_1a937d4dd628a8858b443a399410d2600b">result</link>.x&#32;+=&#32;minDeviation;
+796 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+797 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>
+798 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+799 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2glm_2test_2core_2core__func__integer_8cpp_1a937d4dd628a8858b443a399410d2600b">result</link>.x&#32;-=&#32;minDeviation;
+800 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+801 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+802 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>&#32;<emphasis role="keywordflow">if</emphasis>&#32;(roll&#32;==&#32;2)
+803 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+804 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2glm_2test_2core_2core__func__integer_8cpp_1a937d4dd628a8858b443a399410d2600b">result</link>.y&#32;+=&#32;(float)<link linkend="__classes_2lib_2raylib_8h_1ad79a5d3dd9c701669515f5f3933b6bd4">GetRandomValue</link>(minDeviation,&#32;maxDeviation);
+805 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2glm_2test_2core_2core__func__integer_8cpp_1a937d4dd628a8858b443a399410d2600b">result</link>.z&#32;+=&#32;minDeviation;
+806 
+807 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(deviationRoll&#32;==&#32;1)
+808 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+809 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2glm_2test_2core_2core__func__integer_8cpp_1a937d4dd628a8858b443a399410d2600b">result</link>.y&#32;+=&#32;minDeviation;
+810 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+811 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>
+812 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+813 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2glm_2test_2core_2core__func__integer_8cpp_1a937d4dd628a8858b443a399410d2600b">result</link>.y&#32;-=&#32;minDeviation;
+814 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+815 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+816 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>
+817 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+818 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2glm_2test_2core_2core__func__integer_8cpp_1a937d4dd628a8858b443a399410d2600b">result</link>.x&#32;+=&#32;minDeviation;
+819 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2glm_2test_2core_2core__func__integer_8cpp_1a937d4dd628a8858b443a399410d2600b">result</link>.y&#32;+=&#32;minDeviation;
+820 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2glm_2test_2core_2core__func__integer_8cpp_1a937d4dd628a8858b443a399410d2600b">result</link>.z&#32;+=&#32;minDeviation;
+821 
+822 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(deviationRoll&#32;==&#32;1)
+823 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+824 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2glm_2test_2core_2core__func__integer_8cpp_1a937d4dd628a8858b443a399410d2600b">result</link>.z&#32;+=&#32;(float)<link linkend="__classes_2lib_2raylib_8h_1ad79a5d3dd9c701669515f5f3933b6bd4">GetRandomValue</link>(minDeviation,&#32;maxDeviation);
+825 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+826 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>
+827 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+828 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2glm_2test_2core_2core__func__integer_8cpp_1a937d4dd628a8858b443a399410d2600b">result</link>.z&#32;-=&#32;(float)<link linkend="__classes_2lib_2raylib_8h_1ad79a5d3dd9c701669515f5f3933b6bd4">GetRandomValue</link>(minDeviation,&#32;maxDeviation);
+829 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+830 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+831 
+832 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="__classes_2lib_2glm_2test_2core_2core__func__integer_8cpp_1a937d4dd628a8858b443a399410d2600b">result</link>;
+833 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+834 
+835 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;same&#32;as&#32;DualVector3RandomEx()&#32;but&#32;only&#32;returns&#32;one&#32;value</emphasis>
+836 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">static</emphasis>&#32;<link linkend="_struct_vector3">Vector3</link>&#32;<link linkend="_class_global_1_1_math_1a5643e6f21e4df1fcd428ac849477ca13">Vector3RandomEx</link>(<link linkend="_struct_vector3">Vector3</link>&#32;<link linkend="_toml_8hpp_1aef6fbc596e7e69a80f14c34a2b786a14">min</link>,&#32;<link linkend="_struct_vector3">Vector3</link>&#32;max)
+837 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+838 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;(<link linkend="_struct_vector3">Vector3</link>){(float)<link linkend="__classes_2lib_2raylib_8h_1ad79a5d3dd9c701669515f5f3933b6bd4">GetRandomValue</link>(<link linkend="_toml_8hpp_1aef6fbc596e7e69a80f14c34a2b786a14">min</link>.x,&#32;max.x),&#32;(float)<link linkend="__classes_2lib_2raylib_8h_1ad79a5d3dd9c701669515f5f3933b6bd4">GetRandomValue</link>(<link linkend="_toml_8hpp_1aef6fbc596e7e69a80f14c34a2b786a14">min</link>.y,&#32;max.y),&#32;(float)<link linkend="__classes_2lib_2raylib_8h_1ad79a5d3dd9c701669515f5f3933b6bd4">GetRandomValue</link>(<link linkend="_toml_8hpp_1aef6fbc596e7e69a80f14c34a2b786a14">min</link>.z,&#32;max.z)};
+839 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+840 &#32;&#32;&#32;&#32;};
+841 
+842 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;the&#32;same&#32;as&#32;Vector2&#32;but&#32;with&#32;int</emphasis>
+843 &#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">struct</emphasis>
+844 &#32;&#32;&#32;&#32;{
+845 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="_struct_global_1_1int_vec2_1abea54232df77196a109b17ab6097546a">x</link>;
+846 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="_struct_global_1_1int_vec2_1aa796e360cb65a2a6e8ac2a031f16b1dd">y</link>;
+847 &#32;&#32;&#32;&#32;}&#32;<link linkend="_struct_global_1_1int_vec2">intVec2</link>;
+848 
+849 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;the&#32;same&#32;as&#32;Vector3&#32;but&#32;with&#32;ints</emphasis>
+850 &#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">struct</emphasis>
+851 &#32;&#32;&#32;&#32;{
+852 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="_struct_global_1_1int_vec3_1afd6e673d837c8cdcc216c7f1e42f681b">x</link>;
+853 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="_struct_global_1_1int_vec3_1a54fe1d833208b5116074a7cd45c1bf81">y</link>;
+854 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="_struct_global_1_1int_vec3_1af140dac5dccb380777cfa865bda43640">z</link>;
+855 &#32;&#32;&#32;&#32;}&#32;<link linkend="_struct_global_1_1int_vec3">intVec3</link>;
+856 
+857 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;for&#32;use&#32;where&#32;you&#32;need&#32;to&#32;have&#32;a&#32;equal&#32;reflection.&#32;So&#32;it&#32;will&#32;be&#32;both&#32;positive&#32;vector3&#32;and&#32;negative</emphasis>
+858 &#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">struct</emphasis>
+859 &#32;&#32;&#32;&#32;{
+860 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_struct_vector3">Vector3</link>&#32;<link linkend="_struct_global_1_1_dual_vec3_1a70e89a91a8173dfd70af30b836a81540">p</link>;
+861 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_struct_vector3">Vector3</link>&#32;<link linkend="_struct_global_1_1_dual_vec3_1a20aeb7f4c0548c79f5e0f08ad9f75f6c">n</link>;
+862 &#32;&#32;&#32;&#32;}&#32;<link linkend="_struct_global_1_1_dual_vec3">DualVec3</link>;
+863 
+864 &#32;&#32;&#32;&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keyword">const</emphasis>&#32;<link linkend="_struct_bounding_box">BoundingBox</link>&#32;BoxNull&#32;=&#32;{0,&#32;0,&#32;0,&#32;0,&#32;0,&#32;0};
+865 }
+</programlisting></section>

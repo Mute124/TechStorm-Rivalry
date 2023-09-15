@@ -1,0 +1,392 @@
+\chapter{m\+INI}
+\hypertarget{md__c_1_2_users_2_h_p_2_documents_2_git_hub_2_minero-_game_2lib_2m_i_n_i-master_2_r_e_a_d_m_e}{}\label{md__c_1_2_users_2_h_p_2_documents_2_git_hub_2_minero-_game_2lib_2m_i_n_i-master_2_r_e_a_d_m_e}\index{mINI@{mINI}}
+\label{md__c_1_2_users_2_h_p_2_documents_2_git_hub_2_minero-_game_2lib_2m_i_n_i-master_2_r_e_a_d_m_e_autotoc_md1244}%
+\Hypertarget{md__c_1_2_users_2_h_p_2_documents_2_git_hub_2_minero-_game_2lib_2m_i_n_i-master_2_r_e_a_d_m_e_autotoc_md1244}%
+ v0.\+9.\+14\hypertarget{md__c_1_2_users_2_h_p_2_documents_2_git_hub_2_minero-_game_2lib_2m_i_n_i-master_2_r_e_a_d_m_e_autotoc_md1245}{}\doxysection{\texorpdfstring{Info}{Info}}\label{md__c_1_2_users_2_h_p_2_documents_2_git_hub_2_minero-_game_2lib_2m_i_n_i-master_2_r_e_a_d_m_e_autotoc_md1245}
+This is a tiny, header only C++ library for manipulating INI files.
+
+It conforms to the following format\+:
+\begin{DoxyItemize}
+\item section and key names are case insensitive
+\item whitespace around sections, keys and values is ignored
+\item empty section and key names are allowed
+\item keys that do not belong to a section are ignored
+\item comments are lines where the first non-\/whitespace character is a semicolon ({\ttfamily ;})
+\item trailing comments are allowed on section lines, but not key/value lines
+\item every entry exists on a single line and multiline is not supported
+\end{DoxyItemize}
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{[section]}
+\DoxyCodeLine{key\ =\ value}
+
+\end{DoxyCode}
+
+
+Files are read on demand in one go, after which the data is kept in memory and is ready to be manipulated. Files are closed after read or write operations. This utility supports lazy writing, which only writes changes and updates and preserves custom formatting and comments. A lazy write invoked by a {\ttfamily write()} call will read the output file, find which changes have been made, and update the file accordingly. If you only need to generate files, use {\ttfamily generate()} instead.
+
+Section and key order is preserved on read and write operations. Iterating through data will take the same order as the original file or the order in which keys were added to the structure.
+
+This library operates with the {\ttfamily std\+::string} type to hold values and relies on your host environment for encoding. It should play nicely with UTF-\/8 but your mileage may vary.\hypertarget{md__c_1_2_users_2_h_p_2_documents_2_git_hub_2_minero-_game_2lib_2m_i_n_i-master_2_r_e_a_d_m_e_autotoc_md1246}{}\doxysection{\texorpdfstring{Installation}{Installation}}\label{md__c_1_2_users_2_h_p_2_documents_2_git_hub_2_minero-_game_2lib_2m_i_n_i-master_2_r_e_a_d_m_e_autotoc_md1246}
+This is a header-\/only library. To install it, just copy everything in {\ttfamily /src/} into your own project\textquotesingle{}s source code folder, or use a custom location and just make sure your compiler sees the additional include directory. Then include the file somewhere in your code\+:
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\ ++}
+\DoxyCodeLine{\textcolor{preprocessor}{\#include\ "{}mini/ini.h"{}}}
+
+\end{DoxyCode}
+
+
+You\textquotesingle{}re good to go!\hypertarget{md__c_1_2_users_2_h_p_2_documents_2_git_hub_2_minero-_game_2lib_2m_i_n_i-master_2_r_e_a_d_m_e_autotoc_md1247}{}\doxysection{\texorpdfstring{Basic examples}{Basic examples}}\label{md__c_1_2_users_2_h_p_2_documents_2_git_hub_2_minero-_game_2lib_2m_i_n_i-master_2_r_e_a_d_m_e_autotoc_md1247}
+\hypertarget{md__c_1_2_users_2_h_p_2_documents_2_git_hub_2_minero-_game_2lib_2m_i_n_i-master_2_r_e_a_d_m_e_autotoc_md1248}{}\doxysubsection{\texorpdfstring{Reading / writing}{Reading / writing}}\label{md__c_1_2_users_2_h_p_2_documents_2_git_hub_2_minero-_game_2lib_2m_i_n_i-master_2_r_e_a_d_m_e_autotoc_md1248}
+Start with an INI file named {\ttfamily myfile.\+ini}\+: 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{;\ amounts\ of\ fruits}
+\DoxyCodeLine{[fruits]}
+\DoxyCodeLine{apples=20}
+\DoxyCodeLine{oranges=30}
+
+\end{DoxyCode}
+
+
+Our code\+: 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\ ++}
+\DoxyCodeLine{\textcolor{comment}{//\ first,\ create\ a\ file\ instance}}
+\DoxyCodeLine{\mbox{\hyperlink{classm_i_n_i_1_1_i_n_i_file}{mINI::INIFile}}\ \mbox{\hyperlink{namespaceversion_aee8dac8d4699e20bfc999959504928c0}{file}}(\textcolor{stringliteral}{"{}myfile.ini"{}});}
+\DoxyCodeLine{}
+\DoxyCodeLine{\textcolor{comment}{//\ next,\ create\ a\ structure\ that\ will\ hold\ data}}
+\DoxyCodeLine{\mbox{\hyperlink{classm_i_n_i_1_1_i_n_i_map}{mINI::INIStructure}}\ ini;}
+\DoxyCodeLine{}
+\DoxyCodeLine{\textcolor{comment}{//\ now\ we\ can\ read\ the\ file}}
+\DoxyCodeLine{\mbox{\hyperlink{namespaceversion_aee8dac8d4699e20bfc999959504928c0}{file}}.read(ini);}
+\DoxyCodeLine{}
+\DoxyCodeLine{\textcolor{comment}{//\ read\ a\ value}}
+\DoxyCodeLine{std::string\&\ amountOfApples\ =\ ini[\textcolor{stringliteral}{"{}fruits"{}}][\textcolor{stringliteral}{"{}apples"{}}];}
+\DoxyCodeLine{}
+\DoxyCodeLine{\textcolor{comment}{//\ update\ a\ value}}
+\DoxyCodeLine{ini[\textcolor{stringliteral}{"{}fruits"{}}][\textcolor{stringliteral}{"{}oranges"{}}]\ =\ \textcolor{stringliteral}{"{}50"{}};}
+\DoxyCodeLine{}
+\DoxyCodeLine{\textcolor{comment}{//\ add\ a\ new\ entry}}
+\DoxyCodeLine{ini[\textcolor{stringliteral}{"{}fruits"{}}][\textcolor{stringliteral}{"{}bananas"{}}]\ =\ \textcolor{stringliteral}{"{}100"{}};}
+\DoxyCodeLine{}
+\DoxyCodeLine{\textcolor{comment}{//\ write\ updates\ to\ file}}
+\DoxyCodeLine{\mbox{\hyperlink{namespaceversion_aee8dac8d4699e20bfc999959504928c0}{file}}.write(ini);}
+
+\end{DoxyCode}
+
+
+After running the code, our INI file now looks like this\+: 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{;\ amounts\ of\ fruits}
+\DoxyCodeLine{[fruits]}
+\DoxyCodeLine{apples=20}
+\DoxyCodeLine{oranges=50}
+\DoxyCodeLine{bananas=100}
+
+\end{DoxyCode}
+\hypertarget{md__c_1_2_users_2_h_p_2_documents_2_git_hub_2_minero-_game_2lib_2m_i_n_i-master_2_r_e_a_d_m_e_autotoc_md1249}{}\doxysubsection{\texorpdfstring{Generating a file}{Generating a file}}\label{md__c_1_2_users_2_h_p_2_documents_2_git_hub_2_minero-_game_2lib_2m_i_n_i-master_2_r_e_a_d_m_e_autotoc_md1249}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\ ++}
+\DoxyCodeLine{\textcolor{comment}{//\ create\ a\ file\ instance}}
+\DoxyCodeLine{\mbox{\hyperlink{classm_i_n_i_1_1_i_n_i_file}{mINI::INIFile}}\ \mbox{\hyperlink{namespaceversion_aee8dac8d4699e20bfc999959504928c0}{file}}(\textcolor{stringliteral}{"{}myfile.ini"{}});}
+\DoxyCodeLine{}
+\DoxyCodeLine{\textcolor{comment}{//\ create\ a\ data\ structure}}
+\DoxyCodeLine{\mbox{\hyperlink{classm_i_n_i_1_1_i_n_i_map}{mINI::INIStructure}}\ ini;}
+\DoxyCodeLine{}
+\DoxyCodeLine{\textcolor{comment}{//\ populate\ the\ structure}}
+\DoxyCodeLine{ini[\textcolor{stringliteral}{"{}things"{}}][\textcolor{stringliteral}{"{}chairs"{}}]\ =\ \textcolor{stringliteral}{"{}20"{}};}
+\DoxyCodeLine{ini[\textcolor{stringliteral}{"{}things"{}}][\textcolor{stringliteral}{"{}balloons"{}}]\ =\ \textcolor{stringliteral}{"{}100"{}};}
+\DoxyCodeLine{}
+\DoxyCodeLine{\textcolor{comment}{//\ generate\ an\ INI\ file\ (overwrites\ any\ previous\ file)}}
+\DoxyCodeLine{\mbox{\hyperlink{namespaceversion_aee8dac8d4699e20bfc999959504928c0}{file}}.generate(ini);}
+
+\end{DoxyCode}
+\hypertarget{md__c_1_2_users_2_h_p_2_documents_2_git_hub_2_minero-_game_2lib_2m_i_n_i-master_2_r_e_a_d_m_e_autotoc_md1250}{}\doxysection{\texorpdfstring{Manipulating files}{Manipulating files}}\label{md__c_1_2_users_2_h_p_2_documents_2_git_hub_2_minero-_game_2lib_2m_i_n_i-master_2_r_e_a_d_m_e_autotoc_md1250}
+The {\ttfamily INIFile} class holds the filename and exposes functions for reading, writing and generating INI files. It does not keep the file open but merely provides an abstraction you can use to access physical files.
+
+To create a file instance\+: 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\ ++}
+\DoxyCodeLine{\mbox{\hyperlink{classm_i_n_i_1_1_i_n_i_file}{mINI::INIFile}}\ \mbox{\hyperlink{namespaceversion_aee8dac8d4699e20bfc999959504928c0}{file}}(\textcolor{stringliteral}{"{}myfile.ini"{}});}
+
+\end{DoxyCode}
+
+
+You will also need a structure you can operate on\+: 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\ ++}
+\DoxyCodeLine{\mbox{\hyperlink{classm_i_n_i_1_1_i_n_i_map}{mINI::INIStructure}}\ ini;}
+
+\end{DoxyCode}
+
+
+To read from a file\+: 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\ ++}
+\DoxyCodeLine{\textcolor{keywordtype}{bool}\ readSuccess\ =\ \mbox{\hyperlink{namespaceversion_aee8dac8d4699e20bfc999959504928c0}{file}}.read(ini);}
+
+\end{DoxyCode}
+
+
+To write back to a file while preserving comments and custom formatting\+: 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\ ++}
+\DoxyCodeLine{\textcolor{keywordtype}{bool}\ writeSuccess\ =\ \mbox{\hyperlink{namespaceversion_aee8dac8d4699e20bfc999959504928c0}{file}}.write(ini);}
+
+\end{DoxyCode}
+
+
+You can set the second parameter to {\ttfamily write()} to {\ttfamily true} if you want the file to be written with pretty-\/print. Pretty-\/print adds spaces between key-\/value pairs and blank lines between sections in the output file\+: 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\ ++}
+\DoxyCodeLine{\textcolor{keywordtype}{bool}\ writeSuccess\ =\ \mbox{\hyperlink{namespaceversion_aee8dac8d4699e20bfc999959504928c0}{file}}.write(ini,\ \textcolor{keyword}{true});}
+
+\end{DoxyCode}
+
+
+A {\ttfamily write()} call will attempt to preserve any custom formatting the original INI file uses and will only use pretty-\/print for creation of new keys and sections.
+
+To generate a file\+: 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\ ++}
+\DoxyCodeLine{\mbox{\hyperlink{namespaceversion_aee8dac8d4699e20bfc999959504928c0}{file}}.generate(ini);}
+
+\end{DoxyCode}
+
+
+Note that {\ttfamily generate()} will overwrite any custom formatting and comments from the original file!
+
+You can use pretty-\/print with {\ttfamily generate()} as well\+: 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\ ++}
+\DoxyCodeLine{\mbox{\hyperlink{namespaceversion_aee8dac8d4699e20bfc999959504928c0}{file}}.generate(ini,\ \textcolor{keyword}{true});}
+
+\end{DoxyCode}
+
+
+Example output for a generated INI file {\itshape without} pretty-\/print\+: 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{[section1]}
+\DoxyCodeLine{key1=value1}
+\DoxyCodeLine{key2=value2}
+\DoxyCodeLine{[section2]}
+\DoxyCodeLine{key1=value1}
+
+\end{DoxyCode}
+
+
+Example output for a generated INI file {\itshape with} pretty-\/print\+: 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{[section1]}
+\DoxyCodeLine{key1\ =\ value1}
+\DoxyCodeLine{key2\ =\ value2}
+\DoxyCodeLine{}
+\DoxyCodeLine{[section2]}
+\DoxyCodeLine{key1\ =\ value1}
+
+\end{DoxyCode}
+\hypertarget{md__c_1_2_users_2_h_p_2_documents_2_git_hub_2_minero-_game_2lib_2m_i_n_i-master_2_r_e_a_d_m_e_autotoc_md1251}{}\doxysection{\texorpdfstring{Manipulating data}{Manipulating data}}\label{md__c_1_2_users_2_h_p_2_documents_2_git_hub_2_minero-_game_2lib_2m_i_n_i-master_2_r_e_a_d_m_e_autotoc_md1251}
+\hypertarget{md__c_1_2_users_2_h_p_2_documents_2_git_hub_2_minero-_game_2lib_2m_i_n_i-master_2_r_e_a_d_m_e_autotoc_md1252}{}\doxysubsection{\texorpdfstring{Reading data}{Reading data}}\label{md__c_1_2_users_2_h_p_2_documents_2_git_hub_2_minero-_game_2lib_2m_i_n_i-master_2_r_e_a_d_m_e_autotoc_md1252}
+There are two ways to read data from the INI structure. You can either use the {\ttfamily \mbox{[}\mbox{]}} operator or the {\ttfamily \doxylink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_afc5e04fa58feb228bb06199ff10caa22}{get()}} function\+:
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\ ++}
+\DoxyCodeLine{\textcolor{comment}{//\ read\ value\ -\/\ if\ key\ or\ section\ don't\ exist,\ they\ will\ be\ created}}
+\DoxyCodeLine{\textcolor{comment}{//\ returns\ reference\ to\ real\ value}}
+\DoxyCodeLine{std::string\&\ \mbox{\hyperlink{classvalue}{value}}\ =\ ini[\textcolor{stringliteral}{"{}section"{}}][\textcolor{stringliteral}{"{}key"{}}];}
+\DoxyCodeLine{}
+\DoxyCodeLine{\textcolor{comment}{//\ read\ value\ safely\ -\/\ if\ key\ or\ section\ don't\ exist\ they\ will\ NOT\ be\ created}}
+\DoxyCodeLine{\textcolor{comment}{//\ returns\ a\ copy}}
+\DoxyCodeLine{std::string\ \mbox{\hyperlink{classvalue}{value}}\ =\ ini.\mbox{\hyperlink{classm_i_n_i_1_1_i_n_i_map_a03713f77edbfee3e32fc2da9d57c7911}{get}}(\textcolor{stringliteral}{"{}section"{}}).get(\textcolor{stringliteral}{"{}key"{}});}
+
+\end{DoxyCode}
+
+
+The difference between {\ttfamily \mbox{[}\mbox{]}} and {\ttfamily \doxylink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_afc5e04fa58feb228bb06199ff10caa22}{get()}} operations is that {\ttfamily \mbox{[}\mbox{]}} returns a reference to {\bfseries{real}} data (that you may modify) and creates a new item automatically if it does not yet exist, whereas {\ttfamily \doxylink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_afc5e04fa58feb228bb06199ff10caa22}{get()}} returns a {\bfseries{copy}} of the data and does not create new items in the structure. Use {\ttfamily has()} before doing any operations with {\ttfamily \mbox{[}\mbox{]}} if you wish to avoid altering the structure.
+
+You may combine usage of {\ttfamily \mbox{[}\mbox{]}} and {\ttfamily \doxylink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_afc5e04fa58feb228bb06199ff10caa22}{get()}}.
+
+Section and key names are case insensitive and are stripped of leading and trailing whitespace. {\ttfamily ini\mbox{[}"{}section"{}\mbox{]}} is the same as {\ttfamily ini\mbox{[}"{}\+SECTION"{}\mbox{]}} is the same as {\ttfamily ini\mbox{[}"{}   s\+Ec\+Ti\+On   "{}\mbox{]}} and so on, and same for keys. Generated files always use lower case for section and key names. Writing to an existing file will preserve letter cases of the original file whenever those keys or sections already exists.\hypertarget{md__c_1_2_users_2_h_p_2_documents_2_git_hub_2_minero-_game_2lib_2m_i_n_i-master_2_r_e_a_d_m_e_autotoc_md1253}{}\doxysubsection{\texorpdfstring{Updating data}{Updating data}}\label{md__c_1_2_users_2_h_p_2_documents_2_git_hub_2_minero-_game_2lib_2m_i_n_i-master_2_r_e_a_d_m_e_autotoc_md1253}
+To set or update a value\+: 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\ ++}
+\DoxyCodeLine{ini[\textcolor{stringliteral}{"{}section"{}}][\textcolor{stringliteral}{"{}key"{}}]\ =\ \textcolor{stringliteral}{"{}value"{}};}
+
+\end{DoxyCode}
+
+
+Note that when writing to a file, values will be stripped of leading and trailing whitespace . For example, the following value will be converted to just {\ttfamily "{}c"{}} when reading back from a file\+: {\ttfamily ini\mbox{[}"{}a"{}\mbox{]}\mbox{[}"{}b"{}\mbox{]} = "{}   c   "{};}
+
+You can set multiple values at once by using {\ttfamily \doxylink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_aeff0e04220766bdd67e3a38ffa302e1c}{set()}}\+: 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\ ++}
+\DoxyCodeLine{ini[\textcolor{stringliteral}{"{}section"{}}].\mbox{\hyperlink{classm_i_n_i_1_1_i_n_i_map_ac6a42d8dc2610b55b7e7849d2008954f}{set}}(\{}
+\DoxyCodeLine{\ \ \ \ \{\textcolor{stringliteral}{"{}key1"{}},\ \textcolor{stringliteral}{"{}value1"{}}\},}
+\DoxyCodeLine{\ \ \ \ \{\textcolor{stringliteral}{"{}key2"{}},\ \textcolor{stringliteral}{"{}value2"{}}\}}
+\DoxyCodeLine{\});}
+
+\end{DoxyCode}
+
+
+To create an empty section, simply do\+: 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\ ++}
+\DoxyCodeLine{ini[\textcolor{stringliteral}{"{}section"{}}];}
+
+\end{DoxyCode}
+
+
+Similarly, to create an empty key\+: 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\ ++}
+\DoxyCodeLine{ini[\textcolor{stringliteral}{"{}section"{}}][\textcolor{stringliteral}{"{}key"{}}];}
+
+\end{DoxyCode}
+
+
+To remove a single key from a section\+: 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\ ++}
+\DoxyCodeLine{\textcolor{keywordtype}{bool}\ removeSuccess\ =\ ini[\textcolor{stringliteral}{"{}section"{}}].\mbox{\hyperlink{classm_i_n_i_1_1_i_n_i_map_ab71316b8d144eaa86bf263e7bcae201f}{remove}}(\textcolor{stringliteral}{"{}key"{}});}
+
+\end{DoxyCode}
+
+
+To remove a section\+: 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\ ++}
+\DoxyCodeLine{\textcolor{keywordtype}{bool}\ removeSuccess\ =\ ini.\mbox{\hyperlink{classm_i_n_i_1_1_i_n_i_map_ab71316b8d144eaa86bf263e7bcae201f}{remove}}(\textcolor{stringliteral}{"{}section"{}});}
+
+\end{DoxyCode}
+
+
+To remove all keys from a section\+: 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\ ++}
+\DoxyCodeLine{ini[\textcolor{stringliteral}{"{}section"{}}].\mbox{\hyperlink{classm_i_n_i_1_1_i_n_i_map_af0b1251e710882fbdb5bced08a4fe341}{clear}}();}
+
+\end{DoxyCode}
+
+
+To remove all data in structure\+: 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\ ++}
+\DoxyCodeLine{ini.\mbox{\hyperlink{classm_i_n_i_1_1_i_n_i_map_af0b1251e710882fbdb5bced08a4fe341}{clear}}();}
+
+\end{DoxyCode}
+\hypertarget{md__c_1_2_users_2_h_p_2_documents_2_git_hub_2_minero-_game_2lib_2m_i_n_i-master_2_r_e_a_d_m_e_autotoc_md1254}{}\doxysubsection{\texorpdfstring{Other functions}{Other functions}}\label{md__c_1_2_users_2_h_p_2_documents_2_git_hub_2_minero-_game_2lib_2m_i_n_i-master_2_r_e_a_d_m_e_autotoc_md1254}
+To check if a section is present\+: 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\ ++}
+\DoxyCodeLine{\textcolor{keywordtype}{bool}\ hasSection\ =\ ini.\mbox{\hyperlink{classm_i_n_i_1_1_i_n_i_map_a9403e3ff093497a548eee31d16136c4a}{has}}(\textcolor{stringliteral}{"{}section"{}});}
+
+\end{DoxyCode}
+
+
+To check if a key within a section is present\+: 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\ ++}
+\DoxyCodeLine{\textcolor{keywordtype}{bool}\ hasKey\ =\ ini[\textcolor{stringliteral}{"{}section"{}}].\mbox{\hyperlink{classm_i_n_i_1_1_i_n_i_map_a9403e3ff093497a548eee31d16136c4a}{has}}(\textcolor{stringliteral}{"{}key"{}});}
+
+\end{DoxyCode}
+
+
+To get the number of keys in a section\+: 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\ ++}
+\DoxyCodeLine{\textcolor{keywordtype}{size\_t}\ n\_keys\ =\ ini[\textcolor{stringliteral}{"{}section"{}}].\mbox{\hyperlink{classm_i_n_i_1_1_i_n_i_map_afbfa4c9a30218b05aff20032f74fefca}{size}}();}
+
+\end{DoxyCode}
+
+
+To get the number of sections in the structure\+: 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\ ++}
+\DoxyCodeLine{\textcolor{keywordtype}{size\_t}\ n\_sections\ =\ ini.\mbox{\hyperlink{classm_i_n_i_1_1_i_n_i_map_afbfa4c9a30218b05aff20032f74fefca}{size}}();}
+
+\end{DoxyCode}
+\hypertarget{md__c_1_2_users_2_h_p_2_documents_2_git_hub_2_minero-_game_2lib_2m_i_n_i-master_2_r_e_a_d_m_e_autotoc_md1255}{}\doxysubsection{\texorpdfstring{Nitty-\/gritty}{Nitty-gritty}}\label{md__c_1_2_users_2_h_p_2_documents_2_git_hub_2_minero-_game_2lib_2m_i_n_i-master_2_r_e_a_d_m_e_autotoc_md1255}
+Keep in mind that {\ttfamily \mbox{[}\mbox{]}} will always create a new item if the item does not already exist! You can use {\ttfamily has()} to check if an item exists before performing further operations. Remember that {\ttfamily \doxylink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_afc5e04fa58feb228bb06199ff10caa22}{get()}} will return a copy of data, so you should {\bfseries{not}} be doing removes or updates to data with it!
+
+Usage of the {\ttfamily \mbox{[}\mbox{]}} operator shouldn\textquotesingle{}t be a problem in most real-\/world cases where you\textquotesingle{}re doing lookups on known keys and you may not care if empty keys or sections get created. However -\/ if you have a situation where you do not want new items to be added to the structure, either use {\ttfamily \doxylink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_afc5e04fa58feb228bb06199ff10caa22}{get()}} to retreive items, or if you don\textquotesingle{}t want to be working with copies of data, use {\ttfamily has()} before using the {\ttfamily \mbox{[}\mbox{]}} operator if you want to be on the safe side.
+
+Short example that demonstrates safe manipulation of data\+: 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\ ++}
+\DoxyCodeLine{\textcolor{keywordflow}{if}\ (ini.\mbox{\hyperlink{classm_i_n_i_1_1_i_n_i_map_a9403e3ff093497a548eee31d16136c4a}{has}}(\textcolor{stringliteral}{"{}section"{}}))}
+\DoxyCodeLine{\{}
+\DoxyCodeLine{\ \ \ \ \textcolor{comment}{//\ we\ have\ section,\ we\ can\ access\ it\ safely\ without\ creating\ a\ new\ one}}
+\DoxyCodeLine{\ \ \ \ \textcolor{keyword}{auto}\&\ collection\ =\ ini[\textcolor{stringliteral}{"{}section"{}}];}
+\DoxyCodeLine{\ \ \ \ \textcolor{keywordflow}{if}\ (collection.has(\textcolor{stringliteral}{"{}key"{}}))}
+\DoxyCodeLine{\ \ \ \ \{}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ \textcolor{comment}{//\ we\ have\ key,\ we\ can\ access\ it\ safely\ without\ creating\ a\ new\ one}}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ \textcolor{keyword}{auto}\&\ \mbox{\hyperlink{classvalue}{value}}\ =\ collection[\textcolor{stringliteral}{"{}key"{}}];}
+\DoxyCodeLine{\ \ \ \ \}}
+\DoxyCodeLine{\}}
+
+\end{DoxyCode}
+\hypertarget{md__c_1_2_users_2_h_p_2_documents_2_git_hub_2_minero-_game_2lib_2m_i_n_i-master_2_r_e_a_d_m_e_autotoc_md1256}{}\doxysection{\texorpdfstring{Iteration}{Iteration}}\label{md__c_1_2_users_2_h_p_2_documents_2_git_hub_2_minero-_game_2lib_2m_i_n_i-master_2_r_e_a_d_m_e_autotoc_md1256}
+You can traverse the structure in order of insertion. The following example loops through the structure and displays results in a familiar format\+: 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\ ++}
+\DoxyCodeLine{\textcolor{keywordflow}{for}\ (\textcolor{keyword}{auto}\ \textcolor{keyword}{const}\&\ it\ :\ ini)}
+\DoxyCodeLine{\{}
+\DoxyCodeLine{\ \ \ \ \textcolor{keyword}{auto}\ \textcolor{keyword}{const}\&\ section\ =\ it.first;}
+\DoxyCodeLine{\ \ \ \ \textcolor{keyword}{auto}\ \textcolor{keyword}{const}\&\ collection\ =\ it.second;}
+\DoxyCodeLine{\ \ \ \ std::cout\ <<\ \textcolor{stringliteral}{"{}["{}}\ <<\ section\ <<\ \textcolor{stringliteral}{"{}]"{}}\ <<\ std::endl;}
+\DoxyCodeLine{\ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keyword}{auto}\ \textcolor{keyword}{const}\&\ it2\ :\ collection)}
+\DoxyCodeLine{\ \ \ \ \{}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ \textcolor{keyword}{auto}\ \textcolor{keyword}{const}\&\ key\ =\ it2.first;}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ \textcolor{keyword}{auto}\ \textcolor{keyword}{const}\&\ \mbox{\hyperlink{classvalue}{value}}\ =\ it2.second;}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ std::cout\ <<\ key\ <<\ \textcolor{stringliteral}{"{}="{}}\ <<\ \mbox{\hyperlink{classvalue}{value}}\ <<\ std::endl;}
+\DoxyCodeLine{\ \ \ \ \}}
+\DoxyCodeLine{\}}
+
+\end{DoxyCode}
+
+
+{\ttfamily it.\+first} is always {\ttfamily std\+::string} type.
+
+{\ttfamily it.\+second} is an object which is either a {\ttfamily \doxylink{classm_i_n_i_1_1_i_n_i_map}{m\+INI\+::\+INIMap}} type on the first level or {\ttfamily std\+::string} type on the second level.
+
+The API only exposes a {\ttfamily const\+\_\+iterator}, so you can\textquotesingle{}t use iterators to manipulate data directly. You can however access the structure as normal while iterating\+:
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\ ++}
+\DoxyCodeLine{\textcolor{comment}{//\ change\ all\ values\ in\ the\ structure\ to\ "{}banana"{}}}
+\DoxyCodeLine{\textcolor{keywordflow}{for}\ (\textcolor{keyword}{auto}\ \textcolor{keyword}{const}\&\ it\ :\ ini)}
+\DoxyCodeLine{\{}
+\DoxyCodeLine{\ \ \ \ \textcolor{keyword}{auto}\ \textcolor{keyword}{const}\&\ section\ =\ it.first;}
+\DoxyCodeLine{\ \ \ \ \textcolor{keyword}{auto}\ \textcolor{keyword}{const}\&\ collection\ =\ it.second;}
+\DoxyCodeLine{\ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keyword}{auto}\ \textcolor{keyword}{const}\&\ it2\ :\ collection)}
+\DoxyCodeLine{\ \ \ \ \{}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ \textcolor{keyword}{auto}\ \textcolor{keyword}{const}\&\ key\ =\ it2.first;}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ ini[section][key]\ =\ \textcolor{stringliteral}{"{}banana"{}};}
+\DoxyCodeLine{\ \ \ \ \}}
+\DoxyCodeLine{\}}
+
+\end{DoxyCode}
+\hypertarget{md__c_1_2_users_2_h_p_2_documents_2_git_hub_2_minero-_game_2lib_2m_i_n_i-master_2_r_e_a_d_m_e_autotoc_md1257}{}\doxysection{\texorpdfstring{Case sensitivity}{Case sensitivity}}\label{md__c_1_2_users_2_h_p_2_documents_2_git_hub_2_minero-_game_2lib_2m_i_n_i-master_2_r_e_a_d_m_e_autotoc_md1257}
+If you wish to make the library not ignore letter case, add the directive {\ttfamily \#define MINI\+\_\+\+CASE\+\_\+\+SENSITIVE} {\bfseries{before}} including the library\+: 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\ ++}
+\DoxyCodeLine{\textcolor{preprocessor}{\#define\ MINI\_CASE\_SENSITIVE}}
+\DoxyCodeLine{\textcolor{preprocessor}{\#include\ "{}mini/ini.h"{}}}
+
+\end{DoxyCode}
+
+
+This will affect reading and writing from files and access to the structure.\hypertarget{md__c_1_2_users_2_h_p_2_documents_2_git_hub_2_minero-_game_2lib_2m_i_n_i-master_2_r_e_a_d_m_e_autotoc_md1258}{}\doxysection{\texorpdfstring{Thanks}{Thanks}}\label{md__c_1_2_users_2_h_p_2_documents_2_git_hub_2_minero-_game_2lib_2m_i_n_i-master_2_r_e_a_d_m_e_autotoc_md1258}
+
+\begin{DoxyItemize}
+\item \href{https://github.com/martinmoene/lest}{\texttt{ lest}} -\/ testing framework
+\end{DoxyItemize}\hypertarget{md__c_1_2_users_2_h_p_2_documents_2_git_hub_2_minero-_game_2lib_2m_i_n_i-master_2_r_e_a_d_m_e_autotoc_md1259}{}\doxysection{\texorpdfstring{License}{License}}\label{md__c_1_2_users_2_h_p_2_documents_2_git_hub_2_minero-_game_2lib_2m_i_n_i-master_2_r_e_a_d_m_e_autotoc_md1259}
+Copyright (c) 2018 Danijel Durakovic
+
+MIT License 

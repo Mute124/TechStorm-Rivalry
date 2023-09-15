@@ -1,0 +1,1876 @@
+\doxysection{hashtable\+\_\+policy.\+h}
+\hypertarget{_old_2_classes_2lib_2include_2c_09_09_2bits_2hashtable__policy_8h_source}{}\label{_old_2_classes_2lib_2include_2c_09_09_2bits_2hashtable__policy_8h_source}\index{C:/Users/HP/Documents/GitHub/Minero-\/Game/Old/Classes/lib/include/c++/bits/hashtable\_policy.h@{C:/Users/HP/Documents/GitHub/Minero-\/Game/Old/Classes/lib/include/c++/bits/hashtable\_policy.h}}
+\mbox{\hyperlink{_old_2_classes_2lib_2include_2c_09_09_2bits_2hashtable__policy_8h}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{comment}{//\ Internal\ policy\ header\ for\ unordered\_set\ and\ unordered\_map\ -\/*-\/\ C++\ -\/*-\/}}
+\DoxyCodeLine{00002\ }
+\DoxyCodeLine{00003\ \textcolor{comment}{//\ Copyright\ (C)\ 2010-\/2022\ Free\ Software\ Foundation,\ Inc.}}
+\DoxyCodeLine{00004\ \textcolor{comment}{//}}
+\DoxyCodeLine{00005\ \textcolor{comment}{//\ This\ file\ is\ part\ of\ the\ GNU\ ISO\ C++\ Library.\ \ This\ library\ is\ free}}
+\DoxyCodeLine{00006\ \textcolor{comment}{//\ software;\ you\ can\ redistribute\ it\ and/or\ modify\ it\ under\ the}}
+\DoxyCodeLine{00007\ \textcolor{comment}{//\ terms\ of\ the\ GNU\ General\ Public\ License\ as\ published\ by\ the}}
+\DoxyCodeLine{00008\ \textcolor{comment}{//\ Free\ Software\ Foundation;\ either\ version\ 3,\ or\ (at\ your\ option)}}
+\DoxyCodeLine{00009\ \textcolor{comment}{//\ any\ later\ version.}}
+\DoxyCodeLine{00010\ }
+\DoxyCodeLine{00011\ \textcolor{comment}{//\ This\ library\ is\ distributed\ in\ the\ hope\ that\ it\ will\ be\ useful,}}
+\DoxyCodeLine{00012\ \textcolor{comment}{//\ but\ WITHOUT\ ANY\ WARRANTY;\ without\ even\ the\ implied\ warranty\ of}}
+\DoxyCodeLine{00013\ \textcolor{comment}{//\ MERCHANTABILITY\ or\ FITNESS\ FOR\ A\ PARTICULAR\ PURPOSE.\ \ See\ the}}
+\DoxyCodeLine{00014\ \textcolor{comment}{//\ GNU\ General\ Public\ License\ for\ more\ details.}}
+\DoxyCodeLine{00015\ }
+\DoxyCodeLine{00016\ \textcolor{comment}{//\ Under\ Section\ 7\ of\ GPL\ version\ 3,\ you\ are\ granted\ additional}}
+\DoxyCodeLine{00017\ \textcolor{comment}{//\ permissions\ described\ in\ the\ GCC\ Runtime\ Library\ Exception,\ version}}
+\DoxyCodeLine{00018\ \textcolor{comment}{//\ 3.1,\ as\ published\ by\ the\ Free\ Software\ Foundation.}}
+\DoxyCodeLine{00019\ }
+\DoxyCodeLine{00020\ \textcolor{comment}{//\ You\ should\ have\ received\ a\ copy\ of\ the\ GNU\ General\ Public\ License\ and}}
+\DoxyCodeLine{00021\ \textcolor{comment}{//\ a\ copy\ of\ the\ GCC\ Runtime\ Library\ Exception\ along\ with\ this\ program;}}
+\DoxyCodeLine{00022\ \textcolor{comment}{//\ see\ the\ files\ COPYING3\ and\ COPYING.RUNTIME\ respectively.\ \ If\ not,\ see}}
+\DoxyCodeLine{00023\ \textcolor{comment}{//\ <http://www.gnu.org/licenses/>.}}
+\DoxyCodeLine{00024\ }
+\DoxyCodeLine{00031\ \textcolor{preprocessor}{\#ifndef\ \_HASHTABLE\_POLICY\_H}}
+\DoxyCodeLine{00032\ \textcolor{preprocessor}{\#define\ \_HASHTABLE\_POLICY\_H\ 1}}
+\DoxyCodeLine{00033\ }
+\DoxyCodeLine{00034\ \textcolor{preprocessor}{\#include\ <tuple>}\ \ \ \ \ \ \ \ \textcolor{comment}{//\ for\ std::tuple,\ std::forward\_as\_tuple}}
+\DoxyCodeLine{00035\ \textcolor{preprocessor}{\#include\ <bits/stl\_algobase.h>}\ \ \textcolor{comment}{//\ for\ std::min,\ std::is\_permutation.}}
+\DoxyCodeLine{00036\ \textcolor{preprocessor}{\#include\ <ext/aligned\_buffer.h>}\ \textcolor{comment}{//\ for\ \_\_gnu\_cxx::\_\_aligned\_buffer}}
+\DoxyCodeLine{00037\ \textcolor{preprocessor}{\#include\ <ext/alloc\_traits.h>}\ \ \ \textcolor{comment}{//\ for\ std::\_\_alloc\_rebind}}
+\DoxyCodeLine{00038\ \textcolor{preprocessor}{\#include\ <ext/numeric\_traits.h>}\ \textcolor{comment}{//\ for\ \_\_gnu\_cxx::\_\_int\_traits}}
+\DoxyCodeLine{00039\ }
+\DoxyCodeLine{00040\ \textcolor{keyword}{namespace\ }\mbox{\hyperlink{namespacestd}{std}}\ \mbox{\hyperlink{_classes_2lib_2include_2c_09_09_2x86__64-w64-mingw32_2bits_2c_09_09config_8h_a44377df0d3503f0b3d9ab316dd8ddf8b}{\_GLIBCXX\_VISIBILITY}}(default)}
+\DoxyCodeLine{00041\ \{}
+\DoxyCodeLine{00042\ \_GLIBCXX\_BEGIN\_NAMESPACE\_VERSION}
+\DoxyCodeLine{00044\ }
+\DoxyCodeLine{00045\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Key,\ \textcolor{keyword}{typename}\ \_Value,\ \textcolor{keyword}{typename}\ \_Alloc,}
+\DoxyCodeLine{00046\ \ \ \ \ \ \ \ \textcolor{keyword}{typename}\ \_ExtractKey,\ \textcolor{keyword}{typename}\ \_Equal,}
+\DoxyCodeLine{00047\ \ \ \ \ \ \ \ \textcolor{keyword}{typename}\ \_Hash,\ \textcolor{keyword}{typename}\ \_RangeHash,\ \textcolor{keyword}{typename}\ \_Unused,}
+\DoxyCodeLine{00048\ \ \ \ \ \ \ \ \textcolor{keyword}{typename}\ \_RehashPolicy,\ \textcolor{keyword}{typename}\ \_Traits>}
+\DoxyCodeLine{00049\ \ \ \ \ \textcolor{keyword}{class\ }\_Hashtable;}
+\DoxyCodeLine{00050\ }
+\DoxyCodeLine{00051\ \textcolor{keyword}{namespace\ }\_\_detail}
+\DoxyCodeLine{00052\ \{}
+\DoxyCodeLine{00058\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Key,\ \textcolor{keyword}{typename}\ \_Value,\ \textcolor{keyword}{typename}\ \_ExtractKey,}
+\DoxyCodeLine{00059\ \ \ \ \ \ \ \ \textcolor{keyword}{typename}\ \_Equal,\ \textcolor{keyword}{typename}\ \_Hash,\ \textcolor{keyword}{typename}\ \_RangeHash,}
+\DoxyCodeLine{00060\ \ \ \ \ \ \ \ \textcolor{keyword}{typename}\ \_Unused,\ \textcolor{keyword}{typename}\ \_Traits>}
+\DoxyCodeLine{00061\ \ \ \ \ \textcolor{keyword}{struct\ }\_Hashtable\_base;}
+\DoxyCodeLine{00062\ }
+\DoxyCodeLine{00063\ \ \ \textcolor{comment}{//\ Helper\ function:\ return\ distance(first,\ last)\ for\ forward}}
+\DoxyCodeLine{00064\ \ \ \textcolor{comment}{//\ iterators,\ or\ 0/1\ for\ input\ iterators.}}
+\DoxyCodeLine{00065\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Iterator>}
+\DoxyCodeLine{00066\ \ \ \ \ \textcolor{keyword}{inline}\ \textcolor{keyword}{typename}\ std::iterator\_traits<\_Iterator>::difference\_type}
+\DoxyCodeLine{00067\ \ \ \ \ \_\_distance\_fw(\_Iterator\ \_\_first,\ \_Iterator\ \_\_last,}
+\DoxyCodeLine{00068\ \ \ \ \ \ \ \ \ \ \ std::input\_iterator\_tag)}
+\DoxyCodeLine{00069\ \ \ \ \ \{\ \textcolor{keywordflow}{return}\ \_\_first\ !=\ \_\_last\ ?\ 1\ :\ 0;\ \}}
+\DoxyCodeLine{00070\ }
+\DoxyCodeLine{00071\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Iterator>}
+\DoxyCodeLine{00072\ \ \ \ \ \textcolor{keyword}{inline}\ \textcolor{keyword}{typename}\ std::iterator\_traits<\_Iterator>::difference\_type}
+\DoxyCodeLine{00073\ \ \ \ \ \_\_distance\_fw(\_Iterator\ \_\_first,\ \_Iterator\ \_\_last,}
+\DoxyCodeLine{00074\ \ \ \ \ \ \ \ \ \ \ std::forward\_iterator\_tag)}
+\DoxyCodeLine{00075\ \ \ \ \ \{\ \textcolor{keywordflow}{return}\ std::distance(\_\_first,\ \_\_last);\ \}}
+\DoxyCodeLine{00076\ }
+\DoxyCodeLine{00077\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Iterator>}
+\DoxyCodeLine{00078\ \ \ \ \ \textcolor{keyword}{inline}\ \textcolor{keyword}{typename}\ std::iterator\_traits<\_Iterator>::difference\_type}
+\DoxyCodeLine{00079\ \ \ \ \ \_\_distance\_fw(\_Iterator\ \_\_first,\ \_Iterator\ \_\_last)}
+\DoxyCodeLine{00080\ \ \ \ \ \{\ \textcolor{keywordflow}{return}\ \_\_distance\_fw(\_\_first,\ \_\_last,}
+\DoxyCodeLine{00081\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::\_\_iterator\_category(\_\_first));\ \}}
+\DoxyCodeLine{00082\ }
+\DoxyCodeLine{00083\ \ \ \textcolor{keyword}{struct\ }\_Identity}
+\DoxyCodeLine{00084\ \ \ \{}
+\DoxyCodeLine{00085\ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Tp>}
+\DoxyCodeLine{00086\ \ \ \ \ \ \ \_Tp\&\&}
+\DoxyCodeLine{00087\ \ \ \ \ \ \ operator()(\_Tp\&\&\ \_\_x)\ \textcolor{keyword}{const}\ \textcolor{keyword}{noexcept}}
+\DoxyCodeLine{00088\ \ \ \ \ \ \ \{\ \textcolor{keywordflow}{return}\ std::forward<\_Tp>(\_\_x);\ \}}
+\DoxyCodeLine{00089\ \ \ \};}
+\DoxyCodeLine{00090\ }
+\DoxyCodeLine{00091\ \ \ \textcolor{keyword}{struct\ }\_Select1st}
+\DoxyCodeLine{00092\ \ \ \{}
+\DoxyCodeLine{00093\ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Pair>}
+\DoxyCodeLine{00094\ \ \ \ \ \ \ \textcolor{keyword}{struct\ }\_\_1st\_type;}
+\DoxyCodeLine{00095\ }
+\DoxyCodeLine{00096\ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Tp,\ \textcolor{keyword}{typename}\ \_Up>}
+\DoxyCodeLine{00097\ \ \ \ \ \ \ \textcolor{keyword}{struct\ }\_\_1st\_type<pair<\_Tp,\ \_Up>>}
+\DoxyCodeLine{00098\ \ \ \ \ \ \ \{\ \textcolor{keyword}{using\ }\mbox{\hyperlink{_classes_2_gameobj_8h_a890efa53b3d7deeeced6f3a0d6653ed3}{type}}\ =\ \_Tp;\ \};}
+\DoxyCodeLine{00099\ }
+\DoxyCodeLine{00100\ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Tp,\ \textcolor{keyword}{typename}\ \_Up>}
+\DoxyCodeLine{00101\ \ \ \ \ \ \ \textcolor{keyword}{struct\ }\_\_1st\_type<const\ pair<\_Tp,\ \_Up>>}
+\DoxyCodeLine{00102\ \ \ \ \ \ \ \{\ \textcolor{keyword}{using\ }\mbox{\hyperlink{_classes_2_gameobj_8h_a890efa53b3d7deeeced6f3a0d6653ed3}{type}}\ =\ \textcolor{keyword}{const}\ \_Tp;\ \};}
+\DoxyCodeLine{00103\ }
+\DoxyCodeLine{00104\ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Pair>}
+\DoxyCodeLine{00105\ \ \ \ \ \ \ \textcolor{keyword}{struct\ }\_\_1st\_type<\_Pair\&>}
+\DoxyCodeLine{00106\ \ \ \ \ \ \ \{\ \textcolor{keyword}{using\ }\mbox{\hyperlink{_classes_2_gameobj_8h_a890efa53b3d7deeeced6f3a0d6653ed3}{type}}\ =\ \textcolor{keyword}{typename}\ \_\_1st\_type<\_Pair>::type\&;\ \};}
+\DoxyCodeLine{00107\ }
+\DoxyCodeLine{00108\ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Tp>}
+\DoxyCodeLine{00109\ \ \ \ \ \ \ \textcolor{keyword}{typename}\ \_\_1st\_type<\_Tp>::type\&\&}
+\DoxyCodeLine{00110\ \ \ \ \ \ \ operator()(\_Tp\&\&\ \_\_x)\ \textcolor{keyword}{const}\ \textcolor{keyword}{noexcept}}
+\DoxyCodeLine{00111\ \ \ \ \ \ \ \{\ \textcolor{keywordflow}{return}\ std::forward<\_Tp>(\_\_x).first;\ \}}
+\DoxyCodeLine{00112\ \ \ \};}
+\DoxyCodeLine{00113\ }
+\DoxyCodeLine{00114\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_ExKey>}
+\DoxyCodeLine{00115\ \ \ \ \ \textcolor{keyword}{struct\ }\_NodeBuilder;}
+\DoxyCodeLine{00116\ }
+\DoxyCodeLine{00117\ \ \ \textcolor{keyword}{template}<>}
+\DoxyCodeLine{00118\ \ \ \ \ \textcolor{keyword}{struct\ }\_NodeBuilder<\_Select1st>}
+\DoxyCodeLine{00119\ \ \ \ \ \{}
+\DoxyCodeLine{00120\ \ \ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Kt,\ \textcolor{keyword}{typename}\ \_Arg,\ \textcolor{keyword}{typename}\ \_NodeGenerator>}
+\DoxyCodeLine{00121\ \ \ \ \ \textcolor{keyword}{static}\ \textcolor{keyword}{auto}}
+\DoxyCodeLine{00122\ \ \ \ \ \_S\_build(\_Kt\&\&\ \_\_k,\ \_Arg\&\&\ \_\_arg,\ \textcolor{keyword}{const}\ \_NodeGenerator\&\ \_\_node\_gen)}
+\DoxyCodeLine{00123\ \ \ \ \ -\/>\ \textcolor{keyword}{typename}\ \_NodeGenerator::\_\_node\_type*}
+\DoxyCodeLine{00124\ \ \ \ \ \{}
+\DoxyCodeLine{00125\ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \_\_node\_gen(std::forward<\_Kt>(\_\_k),}
+\DoxyCodeLine{00126\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::forward<\_Arg>(\_\_arg).second);}
+\DoxyCodeLine{00127\ \ \ \ \ \}}
+\DoxyCodeLine{00128\ \ \ \ \ \};}
+\DoxyCodeLine{00129\ }
+\DoxyCodeLine{00130\ \ \ \textcolor{keyword}{template}<>}
+\DoxyCodeLine{00131\ \ \ \ \ \textcolor{keyword}{struct\ }\_NodeBuilder<\_Identity>}
+\DoxyCodeLine{00132\ \ \ \ \ \{}
+\DoxyCodeLine{00133\ \ \ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Kt,\ \textcolor{keyword}{typename}\ \_Arg,\ \textcolor{keyword}{typename}\ \_NodeGenerator>}
+\DoxyCodeLine{00134\ \ \ \ \ \textcolor{keyword}{static}\ \textcolor{keyword}{auto}}
+\DoxyCodeLine{00135\ \ \ \ \ \_S\_build(\_Kt\&\&\ \_\_k,\ \_Arg\&\&,\ \textcolor{keyword}{const}\ \_NodeGenerator\&\ \_\_node\_gen)}
+\DoxyCodeLine{00136\ \ \ \ \ -\/>\ \textcolor{keyword}{typename}\ \_NodeGenerator::\_\_node\_type*}
+\DoxyCodeLine{00137\ \ \ \ \ \{\ \textcolor{keywordflow}{return}\ \_\_node\_gen(std::forward<\_Kt>(\_\_k));\ \}}
+\DoxyCodeLine{00138\ \ \ \ \ \};}
+\DoxyCodeLine{00139\ }
+\DoxyCodeLine{00140\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_NodeAlloc>}
+\DoxyCodeLine{00141\ \ \ \ \ \textcolor{keyword}{struct\ }\_Hashtable\_alloc;}
+\DoxyCodeLine{00142\ }
+\DoxyCodeLine{00143\ \ \ \textcolor{comment}{//\ Functor\ recycling\ a\ pool\ of\ nodes\ and\ using\ allocation\ once\ the\ pool\ is}}
+\DoxyCodeLine{00144\ \ \ \textcolor{comment}{//\ empty.}}
+\DoxyCodeLine{00145\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_NodeAlloc>}
+\DoxyCodeLine{00146\ \ \ \ \ \textcolor{keyword}{struct\ }\_ReuseOrAllocNode}
+\DoxyCodeLine{00147\ \ \ \ \ \{}
+\DoxyCodeLine{00148\ \ \ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00149\ \ \ \ \ \ \ \textcolor{keyword}{using\ }\_\_node\_alloc\_type\ =\ \_NodeAlloc;}
+\DoxyCodeLine{00150\ \ \ \ \ \ \ \textcolor{keyword}{using\ }\_\_hashtable\_alloc\ =\ \_Hashtable\_alloc<\_\_node\_alloc\_type>;}
+\DoxyCodeLine{00151\ \ \ \ \ \ \ \textcolor{keyword}{using\ }\_\_node\_alloc\_traits\ =}
+\DoxyCodeLine{00152\ \ \ \ \ \textcolor{keyword}{typename}\ \_\_hashtable\_alloc::\_\_node\_alloc\_traits;}
+\DoxyCodeLine{00153\ }
+\DoxyCodeLine{00154\ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00155\ \ \ \ \ \ \ \textcolor{keyword}{using\ }\_\_node\_type\ =\ \textcolor{keyword}{typename}\ \_\_hashtable\_alloc::\_\_node\_type;}
+\DoxyCodeLine{00156\ }
+\DoxyCodeLine{00157\ \ \ \ \ \ \ \_ReuseOrAllocNode(\_\_node\_type*\ \_\_nodes,\ \_\_hashtable\_alloc\&\ \_\_h)}
+\DoxyCodeLine{00158\ \ \ \ \ \ \ :\ \_M\_nodes(\_\_nodes),\ \_M\_h(\_\_h)\ \{\ \}}
+\DoxyCodeLine{00159\ \ \ \ \ \ \ \_ReuseOrAllocNode(\textcolor{keyword}{const}\ \_ReuseOrAllocNode\&)\ =\ \textcolor{keyword}{delete};}
+\DoxyCodeLine{00160\ }
+\DoxyCodeLine{00161\ \ \ \ \ \ \ \string~\_ReuseOrAllocNode()}
+\DoxyCodeLine{00162\ \ \ \ \ \ \ \{\ \_M\_h.\_M\_deallocate\_nodes(\_M\_nodes);\ \}}
+\DoxyCodeLine{00163\ }
+\DoxyCodeLine{00164\ \ \ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}...\ \_Args>}
+\DoxyCodeLine{00165\ \ \ \ \ \_\_node\_type*}
+\DoxyCodeLine{00166\ \ \ \ \ operator()(\_Args\&\&...\ \_\_args)\textcolor{keyword}{\ const}}
+\DoxyCodeLine{00167\ \textcolor{keyword}{\ \ \ \ }\{}
+\DoxyCodeLine{00168\ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\_M\_nodes)}
+\DoxyCodeLine{00169\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00170\ \ \ \ \ \ \ \ \ \ \ \_\_node\_type*\ \_\_node\ =\ \_M\_nodes;}
+\DoxyCodeLine{00171\ \ \ \ \ \ \ \ \ \ \ \_M\_nodes\ =\ \_M\_nodes-\/>\_M\_next();}
+\DoxyCodeLine{00172\ \ \ \ \ \ \ \ \ \ \ \_\_node-\/>\_M\_nxt\ =\ \textcolor{keyword}{nullptr};}
+\DoxyCodeLine{00173\ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{auto}\&\ \_\_a\ =\ \_M\_h.\_M\_node\_allocator();}
+\DoxyCodeLine{00174\ \ \ \ \ \ \ \ \ \ \ \_\_node\_alloc\_traits::destroy(\_\_a,\ \_\_node-\/>\_M\_valptr());}
+\DoxyCodeLine{00175\ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{_classes_2lib_2include_2c_09_09_2bits_2exception__defines_8h_a130bf0cd31a0783cd03563f46b46915b}{\_\_try}}}
+\DoxyCodeLine{00176\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00177\ \ \ \ \ \ \ \ \ \ \ \_\_node\_alloc\_traits::construct(\_\_a,\ \_\_node-\/>\_M\_valptr(),}
+\DoxyCodeLine{00178\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::forward<\_Args>(\_\_args)...);}
+\DoxyCodeLine{00179\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00180\ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{_classes_2lib_2include_2c_09_09_2bits_2exception__defines_8h_a9e51d2f324c18a996a3e4f9a6ba0f6c2}{\_\_catch}}(...)}
+\DoxyCodeLine{00181\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00182\ \ \ \ \ \ \ \ \ \ \ \_M\_h.\_M\_deallocate\_node\_ptr(\_\_node);}
+\DoxyCodeLine{00183\ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{_classes_2lib_2include_2c_09_09_2bits_2exception__defines_8h_a92ef03a5310b10a4243a6ec8f43494b5}{\_\_throw\_exception\_again}};}
+\DoxyCodeLine{00184\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00185\ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \_\_node;}
+\DoxyCodeLine{00186\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00187\ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \_M\_h.\_M\_allocate\_node(std::forward<\_Args>(\_\_args)...);}
+\DoxyCodeLine{00188\ \ \ \ \ \}}
+\DoxyCodeLine{00189\ }
+\DoxyCodeLine{00190\ \ \ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00191\ \ \ \ \ \ \ \textcolor{keyword}{mutable}\ \_\_node\_type*\ \_M\_nodes;}
+\DoxyCodeLine{00192\ \ \ \ \ \ \ \_\_hashtable\_alloc\&\ \_M\_h;}
+\DoxyCodeLine{00193\ \ \ \ \ \};}
+\DoxyCodeLine{00194\ }
+\DoxyCodeLine{00195\ \ \ \textcolor{comment}{//\ Functor\ similar\ to\ the\ previous\ one\ but\ without\ any\ pool\ of\ nodes\ to}}
+\DoxyCodeLine{00196\ \ \ \textcolor{comment}{//\ recycle.}}
+\DoxyCodeLine{00197\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_NodeAlloc>}
+\DoxyCodeLine{00198\ \ \ \ \ \textcolor{keyword}{struct\ }\_AllocNode}
+\DoxyCodeLine{00199\ \ \ \ \ \{}
+\DoxyCodeLine{00200\ \ \ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00201\ \ \ \ \ \ \ \textcolor{keyword}{using\ }\_\_hashtable\_alloc\ =\ \_Hashtable\_alloc<\_NodeAlloc>;}
+\DoxyCodeLine{00202\ }
+\DoxyCodeLine{00203\ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00204\ \ \ \ \ \ \ \textcolor{keyword}{using\ }\_\_node\_type\ =\ \textcolor{keyword}{typename}\ \_\_hashtable\_alloc::\_\_node\_type;}
+\DoxyCodeLine{00205\ }
+\DoxyCodeLine{00206\ \ \ \ \ \ \ \_AllocNode(\_\_hashtable\_alloc\&\ \_\_h)}
+\DoxyCodeLine{00207\ \ \ \ \ \ \ :\ \_M\_h(\_\_h)\ \{\ \}}
+\DoxyCodeLine{00208\ }
+\DoxyCodeLine{00209\ \ \ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}...\ \_Args>}
+\DoxyCodeLine{00210\ \ \ \ \ \_\_node\_type*}
+\DoxyCodeLine{00211\ \ \ \ \ operator()(\_Args\&\&...\ \_\_args)\textcolor{keyword}{\ const}}
+\DoxyCodeLine{00212\ \textcolor{keyword}{\ \ \ \ }\{\ \textcolor{keywordflow}{return}\ \_M\_h.\_M\_allocate\_node(std::forward<\_Args>(\_\_args)...);\ \}}
+\DoxyCodeLine{00213\ }
+\DoxyCodeLine{00214\ \ \ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00215\ \ \ \ \ \ \ \_\_hashtable\_alloc\&\ \_M\_h;}
+\DoxyCodeLine{00216\ \ \ \ \ \};}
+\DoxyCodeLine{00217\ }
+\DoxyCodeLine{00218\ \ \ \textcolor{comment}{//\ Auxiliary\ types\ used\ for\ all\ instantiations\ of\ \_Hashtable\ nodes}}
+\DoxyCodeLine{00219\ \ \ \textcolor{comment}{//\ and\ iterators.}}
+\DoxyCodeLine{00220\ }
+\DoxyCodeLine{00243\ \ \ \textcolor{keyword}{template}<\textcolor{keywordtype}{bool}\ \_Cache\_hash\_code,\ \textcolor{keywordtype}{bool}\ \_Constant\_iterators,\ \textcolor{keywordtype}{bool}\ \_Unique\_keys>}
+\DoxyCodeLine{00244\ \ \ \ \ \textcolor{keyword}{struct\ }\_Hashtable\_traits}
+\DoxyCodeLine{00245\ \ \ \ \ \{}
+\DoxyCodeLine{00246\ \ \ \ \ \ \ \textcolor{keyword}{using\ }\_\_hash\_cached\ =\ \_\_bool\_constant<\_Cache\_hash\_code>;}
+\DoxyCodeLine{00247\ \ \ \ \ \ \ \textcolor{keyword}{using\ }\_\_constant\_iterators\ =\ \_\_bool\_constant<\_Constant\_iterators>;}
+\DoxyCodeLine{00248\ \ \ \ \ \ \ \textcolor{keyword}{using\ }\_\_unique\_keys\ =\ \_\_bool\_constant<\_Unique\_keys>;}
+\DoxyCodeLine{00249\ \ \ \ \ \};}
+\DoxyCodeLine{00250\ }
+\DoxyCodeLine{00257\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Hash>}
+\DoxyCodeLine{00258\ \ \ \ \ \textcolor{keyword}{struct\ }\_Hashtable\_hash\_traits}
+\DoxyCodeLine{00259\ \ \ \ \ \{}
+\DoxyCodeLine{00260\ \ \ \ \ \ \ \textcolor{keyword}{static}\ \textcolor{keyword}{constexpr}\ std::size\_t}
+\DoxyCodeLine{00261\ \ \ \ \ \ \ \_\_small\_size\_threshold()\ \textcolor{keyword}{noexcept}}
+\DoxyCodeLine{00262\ \ \ \ \ \ \ \{\ \textcolor{keywordflow}{return}\ std::\_\_is\_fast\_hash<\_Hash>::value\ ?\ 0\ :\ 20;\ \}}
+\DoxyCodeLine{00263\ \ \ \ \ \};}
+\DoxyCodeLine{00264\ }
+\DoxyCodeLine{00273\ \ \ \textcolor{keyword}{struct\ }\_Hash\_node\_base}
+\DoxyCodeLine{00274\ \ \ \{}
+\DoxyCodeLine{00275\ \ \ \ \ \_Hash\_node\_base*\ \_M\_nxt;}
+\DoxyCodeLine{00276\ }
+\DoxyCodeLine{00277\ \ \ \ \ \_Hash\_node\_base()\ noexcept\ :\ \_M\_nxt()\ \{\ \}}
+\DoxyCodeLine{00278\ }
+\DoxyCodeLine{00279\ \ \ \ \ \_Hash\_node\_base(\_Hash\_node\_base*\ \_\_next)\ noexcept\ :\ \_M\_nxt(\_\_next)\ \{\ \}}
+\DoxyCodeLine{00280\ \ \ \};}
+\DoxyCodeLine{00281\ }
+\DoxyCodeLine{00287\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Value>}
+\DoxyCodeLine{00288\ \ \ \ \ \textcolor{keyword}{struct\ }\_Hash\_node\_value\_base}
+\DoxyCodeLine{00289\ \ \ \ \ \{}
+\DoxyCodeLine{00290\ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ \_Value\ value\_type;}
+\DoxyCodeLine{00291\ }
+\DoxyCodeLine{00292\ \ \ \ \ \ \ \mbox{\hyperlink{struct____gnu__cxx_1_1____aligned__buffer}{\_\_gnu\_cxx::\_\_aligned\_buffer<\_Value>}}\ \_M\_storage;}
+\DoxyCodeLine{00293\ }
+\DoxyCodeLine{00294\ \ \ \ \ \ \ \_Value*}
+\DoxyCodeLine{00295\ \ \ \ \ \ \ \_M\_valptr()\ \textcolor{keyword}{noexcept}}
+\DoxyCodeLine{00296\ \ \ \ \ \ \ \{\ \textcolor{keywordflow}{return}\ \_M\_storage.\mbox{\hyperlink{struct____gnu__cxx_1_1____aligned__buffer_a4f7396ec827253c1af249edad1c67b06}{\_M\_ptr}}();\ \}}
+\DoxyCodeLine{00297\ }
+\DoxyCodeLine{00298\ \ \ \ \ \ \ \textcolor{keyword}{const}\ \_Value*}
+\DoxyCodeLine{00299\ \ \ \ \ \ \ \_M\_valptr()\ \textcolor{keyword}{const}\ \textcolor{keyword}{noexcept}}
+\DoxyCodeLine{00300\ \ \ \ \ \ \ \{\ \textcolor{keywordflow}{return}\ \_M\_storage.\mbox{\hyperlink{struct____gnu__cxx_1_1____aligned__buffer_a4f7396ec827253c1af249edad1c67b06}{\_M\_ptr}}();\ \}}
+\DoxyCodeLine{00301\ }
+\DoxyCodeLine{00302\ \ \ \ \ \ \ \_Value\&}
+\DoxyCodeLine{00303\ \ \ \ \ \ \ \_M\_v()\ \textcolor{keyword}{noexcept}}
+\DoxyCodeLine{00304\ \ \ \ \ \ \ \{\ \textcolor{keywordflow}{return}\ *\_M\_valptr();\ \}}
+\DoxyCodeLine{00305\ }
+\DoxyCodeLine{00306\ \ \ \ \ \ \ \textcolor{keyword}{const}\ \_Value\&}
+\DoxyCodeLine{00307\ \ \ \ \ \ \ \_M\_v()\ \textcolor{keyword}{const}\ \textcolor{keyword}{noexcept}}
+\DoxyCodeLine{00308\ \ \ \ \ \ \ \{\ \textcolor{keywordflow}{return}\ *\_M\_valptr();\ \}}
+\DoxyCodeLine{00309\ \ \ \ \ \};}
+\DoxyCodeLine{00310\ }
+\DoxyCodeLine{00314\ \ \ \textcolor{keyword}{template}<\textcolor{keywordtype}{bool}\ \_Cache\_hash\_code>}
+\DoxyCodeLine{00315\ \ \ \ \ \textcolor{keyword}{struct\ }\_Hash\_node\_code\_cache}
+\DoxyCodeLine{00316\ \ \ \ \ \{\ \};}
+\DoxyCodeLine{00317\ }
+\DoxyCodeLine{00321\ \ \ \textcolor{keyword}{template}<>}
+\DoxyCodeLine{00322\ \ \ \ \ \textcolor{keyword}{struct\ }\_Hash\_node\_code\_cache<\mbox{\hyperlink{_classes_2lib_2include_2stdbool_8h_a41f9c5fb8b08eb5dc3edce4dcb37fee7}{true}}>}
+\DoxyCodeLine{00323\ \ \ \ \ \{\ std::size\_t\ \ \_M\_hash\_code;\ \};}
+\DoxyCodeLine{00324\ }
+\DoxyCodeLine{00325\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Value,\ \textcolor{keywordtype}{bool}\ \_Cache\_hash\_code>}
+\DoxyCodeLine{00326\ \ \ \ \ \textcolor{keyword}{struct\ }\_Hash\_node\_value}
+\DoxyCodeLine{00327\ \ \ \ \ :\ \_Hash\_node\_value\_base<\_Value>}
+\DoxyCodeLine{00328\ \ \ \ \ ,\ \_Hash\_node\_code\_cache<\_Cache\_hash\_code>}
+\DoxyCodeLine{00329\ \ \ \ \ \{\ \};}
+\DoxyCodeLine{00330\ }
+\DoxyCodeLine{00334\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Value,\ \textcolor{keywordtype}{bool}\ \_Cache\_hash\_code>}
+\DoxyCodeLine{00335\ \ \ \ \ \textcolor{keyword}{struct\ }\_Hash\_node}
+\DoxyCodeLine{00336\ \ \ \ \ :\ \_Hash\_node\_base}
+\DoxyCodeLine{00337\ \ \ \ \ ,\ \_Hash\_node\_value<\_Value,\ \_Cache\_hash\_code>}
+\DoxyCodeLine{00338\ \ \ \ \ \{}
+\DoxyCodeLine{00339\ \ \ \ \ \ \ \_Hash\_node*}
+\DoxyCodeLine{00340\ \ \ \ \ \ \ \_M\_next()\ \textcolor{keyword}{const}\ \textcolor{keyword}{noexcept}}
+\DoxyCodeLine{00341\ \ \ \ \ \ \ \{\ \textcolor{keywordflow}{return}\ \textcolor{keyword}{static\_cast<}\_Hash\_node*\textcolor{keyword}{>}(this-\/>\_M\_nxt);\ \}}
+\DoxyCodeLine{00342\ \ \ \ \ \};}
+\DoxyCodeLine{00343\ }
+\DoxyCodeLine{00345\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Value,\ \textcolor{keywordtype}{bool}\ \_Cache\_hash\_code>}
+\DoxyCodeLine{00346\ \ \ \ \ \textcolor{keyword}{struct\ }\_Node\_iterator\_base}
+\DoxyCodeLine{00347\ \ \ \ \ \{}
+\DoxyCodeLine{00348\ \ \ \ \ \ \ \textcolor{keyword}{using\ }\_\_node\_type\ =\ \_Hash\_node<\_Value,\ \_Cache\_hash\_code>;}
+\DoxyCodeLine{00349\ }
+\DoxyCodeLine{00350\ \ \ \ \ \ \ \_\_node\_type*\ \_M\_cur;}
+\DoxyCodeLine{00351\ }
+\DoxyCodeLine{00352\ \ \ \ \ \ \ \_Node\_iterator\_base()\ :\ \_M\_cur(\textcolor{keyword}{nullptr})\ \{\ \}}
+\DoxyCodeLine{00353\ \ \ \ \ \ \ \_Node\_iterator\_base(\_\_node\_type*\ \_\_p)\ noexcept}
+\DoxyCodeLine{00354\ \ \ \ \ \ \ :\ \_M\_cur(\_\_p)\ \{\ \}}
+\DoxyCodeLine{00355\ }
+\DoxyCodeLine{00356\ \ \ \ \ \ \ \textcolor{keywordtype}{void}}
+\DoxyCodeLine{00357\ \ \ \ \ \ \ \_M\_incr()\ \textcolor{keyword}{noexcept}}
+\DoxyCodeLine{00358\ \ \ \ \ \ \ \{\ \_M\_cur\ =\ \_M\_cur-\/>\_M\_next();\ \}}
+\DoxyCodeLine{00359\ }
+\DoxyCodeLine{00360\ \ \ \ \ \ \ \textcolor{keyword}{friend}\ \textcolor{keywordtype}{bool}}
+\DoxyCodeLine{00361\ \ \ \ \ \ \ operator==(\textcolor{keyword}{const}\ \_Node\_iterator\_base\&\ \_\_x,\ \textcolor{keyword}{const}\ \_Node\_iterator\_base\&\ \_\_y)}
+\DoxyCodeLine{00362\ \ \ \ \ \ \ \textcolor{keyword}{noexcept}}
+\DoxyCodeLine{00363\ \ \ \ \ \ \ \{\ \textcolor{keywordflow}{return}\ \_\_x.\_M\_cur\ ==\ \_\_y.\_M\_cur;\ \}}
+\DoxyCodeLine{00364\ }
+\DoxyCodeLine{00365\ \textcolor{preprocessor}{\#if\ \_\_cpp\_impl\_three\_way\_comparison\ <\ 201907L}}
+\DoxyCodeLine{00366\ \ \ \ \ \ \ \textcolor{keyword}{friend}\ \textcolor{keywordtype}{bool}}
+\DoxyCodeLine{00367\ \ \ \ \ \ \ operator!=(\textcolor{keyword}{const}\ \_Node\_iterator\_base\&\ \_\_x,\ \textcolor{keyword}{const}\ \_Node\_iterator\_base\&\ \_\_y)}
+\DoxyCodeLine{00368\ \ \ \ \ \ \ \textcolor{keyword}{noexcept}}
+\DoxyCodeLine{00369\ \ \ \ \ \ \ \{\ \textcolor{keywordflow}{return}\ \_\_x.\_M\_cur\ !=\ \_\_y.\_M\_cur;\ \}}
+\DoxyCodeLine{00370\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00371\ \ \ \ \ \};}
+\DoxyCodeLine{00372\ }
+\DoxyCodeLine{00374\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Value,\ \textcolor{keywordtype}{bool}\ \_\_constant\_iterators,\ \textcolor{keywordtype}{bool}\ \_\_cache>}
+\DoxyCodeLine{00375\ \ \ \ \ \textcolor{keyword}{struct\ }\_Node\_iterator}
+\DoxyCodeLine{00376\ \ \ \ \ :\ \textcolor{keyword}{public}\ \_Node\_iterator\_base<\_Value,\ \_\_cache>}
+\DoxyCodeLine{00377\ \ \ \ \ \{}
+\DoxyCodeLine{00378\ \ \ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00379\ \ \ \ \ \ \ \textcolor{keyword}{using\ }\_\_base\_type\ =\ \_Node\_iterator\_base<\_Value,\ \_\_cache>;}
+\DoxyCodeLine{00380\ \ \ \ \ \ \ \textcolor{keyword}{using\ }\_\_node\_type\ =\ \textcolor{keyword}{typename}\ \_\_base\_type::\_\_node\_type;}
+\DoxyCodeLine{00381\ }
+\DoxyCodeLine{00382\ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00383\ \ \ \ \ \ \ \textcolor{keyword}{using\ }value\_type\ =\ \_Value;}
+\DoxyCodeLine{00384\ \ \ \ \ \ \ \textcolor{keyword}{using\ }difference\_type\ =\ std::ptrdiff\_t;}
+\DoxyCodeLine{00385\ \ \ \ \ \ \ \textcolor{keyword}{using\ }iterator\_category\ =\ std::forward\_iterator\_tag;}
+\DoxyCodeLine{00386\ }
+\DoxyCodeLine{00387\ \ \ \ \ \ \ \textcolor{keyword}{using\ }\mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2glad_8h_aca2093d4756bde9a55b94e9ff8d9c623}{pointer}}\ =\ \_\_conditional\_t<\_\_constant\_iterators,}
+\DoxyCodeLine{00388\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ value\_type*,\ value\_type*>;}
+\DoxyCodeLine{00389\ }
+\DoxyCodeLine{00390\ \ \ \ \ \ \ \textcolor{keyword}{using\ }reference\ =\ \_\_conditional\_t<\_\_constant\_iterators,}
+\DoxyCodeLine{00391\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ value\_type\&,\ value\_type\&>;}
+\DoxyCodeLine{00392\ }
+\DoxyCodeLine{00393\ \ \ \ \ \ \ \_Node\_iterator()\ =\ \textcolor{keywordflow}{default};}
+\DoxyCodeLine{00394\ }
+\DoxyCodeLine{00395\ \ \ \ \ \ \ \textcolor{keyword}{explicit}}
+\DoxyCodeLine{00396\ \ \ \ \ \ \ \_Node\_iterator(\_\_node\_type*\ \_\_p)\ noexcept}
+\DoxyCodeLine{00397\ \ \ \ \ \ \ :\ \_\_base\_type(\_\_p)\ \{\ \}}
+\DoxyCodeLine{00398\ }
+\DoxyCodeLine{00399\ \ \ \ \ \ \ reference}
+\DoxyCodeLine{00400\ \ \ \ \ \ \ operator*()\ \textcolor{keyword}{const}\ \textcolor{keyword}{noexcept}}
+\DoxyCodeLine{00401\ \ \ \ \ \ \ \{\ \textcolor{keywordflow}{return}\ this-\/>\_M\_cur-\/>\_M\_v();\ \}}
+\DoxyCodeLine{00402\ }
+\DoxyCodeLine{00403\ \ \ \ \ \ \ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2glad_8h_aca2093d4756bde9a55b94e9ff8d9c623}{pointer}}}
+\DoxyCodeLine{00404\ \ \ \ \ \ \ operator-\/>()\ \textcolor{keyword}{const}\ \textcolor{keyword}{noexcept}}
+\DoxyCodeLine{00405\ \ \ \ \ \ \ \{\ \textcolor{keywordflow}{return}\ this-\/>\_M\_cur-\/>\_M\_valptr();\ \}}
+\DoxyCodeLine{00406\ }
+\DoxyCodeLine{00407\ \ \ \ \ \ \ \_Node\_iterator\&}
+\DoxyCodeLine{00408\ \ \ \ \ \ \ operator++()\ \textcolor{keyword}{noexcept}}
+\DoxyCodeLine{00409\ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00410\ \ \ \ \ this-\/>\_M\_incr();}
+\DoxyCodeLine{00411\ \ \ \ \ \textcolor{keywordflow}{return}\ *\textcolor{keyword}{this};}
+\DoxyCodeLine{00412\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00413\ }
+\DoxyCodeLine{00414\ \ \ \ \ \ \ \_Node\_iterator}
+\DoxyCodeLine{00415\ \ \ \ \ \ \ operator++(\textcolor{keywordtype}{int})\ \textcolor{keyword}{noexcept}}
+\DoxyCodeLine{00416\ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00417\ \ \ \ \ \_Node\_iterator\ \mbox{\hyperlink{_classes_2lib_2include_2xmmintrin_8h_ad56bf6b8c22ee698e455f99196a1fe12}{\_\_tmp}}(*\textcolor{keyword}{this});}
+\DoxyCodeLine{00418\ \ \ \ \ this-\/>\_M\_incr();}
+\DoxyCodeLine{00419\ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{_classes_2lib_2include_2xmmintrin_8h_ad56bf6b8c22ee698e455f99196a1fe12}{\_\_tmp}};}
+\DoxyCodeLine{00420\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00421\ \ \ \ \ \};}
+\DoxyCodeLine{00422\ }
+\DoxyCodeLine{00424\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Value,\ \textcolor{keywordtype}{bool}\ \_\_constant\_iterators,\ \textcolor{keywordtype}{bool}\ \_\_cache>}
+\DoxyCodeLine{00425\ \ \ \ \ \textcolor{keyword}{struct\ }\_Node\_const\_iterator}
+\DoxyCodeLine{00426\ \ \ \ \ :\ \textcolor{keyword}{public}\ \_Node\_iterator\_base<\_Value,\ \_\_cache>}
+\DoxyCodeLine{00427\ \ \ \ \ \{}
+\DoxyCodeLine{00428\ \ \ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00429\ \ \ \ \ \ \ \textcolor{keyword}{using\ }\_\_base\_type\ =\ \_Node\_iterator\_base<\_Value,\ \_\_cache>;}
+\DoxyCodeLine{00430\ \ \ \ \ \ \ \textcolor{keyword}{using\ }\_\_node\_type\ =\ \textcolor{keyword}{typename}\ \_\_base\_type::\_\_node\_type;}
+\DoxyCodeLine{00431\ }
+\DoxyCodeLine{00432\ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00433\ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ \_Value\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ value\_type;}
+\DoxyCodeLine{00434\ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ std::ptrdiff\_t\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ difference\_type;}
+\DoxyCodeLine{00435\ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ std::forward\_iterator\_tag\ \ \ \ \ \ \ \ \ iterator\_category;}
+\DoxyCodeLine{00436\ }
+\DoxyCodeLine{00437\ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ \textcolor{keyword}{const}\ value\_type*\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2glad_8h_aca2093d4756bde9a55b94e9ff8d9c623}{pointer}};}
+\DoxyCodeLine{00438\ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ \textcolor{keyword}{const}\ value\_type\&\ \ \ \ \ \ \ \ \ \ \ \ \ reference;}
+\DoxyCodeLine{00439\ }
+\DoxyCodeLine{00440\ \ \ \ \ \ \ \_Node\_const\_iterator()\ =\ \textcolor{keywordflow}{default};}
+\DoxyCodeLine{00441\ }
+\DoxyCodeLine{00442\ \ \ \ \ \ \ \textcolor{keyword}{explicit}}
+\DoxyCodeLine{00443\ \ \ \ \ \ \ \_Node\_const\_iterator(\_\_node\_type*\ \_\_p)\ noexcept}
+\DoxyCodeLine{00444\ \ \ \ \ \ \ :\ \_\_base\_type(\_\_p)\ \{\ \}}
+\DoxyCodeLine{00445\ }
+\DoxyCodeLine{00446\ \ \ \ \ \ \ \_Node\_const\_iterator(\textcolor{keyword}{const}\ \_Node\_iterator<\_Value,\ \_\_constant\_iterators,}
+\DoxyCodeLine{00447\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_\_cache>\&\ \_\_x)\ noexcept}
+\DoxyCodeLine{00448\ \ \ \ \ \ \ :\ \_\_base\_type(\_\_x.\_M\_cur)\ \{\ \}}
+\DoxyCodeLine{00449\ }
+\DoxyCodeLine{00450\ \ \ \ \ \ \ reference}
+\DoxyCodeLine{00451\ \ \ \ \ \ \ operator*()\ \textcolor{keyword}{const}\ \textcolor{keyword}{noexcept}}
+\DoxyCodeLine{00452\ \ \ \ \ \ \ \{\ \textcolor{keywordflow}{return}\ this-\/>\_M\_cur-\/>\_M\_v();\ \}}
+\DoxyCodeLine{00453\ }
+\DoxyCodeLine{00454\ \ \ \ \ \ \ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2glad_8h_aca2093d4756bde9a55b94e9ff8d9c623}{pointer}}}
+\DoxyCodeLine{00455\ \ \ \ \ \ \ operator-\/>()\ \textcolor{keyword}{const}\ \textcolor{keyword}{noexcept}}
+\DoxyCodeLine{00456\ \ \ \ \ \ \ \{\ \textcolor{keywordflow}{return}\ this-\/>\_M\_cur-\/>\_M\_valptr();\ \}}
+\DoxyCodeLine{00457\ }
+\DoxyCodeLine{00458\ \ \ \ \ \ \ \_Node\_const\_iterator\&}
+\DoxyCodeLine{00459\ \ \ \ \ \ \ operator++()\ \textcolor{keyword}{noexcept}}
+\DoxyCodeLine{00460\ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00461\ \ \ \ \ this-\/>\_M\_incr();}
+\DoxyCodeLine{00462\ \ \ \ \ \textcolor{keywordflow}{return}\ *\textcolor{keyword}{this};}
+\DoxyCodeLine{00463\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00464\ }
+\DoxyCodeLine{00465\ \ \ \ \ \ \ \_Node\_const\_iterator}
+\DoxyCodeLine{00466\ \ \ \ \ \ \ operator++(\textcolor{keywordtype}{int})\ \textcolor{keyword}{noexcept}}
+\DoxyCodeLine{00467\ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00468\ \ \ \ \ \_Node\_const\_iterator\ \mbox{\hyperlink{_classes_2lib_2include_2xmmintrin_8h_ad56bf6b8c22ee698e455f99196a1fe12}{\_\_tmp}}(*\textcolor{keyword}{this});}
+\DoxyCodeLine{00469\ \ \ \ \ this-\/>\_M\_incr();}
+\DoxyCodeLine{00470\ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{_classes_2lib_2include_2xmmintrin_8h_ad56bf6b8c22ee698e455f99196a1fe12}{\_\_tmp}};}
+\DoxyCodeLine{00471\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00472\ \ \ \ \ \};}
+\DoxyCodeLine{00473\ }
+\DoxyCodeLine{00474\ \ \ \textcolor{comment}{//\ Many\ of\ class\ template\ \_Hashtable's\ template\ parameters\ are\ policy}}
+\DoxyCodeLine{00475\ \ \ \textcolor{comment}{//\ classes.\ \ These\ are\ defaults\ for\ the\ policies.}}
+\DoxyCodeLine{00476\ }
+\DoxyCodeLine{00479\ \ \ \textcolor{keyword}{struct\ }\_Mod\_range\_hashing}
+\DoxyCodeLine{00480\ \ \ \{}
+\DoxyCodeLine{00481\ \ \ \ \ \textcolor{keyword}{typedef}\ std::size\_t\ first\_argument\_type;}
+\DoxyCodeLine{00482\ \ \ \ \ \textcolor{keyword}{typedef}\ std::size\_t\ second\_argument\_type;}
+\DoxyCodeLine{00483\ \ \ \ \ \textcolor{keyword}{typedef}\ std::size\_t\ result\_type;}
+\DoxyCodeLine{00484\ }
+\DoxyCodeLine{00485\ \ \ \ \ result\_type}
+\DoxyCodeLine{00486\ \ \ \ \ operator()(first\_argument\_type\ \_\_num,}
+\DoxyCodeLine{00487\ \ \ \ \ \ \ \ \ \ \ \ second\_argument\_type\ \_\_den)\ \textcolor{keyword}{const}\ \textcolor{keyword}{noexcept}}
+\DoxyCodeLine{00488\ \ \ \ \ \{\ \textcolor{keywordflow}{return}\ \_\_num\ \%\ \_\_den;\ \}}
+\DoxyCodeLine{00489\ \ \ \};}
+\DoxyCodeLine{00490\ }
+\DoxyCodeLine{00496\ \ \ \textcolor{keyword}{struct\ }\_Default\_ranged\_hash\ \{\ \};}
+\DoxyCodeLine{00497\ }
+\DoxyCodeLine{00500\ \ \ \textcolor{keyword}{struct\ }\_Prime\_rehash\_policy}
+\DoxyCodeLine{00501\ \ \ \{}
+\DoxyCodeLine{00502\ \ \ \ \ \textcolor{keyword}{using\ }\_\_has\_load\_factor\ =\ true\_type;}
+\DoxyCodeLine{00503\ }
+\DoxyCodeLine{00504\ \ \ \ \ \_Prime\_rehash\_policy(\textcolor{keywordtype}{float}\ \_\_z\ =\ 1.0)\ noexcept}
+\DoxyCodeLine{00505\ \ \ \ \ :\ \_M\_max\_load\_factor(\_\_z),\ \_M\_next\_resize(0)\ \{\ \}}
+\DoxyCodeLine{00506\ }
+\DoxyCodeLine{00507\ \ \ \ \ \textcolor{keywordtype}{float}}
+\DoxyCodeLine{00508\ \ \ \ \ max\_load\_factor()\ \textcolor{keyword}{const}\ \textcolor{keyword}{noexcept}}
+\DoxyCodeLine{00509\ \ \ \ \ \{\ \textcolor{keywordflow}{return}\ \_M\_max\_load\_factor;\ \}}
+\DoxyCodeLine{00510\ }
+\DoxyCodeLine{00511\ \ \ \ \ \textcolor{comment}{//\ Return\ a\ bucket\ size\ no\ smaller\ than\ n.}}
+\DoxyCodeLine{00512\ \ \ \ \ std::size\_t}
+\DoxyCodeLine{00513\ \ \ \ \ \_M\_next\_bkt(std::size\_t\ \_\_n)\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00514\ }
+\DoxyCodeLine{00515\ \ \ \ \ \textcolor{comment}{//\ Return\ a\ bucket\ count\ appropriate\ for\ n\ elements}}
+\DoxyCodeLine{00516\ \ \ \ \ std::size\_t}
+\DoxyCodeLine{00517\ \ \ \ \ \_M\_bkt\_for\_elements(std::size\_t\ \_\_n)\textcolor{keyword}{\ const}}
+\DoxyCodeLine{00518\ \textcolor{keyword}{\ \ \ \ }\{\ \textcolor{keywordflow}{return}\ \_\_builtin\_ceil(\_\_n\ /\ (\textcolor{keywordtype}{double})\_M\_max\_load\_factor);\ \}}
+\DoxyCodeLine{00519\ }
+\DoxyCodeLine{00520\ \ \ \ \ \textcolor{comment}{//\ \_\_n\_bkt\ is\ current\ bucket\ count,\ \_\_n\_elt\ is\ current\ element\ count,}}
+\DoxyCodeLine{00521\ \ \ \ \ \textcolor{comment}{//\ and\ \_\_n\_ins\ is\ number\ of\ elements\ to\ be\ inserted.\ \ Do\ we\ need\ to}}
+\DoxyCodeLine{00522\ \ \ \ \ \textcolor{comment}{//\ increase\ bucket\ count?\ \ If\ so,\ return\ make\_pair(true,\ n),\ where\ n}}
+\DoxyCodeLine{00523\ \ \ \ \ \textcolor{comment}{//\ is\ the\ new\ bucket\ count.\ \ If\ not,\ return\ make\_pair(false,\ 0).}}
+\DoxyCodeLine{00524\ \ \ \ \ std::pair<bool,\ std::size\_t>}
+\DoxyCodeLine{00525\ \ \ \ \ \_M\_need\_rehash(std::size\_t\ \_\_n\_bkt,\ std::size\_t\ \_\_n\_elt,}
+\DoxyCodeLine{00526\ \ \ \ \ \ \ \ \ \ \ \ std::size\_t\ \_\_n\_ins)\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00527\ }
+\DoxyCodeLine{00528\ \ \ \ \ \textcolor{keyword}{typedef}\ std::size\_t\ \_State;}
+\DoxyCodeLine{00529\ }
+\DoxyCodeLine{00530\ \ \ \ \ \_State}
+\DoxyCodeLine{00531\ \ \ \ \ \_M\_state()\textcolor{keyword}{\ const}}
+\DoxyCodeLine{00532\ \textcolor{keyword}{\ \ \ \ }\{\ \textcolor{keywordflow}{return}\ \_M\_next\_resize;\ \}}
+\DoxyCodeLine{00533\ }
+\DoxyCodeLine{00534\ \ \ \ \ \textcolor{keywordtype}{void}}
+\DoxyCodeLine{00535\ \ \ \ \ \_M\_reset()\ \textcolor{keyword}{noexcept}}
+\DoxyCodeLine{00536\ \ \ \ \ \{\ \_M\_next\_resize\ =\ 0;\ \}}
+\DoxyCodeLine{00537\ }
+\DoxyCodeLine{00538\ \ \ \ \ \textcolor{keywordtype}{void}}
+\DoxyCodeLine{00539\ \ \ \ \ \_M\_reset(\_State\ \_\_state)}
+\DoxyCodeLine{00540\ \ \ \ \ \{\ \_M\_next\_resize\ =\ \_\_state;\ \}}
+\DoxyCodeLine{00541\ }
+\DoxyCodeLine{00542\ \ \ \ \ \textcolor{keyword}{static}\ \textcolor{keyword}{const}\ std::size\_t\ \_S\_growth\_factor\ =\ 2;}
+\DoxyCodeLine{00543\ }
+\DoxyCodeLine{00544\ \ \ \ \ \textcolor{keywordtype}{float}\ \ \ \ \ \ \ \_M\_max\_load\_factor;}
+\DoxyCodeLine{00545\ \ \ \ \ \textcolor{keyword}{mutable}\ std::size\_t\ \_M\_next\_resize;}
+\DoxyCodeLine{00546\ \ \ \};}
+\DoxyCodeLine{00547\ }
+\DoxyCodeLine{00549\ \ \ \textcolor{keyword}{struct\ }\_Mask\_range\_hashing}
+\DoxyCodeLine{00550\ \ \ \{}
+\DoxyCodeLine{00551\ \ \ \ \ \textcolor{keyword}{typedef}\ std::size\_t\ first\_argument\_type;}
+\DoxyCodeLine{00552\ \ \ \ \ \textcolor{keyword}{typedef}\ std::size\_t\ second\_argument\_type;}
+\DoxyCodeLine{00553\ \ \ \ \ \textcolor{keyword}{typedef}\ std::size\_t\ result\_type;}
+\DoxyCodeLine{00554\ }
+\DoxyCodeLine{00555\ \ \ \ \ result\_type}
+\DoxyCodeLine{00556\ \ \ \ \ operator()(first\_argument\_type\ \_\_num,}
+\DoxyCodeLine{00557\ \ \ \ \ \ \ \ \ \ \ \ second\_argument\_type\ \_\_den)\ \textcolor{keyword}{const}\ \textcolor{keyword}{noexcept}}
+\DoxyCodeLine{00558\ \ \ \ \ \{\ \textcolor{keywordflow}{return}\ \_\_num\ \&\ (\_\_den\ -\/\ 1);\ \}}
+\DoxyCodeLine{00559\ \ \ \};}
+\DoxyCodeLine{00560\ }
+\DoxyCodeLine{00562\ \ \ \textcolor{keyword}{inline}\ std::size\_t}
+\DoxyCodeLine{00563\ \ \ \_\_clp2(std::size\_t\ \_\_n)\ \textcolor{keyword}{noexcept}}
+\DoxyCodeLine{00564\ \ \ \{}
+\DoxyCodeLine{00565\ \ \ \ \ \textcolor{keyword}{using\ }\_\_gnu\_cxx::\_\_int\_traits;}
+\DoxyCodeLine{00566\ \ \ \ \ \textcolor{comment}{//\ Equivalent\ to\ return\ \_\_n\ ?\ std::bit\_ceil(\_\_n)\ :\ 0;}}
+\DoxyCodeLine{00567\ \ \ \ \ \textcolor{keywordflow}{if}\ (\_\_n\ <\ 2)}
+\DoxyCodeLine{00568\ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \_\_n;}
+\DoxyCodeLine{00569\ \ \ \ \ \textcolor{keyword}{const}\ \textcolor{keywordtype}{unsigned}\ \_\_lz\ =\ \textcolor{keyword}{sizeof}(\mbox{\hyperlink{_classes_2lib_2include_2stddef_8h_aa9d55e2f20e580b7445617d0d12fff6e}{size\_t}})\ >\ \textcolor{keyword}{sizeof}(\textcolor{keywordtype}{long})}
+\DoxyCodeLine{00570\ \ \ \ \ \ \ ?\ \_\_builtin\_clzll(\_\_n\ -\/\ 1ull)}
+\DoxyCodeLine{00571\ \ \ \ \ \ \ :\ \_\_builtin\_clzl(\_\_n\ -\/\ 1ul);}
+\DoxyCodeLine{00572\ \ \ \ \ \textcolor{comment}{//\ Doing\ two\ shifts\ avoids\ undefined\ behaviour\ when\ \_\_lz\ ==\ 0.}}
+\DoxyCodeLine{00573\ \ \ \ \ \textcolor{keywordflow}{return}\ (\textcolor{keywordtype}{size\_t}(1)\ <<\ (\_\_int\_traits<size\_t>::\_\_digits\ -\/\ \_\_lz\ -\/\ 1))\ <<\ 1;}
+\DoxyCodeLine{00574\ \ \ \}}
+\DoxyCodeLine{00575\ }
+\DoxyCodeLine{00578\ \ \ \textcolor{keyword}{struct\ }\_Power2\_rehash\_policy}
+\DoxyCodeLine{00579\ \ \ \{}
+\DoxyCodeLine{00580\ \ \ \ \ \textcolor{keyword}{using\ }\_\_has\_load\_factor\ =\ true\_type;}
+\DoxyCodeLine{00581\ }
+\DoxyCodeLine{00582\ \ \ \ \ \_Power2\_rehash\_policy(\textcolor{keywordtype}{float}\ \_\_z\ =\ 1.0)\ noexcept}
+\DoxyCodeLine{00583\ \ \ \ \ :\ \_M\_max\_load\_factor(\_\_z),\ \_M\_next\_resize(0)\ \{\ \}}
+\DoxyCodeLine{00584\ }
+\DoxyCodeLine{00585\ \ \ \ \ \textcolor{keywordtype}{float}}
+\DoxyCodeLine{00586\ \ \ \ \ max\_load\_factor()\ \textcolor{keyword}{const}\ \textcolor{keyword}{noexcept}}
+\DoxyCodeLine{00587\ \ \ \ \ \{\ \textcolor{keywordflow}{return}\ \_M\_max\_load\_factor;\ \}}
+\DoxyCodeLine{00588\ }
+\DoxyCodeLine{00589\ \ \ \ \ \textcolor{comment}{//\ Return\ a\ bucket\ size\ no\ smaller\ than\ n\ (as\ long\ as\ n\ is\ not\ above\ the}}
+\DoxyCodeLine{00590\ \ \ \ \ \textcolor{comment}{//\ highest\ power\ of\ 2).}}
+\DoxyCodeLine{00591\ \ \ \ \ std::size\_t}
+\DoxyCodeLine{00592\ \ \ \ \ \_M\_next\_bkt(std::size\_t\ \_\_n)\ \textcolor{keyword}{noexcept}}
+\DoxyCodeLine{00593\ \ \ \ \ \{}
+\DoxyCodeLine{00594\ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\_\_n\ ==\ 0)}
+\DoxyCodeLine{00595\ \ \ \ \ \textcolor{comment}{//\ Special\ case\ on\ container\ 1st\ initialization\ with\ 0\ bucket\ count}}
+\DoxyCodeLine{00596\ \ \ \ \ \textcolor{comment}{//\ hint.\ We\ keep\ \_M\_next\_resize\ to\ 0\ to\ make\ sure\ that\ next\ time\ we}}
+\DoxyCodeLine{00597\ \ \ \ \ \textcolor{comment}{//\ want\ to\ add\ an\ element\ allocation\ will\ take\ place.}}
+\DoxyCodeLine{00598\ \ \ \ \ \textcolor{keywordflow}{return}\ 1;}
+\DoxyCodeLine{00599\ }
+\DoxyCodeLine{00600\ \ \ \ \ \ \ \textcolor{keyword}{const}\ \textcolor{keyword}{auto}\ \_\_max\_width\ =\ std::min<size\_t>(\textcolor{keyword}{sizeof}(\textcolor{keywordtype}{size\_t}),\ 8);}
+\DoxyCodeLine{00601\ \ \ \ \ \ \ \textcolor{keyword}{const}\ \textcolor{keyword}{auto}\ \_\_max\_bkt\ =\ \mbox{\hyperlink{_classes_2lib_2include_2stddef_8h_aa9d55e2f20e580b7445617d0d12fff6e}{size\_t}}(1)\ <<\ (\_\_max\_width\ *\ \_\_CHAR\_BIT\_\_\ -\/\ 1);}
+\DoxyCodeLine{00602\ \ \ \ \ \ \ std::size\_t\ \_\_res\ =\ \_\_clp2(\_\_n);}
+\DoxyCodeLine{00603\ }
+\DoxyCodeLine{00604\ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\_\_res\ ==\ 0)}
+\DoxyCodeLine{00605\ \ \ \ \ \_\_res\ =\ \_\_max\_bkt;}
+\DoxyCodeLine{00606\ \ \ \ \ \ \ \textcolor{keywordflow}{else}\ \textcolor{keywordflow}{if}\ (\_\_res\ ==\ 1)}
+\DoxyCodeLine{00607\ \ \ \ \ \textcolor{comment}{//\ If\ \_\_res\ is\ 1\ we\ force\ it\ to\ 2\ to\ make\ sure\ there\ will\ be\ an}}
+\DoxyCodeLine{00608\ \ \ \ \ \textcolor{comment}{//\ allocation\ so\ that\ nothing\ need\ to\ be\ stored\ in\ the\ initial}}
+\DoxyCodeLine{00609\ \ \ \ \ \textcolor{comment}{//\ single\ bucket}}
+\DoxyCodeLine{00610\ \ \ \ \ \_\_res\ =\ 2;}
+\DoxyCodeLine{00611\ }
+\DoxyCodeLine{00612\ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\_\_res\ ==\ \_\_max\_bkt)}
+\DoxyCodeLine{00613\ \ \ \ \ \textcolor{comment}{//\ Set\ next\ resize\ to\ the\ max\ value\ so\ that\ we\ never\ try\ to\ rehash\ again}}
+\DoxyCodeLine{00614\ \ \ \ \ \textcolor{comment}{//\ as\ we\ already\ reach\ the\ biggest\ possible\ bucket\ number.}}
+\DoxyCodeLine{00615\ \ \ \ \ \textcolor{comment}{//\ Note\ that\ it\ might\ result\ in\ max\_load\_factor\ not\ being\ respected.}}
+\DoxyCodeLine{00616\ \ \ \ \ \_M\_next\_resize\ =\ \mbox{\hyperlink{_classes_2lib_2include_2stddef_8h_aa9d55e2f20e580b7445617d0d12fff6e}{size\_t}}(-\/1);}
+\DoxyCodeLine{00617\ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{00618\ \ \ \ \ \_M\_next\_resize}
+\DoxyCodeLine{00619\ \ \ \ \ \ \ =\ \_\_builtin\_floor(\_\_res\ *\ (\textcolor{keywordtype}{double})\_M\_max\_load\_factor);}
+\DoxyCodeLine{00620\ }
+\DoxyCodeLine{00621\ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \_\_res;}
+\DoxyCodeLine{00622\ \ \ \ \ \}}
+\DoxyCodeLine{00623\ }
+\DoxyCodeLine{00624\ \ \ \ \ \textcolor{comment}{//\ Return\ a\ bucket\ count\ appropriate\ for\ n\ elements}}
+\DoxyCodeLine{00625\ \ \ \ \ std::size\_t}
+\DoxyCodeLine{00626\ \ \ \ \ \_M\_bkt\_for\_elements(std::size\_t\ \_\_n)\ \textcolor{keyword}{const}\ \textcolor{keyword}{noexcept}}
+\DoxyCodeLine{00627\ \ \ \ \ \{\ \textcolor{keywordflow}{return}\ \_\_builtin\_ceil(\_\_n\ /\ (\textcolor{keywordtype}{double})\_M\_max\_load\_factor);\ \}}
+\DoxyCodeLine{00628\ }
+\DoxyCodeLine{00629\ \ \ \ \ \textcolor{comment}{//\ \_\_n\_bkt\ is\ current\ bucket\ count,\ \_\_n\_elt\ is\ current\ element\ count,}}
+\DoxyCodeLine{00630\ \ \ \ \ \textcolor{comment}{//\ and\ \_\_n\_ins\ is\ number\ of\ elements\ to\ be\ inserted.\ \ Do\ we\ need\ to}}
+\DoxyCodeLine{00631\ \ \ \ \ \textcolor{comment}{//\ increase\ bucket\ count?\ \ If\ so,\ return\ make\_pair(true,\ n),\ where\ n}}
+\DoxyCodeLine{00632\ \ \ \ \ \textcolor{comment}{//\ is\ the\ new\ bucket\ count.\ \ If\ not,\ return\ make\_pair(false,\ 0).}}
+\DoxyCodeLine{00633\ \ \ \ \ std::pair<bool,\ std::size\_t>}
+\DoxyCodeLine{00634\ \ \ \ \ \_M\_need\_rehash(std::size\_t\ \_\_n\_bkt,\ std::size\_t\ \_\_n\_elt,}
+\DoxyCodeLine{00635\ \ \ \ \ \ \ \ \ \ \ \ std::size\_t\ \_\_n\_ins)\ \textcolor{keyword}{noexcept}}
+\DoxyCodeLine{00636\ \ \ \ \ \{}
+\DoxyCodeLine{00637\ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\_\_n\_elt\ +\ \_\_n\_ins\ >\ \_M\_next\_resize)}
+\DoxyCodeLine{00638\ \ \ \ \ \{}
+\DoxyCodeLine{00639\ \ \ \ \ \ \ \textcolor{comment}{//\ If\ \_M\_next\_resize\ is\ 0\ it\ means\ that\ we\ have\ nothing\ allocated\ so}}
+\DoxyCodeLine{00640\ \ \ \ \ \ \ \textcolor{comment}{//\ far\ and\ that\ we\ start\ inserting\ elements.\ In\ this\ case\ we\ start}}
+\DoxyCodeLine{00641\ \ \ \ \ \ \ \textcolor{comment}{//\ with\ an\ initial\ bucket\ size\ of\ 11.}}
+\DoxyCodeLine{00642\ \ \ \ \ \ \ \textcolor{keywordtype}{double}\ \_\_min\_bkts}
+\DoxyCodeLine{00643\ \ \ \ \ \ \ \ \ =\ std::max<std::size\_t>(\_\_n\_elt\ +\ \_\_n\_ins,\ \_M\_next\_resize\ ?\ 0\ :\ 11)}
+\DoxyCodeLine{00644\ \ \ \ \ \ \ \ \ \ \ /\ (\textcolor{keywordtype}{double})\_M\_max\_load\_factor;}
+\DoxyCodeLine{00645\ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\_\_min\_bkts\ >=\ \_\_n\_bkt)}
+\DoxyCodeLine{00646\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \{\ \textcolor{keyword}{true},}
+\DoxyCodeLine{00647\ \ \ \ \ \ \ \ \ \ \ \_M\_next\_bkt(std::max<std::size\_t>(\_\_builtin\_floor(\_\_min\_bkts)\ +\ 1,}
+\DoxyCodeLine{00648\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_\_n\_bkt\ *\ \_S\_growth\_factor))\ \};}
+\DoxyCodeLine{00649\ }
+\DoxyCodeLine{00650\ \ \ \ \ \ \ \_M\_next\_resize}
+\DoxyCodeLine{00651\ \ \ \ \ \ \ \ \ =\ \_\_builtin\_floor(\_\_n\_bkt\ *\ (\textcolor{keywordtype}{double})\_M\_max\_load\_factor);}
+\DoxyCodeLine{00652\ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \{\ \textcolor{keyword}{false},\ 0\ \};}
+\DoxyCodeLine{00653\ \ \ \ \ \}}
+\DoxyCodeLine{00654\ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{00655\ \ \ \ \ \textcolor{keywordflow}{return}\ \{\ \textcolor{keyword}{false},\ 0\ \};}
+\DoxyCodeLine{00656\ \ \ \ \ \}}
+\DoxyCodeLine{00657\ }
+\DoxyCodeLine{00658\ \ \ \ \ \textcolor{keyword}{typedef}\ std::size\_t\ \_State;}
+\DoxyCodeLine{00659\ }
+\DoxyCodeLine{00660\ \ \ \ \ \_State}
+\DoxyCodeLine{00661\ \ \ \ \ \_M\_state()\ \textcolor{keyword}{const}\ \textcolor{keyword}{noexcept}}
+\DoxyCodeLine{00662\ \ \ \ \ \{\ \textcolor{keywordflow}{return}\ \_M\_next\_resize;\ \}}
+\DoxyCodeLine{00663\ }
+\DoxyCodeLine{00664\ \ \ \ \ \textcolor{keywordtype}{void}}
+\DoxyCodeLine{00665\ \ \ \ \ \_M\_reset()\ \textcolor{keyword}{noexcept}}
+\DoxyCodeLine{00666\ \ \ \ \ \{\ \_M\_next\_resize\ =\ 0;\ \}}
+\DoxyCodeLine{00667\ }
+\DoxyCodeLine{00668\ \ \ \ \ \textcolor{keywordtype}{void}}
+\DoxyCodeLine{00669\ \ \ \ \ \_M\_reset(\_State\ \_\_state)\ \textcolor{keyword}{noexcept}}
+\DoxyCodeLine{00670\ \ \ \ \ \{\ \_M\_next\_resize\ =\ \_\_state;\ \}}
+\DoxyCodeLine{00671\ }
+\DoxyCodeLine{00672\ \ \ \ \ \textcolor{keyword}{static}\ \textcolor{keyword}{const}\ std::size\_t\ \_S\_growth\_factor\ =\ 2;}
+\DoxyCodeLine{00673\ }
+\DoxyCodeLine{00674\ \ \ \ \ \textcolor{keywordtype}{float}\ \ \ \_M\_max\_load\_factor;}
+\DoxyCodeLine{00675\ \ \ \ \ std::size\_t\ \_M\_next\_resize;}
+\DoxyCodeLine{00676\ \ \ \};}
+\DoxyCodeLine{00677\ }
+\DoxyCodeLine{00678\ \ \ \textcolor{comment}{//\ Base\ classes\ for\ std::\_Hashtable.\ \ We\ define\ these\ base\ classes}}
+\DoxyCodeLine{00679\ \ \ \textcolor{comment}{//\ because\ in\ some\ cases\ we\ want\ to\ do\ different\ things\ depending\ on}}
+\DoxyCodeLine{00680\ \ \ \textcolor{comment}{//\ the\ value\ of\ a\ policy\ class.\ \ In\ some\ cases\ the\ policy\ class}}
+\DoxyCodeLine{00681\ \ \ \textcolor{comment}{//\ affects\ which\ member\ functions\ and\ nested\ typedefs\ are\ defined;}}
+\DoxyCodeLine{00682\ \ \ \textcolor{comment}{//\ we\ handle\ that\ by\ specializing\ base\ class\ templates.\ \ Several\ of}}
+\DoxyCodeLine{00683\ \ \ \textcolor{comment}{//\ the\ base\ class\ templates\ need\ to\ access\ other\ members\ of\ class}}
+\DoxyCodeLine{00684\ \ \ \textcolor{comment}{//\ template\ \_Hashtable,\ so\ we\ use\ a\ variant\ of\ the\ "{}Curiously}}
+\DoxyCodeLine{00685\ \ \ \textcolor{comment}{//\ Recurring\ Template\ Pattern"{}\ (CRTP)\ technique.}}
+\DoxyCodeLine{00686\ }
+\DoxyCodeLine{00696\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Key,\ \textcolor{keyword}{typename}\ \_Value,\ \textcolor{keyword}{typename}\ \_Alloc,}
+\DoxyCodeLine{00697\ \ \ \ \ \ \ \ \textcolor{keyword}{typename}\ \_ExtractKey,\ \textcolor{keyword}{typename}\ \_Equal,}
+\DoxyCodeLine{00698\ \ \ \ \ \ \ \ \textcolor{keyword}{typename}\ \_Hash,\ \textcolor{keyword}{typename}\ \_RangeHash,\ \textcolor{keyword}{typename}\ \_Unused,}
+\DoxyCodeLine{00699\ \ \ \ \ \ \ \ \textcolor{keyword}{typename}\ \_RehashPolicy,\ \textcolor{keyword}{typename}\ \_Traits,}
+\DoxyCodeLine{00700\ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ \_Unique\_keys\ =\ \_Traits::\_\_unique\_keys::value>}
+\DoxyCodeLine{00701\ \ \ \ \ \textcolor{keyword}{struct\ }\_Map\_base\ \{\ \};}
+\DoxyCodeLine{00702\ }
+\DoxyCodeLine{00704\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Key,\ \textcolor{keyword}{typename}\ \_Val,\ \textcolor{keyword}{typename}\ \_Alloc,\ \textcolor{keyword}{typename}\ \_Equal,}
+\DoxyCodeLine{00705\ \ \ \ \ \ \ \ \textcolor{keyword}{typename}\ \_Hash,\ \textcolor{keyword}{typename}\ \_RangeHash,\ \textcolor{keyword}{typename}\ \_Unused,}
+\DoxyCodeLine{00706\ \ \ \ \ \ \ \ \textcolor{keyword}{typename}\ \_RehashPolicy,\ \textcolor{keyword}{typename}\ \_Traits>}
+\DoxyCodeLine{00707\ \ \ \ \ \textcolor{keyword}{struct\ }\_Map\_base<\_Key,\ pair<const\ \_Key,\ \_Val>,\ \_Alloc,\ \_Select1st,\ \_Equal,}
+\DoxyCodeLine{00708\ \ \ \ \ \ \ \ \ \ \ \ \ \ \_Hash,\ \_RangeHash,\ \_Unused,\ \_RehashPolicy,\ \_Traits,\ \mbox{\hyperlink{_classes_2lib_2include_2stdbool_8h_a65e9886d74aaee76545e83dd09011727}{false}}>}
+\DoxyCodeLine{00709\ \ \ \ \ \{}
+\DoxyCodeLine{00710\ \ \ \ \ \ \ \textcolor{keyword}{using\ }mapped\_type\ =\ \_Val;}
+\DoxyCodeLine{00711\ \ \ \ \ \};}
+\DoxyCodeLine{00712\ }
+\DoxyCodeLine{00714\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Key,\ \textcolor{keyword}{typename}\ \_Val,\ \textcolor{keyword}{typename}\ \_Alloc,\ \textcolor{keyword}{typename}\ \_Equal,}
+\DoxyCodeLine{00715\ \ \ \ \ \ \ \ \textcolor{keyword}{typename}\ \_Hash,\ \textcolor{keyword}{typename}\ \_RangeHash,\ \textcolor{keyword}{typename}\ \_Unused,}
+\DoxyCodeLine{00716\ \ \ \ \ \ \ \ \textcolor{keyword}{typename}\ \_RehashPolicy,\ \textcolor{keyword}{typename}\ \_Traits>}
+\DoxyCodeLine{00717\ \ \ \ \ \textcolor{keyword}{struct\ }\_Map\_base<\_Key,\ pair<const\ \_Key,\ \_Val>,\ \_Alloc,\ \_Select1st,\ \_Equal,}
+\DoxyCodeLine{00718\ \ \ \ \ \ \ \ \ \ \ \ \ \ \_Hash,\ \_RangeHash,\ \_Unused,\ \_RehashPolicy,\ \_Traits,\ \mbox{\hyperlink{_classes_2lib_2include_2stdbool_8h_a41f9c5fb8b08eb5dc3edce4dcb37fee7}{true}}>}
+\DoxyCodeLine{00719\ \ \ \ \ \{}
+\DoxyCodeLine{00720\ \ \ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00721\ \ \ \ \ \ \ \textcolor{keyword}{using\ }\_\_hashtable\_base\ =\ \_Hashtable\_base<\_Key,\ pair<const\ \_Key,\ \_Val>,}
+\DoxyCodeLine{00722\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_Select1st,\ \_Equal,\ \_Hash,}
+\DoxyCodeLine{00723\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_RangeHash,\ \_Unused,}
+\DoxyCodeLine{00724\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_Traits>;}
+\DoxyCodeLine{00725\ }
+\DoxyCodeLine{00726\ \ \ \ \ \ \ \textcolor{keyword}{using\ }\_\_hashtable\ =\ \_Hashtable<\_Key,\ pair<const\ \_Key,\ \_Val>,\ \_Alloc,}
+\DoxyCodeLine{00727\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_Select1st,\ \_Equal,\ \_Hash,\ \_RangeHash,}
+\DoxyCodeLine{00728\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_Unused,\ \_RehashPolicy,\ \_Traits>;}
+\DoxyCodeLine{00729\ }
+\DoxyCodeLine{00730\ \ \ \ \ \ \ \textcolor{keyword}{using\ }\_\_hash\_code\ =\ \textcolor{keyword}{typename}\ \_\_hashtable\_base::\_\_hash\_code;}
+\DoxyCodeLine{00731\ }
+\DoxyCodeLine{00732\ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00733\ \ \ \ \ \ \ \textcolor{keyword}{using\ }key\_type\ =\ \textcolor{keyword}{typename}\ \_\_hashtable\_base::key\_type;}
+\DoxyCodeLine{00734\ \ \ \ \ \ \ \textcolor{keyword}{using\ }mapped\_type\ =\ \_Val;}
+\DoxyCodeLine{00735\ }
+\DoxyCodeLine{00736\ \ \ \ \ \ \ mapped\_type\&}
+\DoxyCodeLine{00737\ \ \ \ \ \ \ operator[](\textcolor{keyword}{const}\ key\_type\&\ \_\_k);}
+\DoxyCodeLine{00738\ }
+\DoxyCodeLine{00739\ \ \ \ \ \ \ mapped\_type\&}
+\DoxyCodeLine{00740\ \ \ \ \ \ \ operator[](key\_type\&\&\ \_\_k);}
+\DoxyCodeLine{00741\ }
+\DoxyCodeLine{00742\ \ \ \ \ \ \ \textcolor{comment}{//\ \_GLIBCXX\_RESOLVE\_LIB\_DEFECTS}}
+\DoxyCodeLine{00743\ \ \ \ \ \ \ \textcolor{comment}{//\ DR\ 761.\ unordered\_map\ needs\ an\ at()\ member\ function.}}
+\DoxyCodeLine{00744\ \ \ \ \ \ \ mapped\_type\&}
+\DoxyCodeLine{00745\ \ \ \ \ \ \ at(\textcolor{keyword}{const}\ key\_type\&\ \_\_k)}
+\DoxyCodeLine{00746\ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00747\ \ \ \ \ \textcolor{keyword}{auto}\ \_\_ite\ =\ \textcolor{keyword}{static\_cast<}\_\_hashtable*\textcolor{keyword}{>}(\textcolor{keyword}{this})-\/>\mbox{\hyperlink{toml_8hpp_a334e40fb57f310a5de10f332f1914bf4}{find}}(\_\_k);}
+\DoxyCodeLine{00748\ \ \ \ \ \textcolor{keywordflow}{if}\ (!\_\_ite.\_M\_cur)}
+\DoxyCodeLine{00749\ \ \ \ \ \ \ \_\_throw\_out\_of\_range(\mbox{\hyperlink{_classes_2lib_2include_2c_09_09_2x86__64-w64-mingw32_2bits_2c_09_09config_8h_ad90b1fa000da1666f104c4dd9c0d7f9b}{\_\_N}}(\textcolor{stringliteral}{"{}unordered\_map::at"{}}));}
+\DoxyCodeLine{00750\ \ \ \ \ \textcolor{keywordflow}{return}\ \_\_ite-\/>second;}
+\DoxyCodeLine{00751\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00752\ }
+\DoxyCodeLine{00753\ \ \ \ \ \ \ \textcolor{keyword}{const}\ mapped\_type\&}
+\DoxyCodeLine{00754\ \ \ \ \ \ \ at(\textcolor{keyword}{const}\ key\_type\&\ \_\_k)\textcolor{keyword}{\ const}}
+\DoxyCodeLine{00755\ \textcolor{keyword}{\ \ \ \ \ \ }\{}
+\DoxyCodeLine{00756\ \ \ \ \ \textcolor{keyword}{auto}\ \_\_ite\ =\ \textcolor{keyword}{static\_cast<}\textcolor{keyword}{const\ }\_\_hashtable*\textcolor{keyword}{>}(\textcolor{keyword}{this})-\/>\mbox{\hyperlink{toml_8hpp_a334e40fb57f310a5de10f332f1914bf4}{find}}(\_\_k);}
+\DoxyCodeLine{00757\ \ \ \ \ \textcolor{keywordflow}{if}\ (!\_\_ite.\_M\_cur)}
+\DoxyCodeLine{00758\ \ \ \ \ \ \ \_\_throw\_out\_of\_range(\mbox{\hyperlink{_classes_2lib_2include_2c_09_09_2x86__64-w64-mingw32_2bits_2c_09_09config_8h_ad90b1fa000da1666f104c4dd9c0d7f9b}{\_\_N}}(\textcolor{stringliteral}{"{}unordered\_map::at"{}}));}
+\DoxyCodeLine{00759\ \ \ \ \ \textcolor{keywordflow}{return}\ \_\_ite-\/>second;}
+\DoxyCodeLine{00760\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00761\ \ \ \ \ \};}
+\DoxyCodeLine{00762\ }
+\DoxyCodeLine{00763\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Key,\ \textcolor{keyword}{typename}\ \_Val,\ \textcolor{keyword}{typename}\ \_Alloc,\ \textcolor{keyword}{typename}\ \_Equal,}
+\DoxyCodeLine{00764\ \ \ \ \ \ \ \ \textcolor{keyword}{typename}\ \_Hash,\ \textcolor{keyword}{typename}\ \_RangeHash,\ \textcolor{keyword}{typename}\ \_Unused,}
+\DoxyCodeLine{00765\ \ \ \ \ \ \ \ \textcolor{keyword}{typename}\ \_RehashPolicy,\ \textcolor{keyword}{typename}\ \_Traits>}
+\DoxyCodeLine{00766\ \ \ \ \ \textcolor{keyword}{auto}}
+\DoxyCodeLine{00767\ \ \ \ \ \_Map\_base<\_Key,\ pair<const\ \_Key,\ \_Val>,\ \_Alloc,\ \_Select1st,\ \_Equal,}
+\DoxyCodeLine{00768\ \ \ \ \ \ \ \ \ \ \ \_Hash,\ \_RangeHash,\ \_Unused,\ \_RehashPolicy,\ \_Traits,\ \textcolor{keyword}{true}>::}
+\DoxyCodeLine{00769\ \ \ \ \ operator[](\textcolor{keyword}{const}\ key\_type\&\ \_\_k)}
+\DoxyCodeLine{00770\ \ \ \ \ -\/>\ mapped\_type\&}
+\DoxyCodeLine{00771\ \ \ \ \ \{}
+\DoxyCodeLine{00772\ \ \ \ \ \ \ \_\_hashtable*\ \_\_h\ =\ \textcolor{keyword}{static\_cast<}\_\_hashtable*\textcolor{keyword}{>}(\textcolor{keyword}{this});}
+\DoxyCodeLine{00773\ \ \ \ \ \ \ \_\_hash\_code\ \_\_code\ =\ \_\_h-\/>\_M\_hash\_code(\_\_k);}
+\DoxyCodeLine{00774\ \ \ \ \ \ \ std::size\_t\ \_\_bkt\ =\ \_\_h-\/>\_M\_bucket\_index(\_\_code);}
+\DoxyCodeLine{00775\ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\textcolor{keyword}{auto}\ \_\_node\ =\ \_\_h-\/>\_M\_find\_node(\_\_bkt,\ \_\_k,\ \_\_code))}
+\DoxyCodeLine{00776\ \ \ \ \ \textcolor{keywordflow}{return}\ \_\_node-\/>\_M\_v().second;}
+\DoxyCodeLine{00777\ }
+\DoxyCodeLine{00778\ \ \ \ \ \ \ \textcolor{keyword}{typename}\ \_\_hashtable::\_Scoped\_node\ \_\_node\ \{}
+\DoxyCodeLine{00779\ \ \ \ \ \_\_h,}
+\DoxyCodeLine{00780\ \ \ \ \ std::piecewise\_construct,}
+\DoxyCodeLine{00781\ \ \ \ \ std::tuple<const\ key\_type\&>(\_\_k),}
+\DoxyCodeLine{00782\ \ \ \ \ std::tuple<>()}
+\DoxyCodeLine{00783\ \ \ \ \ \ \ \};}
+\DoxyCodeLine{00784\ \ \ \ \ \ \ \textcolor{keyword}{auto}\ \_\_pos}
+\DoxyCodeLine{00785\ \ \ \ \ =\ \_\_h-\/>\_M\_insert\_unique\_node(\_\_bkt,\ \_\_code,\ \_\_node.\_M\_node);}
+\DoxyCodeLine{00786\ \ \ \ \ \ \ \_\_node.\_M\_node\ =\ \textcolor{keyword}{nullptr};}
+\DoxyCodeLine{00787\ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \_\_pos-\/>second;}
+\DoxyCodeLine{00788\ \ \ \ \ \}}
+\DoxyCodeLine{00789\ }
+\DoxyCodeLine{00790\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Key,\ \textcolor{keyword}{typename}\ \_Val,\ \textcolor{keyword}{typename}\ \_Alloc,\ \textcolor{keyword}{typename}\ \_Equal,}
+\DoxyCodeLine{00791\ \ \ \ \ \ \ \ \textcolor{keyword}{typename}\ \_Hash,\ \textcolor{keyword}{typename}\ \_RangeHash,\ \textcolor{keyword}{typename}\ \_Unused,}
+\DoxyCodeLine{00792\ \ \ \ \ \ \ \ \textcolor{keyword}{typename}\ \_RehashPolicy,\ \textcolor{keyword}{typename}\ \_Traits>}
+\DoxyCodeLine{00793\ \ \ \ \ \textcolor{keyword}{auto}}
+\DoxyCodeLine{00794\ \ \ \ \ \_Map\_base<\_Key,\ pair<const\ \_Key,\ \_Val>,\ \_Alloc,\ \_Select1st,\ \_Equal,}
+\DoxyCodeLine{00795\ \ \ \ \ \ \ \ \ \ \ \_Hash,\ \_RangeHash,\ \_Unused,\ \_RehashPolicy,\ \_Traits,\ \textcolor{keyword}{true}>::}
+\DoxyCodeLine{00796\ \ \ \ \ operator[](key\_type\&\&\ \_\_k)}
+\DoxyCodeLine{00797\ \ \ \ \ -\/>\ mapped\_type\&}
+\DoxyCodeLine{00798\ \ \ \ \ \{}
+\DoxyCodeLine{00799\ \ \ \ \ \ \ \_\_hashtable*\ \_\_h\ =\ \textcolor{keyword}{static\_cast<}\_\_hashtable*\textcolor{keyword}{>}(\textcolor{keyword}{this});}
+\DoxyCodeLine{00800\ \ \ \ \ \ \ \_\_hash\_code\ \_\_code\ =\ \_\_h-\/>\_M\_hash\_code(\_\_k);}
+\DoxyCodeLine{00801\ \ \ \ \ \ \ std::size\_t\ \_\_bkt\ =\ \_\_h-\/>\_M\_bucket\_index(\_\_code);}
+\DoxyCodeLine{00802\ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\textcolor{keyword}{auto}\ \_\_node\ =\ \_\_h-\/>\_M\_find\_node(\_\_bkt,\ \_\_k,\ \_\_code))}
+\DoxyCodeLine{00803\ \ \ \ \ \textcolor{keywordflow}{return}\ \_\_node-\/>\_M\_v().second;}
+\DoxyCodeLine{00804\ }
+\DoxyCodeLine{00805\ \ \ \ \ \ \ \textcolor{keyword}{typename}\ \_\_hashtable::\_Scoped\_node\ \_\_node\ \{}
+\DoxyCodeLine{00806\ \ \ \ \ \_\_h,}
+\DoxyCodeLine{00807\ \ \ \ \ std::piecewise\_construct,}
+\DoxyCodeLine{00808\ \ \ \ \ std::forward\_as\_tuple(\mbox{\hyperlink{namespacestd_ac7095819f6a8da64d69b1ee3029c52be}{std::move}}(\_\_k)),}
+\DoxyCodeLine{00809\ \ \ \ \ std::tuple<>()}
+\DoxyCodeLine{00810\ \ \ \ \ \ \ \};}
+\DoxyCodeLine{00811\ \ \ \ \ \ \ \textcolor{keyword}{auto}\ \_\_pos}
+\DoxyCodeLine{00812\ \ \ \ \ =\ \_\_h-\/>\_M\_insert\_unique\_node(\_\_bkt,\ \_\_code,\ \_\_node.\_M\_node);}
+\DoxyCodeLine{00813\ \ \ \ \ \ \ \_\_node.\_M\_node\ =\ \textcolor{keyword}{nullptr};}
+\DoxyCodeLine{00814\ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \_\_pos-\/>second;}
+\DoxyCodeLine{00815\ \ \ \ \ \}}
+\DoxyCodeLine{00816\ }
+\DoxyCodeLine{00817\ \ \ \textcolor{comment}{//\ Partial\ specialization\ for\ unordered\_map<const\ T,\ U>,\ see\ PR\ 104174.}}
+\DoxyCodeLine{00818\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Key,\ \textcolor{keyword}{typename}\ \_Val,\ \textcolor{keyword}{typename}\ \_Alloc,\ \textcolor{keyword}{typename}\ \_Equal,}
+\DoxyCodeLine{00819\ \ \ \ \ \ \ \ \textcolor{keyword}{typename}\ \_Hash,\ \textcolor{keyword}{typename}\ \_RangeHash,\ \textcolor{keyword}{typename}\ \_Unused,}
+\DoxyCodeLine{00820\ \ \ \ \ \ \ \ \textcolor{keyword}{typename}\ \_RehashPolicy,\ \textcolor{keyword}{typename}\ \_Traits,\ \textcolor{keywordtype}{bool}\ \_\_uniq>}
+\DoxyCodeLine{00821\ \ \ \ \ \textcolor{keyword}{struct\ }\_Map\_base<const\ \_Key,\ pair<const\ \_Key,\ \_Val>,}
+\DoxyCodeLine{00822\ \ \ \ \ \ \ \ \ \ \ \ \ \ \_Alloc,\ \_Select1st,\ \_Equal,\ \_Hash,}
+\DoxyCodeLine{00823\ \ \ \ \ \ \ \ \ \ \ \ \ \ \_RangeHash,\ \_Unused,\ \_RehashPolicy,\ \_Traits,\ \_\_uniq>}
+\DoxyCodeLine{00824\ \ \ \ \ :\ \_Map\_base<\_Key,\ pair<const\ \_Key,\ \_Val>,\ \_Alloc,\ \_Select1st,\ \_Equal,\ \_Hash,}
+\DoxyCodeLine{00825\ \ \ \ \ \ \ \ \ \_RangeHash,\ \_Unused,\ \_RehashPolicy,\ \_Traits,\ \_\_uniq>}
+\DoxyCodeLine{00826\ \ \ \ \ \{\ \};}
+\DoxyCodeLine{00827\ }
+\DoxyCodeLine{00833\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Key,\ \textcolor{keyword}{typename}\ \_Value,\ \textcolor{keyword}{typename}\ \_Alloc,}
+\DoxyCodeLine{00834\ \ \ \ \ \ \ \ \textcolor{keyword}{typename}\ \_ExtractKey,\ \textcolor{keyword}{typename}\ \_Equal,}
+\DoxyCodeLine{00835\ \ \ \ \ \ \ \ \textcolor{keyword}{typename}\ \_Hash,\ \textcolor{keyword}{typename}\ \_RangeHash,\ \textcolor{keyword}{typename}\ \_Unused,}
+\DoxyCodeLine{00836\ \ \ \ \ \ \ \ \textcolor{keyword}{typename}\ \_RehashPolicy,\ \textcolor{keyword}{typename}\ \_Traits>}
+\DoxyCodeLine{00837\ \ \ \ \ \textcolor{keyword}{struct\ }\_Insert\_base}
+\DoxyCodeLine{00838\ \ \ \ \ \{}
+\DoxyCodeLine{00839\ \ \ \ \ \textcolor{keyword}{protected}:}
+\DoxyCodeLine{00840\ \ \ \ \ \ \ \textcolor{keyword}{using\ }\_\_hashtable\_base\ =\ \_Hashtable\_base<\_Key,\ \_Value,\ \_ExtractKey,}
+\DoxyCodeLine{00841\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_Equal,\ \_Hash,\ \_RangeHash,}
+\DoxyCodeLine{00842\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_Unused,\ \_Traits>;}
+\DoxyCodeLine{00843\ }
+\DoxyCodeLine{00844\ \ \ \ \ \ \ \textcolor{keyword}{using\ }\_\_hashtable\ =\ \_Hashtable<\_Key,\ \_Value,\ \_Alloc,\ \_ExtractKey,\ \_Equal,}
+\DoxyCodeLine{00845\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_Hash,\ \_RangeHash,}
+\DoxyCodeLine{00846\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_Unused,\ \_RehashPolicy,\ \_Traits>;}
+\DoxyCodeLine{00847\ }
+\DoxyCodeLine{00848\ \ \ \ \ \ \ \textcolor{keyword}{using\ }\_\_hash\_cached\ =\ \textcolor{keyword}{typename}\ \_Traits::\_\_hash\_cached;}
+\DoxyCodeLine{00849\ \ \ \ \ \ \ \textcolor{keyword}{using\ }\_\_constant\_iterators\ =\ \textcolor{keyword}{typename}\ \_Traits::\_\_constant\_iterators;}
+\DoxyCodeLine{00850\ }
+\DoxyCodeLine{00851\ \ \ \ \ \ \ \textcolor{keyword}{using\ }\_\_hashtable\_alloc\ =\ \_Hashtable\_alloc<}
+\DoxyCodeLine{00852\ \ \ \ \ \_\_alloc\_rebind<\_Alloc,\ \_Hash\_node<\_Value,}
+\DoxyCodeLine{00853\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_\_hash\_cached::value>>>;}
+\DoxyCodeLine{00854\ }
+\DoxyCodeLine{00855\ \ \ \ \ \ \ \textcolor{keyword}{using\ }value\_type\ =\ \textcolor{keyword}{typename}\ \_\_hashtable\_base::value\_type;}
+\DoxyCodeLine{00856\ \ \ \ \ \ \ \textcolor{keyword}{using\ }size\_type\ =\ \textcolor{keyword}{typename}\ \_\_hashtable\_base::size\_type;}
+\DoxyCodeLine{00857\ }
+\DoxyCodeLine{00858\ \ \ \ \ \ \ \textcolor{keyword}{using\ }\_\_unique\_keys\ =\ \textcolor{keyword}{typename}\ \_Traits::\_\_unique\_keys;}
+\DoxyCodeLine{00859\ \ \ \ \ \ \ \textcolor{keyword}{using\ }\_\_node\_alloc\_type\ =\ \textcolor{keyword}{typename}\ \_\_hashtable\_alloc::\_\_node\_alloc\_type;}
+\DoxyCodeLine{00860\ \ \ \ \ \ \ \textcolor{keyword}{using\ }\_\_node\_gen\_type\ =\ \_AllocNode<\_\_node\_alloc\_type>;}
+\DoxyCodeLine{00861\ }
+\DoxyCodeLine{00862\ \ \ \ \ \ \ \_\_hashtable\&}
+\DoxyCodeLine{00863\ \ \ \ \ \ \ \_M\_conjure\_hashtable()}
+\DoxyCodeLine{00864\ \ \ \ \ \ \ \{\ \textcolor{keywordflow}{return}\ *(\textcolor{keyword}{static\_cast<}\_\_hashtable*\textcolor{keyword}{>}(\textcolor{keyword}{this}));\ \}}
+\DoxyCodeLine{00865\ }
+\DoxyCodeLine{00866\ \ \ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_InputIterator,\ \textcolor{keyword}{typename}\ \_NodeGetter>}
+\DoxyCodeLine{00867\ \ \ \ \ \textcolor{keywordtype}{void}}
+\DoxyCodeLine{00868\ \ \ \ \ \_M\_insert\_range(\_InputIterator\ \_\_first,\ \_InputIterator\ \_\_last,}
+\DoxyCodeLine{00869\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \_NodeGetter\&,\ true\_type\ \_\_uks);}
+\DoxyCodeLine{00870\ }
+\DoxyCodeLine{00871\ \ \ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_InputIterator,\ \textcolor{keyword}{typename}\ \_NodeGetter>}
+\DoxyCodeLine{00872\ \ \ \ \ \textcolor{keywordtype}{void}}
+\DoxyCodeLine{00873\ \ \ \ \ \_M\_insert\_range(\_InputIterator\ \_\_first,\ \_InputIterator\ \_\_last,}
+\DoxyCodeLine{00874\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \_NodeGetter\&,\ false\_type\ \_\_uks);}
+\DoxyCodeLine{00875\ }
+\DoxyCodeLine{00876\ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00877\ \ \ \ \ \ \ \textcolor{keyword}{using\ }iterator\ =\ \_Node\_iterator<\_Value,\ \_\_constant\_iterators::value,}
+\DoxyCodeLine{00878\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_\_hash\_cached::value>;}
+\DoxyCodeLine{00879\ }
+\DoxyCodeLine{00880\ \ \ \ \ \ \ \textcolor{keyword}{using\ }const\_iterator\ =\ \_Node\_const\_iterator<\_Value,}
+\DoxyCodeLine{00881\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_\_constant\_iterators::value,}
+\DoxyCodeLine{00882\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_\_hash\_cached::value>;}
+\DoxyCodeLine{00883\ }
+\DoxyCodeLine{00884\ \ \ \ \ \ \ \textcolor{keyword}{using\ }\_\_ireturn\_type\ =\ \_\_conditional\_t<\_\_unique\_keys::value,}
+\DoxyCodeLine{00885\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::pair<iterator,\ bool>,}
+\DoxyCodeLine{00886\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ iterator>;}
+\DoxyCodeLine{00887\ }
+\DoxyCodeLine{00888\ \ \ \ \ \ \ \_\_ireturn\_type}
+\DoxyCodeLine{00889\ \ \ \ \ \ \ insert(\textcolor{keyword}{const}\ value\_type\&\ \_\_v)}
+\DoxyCodeLine{00890\ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00891\ \ \ \ \ \_\_hashtable\&\ \_\_h\ =\ \_M\_conjure\_hashtable();}
+\DoxyCodeLine{00892\ \ \ \ \ \_\_node\_gen\_type\ \_\_node\_gen(\_\_h);}
+\DoxyCodeLine{00893\ \ \ \ \ \textcolor{keywordflow}{return}\ \_\_h.\_M\_insert(\_\_v,\ \_\_node\_gen,\ \_\_unique\_keys\{\});}
+\DoxyCodeLine{00894\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00895\ }
+\DoxyCodeLine{00896\ \ \ \ \ \ \ iterator}
+\DoxyCodeLine{00897\ \ \ \ \ \ \ insert(const\_iterator\ \_\_hint,\ \textcolor{keyword}{const}\ value\_type\&\ \_\_v)}
+\DoxyCodeLine{00898\ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00899\ \ \ \ \ \_\_hashtable\&\ \_\_h\ =\ \_M\_conjure\_hashtable();}
+\DoxyCodeLine{00900\ \ \ \ \ \_\_node\_gen\_type\ \_\_node\_gen(\_\_h);\ \ \ \ }
+\DoxyCodeLine{00901\ \ \ \ \ \textcolor{keywordflow}{return}\ \_\_h.\_M\_insert(\_\_hint,\ \_\_v,\ \_\_node\_gen,\ \_\_unique\_keys\{\});}
+\DoxyCodeLine{00902\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00903\ }
+\DoxyCodeLine{00904\ \ \ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_KType,\ \textcolor{keyword}{typename}...\ \_Args>}
+\DoxyCodeLine{00905\ \ \ \ \ std::pair<iterator,\ bool>}
+\DoxyCodeLine{00906\ \ \ \ \ try\_emplace(const\_iterator,\ \_KType\&\&\ \_\_k,\ \_Args\&\&...\ \_\_args)}
+\DoxyCodeLine{00907\ \ \ \ \ \{}
+\DoxyCodeLine{00908\ \ \ \ \ \ \ \_\_hashtable\&\ \_\_h\ =\ \_M\_conjure\_hashtable();}
+\DoxyCodeLine{00909\ \ \ \ \ \ \ \textcolor{keyword}{auto}\ \_\_code\ =\ \_\_h.\_M\_hash\_code(\_\_k);}
+\DoxyCodeLine{00910\ \ \ \ \ \ \ std::size\_t\ \_\_bkt\ =\ \_\_h.\_M\_bucket\_index(\_\_code);}
+\DoxyCodeLine{00911\ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\textcolor{keyword}{auto}\ \_\_node\ =\ \_\_h.\_M\_find\_node(\_\_bkt,\ \_\_k,\ \_\_code))}
+\DoxyCodeLine{00912\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \{\ iterator(\_\_node),\ \textcolor{keyword}{false}\ \};}
+\DoxyCodeLine{00913\ }
+\DoxyCodeLine{00914\ \ \ \ \ \ \ \textcolor{keyword}{typename}\ \_\_hashtable::\_Scoped\_node\ \_\_node\ \{}
+\DoxyCodeLine{00915\ \ \ \ \ \ \ \ \ \&\_\_h,}
+\DoxyCodeLine{00916\ \ \ \ \ \ \ \ \ std::piecewise\_construct,}
+\DoxyCodeLine{00917\ \ \ \ \ \ \ \ \ std::forward\_as\_tuple(std::forward<\_KType>(\_\_k)),}
+\DoxyCodeLine{00918\ \ \ \ \ \ \ \ \ std::forward\_as\_tuple(std::forward<\_Args>(\_\_args)...)}
+\DoxyCodeLine{00919\ \ \ \ \ \ \ \ \ \};}
+\DoxyCodeLine{00920\ \ \ \ \ \ \ \textcolor{keyword}{auto}\ \_\_it}
+\DoxyCodeLine{00921\ \ \ \ \ \ \ \ \ =\ \_\_h.\_M\_insert\_unique\_node(\_\_bkt,\ \_\_code,\ \_\_node.\_M\_node);}
+\DoxyCodeLine{00922\ \ \ \ \ \ \ \_\_node.\_M\_node\ =\ \textcolor{keyword}{nullptr};}
+\DoxyCodeLine{00923\ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \{\ \_\_it,\ \textcolor{keyword}{true}\ \};}
+\DoxyCodeLine{00924\ \ \ \ \ \}}
+\DoxyCodeLine{00925\ }
+\DoxyCodeLine{00926\ \ \ \ \ \ \ \textcolor{keywordtype}{void}}
+\DoxyCodeLine{00927\ \ \ \ \ \ \ insert(initializer\_list<value\_type>\ \_\_l)}
+\DoxyCodeLine{00928\ \ \ \ \ \ \ \{\ this-\/>insert(\_\_l.begin(),\ \_\_l.end());\ \}}
+\DoxyCodeLine{00929\ }
+\DoxyCodeLine{00930\ \ \ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_InputIterator>}
+\DoxyCodeLine{00931\ \ \ \ \ \textcolor{keywordtype}{void}}
+\DoxyCodeLine{00932\ \ \ \ \ insert(\_InputIterator\ \_\_first,\ \_InputIterator\ \_\_last)}
+\DoxyCodeLine{00933\ \ \ \ \ \{}
+\DoxyCodeLine{00934\ \ \ \ \ \ \ \_\_hashtable\&\ \_\_h\ =\ \_M\_conjure\_hashtable();}
+\DoxyCodeLine{00935\ \ \ \ \ \ \ \_\_node\_gen\_type\ \_\_node\_gen(\_\_h);}
+\DoxyCodeLine{00936\ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \_M\_insert\_range(\_\_first,\ \_\_last,\ \_\_node\_gen,\ \_\_unique\_keys\{\});}
+\DoxyCodeLine{00937\ \ \ \ \ \}}
+\DoxyCodeLine{00938\ \ \ \ \ \};}
+\DoxyCodeLine{00939\ }
+\DoxyCodeLine{00940\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Key,\ \textcolor{keyword}{typename}\ \_Value,\ \textcolor{keyword}{typename}\ \_Alloc,}
+\DoxyCodeLine{00941\ \ \ \ \ \ \ \ \textcolor{keyword}{typename}\ \_ExtractKey,\ \textcolor{keyword}{typename}\ \_Equal,}
+\DoxyCodeLine{00942\ \ \ \ \ \ \ \ \textcolor{keyword}{typename}\ \_Hash,\ \textcolor{keyword}{typename}\ \_RangeHash,\ \textcolor{keyword}{typename}\ \_Unused,}
+\DoxyCodeLine{00943\ \ \ \ \ \ \ \ \textcolor{keyword}{typename}\ \_RehashPolicy,\ \textcolor{keyword}{typename}\ \_Traits>}
+\DoxyCodeLine{00944\ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_InputIterator,\ \textcolor{keyword}{typename}\ \_NodeGetter>}
+\DoxyCodeLine{00945\ \ \ \ \ \ \ \textcolor{keywordtype}{void}}
+\DoxyCodeLine{00946\ \ \ \ \ \ \ \_Insert\_base<\_Key,\ \_Value,\ \_Alloc,\ \_ExtractKey,\ \_Equal,}
+\DoxyCodeLine{00947\ \ \ \ \ \ \ \ \ \ \ \ \_Hash,\ \_RangeHash,\ \_Unused,}
+\DoxyCodeLine{00948\ \ \ \ \ \ \ \ \ \ \ \ \_RehashPolicy,\ \_Traits>::}
+\DoxyCodeLine{00949\ \ \ \ \ \ \ \_M\_insert\_range(\_InputIterator\ \_\_first,\ \_InputIterator\ \_\_last,}
+\DoxyCodeLine{00950\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \_NodeGetter\&\ \_\_node\_gen,\ true\_type\ \_\_uks)}
+\DoxyCodeLine{00951\ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00952\ \ \ \ \ \_\_hashtable\&\ \_\_h\ =\ \_M\_conjure\_hashtable();}
+\DoxyCodeLine{00953\ \ \ \ \ \textcolor{keywordflow}{for}\ (;\ \_\_first\ !=\ \_\_last;\ ++\_\_first)}
+\DoxyCodeLine{00954\ \ \ \ \ \ \ \_\_h.\_M\_insert(*\_\_first,\ \_\_node\_gen,\ \_\_uks);}
+\DoxyCodeLine{00955\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00956\ }
+\DoxyCodeLine{00957\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Key,\ \textcolor{keyword}{typename}\ \_Value,\ \textcolor{keyword}{typename}\ \_Alloc,}
+\DoxyCodeLine{00958\ \ \ \ \ \ \ \ \textcolor{keyword}{typename}\ \_ExtractKey,\ \textcolor{keyword}{typename}\ \_Equal,}
+\DoxyCodeLine{00959\ \ \ \ \ \ \ \ \textcolor{keyword}{typename}\ \_Hash,\ \textcolor{keyword}{typename}\ \_RangeHash,\ \textcolor{keyword}{typename}\ \_Unused,}
+\DoxyCodeLine{00960\ \ \ \ \ \ \ \ \textcolor{keyword}{typename}\ \_RehashPolicy,\ \textcolor{keyword}{typename}\ \_Traits>}
+\DoxyCodeLine{00961\ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_InputIterator,\ \textcolor{keyword}{typename}\ \_NodeGetter>}
+\DoxyCodeLine{00962\ \ \ \ \ \ \ \textcolor{keywordtype}{void}}
+\DoxyCodeLine{00963\ \ \ \ \ \ \ \_Insert\_base<\_Key,\ \_Value,\ \_Alloc,\ \_ExtractKey,\ \_Equal,}
+\DoxyCodeLine{00964\ \ \ \ \ \ \ \ \ \ \ \ \_Hash,\ \_RangeHash,\ \_Unused,}
+\DoxyCodeLine{00965\ \ \ \ \ \ \ \ \ \ \ \ \_RehashPolicy,\ \_Traits>::}
+\DoxyCodeLine{00966\ \ \ \ \ \ \ \_M\_insert\_range(\_InputIterator\ \_\_first,\ \_InputIterator\ \_\_last,}
+\DoxyCodeLine{00967\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \_NodeGetter\&\ \_\_node\_gen,\ false\_type\ \_\_uks)}
+\DoxyCodeLine{00968\ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00969\ \ \ \ \ \textcolor{keyword}{using\ }\_\_rehash\_type\ =\ \textcolor{keyword}{typename}\ \_\_hashtable::\_\_rehash\_type;}
+\DoxyCodeLine{00970\ \ \ \ \ \textcolor{keyword}{using\ }\_\_rehash\_state\ =\ \textcolor{keyword}{typename}\ \_\_hashtable::\_\_rehash\_state;}
+\DoxyCodeLine{00971\ \ \ \ \ \textcolor{keyword}{using\ }pair\_type\ =\ std::pair<bool,\ std::size\_t>;}
+\DoxyCodeLine{00972\ }
+\DoxyCodeLine{00973\ \ \ \ \ size\_type\ \_\_n\_elt\ =\ \_\_detail::\_\_distance\_fw(\_\_first,\ \_\_last);}
+\DoxyCodeLine{00974\ \ \ \ \ \textcolor{keywordflow}{if}\ (\_\_n\_elt\ ==\ 0)}
+\DoxyCodeLine{00975\ \ \ \ \ \ \ \textcolor{keywordflow}{return};}
+\DoxyCodeLine{00976\ }
+\DoxyCodeLine{00977\ \ \ \ \ \_\_hashtable\&\ \_\_h\ =\ \_M\_conjure\_hashtable();}
+\DoxyCodeLine{00978\ \ \ \ \ \_\_rehash\_type\&\ \_\_rehash\ =\ \_\_h.\_M\_rehash\_policy;}
+\DoxyCodeLine{00979\ \ \ \ \ \textcolor{keyword}{const}\ \_\_rehash\_state\&\ \_\_saved\_state\ =\ \_\_rehash.\_M\_state();}
+\DoxyCodeLine{00980\ \ \ \ \ pair\_type\ \_\_do\_rehash\ =\ \_\_rehash.\_M\_need\_rehash(\_\_h.\_M\_bucket\_count,}
+\DoxyCodeLine{00981\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_\_h.\_M\_element\_count,}
+\DoxyCodeLine{00982\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_\_n\_elt);}
+\DoxyCodeLine{00983\ }
+\DoxyCodeLine{00984\ \ \ \ \ \textcolor{keywordflow}{if}\ (\_\_do\_rehash.first)}
+\DoxyCodeLine{00985\ \ \ \ \ \ \ \_\_h.\_M\_rehash(\_\_do\_rehash.second,\ \_\_saved\_state);}
+\DoxyCodeLine{00986\ }
+\DoxyCodeLine{00987\ \ \ \ \ \textcolor{keywordflow}{for}\ (;\ \_\_first\ !=\ \_\_last;\ ++\_\_first)}
+\DoxyCodeLine{00988\ \ \ \ \ \ \ \_\_h.\_M\_insert(*\_\_first,\ \_\_node\_gen,\ \_\_uks);}
+\DoxyCodeLine{00989\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00990\ }
+\DoxyCodeLine{00997\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Key,\ \textcolor{keyword}{typename}\ \_Value,\ \textcolor{keyword}{typename}\ \_Alloc,}
+\DoxyCodeLine{00998\ \ \ \ \ \ \ \ \textcolor{keyword}{typename}\ \_ExtractKey,\ \textcolor{keyword}{typename}\ \_Equal,}
+\DoxyCodeLine{00999\ \ \ \ \ \ \ \ \textcolor{keyword}{typename}\ \_Hash,\ \textcolor{keyword}{typename}\ \_RangeHash,\ \textcolor{keyword}{typename}\ \_Unused,}
+\DoxyCodeLine{01000\ \ \ \ \ \ \ \ \textcolor{keyword}{typename}\ \_RehashPolicy,\ \textcolor{keyword}{typename}\ \_Traits,}
+\DoxyCodeLine{01001\ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ \_Constant\_iterators\ =\ \_Traits::\_\_constant\_iterators::value>}
+\DoxyCodeLine{01002\ \ \ \ \ \textcolor{keyword}{struct\ }\_Insert;}
+\DoxyCodeLine{01003\ }
+\DoxyCodeLine{01005\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Key,\ \textcolor{keyword}{typename}\ \_Value,\ \textcolor{keyword}{typename}\ \_Alloc,}
+\DoxyCodeLine{01006\ \ \ \ \ \ \ \ \textcolor{keyword}{typename}\ \_ExtractKey,\ \textcolor{keyword}{typename}\ \_Equal,}
+\DoxyCodeLine{01007\ \ \ \ \ \ \ \ \textcolor{keyword}{typename}\ \_Hash,\ \textcolor{keyword}{typename}\ \_RangeHash,\ \textcolor{keyword}{typename}\ \_Unused,}
+\DoxyCodeLine{01008\ \ \ \ \ \ \ \ \textcolor{keyword}{typename}\ \_RehashPolicy,\ \textcolor{keyword}{typename}\ \_Traits>}
+\DoxyCodeLine{01009\ \ \ \ \ \textcolor{keyword}{struct\ }\_Insert<\_Key,\ \_Value,\ \_Alloc,\ \_ExtractKey,\ \_Equal,}
+\DoxyCodeLine{01010\ \ \ \ \ \ \ \ \ \ \ \ \_Hash,\ \_RangeHash,\ \_Unused,}
+\DoxyCodeLine{01011\ \ \ \ \ \ \ \ \ \ \ \ \_RehashPolicy,\ \_Traits,\ \mbox{\hyperlink{_classes_2lib_2include_2stdbool_8h_a41f9c5fb8b08eb5dc3edce4dcb37fee7}{true}}>}
+\DoxyCodeLine{01012\ \ \ \ \ :\ \textcolor{keyword}{public}\ \_Insert\_base<\_Key,\ \_Value,\ \_Alloc,\ \_ExtractKey,\ \_Equal,}
+\DoxyCodeLine{01013\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_Hash,\ \_RangeHash,\ \_Unused,\ \_RehashPolicy,\ \_Traits>}
+\DoxyCodeLine{01014\ \ \ \ \ \{}
+\DoxyCodeLine{01015\ \ \ \ \ \ \ \textcolor{keyword}{using\ }\_\_base\_type\ =\ \_Insert\_base<\_Key,\ \_Value,\ \_Alloc,\ \_ExtractKey,}
+\DoxyCodeLine{01016\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_Equal,\ \_Hash,\ \_RangeHash,\ \_Unused,}
+\DoxyCodeLine{01017\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_RehashPolicy,\ \_Traits>;}
+\DoxyCodeLine{01018\ }
+\DoxyCodeLine{01019\ \ \ \ \ \ \ \textcolor{keyword}{using\ }value\_type\ =\ \textcolor{keyword}{typename}\ \_\_base\_type::value\_type;}
+\DoxyCodeLine{01020\ \ \ \ \ \ \ \textcolor{keyword}{using\ }iterator\ =\ \textcolor{keyword}{typename}\ \_\_base\_type::iterator;}
+\DoxyCodeLine{01021\ \ \ \ \ \ \ \textcolor{keyword}{using\ }const\_iterator\ =\ \ \textcolor{keyword}{typename}\ \_\_base\_type::const\_iterator;}
+\DoxyCodeLine{01022\ \ \ \ \ \ \ \textcolor{keyword}{using\ }\_\_ireturn\_type\ =\ \textcolor{keyword}{typename}\ \_\_base\_type::\_\_ireturn\_type;}
+\DoxyCodeLine{01023\ }
+\DoxyCodeLine{01024\ \ \ \ \ \ \ \textcolor{keyword}{using\ }\_\_unique\_keys\ =\ \textcolor{keyword}{typename}\ \_\_base\_type::\_\_unique\_keys;}
+\DoxyCodeLine{01025\ \ \ \ \ \ \ \textcolor{keyword}{using\ }\_\_hashtable\ =\ \textcolor{keyword}{typename}\ \_\_base\_type::\_\_hashtable;}
+\DoxyCodeLine{01026\ \ \ \ \ \ \ \textcolor{keyword}{using\ }\_\_node\_gen\_type\ =\ \textcolor{keyword}{typename}\ \_\_base\_type::\_\_node\_gen\_type;}
+\DoxyCodeLine{01027\ }
+\DoxyCodeLine{01028\ \ \ \ \ \ \ \textcolor{keyword}{using\ }\_\_base\_type::insert;}
+\DoxyCodeLine{01029\ }
+\DoxyCodeLine{01030\ \ \ \ \ \ \ \_\_ireturn\_type}
+\DoxyCodeLine{01031\ \ \ \ \ \ \ insert(value\_type\&\&\ \_\_v)}
+\DoxyCodeLine{01032\ \ \ \ \ \ \ \{}
+\DoxyCodeLine{01033\ \ \ \ \ \_\_hashtable\&\ \_\_h\ =\ this-\/>\_M\_conjure\_hashtable();}
+\DoxyCodeLine{01034\ \ \ \ \ \_\_node\_gen\_type\ \_\_node\_gen(\_\_h);}
+\DoxyCodeLine{01035\ \ \ \ \ \textcolor{keywordflow}{return}\ \_\_h.\_M\_insert(\mbox{\hyperlink{namespacestd_ac7095819f6a8da64d69b1ee3029c52be}{std::move}}(\_\_v),\ \_\_node\_gen,\ \_\_unique\_keys\{\});}
+\DoxyCodeLine{01036\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{01037\ }
+\DoxyCodeLine{01038\ \ \ \ \ \ \ iterator}
+\DoxyCodeLine{01039\ \ \ \ \ \ \ insert(const\_iterator\ \_\_hint,\ value\_type\&\&\ \_\_v)}
+\DoxyCodeLine{01040\ \ \ \ \ \ \ \{}
+\DoxyCodeLine{01041\ \ \ \ \ \_\_hashtable\&\ \_\_h\ =\ this-\/>\_M\_conjure\_hashtable();}
+\DoxyCodeLine{01042\ \ \ \ \ \_\_node\_gen\_type\ \_\_node\_gen(\_\_h);}
+\DoxyCodeLine{01043\ \ \ \ \ \textcolor{keywordflow}{return}\ \_\_h.\_M\_insert(\_\_hint,\ \mbox{\hyperlink{namespacestd_ac7095819f6a8da64d69b1ee3029c52be}{std::move}}(\_\_v),\ \_\_node\_gen,}
+\DoxyCodeLine{01044\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_\_unique\_keys\{\});}
+\DoxyCodeLine{01045\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{01046\ \ \ \ \ \};}
+\DoxyCodeLine{01047\ }
+\DoxyCodeLine{01049\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Key,\ \textcolor{keyword}{typename}\ \_Value,\ \textcolor{keyword}{typename}\ \_Alloc,}
+\DoxyCodeLine{01050\ \ \ \ \ \ \ \ \textcolor{keyword}{typename}\ \_ExtractKey,\ \textcolor{keyword}{typename}\ \_Equal,}
+\DoxyCodeLine{01051\ \ \ \ \ \ \ \ \textcolor{keyword}{typename}\ \_Hash,\ \textcolor{keyword}{typename}\ \_RangeHash,\ \textcolor{keyword}{typename}\ \_Unused,}
+\DoxyCodeLine{01052\ \ \ \ \ \ \ \ \textcolor{keyword}{typename}\ \_RehashPolicy,\ \textcolor{keyword}{typename}\ \_Traits>}
+\DoxyCodeLine{01053\ \ \ \ \ \textcolor{keyword}{struct\ }\_Insert<\_Key,\ \_Value,\ \_Alloc,\ \_ExtractKey,\ \_Equal,}
+\DoxyCodeLine{01054\ \ \ \ \ \ \ \ \ \ \ \ \_Hash,\ \_RangeHash,\ \_Unused,\ \_RehashPolicy,\ \_Traits,\ \mbox{\hyperlink{_classes_2lib_2include_2stdbool_8h_a65e9886d74aaee76545e83dd09011727}{false}}>}
+\DoxyCodeLine{01055\ \ \ \ \ :\ \textcolor{keyword}{public}\ \_Insert\_base<\_Key,\ \_Value,\ \_Alloc,\ \_ExtractKey,\ \_Equal,}
+\DoxyCodeLine{01056\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_Hash,\ \_RangeHash,\ \_Unused,\ \_RehashPolicy,\ \_Traits>}
+\DoxyCodeLine{01057\ \ \ \ \ \{}
+\DoxyCodeLine{01058\ \ \ \ \ \ \ \textcolor{keyword}{using\ }\_\_base\_type\ =\ \_Insert\_base<\_Key,\ \_Value,\ \_Alloc,\ \_ExtractKey,}
+\DoxyCodeLine{01059\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_Equal,\ \_Hash,\ \_RangeHash,\ \_Unused,}
+\DoxyCodeLine{01060\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_RehashPolicy,\ \_Traits>;}
+\DoxyCodeLine{01061\ \ \ \ \ \ \ \textcolor{keyword}{using\ }value\_type\ =\ \textcolor{keyword}{typename}\ \_\_base\_type::value\_type;}
+\DoxyCodeLine{01062\ \ \ \ \ \ \ \textcolor{keyword}{using\ }iterator\ =\ \textcolor{keyword}{typename}\ \_\_base\_type::iterator;}
+\DoxyCodeLine{01063\ \ \ \ \ \ \ \textcolor{keyword}{using\ }const\_iterator\ =\ \ \textcolor{keyword}{typename}\ \_\_base\_type::const\_iterator;}
+\DoxyCodeLine{01064\ }
+\DoxyCodeLine{01065\ \ \ \ \ \ \ \textcolor{keyword}{using\ }\_\_unique\_keys\ =\ \textcolor{keyword}{typename}\ \_\_base\_type::\_\_unique\_keys;}
+\DoxyCodeLine{01066\ \ \ \ \ \ \ \textcolor{keyword}{using\ }\_\_hashtable\ =\ \textcolor{keyword}{typename}\ \_\_base\_type::\_\_hashtable;}
+\DoxyCodeLine{01067\ \ \ \ \ \ \ \textcolor{keyword}{using\ }\_\_ireturn\_type\ =\ \textcolor{keyword}{typename}\ \_\_base\_type::\_\_ireturn\_type;}
+\DoxyCodeLine{01068\ }
+\DoxyCodeLine{01069\ \ \ \ \ \ \ \textcolor{keyword}{using\ }\_\_base\_type::insert;}
+\DoxyCodeLine{01070\ }
+\DoxyCodeLine{01071\ \ \ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Pair>}
+\DoxyCodeLine{01072\ \ \ \ \ \textcolor{keyword}{using\ }\_\_is\_cons\ =\ std::is\_constructible<value\_type,\ \_Pair\&\&>;}
+\DoxyCodeLine{01073\ }
+\DoxyCodeLine{01074\ \ \ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Pair>}
+\DoxyCodeLine{01075\ \ \ \ \ \textcolor{keyword}{using\ }\_IFcons\ =\ std::enable\_if<\_\_is\_cons<\_Pair>::value>;}
+\DoxyCodeLine{01076\ }
+\DoxyCodeLine{01077\ \ \ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Pair>}
+\DoxyCodeLine{01078\ \ \ \ \ \textcolor{keyword}{using\ }\_IFconsp\ =\ \textcolor{keyword}{typename}\ \_IFcons<\_Pair>::type;}
+\DoxyCodeLine{01079\ }
+\DoxyCodeLine{01080\ \ \ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Pair,\ \textcolor{keyword}{typename}\ =\ \_IFconsp<\_Pair>>}
+\DoxyCodeLine{01081\ \ \ \ \ \_\_ireturn\_type}
+\DoxyCodeLine{01082\ \ \ \ \ insert(\_Pair\&\&\ \_\_v)}
+\DoxyCodeLine{01083\ \ \ \ \ \{}
+\DoxyCodeLine{01084\ \ \ \ \ \ \ \_\_hashtable\&\ \_\_h\ =\ this-\/>\_M\_conjure\_hashtable();}
+\DoxyCodeLine{01085\ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \_\_h.\_M\_emplace(\_\_unique\_keys\{\},\ std::forward<\_Pair>(\_\_v));}
+\DoxyCodeLine{01086\ \ \ \ \ \}}
+\DoxyCodeLine{01087\ }
+\DoxyCodeLine{01088\ \ \ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Pair,\ \textcolor{keyword}{typename}\ =\ \_IFconsp<\_Pair>>}
+\DoxyCodeLine{01089\ \ \ \ \ iterator}
+\DoxyCodeLine{01090\ \ \ \ \ insert(const\_iterator\ \_\_hint,\ \_Pair\&\&\ \_\_v)}
+\DoxyCodeLine{01091\ \ \ \ \ \{}
+\DoxyCodeLine{01092\ \ \ \ \ \ \ \_\_hashtable\&\ \_\_h\ =\ this-\/>\_M\_conjure\_hashtable();}
+\DoxyCodeLine{01093\ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \_\_h.\_M\_emplace(\_\_hint,\ \_\_unique\_keys\{\},}
+\DoxyCodeLine{01094\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::forward<\_Pair>(\_\_v));}
+\DoxyCodeLine{01095\ \ \ \ \ \}}
+\DoxyCodeLine{01096\ \ \ \ \};}
+\DoxyCodeLine{01097\ }
+\DoxyCodeLine{01098\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Policy>}
+\DoxyCodeLine{01099\ \ \ \ \ \textcolor{keyword}{using\ }\_\_has\_load\_factor\ =\ \textcolor{keyword}{typename}\ \_Policy::\_\_has\_load\_factor;}
+\DoxyCodeLine{01100\ }
+\DoxyCodeLine{01107\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Key,\ \textcolor{keyword}{typename}\ \_Value,\ \textcolor{keyword}{typename}\ \_Alloc,}
+\DoxyCodeLine{01108\ \ \ \ \ \ \ \ \textcolor{keyword}{typename}\ \_ExtractKey,\ \textcolor{keyword}{typename}\ \_Equal,}
+\DoxyCodeLine{01109\ \ \ \ \ \ \ \ \textcolor{keyword}{typename}\ \_Hash,\ \textcolor{keyword}{typename}\ \_RangeHash,\ \textcolor{keyword}{typename}\ \_Unused,}
+\DoxyCodeLine{01110\ \ \ \ \ \ \ \ \textcolor{keyword}{typename}\ \_RehashPolicy,\ \textcolor{keyword}{typename}\ \_Traits,}
+\DoxyCodeLine{01111\ \ \ \ \ \ \ \ \textcolor{keyword}{typename}\ =}
+\DoxyCodeLine{01112\ \ \ \ \ \ \ \ \ \ \_\_detected\_or\_t<false\_type,\ \_\_has\_load\_factor,\ \_RehashPolicy>>}
+\DoxyCodeLine{01113\ \ \ \ \ \textcolor{keyword}{struct\ }\_Rehash\_base;}
+\DoxyCodeLine{01114\ }
+\DoxyCodeLine{01116\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Key,\ \textcolor{keyword}{typename}\ \_Value,\ \textcolor{keyword}{typename}\ \_Alloc,}
+\DoxyCodeLine{01117\ \ \ \ \ \ \ \ \textcolor{keyword}{typename}\ \_ExtractKey,\ \textcolor{keyword}{typename}\ \_Equal,}
+\DoxyCodeLine{01118\ \ \ \ \ \ \ \ \textcolor{keyword}{typename}\ \_Hash,\ \textcolor{keyword}{typename}\ \_RangeHash,\ \textcolor{keyword}{typename}\ \_Unused,}
+\DoxyCodeLine{01119\ \ \ \ \ \ \ \ \textcolor{keyword}{typename}\ \_RehashPolicy,\ \textcolor{keyword}{typename}\ \_Traits>}
+\DoxyCodeLine{01120\ \ \ \ \ \textcolor{keyword}{struct\ }\_Rehash\_base<\_Key,\ \_Value,\ \_Alloc,\ \_ExtractKey,\ \_Equal,}
+\DoxyCodeLine{01121\ \ \ \ \ \ \ \ \ \ \ \ \ \_Hash,\ \_RangeHash,\ \_Unused,\ \_RehashPolicy,\ \_Traits,}
+\DoxyCodeLine{01122\ \ \ \ \ \ \ \ \ \ \ \ \ false\_type\ \textcolor{comment}{/*\ Has\ load\ factor\ */}>}
+\DoxyCodeLine{01123\ \ \ \ \ \{}
+\DoxyCodeLine{01124\ \ \ \ \ \};}
+\DoxyCodeLine{01125\ }
+\DoxyCodeLine{01127\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Key,\ \textcolor{keyword}{typename}\ \_Value,\ \textcolor{keyword}{typename}\ \_Alloc,}
+\DoxyCodeLine{01128\ \ \ \ \ \ \ \ \textcolor{keyword}{typename}\ \_ExtractKey,\ \textcolor{keyword}{typename}\ \_Equal,}
+\DoxyCodeLine{01129\ \ \ \ \ \ \ \ \textcolor{keyword}{typename}\ \_Hash,\ \textcolor{keyword}{typename}\ \_RangeHash,\ \textcolor{keyword}{typename}\ \_Unused,}
+\DoxyCodeLine{01130\ \ \ \ \ \ \ \ \textcolor{keyword}{typename}\ \_RehashPolicy,\ \textcolor{keyword}{typename}\ \_Traits>}
+\DoxyCodeLine{01131\ \ \ \ \ \textcolor{keyword}{struct\ }\_Rehash\_base<\_Key,\ \_Value,\ \_Alloc,\ \_ExtractKey,\ \_Equal,}
+\DoxyCodeLine{01132\ \ \ \ \ \ \ \ \ \ \ \ \ \_Hash,\ \_RangeHash,\ \_Unused,\ \_RehashPolicy,\ \_Traits,}
+\DoxyCodeLine{01133\ \ \ \ \ \ \ \ \ \ \ \ \ true\_type\ \textcolor{comment}{/*\ Has\ load\ factor\ */}>}
+\DoxyCodeLine{01134\ \ \ \ \ \{}
+\DoxyCodeLine{01135\ \ \ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{01136\ \ \ \ \ \ \ \textcolor{keyword}{using\ }\_\_hashtable\ =\ \_Hashtable<\_Key,\ \_Value,\ \_Alloc,\ \_ExtractKey,}
+\DoxyCodeLine{01137\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_Equal,\ \_Hash,\ \_RangeHash,\ \_Unused,}
+\DoxyCodeLine{01138\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_RehashPolicy,\ \_Traits>;}
+\DoxyCodeLine{01139\ }
+\DoxyCodeLine{01140\ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{01141\ \ \ \ \ \ \ \textcolor{keywordtype}{float}}
+\DoxyCodeLine{01142\ \ \ \ \ \ \ max\_load\_factor()\ \textcolor{keyword}{const}\ \textcolor{keyword}{noexcept}}
+\DoxyCodeLine{01143\ \ \ \ \ \ \ \{}
+\DoxyCodeLine{01144\ \ \ \ \ \textcolor{keyword}{const}\ \_\_hashtable*\ \_\_this\ =\ \textcolor{keyword}{static\_cast<}\textcolor{keyword}{const\ }\_\_hashtable*\textcolor{keyword}{>}(\textcolor{keyword}{this});}
+\DoxyCodeLine{01145\ \ \ \ \ \textcolor{keywordflow}{return}\ \_\_this-\/>\_\_rehash\_policy().max\_load\_factor();}
+\DoxyCodeLine{01146\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{01147\ }
+\DoxyCodeLine{01148\ \ \ \ \ \ \ \textcolor{keywordtype}{void}}
+\DoxyCodeLine{01149\ \ \ \ \ \ \ max\_load\_factor(\textcolor{keywordtype}{float}\ \_\_z)}
+\DoxyCodeLine{01150\ \ \ \ \ \ \ \{}
+\DoxyCodeLine{01151\ \ \ \ \ \_\_hashtable*\ \_\_this\ =\ \textcolor{keyword}{static\_cast<}\_\_hashtable*\textcolor{keyword}{>}(\textcolor{keyword}{this});}
+\DoxyCodeLine{01152\ \ \ \ \ \_\_this-\/>\_\_rehash\_policy(\_RehashPolicy(\_\_z));}
+\DoxyCodeLine{01153\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{01154\ }
+\DoxyCodeLine{01155\ \ \ \ \ \ \ \textcolor{keywordtype}{void}}
+\DoxyCodeLine{01156\ \ \ \ \ \ \ reserve(std::size\_t\ \_\_n)}
+\DoxyCodeLine{01157\ \ \ \ \ \ \ \{}
+\DoxyCodeLine{01158\ \ \ \ \ \_\_hashtable*\ \_\_this\ =\ \textcolor{keyword}{static\_cast<}\_\_hashtable*\textcolor{keyword}{>}(\textcolor{keyword}{this});}
+\DoxyCodeLine{01159\ \ \ \ \ \_\_this-\/>rehash(\_\_this-\/>\_\_rehash\_policy().\_M\_bkt\_for\_elements(\_\_n));}
+\DoxyCodeLine{01160\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{01161\ \ \ \ \ \};}
+\DoxyCodeLine{01162\ }
+\DoxyCodeLine{01169\ \ \ \textcolor{keyword}{template}<\textcolor{keywordtype}{int}\ \_Nm,\ \textcolor{keyword}{typename}\ \_Tp,}
+\DoxyCodeLine{01170\ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ \_\_use\_ebo\ =\ !\_\_is\_final(\_Tp)\ \&\&\ \_\_is\_empty(\_Tp)>}
+\DoxyCodeLine{01171\ \ \ \ \ \textcolor{keyword}{struct\ }\_Hashtable\_ebo\_helper;}
+\DoxyCodeLine{01172\ }
+\DoxyCodeLine{01174\ \ \ \textcolor{keyword}{template}<\textcolor{keywordtype}{int}\ \_Nm,\ \textcolor{keyword}{typename}\ \_Tp>}
+\DoxyCodeLine{01175\ \ \ \ \ \textcolor{keyword}{struct\ }\_Hashtable\_ebo\_helper<\_Nm,\ \_Tp,\ \mbox{\hyperlink{_classes_2lib_2include_2stdbool_8h_a41f9c5fb8b08eb5dc3edce4dcb37fee7}{true}}>}
+\DoxyCodeLine{01176\ \ \ \ \ :\ \textcolor{keyword}{private}\ \_Tp}
+\DoxyCodeLine{01177\ \ \ \ \ \{}
+\DoxyCodeLine{01178\ \ \ \ \ \ \ \_Hashtable\_ebo\_helper()\ \textcolor{keyword}{noexcept}(\textcolor{keyword}{noexcept}(\_Tp()))\ :\ \_Tp()\ \{\ \}}
+\DoxyCodeLine{01179\ }
+\DoxyCodeLine{01180\ \ \ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_OtherTp>}
+\DoxyCodeLine{01181\ \ \ \ \ \_Hashtable\_ebo\_helper(\_OtherTp\&\&\ \_\_tp)}
+\DoxyCodeLine{01182\ \ \ \ \ :\ \_Tp(std::forward<\_OtherTp>(\_\_tp))}
+\DoxyCodeLine{01183\ \ \ \ \ \{\ \}}
+\DoxyCodeLine{01184\ }
+\DoxyCodeLine{01185\ \ \ \ \ \ \ \textcolor{keyword}{const}\ \_Tp\&\ \_M\_cget()\textcolor{keyword}{\ const\ }\{\ \textcolor{keywordflow}{return}\ \textcolor{keyword}{static\_cast<}\textcolor{keyword}{const\ }\_Tp\&\textcolor{keyword}{>}(*this);\ \}}
+\DoxyCodeLine{01186\ \ \ \ \ \ \ \_Tp\&\ \_M\_get()\ \{\ \textcolor{keywordflow}{return}\ \textcolor{keyword}{static\_cast<}\_Tp\&\textcolor{keyword}{>}(*this);\ \}}
+\DoxyCodeLine{01187\ \ \ \ \ \};}
+\DoxyCodeLine{01188\ }
+\DoxyCodeLine{01190\ \ \ \textcolor{keyword}{template}<\textcolor{keywordtype}{int}\ \_Nm,\ \textcolor{keyword}{typename}\ \_Tp>}
+\DoxyCodeLine{01191\ \ \ \ \ \textcolor{keyword}{struct\ }\_Hashtable\_ebo\_helper<\_Nm,\ \_Tp,\ \mbox{\hyperlink{_classes_2lib_2include_2stdbool_8h_a65e9886d74aaee76545e83dd09011727}{false}}>}
+\DoxyCodeLine{01192\ \ \ \ \ \{}
+\DoxyCodeLine{01193\ \ \ \ \ \ \ \_Hashtable\_ebo\_helper()\ =\ \textcolor{keywordflow}{default};}
+\DoxyCodeLine{01194\ }
+\DoxyCodeLine{01195\ \ \ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_OtherTp>}
+\DoxyCodeLine{01196\ \ \ \ \ \_Hashtable\_ebo\_helper(\_OtherTp\&\&\ \_\_tp)}
+\DoxyCodeLine{01197\ \ \ \ \ :\ \_M\_tp(std::forward<\_OtherTp>(\_\_tp))}
+\DoxyCodeLine{01198\ \ \ \ \ \{\ \}}
+\DoxyCodeLine{01199\ }
+\DoxyCodeLine{01200\ \ \ \ \ \ \ \textcolor{keyword}{const}\ \_Tp\&\ \_M\_cget()\textcolor{keyword}{\ const\ }\{\ \textcolor{keywordflow}{return}\ \_M\_tp;\ \}}
+\DoxyCodeLine{01201\ \ \ \ \ \ \ \_Tp\&\ \_M\_get()\ \{\ \textcolor{keywordflow}{return}\ \_M\_tp;\ \}}
+\DoxyCodeLine{01202\ }
+\DoxyCodeLine{01203\ \ \ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{01204\ \ \ \ \ \ \ \_Tp\ \_M\_tp\{\};}
+\DoxyCodeLine{01205\ \ \ \ \ \};}
+\DoxyCodeLine{01206\ }
+\DoxyCodeLine{01213\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Key,\ \textcolor{keyword}{typename}\ \_Value,\ \textcolor{keyword}{typename}\ \_ExtractKey,}
+\DoxyCodeLine{01214\ \ \ \ \ \ \ \ \textcolor{keyword}{typename}\ \_Hash,\ \textcolor{keyword}{typename}\ \_RangeHash,\ \textcolor{keyword}{typename}\ \_Unused,}
+\DoxyCodeLine{01215\ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ \_\_cache\_hash\_code>}
+\DoxyCodeLine{01216\ \ \ \ \ \textcolor{keyword}{struct\ }\_Local\_iterator\_base;}
+\DoxyCodeLine{01217\ }
+\DoxyCodeLine{01236\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Key,\ \textcolor{keyword}{typename}\ \_Value,\ \textcolor{keyword}{typename}\ \_ExtractKey,}
+\DoxyCodeLine{01237\ \ \ \ \ \ \ \ \textcolor{keyword}{typename}\ \_Hash,\ \textcolor{keyword}{typename}\ \_RangeHash,\ \textcolor{keyword}{typename}\ \_Unused,}
+\DoxyCodeLine{01238\ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ \_\_cache\_hash\_code>}
+\DoxyCodeLine{01239\ \ \ \ \ \textcolor{keyword}{struct\ }\_Hash\_code\_base}
+\DoxyCodeLine{01240\ \ \ \ \ :\ \textcolor{keyword}{private}\ \_Hashtable\_ebo\_helper<1,\ \_Hash>}
+\DoxyCodeLine{01241\ \ \ \ \ \{}
+\DoxyCodeLine{01242\ \ \ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{01243\ \ \ \ \ \ \ \textcolor{keyword}{using\ }\_\_ebo\_hash\ =\ \_Hashtable\_ebo\_helper<1,\ \_Hash>;}
+\DoxyCodeLine{01244\ }
+\DoxyCodeLine{01245\ \ \ \ \ \ \ \textcolor{comment}{//\ Gives\ the\ local\ iterator\ implementation\ access\ to\ \_M\_bucket\_index().}}
+\DoxyCodeLine{01246\ \ \ \ \ \ \ \textcolor{keyword}{friend}\ \textcolor{keyword}{struct\ }\_Local\_iterator\_base<\_Key,\ \_Value,\ \_ExtractKey,}
+\DoxyCodeLine{01247\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_Hash,\ \_RangeHash,\ \_Unused,\ \mbox{\hyperlink{_classes_2lib_2include_2stdbool_8h_a65e9886d74aaee76545e83dd09011727}{false}}>;}
+\DoxyCodeLine{01248\ }
+\DoxyCodeLine{01249\ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{01250\ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ \_Hash\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ hasher;}
+\DoxyCodeLine{01251\ }
+\DoxyCodeLine{01252\ \ \ \ \ \ \ hasher}
+\DoxyCodeLine{01253\ \ \ \ \ \ \ hash\_function()\textcolor{keyword}{\ const}}
+\DoxyCodeLine{01254\ \textcolor{keyword}{\ \ \ \ \ \ }\{\ \textcolor{keywordflow}{return}\ \_M\_hash();\ \}}
+\DoxyCodeLine{01255\ }
+\DoxyCodeLine{01256\ \ \ \ \ \textcolor{keyword}{protected}:}
+\DoxyCodeLine{01257\ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ std::size\_t\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_\_hash\_code;}
+\DoxyCodeLine{01258\ }
+\DoxyCodeLine{01259\ \ \ \ \ \ \ \textcolor{comment}{//\ We\ need\ the\ default\ constructor\ for\ the\ local\ iterators\ and\ \_Hashtable}}
+\DoxyCodeLine{01260\ \ \ \ \ \ \ \textcolor{comment}{//\ default\ constructor.}}
+\DoxyCodeLine{01261\ \ \ \ \ \ \ \_Hash\_code\_base()\ =\ \textcolor{keywordflow}{default};}
+\DoxyCodeLine{01262\ }
+\DoxyCodeLine{01263\ \ \ \ \ \ \ \_Hash\_code\_base(\textcolor{keyword}{const}\ \_Hash\&\ \_\_hash)\ :\ \_\_ebo\_hash(\_\_hash)\ \{\ \}}
+\DoxyCodeLine{01264\ }
+\DoxyCodeLine{01265\ \ \ \ \ \ \ \_\_hash\_code}
+\DoxyCodeLine{01266\ \ \ \ \ \ \ \_M\_hash\_code(\textcolor{keyword}{const}\ \_Key\&\ \_\_k)\textcolor{keyword}{\ const}}
+\DoxyCodeLine{01267\ \textcolor{keyword}{\ \ \ \ \ \ }\{}
+\DoxyCodeLine{01268\ \ \ \ \ \textcolor{keyword}{static\_assert}(\_\_is\_invocable<const\ \_Hash\&,\ const\ \_Key\&>\{\},}
+\DoxyCodeLine{01269\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}hash\ function\ must\ be\ invocable\ with\ an\ argument\ of\ key\ type"{}});}
+\DoxyCodeLine{01270\ \ \ \ \ \textcolor{keywordflow}{return}\ \_M\_hash()(\_\_k);}
+\DoxyCodeLine{01271\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{01272\ }
+\DoxyCodeLine{01273\ \ \ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Kt>}
+\DoxyCodeLine{01274\ \ \ \ \ \_\_hash\_code}
+\DoxyCodeLine{01275\ \ \ \ \ \_M\_hash\_code\_tr(\textcolor{keyword}{const}\ \_Kt\&\ \_\_k)\textcolor{keyword}{\ const}}
+\DoxyCodeLine{01276\ \textcolor{keyword}{\ \ \ \ }\{}
+\DoxyCodeLine{01277\ \ \ \ \ \ \ \textcolor{keyword}{static\_assert}(\_\_is\_invocable<const\ \_Hash\&,\ const\ \_Kt\&>\{\},}
+\DoxyCodeLine{01278\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}hash\ function\ must\ be\ invocable\ with\ an\ argument\ of\ key\ type"{}});}
+\DoxyCodeLine{01279\ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \_M\_hash()(\_\_k);}
+\DoxyCodeLine{01280\ \ \ \ \ \}}
+\DoxyCodeLine{01281\ }
+\DoxyCodeLine{01282\ \ \ \ \ \ \ \_\_hash\_code}
+\DoxyCodeLine{01283\ \ \ \ \ \ \ \_M\_hash\_code(\textcolor{keyword}{const}\ \_Hash\&,}
+\DoxyCodeLine{01284\ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \_Hash\_node\_value<\_Value,\ true>\&\ \_\_n)\textcolor{keyword}{\ const}}
+\DoxyCodeLine{01285\ \textcolor{keyword}{\ \ \ \ \ \ }\{\ \textcolor{keywordflow}{return}\ \_\_n.\_M\_hash\_code;\ \}}
+\DoxyCodeLine{01286\ }
+\DoxyCodeLine{01287\ \ \ \ \ \ \ \textcolor{comment}{//\ Compute\ hash\ code\ using\ \_Hash\ as\ \_\_n\ \_M\_hash\_code,\ if\ present,\ was}}
+\DoxyCodeLine{01288\ \ \ \ \ \ \ \textcolor{comment}{//\ computed\ using\ \_H2.}}
+\DoxyCodeLine{01289\ \ \ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_H2>}
+\DoxyCodeLine{01290\ \ \ \ \ \_\_hash\_code}
+\DoxyCodeLine{01291\ \ \ \ \ \_M\_hash\_code(\textcolor{keyword}{const}\ \_H2\&,}
+\DoxyCodeLine{01292\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \_Hash\_node\_value<\_Value,\ \_\_cache\_hash\_code>\&\ \_\_n)\textcolor{keyword}{\ const}}
+\DoxyCodeLine{01293\ \textcolor{keyword}{\ \ \ \ }\{\ \textcolor{keywordflow}{return}\ \_M\_hash\_code(\_ExtractKey\{\}(\_\_n.\_M\_v()));\ \}}
+\DoxyCodeLine{01294\ }
+\DoxyCodeLine{01295\ \ \ \ \ \ \ \_\_hash\_code}
+\DoxyCodeLine{01296\ \ \ \ \ \ \ \_M\_hash\_code(\textcolor{keyword}{const}\ \_Hash\_node\_value<\_Value,\ false>\&\ \_\_n)\textcolor{keyword}{\ const}}
+\DoxyCodeLine{01297\ \textcolor{keyword}{\ \ \ \ \ \ }\{\ \textcolor{keywordflow}{return}\ \_M\_hash\_code(\_ExtractKey\{\}(\_\_n.\_M\_v()));\ \}}
+\DoxyCodeLine{01298\ }
+\DoxyCodeLine{01299\ \ \ \ \ \ \ \_\_hash\_code}
+\DoxyCodeLine{01300\ \ \ \ \ \ \ \_M\_hash\_code(\textcolor{keyword}{const}\ \_Hash\_node\_value<\_Value,\ true>\&\ \_\_n)\textcolor{keyword}{\ const}}
+\DoxyCodeLine{01301\ \textcolor{keyword}{\ \ \ \ \ \ }\{\ \textcolor{keywordflow}{return}\ \_\_n.\_M\_hash\_code;\ \}}
+\DoxyCodeLine{01302\ }
+\DoxyCodeLine{01303\ \ \ \ \ \ \ std::size\_t}
+\DoxyCodeLine{01304\ \ \ \ \ \ \ \_M\_bucket\_index(\_\_hash\_code\ \_\_c,\ std::size\_t\ \_\_bkt\_count)\textcolor{keyword}{\ const}}
+\DoxyCodeLine{01305\ \textcolor{keyword}{\ \ \ \ \ \ }\{\ \textcolor{keywordflow}{return}\ \_RangeHash\{\}(\_\_c,\ \_\_bkt\_count);\ \}}
+\DoxyCodeLine{01306\ }
+\DoxyCodeLine{01307\ \ \ \ \ \ \ std::size\_t}
+\DoxyCodeLine{01308\ \ \ \ \ \ \ \_M\_bucket\_index(\textcolor{keyword}{const}\ \_Hash\_node\_value<\_Value,\ false>\&\ \_\_n,}
+\DoxyCodeLine{01309\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::size\_t\ \_\_bkt\_count)\ \textcolor{keyword}{const}}
+\DoxyCodeLine{01310\ \ \ \ \ \textcolor{keyword}{noexcept}(\ \textcolor{keyword}{noexcept}(declval<const\ \_Hash\&>()(declval<const\ \_Key\&>()))}
+\DoxyCodeLine{01311\ \ \ \ \ \ \ \ \ \ \ \&\&\ \textcolor{keyword}{noexcept}(declval<const\ \_RangeHash\&>()((\_\_hash\_code)0,}
+\DoxyCodeLine{01312\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ (std::size\_t)0))\ )}
+\DoxyCodeLine{01313\ \ \ \ \ \ \ \{}
+\DoxyCodeLine{01314\ \ \ \ \ \textcolor{keywordflow}{return}\ \_RangeHash\{\}(\_M\_hash\_code(\_ExtractKey\{\}(\_\_n.\_M\_v())),}
+\DoxyCodeLine{01315\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_\_bkt\_count);}
+\DoxyCodeLine{01316\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{01317\ }
+\DoxyCodeLine{01318\ \ \ \ \ \ \ std::size\_t}
+\DoxyCodeLine{01319\ \ \ \ \ \ \ \_M\_bucket\_index(\textcolor{keyword}{const}\ \_Hash\_node\_value<\_Value,\ true>\&\ \_\_n,}
+\DoxyCodeLine{01320\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::size\_t\ \_\_bkt\_count)\ \textcolor{keyword}{const}}
+\DoxyCodeLine{01321\ \ \ \ \ \textcolor{keyword}{noexcept}(\ \textcolor{keyword}{noexcept}(declval<const\ \_RangeHash\&>()((\_\_hash\_code)0,}
+\DoxyCodeLine{01322\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ (std::size\_t)0))\ )}
+\DoxyCodeLine{01323\ \ \ \ \ \ \ \{\ \textcolor{keywordflow}{return}\ \_RangeHash\{\}(\_\_n.\_M\_hash\_code,\ \_\_bkt\_count);\ \}}
+\DoxyCodeLine{01324\ }
+\DoxyCodeLine{01325\ \ \ \ \ \ \ \textcolor{keywordtype}{void}}
+\DoxyCodeLine{01326\ \ \ \ \ \ \ \_M\_store\_code(\_Hash\_node\_code\_cache<false>\&,\ \_\_hash\_code)\textcolor{keyword}{\ const}}
+\DoxyCodeLine{01327\ \textcolor{keyword}{\ \ \ \ \ \ }\{\ \}}
+\DoxyCodeLine{01328\ }
+\DoxyCodeLine{01329\ \ \ \ \ \ \ \textcolor{keywordtype}{void}}
+\DoxyCodeLine{01330\ \ \ \ \ \ \ \_M\_copy\_code(\_Hash\_node\_code\_cache<false>\&,}
+\DoxyCodeLine{01331\ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \_Hash\_node\_code\_cache<false>\&)\textcolor{keyword}{\ const}}
+\DoxyCodeLine{01332\ \textcolor{keyword}{\ \ \ \ \ \ }\{\ \}}
+\DoxyCodeLine{01333\ }
+\DoxyCodeLine{01334\ \ \ \ \ \ \ \textcolor{keywordtype}{void}}
+\DoxyCodeLine{01335\ \ \ \ \ \ \ \_M\_store\_code(\_Hash\_node\_code\_cache<true>\&\ \_\_n,\ \_\_hash\_code\ \_\_c)\textcolor{keyword}{\ const}}
+\DoxyCodeLine{01336\ \textcolor{keyword}{\ \ \ \ \ \ }\{\ \_\_n.\_M\_hash\_code\ =\ \_\_c;\ \}}
+\DoxyCodeLine{01337\ }
+\DoxyCodeLine{01338\ \ \ \ \ \ \ \textcolor{keywordtype}{void}}
+\DoxyCodeLine{01339\ \ \ \ \ \ \ \_M\_copy\_code(\_Hash\_node\_code\_cache<true>\&\ \_\_to,}
+\DoxyCodeLine{01340\ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \_Hash\_node\_code\_cache<true>\&\ \_\_from)\textcolor{keyword}{\ const}}
+\DoxyCodeLine{01341\ \textcolor{keyword}{\ \ \ \ \ \ }\{\ \_\_to.\_M\_hash\_code\ =\ \_\_from.\_M\_hash\_code;\ \}}
+\DoxyCodeLine{01342\ }
+\DoxyCodeLine{01343\ \ \ \ \ \ \ \textcolor{keywordtype}{void}}
+\DoxyCodeLine{01344\ \ \ \ \ \ \ \_M\_swap(\_Hash\_code\_base\&\ \_\_x)}
+\DoxyCodeLine{01345\ \ \ \ \ \ \ \{\ \mbox{\hyperlink{namespacestd_a3ece115a1c8ed9020a20f1d0b70efda8}{std::swap}}(\_\_ebo\_hash::\_M\_get(),\ \_\_x.\_\_ebo\_hash::\_M\_get());\ \}}
+\DoxyCodeLine{01346\ }
+\DoxyCodeLine{01347\ \ \ \ \ \ \ \textcolor{keyword}{const}\ \_Hash\&}
+\DoxyCodeLine{01348\ \ \ \ \ \ \ \_M\_hash()\textcolor{keyword}{\ const\ }\{\ \textcolor{keywordflow}{return}\ \_\_ebo\_hash::\_M\_cget();\ \}}
+\DoxyCodeLine{01349\ \ \ \ \ \};}
+\DoxyCodeLine{01350\ }
+\DoxyCodeLine{01352\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Key,\ \textcolor{keyword}{typename}\ \_Value,\ \textcolor{keyword}{typename}\ \_ExtractKey,}
+\DoxyCodeLine{01353\ \ \ \ \ \ \ \ \textcolor{keyword}{typename}\ \_Hash,\ \textcolor{keyword}{typename}\ \_RangeHash,\ \textcolor{keyword}{typename}\ \_Unused>}
+\DoxyCodeLine{01354\ \ \ \ \ \textcolor{keyword}{struct\ }\_Local\_iterator\_base<\_Key,\ \_Value,\ \_ExtractKey,}
+\DoxyCodeLine{01355\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_Hash,\ \_RangeHash,\ \_Unused,\ \mbox{\hyperlink{_classes_2lib_2include_2stdbool_8h_a41f9c5fb8b08eb5dc3edce4dcb37fee7}{true}}>}
+\DoxyCodeLine{01356\ \ \ \ \ :\ \textcolor{keyword}{public}\ \_Node\_iterator\_base<\_Value,\ true>}
+\DoxyCodeLine{01357\ \ \ \ \ \{}
+\DoxyCodeLine{01358\ \ \ \ \ \textcolor{keyword}{protected}:}
+\DoxyCodeLine{01359\ \ \ \ \ \ \ \textcolor{keyword}{using\ }\_\_base\_node\_iter\ =\ \_Node\_iterator\_base<\_Value,\ true>;}
+\DoxyCodeLine{01360\ \ \ \ \ \ \ \textcolor{keyword}{using\ }\_\_hash\_code\_base\ =\ \_Hash\_code\_base<\_Key,\ \_Value,\ \_ExtractKey,}
+\DoxyCodeLine{01361\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_Hash,\ \_RangeHash,\ \_Unused,\ \textcolor{keyword}{true}>;}
+\DoxyCodeLine{01362\ }
+\DoxyCodeLine{01363\ \ \ \ \ \ \ \_Local\_iterator\_base()\ =\ \textcolor{keywordflow}{default};}
+\DoxyCodeLine{01364\ \ \ \ \ \ \ \_Local\_iterator\_base(\textcolor{keyword}{const}\ \_\_hash\_code\_base\&,}
+\DoxyCodeLine{01365\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_Hash\_node<\_Value,\ true>*\ \_\_p,}
+\DoxyCodeLine{01366\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::size\_t\ \_\_bkt,\ std::size\_t\ \_\_bkt\_count)}
+\DoxyCodeLine{01367\ \ \ \ \ \ \ :\ \_\_base\_node\_iter(\_\_p),\ \_M\_bucket(\_\_bkt),\ \_M\_bucket\_count(\_\_bkt\_count)}
+\DoxyCodeLine{01368\ \ \ \ \ \ \ \{\ \}}
+\DoxyCodeLine{01369\ }
+\DoxyCodeLine{01370\ \ \ \ \ \ \ \textcolor{keywordtype}{void}}
+\DoxyCodeLine{01371\ \ \ \ \ \ \ \_M\_incr()}
+\DoxyCodeLine{01372\ \ \ \ \ \ \ \{}
+\DoxyCodeLine{01373\ \ \ \ \ \_\_base\_node\_iter::\_M\_incr();}
+\DoxyCodeLine{01374\ \ \ \ \ \textcolor{keywordflow}{if}\ (this-\/>\_M\_cur)}
+\DoxyCodeLine{01375\ \ \ \ \ \ \ \{}
+\DoxyCodeLine{01376\ \ \ \ \ \ \ \ \ std::size\_t\ \_\_bkt}
+\DoxyCodeLine{01377\ \ \ \ \ \ \ \ \ \ \ =\ \_RangeHash\{\}(this-\/>\_M\_cur-\/>\_M\_hash\_code,\ \_M\_bucket\_count);}
+\DoxyCodeLine{01378\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\_\_bkt\ !=\ \_M\_bucket)}
+\DoxyCodeLine{01379\ \ \ \ \ \ \ \ \ \ \ this-\/>\_M\_cur\ =\ \textcolor{keyword}{nullptr};}
+\DoxyCodeLine{01380\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{01381\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{01382\ }
+\DoxyCodeLine{01383\ \ \ \ \ \ \ std::size\_t\ \_M\_bucket;}
+\DoxyCodeLine{01384\ \ \ \ \ \ \ std::size\_t\ \_M\_bucket\_count;}
+\DoxyCodeLine{01385\ }
+\DoxyCodeLine{01386\ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{01387\ \ \ \ \ \ \ std::size\_t}
+\DoxyCodeLine{01388\ \ \ \ \ \ \ \_M\_get\_bucket()\textcolor{keyword}{\ const\ }\{\ \textcolor{keywordflow}{return}\ \_M\_bucket;\ \}\ \ \textcolor{comment}{//\ for\ debug\ mode}}
+\DoxyCodeLine{01389\ \ \ \ \ \};}
+\DoxyCodeLine{01390\ }
+\DoxyCodeLine{01391\ \ \ \textcolor{comment}{//\ Uninitialized\ storage\ for\ a\ \_Hash\_code\_base.}}
+\DoxyCodeLine{01392\ \ \ \textcolor{comment}{//\ This\ type\ is\ DefaultConstructible\ and\ Assignable\ even\ if\ the}}
+\DoxyCodeLine{01393\ \ \ \textcolor{comment}{//\ \_Hash\_code\_base\ type\ isn't,\ so\ that\ \_Local\_iterator\_base<...,\ false>}}
+\DoxyCodeLine{01394\ \ \ \textcolor{comment}{//\ can\ be\ DefaultConstructible\ and\ Assignable.}}
+\DoxyCodeLine{01395\ \ \ template<typename\ \_Tp,\ bool\ \_IsEmpty\ =\ std::is\_empty<\_Tp>::value>}
+\DoxyCodeLine{01396\ \ \ \ \ \textcolor{keyword}{struct\ }\_Hash\_code\_storage}
+\DoxyCodeLine{01397\ \ \ \ \ \{}
+\DoxyCodeLine{01398\ \ \ \ \ \ \ \mbox{\hyperlink{struct____gnu__cxx_1_1____aligned__buffer}{\_\_gnu\_cxx::\_\_aligned\_buffer<\_Tp>}}\ \_M\_storage;}
+\DoxyCodeLine{01399\ }
+\DoxyCodeLine{01400\ \ \ \ \ \ \ \_Tp*}
+\DoxyCodeLine{01401\ \ \ \ \ \ \ \_M\_h()\ \{\ \textcolor{keywordflow}{return}\ \_M\_storage.\mbox{\hyperlink{struct____gnu__cxx_1_1____aligned__buffer_a4f7396ec827253c1af249edad1c67b06}{\_M\_ptr}}();\ \}}
+\DoxyCodeLine{01402\ }
+\DoxyCodeLine{01403\ \ \ \ \ \ \ \textcolor{keyword}{const}\ \_Tp*}
+\DoxyCodeLine{01404\ \ \ \ \ \ \ \_M\_h()\textcolor{keyword}{\ const\ }\{\ \textcolor{keywordflow}{return}\ \_M\_storage.\_M\_ptr();\ \}}
+\DoxyCodeLine{01405\ \ \ \ \ \};}
+\DoxyCodeLine{01406\ }
+\DoxyCodeLine{01407\ \ \ \textcolor{comment}{//\ Empty\ partial\ specialization\ for\ empty\ \_Hash\_code\_base\ types.}}
+\DoxyCodeLine{01408\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Tp>}
+\DoxyCodeLine{01409\ \ \ \ \ \textcolor{keyword}{struct\ }\_Hash\_code\_storage<\_Tp,\ \mbox{\hyperlink{_classes_2lib_2include_2stdbool_8h_a41f9c5fb8b08eb5dc3edce4dcb37fee7}{true}}>}
+\DoxyCodeLine{01410\ \ \ \ \ \{}
+\DoxyCodeLine{01411\ \ \ \ \ \ \ \textcolor{keyword}{static\_assert}(\ std::is\_empty<\_Tp>::value,\ \textcolor{stringliteral}{"{}Type\ must\ be\ empty"{}}\ );}
+\DoxyCodeLine{01412\ }
+\DoxyCodeLine{01413\ \ \ \ \ \ \ \textcolor{comment}{//\ As\ \_Tp\ is\ an\ empty\ type\ there\ will\ be\ no\ bytes\ written/read\ through}}
+\DoxyCodeLine{01414\ \ \ \ \ \ \ \textcolor{comment}{//\ the\ cast\ pointer,\ so\ no\ strict-\/aliasing\ violation.}}
+\DoxyCodeLine{01415\ \ \ \ \ \ \ \_Tp*}
+\DoxyCodeLine{01416\ \ \ \ \ \ \ \_M\_h()\ \{\ \textcolor{keywordflow}{return}\ \textcolor{keyword}{reinterpret\_cast<}\_Tp*\textcolor{keyword}{>}(\textcolor{keyword}{this});\ \}}
+\DoxyCodeLine{01417\ }
+\DoxyCodeLine{01418\ \ \ \ \ \ \ \textcolor{keyword}{const}\ \_Tp*}
+\DoxyCodeLine{01419\ \ \ \ \ \ \ \_M\_h()\textcolor{keyword}{\ const\ }\{\ \textcolor{keywordflow}{return}\ \textcolor{keyword}{reinterpret\_cast<}\textcolor{keyword}{const\ }\_Tp*\textcolor{keyword}{>}(\textcolor{keyword}{this});\ \}}
+\DoxyCodeLine{01420\ \ \ \ \ \};}
+\DoxyCodeLine{01421\ }
+\DoxyCodeLine{01422\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Key,\ \textcolor{keyword}{typename}\ \_Value,\ \textcolor{keyword}{typename}\ \_ExtractKey,}
+\DoxyCodeLine{01423\ \ \ \ \ \ \ \ \textcolor{keyword}{typename}\ \_Hash,\ \textcolor{keyword}{typename}\ \_RangeHash,\ \textcolor{keyword}{typename}\ \_Unused>}
+\DoxyCodeLine{01424\ \ \ \ \ \textcolor{keyword}{using\ }\_\_hash\_code\_for\_local\_iter}
+\DoxyCodeLine{01425\ \ \ \ \ \ \ =\ \_Hash\_code\_storage<\_Hash\_code\_base<\_Key,\ \_Value,\ \_ExtractKey,}
+\DoxyCodeLine{01426\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_Hash,\ \_RangeHash,\ \_Unused,\ \textcolor{keyword}{false}>>;}
+\DoxyCodeLine{01427\ }
+\DoxyCodeLine{01428\ \ \ \textcolor{comment}{//\ Partial\ specialization\ used\ when\ hash\ codes\ are\ not\ cached}}
+\DoxyCodeLine{01429\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Key,\ \textcolor{keyword}{typename}\ \_Value,\ \textcolor{keyword}{typename}\ \_ExtractKey,}
+\DoxyCodeLine{01430\ \ \ \ \ \ \ \ \textcolor{keyword}{typename}\ \_Hash,\ \textcolor{keyword}{typename}\ \_RangeHash,\ \textcolor{keyword}{typename}\ \_Unused>}
+\DoxyCodeLine{01431\ \ \ \ \ \textcolor{keyword}{struct\ }\_Local\_iterator\_base<\_Key,\ \_Value,\ \_ExtractKey,}
+\DoxyCodeLine{01432\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_Hash,\ \_RangeHash,\ \_Unused,\ \mbox{\hyperlink{_classes_2lib_2include_2stdbool_8h_a65e9886d74aaee76545e83dd09011727}{false}}>}
+\DoxyCodeLine{01433\ \ \ \ \ :\ \_\_hash\_code\_for\_local\_iter<\_Key,\ \_Value,\ \_ExtractKey,\ \_Hash,\ \_RangeHash,}
+\DoxyCodeLine{01434\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_Unused>}
+\DoxyCodeLine{01435\ \ \ \ \ ,\ \_Node\_iterator\_base<\_Value,\ false>}
+\DoxyCodeLine{01436\ \ \ \ \ \{}
+\DoxyCodeLine{01437\ \ \ \ \ \textcolor{keyword}{protected}:}
+\DoxyCodeLine{01438\ \ \ \ \ \ \ \textcolor{keyword}{using\ }\_\_hash\_code\_base\ =\ \_Hash\_code\_base<\_Key,\ \_Value,\ \_ExtractKey,}
+\DoxyCodeLine{01439\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_Hash,\ \_RangeHash,\ \_Unused,\ \textcolor{keyword}{false}>;}
+\DoxyCodeLine{01440\ \ \ \ \ \ \ \textcolor{keyword}{using\ }\_\_node\_iter\_base\ =\ \_Node\_iterator\_base<\_Value,\ false>;}
+\DoxyCodeLine{01441\ }
+\DoxyCodeLine{01442\ \ \ \ \ \ \ \_Local\_iterator\_base()\ :\ \_M\_bucket\_count(-\/1)\ \{\ \}}
+\DoxyCodeLine{01443\ }
+\DoxyCodeLine{01444\ \ \ \ \ \ \ \_Local\_iterator\_base(\textcolor{keyword}{const}\ \_\_hash\_code\_base\&\ \_\_base,}
+\DoxyCodeLine{01445\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_Hash\_node<\_Value,\ false>*\ \_\_p,}
+\DoxyCodeLine{01446\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::size\_t\ \_\_bkt,\ std::size\_t\ \_\_bkt\_count)}
+\DoxyCodeLine{01447\ \ \ \ \ \ \ :\ \_\_node\_iter\_base(\_\_p),\ \_M\_bucket(\_\_bkt),\ \_M\_bucket\_count(\_\_bkt\_count)}
+\DoxyCodeLine{01448\ \ \ \ \ \ \ \{\ \_M\_init(\_\_base);\ \}}
+\DoxyCodeLine{01449\ }
+\DoxyCodeLine{01450\ \ \ \ \ \ \ \string~\_Local\_iterator\_base()}
+\DoxyCodeLine{01451\ \ \ \ \ \ \ \{}
+\DoxyCodeLine{01452\ \ \ \ \ \textcolor{keywordflow}{if}\ (\_M\_bucket\_count\ !=\ \textcolor{keywordtype}{size\_t}(-\/1))}
+\DoxyCodeLine{01453\ \ \ \ \ \ \ \_M\_destroy();}
+\DoxyCodeLine{01454\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{01455\ }
+\DoxyCodeLine{01456\ \ \ \ \ \ \ \_Local\_iterator\_base(\textcolor{keyword}{const}\ \_Local\_iterator\_base\&\ \_\_iter)}
+\DoxyCodeLine{01457\ \ \ \ \ \ \ :\ \_\_node\_iter\_base(\_\_iter.\_M\_cur),\ \_M\_bucket(\_\_iter.\_M\_bucket)}
+\DoxyCodeLine{01458\ \ \ \ \ \ \ ,\ \_M\_bucket\_count(\_\_iter.\_M\_bucket\_count)}
+\DoxyCodeLine{01459\ \ \ \ \ \ \ \{}
+\DoxyCodeLine{01460\ \ \ \ \ \textcolor{keywordflow}{if}\ (\_M\_bucket\_count\ !=\ \textcolor{keywordtype}{size\_t}(-\/1))}
+\DoxyCodeLine{01461\ \ \ \ \ \ \ \_M\_init(*\_\_iter.\_M\_h());}
+\DoxyCodeLine{01462\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{01463\ }
+\DoxyCodeLine{01464\ \ \ \ \ \ \ \_Local\_iterator\_base\&}
+\DoxyCodeLine{01465\ \ \ \ \ \ \ operator=(\textcolor{keyword}{const}\ \_Local\_iterator\_base\&\ \_\_iter)}
+\DoxyCodeLine{01466\ \ \ \ \ \ \ \{}
+\DoxyCodeLine{01467\ \ \ \ \ \textcolor{keywordflow}{if}\ (\_M\_bucket\_count\ !=\ -\/1)}
+\DoxyCodeLine{01468\ \ \ \ \ \ \ \_M\_destroy();}
+\DoxyCodeLine{01469\ \ \ \ \ this-\/>\_M\_cur\ =\ \_\_iter.\_M\_cur;}
+\DoxyCodeLine{01470\ \ \ \ \ \_M\_bucket\ =\ \_\_iter.\_M\_bucket;}
+\DoxyCodeLine{01471\ \ \ \ \ \_M\_bucket\_count\ =\ \_\_iter.\_M\_bucket\_count;}
+\DoxyCodeLine{01472\ \ \ \ \ \textcolor{keywordflow}{if}\ (\_M\_bucket\_count\ !=\ -\/1)}
+\DoxyCodeLine{01473\ \ \ \ \ \ \ \_M\_init(*\_\_iter.\_M\_h());}
+\DoxyCodeLine{01474\ \ \ \ \ \textcolor{keywordflow}{return}\ *\textcolor{keyword}{this};}
+\DoxyCodeLine{01475\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{01476\ }
+\DoxyCodeLine{01477\ \ \ \ \ \ \ \textcolor{keywordtype}{void}}
+\DoxyCodeLine{01478\ \ \ \ \ \ \ \_M\_incr()}
+\DoxyCodeLine{01479\ \ \ \ \ \ \ \{}
+\DoxyCodeLine{01480\ \ \ \ \ \_\_node\_iter\_base::\_M\_incr();}
+\DoxyCodeLine{01481\ \ \ \ \ \textcolor{keywordflow}{if}\ (this-\/>\_M\_cur)}
+\DoxyCodeLine{01482\ \ \ \ \ \ \ \{}
+\DoxyCodeLine{01483\ \ \ \ \ \ \ \ \ std::size\_t\ \_\_bkt\ =\ this-\/>\_M\_h()-\/>\_M\_bucket\_index(*this-\/>\_M\_cur,}
+\DoxyCodeLine{01484\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_M\_bucket\_count);}
+\DoxyCodeLine{01485\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\_\_bkt\ !=\ \_M\_bucket)}
+\DoxyCodeLine{01486\ \ \ \ \ \ \ \ \ \ \ this-\/>\_M\_cur\ =\ \textcolor{keyword}{nullptr};}
+\DoxyCodeLine{01487\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{01488\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{01489\ }
+\DoxyCodeLine{01490\ \ \ \ \ \ \ std::size\_t\ \_M\_bucket;}
+\DoxyCodeLine{01491\ \ \ \ \ \ \ std::size\_t\ \_M\_bucket\_count;}
+\DoxyCodeLine{01492\ }
+\DoxyCodeLine{01493\ \ \ \ \ \ \ \textcolor{keywordtype}{void}}
+\DoxyCodeLine{01494\ \ \ \ \ \ \ \_M\_init(\textcolor{keyword}{const}\ \_\_hash\_code\_base\&\ \_\_base)}
+\DoxyCodeLine{01495\ \ \ \ \ \ \ \{\ ::new(this-\/>\_M\_h())\ \_\_hash\_code\_base(\_\_base);\ \}}
+\DoxyCodeLine{01496\ }
+\DoxyCodeLine{01497\ \ \ \ \ \ \ \textcolor{keywordtype}{void}}
+\DoxyCodeLine{01498\ \ \ \ \ \ \ \_M\_destroy()\ \{\ this-\/>\_M\_h()-\/>\string~\_\_hash\_code\_base();\ \}}
+\DoxyCodeLine{01499\ }
+\DoxyCodeLine{01500\ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{01501\ \ \ \ \ \ \ std::size\_t}
+\DoxyCodeLine{01502\ \ \ \ \ \ \ \_M\_get\_bucket()\textcolor{keyword}{\ const\ }\{\ \textcolor{keywordflow}{return}\ \_M\_bucket;\ \}\ \ \textcolor{comment}{//\ for\ debug\ mode}}
+\DoxyCodeLine{01503\ \ \ \ \ \};}
+\DoxyCodeLine{01504\ }
+\DoxyCodeLine{01506\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Key,\ \textcolor{keyword}{typename}\ \_Value,\ \textcolor{keyword}{typename}\ \_ExtractKey,}
+\DoxyCodeLine{01507\ \ \ \ \ \ \ \ \textcolor{keyword}{typename}\ \_Hash,\ \textcolor{keyword}{typename}\ \_RangeHash,\ \textcolor{keyword}{typename}\ \_Unused,}
+\DoxyCodeLine{01508\ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ \_\_constant\_iterators,\ \textcolor{keywordtype}{bool}\ \_\_cache>}
+\DoxyCodeLine{01509\ \ \ \ \ \textcolor{keyword}{struct\ }\_Local\_iterator}
+\DoxyCodeLine{01510\ \ \ \ \ :\ \textcolor{keyword}{public}\ \_Local\_iterator\_base<\_Key,\ \_Value,\ \_ExtractKey,}
+\DoxyCodeLine{01511\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_Hash,\ \_RangeHash,\ \_Unused,\ \_\_cache>}
+\DoxyCodeLine{01512\ \ \ \ \ \{}
+\DoxyCodeLine{01513\ \ \ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{01514\ \ \ \ \ \ \ \textcolor{keyword}{using\ }\_\_base\_type\ =\ \_Local\_iterator\_base<\_Key,\ \_Value,\ \_ExtractKey,}
+\DoxyCodeLine{01515\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_Hash,\ \_RangeHash,\ \_Unused,\ \_\_cache>;}
+\DoxyCodeLine{01516\ \ \ \ \ \ \ \textcolor{keyword}{using\ }\_\_hash\_code\_base\ =\ \textcolor{keyword}{typename}\ \_\_base\_type::\_\_hash\_code\_base;}
+\DoxyCodeLine{01517\ }
+\DoxyCodeLine{01518\ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{01519\ \ \ \ \ \ \ \textcolor{keyword}{using\ }value\_type\ =\ \_Value;}
+\DoxyCodeLine{01520\ \ \ \ \ \ \ \textcolor{keyword}{using\ }\mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2glad_8h_aca2093d4756bde9a55b94e9ff8d9c623}{pointer}}\ =\ \_\_conditional\_t<\_\_constant\_iterators,}
+\DoxyCodeLine{01521\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ value\_type*,\ value\_type*>;}
+\DoxyCodeLine{01522\ \ \ \ \ \ \ \textcolor{keyword}{using\ }reference\ =\ \_\_conditional\_t<\_\_constant\_iterators,}
+\DoxyCodeLine{01523\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ value\_type\&,\ value\_type\&>;}
+\DoxyCodeLine{01524\ \ \ \ \ \ \ \textcolor{keyword}{using\ }difference\_type\ =\ \mbox{\hyperlink{_classes_2lib_2include_2stddef_8h_a6d26a0475a6d6c897e655cdc5d8019d2}{ptrdiff\_t}};}
+\DoxyCodeLine{01525\ \ \ \ \ \ \ \textcolor{keyword}{using\ }iterator\_category\ =\ forward\_iterator\_tag;}
+\DoxyCodeLine{01526\ }
+\DoxyCodeLine{01527\ \ \ \ \ \ \ \_Local\_iterator()\ =\ \textcolor{keywordflow}{default};}
+\DoxyCodeLine{01528\ }
+\DoxyCodeLine{01529\ \ \ \ \ \ \ \_Local\_iterator(\textcolor{keyword}{const}\ \_\_hash\_code\_base\&\ \_\_base,}
+\DoxyCodeLine{01530\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_Hash\_node<\_Value,\ \_\_cache>*\ \_\_n,}
+\DoxyCodeLine{01531\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::size\_t\ \_\_bkt,\ std::size\_t\ \_\_bkt\_count)}
+\DoxyCodeLine{01532\ \ \ \ \ \ \ :\ \_\_base\_type(\_\_base,\ \_\_n,\ \_\_bkt,\ \_\_bkt\_count)}
+\DoxyCodeLine{01533\ \ \ \ \ \ \ \{\ \}}
+\DoxyCodeLine{01534\ }
+\DoxyCodeLine{01535\ \ \ \ \ \ \ reference}
+\DoxyCodeLine{01536\ \ \ \ \ \ \ operator*()\textcolor{keyword}{\ const}}
+\DoxyCodeLine{01537\ \textcolor{keyword}{\ \ \ \ \ \ }\{\ \textcolor{keywordflow}{return}\ this-\/>\_M\_cur-\/>\_M\_v();\ \}}
+\DoxyCodeLine{01538\ }
+\DoxyCodeLine{01539\ \ \ \ \ \ \ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2glad_8h_aca2093d4756bde9a55b94e9ff8d9c623}{pointer}}}
+\DoxyCodeLine{01540\ \ \ \ \ \ \ operator-\/>()\textcolor{keyword}{\ const}}
+\DoxyCodeLine{01541\ \textcolor{keyword}{\ \ \ \ \ \ }\{\ \textcolor{keywordflow}{return}\ this-\/>\_M\_cur-\/>\_M\_valptr();\ \}}
+\DoxyCodeLine{01542\ }
+\DoxyCodeLine{01543\ \ \ \ \ \ \ \_Local\_iterator\&}
+\DoxyCodeLine{01544\ \ \ \ \ \ \ operator++()}
+\DoxyCodeLine{01545\ \ \ \ \ \ \ \{}
+\DoxyCodeLine{01546\ \ \ \ \ this-\/>\_M\_incr();}
+\DoxyCodeLine{01547\ \ \ \ \ \textcolor{keywordflow}{return}\ *\textcolor{keyword}{this};}
+\DoxyCodeLine{01548\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{01549\ }
+\DoxyCodeLine{01550\ \ \ \ \ \ \ \_Local\_iterator}
+\DoxyCodeLine{01551\ \ \ \ \ \ \ operator++(\textcolor{keywordtype}{int})}
+\DoxyCodeLine{01552\ \ \ \ \ \ \ \{}
+\DoxyCodeLine{01553\ \ \ \ \ \_Local\_iterator\ \mbox{\hyperlink{_classes_2lib_2include_2xmmintrin_8h_ad56bf6b8c22ee698e455f99196a1fe12}{\_\_tmp}}(*\textcolor{keyword}{this});}
+\DoxyCodeLine{01554\ \ \ \ \ this-\/>\_M\_incr();}
+\DoxyCodeLine{01555\ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{_classes_2lib_2include_2xmmintrin_8h_ad56bf6b8c22ee698e455f99196a1fe12}{\_\_tmp}};}
+\DoxyCodeLine{01556\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{01557\ \ \ \ \ \};}
+\DoxyCodeLine{01558\ }
+\DoxyCodeLine{01560\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Key,\ \textcolor{keyword}{typename}\ \_Value,\ \textcolor{keyword}{typename}\ \_ExtractKey,}
+\DoxyCodeLine{01561\ \ \ \ \ \ \ \ \textcolor{keyword}{typename}\ \_Hash,\ \textcolor{keyword}{typename}\ \_RangeHash,\ \textcolor{keyword}{typename}\ \_Unused,}
+\DoxyCodeLine{01562\ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ \_\_constant\_iterators,\ \textcolor{keywordtype}{bool}\ \_\_cache>}
+\DoxyCodeLine{01563\ \ \ \ \ \textcolor{keyword}{struct\ }\_Local\_const\_iterator}
+\DoxyCodeLine{01564\ \ \ \ \ :\ \textcolor{keyword}{public}\ \_Local\_iterator\_base<\_Key,\ \_Value,\ \_ExtractKey,}
+\DoxyCodeLine{01565\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_Hash,\ \_RangeHash,\ \_Unused,\ \_\_cache>}
+\DoxyCodeLine{01566\ \ \ \ \ \{}
+\DoxyCodeLine{01567\ \ \ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{01568\ \ \ \ \ \ \ \textcolor{keyword}{using\ }\_\_base\_type\ =\ \_Local\_iterator\_base<\_Key,\ \_Value,\ \_ExtractKey,}
+\DoxyCodeLine{01569\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_Hash,\ \_RangeHash,\ \_Unused,\ \_\_cache>;}
+\DoxyCodeLine{01570\ \ \ \ \ \ \ \textcolor{keyword}{using\ }\_\_hash\_code\_base\ =\ \textcolor{keyword}{typename}\ \_\_base\_type::\_\_hash\_code\_base;}
+\DoxyCodeLine{01571\ }
+\DoxyCodeLine{01572\ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{01573\ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ \_Value\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ value\_type;}
+\DoxyCodeLine{01574\ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ \textcolor{keyword}{const}\ value\_type*\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2glad_8h_aca2093d4756bde9a55b94e9ff8d9c623}{pointer}};}
+\DoxyCodeLine{01575\ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ \textcolor{keyword}{const}\ value\_type\&\ \ \ \ \ \ \ \ \ \ \ \ \ reference;}
+\DoxyCodeLine{01576\ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ std::ptrdiff\_t\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ difference\_type;}
+\DoxyCodeLine{01577\ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ std::forward\_iterator\_tag\ \ \ \ \ \ \ \ \ iterator\_category;}
+\DoxyCodeLine{01578\ }
+\DoxyCodeLine{01579\ \ \ \ \ \ \ \_Local\_const\_iterator()\ =\ \textcolor{keywordflow}{default};}
+\DoxyCodeLine{01580\ }
+\DoxyCodeLine{01581\ \ \ \ \ \ \ \_Local\_const\_iterator(\textcolor{keyword}{const}\ \_\_hash\_code\_base\&\ \_\_base,}
+\DoxyCodeLine{01582\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_Hash\_node<\_Value,\ \_\_cache>*\ \_\_n,}
+\DoxyCodeLine{01583\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::size\_t\ \_\_bkt,\ std::size\_t\ \_\_bkt\_count)}
+\DoxyCodeLine{01584\ \ \ \ \ \ \ :\ \_\_base\_type(\_\_base,\ \_\_n,\ \_\_bkt,\ \_\_bkt\_count)}
+\DoxyCodeLine{01585\ \ \ \ \ \ \ \{\ \}}
+\DoxyCodeLine{01586\ }
+\DoxyCodeLine{01587\ \ \ \ \ \ \ \_Local\_const\_iterator(\textcolor{keyword}{const}\ \_Local\_iterator<\_Key,\ \_Value,\ \_ExtractKey,}
+\DoxyCodeLine{01588\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_Hash,\ \_RangeHash,\ \_Unused,}
+\DoxyCodeLine{01589\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_\_constant\_iterators,}
+\DoxyCodeLine{01590\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_\_cache>\&\ \_\_x)}
+\DoxyCodeLine{01591\ \ \ \ \ \ \ :\ \_\_base\_type(\_\_x)}
+\DoxyCodeLine{01592\ \ \ \ \ \ \ \{\ \}}
+\DoxyCodeLine{01593\ }
+\DoxyCodeLine{01594\ \ \ \ \ \ \ reference}
+\DoxyCodeLine{01595\ \ \ \ \ \ \ operator*()\textcolor{keyword}{\ const}}
+\DoxyCodeLine{01596\ \textcolor{keyword}{\ \ \ \ \ \ }\{\ \textcolor{keywordflow}{return}\ this-\/>\_M\_cur-\/>\_M\_v();\ \}}
+\DoxyCodeLine{01597\ }
+\DoxyCodeLine{01598\ \ \ \ \ \ \ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2glad_8h_aca2093d4756bde9a55b94e9ff8d9c623}{pointer}}}
+\DoxyCodeLine{01599\ \ \ \ \ \ \ operator-\/>()\textcolor{keyword}{\ const}}
+\DoxyCodeLine{01600\ \textcolor{keyword}{\ \ \ \ \ \ }\{\ \textcolor{keywordflow}{return}\ this-\/>\_M\_cur-\/>\_M\_valptr();\ \}}
+\DoxyCodeLine{01601\ }
+\DoxyCodeLine{01602\ \ \ \ \ \ \ \_Local\_const\_iterator\&}
+\DoxyCodeLine{01603\ \ \ \ \ \ \ operator++()}
+\DoxyCodeLine{01604\ \ \ \ \ \ \ \{}
+\DoxyCodeLine{01605\ \ \ \ \ this-\/>\_M\_incr();}
+\DoxyCodeLine{01606\ \ \ \ \ \textcolor{keywordflow}{return}\ *\textcolor{keyword}{this};}
+\DoxyCodeLine{01607\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{01608\ }
+\DoxyCodeLine{01609\ \ \ \ \ \ \ \_Local\_const\_iterator}
+\DoxyCodeLine{01610\ \ \ \ \ \ \ operator++(\textcolor{keywordtype}{int})}
+\DoxyCodeLine{01611\ \ \ \ \ \ \ \{}
+\DoxyCodeLine{01612\ \ \ \ \ \_Local\_const\_iterator\ \mbox{\hyperlink{_classes_2lib_2include_2xmmintrin_8h_ad56bf6b8c22ee698e455f99196a1fe12}{\_\_tmp}}(*\textcolor{keyword}{this});}
+\DoxyCodeLine{01613\ \ \ \ \ this-\/>\_M\_incr();}
+\DoxyCodeLine{01614\ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{_classes_2lib_2include_2xmmintrin_8h_ad56bf6b8c22ee698e455f99196a1fe12}{\_\_tmp}};}
+\DoxyCodeLine{01615\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{01616\ \ \ \ \ \};}
+\DoxyCodeLine{01617\ }
+\DoxyCodeLine{01628\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Key,\ \textcolor{keyword}{typename}\ \_Value,\ \textcolor{keyword}{typename}\ \_ExtractKey,}
+\DoxyCodeLine{01629\ \ \ \ \ \ \ \ \textcolor{keyword}{typename}\ \_Equal,\ \textcolor{keyword}{typename}\ \_Hash,\ \textcolor{keyword}{typename}\ \_RangeHash,}
+\DoxyCodeLine{01630\ \ \ \ \ \ \ \ \textcolor{keyword}{typename}\ \_Unused,\ \textcolor{keyword}{typename}\ \_Traits>}
+\DoxyCodeLine{01631\ \ \ \ \ \textcolor{keyword}{struct\ }\_Hashtable\_base}
+\DoxyCodeLine{01632\ \ \ \ \ :\ \textcolor{keyword}{public}\ \_Hash\_code\_base<\_Key,\ \_Value,\ \_ExtractKey,\ \_Hash,\ \_RangeHash,}
+\DoxyCodeLine{01633\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_Unused,\ \_Traits::\_\_hash\_cached::value>,}
+\DoxyCodeLine{01634\ \ \ \ \ \ \ \textcolor{keyword}{private}\ \_Hashtable\_ebo\_helper<0,\ \_Equal>}
+\DoxyCodeLine{01635\ \ \ \ \ \{}
+\DoxyCodeLine{01636\ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{01637\ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ \_Key\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ key\_type;}
+\DoxyCodeLine{01638\ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ \_Value\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ value\_type;}
+\DoxyCodeLine{01639\ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ \_Equal\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ key\_equal;}
+\DoxyCodeLine{01640\ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ std::size\_t\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ size\_type;}
+\DoxyCodeLine{01641\ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ std::ptrdiff\_t\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ difference\_type;}
+\DoxyCodeLine{01642\ }
+\DoxyCodeLine{01643\ \ \ \ \ \ \ \textcolor{keyword}{using\ }\_\_traits\_type\ =\ \_Traits;}
+\DoxyCodeLine{01644\ \ \ \ \ \ \ \textcolor{keyword}{using\ }\_\_hash\_cached\ =\ \textcolor{keyword}{typename}\ \_\_traits\_type::\_\_hash\_cached;}
+\DoxyCodeLine{01645\ }
+\DoxyCodeLine{01646\ \ \ \ \ \ \ \textcolor{keyword}{using\ }\_\_hash\_code\_base\ =\ \_Hash\_code\_base<\_Key,\ \_Value,\ \_ExtractKey,}
+\DoxyCodeLine{01647\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_Hash,\ \_RangeHash,\ \_Unused,}
+\DoxyCodeLine{01648\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_\_hash\_cached::value>;}
+\DoxyCodeLine{01649\ }
+\DoxyCodeLine{01650\ \ \ \ \ \ \ \textcolor{keyword}{using\ }\_\_hash\_code\ =\ \textcolor{keyword}{typename}\ \_\_hash\_code\_base::\_\_hash\_code;}
+\DoxyCodeLine{01651\ }
+\DoxyCodeLine{01652\ \ \ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{01653\ \ \ \ \ \ \ \textcolor{keyword}{using\ }\_EqualEBO\ =\ \_Hashtable\_ebo\_helper<0,\ \_Equal>;}
+\DoxyCodeLine{01654\ }
+\DoxyCodeLine{01655\ \ \ \ \ \ \ \textcolor{keyword}{static}\ \textcolor{keywordtype}{bool}}
+\DoxyCodeLine{01656\ \ \ \ \ \ \ \_S\_equals(\_\_hash\_code,\ \textcolor{keyword}{const}\ \_Hash\_node\_code\_cache<false>\&)}
+\DoxyCodeLine{01657\ \ \ \ \ \ \ \{\ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};\ \}}
+\DoxyCodeLine{01658\ }
+\DoxyCodeLine{01659\ \ \ \ \ \ \ \textcolor{keyword}{static}\ \textcolor{keywordtype}{bool}}
+\DoxyCodeLine{01660\ \ \ \ \ \ \ \_S\_node\_equals(\textcolor{keyword}{const}\ \_Hash\_node\_code\_cache<false>\&,}
+\DoxyCodeLine{01661\ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \_Hash\_node\_code\_cache<false>\&)}
+\DoxyCodeLine{01662\ \ \ \ \ \ \ \{\ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};\ \}}
+\DoxyCodeLine{01663\ }
+\DoxyCodeLine{01664\ \ \ \ \ \ \ \textcolor{keyword}{static}\ \textcolor{keywordtype}{bool}}
+\DoxyCodeLine{01665\ \ \ \ \ \ \ \_S\_equals(\_\_hash\_code\ \_\_c,\ \textcolor{keyword}{const}\ \_Hash\_node\_code\_cache<true>\&\ \_\_n)}
+\DoxyCodeLine{01666\ \ \ \ \ \ \ \{\ \textcolor{keywordflow}{return}\ \_\_c\ ==\ \_\_n.\_M\_hash\_code;\ \}}
+\DoxyCodeLine{01667\ }
+\DoxyCodeLine{01668\ \ \ \ \ \ \ \textcolor{keyword}{static}\ \textcolor{keywordtype}{bool}}
+\DoxyCodeLine{01669\ \ \ \ \ \ \ \_S\_node\_equals(\textcolor{keyword}{const}\ \_Hash\_node\_code\_cache<true>\&\ \_\_lhn,}
+\DoxyCodeLine{01670\ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \_Hash\_node\_code\_cache<true>\&\ \_\_rhn)}
+\DoxyCodeLine{01671\ \ \ \ \ \ \ \{\ \textcolor{keywordflow}{return}\ \_\_lhn.\_M\_hash\_code\ ==\ \_\_rhn.\_M\_hash\_code;\ \}}
+\DoxyCodeLine{01672\ }
+\DoxyCodeLine{01673\ \ \ \ \ \textcolor{keyword}{protected}:}
+\DoxyCodeLine{01674\ \ \ \ \ \ \ \_Hashtable\_base()\ =\ \textcolor{keywordflow}{default};}
+\DoxyCodeLine{01675\ }
+\DoxyCodeLine{01676\ \ \ \ \ \ \ \_Hashtable\_base(\textcolor{keyword}{const}\ \_Hash\&\ \_\_hash,\ \textcolor{keyword}{const}\ \_Equal\&\ \_\_eq)}
+\DoxyCodeLine{01677\ \ \ \ \ \ \ :\ \_\_hash\_code\_base(\_\_hash),\ \_EqualEBO(\_\_eq)}
+\DoxyCodeLine{01678\ \ \ \ \ \ \ \{\ \}}
+\DoxyCodeLine{01679\ }
+\DoxyCodeLine{01680\ \ \ \ \ \ \ \textcolor{keywordtype}{bool}}
+\DoxyCodeLine{01681\ \ \ \ \ \ \ \_M\_key\_equals(\textcolor{keyword}{const}\ \_Key\&\ \_\_k,}
+\DoxyCodeLine{01682\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \_Hash\_node\_value<\_Value,}
+\DoxyCodeLine{01683\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_\_hash\_cached::value>\&\ \_\_n)\textcolor{keyword}{\ const}}
+\DoxyCodeLine{01684\ \textcolor{keyword}{\ \ \ \ \ \ }\{}
+\DoxyCodeLine{01685\ \ \ \ \ \textcolor{keyword}{static\_assert}(\_\_is\_invocable<const\ \_Equal\&,\ const\ \_Key\&,\ const\ \_Key\&>\{\},}
+\DoxyCodeLine{01686\ \ \ \ \ \ \ \textcolor{stringliteral}{"{}key\ equality\ predicate\ must\ be\ invocable\ with\ two\ arguments\ of\ "{}}}
+\DoxyCodeLine{01687\ \ \ \ \ \ \ \textcolor{stringliteral}{"{}key\ type"{}});}
+\DoxyCodeLine{01688\ \ \ \ \ \textcolor{keywordflow}{return}\ \_M\_eq()(\_\_k,\ \_ExtractKey\{\}(\_\_n.\_M\_v()));}
+\DoxyCodeLine{01689\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{01690\ }
+\DoxyCodeLine{01691\ \ \ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Kt>}
+\DoxyCodeLine{01692\ \ \ \ \ \textcolor{keywordtype}{bool}}
+\DoxyCodeLine{01693\ \ \ \ \ \_M\_key\_equals\_tr(\textcolor{keyword}{const}\ \_Kt\&\ \_\_k,}
+\DoxyCodeLine{01694\ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \_Hash\_node\_value<\_Value,}
+\DoxyCodeLine{01695\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_\_hash\_cached::value>\&\ \_\_n)\textcolor{keyword}{\ const}}
+\DoxyCodeLine{01696\ \textcolor{keyword}{\ \ \ \ }\{}
+\DoxyCodeLine{01697\ \ \ \ \ \ \ \textcolor{keyword}{static\_assert}(}
+\DoxyCodeLine{01698\ \ \ \ \ \ \ \ \ \_\_is\_invocable<const\ \_Equal\&,\ const\ \_Kt\&,\ const\ \_Key\&>\{\},}
+\DoxyCodeLine{01699\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}key\ equality\ predicate\ must\ be\ invocable\ with\ two\ arguments\ of\ "{}}}
+\DoxyCodeLine{01700\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}key\ type"{}});}
+\DoxyCodeLine{01701\ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \_M\_eq()(\_\_k,\ \_ExtractKey\{\}(\_\_n.\_M\_v()));}
+\DoxyCodeLine{01702\ \ \ \ \ \}}
+\DoxyCodeLine{01703\ }
+\DoxyCodeLine{01704\ \ \ \ \ \ \ \textcolor{keywordtype}{bool}}
+\DoxyCodeLine{01705\ \ \ \ \ \ \ \_M\_equals(\textcolor{keyword}{const}\ \_Key\&\ \_\_k,\ \_\_hash\_code\ \_\_c,}
+\DoxyCodeLine{01706\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \_Hash\_node\_value<\_Value,\ \_\_hash\_cached::value>\&\ \_\_n)\textcolor{keyword}{\ const}}
+\DoxyCodeLine{01707\ \textcolor{keyword}{\ \ \ \ \ \ }\{\ \textcolor{keywordflow}{return}\ \_S\_equals(\_\_c,\ \_\_n)\ \&\&\ \_M\_key\_equals(\_\_k,\ \_\_n);\ \}}
+\DoxyCodeLine{01708\ }
+\DoxyCodeLine{01709\ \ \ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Kt>}
+\DoxyCodeLine{01710\ \ \ \ \ \textcolor{keywordtype}{bool}}
+\DoxyCodeLine{01711\ \ \ \ \ \_M\_equals\_tr(\textcolor{keyword}{const}\ \_Kt\&\ \_\_k,\ \_\_hash\_code\ \_\_c,}
+\DoxyCodeLine{01712\ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \_Hash\_node\_value<\_Value,}
+\DoxyCodeLine{01713\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_\_hash\_cached::value>\&\ \_\_n)\textcolor{keyword}{\ const}}
+\DoxyCodeLine{01714\ \textcolor{keyword}{\ \ \ \ }\{\ \textcolor{keywordflow}{return}\ \_S\_equals(\_\_c,\ \_\_n)\ \&\&\ \_M\_key\_equals\_tr(\_\_k,\ \_\_n);\ \}}
+\DoxyCodeLine{01715\ }
+\DoxyCodeLine{01716\ \ \ \ \ \ \ \textcolor{keywordtype}{bool}}
+\DoxyCodeLine{01717\ \ \ \ \ \ \ \_M\_node\_equals(}
+\DoxyCodeLine{01718\ \ \ \ \ \textcolor{keyword}{const}\ \_Hash\_node\_value<\_Value,\ \_\_hash\_cached::value>\&\ \_\_lhn,}
+\DoxyCodeLine{01719\ \ \ \ \ \textcolor{keyword}{const}\ \_Hash\_node\_value<\_Value,\ \_\_hash\_cached::value>\&\ \_\_rhn)\textcolor{keyword}{\ const}}
+\DoxyCodeLine{01720\ \textcolor{keyword}{\ \ \ \ \ \ }\{}
+\DoxyCodeLine{01721\ \ \ \ \ \textcolor{keywordflow}{return}\ \_S\_node\_equals(\_\_lhn,\ \_\_rhn)}
+\DoxyCodeLine{01722\ \ \ \ \ \ \ \&\&\ \_M\_key\_equals(\_ExtractKey\{\}(\_\_lhn.\_M\_v()),\ \_\_rhn);}
+\DoxyCodeLine{01723\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{01724\ }
+\DoxyCodeLine{01725\ \ \ \ \ \ \ \textcolor{keywordtype}{void}}
+\DoxyCodeLine{01726\ \ \ \ \ \ \ \_M\_swap(\_Hashtable\_base\&\ \_\_x)}
+\DoxyCodeLine{01727\ \ \ \ \ \ \ \{}
+\DoxyCodeLine{01728\ \ \ \ \ \_\_hash\_code\_base::\_M\_swap(\_\_x);}
+\DoxyCodeLine{01729\ \ \ \ \ \mbox{\hyperlink{namespacestd_a3ece115a1c8ed9020a20f1d0b70efda8}{std::swap}}(\_EqualEBO::\_M\_get(),\ \_\_x.\_EqualEBO::\_M\_get());}
+\DoxyCodeLine{01730\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{01731\ }
+\DoxyCodeLine{01732\ \ \ \ \ \ \ \textcolor{keyword}{const}\ \_Equal\&}
+\DoxyCodeLine{01733\ \ \ \ \ \ \ \_M\_eq()\textcolor{keyword}{\ const\ }\{\ \textcolor{keywordflow}{return}\ \_EqualEBO::\_M\_cget();\ \}}
+\DoxyCodeLine{01734\ \ \ \ \ \};}
+\DoxyCodeLine{01735\ }
+\DoxyCodeLine{01744\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Key,\ \textcolor{keyword}{typename}\ \_Value,\ \textcolor{keyword}{typename}\ \_Alloc,}
+\DoxyCodeLine{01745\ \ \ \ \ \ \ \ \textcolor{keyword}{typename}\ \_ExtractKey,\ \textcolor{keyword}{typename}\ \_Equal,}
+\DoxyCodeLine{01746\ \ \ \ \ \ \ \ \textcolor{keyword}{typename}\ \_Hash,\ \textcolor{keyword}{typename}\ \_RangeHash,\ \textcolor{keyword}{typename}\ \_Unused,}
+\DoxyCodeLine{01747\ \ \ \ \ \ \ \ \textcolor{keyword}{typename}\ \_RehashPolicy,\ \textcolor{keyword}{typename}\ \_Traits,}
+\DoxyCodeLine{01748\ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ \_Unique\_keys\ =\ \_Traits::\_\_unique\_keys::value>}
+\DoxyCodeLine{01749\ \ \ \ \ \textcolor{keyword}{struct\ }\_Equality;}
+\DoxyCodeLine{01750\ }
+\DoxyCodeLine{01752\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Key,\ \textcolor{keyword}{typename}\ \_Value,\ \textcolor{keyword}{typename}\ \_Alloc,}
+\DoxyCodeLine{01753\ \ \ \ \ \ \ \ \textcolor{keyword}{typename}\ \_ExtractKey,\ \textcolor{keyword}{typename}\ \_Equal,}
+\DoxyCodeLine{01754\ \ \ \ \ \ \ \ \textcolor{keyword}{typename}\ \_Hash,\ \textcolor{keyword}{typename}\ \_RangeHash,\ \textcolor{keyword}{typename}\ \_Unused,}
+\DoxyCodeLine{01755\ \ \ \ \ \ \ \ \textcolor{keyword}{typename}\ \_RehashPolicy,\ \textcolor{keyword}{typename}\ \_Traits>}
+\DoxyCodeLine{01756\ \ \ \ \ \textcolor{keyword}{struct\ }\_Equality<\_Key,\ \_Value,\ \_Alloc,\ \_ExtractKey,\ \_Equal,}
+\DoxyCodeLine{01757\ \ \ \ \ \ \ \ \ \ \ \ \ \ \_Hash,\ \_RangeHash,\ \_Unused,\ \_RehashPolicy,\ \_Traits,\ \mbox{\hyperlink{_classes_2lib_2include_2stdbool_8h_a41f9c5fb8b08eb5dc3edce4dcb37fee7}{true}}>}
+\DoxyCodeLine{01758\ \ \ \ \ \{}
+\DoxyCodeLine{01759\ \ \ \ \ \ \ \textcolor{keyword}{using\ }\_\_hashtable\ =\ \_Hashtable<\_Key,\ \_Value,\ \_Alloc,\ \_ExtractKey,\ \_Equal,}
+\DoxyCodeLine{01760\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_Hash,\ \_RangeHash,\ \_Unused,}
+\DoxyCodeLine{01761\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_RehashPolicy,\ \_Traits>;}
+\DoxyCodeLine{01762\ }
+\DoxyCodeLine{01763\ \ \ \ \ \ \ \textcolor{keywordtype}{bool}}
+\DoxyCodeLine{01764\ \ \ \ \ \ \ \_M\_equal(\textcolor{keyword}{const}\ \_\_hashtable\&)\ \textcolor{keyword}{const};}
+\DoxyCodeLine{01765\ \ \ \ \ \};}
+\DoxyCodeLine{01766\ }
+\DoxyCodeLine{01767\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Key,\ \textcolor{keyword}{typename}\ \_Value,\ \textcolor{keyword}{typename}\ \_Alloc,}
+\DoxyCodeLine{01768\ \ \ \ \ \ \ \ \textcolor{keyword}{typename}\ \_ExtractKey,\ \textcolor{keyword}{typename}\ \_Equal,}
+\DoxyCodeLine{01769\ \ \ \ \ \ \ \ \textcolor{keyword}{typename}\ \_Hash,\ \textcolor{keyword}{typename}\ \_RangeHash,\ \textcolor{keyword}{typename}\ \_Unused,}
+\DoxyCodeLine{01770\ \ \ \ \ \ \ \ \textcolor{keyword}{typename}\ \_RehashPolicy,\ \textcolor{keyword}{typename}\ \_Traits>}
+\DoxyCodeLine{01771\ \ \ \ \ \textcolor{keywordtype}{bool}}
+\DoxyCodeLine{01772\ \ \ \ \ \_Equality<\_Key,\ \_Value,\ \_Alloc,\ \_ExtractKey,\ \_Equal,}
+\DoxyCodeLine{01773\ \ \ \ \ \ \ \ \ \ \ \_Hash,\ \_RangeHash,\ \_Unused,\ \_RehashPolicy,\ \_Traits,\ \textcolor{keyword}{true}>::}
+\DoxyCodeLine{01774\ \ \ \ \ \_M\_equal(\textcolor{keyword}{const}\ \_\_hashtable\&\ \_\_other)\textcolor{keyword}{\ const}}
+\DoxyCodeLine{01775\ \textcolor{keyword}{\ \ \ \ }\{}
+\DoxyCodeLine{01776\ \ \ \ \ \ \ \textcolor{keyword}{using\ }\_\_node\_type\ =\ \textcolor{keyword}{typename}\ \_\_hashtable::\_\_node\_type;}
+\DoxyCodeLine{01777\ \ \ \ \ \ \ \textcolor{keyword}{const}\ \_\_hashtable*\ \_\_this\ =\ \textcolor{keyword}{static\_cast<}\textcolor{keyword}{const\ }\_\_hashtable*\textcolor{keyword}{>}(\textcolor{keyword}{this});}
+\DoxyCodeLine{01778\ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\_\_this-\/>size()\ !=\ \_\_other.size())}
+\DoxyCodeLine{01779\ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{01780\ }
+\DoxyCodeLine{01781\ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keyword}{auto}\ \_\_itx\ =\ \_\_this-\/>begin();\ \_\_itx\ !=\ \_\_this-\/>end();\ ++\_\_itx)}
+\DoxyCodeLine{01782\ \ \ \ \ \{}
+\DoxyCodeLine{01783\ \ \ \ \ \ \ std::size\_t\ \_\_ybkt\ =\ \_\_other.\_M\_bucket\_index(*\_\_itx.\_M\_cur);}
+\DoxyCodeLine{01784\ \ \ \ \ \ \ \textcolor{keyword}{auto}\ \_\_prev\_n\ =\ \_\_other.\_M\_buckets[\_\_ybkt];}
+\DoxyCodeLine{01785\ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (!\_\_prev\_n)}
+\DoxyCodeLine{01786\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{01787\ }
+\DoxyCodeLine{01788\ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\_\_node\_type*\ \_\_n\ =\ \textcolor{keyword}{static\_cast<}\_\_node\_type*\textcolor{keyword}{>}(\_\_prev\_n-\/>\_M\_nxt);;}
+\DoxyCodeLine{01789\ \ \ \ \ \ \ \ \ \ \ \ \_\_n\ =\ \_\_n-\/>\_M\_next())}
+\DoxyCodeLine{01790\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{01791\ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\_\_n-\/>\_M\_v()\ ==\ *\_\_itx)}
+\DoxyCodeLine{01792\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{01793\ }
+\DoxyCodeLine{01794\ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (!\_\_n-\/>\_M\_nxt}
+\DoxyCodeLine{01795\ \ \ \ \ \ \ \ \ \ \ ||\ \_\_other.\_M\_bucket\_index(*\_\_n-\/>\_M\_next())\ !=\ \_\_ybkt)}
+\DoxyCodeLine{01796\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{01797\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{01798\ \ \ \ \ \}}
+\DoxyCodeLine{01799\ }
+\DoxyCodeLine{01800\ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{01801\ \ \ \ \ \}}
+\DoxyCodeLine{01802\ }
+\DoxyCodeLine{01804\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Key,\ \textcolor{keyword}{typename}\ \_Value,\ \textcolor{keyword}{typename}\ \_Alloc,}
+\DoxyCodeLine{01805\ \ \ \ \ \ \ \ \textcolor{keyword}{typename}\ \_ExtractKey,\ \textcolor{keyword}{typename}\ \_Equal,}
+\DoxyCodeLine{01806\ \ \ \ \ \ \ \ \textcolor{keyword}{typename}\ \_Hash,\ \textcolor{keyword}{typename}\ \_RangeHash,\ \textcolor{keyword}{typename}\ \_Unused,}
+\DoxyCodeLine{01807\ \ \ \ \ \ \ \ \textcolor{keyword}{typename}\ \_RehashPolicy,\ \textcolor{keyword}{typename}\ \_Traits>}
+\DoxyCodeLine{01808\ \ \ \ \ \textcolor{keyword}{struct\ }\_Equality<\_Key,\ \_Value,\ \_Alloc,\ \_ExtractKey,\ \_Equal,}
+\DoxyCodeLine{01809\ \ \ \ \ \ \ \ \ \ \ \ \ \ \_Hash,\ \_RangeHash,\ \_Unused,\ \_RehashPolicy,\ \_Traits,\ \mbox{\hyperlink{_classes_2lib_2include_2stdbool_8h_a65e9886d74aaee76545e83dd09011727}{false}}>}
+\DoxyCodeLine{01810\ \ \ \ \ \{}
+\DoxyCodeLine{01811\ \ \ \ \ \ \ \textcolor{keyword}{using\ }\_\_hashtable\ =\ \_Hashtable<\_Key,\ \_Value,\ \_Alloc,\ \_ExtractKey,\ \_Equal,}
+\DoxyCodeLine{01812\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_Hash,\ \_RangeHash,\ \_Unused,}
+\DoxyCodeLine{01813\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_RehashPolicy,\ \_Traits>;}
+\DoxyCodeLine{01814\ }
+\DoxyCodeLine{01815\ \ \ \ \ \ \ \textcolor{keywordtype}{bool}}
+\DoxyCodeLine{01816\ \ \ \ \ \ \ \_M\_equal(\textcolor{keyword}{const}\ \_\_hashtable\&)\ \textcolor{keyword}{const};}
+\DoxyCodeLine{01817\ \ \ \ \ \};}
+\DoxyCodeLine{01818\ }
+\DoxyCodeLine{01819\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Key,\ \textcolor{keyword}{typename}\ \_Value,\ \textcolor{keyword}{typename}\ \_Alloc,}
+\DoxyCodeLine{01820\ \ \ \ \ \ \ \ \textcolor{keyword}{typename}\ \_ExtractKey,\ \textcolor{keyword}{typename}\ \_Equal,}
+\DoxyCodeLine{01821\ \ \ \ \ \ \ \ \textcolor{keyword}{typename}\ \_Hash,\ \textcolor{keyword}{typename}\ \_RangeHash,\ \textcolor{keyword}{typename}\ \_Unused,}
+\DoxyCodeLine{01822\ \ \ \ \ \ \ \ \textcolor{keyword}{typename}\ \_RehashPolicy,\ \textcolor{keyword}{typename}\ \_Traits>}
+\DoxyCodeLine{01823\ \ \ \ \ \textcolor{keywordtype}{bool}}
+\DoxyCodeLine{01824\ \ \ \ \ \_Equality<\_Key,\ \_Value,\ \_Alloc,\ \_ExtractKey,\ \_Equal,}
+\DoxyCodeLine{01825\ \ \ \ \ \ \ \ \ \ \ \_Hash,\ \_RangeHash,\ \_Unused,\ \_RehashPolicy,\ \_Traits,\ \textcolor{keyword}{false}>::}
+\DoxyCodeLine{01826\ \ \ \ \ \_M\_equal(\textcolor{keyword}{const}\ \_\_hashtable\&\ \_\_other)\textcolor{keyword}{\ const}}
+\DoxyCodeLine{01827\ \textcolor{keyword}{\ \ \ \ }\{}
+\DoxyCodeLine{01828\ \ \ \ \ \ \ \textcolor{keyword}{using\ }\_\_node\_type\ =\ \textcolor{keyword}{typename}\ \_\_hashtable::\_\_node\_type;}
+\DoxyCodeLine{01829\ \ \ \ \ \ \ \textcolor{keyword}{const}\ \_\_hashtable*\ \_\_this\ =\ \textcolor{keyword}{static\_cast<}\textcolor{keyword}{const\ }\_\_hashtable*\textcolor{keyword}{>}(\textcolor{keyword}{this});}
+\DoxyCodeLine{01830\ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\_\_this-\/>size()\ !=\ \_\_other.size())}
+\DoxyCodeLine{01831\ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{01832\ }
+\DoxyCodeLine{01833\ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keyword}{auto}\ \_\_itx\ =\ \_\_this-\/>begin();\ \_\_itx\ !=\ \_\_this-\/>end();)}
+\DoxyCodeLine{01834\ \ \ \ \ \{}
+\DoxyCodeLine{01835\ \ \ \ \ \ \ std::size\_t\ \_\_x\_count\ =\ 1;}
+\DoxyCodeLine{01836\ \ \ \ \ \ \ \textcolor{keyword}{auto}\ \_\_itx\_end\ =\ \_\_itx;}
+\DoxyCodeLine{01837\ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (++\_\_itx\_end;\ \_\_itx\_end\ !=\ \_\_this-\/>end()}
+\DoxyCodeLine{01838\ \ \ \ \ \ \ \ \ \ \&\&\ \_\_this-\/>key\_eq()(\_ExtractKey\{\}(*\_\_itx),}
+\DoxyCodeLine{01839\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_ExtractKey\{\}(*\_\_itx\_end));}
+\DoxyCodeLine{01840\ \ \ \ \ \ \ \ \ \ \ \ ++\_\_itx\_end)}
+\DoxyCodeLine{01841\ \ \ \ \ \ \ \ \ ++\_\_x\_count;}
+\DoxyCodeLine{01842\ }
+\DoxyCodeLine{01843\ \ \ \ \ \ \ std::size\_t\ \_\_ybkt\ =\ \_\_other.\_M\_bucket\_index(*\_\_itx.\_M\_cur);}
+\DoxyCodeLine{01844\ \ \ \ \ \ \ \textcolor{keyword}{auto}\ \_\_y\_prev\_n\ =\ \_\_other.\_M\_buckets[\_\_ybkt];}
+\DoxyCodeLine{01845\ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (!\_\_y\_prev\_n)}
+\DoxyCodeLine{01846\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{01847\ }
+\DoxyCodeLine{01848\ \ \ \ \ \ \ \_\_node\_type*\ \_\_y\_n\ =\ \textcolor{keyword}{static\_cast<}\_\_node\_type*\textcolor{keyword}{>}(\_\_y\_prev\_n-\/>\_M\_nxt);}
+\DoxyCodeLine{01849\ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (;;)}
+\DoxyCodeLine{01850\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{01851\ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\_\_this-\/>key\_eq()(\_ExtractKey\{\}(\_\_y\_n-\/>\_M\_v()),}
+\DoxyCodeLine{01852\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_ExtractKey\{\}(*\_\_itx)))}
+\DoxyCodeLine{01853\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{01854\ }
+\DoxyCodeLine{01855\ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{auto}\ \_\_y\_ref\_n\ =\ \_\_y\_n;}
+\DoxyCodeLine{01856\ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\_\_y\_n\ =\ \_\_y\_n-\/>\_M\_next();\ \_\_y\_n;\ \_\_y\_n\ =\ \_\_y\_n-\/>\_M\_next())}
+\DoxyCodeLine{01857\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (!\_\_other.\_M\_node\_equals(*\_\_y\_ref\_n,\ *\_\_y\_n))}
+\DoxyCodeLine{01858\ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{01859\ }
+\DoxyCodeLine{01860\ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (!\_\_y\_n\ ||\ \_\_other.\_M\_bucket\_index(*\_\_y\_n)\ !=\ \_\_ybkt)}
+\DoxyCodeLine{01861\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{01862\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{01863\ }
+\DoxyCodeLine{01864\ \ \ \ \ \ \ \textcolor{keyword}{typename}\ \_\_hashtable::const\_iterator\ \_\_ity(\_\_y\_n);}
+\DoxyCodeLine{01865\ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keyword}{auto}\ \_\_ity\_end\ =\ \_\_ity;\ \_\_ity\_end\ !=\ \_\_other.end();\ ++\_\_ity\_end)}
+\DoxyCodeLine{01866\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (-\/-\/\_\_x\_count\ ==\ 0)}
+\DoxyCodeLine{01867\ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{01868\ }
+\DoxyCodeLine{01869\ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\_\_x\_count\ !=\ 0)}
+\DoxyCodeLine{01870\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{01871\ }
+\DoxyCodeLine{01872\ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (!std::is\_permutation(\_\_itx,\ \_\_itx\_end,\ \_\_ity))}
+\DoxyCodeLine{01873\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{01874\ }
+\DoxyCodeLine{01875\ \ \ \ \ \ \ \_\_itx\ =\ \_\_itx\_end;}
+\DoxyCodeLine{01876\ \ \ \ \ \}}
+\DoxyCodeLine{01877\ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{01878\ \ \ \ \ \}}
+\DoxyCodeLine{01879\ }
+\DoxyCodeLine{01884\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_NodeAlloc>}
+\DoxyCodeLine{01885\ \ \ \ \ \textcolor{keyword}{struct\ }\_Hashtable\_alloc\ :\ \textcolor{keyword}{private}\ \_Hashtable\_ebo\_helper<0,\ \_NodeAlloc>}
+\DoxyCodeLine{01886\ \ \ \ \ \{}
+\DoxyCodeLine{01887\ \ \ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{01888\ \ \ \ \ \ \ \textcolor{keyword}{using\ }\_\_ebo\_node\_alloc\ =\ \_Hashtable\_ebo\_helper<0,\ \_NodeAlloc>;}
+\DoxyCodeLine{01889\ }
+\DoxyCodeLine{01890\ \ \ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}>}
+\DoxyCodeLine{01891\ \ \ \ \ \textcolor{keyword}{struct\ }\_\_get\_value\_type;}
+\DoxyCodeLine{01892\ \ \ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Val,\ \textcolor{keywordtype}{bool}\ \_Cache\_hash\_code>}
+\DoxyCodeLine{01893\ \ \ \ \ \textcolor{keyword}{struct\ }\_\_get\_value\_type<\_Hash\_node<\_Val,\ \_Cache\_hash\_code>>}
+\DoxyCodeLine{01894\ \ \ \ \ \{\ \textcolor{keyword}{using\ }\mbox{\hyperlink{_classes_2_gameobj_8h_a890efa53b3d7deeeced6f3a0d6653ed3}{type}}\ =\ \_Val;\ \};}
+\DoxyCodeLine{01895\ }
+\DoxyCodeLine{01896\ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{01897\ \ \ \ \ \ \ \textcolor{keyword}{using\ }\_\_node\_type\ =\ \textcolor{keyword}{typename}\ \_NodeAlloc::value\_type;}
+\DoxyCodeLine{01898\ \ \ \ \ \ \ \textcolor{keyword}{using\ }\_\_node\_alloc\_type\ =\ \_NodeAlloc;}
+\DoxyCodeLine{01899\ \ \ \ \ \ \ \textcolor{comment}{//\ Use\ \_\_gnu\_cxx\ to\ benefit\ from\ \_S\_always\_equal\ and\ al.}}
+\DoxyCodeLine{01900\ \ \ \ \ \ \ \textcolor{keyword}{using\ }\_\_node\_alloc\_traits\ =\ \_\_gnu\_cxx::\_\_alloc\_traits<\_\_node\_alloc\_type>;}
+\DoxyCodeLine{01901\ }
+\DoxyCodeLine{01902\ \ \ \ \ \ \ \textcolor{keyword}{using\ }\_\_value\_alloc\_traits\ =\ \textcolor{keyword}{typename}\ \_\_node\_alloc\_traits::template}
+\DoxyCodeLine{01903\ \ \ \ \ rebind\_traits<typename\ \_\_get\_value\_type<\_\_node\_type>::type>;}
+\DoxyCodeLine{01904\ }
+\DoxyCodeLine{01905\ \ \ \ \ \ \ \textcolor{keyword}{using\ }\_\_node\_ptr\ =\ \_\_node\_type*;}
+\DoxyCodeLine{01906\ \ \ \ \ \ \ \textcolor{keyword}{using\ }\_\_node\_base\ =\ \_Hash\_node\_base;}
+\DoxyCodeLine{01907\ \ \ \ \ \ \ \textcolor{keyword}{using\ }\_\_node\_base\_ptr\ =\ \_\_node\_base*;}
+\DoxyCodeLine{01908\ \ \ \ \ \ \ \textcolor{keyword}{using\ }\_\_buckets\_alloc\_type\ =}
+\DoxyCodeLine{01909\ \ \ \ \ \_\_alloc\_rebind<\_\_node\_alloc\_type,\ \_\_node\_base\_ptr>;}
+\DoxyCodeLine{01910\ \ \ \ \ \ \ \textcolor{keyword}{using\ }\_\_buckets\_alloc\_traits\ =\ std::allocator\_traits<\_\_buckets\_alloc\_type>;}
+\DoxyCodeLine{01911\ \ \ \ \ \ \ \textcolor{keyword}{using\ }\_\_buckets\_ptr\ =\ \_\_node\_base\_ptr*;}
+\DoxyCodeLine{01912\ }
+\DoxyCodeLine{01913\ \ \ \ \ \ \ \_Hashtable\_alloc()\ =\ \textcolor{keywordflow}{default};}
+\DoxyCodeLine{01914\ \ \ \ \ \ \ \_Hashtable\_alloc(\textcolor{keyword}{const}\ \_Hashtable\_alloc\&)\ =\ \textcolor{keywordflow}{default};}
+\DoxyCodeLine{01915\ \ \ \ \ \ \ \_Hashtable\_alloc(\_Hashtable\_alloc\&\&)\ =\ \textcolor{keywordflow}{default};}
+\DoxyCodeLine{01916\ }
+\DoxyCodeLine{01917\ \ \ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_Alloc>}
+\DoxyCodeLine{01918\ \ \ \ \ \_Hashtable\_alloc(\_Alloc\&\&\ \_\_a)}
+\DoxyCodeLine{01919\ \ \ \ \ :\ \_\_ebo\_node\_alloc(std::forward<\_Alloc>(\_\_a))}
+\DoxyCodeLine{01920\ \ \ \ \ \{\ \}}
+\DoxyCodeLine{01921\ }
+\DoxyCodeLine{01922\ \ \ \ \ \ \ \_\_node\_alloc\_type\&}
+\DoxyCodeLine{01923\ \ \ \ \ \ \ \_M\_node\_allocator()}
+\DoxyCodeLine{01924\ \ \ \ \ \ \ \{\ \textcolor{keywordflow}{return}\ \_\_ebo\_node\_alloc::\_M\_get();\ \}}
+\DoxyCodeLine{01925\ }
+\DoxyCodeLine{01926\ \ \ \ \ \ \ \textcolor{keyword}{const}\ \_\_node\_alloc\_type\&}
+\DoxyCodeLine{01927\ \ \ \ \ \ \ \_M\_node\_allocator()\textcolor{keyword}{\ const}}
+\DoxyCodeLine{01928\ \textcolor{keyword}{\ \ \ \ \ \ }\{\ \textcolor{keywordflow}{return}\ \_\_ebo\_node\_alloc::\_M\_cget();\ \}}
+\DoxyCodeLine{01929\ }
+\DoxyCodeLine{01930\ \ \ \ \ \ \ \textcolor{comment}{//\ Allocate\ a\ node\ and\ construct\ an\ element\ within\ it.}}
+\DoxyCodeLine{01931\ \ \ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}...\ \_Args>}
+\DoxyCodeLine{01932\ \ \ \ \ \_\_node\_ptr}
+\DoxyCodeLine{01933\ \ \ \ \ \_M\_allocate\_node(\_Args\&\&...\ \_\_args);}
+\DoxyCodeLine{01934\ }
+\DoxyCodeLine{01935\ \ \ \ \ \ \ \textcolor{comment}{//\ Destroy\ the\ element\ within\ a\ node\ and\ deallocate\ the\ node.}}
+\DoxyCodeLine{01936\ \ \ \ \ \ \ \textcolor{keywordtype}{void}}
+\DoxyCodeLine{01937\ \ \ \ \ \ \ \_M\_deallocate\_node(\_\_node\_ptr\ \_\_n);}
+\DoxyCodeLine{01938\ }
+\DoxyCodeLine{01939\ \ \ \ \ \ \ \textcolor{comment}{//\ Deallocate\ a\ node.}}
+\DoxyCodeLine{01940\ \ \ \ \ \ \ \textcolor{keywordtype}{void}}
+\DoxyCodeLine{01941\ \ \ \ \ \ \ \_M\_deallocate\_node\_ptr(\_\_node\_ptr\ \_\_n);}
+\DoxyCodeLine{01942\ }
+\DoxyCodeLine{01943\ \ \ \ \ \ \ \textcolor{comment}{//\ Deallocate\ the\ linked\ list\ of\ nodes\ pointed\ to\ by\ \_\_n.}}
+\DoxyCodeLine{01944\ \ \ \ \ \ \ \textcolor{comment}{//\ The\ elements\ within\ the\ nodes\ are\ destroyed.}}
+\DoxyCodeLine{01945\ \ \ \ \ \ \ \textcolor{keywordtype}{void}}
+\DoxyCodeLine{01946\ \ \ \ \ \ \ \_M\_deallocate\_nodes(\_\_node\_ptr\ \_\_n);}
+\DoxyCodeLine{01947\ }
+\DoxyCodeLine{01948\ \ \ \ \ \ \ \_\_buckets\_ptr}
+\DoxyCodeLine{01949\ \ \ \ \ \ \ \_M\_allocate\_buckets(std::size\_t\ \_\_bkt\_count);}
+\DoxyCodeLine{01950\ }
+\DoxyCodeLine{01951\ \ \ \ \ \ \ \textcolor{keywordtype}{void}}
+\DoxyCodeLine{01952\ \ \ \ \ \ \ \_M\_deallocate\_buckets(\_\_buckets\_ptr,\ std::size\_t\ \_\_bkt\_count);}
+\DoxyCodeLine{01953\ \ \ \ \ \};}
+\DoxyCodeLine{01954\ }
+\DoxyCodeLine{01955\ \ \ \textcolor{comment}{//\ Definitions\ of\ class\ template\ \_Hashtable\_alloc's\ out-\/of-\/line\ member}}
+\DoxyCodeLine{01956\ \ \ \textcolor{comment}{//\ functions.}}
+\DoxyCodeLine{01957\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_NodeAlloc>}
+\DoxyCodeLine{01958\ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}...\ \_Args>}
+\DoxyCodeLine{01959\ \ \ \ \ \ \ \textcolor{keyword}{auto}}
+\DoxyCodeLine{01960\ \ \ \ \ \ \ \_Hashtable\_alloc<\_NodeAlloc>::\_M\_allocate\_node(\_Args\&\&...\ \_\_args)}
+\DoxyCodeLine{01961\ \ \ \ \ \ \ -\/>\ \_\_node\_ptr}
+\DoxyCodeLine{01962\ \ \ \ \ \ \ \{}
+\DoxyCodeLine{01963\ \ \ \ \ \textcolor{keyword}{auto}\ \_\_nptr\ =\ \_\_node\_alloc\_traits::allocate(\_M\_node\_allocator(),\ 1);}
+\DoxyCodeLine{01964\ \ \ \ \ \_\_node\_ptr\ \_\_n\ =\ std::\_\_to\_address(\_\_nptr);}
+\DoxyCodeLine{01965\ \ \ \ \ \mbox{\hyperlink{_classes_2lib_2include_2c_09_09_2bits_2exception__defines_8h_a130bf0cd31a0783cd03563f46b46915b}{\_\_try}}}
+\DoxyCodeLine{01966\ \ \ \ \ \ \ \{}
+\DoxyCodeLine{01967\ \ \ \ \ \ \ \ \ ::new\ ((\textcolor{keywordtype}{void}*)\_\_n)\ \_\_node\_type;}
+\DoxyCodeLine{01968\ \ \ \ \ \ \ \ \ \_\_node\_alloc\_traits::construct(\_M\_node\_allocator(),}
+\DoxyCodeLine{01969\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_\_n-\/>\_M\_valptr(),}
+\DoxyCodeLine{01970\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::forward<\_Args>(\_\_args)...);}
+\DoxyCodeLine{01971\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \_\_n;}
+\DoxyCodeLine{01972\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{01973\ \ \ \ \ \mbox{\hyperlink{_classes_2lib_2include_2c_09_09_2bits_2exception__defines_8h_a9e51d2f324c18a996a3e4f9a6ba0f6c2}{\_\_catch}}(...)}
+\DoxyCodeLine{01974\ \ \ \ \ \ \ \{}
+\DoxyCodeLine{01975\ \ \ \ \ \ \ \ \ \_\_node\_alloc\_traits::deallocate(\_M\_node\_allocator(),\ \_\_nptr,\ 1);}
+\DoxyCodeLine{01976\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{_classes_2lib_2include_2c_09_09_2bits_2exception__defines_8h_a92ef03a5310b10a4243a6ec8f43494b5}{\_\_throw\_exception\_again}};}
+\DoxyCodeLine{01977\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{01978\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{01979\ }
+\DoxyCodeLine{01980\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_NodeAlloc>}
+\DoxyCodeLine{01981\ \ \ \ \ \textcolor{keywordtype}{void}}
+\DoxyCodeLine{01982\ \ \ \ \ \_Hashtable\_alloc<\_NodeAlloc>::\_M\_deallocate\_node(\_\_node\_ptr\ \_\_n)}
+\DoxyCodeLine{01983\ \ \ \ \ \{}
+\DoxyCodeLine{01984\ \ \ \ \ \ \ \_\_node\_alloc\_traits::destroy(\_M\_node\_allocator(),\ \_\_n-\/>\_M\_valptr());}
+\DoxyCodeLine{01985\ \ \ \ \ \ \ \_M\_deallocate\_node\_ptr(\_\_n);}
+\DoxyCodeLine{01986\ \ \ \ \ \}}
+\DoxyCodeLine{01987\ }
+\DoxyCodeLine{01988\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_NodeAlloc>}
+\DoxyCodeLine{01989\ \ \ \ \ \textcolor{keywordtype}{void}}
+\DoxyCodeLine{01990\ \ \ \ \ \_Hashtable\_alloc<\_NodeAlloc>::\_M\_deallocate\_node\_ptr(\_\_node\_ptr\ \_\_n)}
+\DoxyCodeLine{01991\ \ \ \ \ \{}
+\DoxyCodeLine{01992\ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ \textcolor{keyword}{typename}\ \_\_node\_alloc\_traits::pointer\ \_Ptr;}
+\DoxyCodeLine{01993\ \ \ \ \ \ \ \textcolor{keyword}{auto}\ \_\_ptr\ =\ std::pointer\_traits<\_Ptr>::pointer\_to(*\_\_n);}
+\DoxyCodeLine{01994\ \ \ \ \ \ \ \_\_n-\/>\string~\_\_node\_type();}
+\DoxyCodeLine{01995\ \ \ \ \ \ \ \_\_node\_alloc\_traits::deallocate(\_M\_node\_allocator(),\ \_\_ptr,\ 1);}
+\DoxyCodeLine{01996\ \ \ \ \ \}}
+\DoxyCodeLine{01997\ }
+\DoxyCodeLine{01998\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_NodeAlloc>}
+\DoxyCodeLine{01999\ \ \ \ \ \textcolor{keywordtype}{void}}
+\DoxyCodeLine{02000\ \ \ \ \ \_Hashtable\_alloc<\_NodeAlloc>::\_M\_deallocate\_nodes(\_\_node\_ptr\ \_\_n)}
+\DoxyCodeLine{02001\ \ \ \ \ \{}
+\DoxyCodeLine{02002\ \ \ \ \ \ \ \textcolor{keywordflow}{while}\ (\_\_n)}
+\DoxyCodeLine{02003\ \ \ \ \ \{}
+\DoxyCodeLine{02004\ \ \ \ \ \ \ \_\_node\_ptr\ \mbox{\hyperlink{_classes_2lib_2include_2xmmintrin_8h_ad56bf6b8c22ee698e455f99196a1fe12}{\_\_tmp}}\ =\ \_\_n;}
+\DoxyCodeLine{02005\ \ \ \ \ \ \ \_\_n\ =\ \_\_n-\/>\_M\_next();}
+\DoxyCodeLine{02006\ \ \ \ \ \ \ \_M\_deallocate\_node(\mbox{\hyperlink{_classes_2lib_2include_2xmmintrin_8h_ad56bf6b8c22ee698e455f99196a1fe12}{\_\_tmp}});}
+\DoxyCodeLine{02007\ \ \ \ \ \}}
+\DoxyCodeLine{02008\ \ \ \ \ \}}
+\DoxyCodeLine{02009\ }
+\DoxyCodeLine{02010\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_NodeAlloc>}
+\DoxyCodeLine{02011\ \ \ \ \ \textcolor{keyword}{auto}}
+\DoxyCodeLine{02012\ \ \ \ \ \_Hashtable\_alloc<\_NodeAlloc>::\_M\_allocate\_buckets(std::size\_t\ \_\_bkt\_count)}
+\DoxyCodeLine{02013\ \ \ \ \ -\/>\ \_\_buckets\_ptr}
+\DoxyCodeLine{02014\ \ \ \ \ \{}
+\DoxyCodeLine{02015\ \ \ \ \ \ \ \_\_buckets\_alloc\_type\ \_\_alloc(\_M\_node\_allocator());}
+\DoxyCodeLine{02016\ }
+\DoxyCodeLine{02017\ \ \ \ \ \ \ \textcolor{keyword}{auto}\ \_\_ptr\ =\ \_\_buckets\_alloc\_traits::allocate(\_\_alloc,\ \_\_bkt\_count);}
+\DoxyCodeLine{02018\ \ \ \ \ \ \ \_\_buckets\_ptr\ \_\_p\ =\ std::\_\_to\_address(\_\_ptr);}
+\DoxyCodeLine{02019\ \ \ \ \ \ \ \_\_builtin\_memset(\_\_p,\ 0,\ \_\_bkt\_count\ *\ \textcolor{keyword}{sizeof}(\_\_node\_base\_ptr));}
+\DoxyCodeLine{02020\ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \_\_p;}
+\DoxyCodeLine{02021\ \ \ \ \ \}}
+\DoxyCodeLine{02022\ }
+\DoxyCodeLine{02023\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ \_NodeAlloc>}
+\DoxyCodeLine{02024\ \ \ \ \ \textcolor{keywordtype}{void}}
+\DoxyCodeLine{02025\ \ \ \ \ \_Hashtable\_alloc<\_NodeAlloc>::}
+\DoxyCodeLine{02026\ \ \ \ \ \_M\_deallocate\_buckets(\_\_buckets\_ptr\ \_\_bkts,}
+\DoxyCodeLine{02027\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::size\_t\ \_\_bkt\_count)}
+\DoxyCodeLine{02028\ \ \ \ \ \{}
+\DoxyCodeLine{02029\ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ \textcolor{keyword}{typename}\ \_\_buckets\_alloc\_traits::pointer\ \_Ptr;}
+\DoxyCodeLine{02030\ \ \ \ \ \ \ \textcolor{keyword}{auto}\ \_\_ptr\ =\ std::pointer\_traits<\_Ptr>::pointer\_to(*\_\_bkts);}
+\DoxyCodeLine{02031\ \ \ \ \ \ \ \_\_buckets\_alloc\_type\ \_\_alloc(\_M\_node\_allocator());}
+\DoxyCodeLine{02032\ \ \ \ \ \ \ \_\_buckets\_alloc\_traits::deallocate(\_\_alloc,\ \_\_ptr,\ \_\_bkt\_count);}
+\DoxyCodeLine{02033\ \ \ \ \ \}}
+\DoxyCodeLine{02034\ }
+\DoxyCodeLine{02036\ \}\ \textcolor{comment}{//\ namespace\ \_\_detail}}
+\DoxyCodeLine{02038\ \_GLIBCXX\_END\_NAMESPACE\_VERSION}
+\DoxyCodeLine{02039\ \}\ \textcolor{comment}{//\ namespace\ std}}
+\DoxyCodeLine{02040\ }
+\DoxyCodeLine{02041\ \textcolor{preprocessor}{\#endif\ }\textcolor{comment}{//\ \_HASHTABLE\_POLICY\_H}}
+
+\end{DoxyCode}

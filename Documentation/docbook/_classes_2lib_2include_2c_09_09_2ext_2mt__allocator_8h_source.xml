@@ -1,0 +1,766 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<section xmlns="http://docbook.org/ns/docbook" version="5.0" xmlns:xlink="http://www.w3.org/1999/xlink" xml:id="__classes_2lib_2include_2c_09_09_2ext_2mt__allocator_8h_source" xml:lang="en-US">
+<title>mt_allocator.h</title>
+<indexterm><primary>C:/Users/HP/Documents/GitHub/Minero-Game/Classes/lib/include/c++/ext/mt_allocator.h</primary></indexterm>
+Go to the documentation of this file.<programlisting linenumbering="unnumbered">1 <emphasis role="comment">//&#32;MT-optimized&#32;allocator&#32;-*-&#32;C++&#32;-*-</emphasis>
+2 
+3 <emphasis role="comment">//&#32;Copyright&#32;(C)&#32;2003-2022&#32;Free&#32;Software&#32;Foundation,&#32;Inc.</emphasis>
+4 <emphasis role="comment">//</emphasis>
+5 <emphasis role="comment">//&#32;This&#32;file&#32;is&#32;part&#32;of&#32;the&#32;GNU&#32;ISO&#32;C++&#32;Library.&#32;&#32;This&#32;library&#32;is&#32;free</emphasis>
+6 <emphasis role="comment">//&#32;software;&#32;you&#32;can&#32;redistribute&#32;it&#32;and/or&#32;modify&#32;it&#32;under&#32;the</emphasis>
+7 <emphasis role="comment">//&#32;terms&#32;of&#32;the&#32;GNU&#32;General&#32;Public&#32;License&#32;as&#32;published&#32;by&#32;the</emphasis>
+8 <emphasis role="comment">//&#32;Free&#32;Software&#32;Foundation;&#32;either&#32;version&#32;3,&#32;or&#32;(at&#32;your&#32;option)</emphasis>
+9 <emphasis role="comment">//&#32;any&#32;later&#32;version.</emphasis>
+10 
+11 <emphasis role="comment">//&#32;This&#32;library&#32;is&#32;distributed&#32;in&#32;the&#32;hope&#32;that&#32;it&#32;will&#32;be&#32;useful,</emphasis>
+12 <emphasis role="comment">//&#32;but&#32;WITHOUT&#32;ANY&#32;WARRANTY;&#32;without&#32;even&#32;the&#32;implied&#32;warranty&#32;of</emphasis>
+13 <emphasis role="comment">//&#32;MERCHANTABILITY&#32;or&#32;FITNESS&#32;FOR&#32;A&#32;PARTICULAR&#32;PURPOSE.&#32;&#32;See&#32;the</emphasis>
+14 <emphasis role="comment">//&#32;GNU&#32;General&#32;Public&#32;License&#32;for&#32;more&#32;details.</emphasis>
+15 
+16 <emphasis role="comment">//&#32;Under&#32;Section&#32;7&#32;of&#32;GPL&#32;version&#32;3,&#32;you&#32;are&#32;granted&#32;additional</emphasis>
+17 <emphasis role="comment">//&#32;permissions&#32;described&#32;in&#32;the&#32;GCC&#32;Runtime&#32;Library&#32;Exception,&#32;version</emphasis>
+18 <emphasis role="comment">//&#32;3.1,&#32;as&#32;published&#32;by&#32;the&#32;Free&#32;Software&#32;Foundation.</emphasis>
+19 
+20 <emphasis role="comment">//&#32;You&#32;should&#32;have&#32;received&#32;a&#32;copy&#32;of&#32;the&#32;GNU&#32;General&#32;Public&#32;License&#32;and</emphasis>
+21 <emphasis role="comment">//&#32;a&#32;copy&#32;of&#32;the&#32;GCC&#32;Runtime&#32;Library&#32;Exception&#32;along&#32;with&#32;this&#32;program;</emphasis>
+22 <emphasis role="comment">//&#32;see&#32;the&#32;files&#32;COPYING3&#32;and&#32;COPYING.RUNTIME&#32;respectively.&#32;&#32;If&#32;not,&#32;see</emphasis>
+23 <emphasis role="comment">//&#32;&lt;http://www.gnu.org/licenses/&gt;.</emphasis>
+24 
+29 <emphasis role="preprocessor">#ifndef&#32;_MT_ALLOCATOR_H</emphasis>
+30 <emphasis role="preprocessor">#define&#32;_MT_ALLOCATOR_H&#32;1</emphasis>
+31 
+32 <emphasis role="preprocessor">#include&#32;&lt;new&gt;</emphasis>
+33 <emphasis role="preprocessor">#include&#32;&lt;cstdlib&gt;</emphasis>
+34 <emphasis role="preprocessor">#include&#32;&lt;bits/functexcept.h&gt;</emphasis>
+35 <emphasis role="preprocessor">#include&#32;&lt;ext/atomicity.h&gt;</emphasis>
+36 <emphasis role="preprocessor">#include&#32;&lt;bits/move.h&gt;</emphasis>
+37 <emphasis role="preprocessor">#if&#32;__cplusplus&#32;&gt;=&#32;201103L</emphasis>
+38 <emphasis role="preprocessor">#include&#32;&lt;type_traits&gt;</emphasis>
+39 <emphasis role="preprocessor">#endif</emphasis>
+40 
+41 <emphasis role="keyword">namespace&#32;</emphasis><link linkend="_namespace____gnu__cxx">__gnu_cxx</link>&#32;<link linkend="__classes_2lib_2include_2c_09_09_2x86__64-w64-mingw32_2bits_2c_09_09config_8h_1a44377df0d3503f0b3d9ab316dd8ddf8b">_GLIBCXX_VISIBILITY</link>(default)
+42 {
+43 _GLIBCXX_BEGIN_NAMESPACE_VERSION
+44 
+45 
+46 &#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a0f7193911e632cd84da4082d5c628fe3">void</link>&#32;(*__destroy_handler)(<emphasis role="keywordtype">void</emphasis>*);
+47 
+49 &#32;&#32;<emphasis role="keyword">struct&#32;</emphasis>__pool_base
+50 &#32;&#32;{
+51 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Using&#32;short&#32;int&#32;as&#32;type&#32;for&#32;the&#32;binmap&#32;implies&#32;we&#32;are&#32;never</emphasis>
+52 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;caching&#32;blocks&#32;larger&#32;than&#32;32768&#32;with&#32;this&#32;allocator.</emphasis>
+53 &#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">short</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;_Binmap_type;
+54 &#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;std::size_t&#32;<link linkend="__classes_2lib_2include_2stddef_8h_1aa9d55e2f20e580b7445617d0d12fff6e">size_t</link>;
+55 
+56 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Variables&#32;used&#32;to&#32;configure&#32;the&#32;behavior&#32;of&#32;the&#32;allocator,</emphasis>
+57 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;assigned&#32;and&#32;explained&#32;in&#32;detail&#32;below.</emphasis>
+58 &#32;&#32;&#32;&#32;<emphasis role="keyword">struct&#32;</emphasis>_Tune
+59 &#32;&#32;&#32;&#32;{
+60 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Compile&#32;time&#32;constants&#32;for&#32;the&#32;default&#32;_Tune&#32;values.</emphasis>
+61 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">enum</emphasis>&#32;{&#32;_S_align&#32;=&#32;8&#32;};
+62 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">enum</emphasis>&#32;{&#32;_S_max_bytes&#32;=&#32;128&#32;};
+63 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">enum</emphasis>&#32;{&#32;_S_min_bin&#32;=&#32;8&#32;};
+64 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">enum</emphasis>&#32;{&#32;_S_chunk_size&#32;=&#32;4096&#32;-&#32;4&#32;*&#32;<emphasis role="keyword">sizeof</emphasis>(<emphasis role="keywordtype">void</emphasis>*)&#32;};
+65 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">enum</emphasis>&#32;{&#32;_S_max_threads&#32;=&#32;4096&#32;};
+66 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">enum</emphasis>&#32;{&#32;_S_freelist_headroom&#32;=&#32;10&#32;};
+67 
+68 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Alignment&#32;needed.</emphasis>
+69 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;NB:&#32;In&#32;any&#32;case&#32;must&#32;be&#32;&gt;=&#32;sizeof(_Block_record),&#32;that</emphasis>
+70 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;is&#32;4&#32;on&#32;32&#32;bit&#32;machines&#32;and&#32;8&#32;on&#32;64&#32;bit&#32;machines.</emphasis>
+71 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;&#32;&#32;&#32;_M_align;
+72 &#32;&#32;&#32;&#32;&#32;&#32;
+73 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Allocation&#32;requests&#32;(after&#32;round-up&#32;to&#32;power&#32;of&#32;2)&#32;below</emphasis>
+74 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;this&#32;value&#32;will&#32;be&#32;handled&#32;by&#32;the&#32;allocator.&#32;A&#32;raw&#32;new/</emphasis>
+75 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;call&#32;will&#32;be&#32;used&#32;for&#32;requests&#32;larger&#32;than&#32;this&#32;value.</emphasis>
+76 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;NB:&#32;Must&#32;be&#32;much&#32;smaller&#32;than&#32;_M_chunk_size&#32;and&#32;in&#32;any</emphasis>
+77 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;case&#32;&lt;=&#32;32768.</emphasis>
+78 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;&#32;&#32;&#32;_M_max_bytes;&#32;
+79 
+80 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Size&#32;in&#32;bytes&#32;of&#32;the&#32;smallest&#32;bin.</emphasis>
+81 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;NB:&#32;Must&#32;be&#32;a&#32;power&#32;of&#32;2&#32;and&#32;&gt;=&#32;_M_align&#32;(and&#32;of&#32;course</emphasis>
+82 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;much&#32;smaller&#32;than&#32;_M_max_bytes).</emphasis>
+83 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;&#32;&#32;&#32;_M_min_bin;
+84 
+85 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;In&#32;order&#32;to&#32;avoid&#32;fragmenting&#32;and&#32;minimize&#32;the&#32;number&#32;of</emphasis>
+86 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;new()&#32;calls&#32;we&#32;always&#32;request&#32;new&#32;memory&#32;using&#32;this</emphasis>
+87 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;value.&#32;Based&#32;on&#32;previous&#32;discussions&#32;on&#32;the&#32;libstdc++</emphasis>
+88 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;mailing&#32;list&#32;we&#32;have&#32;chosen&#32;the&#32;value&#32;below.</emphasis>
+89 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;See&#32;http://gcc.gnu.org/ml/libstdc++/2001-07/msg00077.html</emphasis>
+90 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;NB:&#32;At&#32;least&#32;one&#32;order&#32;of&#32;magnitude&#32;&gt;&#32;_M_max_bytes.&#32;</emphasis>
+91 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;&#32;&#32;&#32;_M_chunk_size;
+92 
+93 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;The&#32;maximum&#32;number&#32;of&#32;supported&#32;threads.&#32;For</emphasis>
+94 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;single-threaded&#32;operation,&#32;use&#32;one.&#32;Maximum&#32;values&#32;will</emphasis>
+95 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;vary&#32;depending&#32;on&#32;details&#32;of&#32;the&#32;underlying&#32;system.&#32;(For</emphasis>
+96 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;instance,&#32;Linux&#32;2.4.18&#32;reports&#32;4070&#32;in</emphasis>
+97 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;/proc/sys/kernel/threads-max,&#32;while&#32;Linux&#32;2.6.6&#32;reports</emphasis>
+98 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;65534)</emphasis>
+99 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;&#32;&#32;&#32;_M_max_threads;
+100 
+101 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Each&#32;time&#32;a&#32;deallocation&#32;occurs&#32;in&#32;a&#32;threaded&#32;application</emphasis>
+102 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;we&#32;make&#32;sure&#32;that&#32;there&#32;are&#32;no&#32;more&#32;than</emphasis>
+103 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;_M_freelist_headroom&#32;%&#32;of&#32;used&#32;memory&#32;on&#32;the&#32;freelist.&#32;If</emphasis>
+104 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;the&#32;number&#32;of&#32;additional&#32;records&#32;is&#32;more&#32;than</emphasis>
+105 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;_M_freelist_headroom&#32;%&#32;of&#32;the&#32;freelist,&#32;we&#32;move&#32;these</emphasis>
+106 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;records&#32;back&#32;to&#32;the&#32;global&#32;pool.</emphasis>
+107 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;&#32;&#32;&#32;_M_freelist_headroom;
+108 &#32;&#32;&#32;&#32;&#32;&#32;
+109 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Set&#32;to&#32;true&#32;forces&#32;all&#32;allocations&#32;to&#32;use&#32;new().</emphasis>
+110 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">bool</emphasis>&#32;&#32;_M_force_new;&#32;
+111 &#32;&#32;&#32;&#32;&#32;&#32;
+112 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">explicit</emphasis>
+113 &#32;&#32;&#32;&#32;&#32;&#32;_Tune()
+114 &#32;&#32;&#32;&#32;&#32;&#32;:&#32;_M_align(_S_align),&#32;_M_max_bytes(_S_max_bytes),&#32;_M_min_bin(_S_min_bin),
+115 &#32;&#32;&#32;&#32;&#32;&#32;_M_chunk_size(_S_chunk_size),&#32;_M_max_threads(_S_max_threads),&#32;
+116 &#32;&#32;&#32;&#32;&#32;&#32;_M_freelist_headroom(_S_freelist_headroom),&#32;
+117 &#32;&#32;&#32;&#32;&#32;&#32;_M_force_new(<link linkend="_namespacestd">std</link>::getenv(<emphasis role="stringliteral">&quot;GLIBCXX_FORCE_NEW&quot;</emphasis>)&#32;?&#32;<link linkend="__classes_2lib_2include_2stdbool_8h_1a41f9c5fb8b08eb5dc3edce4dcb37fee7">true</link>&#32;:&#32;<link linkend="__classes_2lib_2include_2stdbool_8h_1a65e9886d74aaee76545e83dd09011727">false</link>)
+118 &#32;&#32;&#32;&#32;&#32;&#32;{&#32;}
+119 
+120 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">explicit</emphasis>
+121 &#32;&#32;&#32;&#32;&#32;&#32;_Tune(<emphasis role="keywordtype">size_t</emphasis>&#32;__align,&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;__maxb,&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;__minbin,&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;__chunk,&#32;
+122 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;__maxthreads,&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;__headroom,&#32;<emphasis role="keywordtype">bool</emphasis>&#32;__force)&#32;
+123 &#32;&#32;&#32;&#32;&#32;&#32;:&#32;_M_align(__align),&#32;_M_max_bytes(__maxb),&#32;_M_min_bin(__minbin),
+124 &#32;&#32;&#32;&#32;&#32;&#32;_M_chunk_size(__chunk),&#32;_M_max_threads(__maxthreads),
+125 &#32;&#32;&#32;&#32;&#32;&#32;_M_freelist_headroom(__headroom),&#32;_M_force_new(__force)
+126 &#32;&#32;&#32;&#32;&#32;&#32;{&#32;}
+127 &#32;&#32;&#32;&#32;};
+128 &#32;&#32;&#32;&#32;
+129 &#32;&#32;&#32;&#32;<emphasis role="keyword">struct&#32;</emphasis>_Block_address
+130 &#32;&#32;&#32;&#32;{
+131 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>*&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_M_initial;
+132 &#32;&#32;&#32;&#32;&#32;&#32;_Block_address*&#32;&#32;&#32;&#32;&#32;&#32;&#32;_M_next;
+133 &#32;&#32;&#32;&#32;};
+134 &#32;&#32;&#32;&#32;
+135 &#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;_Tune&amp;
+136 &#32;&#32;&#32;&#32;_M_get_options()<emphasis role="keyword">&#32;const</emphasis>
+137 <emphasis role="keyword">&#32;&#32;&#32;&#32;</emphasis>{&#32;<emphasis role="keywordflow">return</emphasis>&#32;_M_options;&#32;}
+138 
+139 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+140 &#32;&#32;&#32;&#32;_M_set_options(_Tune&#32;__t)
+141 &#32;&#32;&#32;&#32;{&#32;
+142 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(!_M_init)
+143 &#32;&#32;&#32;&#32;_M_options&#32;=&#32;__t;
+144 &#32;&#32;&#32;&#32;}
+145 
+146 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">bool</emphasis>
+147 &#32;&#32;&#32;&#32;_M_check_threshold(<emphasis role="keywordtype">size_t</emphasis>&#32;__bytes)
+148 &#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;__bytes&#32;&gt;&#32;_M_options._M_max_bytes&#32;||&#32;_M_options._M_force_new;&#32;}
+149 
+150 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">size_t</emphasis>
+151 &#32;&#32;&#32;&#32;_M_get_binmap(<emphasis role="keywordtype">size_t</emphasis>&#32;__bytes)
+152 &#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;_M_binmap[__bytes];&#32;}
+153 
+154 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">size_t</emphasis>
+155 &#32;&#32;&#32;&#32;_M_get_align()
+156 &#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;_M_options._M_align;&#32;}
+157 
+158 &#32;&#32;&#32;&#32;<emphasis role="keyword">explicit</emphasis>&#32;
+159 &#32;&#32;&#32;&#32;__pool_base()&#32;
+160 &#32;&#32;&#32;&#32;:&#32;_M_options(_Tune()),&#32;_M_binmap(0),&#32;_M_init(<link linkend="__classes_2lib_2include_2stdbool_8h_1a65e9886d74aaee76545e83dd09011727">false</link>)&#32;{&#32;}
+161 
+162 &#32;&#32;&#32;&#32;<emphasis role="keyword">explicit</emphasis>&#32;
+163 &#32;&#32;&#32;&#32;__pool_base(<emphasis role="keyword">const</emphasis>&#32;_Tune&amp;&#32;__options)
+164 &#32;&#32;&#32;&#32;:&#32;_M_options(__options),&#32;_M_binmap(0),&#32;_M_init(<link linkend="__classes_2lib_2include_2stdbool_8h_1a65e9886d74aaee76545e83dd09011727">false</link>)&#32;{&#32;}
+165 
+166 &#32;&#32;<emphasis role="keyword">private</emphasis>:
+167 &#32;&#32;&#32;&#32;<emphasis role="keyword">explicit</emphasis>&#32;
+168 &#32;&#32;&#32;&#32;__pool_base(<emphasis role="keyword">const</emphasis>&#32;__pool_base&amp;);
+169 
+170 &#32;&#32;&#32;&#32;__pool_base&amp;
+171 &#32;&#32;&#32;&#32;operator=(<emphasis role="keyword">const</emphasis>&#32;__pool_base&amp;);
+172 
+173 &#32;&#32;<emphasis role="keyword">protected</emphasis>:
+174 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Configuration&#32;options.</emphasis>
+175 &#32;&#32;&#32;&#32;_Tune&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_M_options;
+176 &#32;&#32;&#32;&#32;
+177 &#32;&#32;&#32;&#32;_Binmap_type*&#32;&#32;&#32;&#32;&#32;&#32;&#32;_M_binmap;
+178 
+179 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Configuration&#32;of&#32;the&#32;pool&#32;object&#32;via&#32;_M_options&#32;can&#32;happen</emphasis>
+180 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;after&#32;construction&#32;but&#32;before&#32;initialization.&#32;After</emphasis>
+181 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;initialization&#32;is&#32;complete,&#32;this&#32;variable&#32;is&#32;set&#32;to&#32;true.</emphasis>
+182 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">bool</emphasis>&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_M_init;
+183 &#32;&#32;};
+184 
+185 
+190 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keywordtype">bool</emphasis>&#32;_Thread&gt;
+191 &#32;&#32;&#32;&#32;<emphasis role="keyword">class&#32;</emphasis>__pool;
+192 
+194 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;&gt;
+195 &#32;&#32;&#32;&#32;<emphasis role="keyword">class&#32;</emphasis>__pool&lt;<link linkend="__classes_2lib_2include_2stdbool_8h_1a65e9886d74aaee76545e83dd09011727">false</link>&gt;&#32;:&#32;<emphasis role="keyword">public</emphasis>&#32;__pool_base
+196 &#32;&#32;&#32;&#32;{
+197 &#32;&#32;&#32;&#32;<emphasis role="keyword">public</emphasis>:
+198 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">union&#32;</emphasis>_Block_record
+199 &#32;&#32;&#32;&#32;&#32;&#32;{
+200 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Points&#32;to&#32;the&#32;block_record&#32;of&#32;the&#32;next&#32;free&#32;block.</emphasis>
+201 &#32;&#32;&#32;&#32;_Block_record*&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_M_next;
+202 &#32;&#32;&#32;&#32;&#32;&#32;};
+203 
+204 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">struct&#32;</emphasis>_Bin_record
+205 &#32;&#32;&#32;&#32;&#32;&#32;{
+206 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;An&#32;&quot;array&quot;&#32;of&#32;pointers&#32;to&#32;the&#32;first&#32;free&#32;block.</emphasis>
+207 &#32;&#32;&#32;&#32;_Block_record**&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_M_first;
+208 
+209 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;A&#32;list&#32;of&#32;the&#32;initial&#32;addresses&#32;of&#32;all&#32;allocated&#32;blocks.</emphasis>
+210 &#32;&#32;&#32;&#32;_Block_address*&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_M_address;
+211 &#32;&#32;&#32;&#32;&#32;&#32;};
+212 &#32;&#32;&#32;&#32;&#32;&#32;
+213 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+214 &#32;&#32;&#32;&#32;&#32;&#32;_M_initialize_once()
+215 &#32;&#32;&#32;&#32;&#32;&#32;{
+216 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__builtin_expect(_M_init&#32;==&#32;<emphasis role="keyword">false</emphasis>,&#32;<emphasis role="keyword">false</emphasis>))
+217 &#32;&#32;&#32;&#32;&#32;&#32;_M_initialize();
+218 &#32;&#32;&#32;&#32;&#32;&#32;}
+219 
+220 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+221 &#32;&#32;&#32;&#32;&#32;&#32;_M_destroy()&#32;throw();
+222 
+223 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">char</emphasis>*&#32;
+224 &#32;&#32;&#32;&#32;&#32;&#32;_M_reserve_block(<emphasis role="keywordtype">size_t</emphasis>&#32;__bytes,&#32;const&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;__thread_id);
+225 &#32;&#32;&#32;&#32;
+226 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+227 &#32;&#32;&#32;&#32;&#32;&#32;_M_reclaim_block(<emphasis role="keywordtype">char</emphasis>*&#32;__p,&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;__bytes)&#32;throw&#32;();
+228 &#32;&#32;&#32;&#32;
+229 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;
+230 &#32;&#32;&#32;&#32;&#32;&#32;_M_get_thread_id()&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;0;&#32;}
+231 &#32;&#32;&#32;&#32;&#32;&#32;
+232 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;_Bin_record&amp;
+233 &#32;&#32;&#32;&#32;&#32;&#32;_M_get_bin(<emphasis role="keywordtype">size_t</emphasis>&#32;__which)
+234 &#32;&#32;&#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;_M_bin[__which];&#32;}
+235 &#32;&#32;&#32;&#32;&#32;&#32;
+236 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+237 &#32;&#32;&#32;&#32;&#32;&#32;_M_adjust_freelist(<emphasis role="keyword">const</emphasis>&#32;_Bin_record&amp;,&#32;_Block_record*,&#32;<emphasis role="keywordtype">size_t</emphasis>)
+238 &#32;&#32;&#32;&#32;&#32;&#32;{&#32;}
+239 
+240 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">explicit</emphasis>&#32;__pool()&#32;
+241 &#32;&#32;&#32;&#32;&#32;&#32;:&#32;_M_bin(0),&#32;_M_bin_size(1)&#32;{&#32;}
+242 
+243 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">explicit</emphasis>&#32;__pool(<emphasis role="keyword">const</emphasis>&#32;__pool_base::_Tune&amp;&#32;__tune)&#32;
+244 &#32;&#32;&#32;&#32;&#32;&#32;:&#32;__pool_base(__tune),&#32;_M_bin(0),&#32;_M_bin_size(1)&#32;{&#32;}
+245 
+246 &#32;&#32;&#32;&#32;<emphasis role="keyword">private</emphasis>:
+247 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;An&#32;&quot;array&quot;&#32;of&#32;bin_records&#32;each&#32;of&#32;which&#32;represents&#32;a&#32;specific</emphasis>
+248 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;power&#32;of&#32;2&#32;size.&#32;Memory&#32;to&#32;this&#32;&quot;array&quot;&#32;is&#32;allocated&#32;in</emphasis>
+249 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;_M_initialize().</emphasis>
+250 &#32;&#32;&#32;&#32;&#32;&#32;_Bin_record*&#32;&#32;&#32;&#32;&#32;&#32;&#32;_M_bin;
+251 &#32;&#32;&#32;&#32;&#32;&#32;
+252 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Actual&#32;value&#32;calculated&#32;in&#32;_M_initialize().</emphasis>
+253 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_M_bin_size;&#32;&#32;&#32;&#32;&#32;
+254 
+255 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+256 &#32;&#32;&#32;&#32;&#32;&#32;_M_initialize();
+257 &#32;&#32;};
+258 &#32;
+259 <emphasis role="preprocessor">#ifdef&#32;__GTHREADS</emphasis>
+261 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;&gt;
+262 &#32;&#32;&#32;&#32;<emphasis role="keyword">class&#32;</emphasis>__pool&lt;<link linkend="__classes_2lib_2include_2stdbool_8h_1a41f9c5fb8b08eb5dc3edce4dcb37fee7">true</link>&gt;&#32;:&#32;<emphasis role="keyword">public</emphasis>&#32;__pool_base
+263 &#32;&#32;&#32;&#32;{
+264 &#32;&#32;&#32;&#32;<emphasis role="keyword">public</emphasis>:
+265 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Each&#32;requesting&#32;thread&#32;is&#32;assigned&#32;an&#32;id&#32;ranging&#32;from&#32;1&#32;to</emphasis>
+266 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;_S_max_threads.&#32;Thread&#32;id&#32;0&#32;is&#32;used&#32;as&#32;a&#32;global&#32;memory&#32;pool.</emphasis>
+267 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;In&#32;order&#32;to&#32;get&#32;constant&#32;performance&#32;on&#32;the&#32;thread&#32;assignment</emphasis>
+268 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;routine,&#32;we&#32;keep&#32;a&#32;list&#32;of&#32;free&#32;ids.&#32;When&#32;a&#32;thread&#32;first</emphasis>
+269 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;requests&#32;memory&#32;we&#32;remove&#32;the&#32;first&#32;record&#32;in&#32;this&#32;list&#32;and</emphasis>
+270 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;stores&#32;the&#32;address&#32;in&#32;a&#32;__gthread_key.&#32;When&#32;initializing&#32;the</emphasis>
+271 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;__gthread_key&#32;we&#32;specify&#32;a&#32;destructor.&#32;When&#32;this&#32;destructor</emphasis>
+272 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;(i.e.&#32;the&#32;thread&#32;dies)&#32;is&#32;called,&#32;we&#32;return&#32;the&#32;thread&#32;id&#32;to</emphasis>
+273 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;the&#32;front&#32;of&#32;this&#32;list.</emphasis>
+274 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">struct&#32;</emphasis>_Thread_record
+275 &#32;&#32;&#32;&#32;&#32;&#32;{
+276 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Points&#32;to&#32;next&#32;free&#32;thread&#32;id&#32;record.&#32;NULL&#32;if&#32;last&#32;record&#32;in&#32;list.</emphasis>
+277 &#32;&#32;&#32;&#32;_Thread_record*&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_M_next;
+278 &#32;&#32;&#32;&#32;
+279 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Thread&#32;id&#32;ranging&#32;from&#32;1&#32;to&#32;_S_max_threads.</emphasis>
+280 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_M_id;
+281 &#32;&#32;&#32;&#32;&#32;&#32;};
+282 &#32;&#32;&#32;&#32;&#32;&#32;
+283 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">union&#32;</emphasis>_Block_record
+284 &#32;&#32;&#32;&#32;&#32;&#32;{
+285 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Points&#32;to&#32;the&#32;block_record&#32;of&#32;the&#32;next&#32;free&#32;block.</emphasis>
+286 &#32;&#32;&#32;&#32;_Block_record*&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_M_next;
+287 &#32;&#32;&#32;&#32;
+288 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;The&#32;thread&#32;id&#32;of&#32;the&#32;thread&#32;which&#32;has&#32;requested&#32;this&#32;block.</emphasis>
+289 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_M_thread_id;
+290 &#32;&#32;&#32;&#32;&#32;&#32;};
+291 &#32;&#32;&#32;&#32;&#32;&#32;
+292 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">struct&#32;</emphasis>_Bin_record
+293 &#32;&#32;&#32;&#32;&#32;&#32;{
+294 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;An&#32;&quot;array&quot;&#32;of&#32;pointers&#32;to&#32;the&#32;first&#32;free&#32;block&#32;for&#32;each</emphasis>
+295 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;thread&#32;id.&#32;Memory&#32;to&#32;this&#32;&quot;array&quot;&#32;is&#32;allocated&#32;in</emphasis>
+296 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;_S_initialize()&#32;for&#32;_S_max_threads&#32;+&#32;global&#32;pool&#32;0.</emphasis>
+297 &#32;&#32;&#32;&#32;_Block_record**&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_M_first;
+298 &#32;&#32;&#32;&#32;
+299 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;A&#32;list&#32;of&#32;the&#32;initial&#32;addresses&#32;of&#32;all&#32;allocated&#32;blocks.</emphasis>
+300 &#32;&#32;&#32;&#32;_Block_address*&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_M_address;
+301 
+302 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;An&#32;&quot;array&quot;&#32;of&#32;counters&#32;used&#32;to&#32;keep&#32;track&#32;of&#32;the&#32;amount&#32;of</emphasis>
+303 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;blocks&#32;that&#32;are&#32;on&#32;the&#32;freelist/used&#32;for&#32;each&#32;thread&#32;id.</emphasis>
+304 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;-&#32;Note&#32;that&#32;the&#32;second&#32;part&#32;of&#32;the&#32;allocated&#32;_M_used&#32;&quot;array&quot;</emphasis>
+305 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;&#32;&#32;actually&#32;hosts&#32;(atomic)&#32;counters&#32;of&#32;reclaimed&#32;blocks:&#32;&#32;in</emphasis>
+306 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;&#32;&#32;_M_reserve_block&#32;and&#32;in&#32;_M_reclaim_block&#32;those&#32;numbers&#32;are</emphasis>
+307 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;&#32;&#32;subtracted&#32;from&#32;the&#32;first&#32;ones&#32;to&#32;obtain&#32;the&#32;actual&#32;size</emphasis>
+308 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;&#32;&#32;of&#32;the&#32;&quot;working&#32;set&quot;&#32;of&#32;the&#32;given&#32;thread.</emphasis>
+309 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;-&#32;Memory&#32;to&#32;these&#32;&quot;arrays&quot;&#32;is&#32;allocated&#32;in&#32;_S_initialize()</emphasis>
+310 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;&#32;&#32;for&#32;_S_max_threads&#32;+&#32;global&#32;pool&#32;0.</emphasis>
+311 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">size_t</emphasis>*&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_M_free;
+312 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">size_t</emphasis>*&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_M_used;
+313 &#32;&#32;&#32;&#32;
+314 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Each&#32;bin&#32;has&#32;its&#32;own&#32;mutex&#32;which&#32;is&#32;used&#32;to&#32;ensure&#32;data</emphasis>
+315 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;integrity&#32;while&#32;changing&#32;&quot;ownership&quot;&#32;on&#32;a&#32;block.&#32;&#32;The&#32;mutex</emphasis>
+316 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;is&#32;initialized&#32;in&#32;_S_initialize().</emphasis>
+317 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2x86__64-w64-mingw32_2bits_2gthr-default_8h_1a97856e6b17fbc2936d96d8ea2962eda3">__gthread_mutex_t</link>*&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_M_mutex;
+318 &#32;&#32;&#32;&#32;&#32;&#32;};
+319 &#32;&#32;&#32;&#32;&#32;&#32;
+320 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;XXX&#32;GLIBCXX_ABI&#32;Deprecated</emphasis>
+321 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+322 &#32;&#32;&#32;&#32;&#32;&#32;_M_initialize(__destroy_handler);
+323 
+324 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+325 &#32;&#32;&#32;&#32;&#32;&#32;_M_initialize_once()
+326 &#32;&#32;&#32;&#32;&#32;&#32;{
+327 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__builtin_expect(_M_init&#32;==&#32;<emphasis role="keyword">false</emphasis>,&#32;<emphasis role="keyword">false</emphasis>))
+328 &#32;&#32;&#32;&#32;&#32;&#32;_M_initialize();
+329 &#32;&#32;&#32;&#32;&#32;&#32;}
+330 
+331 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+332 &#32;&#32;&#32;&#32;&#32;&#32;_M_destroy()&#32;throw();
+333 
+334 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">char</emphasis>*&#32;
+335 &#32;&#32;&#32;&#32;&#32;&#32;_M_reserve_block(<emphasis role="keywordtype">size_t</emphasis>&#32;__bytes,&#32;const&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;__thread_id);
+336 &#32;&#32;&#32;&#32;
+337 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+338 &#32;&#32;&#32;&#32;&#32;&#32;_M_reclaim_block(<emphasis role="keywordtype">char</emphasis>*&#32;__p,&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;__bytes)&#32;throw&#32;();
+339 &#32;&#32;&#32;&#32;
+340 &#32;&#32;&#32;&#32;&#32;&#32;const&#32;_Bin_record&amp;
+341 &#32;&#32;&#32;&#32;&#32;&#32;_M_get_bin(<emphasis role="keywordtype">size_t</emphasis>&#32;__which)
+342 &#32;&#32;&#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;_M_bin[__which];&#32;}
+343 &#32;&#32;&#32;&#32;&#32;&#32;
+344 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+345 &#32;&#32;&#32;&#32;&#32;&#32;_M_adjust_freelist(<emphasis role="keyword">const</emphasis>&#32;_Bin_record&amp;&#32;__bin,&#32;_Block_record*&#32;__block,&#32;
+346 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;__thread_id)
+347 &#32;&#32;&#32;&#32;&#32;&#32;{
+348 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__gthread_active_p())
+349 &#32;&#32;&#32;&#32;&#32;&#32;{
+350 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__block-&gt;_M_thread_id&#32;=&#32;__thread_id;
+351 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;--__bin._M_free[__thread_id];
+352 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;++__bin._M_used[__thread_id];
+353 &#32;&#32;&#32;&#32;&#32;&#32;}
+354 &#32;&#32;&#32;&#32;&#32;&#32;}
+355 
+356 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;XXX&#32;GLIBCXX_ABI&#32;Deprecated</emphasis>
+357 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+358 &#32;&#32;&#32;&#32;&#32;&#32;_M_destroy_thread_key(<emphasis role="keywordtype">void</emphasis>*)&#32;<emphasis role="keywordflow">throw</emphasis>&#32;();
+359 
+360 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;
+361 &#32;&#32;&#32;&#32;&#32;&#32;_M_get_thread_id();
+362 
+363 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">explicit</emphasis>&#32;__pool()&#32;
+364 &#32;&#32;&#32;&#32;&#32;&#32;:&#32;_M_bin(0),&#32;_M_bin_size(1),&#32;_M_thread_freelist(0)&#32;
+365 &#32;&#32;&#32;&#32;&#32;&#32;{&#32;}
+366 
+367 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">explicit</emphasis>&#32;__pool(<emphasis role="keyword">const</emphasis>&#32;__pool_base::_Tune&amp;&#32;__tune)&#32;
+368 &#32;&#32;&#32;&#32;&#32;&#32;:&#32;__pool_base(__tune),&#32;_M_bin(0),&#32;_M_bin_size(1),&#32;
+369 &#32;&#32;&#32;&#32;_M_thread_freelist(0)&#32;
+370 &#32;&#32;&#32;&#32;&#32;&#32;{&#32;}
+371 
+372 &#32;&#32;&#32;&#32;<emphasis role="keyword">private</emphasis>:
+373 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;An&#32;&quot;array&quot;&#32;of&#32;bin_records&#32;each&#32;of&#32;which&#32;represents&#32;a&#32;specific</emphasis>
+374 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;power&#32;of&#32;2&#32;size.&#32;Memory&#32;to&#32;this&#32;&quot;array&quot;&#32;is&#32;allocated&#32;in</emphasis>
+375 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;_M_initialize().</emphasis>
+376 &#32;&#32;&#32;&#32;&#32;&#32;_Bin_record*&#32;&#32;&#32;&#32;&#32;&#32;_M_bin;
+377 
+378 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Actual&#32;value&#32;calculated&#32;in&#32;_M_initialize().</emphasis>
+379 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_M_bin_size;
+380 
+381 &#32;&#32;&#32;&#32;&#32;&#32;_Thread_record*&#32;&#32;&#32;&#32;&#32;&#32;&#32;_M_thread_freelist;
+382 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>*&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_M_thread_freelist_initial;
+383 
+384 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+385 &#32;&#32;&#32;&#32;&#32;&#32;_M_initialize();
+386 &#32;&#32;&#32;&#32;};
+387 <emphasis role="preprocessor">#endif</emphasis>
+388 
+389 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keywordtype">bool</emphasis>&gt;&#32;<emphasis role="keyword">class&#32;</emphasis>_PoolTp,&#32;<emphasis role="keywordtype">bool</emphasis>&#32;_Thread&gt;
+390 &#32;&#32;&#32;&#32;<emphasis role="keyword">struct&#32;</emphasis>__common_pool
+391 &#32;&#32;&#32;&#32;{
+392 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;_PoolTp&lt;_Thread&gt;&#32;&#32;&#32;&#32;&#32;&#32;pool_type;
+393 &#32;&#32;&#32;&#32;&#32;&#32;
+394 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">static</emphasis>&#32;pool_type&amp;
+395 &#32;&#32;&#32;&#32;&#32;&#32;_S_get_pool()
+396 &#32;&#32;&#32;&#32;&#32;&#32;{&#32;
+397 &#32;&#32;&#32;&#32;<emphasis role="keyword">static</emphasis>&#32;pool_type&#32;_S_pool;
+398 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;_S_pool;
+399 &#32;&#32;&#32;&#32;&#32;&#32;}
+400 &#32;&#32;&#32;&#32;};
+401 
+402 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keywordtype">bool</emphasis>&gt;&#32;<emphasis role="keyword">class&#32;</emphasis>_PoolTp,&#32;<emphasis role="keywordtype">bool</emphasis>&#32;_Thread&gt;
+403 &#32;&#32;&#32;&#32;<emphasis role="keyword">struct&#32;</emphasis>__common_pool_base;
+404 
+405 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keywordtype">bool</emphasis>&gt;&#32;<emphasis role="keyword">class&#32;</emphasis>_PoolTp&gt;
+406 &#32;&#32;&#32;&#32;<emphasis role="keyword">struct&#32;</emphasis>__common_pool_base&lt;_PoolTp,&#32;<link linkend="__classes_2lib_2include_2stdbool_8h_1a65e9886d74aaee76545e83dd09011727">false</link>&gt;&#32;
+407 &#32;&#32;&#32;&#32;:&#32;<emphasis role="keyword">public</emphasis>&#32;__common_pool&lt;_PoolTp,&#32;false&gt;
+408 &#32;&#32;&#32;&#32;{
+409 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">using&#32;&#32;</emphasis>__common_pool&lt;_PoolTp,&#32;<emphasis role="keyword">false</emphasis>&gt;::_S_get_pool;
+410 
+411 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>
+412 &#32;&#32;&#32;&#32;&#32;&#32;_S_initialize_once()
+413 &#32;&#32;&#32;&#32;&#32;&#32;{
+414 &#32;&#32;&#32;&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>&#32;__init;
+415 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__builtin_expect(__init&#32;==&#32;<emphasis role="keyword">false</emphasis>,&#32;<emphasis role="keyword">false</emphasis>))
+416 &#32;&#32;&#32;&#32;&#32;&#32;{
+417 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_S_get_pool()._M_initialize_once();&#32;
+418 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__init&#32;=&#32;<emphasis role="keyword">true</emphasis>;
+419 &#32;&#32;&#32;&#32;&#32;&#32;}
+420 &#32;&#32;&#32;&#32;&#32;&#32;}
+421 &#32;&#32;&#32;&#32;};
+422 
+423 <emphasis role="preprocessor">#ifdef&#32;__GTHREADS</emphasis>
+424 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keywordtype">bool</emphasis>&gt;&#32;<emphasis role="keyword">class&#32;</emphasis>_PoolTp&gt;
+425 &#32;&#32;&#32;&#32;<emphasis role="keyword">struct&#32;</emphasis>__common_pool_base&lt;_PoolTp,&#32;<link linkend="__classes_2lib_2include_2stdbool_8h_1a41f9c5fb8b08eb5dc3edce4dcb37fee7">true</link>&gt;
+426 &#32;&#32;&#32;&#32;:&#32;<emphasis role="keyword">public</emphasis>&#32;__common_pool&lt;_PoolTp,&#32;true&gt;
+427 &#32;&#32;&#32;&#32;{
+428 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">using&#32;&#32;</emphasis>__common_pool&lt;_PoolTp,&#32;<emphasis role="keyword">true</emphasis>&gt;::_S_get_pool;
+429 &#32;&#32;&#32;&#32;&#32;&#32;
+430 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>
+431 &#32;&#32;&#32;&#32;&#32;&#32;_S_initialize()&#32;
+432 &#32;&#32;&#32;&#32;&#32;&#32;{&#32;_S_get_pool()._M_initialize_once();&#32;}
+433 
+434 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>
+435 &#32;&#32;&#32;&#32;&#32;&#32;_S_initialize_once()
+436 &#32;&#32;&#32;&#32;&#32;&#32;{&#32;
+437 &#32;&#32;&#32;&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>&#32;__init;
+438 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__builtin_expect(__init&#32;==&#32;<emphasis role="keyword">false</emphasis>,&#32;<emphasis role="keyword">false</emphasis>))
+439 &#32;&#32;&#32;&#32;&#32;&#32;{
+440 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__gthread_active_p())
+441 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+442 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;On&#32;some&#32;platforms,&#32;__gthread_once_t&#32;is&#32;an&#32;aggregate.</emphasis>
+443 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">static</emphasis>&#32;<link linkend="__classes_2lib_2include_2c_09_09_2x86__64-w64-mingw32_2bits_2gthr-default_8h_1af51081352b97dcd93f8668cc895c1c7f">__gthread_once_t</link>&#32;__once&#32;=&#32;<link linkend="__classes_2lib_2include_2c_09_09_2x86__64-w64-mingw32_2bits_2gthr-default_8h_1ae6eb0abb371e6119fbdc839178481555">__GTHREAD_ONCE_INIT</link>;
+444 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__gthread_once(&amp;__once,&#32;_S_initialize);
+445 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+446 
+447 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Double&#32;check&#32;initialization.&#32;May&#32;be&#32;necessary&#32;on&#32;some</emphasis>
+448 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;systems&#32;for&#32;proper&#32;construction&#32;when&#32;not&#32;compiling&#32;with</emphasis>
+449 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;thread&#32;flags.</emphasis>
+450 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_S_get_pool()._M_initialize_once();&#32;
+451 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__init&#32;=&#32;<emphasis role="keyword">true</emphasis>;
+452 &#32;&#32;&#32;&#32;&#32;&#32;}
+453 &#32;&#32;&#32;&#32;&#32;&#32;}
+454 &#32;&#32;&#32;&#32;};
+455 <emphasis role="preprocessor">#endif</emphasis>
+456 
+458 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keywordtype">bool</emphasis>&gt;&#32;<emphasis role="keyword">class&#32;</emphasis>_PoolTp,&#32;<emphasis role="keywordtype">bool</emphasis>&#32;_Thread&gt;
+459 &#32;&#32;&#32;&#32;<emphasis role="keyword">struct&#32;</emphasis>__common_pool_policy&#32;:&#32;<emphasis role="keyword">public</emphasis>&#32;__common_pool_base&lt;_PoolTp,&#32;_Thread&gt;
+460 &#32;&#32;&#32;&#32;{
+461 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp1,&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keywordtype">bool</emphasis>&gt;&#32;<emphasis role="keyword">class&#32;</emphasis>_PoolTp1&#32;=&#32;_PoolTp,&#32;
+462 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">bool</emphasis>&#32;_Thread1&#32;=&#32;_Thread&gt;
+463 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">struct&#32;</emphasis>_M_rebind
+464 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{&#32;<emphasis role="keyword">typedef</emphasis>&#32;__common_pool_policy&lt;_PoolTp1,&#32;_Thread1&gt;&#32;other;&#32;};
+465 
+466 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">using&#32;&#32;</emphasis>__common_pool_base&lt;_PoolTp,&#32;_Thread&gt;::_S_get_pool;
+467 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">using&#32;&#32;</emphasis>__common_pool_base&lt;_PoolTp,&#32;_Thread&gt;::_S_initialize_once;
+468 &#32;&#32;};
+469 &#32;
+470 
+471 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp,&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keywordtype">bool</emphasis>&gt;&#32;<emphasis role="keyword">class&#32;</emphasis>_PoolTp,&#32;<emphasis role="keywordtype">bool</emphasis>&#32;_Thread&gt;
+472 &#32;&#32;&#32;&#32;<emphasis role="keyword">struct&#32;</emphasis>__per_type_pool
+473 &#32;&#32;&#32;&#32;{
+474 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;_Tp&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;value_type;
+475 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;_PoolTp&lt;_Thread&gt;&#32;&#32;&#32;&#32;&#32;&#32;pool_type;
+476 &#32;&#32;&#32;&#32;&#32;&#32;
+477 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">static</emphasis>&#32;pool_type&amp;
+478 &#32;&#32;&#32;&#32;&#32;&#32;_S_get_pool()
+479 &#32;&#32;&#32;&#32;&#32;&#32;{
+480 &#32;&#32;&#32;&#32;<emphasis role="keyword">using&#32;</emphasis>std::size_t;
+481 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Sane&#32;defaults&#32;for&#32;the&#32;_PoolTp.</emphasis>
+482 &#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">typename</emphasis>&#32;pool_type::_Block_record&#32;_Block_record;
+483 &#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;__a&#32;=&#32;(__alignof__(_Tp)&#32;&gt;=&#32;<emphasis role="keyword">sizeof</emphasis>(_Block_record)
+484 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;?&#32;__alignof__(_Tp)&#32;:&#32;<emphasis role="keyword">sizeof</emphasis>(_Block_record));
+485 
+486 &#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">typename</emphasis>&#32;__pool_base::_Tune&#32;_Tune;
+487 &#32;&#32;&#32;&#32;<emphasis role="keyword">static</emphasis>&#32;_Tune&#32;_S_tune(__a,&#32;<emphasis role="keyword">sizeof</emphasis>(_Tp)&#32;*&#32;64,
+488 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">sizeof</emphasis>(_Tp)&#32;*&#32;2&#32;&gt;=&#32;__a&#32;?&#32;<emphasis role="keyword">sizeof</emphasis>(_Tp)&#32;*&#32;2&#32;:&#32;__a,
+489 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;sizeof(_Tp)&#32;*&#32;<link linkend="__classes_2lib_2include_2stddef_8h_1aa9d55e2f20e580b7445617d0d12fff6e">size_t</link>(_Tune::_S_chunk_size),
+490 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_Tune::_S_max_threads,
+491 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_Tune::_S_freelist_headroom,
+492 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_namespacestd">std</link>::getenv(<emphasis role="stringliteral">&quot;GLIBCXX_FORCE_NEW&quot;</emphasis>)&#32;?&#32;<link linkend="__classes_2lib_2include_2stdbool_8h_1a41f9c5fb8b08eb5dc3edce4dcb37fee7">true</link>&#32;:&#32;<link linkend="__classes_2lib_2include_2stdbool_8h_1a65e9886d74aaee76545e83dd09011727">false</link>);
+493 &#32;&#32;&#32;&#32;<emphasis role="keyword">static</emphasis>&#32;pool_type&#32;_S_pool(_S_tune);
+494 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;_S_pool;
+495 &#32;&#32;&#32;&#32;&#32;&#32;}
+496 &#32;&#32;&#32;&#32;};
+497 
+498 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp,&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keywordtype">bool</emphasis>&gt;&#32;<emphasis role="keyword">class&#32;</emphasis>_PoolTp,&#32;<emphasis role="keywordtype">bool</emphasis>&#32;_Thread&gt;
+499 &#32;&#32;&#32;&#32;<emphasis role="keyword">struct&#32;</emphasis>__per_type_pool_base;
+500 
+501 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp,&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keywordtype">bool</emphasis>&gt;&#32;<emphasis role="keyword">class&#32;</emphasis>_PoolTp&gt;
+502 &#32;&#32;&#32;&#32;<emphasis role="keyword">struct&#32;</emphasis>__per_type_pool_base&lt;_Tp,&#32;_PoolTp,&#32;<link linkend="__classes_2lib_2include_2stdbool_8h_1a65e9886d74aaee76545e83dd09011727">false</link>&gt;&#32;
+503 &#32;&#32;&#32;&#32;:&#32;<emphasis role="keyword">public</emphasis>&#32;__per_type_pool&lt;_Tp,&#32;_PoolTp,&#32;false&gt;&#32;
+504 &#32;&#32;&#32;&#32;{
+505 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">using&#32;&#32;</emphasis>__per_type_pool&lt;_Tp,&#32;_PoolTp,&#32;<emphasis role="keyword">false</emphasis>&gt;::_S_get_pool;
+506 
+507 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>
+508 &#32;&#32;&#32;&#32;&#32;&#32;_S_initialize_once()
+509 &#32;&#32;&#32;&#32;&#32;&#32;{
+510 &#32;&#32;&#32;&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>&#32;__init;
+511 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__builtin_expect(__init&#32;==&#32;<emphasis role="keyword">false</emphasis>,&#32;<emphasis role="keyword">false</emphasis>))
+512 &#32;&#32;&#32;&#32;&#32;&#32;{
+513 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_S_get_pool()._M_initialize_once();&#32;
+514 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__init&#32;=&#32;<emphasis role="keyword">true</emphasis>;
+515 &#32;&#32;&#32;&#32;&#32;&#32;}
+516 &#32;&#32;&#32;&#32;&#32;&#32;}
+517 &#32;&#32;&#32;&#32;};
+518 
+519 <emphasis role="preprocessor">&#32;#ifdef&#32;__GTHREADS</emphasis>
+520 &#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp,&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keywordtype">bool</emphasis>&gt;&#32;<emphasis role="keyword">class&#32;</emphasis>_PoolTp&gt;
+521 &#32;&#32;&#32;&#32;<emphasis role="keyword">struct&#32;</emphasis>__per_type_pool_base&lt;_Tp,&#32;_PoolTp,&#32;<link linkend="__classes_2lib_2include_2stdbool_8h_1a41f9c5fb8b08eb5dc3edce4dcb37fee7">true</link>&gt;&#32;
+522 &#32;&#32;&#32;&#32;:&#32;<emphasis role="keyword">public</emphasis>&#32;__per_type_pool&lt;_Tp,&#32;_PoolTp,&#32;true&gt;&#32;
+523 &#32;&#32;&#32;&#32;{
+524 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">using&#32;&#32;</emphasis>__per_type_pool&lt;_Tp,&#32;_PoolTp,&#32;<emphasis role="keyword">true</emphasis>&gt;::_S_get_pool;
+525 
+526 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>
+527 &#32;&#32;&#32;&#32;&#32;&#32;_S_initialize()&#32;
+528 &#32;&#32;&#32;&#32;&#32;&#32;{&#32;_S_get_pool()._M_initialize_once();&#32;}
+529 
+530 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>
+531 &#32;&#32;&#32;&#32;&#32;&#32;_S_initialize_once()
+532 &#32;&#32;&#32;&#32;&#32;&#32;{&#32;
+533 &#32;&#32;&#32;&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>&#32;__init;
+534 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__builtin_expect(__init&#32;==&#32;<emphasis role="keyword">false</emphasis>,&#32;<emphasis role="keyword">false</emphasis>))
+535 &#32;&#32;&#32;&#32;&#32;&#32;{
+536 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__gthread_active_p())
+537 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+538 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;On&#32;some&#32;platforms,&#32;__gthread_once_t&#32;is&#32;an&#32;aggregate.</emphasis>
+539 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">static</emphasis>&#32;<link linkend="__classes_2lib_2include_2c_09_09_2x86__64-w64-mingw32_2bits_2gthr-default_8h_1af51081352b97dcd93f8668cc895c1c7f">__gthread_once_t</link>&#32;__once&#32;=&#32;<link linkend="__classes_2lib_2include_2c_09_09_2x86__64-w64-mingw32_2bits_2gthr-default_8h_1ae6eb0abb371e6119fbdc839178481555">__GTHREAD_ONCE_INIT</link>;
+540 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__gthread_once(&amp;__once,&#32;_S_initialize);
+541 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+542 
+543 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Double&#32;check&#32;initialization.&#32;May&#32;be&#32;necessary&#32;on&#32;some</emphasis>
+544 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;systems&#32;for&#32;proper&#32;construction&#32;when&#32;not&#32;compiling&#32;with</emphasis>
+545 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;thread&#32;flags.</emphasis>
+546 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_S_get_pool()._M_initialize_once();&#32;
+547 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__init&#32;=&#32;<emphasis role="keyword">true</emphasis>;
+548 &#32;&#32;&#32;&#32;&#32;&#32;}
+549 &#32;&#32;&#32;&#32;&#32;&#32;}
+550 &#32;&#32;&#32;&#32;};
+551 <emphasis role="preprocessor">#endif</emphasis>
+552 
+554 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp,&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keywordtype">bool</emphasis>&gt;&#32;<emphasis role="keyword">class&#32;</emphasis>_PoolTp,&#32;<emphasis role="keywordtype">bool</emphasis>&#32;_Thread&gt;
+555 &#32;&#32;&#32;&#32;<emphasis role="keyword">struct&#32;</emphasis>__per_type_pool_policy&#32;
+556 &#32;&#32;&#32;&#32;:&#32;<emphasis role="keyword">public</emphasis>&#32;__per_type_pool_base&lt;_Tp,&#32;_PoolTp,&#32;_Thread&gt;
+557 &#32;&#32;&#32;&#32;{
+558 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp1,&#32;<emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keywordtype">bool</emphasis>&gt;&#32;<emphasis role="keyword">class&#32;</emphasis>_PoolTp1&#32;=&#32;_PoolTp,&#32;
+559 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">bool</emphasis>&#32;_Thread1&#32;=&#32;_Thread&gt;
+560 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">struct&#32;</emphasis>_M_rebind
+561 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{&#32;<emphasis role="keyword">typedef</emphasis>&#32;__per_type_pool_policy&lt;_Tp1,&#32;_PoolTp1,&#32;_Thread1&gt;&#32;other;&#32;};
+562 
+563 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">using&#32;&#32;</emphasis>__per_type_pool_base&lt;_Tp,&#32;_PoolTp,&#32;_Thread&gt;::_S_get_pool;
+564 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">using&#32;&#32;</emphasis>__per_type_pool_base&lt;_Tp,&#32;_PoolTp,&#32;_Thread&gt;::_S_initialize_once;
+565 &#32;&#32;};
+566 
+567 
+569 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+570 &#32;&#32;&#32;&#32;<emphasis role="keyword">class&#32;</emphasis>__mt_alloc_base&#32;
+571 &#32;&#32;&#32;&#32;{
+572 &#32;&#32;&#32;&#32;<emphasis role="keyword">public</emphasis>:
+573 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;std::size_t&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;size_type;
+574 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;std::ptrdiff_t&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;difference_type;
+575 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;_Tp*&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1aca2093d4756bde9a55b94e9ff8d9c623">pointer</link>;
+576 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">const</emphasis>&#32;_Tp*&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;const_pointer;
+577 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;_Tp&amp;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;reference;
+578 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">const</emphasis>&#32;_Tp&amp;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;const_reference;
+579 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;_Tp&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;value_type;
+580 
+581 <emphasis role="preprocessor">#if&#32;__cplusplus&#32;&gt;=&#32;201103L</emphasis>
+582 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;_GLIBCXX_RESOLVE_LIB_DEFECTS</emphasis>
+583 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;2103.&#32;propagate_on_container_move_assignment</emphasis>
+584 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;std::true_type&#32;propagate_on_container_move_assignment;
+585 <emphasis role="preprocessor">#endif</emphasis>
+586 
+587 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1aca2093d4756bde9a55b94e9ff8d9c623">pointer</link>
+588 &#32;&#32;&#32;&#32;&#32;&#32;address(reference&#32;__x)&#32;<emphasis role="keyword">const</emphasis>&#32;_GLIBCXX_NOEXCEPT
+589 &#32;&#32;&#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;std::__addressof(__x);&#32;}
+590 
+591 &#32;&#32;&#32;&#32;&#32;&#32;const_pointer
+592 &#32;&#32;&#32;&#32;&#32;&#32;address(const_reference&#32;__x)&#32;<emphasis role="keyword">const</emphasis>&#32;_GLIBCXX_NOEXCEPT
+593 &#32;&#32;&#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;std::__addressof(__x);&#32;}
+594 
+595 &#32;&#32;&#32;&#32;&#32;&#32;size_type
+596 &#32;&#32;&#32;&#32;&#32;&#32;max_size()&#32;const&#32;_GLIBCXX_USE_NOEXCEPT&#32;
+597 &#32;&#32;&#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;size_type(-1)&#32;/&#32;<emphasis role="keyword">sizeof</emphasis>(_Tp);&#32;}
+598 
+599 <emphasis role="preprocessor">#if&#32;__cplusplus&#32;&gt;=&#32;201103L</emphasis>
+600 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Up,&#32;<emphasis role="keyword">typename</emphasis>...&#32;_Args&gt;
+601 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+602 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;construct(_Up*&#32;__p,&#32;_Args&amp;&amp;...&#32;__args)
+603 &#32;&#32;&#32;&#32;{&#32;::new((<emphasis role="keywordtype">void</emphasis>&#32;*)__p)&#32;_Up(std::forward&lt;_Args&gt;(__args)...);&#32;}
+604 
+605 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Up&gt;
+606 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>&#32;
+607 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_namespacestd_1a9d87212966db1577458d10be75ce7131">destroy</link>(_Up*&#32;__p)&#32;{&#32;__p-&gt;~_Up();&#32;}
+608 <emphasis role="preprocessor">#else</emphasis>
+609 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;_GLIBCXX_RESOLVE_LIB_DEFECTS</emphasis>
+610 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;402.&#32;wrong&#32;new&#32;expression&#32;in&#32;[some_]&#32;allocator::construct</emphasis>
+611 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>&#32;
+612 &#32;&#32;&#32;&#32;&#32;&#32;construct(<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1aca2093d4756bde9a55b94e9ff8d9c623">pointer</link>&#32;__p,&#32;<emphasis role="keyword">const</emphasis>&#32;_Tp&amp;&#32;<link linkend="__classes_2lib_2include_2stdatomic_8h_1a15181bfd16829c92971879064b9d8dbb">__val</link>)&#32;
+613 &#32;&#32;&#32;&#32;&#32;&#32;{&#32;::new((<emphasis role="keywordtype">void</emphasis>&#32;*)__p)&#32;_Tp(<link linkend="__classes_2lib_2include_2stdatomic_8h_1a15181bfd16829c92971879064b9d8dbb">__val</link>);&#32;}
+614 
+615 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>&#32;
+616 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_namespacestd_1a9d87212966db1577458d10be75ce7131">destroy</link>(<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1aca2093d4756bde9a55b94e9ff8d9c623">pointer</link>&#32;__p)&#32;{&#32;__p-&gt;~_Tp();&#32;}
+617 <emphasis role="preprocessor">#endif</emphasis>
+618 &#32;&#32;&#32;&#32;};
+619 
+620 <emphasis role="preprocessor">#ifdef&#32;__GTHREADS</emphasis>
+621 <emphasis role="preprocessor">#define&#32;__thread_default&#32;true</emphasis>
+622 <emphasis role="preprocessor">#else</emphasis>
+623 <emphasis role="preprocessor">#define&#32;__thread_default&#32;false</emphasis>
+624 <emphasis role="preprocessor">#endif</emphasis>
+625 
+637 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp,&#32;
+638 &#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;_Poolp&#32;=&#32;__common_pool_policy&lt;__pool,&#32;__thread_default&gt;&#32;&gt;
+639 &#32;&#32;&#32;&#32;<emphasis role="keyword">class&#32;</emphasis>__mt_alloc&#32;:&#32;<emphasis role="keyword">public</emphasis>&#32;__mt_alloc_base&lt;_Tp&gt;
+640 &#32;&#32;&#32;&#32;{
+641 &#32;&#32;&#32;&#32;<emphasis role="keyword">public</emphasis>:
+642 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;std::size_t&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;size_type;
+643 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;std::ptrdiff_t&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;difference_type;
+644 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;_Tp*&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1aca2093d4756bde9a55b94e9ff8d9c623">pointer</link>;
+645 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">const</emphasis>&#32;_Tp*&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;const_pointer;
+646 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;_Tp&amp;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;reference;
+647 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">const</emphasis>&#32;_Tp&amp;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;const_reference;
+648 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;_Tp&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;value_type;
+649 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;_Poolp&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__policy_type;
+650 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">typename</emphasis>&#32;_Poolp::pool_type&#32;&#32;&#32;&#32;__pool_type;
+651 
+652 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp1,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Poolp1&#32;=&#32;_Poolp&gt;
+653 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">struct&#32;</emphasis>rebind
+654 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{&#32;
+655 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">typename</emphasis>&#32;_Poolp1::template&#32;_M_rebind&lt;_Tp1&gt;::other&#32;pol_type;
+656 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;__mt_alloc&lt;_Tp1,&#32;pol_type&gt;&#32;other;
+657 &#32;&#32;&#32;&#32;};
+658 
+659 &#32;&#32;&#32;&#32;&#32;&#32;__mt_alloc()&#32;_GLIBCXX_USE_NOEXCEPT&#32;{&#32;}
+660 
+661 &#32;&#32;&#32;&#32;&#32;&#32;__mt_alloc(<emphasis role="keyword">const</emphasis>&#32;__mt_alloc&amp;)&#32;_GLIBCXX_USE_NOEXCEPT&#32;{&#32;}
+662 
+663 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp1,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Poolp1&gt;
+664 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__mt_alloc(<emphasis role="keyword">const</emphasis>&#32;__mt_alloc&lt;_Tp1,&#32;_Poolp1&gt;&amp;)&#32;_GLIBCXX_USE_NOEXCEPT&#32;{&#32;}
+665 
+666 &#32;&#32;&#32;&#32;&#32;&#32;~__mt_alloc()&#32;_GLIBCXX_USE_NOEXCEPT&#32;{&#32;}
+667 
+668 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2x86__64-w64-mingw32_2bits_2c_09_09config_8h_1a56bc959ca1311889bcd1c5abb178ab59">_GLIBCXX_NODISCARD</link>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1aca2093d4756bde9a55b94e9ff8d9c623">pointer</link>
+669 &#32;&#32;&#32;&#32;&#32;&#32;allocate(size_type&#32;__n,&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>*&#32;=&#32;0);
+670 
+671 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+672 &#32;&#32;&#32;&#32;&#32;&#32;deallocate(<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1aca2093d4756bde9a55b94e9ff8d9c623">pointer</link>&#32;__p,&#32;size_type&#32;__n);
+673 
+674 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;__pool_base::_Tune
+675 &#32;&#32;&#32;&#32;&#32;&#32;_M_get_options()
+676 &#32;&#32;&#32;&#32;&#32;&#32;{&#32;
+677 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Return&#32;a&#32;copy,&#32;not&#32;a&#32;reference,&#32;for&#32;external&#32;consumption.</emphasis>
+678 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__policy_type::_S_get_pool()._M_get_options();
+679 &#32;&#32;&#32;&#32;&#32;&#32;}
+680 &#32;&#32;&#32;&#32;&#32;&#32;
+681 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+682 &#32;&#32;&#32;&#32;&#32;&#32;_M_set_options(__pool_base::_Tune&#32;__t)
+683 &#32;&#32;&#32;&#32;&#32;&#32;{&#32;__policy_type::_S_get_pool()._M_set_options(__t);&#32;}
+684 &#32;&#32;&#32;&#32;};
+685 
+686 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Poolp&gt;
+687 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2x86__64-w64-mingw32_2bits_2c_09_09config_8h_1a56bc959ca1311889bcd1c5abb178ab59">_GLIBCXX_NODISCARD</link>&#32;<emphasis role="keyword">typename</emphasis>&#32;__mt_alloc&lt;_Tp,&#32;_Poolp&gt;::pointer
+688 &#32;&#32;&#32;&#32;__mt_alloc&lt;_Tp,&#32;_Poolp&gt;::
+689 &#32;&#32;&#32;&#32;allocate(size_type&#32;__n,&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>*)
+690 &#32;&#32;&#32;&#32;{
+691 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__n&#32;&gt;&#32;this-&gt;max_size())
+692 &#32;&#32;&#32;&#32;std::__throw_bad_alloc();
+693 
+694 <emphasis role="preprocessor">#if&#32;__cpp_aligned_new</emphasis>
+695 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Types&#32;with&#32;extended&#32;alignment&#32;are&#32;handled&#32;by&#32;operator&#32;new/delete.</emphasis>
+696 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(<emphasis role="keyword">alignof</emphasis>(_Tp)&#32;&gt;&#32;__STDCPP_DEFAULT_NEW_ALIGNMENT__)
+697 &#32;&#32;&#32;&#32;{
+698 &#32;&#32;&#32;&#32;&#32;&#32;std::align_val_t&#32;__al&#32;=&#32;std::align_val_t(<emphasis role="keyword">alignof</emphasis>(_Tp));
+699 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<emphasis role="keyword">static_cast&lt;</emphasis>_Tp*<emphasis role="keyword">&gt;</emphasis>(::operator&#32;<emphasis role="keyword">new</emphasis>(__n&#32;*&#32;<emphasis role="keyword">sizeof</emphasis>(_Tp),&#32;__al));
+700 &#32;&#32;&#32;&#32;}
+701 <emphasis role="preprocessor">#endif</emphasis>
+702 
+703 &#32;&#32;&#32;&#32;&#32;&#32;__policy_type::_S_initialize_once();
+704 
+705 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Requests&#32;larger&#32;than&#32;_M_max_bytes&#32;are&#32;handled&#32;by&#32;operator</emphasis>
+706 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;new/delete&#32;directly.</emphasis>
+707 &#32;&#32;&#32;&#32;&#32;&#32;__pool_type&amp;&#32;__pool&#32;=&#32;__policy_type::_S_get_pool();
+708 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;size_type&#32;__bytes&#32;=&#32;__n&#32;*&#32;<emphasis role="keyword">sizeof</emphasis>(_Tp);
+709 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__pool._M_check_threshold(__bytes))
+710 &#32;&#32;&#32;&#32;{
+711 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>*&#32;__ret&#32;=&#32;::operator&#32;<emphasis role="keyword">new</emphasis>(__bytes);
+712 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<emphasis role="keyword">static_cast&lt;</emphasis>_Tp*<emphasis role="keyword">&gt;</emphasis>(__ret);
+713 &#32;&#32;&#32;&#32;}
+714 &#32;&#32;&#32;&#32;&#32;&#32;
+715 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Round&#32;up&#32;to&#32;power&#32;of&#32;2&#32;and&#32;figure&#32;out&#32;which&#32;bin&#32;to&#32;use.</emphasis>
+716 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;size_type&#32;__which&#32;=&#32;__pool._M_get_binmap(__bytes);
+717 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;size_type&#32;__thread_id&#32;=&#32;__pool._M_get_thread_id();
+718 &#32;&#32;&#32;&#32;&#32;&#32;
+719 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Find&#32;out&#32;if&#32;we&#32;have&#32;blocks&#32;on&#32;our&#32;freelist.&#32;&#32;If&#32;so,&#32;go&#32;ahead</emphasis>
+720 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;and&#32;use&#32;them&#32;directly&#32;without&#32;having&#32;to&#32;lock&#32;anything.</emphasis>
+721 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">char</emphasis>*&#32;__c;
+722 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">typename</emphasis>&#32;__pool_type::_Bin_record&#32;_Bin_record;
+723 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;_Bin_record&amp;&#32;__bin&#32;=&#32;__pool._M_get_bin(__which);
+724 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__bin._M_first[__thread_id])
+725 &#32;&#32;&#32;&#32;{
+726 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Already&#32;reserved.</emphasis>
+727 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">typename</emphasis>&#32;__pool_type::_Block_record&#32;_Block_record;
+728 &#32;&#32;&#32;&#32;&#32;&#32;_Block_record*&#32;__block&#32;=&#32;__bin._M_first[__thread_id];
+729 &#32;&#32;&#32;&#32;&#32;&#32;__bin._M_first[__thread_id]&#32;=&#32;__block-&gt;_M_next;
+730 &#32;&#32;&#32;&#32;&#32;&#32;
+731 &#32;&#32;&#32;&#32;&#32;&#32;__pool._M_adjust_freelist(__bin,&#32;__block,&#32;__thread_id);
+732 &#32;&#32;&#32;&#32;&#32;&#32;__c&#32;=&#32;<emphasis role="keyword">reinterpret_cast&lt;</emphasis><emphasis role="keywordtype">char</emphasis>*<emphasis role="keyword">&gt;</emphasis>(__block)&#32;+&#32;__pool._M_get_align();
+733 &#32;&#32;&#32;&#32;}
+734 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>
+735 &#32;&#32;&#32;&#32;{
+736 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Null,&#32;reserve.</emphasis>
+737 &#32;&#32;&#32;&#32;&#32;&#32;__c&#32;=&#32;__pool._M_reserve_block(__bytes,&#32;__thread_id);
+738 &#32;&#32;&#32;&#32;}
+739 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<emphasis role="keyword">static_cast&lt;</emphasis>_Tp*<emphasis role="keyword">&gt;</emphasis>(<emphasis role="keyword">static_cast&lt;</emphasis><emphasis role="keywordtype">void</emphasis>*<emphasis role="keyword">&gt;</emphasis>(__c));
+740 &#32;&#32;&#32;&#32;}
+741 &#32;&#32;
+742 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Poolp&gt;
+743 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+744 &#32;&#32;&#32;&#32;__mt_alloc&lt;_Tp,&#32;_Poolp&gt;::
+745 &#32;&#32;&#32;&#32;deallocate(<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1aca2093d4756bde9a55b94e9ff8d9c623">pointer</link>&#32;__p,&#32;size_type&#32;__n)
+746 &#32;&#32;&#32;&#32;{
+747 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__builtin_expect(__p&#32;!=&#32;0,&#32;<emphasis role="keyword">true</emphasis>))
+748 &#32;&#32;&#32;&#32;{
+749 <emphasis role="preprocessor">#if&#32;__cpp_aligned_new</emphasis>
+750 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Types&#32;with&#32;extended&#32;alignment&#32;are&#32;handled&#32;by&#32;operator&#32;new/delete.</emphasis>
+751 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(<emphasis role="keyword">alignof</emphasis>(_Tp)&#32;&gt;&#32;__STDCPP_DEFAULT_NEW_ALIGNMENT__)
+752 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+753 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;::operator&#32;<emphasis role="keyword">delete</emphasis>(__p,&#32;std::align_val_t(<emphasis role="keyword">alignof</emphasis>(_Tp)));
+754 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>;
+755 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+756 <emphasis role="preprocessor">#endif</emphasis>
+757 
+758 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Requests&#32;larger&#32;than&#32;_M_max_bytes&#32;are&#32;handled&#32;by</emphasis>
+759 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;operators&#32;new/delete&#32;directly.</emphasis>
+760 &#32;&#32;&#32;&#32;&#32;&#32;__pool_type&amp;&#32;__pool&#32;=&#32;__policy_type::_S_get_pool();
+761 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;size_type&#32;__bytes&#32;=&#32;__n&#32;*&#32;<emphasis role="keyword">sizeof</emphasis>(_Tp);
+762 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__pool._M_check_threshold(__bytes))
+763 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;::operator&#32;<emphasis role="keyword">delete</emphasis>(__p);
+764 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>
+765 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__pool._M_reclaim_block(<emphasis role="keyword">reinterpret_cast&lt;</emphasis><emphasis role="keywordtype">char</emphasis>*<emphasis role="keyword">&gt;</emphasis>(__p),&#32;__bytes);
+766 &#32;&#32;&#32;&#32;}
+767 &#32;&#32;&#32;&#32;}
+768 &#32;&#32;
+769 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Poolp&gt;
+770 &#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>
+771 &#32;&#32;&#32;&#32;<link linkend="_namespacenlohmann_1aaf11d1e42c5a671e7cd362ab0a182de1">operator==</link>(<emphasis role="keyword">const</emphasis>&#32;__mt_alloc&lt;_Tp,&#32;_Poolp&gt;&amp;,&#32;<emphasis role="keyword">const</emphasis>&#32;__mt_alloc&lt;_Tp,&#32;_Poolp&gt;&amp;)
+772 &#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;<emphasis role="keyword">true</emphasis>;&#32;}
+773 &#32;&#32;
+774 <emphasis role="preprocessor">#if&#32;__cpp_impl_three_way_comparison&#32;&lt;&#32;201907L</emphasis>
+775 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Poolp&gt;
+776 &#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>
+777 &#32;&#32;&#32;&#32;<link linkend="_namespacenlohmann_1aa9fe6e8e15f1b1b242d291e7703f1b8d">operator!=</link>(<emphasis role="keyword">const</emphasis>&#32;__mt_alloc&lt;_Tp,&#32;_Poolp&gt;&amp;,&#32;<emphasis role="keyword">const</emphasis>&#32;__mt_alloc&lt;_Tp,&#32;_Poolp&gt;&amp;)
+778 &#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;<emphasis role="keyword">false</emphasis>;&#32;}
+779 <emphasis role="preprocessor">#endif</emphasis>
+780 
+781 <emphasis role="preprocessor">#undef&#32;__thread_default</emphasis>
+782 
+783 _GLIBCXX_END_NAMESPACE_VERSION
+784 }&#32;<emphasis role="comment">//&#32;namespace</emphasis>
+785 
+786 <emphasis role="preprocessor">#endif</emphasis>
+</programlisting></section>

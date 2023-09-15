@@ -1,0 +1,946 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<section xmlns="http://docbook.org/ns/docbook" version="5.0" xmlns:xlink="http://www.w3.org/1999/xlink" xml:id="__classes_2lib_2include_2c_09_09_2bits_2ranges__base_8h_source" xml:lang="en-US">
+<title>ranges_base.h</title>
+<indexterm><primary>C:/Users/HP/Documents/GitHub/Minero-Game/Classes/lib/include/c++/bits/ranges_base.h</primary></indexterm>
+Go to the documentation of this file.<programlisting linenumbering="unnumbered">1 <emphasis role="comment">//&#32;Core&#32;concepts&#32;and&#32;definitions&#32;for&#32;&lt;ranges&gt;&#32;-*-&#32;C++&#32;-*-</emphasis>
+2 
+3 <emphasis role="comment">//&#32;Copyright&#32;(C)&#32;2019-2022&#32;Free&#32;Software&#32;Foundation,&#32;Inc.</emphasis>
+4 <emphasis role="comment">//</emphasis>
+5 <emphasis role="comment">//&#32;This&#32;file&#32;is&#32;part&#32;of&#32;the&#32;GNU&#32;ISO&#32;C++&#32;Library.&#32;&#32;This&#32;library&#32;is&#32;free</emphasis>
+6 <emphasis role="comment">//&#32;software;&#32;you&#32;can&#32;redistribute&#32;it&#32;and/or&#32;modify&#32;it&#32;under&#32;the</emphasis>
+7 <emphasis role="comment">//&#32;terms&#32;of&#32;the&#32;GNU&#32;General&#32;Public&#32;License&#32;as&#32;published&#32;by&#32;the</emphasis>
+8 <emphasis role="comment">//&#32;Free&#32;Software&#32;Foundation;&#32;either&#32;version&#32;3,&#32;or&#32;(at&#32;your&#32;option)</emphasis>
+9 <emphasis role="comment">//&#32;any&#32;later&#32;version.</emphasis>
+10 
+11 <emphasis role="comment">//&#32;This&#32;library&#32;is&#32;distributed&#32;in&#32;the&#32;hope&#32;that&#32;it&#32;will&#32;be&#32;useful,</emphasis>
+12 <emphasis role="comment">//&#32;but&#32;WITHOUT&#32;ANY&#32;WARRANTY;&#32;without&#32;even&#32;the&#32;implied&#32;warranty&#32;of</emphasis>
+13 <emphasis role="comment">//&#32;MERCHANTABILITY&#32;or&#32;FITNESS&#32;FOR&#32;A&#32;PARTICULAR&#32;PURPOSE.&#32;&#32;See&#32;the</emphasis>
+14 <emphasis role="comment">//&#32;GNU&#32;General&#32;Public&#32;License&#32;for&#32;more&#32;details.</emphasis>
+15 
+16 <emphasis role="comment">//&#32;Under&#32;Section&#32;7&#32;of&#32;GPL&#32;version&#32;3,&#32;you&#32;are&#32;granted&#32;additional</emphasis>
+17 <emphasis role="comment">//&#32;permissions&#32;described&#32;in&#32;the&#32;GCC&#32;Runtime&#32;Library&#32;Exception,&#32;version</emphasis>
+18 <emphasis role="comment">//&#32;3.1,&#32;as&#32;published&#32;by&#32;the&#32;Free&#32;Software&#32;Foundation.</emphasis>
+19 
+20 <emphasis role="comment">//&#32;You&#32;should&#32;have&#32;received&#32;a&#32;copy&#32;of&#32;the&#32;GNU&#32;General&#32;Public&#32;License&#32;and</emphasis>
+21 <emphasis role="comment">//&#32;a&#32;copy&#32;of&#32;the&#32;GCC&#32;Runtime&#32;Library&#32;Exception&#32;along&#32;with&#32;this&#32;program;</emphasis>
+22 <emphasis role="comment">//&#32;see&#32;the&#32;files&#32;COPYING3&#32;and&#32;COPYING.RUNTIME&#32;respectively.&#32;&#32;If&#32;not,&#32;see</emphasis>
+23 <emphasis role="comment">//&#32;&lt;http://www.gnu.org/licenses/&gt;.</emphasis>
+24 
+30 <emphasis role="preprocessor">#ifndef&#32;_GLIBCXX_RANGES_BASE_H</emphasis>
+31 <emphasis role="preprocessor">#define&#32;_GLIBCXX_RANGES_BASE_H&#32;1</emphasis>
+32 
+33 <emphasis role="preprocessor">#pragma&#32;GCC&#32;system_header</emphasis>
+34 
+35 <emphasis role="preprocessor">#if&#32;__cplusplus&#32;&gt;&#32;201703L</emphasis>
+36 <emphasis role="preprocessor">#include&#32;&lt;bits/iterator_concepts.h&gt;</emphasis>
+37 <emphasis role="preprocessor">#include&#32;&lt;ext/numeric_traits.h&gt;</emphasis>
+38 <emphasis role="preprocessor">#include&#32;&lt;bits/max_size_type.h&gt;</emphasis>
+39 
+40 <emphasis role="preprocessor">#ifdef&#32;__cpp_lib_concepts</emphasis>
+41 <emphasis role="keyword">namespace&#32;</emphasis><link linkend="_namespacestd">std</link>&#32;<link linkend="__classes_2lib_2include_2c_09_09_2x86__64-w64-mingw32_2bits_2c_09_09config_8h_1a44377df0d3503f0b3d9ab316dd8ddf8b">_GLIBCXX_VISIBILITY</link>(default)
+42 {
+43 _GLIBCXX_BEGIN_NAMESPACE_VERSION
+44 <emphasis role="keyword">namespace&#32;</emphasis>ranges
+45 {
+46 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&gt;
+47 &#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keyword">constexpr</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>&#32;disable_sized_range&#32;=&#32;<emphasis role="keyword">false</emphasis>;
+48 
+49 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+50 &#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keyword">constexpr</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>&#32;enable_borrowed_range&#32;=&#32;<emphasis role="keyword">false</emphasis>;
+51 
+52 &#32;&#32;<emphasis role="keyword">namespace&#32;</emphasis>__detail
+53 &#32;&#32;{
+54 &#32;&#32;&#32;&#32;<emphasis role="keyword">constexpr</emphasis>&#32;__max_size_type
+55 &#32;&#32;&#32;&#32;__to_unsigned_like(__max_size_type&#32;__t)&#32;<emphasis role="keyword">noexcept</emphasis>
+56 &#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;__t;&#32;}
+57 
+58 &#32;&#32;&#32;&#32;<emphasis role="keyword">constexpr</emphasis>&#32;__max_size_type
+59 &#32;&#32;&#32;&#32;__to_unsigned_like(__max_diff_type&#32;__t)&#32;<emphasis role="keyword">noexcept</emphasis>
+60 &#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;__max_size_type(__t);&#32;}
+61 
+62 &#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keywordtype">int</emphasis>egral&#32;_Tp&gt;
+63 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">constexpr</emphasis>&#32;<emphasis role="keyword">auto</emphasis>
+64 &#32;&#32;&#32;&#32;&#32;&#32;__to_unsigned_like(_Tp&#32;__t)&#32;<emphasis role="keyword">noexcept</emphasis>
+65 &#32;&#32;&#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;<emphasis role="keyword">static_cast&lt;</emphasis>make_unsigned_t&lt;_Tp&gt;<emphasis role="keyword">&gt;</emphasis>(__t);&#32;}
+66 
+67 <emphasis role="preprocessor">#if&#32;defined&#32;__STRICT_ANSI__&#32;&amp;&amp;&#32;defined&#32;__SIZEOF_INT128__</emphasis>
+68 &#32;&#32;&#32;&#32;<emphasis role="keyword">constexpr</emphasis>&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;__int128
+69 &#32;&#32;&#32;&#32;__to_unsigned_like(__int128&#32;__t)&#32;<emphasis role="keyword">noexcept</emphasis>
+70 &#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;__t;&#32;}
+71 
+72 &#32;&#32;&#32;&#32;<emphasis role="keyword">constexpr</emphasis>&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;__int128
+73 &#32;&#32;&#32;&#32;__to_unsigned_like(<emphasis role="keywordtype">unsigned</emphasis>&#32;__int128&#32;__t)&#32;<emphasis role="keyword">noexcept</emphasis>
+74 &#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;__t;&#32;}
+75 <emphasis role="preprocessor">#endif</emphasis>
+76 
+77 &#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+78 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">using&#32;</emphasis>__make_unsigned_like_t
+79 &#32;&#32;&#32;&#32;=&#32;<emphasis role="keyword">decltype</emphasis>(__detail::__to_unsigned_like(std::declval&lt;_Tp&gt;()));
+80 
+81 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Part&#32;of&#32;the&#32;constraints&#32;of&#32;ranges::borrowed_range</emphasis>
+82 &#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+83 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">concept&#32;</emphasis>__maybe_borrowed_range
+84 &#32;&#32;&#32;&#32;=&#32;is_lvalue_reference_v&lt;_Tp&gt;
+85 &#32;&#32;&#32;&#32;&#32;&#32;||&#32;enable_borrowed_range&lt;remove_cvref_t&lt;_Tp&gt;&gt;;
+86 
+87 &#32;&#32;}&#32;<emphasis role="comment">//&#32;namespace&#32;__detail</emphasis>
+88 
+89 &#32;&#32;<emphasis role="keyword">namespace&#32;</emphasis>__cust_access
+90 &#32;&#32;{
+91 &#32;&#32;&#32;&#32;<emphasis role="keyword">using&#32;</emphasis>std::ranges::__detail::__maybe_borrowed_range;
+92 &#32;&#32;&#32;&#32;<emphasis role="keyword">using&#32;</emphasis>std::__detail::__range_iter_t;
+93 
+94 &#32;&#32;&#32;&#32;<emphasis role="keyword">struct&#32;</emphasis>_Begin
+95 &#32;&#32;&#32;&#32;{
+96 &#32;&#32;&#32;&#32;<emphasis role="keyword">private</emphasis>:
+97 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+98 &#32;&#32;&#32;&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keyword">constexpr</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>
+99 &#32;&#32;&#32;&#32;_S_noexcept()
+100 &#32;&#32;&#32;&#32;{
+101 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;<emphasis role="keyword">constexpr</emphasis>&#32;(is_array_v&lt;remove_reference_t&lt;_Tp&gt;&gt;)
+102 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<emphasis role="keyword">true</emphasis>;
+103 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>&#32;<emphasis role="keywordflow">if</emphasis>&#32;<emphasis role="keyword">constexpr</emphasis>&#32;(__member_begin&lt;_Tp&gt;)
+104 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<emphasis role="keyword">noexcept</emphasis>(__decay_copy(std::declval&lt;_Tp&amp;&gt;().begin()));
+105 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>
+106 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<emphasis role="keyword">noexcept</emphasis>(__decay_copy(<link linkend="_group__gtx__range_1gaa752bdfcbfda8d0593318c4bf8a7dc6e">begin</link>(std::declval&lt;_Tp&amp;&gt;())));
+107 &#32;&#32;&#32;&#32;}
+108 
+109 &#32;&#32;&#32;&#32;<emphasis role="keyword">public</emphasis>:
+110 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;__maybe_borrowed_range&#32;_Tp&gt;
+111 &#32;&#32;&#32;&#32;<emphasis role="keyword">requires</emphasis>&#32;is_array_v&lt;remove_reference_t&lt;_Tp&gt;&gt;&#32;||&#32;__member_begin&lt;_Tp&gt;
+112 &#32;&#32;&#32;&#32;&#32;&#32;||&#32;__adl_begin&lt;_Tp&gt;
+113 &#32;&#32;&#32;&#32;<emphasis role="keyword">constexpr</emphasis>&#32;<emphasis role="keyword">auto</emphasis>
+114 &#32;&#32;&#32;&#32;operator()[[nodiscard]](_Tp&amp;&amp;&#32;__t)&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keyword">noexcept</emphasis>(_S_noexcept&lt;_Tp&amp;&gt;())
+115 &#32;&#32;&#32;&#32;{
+116 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;<emphasis role="keyword">constexpr</emphasis>&#32;(is_array_v&lt;remove_reference_t&lt;_Tp&gt;&gt;)
+117 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+118 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">static_assert</emphasis>(is_lvalue_reference_v&lt;_Tp&gt;);
+119 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__t&#32;+&#32;0;
+120 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+121 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>&#32;<emphasis role="keywordflow">if</emphasis>&#32;<emphasis role="keyword">constexpr</emphasis>&#32;(__member_begin&lt;_Tp&gt;)
+122 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__t.begin();
+123 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>
+124 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="_group__gtx__range_1gaa752bdfcbfda8d0593318c4bf8a7dc6e">begin</link>(__t);
+125 &#32;&#32;&#32;&#32;}
+126 &#32;&#32;&#32;&#32;};
+127 
+128 &#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+129 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">concept&#32;</emphasis>__member_end&#32;=&#32;<emphasis role="keyword">requires</emphasis>(_Tp&amp;&#32;__t)
+130 &#32;&#32;&#32;&#32;{
+131 &#32;&#32;&#32;&#32;&#32;&#32;{&#32;__decay_copy(__t.end())&#32;}&#32;-&gt;&#32;sentinel_for&lt;__range_iter_t&lt;_Tp&gt;&gt;;
+132 &#32;&#32;&#32;&#32;};
+133 
+134 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Poison&#32;pills&#32;so&#32;that&#32;unqualified&#32;lookup&#32;doesn&apos;t&#32;find&#32;std::end.</emphasis>
+135 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a432111147038972f06e049e18a837002">end</link>(<emphasis role="keyword">auto</emphasis>&amp;)&#32;=&#32;<emphasis role="keyword">delete</emphasis>;
+136 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a432111147038972f06e049e18a837002">end</link>(<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keyword">auto</emphasis>&amp;)&#32;=&#32;<emphasis role="keyword">delete</emphasis>;
+137 
+138 &#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+139 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">concept&#32;</emphasis>__adl_end&#32;=&#32;__class_or_enum&lt;remove_reference_t&lt;_Tp&gt;&gt;
+140 &#32;&#32;&#32;&#32;&amp;&amp;&#32;<emphasis role="keyword">requires</emphasis>(_Tp&amp;&#32;__t)
+141 &#32;&#32;&#32;&#32;{
+142 &#32;&#32;&#32;&#32;&#32;&#32;{&#32;__decay_copy(<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a432111147038972f06e049e18a837002">end</link>(__t))&#32;}&#32;-&gt;&#32;sentinel_for&lt;__range_iter_t&lt;_Tp&gt;&gt;;
+143 &#32;&#32;&#32;&#32;};
+144 
+145 &#32;&#32;&#32;&#32;<emphasis role="keyword">struct&#32;</emphasis>_End
+146 &#32;&#32;&#32;&#32;{
+147 &#32;&#32;&#32;&#32;<emphasis role="keyword">private</emphasis>:
+148 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+149 &#32;&#32;&#32;&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keyword">constexpr</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>
+150 &#32;&#32;&#32;&#32;_S_noexcept()
+151 &#32;&#32;&#32;&#32;{
+152 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;<emphasis role="keyword">constexpr</emphasis>&#32;(is_bounded_array_v&lt;remove_reference_t&lt;_Tp&gt;&gt;)
+153 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<emphasis role="keyword">true</emphasis>;
+154 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>&#32;<emphasis role="keywordflow">if</emphasis>&#32;<emphasis role="keyword">constexpr</emphasis>&#32;(__member_end&lt;_Tp&gt;)
+155 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<emphasis role="keyword">noexcept</emphasis>(__decay_copy(std::declval&lt;_Tp&amp;&gt;().end()));
+156 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>
+157 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<emphasis role="keyword">noexcept</emphasis>(__decay_copy(<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a432111147038972f06e049e18a837002">end</link>(std::declval&lt;_Tp&amp;&gt;())));
+158 &#32;&#32;&#32;&#32;}
+159 
+160 &#32;&#32;&#32;&#32;<emphasis role="keyword">public</emphasis>:
+161 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;__maybe_borrowed_range&#32;_Tp&gt;
+162 &#32;&#32;&#32;&#32;<emphasis role="keyword">requires</emphasis>&#32;is_bounded_array_v&lt;remove_reference_t&lt;_Tp&gt;&gt;
+163 &#32;&#32;&#32;&#32;&#32;&#32;||&#32;__member_end&lt;_Tp&gt;&#32;||&#32;__adl_end&lt;_Tp&gt;
+164 &#32;&#32;&#32;&#32;<emphasis role="keyword">constexpr</emphasis>&#32;<emphasis role="keyword">auto</emphasis>
+165 &#32;&#32;&#32;&#32;operator()[[nodiscard]](_Tp&amp;&amp;&#32;__t)&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keyword">noexcept</emphasis>(_S_noexcept&lt;_Tp&amp;&gt;())
+166 &#32;&#32;&#32;&#32;{
+167 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;<emphasis role="keyword">constexpr</emphasis>&#32;(is_bounded_array_v&lt;remove_reference_t&lt;_Tp&gt;&gt;)
+168 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+169 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">static_assert</emphasis>(is_lvalue_reference_v&lt;_Tp&gt;);
+170 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__t&#32;+&#32;extent_v&lt;remove_reference_t&lt;_Tp&gt;&gt;;
+171 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+172 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>&#32;<emphasis role="keywordflow">if</emphasis>&#32;<emphasis role="keyword">constexpr</emphasis>&#32;(__member_end&lt;_Tp&gt;)
+173 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__t.end();
+174 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>
+175 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a432111147038972f06e049e18a837002">end</link>(__t);
+176 &#32;&#32;&#32;&#32;}
+177 &#32;&#32;&#32;&#32;};
+178 
+179 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;If&#32;_To&#32;is&#32;an&#32;lvalue-reference,&#32;return&#32;const&#32;_Tp&amp;,&#32;otherwise&#32;const&#32;_Tp&amp;&amp;.</emphasis>
+180 &#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_To,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+181 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">constexpr</emphasis>&#32;<emphasis role="keyword">decltype</emphasis>(<emphasis role="keyword">auto</emphasis>)
+182 &#32;&#32;&#32;&#32;&#32;&#32;__as_const(_Tp&amp;&#32;__t)&#32;<emphasis role="keyword">noexcept</emphasis>
+183 &#32;&#32;&#32;&#32;&#32;&#32;{
+184 &#32;&#32;&#32;&#32;<emphasis role="keyword">static_assert</emphasis>(std::is_same_v&lt;_To&amp;,&#32;_Tp&amp;&gt;);
+185 
+186 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;<emphasis role="keyword">constexpr</emphasis>&#32;(is_lvalue_reference_v&lt;_To&gt;)
+187 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<emphasis role="keyword">const_cast&lt;</emphasis><emphasis role="keyword">const&#32;</emphasis>_Tp&amp;<emphasis role="keyword">&gt;</emphasis>(__t);
+188 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>
+189 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<emphasis role="keyword">static_cast&lt;</emphasis><emphasis role="keyword">const&#32;</emphasis>_Tp&amp;&amp;<emphasis role="keyword">&gt;</emphasis>(__t);
+190 &#32;&#32;&#32;&#32;&#32;&#32;}
+191 
+192 &#32;&#32;&#32;&#32;<emphasis role="keyword">struct&#32;</emphasis>_CBegin
+193 &#32;&#32;&#32;&#32;{
+194 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+195 &#32;&#32;&#32;&#32;[[nodiscard]]
+196 &#32;&#32;&#32;&#32;<emphasis role="keyword">constexpr</emphasis>&#32;<emphasis role="keyword">auto</emphasis>
+197 &#32;&#32;&#32;&#32;operator()(_Tp&amp;&amp;&#32;__e)&#32;<emphasis role="keyword">const</emphasis>
+198 &#32;&#32;&#32;&#32;<emphasis role="keyword">noexcept</emphasis>(<emphasis role="keyword">noexcept</emphasis>(_Begin{}(__cust_access::__as_const&lt;_Tp&gt;(__e))))
+199 &#32;&#32;&#32;&#32;<emphasis role="keyword">requires</emphasis>&#32;<emphasis role="keyword">requires</emphasis>&#32;{&#32;_Begin{}(__cust_access::__as_const&lt;_Tp&gt;(__e));&#32;}
+200 &#32;&#32;&#32;&#32;{
+201 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;_Begin{}(__cust_access::__as_const&lt;_Tp&gt;(__e));
+202 &#32;&#32;&#32;&#32;}
+203 &#32;&#32;&#32;&#32;};
+204 
+205 &#32;&#32;&#32;&#32;<emphasis role="keyword">struct&#32;</emphasis>_CEnd&#32;final
+206 &#32;&#32;&#32;&#32;{
+207 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+208 &#32;&#32;&#32;&#32;[[nodiscard]]
+209 &#32;&#32;&#32;&#32;<emphasis role="keyword">constexpr</emphasis>&#32;<emphasis role="keyword">auto</emphasis>
+210 &#32;&#32;&#32;&#32;operator()(_Tp&amp;&amp;&#32;__e)&#32;<emphasis role="keyword">const</emphasis>
+211 &#32;&#32;&#32;&#32;<emphasis role="keyword">noexcept</emphasis>(<emphasis role="keyword">noexcept</emphasis>(_End{}(__cust_access::__as_const&lt;_Tp&gt;(__e))))
+212 &#32;&#32;&#32;&#32;<emphasis role="keyword">requires</emphasis>&#32;<emphasis role="keyword">requires</emphasis>&#32;{&#32;_End{}(__cust_access::__as_const&lt;_Tp&gt;(__e));&#32;}
+213 &#32;&#32;&#32;&#32;{
+214 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;_End{}(__cust_access::__as_const&lt;_Tp&gt;(__e));
+215 &#32;&#32;&#32;&#32;}
+216 &#32;&#32;&#32;&#32;};
+217 
+218 &#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+219 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">concept&#32;</emphasis>__member_rbegin&#32;=&#32;<emphasis role="keyword">requires</emphasis>(_Tp&amp;&#32;__t)
+220 &#32;&#32;&#32;&#32;{
+221 &#32;&#32;&#32;&#32;&#32;&#32;{&#32;__decay_copy(__t.rbegin())&#32;}&#32;-&gt;&#32;input_or_output_iterator;
+222 &#32;&#32;&#32;&#32;};
+223 
+224 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>&#32;rbegin(<emphasis role="keyword">auto</emphasis>&amp;)&#32;=&#32;<emphasis role="keyword">delete</emphasis>;
+225 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>&#32;rbegin(<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keyword">auto</emphasis>&amp;)&#32;=&#32;<emphasis role="keyword">delete</emphasis>;
+226 
+227 &#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+228 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">concept&#32;</emphasis>__adl_rbegin&#32;=&#32;__class_or_enum&lt;remove_reference_t&lt;_Tp&gt;&gt;
+229 &#32;&#32;&#32;&#32;&amp;&amp;&#32;<emphasis role="keyword">requires</emphasis>(_Tp&amp;&#32;__t)
+230 &#32;&#32;&#32;&#32;{
+231 &#32;&#32;&#32;&#32;&#32;&#32;{&#32;__decay_copy(rbegin(__t))&#32;}&#32;-&gt;&#32;input_or_output_iterator;
+232 &#32;&#32;&#32;&#32;};
+233 
+234 &#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+235 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">concept&#32;</emphasis>__reversable&#32;=&#32;<emphasis role="keyword">requires</emphasis>(_Tp&amp;&#32;__t)
+236 &#32;&#32;&#32;&#32;{
+237 &#32;&#32;&#32;&#32;&#32;&#32;{&#32;_Begin{}(__t)&#32;}&#32;-&gt;&#32;bidirectional_iterator;
+238 &#32;&#32;&#32;&#32;&#32;&#32;{&#32;_End{}(__t)&#32;}&#32;-&gt;&#32;same_as&lt;<emphasis role="keyword">decltype</emphasis>(_Begin{}(__t))&gt;;
+239 &#32;&#32;&#32;&#32;};
+240 
+241 &#32;&#32;&#32;&#32;<emphasis role="keyword">struct&#32;</emphasis>_RBegin
+242 &#32;&#32;&#32;&#32;{
+243 &#32;&#32;&#32;&#32;<emphasis role="keyword">private</emphasis>:
+244 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+245 &#32;&#32;&#32;&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keyword">constexpr</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>
+246 &#32;&#32;&#32;&#32;_S_noexcept()
+247 &#32;&#32;&#32;&#32;{
+248 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;<emphasis role="keyword">constexpr</emphasis>&#32;(__member_rbegin&lt;_Tp&gt;)
+249 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<emphasis role="keyword">noexcept</emphasis>(__decay_copy(std::declval&lt;_Tp&amp;&gt;().rbegin()));
+250 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>&#32;<emphasis role="keywordflow">if</emphasis>&#32;<emphasis role="keyword">constexpr</emphasis>&#32;(__adl_rbegin&lt;_Tp&gt;)
+251 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<emphasis role="keyword">noexcept</emphasis>(__decay_copy(rbegin(std::declval&lt;_Tp&amp;&gt;())));
+252 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>
+253 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+254 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;<emphasis role="keyword">constexpr</emphasis>&#32;(<emphasis role="keyword">noexcept</emphasis>(_End{}(std::declval&lt;_Tp&amp;&gt;())))
+255 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+256 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">using&#32;</emphasis>_It&#32;=&#32;<emphasis role="keyword">decltype</emphasis>(_End{}(std::declval&lt;_Tp&amp;&gt;()));
+257 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;std::reverse_iterator&#32;copy-initializes&#32;its&#32;member.</emphasis>
+258 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;is_nothrow_copy_constructible_v&lt;_It&gt;;
+259 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+260 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>
+261 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<emphasis role="keyword">false</emphasis>;
+262 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+263 &#32;&#32;&#32;&#32;}
+264 
+265 &#32;&#32;&#32;&#32;<emphasis role="keyword">public</emphasis>:
+266 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;__maybe_borrowed_range&#32;_Tp&gt;
+267 &#32;&#32;&#32;&#32;<emphasis role="keyword">requires</emphasis>&#32;__member_rbegin&lt;_Tp&gt;&#32;||&#32;__adl_rbegin&lt;_Tp&gt;&#32;||&#32;__reversable&lt;_Tp&gt;
+268 &#32;&#32;&#32;&#32;<emphasis role="keyword">constexpr</emphasis>&#32;<emphasis role="keyword">auto</emphasis>
+269 &#32;&#32;&#32;&#32;operator()[[nodiscard]](_Tp&amp;&amp;&#32;__t)&#32;<emphasis role="keyword">const</emphasis>
+270 &#32;&#32;&#32;&#32;<emphasis role="keyword">noexcept</emphasis>(_S_noexcept&lt;_Tp&amp;&gt;())
+271 &#32;&#32;&#32;&#32;{
+272 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;<emphasis role="keyword">constexpr</emphasis>&#32;(__member_rbegin&lt;_Tp&gt;)
+273 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__t.rbegin();
+274 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>&#32;<emphasis role="keywordflow">if</emphasis>&#32;<emphasis role="keyword">constexpr</emphasis>&#32;(__adl_rbegin&lt;_Tp&gt;)
+275 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;rbegin(__t);
+276 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>
+277 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;std::make_reverse_iterator(_End{}(__t));
+278 &#32;&#32;&#32;&#32;}
+279 &#32;&#32;&#32;&#32;};
+280 
+281 &#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+282 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">concept&#32;</emphasis>__member_rend&#32;=&#32;<emphasis role="keyword">requires</emphasis>(_Tp&amp;&#32;__t)
+283 &#32;&#32;&#32;&#32;{
+284 &#32;&#32;&#32;&#32;&#32;&#32;{&#32;__decay_copy(__t.rend())&#32;}
+285 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;-&gt;&#32;sentinel_for&lt;<emphasis role="keyword">decltype</emphasis>(_RBegin{}(std::forward&lt;_Tp&gt;(__t)))&gt;;
+286 &#32;&#32;&#32;&#32;};
+287 
+288 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>&#32;rend(<emphasis role="keyword">auto</emphasis>&amp;)&#32;=&#32;<emphasis role="keyword">delete</emphasis>;
+289 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>&#32;rend(<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keyword">auto</emphasis>&amp;)&#32;=&#32;<emphasis role="keyword">delete</emphasis>;
+290 
+291 &#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+292 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">concept&#32;</emphasis>__adl_rend&#32;=&#32;__class_or_enum&lt;remove_reference_t&lt;_Tp&gt;&gt;
+293 &#32;&#32;&#32;&#32;&amp;&amp;&#32;<emphasis role="keyword">requires</emphasis>(_Tp&amp;&#32;__t)
+294 &#32;&#32;&#32;&#32;{
+295 &#32;&#32;&#32;&#32;&#32;&#32;{&#32;__decay_copy(rend(__t))&#32;}
+296 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;-&gt;&#32;sentinel_for&lt;<emphasis role="keyword">decltype</emphasis>(_RBegin{}(std::forward&lt;_Tp&gt;(__t)))&gt;;
+297 &#32;&#32;&#32;&#32;};
+298 
+299 &#32;&#32;&#32;&#32;<emphasis role="keyword">struct&#32;</emphasis>_REnd
+300 &#32;&#32;&#32;&#32;{
+301 &#32;&#32;&#32;&#32;<emphasis role="keyword">private</emphasis>:
+302 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+303 &#32;&#32;&#32;&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keyword">constexpr</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>
+304 &#32;&#32;&#32;&#32;_S_noexcept()
+305 &#32;&#32;&#32;&#32;{
+306 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;<emphasis role="keyword">constexpr</emphasis>&#32;(__member_rend&lt;_Tp&gt;)
+307 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<emphasis role="keyword">noexcept</emphasis>(__decay_copy(std::declval&lt;_Tp&amp;&gt;().rend()));
+308 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>&#32;<emphasis role="keywordflow">if</emphasis>&#32;<emphasis role="keyword">constexpr</emphasis>&#32;(__adl_rend&lt;_Tp&gt;)
+309 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<emphasis role="keyword">noexcept</emphasis>(__decay_copy(rend(std::declval&lt;_Tp&amp;&gt;())));
+310 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>
+311 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+312 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;<emphasis role="keyword">constexpr</emphasis>&#32;(<emphasis role="keyword">noexcept</emphasis>(_Begin{}(std::declval&lt;_Tp&amp;&gt;())))
+313 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+314 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">using&#32;</emphasis>_It&#32;=&#32;<emphasis role="keyword">decltype</emphasis>(_Begin{}(std::declval&lt;_Tp&amp;&gt;()));
+315 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;std::reverse_iterator&#32;copy-initializes&#32;its&#32;member.</emphasis>
+316 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;is_nothrow_copy_constructible_v&lt;_It&gt;;
+317 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+318 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>
+319 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<emphasis role="keyword">false</emphasis>;
+320 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+321 &#32;&#32;&#32;&#32;}
+322 
+323 &#32;&#32;&#32;&#32;<emphasis role="keyword">public</emphasis>:
+324 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;__maybe_borrowed_range&#32;_Tp&gt;
+325 &#32;&#32;&#32;&#32;<emphasis role="keyword">requires</emphasis>&#32;__member_rend&lt;_Tp&gt;&#32;||&#32;__adl_rend&lt;_Tp&gt;&#32;||&#32;__reversable&lt;_Tp&gt;
+326 &#32;&#32;&#32;&#32;<emphasis role="keyword">constexpr</emphasis>&#32;<emphasis role="keyword">auto</emphasis>
+327 &#32;&#32;&#32;&#32;operator()[[nodiscard]](_Tp&amp;&amp;&#32;__t)&#32;<emphasis role="keyword">const</emphasis>
+328 &#32;&#32;&#32;&#32;<emphasis role="keyword">noexcept</emphasis>(_S_noexcept&lt;_Tp&amp;&gt;())
+329 &#32;&#32;&#32;&#32;{
+330 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;<emphasis role="keyword">constexpr</emphasis>&#32;(__member_rend&lt;_Tp&gt;)
+331 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__t.rend();
+332 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>&#32;<emphasis role="keywordflow">if</emphasis>&#32;<emphasis role="keyword">constexpr</emphasis>&#32;(__adl_rend&lt;_Tp&gt;)
+333 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;rend(__t);
+334 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>
+335 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;std::make_reverse_iterator(_Begin{}(__t));
+336 &#32;&#32;&#32;&#32;}
+337 &#32;&#32;&#32;&#32;};
+338 
+339 &#32;&#32;&#32;&#32;<emphasis role="keyword">struct&#32;</emphasis>_CRBegin
+340 &#32;&#32;&#32;&#32;{
+341 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+342 &#32;&#32;&#32;&#32;[[nodiscard]]
+343 &#32;&#32;&#32;&#32;<emphasis role="keyword">constexpr</emphasis>&#32;<emphasis role="keyword">auto</emphasis>
+344 &#32;&#32;&#32;&#32;operator()(_Tp&amp;&amp;&#32;__e)&#32;<emphasis role="keyword">const</emphasis>
+345 &#32;&#32;&#32;&#32;<emphasis role="keyword">noexcept</emphasis>(<emphasis role="keyword">noexcept</emphasis>(_RBegin{}(__cust_access::__as_const&lt;_Tp&gt;(__e))))
+346 &#32;&#32;&#32;&#32;<emphasis role="keyword">requires</emphasis>&#32;<emphasis role="keyword">requires</emphasis>&#32;{&#32;_RBegin{}(__cust_access::__as_const&lt;_Tp&gt;(__e));&#32;}
+347 &#32;&#32;&#32;&#32;{
+348 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;_RBegin{}(__cust_access::__as_const&lt;_Tp&gt;(__e));
+349 &#32;&#32;&#32;&#32;}
+350 &#32;&#32;&#32;&#32;};
+351 
+352 &#32;&#32;&#32;&#32;<emphasis role="keyword">struct&#32;</emphasis>_CREnd
+353 &#32;&#32;&#32;&#32;{
+354 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+355 &#32;&#32;&#32;&#32;[[nodiscard]]
+356 &#32;&#32;&#32;&#32;<emphasis role="keyword">constexpr</emphasis>&#32;<emphasis role="keyword">auto</emphasis>
+357 &#32;&#32;&#32;&#32;operator()(_Tp&amp;&amp;&#32;__e)&#32;<emphasis role="keyword">const</emphasis>
+358 &#32;&#32;&#32;&#32;<emphasis role="keyword">noexcept</emphasis>(<emphasis role="keyword">noexcept</emphasis>(_REnd{}(__cust_access::__as_const&lt;_Tp&gt;(__e))))
+359 &#32;&#32;&#32;&#32;<emphasis role="keyword">requires</emphasis>&#32;<emphasis role="keyword">requires</emphasis>&#32;{&#32;_REnd{}(__cust_access::__as_const&lt;_Tp&gt;(__e));&#32;}
+360 &#32;&#32;&#32;&#32;{
+361 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;_REnd{}(__cust_access::__as_const&lt;_Tp&gt;(__e));
+362 &#32;&#32;&#32;&#32;}
+363 &#32;&#32;&#32;&#32;};
+364 
+365 &#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+366 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">concept&#32;</emphasis>__member_size&#32;=&#32;!disable_sized_range&lt;remove_cvref_t&lt;_Tp&gt;&gt;
+367 &#32;&#32;&#32;&#32;&amp;&amp;&#32;<emphasis role="keyword">requires</emphasis>(_Tp&amp;&#32;__t)
+368 &#32;&#32;&#32;&#32;{
+369 &#32;&#32;&#32;&#32;&#32;&#32;{&#32;__decay_copy(__t.size())&#32;}&#32;-&gt;&#32;__detail::__is_integer_like;
+370 &#32;&#32;&#32;&#32;};
+371 
+372 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a3d1e3edfcf61ca2d831883e1afbad89e">size</link>(<emphasis role="keyword">auto</emphasis>&amp;)&#32;=&#32;<emphasis role="keyword">delete</emphasis>;
+373 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a3d1e3edfcf61ca2d831883e1afbad89e">size</link>(<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keyword">auto</emphasis>&amp;)&#32;=&#32;<emphasis role="keyword">delete</emphasis>;
+374 
+375 &#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+376 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">concept&#32;</emphasis>__adl_size&#32;=&#32;__class_or_enum&lt;remove_reference_t&lt;_Tp&gt;&gt;
+377 &#32;&#32;&#32;&#32;&amp;&amp;&#32;!disable_sized_range&lt;remove_cvref_t&lt;_Tp&gt;&gt;
+378 &#32;&#32;&#32;&#32;&amp;&amp;&#32;<emphasis role="keyword">requires</emphasis>(_Tp&amp;&#32;__t)
+379 &#32;&#32;&#32;&#32;{
+380 &#32;&#32;&#32;&#32;&#32;&#32;{&#32;__decay_copy(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a3d1e3edfcf61ca2d831883e1afbad89e">size</link>(__t))&#32;}&#32;-&gt;&#32;__detail::__is_integer_like;
+381 &#32;&#32;&#32;&#32;};
+382 
+383 &#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+384 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">concept&#32;</emphasis>__sentinel_size&#32;=&#32;<emphasis role="keyword">requires</emphasis>(_Tp&amp;&#32;__t)
+385 &#32;&#32;&#32;&#32;{
+386 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">requires</emphasis>&#32;(!is_unbounded_array_v&lt;remove_reference_t&lt;_Tp&gt;&gt;);
+387 
+388 &#32;&#32;&#32;&#32;&#32;&#32;{&#32;_Begin{}(__t)&#32;}&#32;-&gt;&#32;forward_iterator;
+389 
+390 &#32;&#32;&#32;&#32;&#32;&#32;{&#32;_End{}(__t)&#32;}&#32;-&gt;&#32;sized_sentinel_for&lt;<emphasis role="keyword">decltype</emphasis>(_Begin{}(__t))&gt;;
+391 
+392 &#32;&#32;&#32;&#32;&#32;&#32;__detail::__to_unsigned_like(_End{}(__t)&#32;-&#32;_Begin{}(__t));
+393 &#32;&#32;&#32;&#32;};
+394 
+395 &#32;&#32;&#32;&#32;<emphasis role="keyword">struct&#32;</emphasis>_Size
+396 &#32;&#32;&#32;&#32;{
+397 &#32;&#32;&#32;&#32;<emphasis role="keyword">private</emphasis>:
+398 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+399 &#32;&#32;&#32;&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keyword">constexpr</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>
+400 &#32;&#32;&#32;&#32;_S_noexcept()
+401 &#32;&#32;&#32;&#32;{
+402 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;<emphasis role="keyword">constexpr</emphasis>&#32;(is_bounded_array_v&lt;remove_reference_t&lt;_Tp&gt;&gt;)
+403 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<emphasis role="keyword">true</emphasis>;
+404 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>&#32;<emphasis role="keywordflow">if</emphasis>&#32;<emphasis role="keyword">constexpr</emphasis>&#32;(__member_size&lt;_Tp&gt;)
+405 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<emphasis role="keyword">noexcept</emphasis>(__decay_copy(std::declval&lt;_Tp&amp;&gt;().size()));
+406 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>&#32;<emphasis role="keywordflow">if</emphasis>&#32;<emphasis role="keyword">constexpr</emphasis>&#32;(__adl_size&lt;_Tp&gt;)
+407 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<emphasis role="keyword">noexcept</emphasis>(__decay_copy(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a3d1e3edfcf61ca2d831883e1afbad89e">size</link>(std::declval&lt;_Tp&amp;&gt;())));
+408 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>&#32;<emphasis role="keywordflow">if</emphasis>&#32;<emphasis role="keyword">constexpr</emphasis>&#32;(__sentinel_size&lt;_Tp&gt;)
+409 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<emphasis role="keyword">noexcept</emphasis>(_End{}(std::declval&lt;_Tp&amp;&gt;())
+410 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;-&#32;_Begin{}(std::declval&lt;_Tp&amp;&gt;()));
+411 &#32;&#32;&#32;&#32;}
+412 
+413 &#32;&#32;&#32;&#32;<emphasis role="keyword">public</emphasis>:
+414 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+415 &#32;&#32;&#32;&#32;<emphasis role="keyword">requires</emphasis>&#32;is_bounded_array_v&lt;remove_reference_t&lt;_Tp&gt;&gt;
+416 &#32;&#32;&#32;&#32;&#32;&#32;||&#32;__member_size&lt;_Tp&gt;&#32;||&#32;__adl_size&lt;_Tp&gt;&#32;||&#32;__sentinel_size&lt;_Tp&gt;
+417 &#32;&#32;&#32;&#32;<emphasis role="keyword">constexpr</emphasis>&#32;<emphasis role="keyword">auto</emphasis>
+418 &#32;&#32;&#32;&#32;operator()[[nodiscard]](_Tp&amp;&amp;&#32;__t)&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keyword">noexcept</emphasis>(_S_noexcept&lt;_Tp&amp;&gt;())
+419 &#32;&#32;&#32;&#32;{
+420 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;<emphasis role="keyword">constexpr</emphasis>&#32;(is_bounded_array_v&lt;remove_reference_t&lt;_Tp&gt;&gt;)
+421 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;extent_v&lt;remove_reference_t&lt;_Tp&gt;&gt;;
+422 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>&#32;<emphasis role="keywordflow">if</emphasis>&#32;<emphasis role="keyword">constexpr</emphasis>&#32;(__member_size&lt;_Tp&gt;)
+423 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__t.size();
+424 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>&#32;<emphasis role="keywordflow">if</emphasis>&#32;<emphasis role="keyword">constexpr</emphasis>&#32;(__adl_size&lt;_Tp&gt;)
+425 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a3d1e3edfcf61ca2d831883e1afbad89e">size</link>(__t);
+426 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>&#32;<emphasis role="keywordflow">if</emphasis>&#32;<emphasis role="keyword">constexpr</emphasis>&#32;(__sentinel_size&lt;_Tp&gt;)
+427 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__detail::__to_unsigned_like(_End{}(__t)&#32;-&#32;_Begin{}(__t));
+428 &#32;&#32;&#32;&#32;}
+429 &#32;&#32;&#32;&#32;};
+430 
+431 &#32;&#32;&#32;&#32;<emphasis role="keyword">struct&#32;</emphasis>_SSize
+432 &#32;&#32;&#32;&#32;{
+433 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;_GLIBCXX_RESOLVE_LIB_DEFECTS</emphasis>
+434 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;3403.&#32;Domain&#32;of&#32;ranges::ssize(E)&#32;doesn&apos;t&#32;match&#32;ranges::size(E)</emphasis>
+435 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+436 &#32;&#32;&#32;&#32;<emphasis role="keyword">requires</emphasis>&#32;<emphasis role="keyword">requires</emphasis>&#32;(_Tp&amp;&#32;__t)&#32;{&#32;_Size{}(__t);&#32;}
+437 &#32;&#32;&#32;&#32;<emphasis role="keyword">constexpr</emphasis>&#32;<emphasis role="keyword">auto</emphasis>
+438 &#32;&#32;&#32;&#32;operator()[[nodiscard]](_Tp&amp;&amp;&#32;__t)&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keyword">noexcept</emphasis>(<emphasis role="keyword">noexcept</emphasis>(_Size{}(__t)))
+439 &#32;&#32;&#32;&#32;{
+440 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">auto</emphasis>&#32;__size&#32;=&#32;_Size{}(__t);
+441 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">using&#32;</emphasis>__size_type&#32;=&#32;<emphasis role="keyword">decltype</emphasis>(__size);
+442 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Return&#32;the&#32;wider&#32;of&#32;ptrdiff_t&#32;and&#32;make-signed-like-t&lt;__size_type&gt;.</emphasis>
+443 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;<emphasis role="keyword">constexpr</emphasis>&#32;(integral&lt;__size_type&gt;)
+444 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+445 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">using&#32;</emphasis>__gnu_cxx::__int_traits;
+446 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;<emphasis role="keyword">constexpr</emphasis>&#32;(__int_traits&lt;__size_type&gt;::__digits
+447 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&lt;&#32;__int_traits&lt;ptrdiff_t&gt;::__digits)
+448 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<emphasis role="keyword">static_cast&lt;</emphasis><link linkend="__classes_2lib_2include_2stddef_8h_1a6d26a0475a6d6c897e655cdc5d8019d2">ptrdiff_t</link><emphasis role="keyword">&gt;</emphasis>(__size);
+449 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>
+450 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<emphasis role="keyword">static_cast&lt;</emphasis>make_signed_t&lt;__size_type&gt;<emphasis role="keyword">&gt;</emphasis>(__size);
+451 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+452 <emphasis role="preprocessor">#if&#32;defined&#32;__STRICT_ANSI__&#32;&amp;&amp;&#32;defined&#32;__SIZEOF_INT128__</emphasis>
+453 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;For&#32;strict-ansi&#32;modes&#32;integral&lt;__int128&gt;&#32;is&#32;false</emphasis>
+454 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>&#32;<emphasis role="keywordflow">if</emphasis>&#32;<emphasis role="keyword">constexpr</emphasis>&#32;(__detail::__is_int128&lt;__size_type&gt;)
+455 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<emphasis role="keyword">static_cast&lt;</emphasis>__int128<emphasis role="keyword">&gt;</emphasis>(__size);
+456 <emphasis role="preprocessor">#endif</emphasis>
+457 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>&#32;<emphasis role="comment">//&#32;Must&#32;be&#32;one&#32;of&#32;__max_diff_type&#32;or&#32;__max_size_type.</emphasis>
+458 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__detail::__max_diff_type(__size);
+459 &#32;&#32;&#32;&#32;}
+460 &#32;&#32;&#32;&#32;};
+461 
+462 &#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+463 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">concept&#32;</emphasis>__member_empty&#32;=&#32;<emphasis role="keyword">requires</emphasis>(_Tp&amp;&#32;__t)&#32;{&#32;<link linkend="__classes_2lib_2include_2stdbool_8h_1abb452686968e48b67397da5f97445f5b">bool</link>(__t.empty());&#32;};
+464 
+465 &#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+466 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">concept&#32;</emphasis>__size0_empty&#32;=&#32;<emphasis role="keyword">requires</emphasis>(_Tp&amp;&#32;__t)&#32;{&#32;_Size{}(__t)&#32;==&#32;0;&#32;};
+467 
+468 &#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+469 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">concept&#32;</emphasis>__eq_iter_empty&#32;=&#32;<emphasis role="keyword">requires</emphasis>(_Tp&amp;&#32;__t)
+470 &#32;&#32;&#32;&#32;{
+471 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">requires</emphasis>&#32;(!is_unbounded_array_v&lt;remove_reference_t&lt;_Tp&gt;&gt;);
+472 
+473 &#32;&#32;&#32;&#32;&#32;&#32;{&#32;_Begin{}(__t)&#32;}&#32;-&gt;&#32;forward_iterator;
+474 
+475 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2stdbool_8h_1abb452686968e48b67397da5f97445f5b">bool</link>(_Begin{}(__t)&#32;==&#32;_End{}(__t));
+476 &#32;&#32;&#32;&#32;};
+477 
+478 &#32;&#32;&#32;&#32;<emphasis role="keyword">struct&#32;</emphasis>_Empty
+479 &#32;&#32;&#32;&#32;{
+480 &#32;&#32;&#32;&#32;<emphasis role="keyword">private</emphasis>:
+481 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+482 &#32;&#32;&#32;&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keyword">constexpr</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>
+483 &#32;&#32;&#32;&#32;_S_noexcept()
+484 &#32;&#32;&#32;&#32;{
+485 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;<emphasis role="keyword">constexpr</emphasis>&#32;(__member_empty&lt;_Tp&gt;)
+486 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<emphasis role="keyword">noexcept</emphasis>(<emphasis role="keywordtype">bool</emphasis>(std::declval&lt;_Tp&amp;&gt;().empty()));
+487 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>&#32;<emphasis role="keywordflow">if</emphasis>&#32;<emphasis role="keyword">constexpr</emphasis>&#32;(__size0_empty&lt;_Tp&gt;)
+488 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<emphasis role="keyword">noexcept</emphasis>(_Size{}(std::declval&lt;_Tp&amp;&gt;())&#32;==&#32;0);
+489 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>
+490 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<emphasis role="keyword">noexcept</emphasis>(<link linkend="__classes_2lib_2include_2stdbool_8h_1abb452686968e48b67397da5f97445f5b">bool</link>(_Begin{}(std::declval&lt;_Tp&amp;&gt;())
+491 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;==&#32;_End{}(std::declval&lt;_Tp&amp;&gt;())));
+492 &#32;&#32;&#32;&#32;}
+493 
+494 &#32;&#32;&#32;&#32;<emphasis role="keyword">public</emphasis>:
+495 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+496 &#32;&#32;&#32;&#32;<emphasis role="keyword">requires</emphasis>&#32;__member_empty&lt;_Tp&gt;&#32;||&#32;__size0_empty&lt;_Tp&gt;
+497 &#32;&#32;&#32;&#32;&#32;&#32;||&#32;__eq_iter_empty&lt;_Tp&gt;
+498 &#32;&#32;&#32;&#32;<emphasis role="keyword">constexpr</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>
+499 &#32;&#32;&#32;&#32;operator()[[nodiscard]](_Tp&amp;&amp;&#32;__t)&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keyword">noexcept</emphasis>(_S_noexcept&lt;_Tp&amp;&gt;())
+500 &#32;&#32;&#32;&#32;{
+501 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;<emphasis role="keyword">constexpr</emphasis>&#32;(__member_empty&lt;_Tp&gt;)
+502 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>(__t.empty());
+503 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>&#32;<emphasis role="keywordflow">if</emphasis>&#32;<emphasis role="keyword">constexpr</emphasis>&#32;(__size0_empty&lt;_Tp&gt;)
+504 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;_Size{}(__t)&#32;==&#32;0;
+505 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>
+506 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="__classes_2lib_2include_2stdbool_8h_1abb452686968e48b67397da5f97445f5b">bool</link>(_Begin{}(__t)&#32;==&#32;_End{}(__t));
+507 &#32;&#32;&#32;&#32;}
+508 &#32;&#32;&#32;&#32;};
+509 
+510 &#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+511 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">concept&#32;</emphasis>__pointer_to_object&#32;=&#32;is_pointer_v&lt;_Tp&gt;
+512 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&amp;&amp;&#32;is_object_v&lt;remove_pointer_t&lt;_Tp&gt;&gt;;
+513 
+514 &#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+515 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">concept&#32;</emphasis>__member_data&#32;=&#32;<emphasis role="keyword">requires</emphasis>(_Tp&amp;&#32;__t)
+516 &#32;&#32;&#32;&#32;{
+517 &#32;&#32;&#32;&#32;&#32;&#32;{&#32;__decay_copy(__t.data())&#32;}&#32;-&gt;&#32;__pointer_to_object;
+518 &#32;&#32;&#32;&#32;};
+519 
+520 &#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+521 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">concept&#32;</emphasis>__begin_data&#32;=&#32;contiguous_iterator&lt;__range_iter_t&lt;_Tp&gt;&gt;;
+522 
+523 &#32;&#32;&#32;&#32;<emphasis role="keyword">struct&#32;</emphasis>_Data
+524 &#32;&#32;&#32;&#32;{
+525 &#32;&#32;&#32;&#32;<emphasis role="keyword">private</emphasis>:
+526 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+527 &#32;&#32;&#32;&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keyword">constexpr</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>
+528 &#32;&#32;&#32;&#32;_S_noexcept()
+529 &#32;&#32;&#32;&#32;{
+530 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;<emphasis role="keyword">constexpr</emphasis>&#32;(__member_data&lt;_Tp&gt;)
+531 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<emphasis role="keyword">noexcept</emphasis>(__decay_copy(std::declval&lt;_Tp&amp;&gt;().<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a89ce72163394e6aef63b551a8806e93f">data</link>()));
+532 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>
+533 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<emphasis role="keyword">noexcept</emphasis>(_Begin{}(std::declval&lt;_Tp&amp;&gt;()));
+534 &#32;&#32;&#32;&#32;}
+535 
+536 &#32;&#32;&#32;&#32;<emphasis role="keyword">public</emphasis>:
+537 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;__maybe_borrowed_range&#32;_Tp&gt;
+538 &#32;&#32;&#32;&#32;<emphasis role="keyword">requires</emphasis>&#32;__member_data&lt;_Tp&gt;&#32;||&#32;__begin_data&lt;_Tp&gt;
+539 &#32;&#32;&#32;&#32;<emphasis role="keyword">constexpr</emphasis>&#32;<emphasis role="keyword">auto</emphasis>
+540 &#32;&#32;&#32;&#32;operator()[[nodiscard]](_Tp&amp;&amp;&#32;__t)&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keyword">noexcept</emphasis>(_S_noexcept&lt;_Tp&gt;())
+541 &#32;&#32;&#32;&#32;{
+542 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;<emphasis role="keyword">constexpr</emphasis>&#32;(__member_data&lt;_Tp&gt;)
+543 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__t.data();
+544 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>
+545 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;std::to_address(_Begin{}(__t));
+546 &#32;&#32;&#32;&#32;}
+547 &#32;&#32;&#32;&#32;};
+548 
+549 &#32;&#32;&#32;&#32;<emphasis role="keyword">struct&#32;</emphasis>_CData
+550 &#32;&#32;&#32;&#32;{
+551 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+552 &#32;&#32;&#32;&#32;[[nodiscard]]
+553 &#32;&#32;&#32;&#32;<emphasis role="keyword">constexpr</emphasis>&#32;<emphasis role="keyword">auto</emphasis>
+554 &#32;&#32;&#32;&#32;operator()(_Tp&amp;&amp;&#32;__e)&#32;<emphasis role="keyword">const</emphasis>
+555 &#32;&#32;&#32;&#32;<emphasis role="keyword">noexcept</emphasis>(<emphasis role="keyword">noexcept</emphasis>(_Data{}(__cust_access::__as_const&lt;_Tp&gt;(__e))))
+556 &#32;&#32;&#32;&#32;<emphasis role="keyword">requires</emphasis>&#32;<emphasis role="keyword">requires</emphasis>&#32;{&#32;_Data{}(__cust_access::__as_const&lt;_Tp&gt;(__e));&#32;}
+557 &#32;&#32;&#32;&#32;{
+558 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;_Data{}(__cust_access::__as_const&lt;_Tp&gt;(__e));
+559 &#32;&#32;&#32;&#32;}
+560 &#32;&#32;&#32;&#32;};
+561 
+562 &#32;&#32;}&#32;<emphasis role="comment">//&#32;namespace&#32;__cust_access</emphasis>
+563 
+564 &#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keyword">namespace&#32;</emphasis>__cust
+565 &#32;&#32;{
+566 &#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keyword">constexpr</emphasis>&#32;__cust_access::_Begin&#32;<link linkend="_group__gtx__range_1gaa752bdfcbfda8d0593318c4bf8a7dc6e">begin</link>{};
+567 &#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keyword">constexpr</emphasis>&#32;__cust_access::_End&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a432111147038972f06e049e18a837002">end</link>{};
+568 &#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keyword">constexpr</emphasis>&#32;__cust_access::_CBegin&#32;cbegin{};
+569 &#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keyword">constexpr</emphasis>&#32;__cust_access::_CEnd&#32;cend{};
+570 &#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keyword">constexpr</emphasis>&#32;__cust_access::_RBegin&#32;rbegin{};
+571 &#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keyword">constexpr</emphasis>&#32;__cust_access::_REnd&#32;rend{};
+572 &#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keyword">constexpr</emphasis>&#32;__cust_access::_CRBegin&#32;crbegin{};
+573 &#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keyword">constexpr</emphasis>&#32;__cust_access::_CREnd&#32;crend{};
+574 &#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keyword">constexpr</emphasis>&#32;__cust_access::_Size&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a3d1e3edfcf61ca2d831883e1afbad89e">size</link>{};
+575 &#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keyword">constexpr</emphasis>&#32;__cust_access::_SSize&#32;ssize{};
+576 &#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keyword">constexpr</emphasis>&#32;__cust_access::_Empty&#32;empty{};
+577 &#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keyword">constexpr</emphasis>&#32;__cust_access::_Data&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a89ce72163394e6aef63b551a8806e93f">data</link>{};
+578 &#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keyword">constexpr</emphasis>&#32;__cust_access::_CData&#32;cdata{};
+579 &#32;&#32;}
+580 
+582 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+583 &#32;&#32;&#32;&#32;<emphasis role="keyword">concept&#32;</emphasis><link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a7b8ad0b27a927682837f95528fa454f5">range</link>&#32;=&#32;<emphasis role="keyword">requires</emphasis>(_Tp&amp;&#32;__t)
+584 &#32;&#32;&#32;&#32;&#32;&#32;{
+585 &#32;&#32;&#32;&#32;ranges::begin(__t);
+586 &#32;&#32;&#32;&#32;ranges::end(__t);
+587 &#32;&#32;&#32;&#32;&#32;&#32;};
+588 
+590 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+591 &#32;&#32;&#32;&#32;<emphasis role="keyword">concept&#32;</emphasis>borrowed_range
+592 &#32;&#32;&#32;&#32;&#32;&#32;=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a7b8ad0b27a927682837f95528fa454f5">range&lt;_Tp&gt;</link>&#32;&amp;&amp;&#32;__detail::__maybe_borrowed_range&lt;_Tp&gt;;
+593 
+594 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+595 &#32;&#32;&#32;&#32;<emphasis role="keyword">using&#32;</emphasis><link linkend="_namespacenlohmann_1_1detail_1a520ea901ba1560b9bc3e274b61497afe">iterator_t</link>&#32;=&#32;std::__detail::__range_iter_t&lt;_Tp&gt;;
+596 
+597 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;range&#32;_Range&gt;
+598 &#32;&#32;&#32;&#32;<emphasis role="keyword">using&#32;</emphasis>sentinel_t&#32;=&#32;<emphasis role="keyword">decltype</emphasis>(ranges::end(std::declval&lt;_Range&amp;&gt;()));
+599 
+600 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;range&#32;_Range&gt;
+601 &#32;&#32;&#32;&#32;<emphasis role="keyword">using&#32;</emphasis>range_difference_t&#32;=&#32;iter_difference_t&lt;iterator_t&lt;_Range&gt;&gt;;
+602 
+603 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;range&#32;_Range&gt;
+604 &#32;&#32;&#32;&#32;<emphasis role="keyword">using&#32;</emphasis><link linkend="_namespacenlohmann_1_1detail_1a1eb075b086024e7c18e3a56db93a6688">range_value_t</link>&#32;=&#32;iter_value_t&lt;iterator_t&lt;_Range&gt;&gt;;
+605 
+606 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;range&#32;_Range&gt;
+607 &#32;&#32;&#32;&#32;<emphasis role="keyword">using&#32;</emphasis>range_reference_t&#32;=&#32;iter_reference_t&lt;iterator_t&lt;_Range&gt;&gt;;
+608 
+609 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;range&#32;_Range&gt;
+610 &#32;&#32;&#32;&#32;<emphasis role="keyword">using&#32;</emphasis>range_rvalue_reference_t
+611 &#32;&#32;&#32;&#32;&#32;&#32;=&#32;iter_rvalue_reference_t&lt;iterator_t&lt;_Range&gt;&gt;;
+612 
+614 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+615 &#32;&#32;&#32;&#32;<emphasis role="keyword">concept&#32;</emphasis>sized_range&#32;=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a7b8ad0b27a927682837f95528fa454f5">range&lt;_Tp&gt;</link>
+616 &#32;&#32;&#32;&#32;&#32;&#32;&amp;&amp;&#32;<emphasis role="keyword">requires</emphasis>(_Tp&amp;&#32;__t)&#32;{&#32;ranges::size(__t);&#32;};
+617 
+618 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;sized_range&#32;_Range&gt;
+619 &#32;&#32;&#32;&#32;<emphasis role="keyword">using&#32;</emphasis>range_size_t&#32;=&#32;<emphasis role="keyword">decltype</emphasis>(ranges::size(std::declval&lt;_Range&amp;&gt;()));
+620 
+621 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Derived&gt;
+622 &#32;&#32;&#32;&#32;<emphasis role="keyword">requires</emphasis>&#32;is_class_v&lt;_Derived&gt;&#32;&amp;&amp;&#32;same_as&lt;_Derived,&#32;remove_cv_t&lt;_Derived&gt;&gt;
+623 &#32;&#32;&#32;&#32;<emphasis role="keyword">class&#32;</emphasis>view_interface;&#32;<emphasis role="comment">//&#32;defined&#32;in&#32;&lt;bits/ranges_util.h&gt;</emphasis>
+624 
+625 &#32;&#32;<emphasis role="keyword">namespace&#32;</emphasis>__detail
+626 &#32;&#32;{
+627 &#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Up&gt;
+628 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">requires</emphasis>&#32;(!same_as&lt;_Tp,&#32;view_interface&lt;_Up&gt;&gt;)
+629 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>&#32;__is_derived_from_view_interface_fn(<emphasis role="keyword">const</emphasis>&#32;_Tp&amp;,
+630 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;view_interface&lt;_Up&gt;&amp;);&#32;<emphasis role="comment">//&#32;not&#32;defined</emphasis>
+631 
+632 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Returns&#32;true&#32;iff&#32;_Tp&#32;has&#32;exactly&#32;one&#32;public&#32;base&#32;class&#32;that&apos;s&#32;a</emphasis>
+633 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;specialization&#32;of&#32;view_interface.</emphasis>
+634 &#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+635 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">concept&#32;</emphasis>__is_derived_from_view_interface
+636 &#32;&#32;&#32;&#32;=&#32;<emphasis role="keyword">requires</emphasis>&#32;(_Tp&#32;__t)&#32;{&#32;__is_derived_from_view_interface_fn(__t,&#32;__t);&#32;};
+637 &#32;&#32;}&#32;<emphasis role="comment">//&#32;namespace&#32;__detail</emphasis>
+638 
+640 &#32;&#32;<emphasis role="keyword">struct&#32;</emphasis>view_base&#32;{&#32;};
+641 
+643 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+644 &#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keyword">constexpr</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>&#32;enable_view&#32;=&#32;derived_from&lt;_Tp,&#32;view_base&gt;
+645 &#32;&#32;&#32;&#32;&#32;&#32;||&#32;__detail::__is_derived_from_view_interface&lt;_Tp&gt;;
+646 
+648 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+649 &#32;&#32;&#32;&#32;<emphasis role="keyword">concept&#32;</emphasis>view
+650 &#32;&#32;&#32;&#32;&#32;&#32;=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a7b8ad0b27a927682837f95528fa454f5">range&lt;_Tp&gt;</link>&#32;&amp;&amp;&#32;movable&lt;_Tp&gt;&#32;&amp;&amp;&#32;enable_view&lt;_Tp&gt;;
+651 
+652 &#32;&#32;<emphasis role="comment">//&#32;[range.refinements]</emphasis>
+653 
+655 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Range,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+656 &#32;&#32;&#32;&#32;<emphasis role="keyword">concept&#32;</emphasis>output_range
+657 &#32;&#32;&#32;&#32;&#32;&#32;=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a7b8ad0b27a927682837f95528fa454f5">range&lt;_Range&gt;</link>&#32;&amp;&amp;&#32;output_iterator&lt;iterator_t&lt;_Range&gt;,&#32;_Tp&gt;;
+658 
+660 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+661 &#32;&#32;&#32;&#32;<emphasis role="keyword">concept&#32;</emphasis>input_range&#32;=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a7b8ad0b27a927682837f95528fa454f5">range&lt;_Tp&gt;</link>&#32;&amp;&amp;&#32;input_iterator&lt;iterator_t&lt;_Tp&gt;&gt;;
+662 
+664 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+665 &#32;&#32;&#32;&#32;<emphasis role="keyword">concept&#32;</emphasis>forward_range
+666 &#32;&#32;&#32;&#32;&#32;&#32;=&#32;input_range&lt;_Tp&gt;&#32;&amp;&amp;&#32;forward_iterator&lt;iterator_t&lt;_Tp&gt;&gt;;
+667 
+669 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+670 &#32;&#32;&#32;&#32;<emphasis role="keyword">concept&#32;</emphasis>bidirectional_range
+671 &#32;&#32;&#32;&#32;&#32;&#32;=&#32;forward_range&lt;_Tp&gt;&#32;&amp;&amp;&#32;bidirectional_iterator&lt;iterator_t&lt;_Tp&gt;&gt;;
+672 
+674 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+675 &#32;&#32;&#32;&#32;<emphasis role="keyword">concept&#32;</emphasis>random_access_range
+676 &#32;&#32;&#32;&#32;&#32;&#32;=&#32;bidirectional_range&lt;_Tp&gt;&#32;&amp;&amp;&#32;random_access_iterator&lt;iterator_t&lt;_Tp&gt;&gt;;
+677 
+679 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+680 &#32;&#32;&#32;&#32;<emphasis role="keyword">concept&#32;</emphasis>contiguous_range
+681 &#32;&#32;&#32;&#32;&#32;&#32;=&#32;random_access_range&lt;_Tp&gt;&#32;&amp;&amp;&#32;contiguous_iterator&lt;iterator_t&lt;_Tp&gt;&gt;
+682 &#32;&#32;&#32;&#32;&#32;&#32;&amp;&amp;&#32;<emphasis role="keyword">requires</emphasis>(_Tp&amp;&#32;__t)
+683 &#32;&#32;&#32;&#32;&#32;&#32;{
+684 &#32;&#32;&#32;&#32;{&#32;ranges::data(__t)&#32;}&#32;-&gt;&#32;same_as&lt;add_pointer_t&lt;range_reference_t&lt;_Tp&gt;&gt;&gt;;
+685 &#32;&#32;&#32;&#32;&#32;&#32;};
+686 
+688 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+689 &#32;&#32;&#32;&#32;<emphasis role="keyword">concept&#32;</emphasis>common_range
+690 &#32;&#32;&#32;&#32;&#32;&#32;=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a7b8ad0b27a927682837f95528fa454f5">range&lt;_Tp&gt;</link>&#32;&amp;&amp;&#32;same_as&lt;iterator_t&lt;_Tp&gt;,&#32;sentinel_t&lt;_Tp&gt;&gt;;
+691 
+692 &#32;&#32;<emphasis role="keyword">namespace&#32;</emphasis>__detail
+693 &#32;&#32;{
+694 &#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+695 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keyword">constexpr</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>&#32;__is_initializer_list&#32;=&#32;<emphasis role="keyword">false</emphasis>;
+696 
+697 &#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+698 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keyword">constexpr</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>&#32;__is_initializer_list&lt;initializer_list&lt;_Tp&gt;&gt;&#32;=&#32;<emphasis role="keyword">true</emphasis>;
+699 &#32;&#32;}&#32;<emphasis role="comment">//&#32;namespace&#32;__detail</emphasis>
+700 
+702 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+703 &#32;&#32;&#32;&#32;<emphasis role="keyword">concept&#32;</emphasis>viewable_range&#32;=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a7b8ad0b27a927682837f95528fa454f5">range&lt;_Tp&gt;</link>
+704 &#32;&#32;&#32;&#32;&#32;&#32;&amp;&amp;&#32;((view&lt;remove_cvref_t&lt;_Tp&gt;&gt;&#32;&amp;&amp;&#32;constructible_from&lt;remove_cvref_t&lt;_Tp&gt;,&#32;_Tp&gt;)
+705 &#32;&#32;&#32;&#32;&#32;&#32;||&#32;(!view&lt;remove_cvref_t&lt;_Tp&gt;&gt;
+706 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&amp;&amp;&#32;(is_lvalue_reference_v&lt;_Tp&gt;
+707 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;||&#32;(movable&lt;remove_reference_t&lt;_Tp&gt;&gt;
+708 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&amp;&amp;&#32;!__detail::__is_initializer_list&lt;remove_cvref_t&lt;_Tp&gt;&gt;))));
+709 
+710 &#32;&#32;<emphasis role="comment">//&#32;[range.iter.ops]&#32;range&#32;iterator&#32;operations</emphasis>
+711 
+712 &#32;&#32;<emphasis role="keyword">struct&#32;</emphasis>__advance_fn&#32;final
+713 &#32;&#32;{
+714 &#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;input_or_output_iterator&#32;_It&gt;
+715 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">constexpr</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>
+716 &#32;&#32;&#32;&#32;&#32;&#32;operator()(_It&amp;&#32;__it,&#32;iter_difference_t&lt;_It&gt;&#32;__n)<emphasis role="keyword">&#32;const</emphasis>
+717 <emphasis role="keyword">&#32;&#32;&#32;&#32;&#32;&#32;</emphasis>{
+718 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;<emphasis role="keyword">constexpr</emphasis>&#32;(random_access_iterator&lt;_It&gt;)
+719 &#32;&#32;&#32;&#32;&#32;&#32;__it&#32;+=&#32;__n;
+720 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>&#32;<emphasis role="keywordflow">if</emphasis>&#32;<emphasis role="keyword">constexpr</emphasis>&#32;(bidirectional_iterator&lt;_It&gt;)
+721 &#32;&#32;&#32;&#32;&#32;&#32;{
+722 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__n&#32;&gt;&#32;0)
+723 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+724 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">do</emphasis>
+725 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+726 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;++__it;
+727 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+728 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">while</emphasis>&#32;(--__n);
+729 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+730 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__n&#32;&lt;&#32;0)
+731 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+732 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">do</emphasis>
+733 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+734 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;--__it;
+735 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+736 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">while</emphasis>&#32;(++__n);
+737 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+738 &#32;&#32;&#32;&#32;&#32;&#32;}
+739 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>
+740 &#32;&#32;&#32;&#32;&#32;&#32;{
+741 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;cannot&#32;decrement&#32;a&#32;non-bidirectional&#32;iterator</emphasis>
+742 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__glibcxx_assert(__n&#32;&gt;=&#32;0);
+743 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">while</emphasis>&#32;(__n--&#32;&gt;&#32;0)
+744 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;++__it;
+745 &#32;&#32;&#32;&#32;&#32;&#32;}
+746 &#32;&#32;&#32;&#32;&#32;&#32;}
+747 
+748 &#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;input_or_output_iterator&#32;_It,&#32;sentinel_for&lt;_It&gt;&#32;_Sent&gt;
+749 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">constexpr</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>
+750 &#32;&#32;&#32;&#32;&#32;&#32;operator()(_It&amp;&#32;__it,&#32;_Sent&#32;__bound)<emphasis role="keyword">&#32;const</emphasis>
+751 <emphasis role="keyword">&#32;&#32;&#32;&#32;&#32;&#32;</emphasis>{
+752 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;<emphasis role="keyword">constexpr</emphasis>&#32;(assignable_from&lt;_It&amp;,&#32;_Sent&gt;)
+753 &#32;&#32;&#32;&#32;&#32;&#32;__it&#32;=&#32;<link linkend="_namespacestd_1ac7095819f6a8da64d69b1ee3029c52be">std::move</link>(__bound);
+754 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>&#32;<emphasis role="keywordflow">if</emphasis>&#32;<emphasis role="keyword">constexpr</emphasis>&#32;(sized_sentinel_for&lt;_Sent,&#32;_It&gt;)
+755 &#32;&#32;&#32;&#32;&#32;&#32;(*<emphasis role="keyword">this</emphasis>)(__it,&#32;__bound&#32;-&#32;__it);
+756 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>
+757 &#32;&#32;&#32;&#32;&#32;&#32;{
+758 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">while</emphasis>&#32;(__it&#32;!=&#32;__bound)
+759 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;++__it;
+760 &#32;&#32;&#32;&#32;&#32;&#32;}
+761 &#32;&#32;&#32;&#32;&#32;&#32;}
+762 
+763 &#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;input_or_output_iterator&#32;_It,&#32;sentinel_for&lt;_It&gt;&#32;_Sent&gt;
+764 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">constexpr</emphasis>&#32;iter_difference_t&lt;_It&gt;
+765 &#32;&#32;&#32;&#32;&#32;&#32;operator()(_It&amp;&#32;__it,&#32;iter_difference_t&lt;_It&gt;&#32;__n,&#32;_Sent&#32;__bound)<emphasis role="keyword">&#32;const</emphasis>
+766 <emphasis role="keyword">&#32;&#32;&#32;&#32;&#32;&#32;</emphasis>{
+767 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;<emphasis role="keyword">constexpr</emphasis>&#32;(sized_sentinel_for&lt;_Sent,&#32;_It&gt;)
+768 &#32;&#32;&#32;&#32;&#32;&#32;{
+769 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keyword">auto</emphasis>&#32;__diff&#32;=&#32;__bound&#32;-&#32;__it;
+770 
+771 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__diff&#32;==&#32;0)
+772 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__n;
+773 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__diff&#32;&gt;&#32;0&#32;?&#32;__n&#32;&gt;=&#32;__diff&#32;:&#32;__n&#32;&lt;=&#32;__diff)
+774 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+775 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;(*this)(__it,&#32;__bound);
+776 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__n&#32;-&#32;__diff;
+777 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+778 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__n&#32;!=&#32;0)&#32;[[likely]]
+779 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+780 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;n&#32;and&#32;bound&#32;must&#32;not&#32;lead&#32;in&#32;opposite&#32;directions:</emphasis>
+781 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__glibcxx_assert(__n&#32;&lt;&#32;0&#32;==&#32;__diff&#32;&lt;&#32;0);
+782 
+783 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;(*this)(__it,&#32;__n);
+784 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;0;
+785 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+786 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>
+787 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;0;
+788 &#32;&#32;&#32;&#32;&#32;&#32;}
+789 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__it&#32;==&#32;__bound&#32;||&#32;__n&#32;==&#32;0)
+790 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__n;
+791 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__n&#32;&gt;&#32;0)
+792 &#32;&#32;&#32;&#32;&#32;&#32;{
+793 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;iter_difference_t&lt;_It&gt;&#32;__m&#32;=&#32;0;
+794 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">do</emphasis>
+795 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+796 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;++__it;
+797 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;++__m;
+798 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+799 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">while</emphasis>&#32;(__m&#32;!=&#32;__n&#32;&amp;&amp;&#32;__it&#32;!=&#32;__bound);
+800 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__n&#32;-&#32;__m;
+801 &#32;&#32;&#32;&#32;&#32;&#32;}
+802 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>&#32;<emphasis role="keywordflow">if</emphasis>&#32;<emphasis role="keyword">constexpr</emphasis>&#32;(bidirectional_iterator&lt;_It&gt;&#32;&amp;&amp;&#32;same_as&lt;_It,&#32;_Sent&gt;)
+803 &#32;&#32;&#32;&#32;&#32;&#32;{
+804 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;iter_difference_t&lt;_It&gt;&#32;__m&#32;=&#32;0;
+805 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">do</emphasis>
+806 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+807 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;--__it;
+808 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;--__m;
+809 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+810 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">while</emphasis>&#32;(__m&#32;!=&#32;__n&#32;&amp;&amp;&#32;__it&#32;!=&#32;__bound);
+811 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__n&#32;-&#32;__m;
+812 &#32;&#32;&#32;&#32;&#32;&#32;}
+813 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>
+814 &#32;&#32;&#32;&#32;&#32;&#32;{
+815 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;cannot&#32;decrement&#32;a&#32;non-bidirectional&#32;iterator</emphasis>
+816 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__glibcxx_assert(__n&#32;&gt;=&#32;0);
+817 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__n;
+818 &#32;&#32;&#32;&#32;&#32;&#32;}
+819 &#32;&#32;&#32;&#32;&#32;&#32;}
+820 
+821 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>&#32;<link linkend="_namespaceglm_1aabdf68ef3b7be9c9b37d01227fa55a36">operator&amp;</link>()&#32;<emphasis role="keyword">const</emphasis>&#32;=&#32;<emphasis role="keyword">delete</emphasis>;
+822 &#32;&#32;};
+823 
+824 &#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keyword">constexpr</emphasis>&#32;__advance_fn&#32;advance{};
+825 
+826 &#32;&#32;<emphasis role="keyword">struct&#32;</emphasis>__distance_fn&#32;final
+827 &#32;&#32;{
+828 &#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;input_or_output_iterator&#32;_It,&#32;sentinel_for&lt;_It&gt;&#32;_Sent&gt;
+829 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">requires</emphasis>&#32;(!sized_sentinel_for&lt;_Sent,&#32;_It&gt;)
+830 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">constexpr</emphasis>&#32;iter_difference_t&lt;_It&gt;
+831 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">operator</emphasis>()[[nodiscard]](_It&#32;__first,&#32;_Sent&#32;__last)&#32;<emphasis role="keyword">const</emphasis>
+832 &#32;&#32;&#32;&#32;&#32;&#32;{
+833 &#32;&#32;&#32;&#32;iter_difference_t&lt;_It&gt;&#32;__n&#32;=&#32;0;
+834 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">while</emphasis>&#32;(__first&#32;!=&#32;__last)
+835 &#32;&#32;&#32;&#32;&#32;&#32;{
+836 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;++__first;
+837 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;++__n;
+838 &#32;&#32;&#32;&#32;&#32;&#32;}
+839 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__n;
+840 &#32;&#32;&#32;&#32;&#32;&#32;}
+841 
+842 &#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;input_or_output_iterator&#32;_It,&#32;sized_sentinel_for&lt;_It&gt;&#32;_Sent&gt;
+843 &#32;&#32;&#32;&#32;&#32;&#32;[[nodiscard]]
+844 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">constexpr</emphasis>&#32;iter_difference_t&lt;_It&gt;
+845 &#32;&#32;&#32;&#32;&#32;&#32;operator()(<emphasis role="keyword">const</emphasis>&#32;_It&amp;&#32;__first,&#32;<emphasis role="keyword">const</emphasis>&#32;_Sent&amp;&#32;__last)<emphasis role="keyword">&#32;const</emphasis>
+846 <emphasis role="keyword">&#32;&#32;&#32;&#32;&#32;&#32;</emphasis>{
+847 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__last&#32;-&#32;__first;
+848 &#32;&#32;&#32;&#32;&#32;&#32;}
+849 
+850 &#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;range&#32;_Range&gt;
+851 &#32;&#32;&#32;&#32;&#32;&#32;[[nodiscard]]
+852 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">constexpr</emphasis>&#32;range_difference_t&lt;_Range&gt;
+853 &#32;&#32;&#32;&#32;&#32;&#32;operator()(_Range&amp;&amp;&#32;__r)<emphasis role="keyword">&#32;const</emphasis>
+854 <emphasis role="keyword">&#32;&#32;&#32;&#32;&#32;&#32;</emphasis>{
+855 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;<emphasis role="keyword">constexpr</emphasis>&#32;(sized_range&lt;_Range&gt;)
+856 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<emphasis role="keyword">static_cast&lt;</emphasis>range_difference_t&lt;_Range&gt;<emphasis role="keyword">&gt;</emphasis>(ranges::size(__r));
+857 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>
+858 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;(*<emphasis role="keyword">this</emphasis>)(ranges::begin(__r),&#32;ranges::end(__r));
+859 &#32;&#32;&#32;&#32;&#32;&#32;}
+860 
+861 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>&#32;<link linkend="_namespaceglm_1aabdf68ef3b7be9c9b37d01227fa55a36">operator&amp;</link>()&#32;<emphasis role="keyword">const</emphasis>&#32;=&#32;<emphasis role="keyword">delete</emphasis>;
+862 &#32;&#32;};
+863 
+864 &#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keyword">constexpr</emphasis>&#32;__distance_fn&#32;<link linkend="_namespacedistance">distance</link>{};
+865 
+866 &#32;&#32;<emphasis role="keyword">struct&#32;</emphasis>__next_fn&#32;final
+867 &#32;&#32;{
+868 &#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;input_or_output_iterator&#32;_It&gt;
+869 &#32;&#32;&#32;&#32;&#32;&#32;[[nodiscard]]
+870 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">constexpr</emphasis>&#32;_It
+871 &#32;&#32;&#32;&#32;&#32;&#32;operator()(_It&#32;__x)<emphasis role="keyword">&#32;const</emphasis>
+872 <emphasis role="keyword">&#32;&#32;&#32;&#32;&#32;&#32;</emphasis>{
+873 &#32;&#32;&#32;&#32;++__x;
+874 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__x;
+875 &#32;&#32;&#32;&#32;&#32;&#32;}
+876 
+877 &#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;input_or_output_iterator&#32;_It&gt;
+878 &#32;&#32;&#32;&#32;&#32;&#32;[[nodiscard]]
+879 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">constexpr</emphasis>&#32;_It
+880 &#32;&#32;&#32;&#32;&#32;&#32;operator()(_It&#32;__x,&#32;iter_difference_t&lt;_It&gt;&#32;__n)<emphasis role="keyword">&#32;const</emphasis>
+881 <emphasis role="keyword">&#32;&#32;&#32;&#32;&#32;&#32;</emphasis>{
+882 &#32;&#32;&#32;&#32;ranges::advance(__x,&#32;__n);
+883 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__x;
+884 &#32;&#32;&#32;&#32;&#32;&#32;}
+885 
+886 &#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;input_or_output_iterator&#32;_It,&#32;sentinel_for&lt;_It&gt;&#32;_Sent&gt;
+887 &#32;&#32;&#32;&#32;&#32;&#32;[[nodiscard]]
+888 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">constexpr</emphasis>&#32;_It
+889 &#32;&#32;&#32;&#32;&#32;&#32;operator()(_It&#32;__x,&#32;_Sent&#32;__bound)<emphasis role="keyword">&#32;const</emphasis>
+890 <emphasis role="keyword">&#32;&#32;&#32;&#32;&#32;&#32;</emphasis>{
+891 &#32;&#32;&#32;&#32;ranges::advance(__x,&#32;__bound);
+892 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__x;
+893 &#32;&#32;&#32;&#32;&#32;&#32;}
+894 
+895 &#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;input_or_output_iterator&#32;_It,&#32;sentinel_for&lt;_It&gt;&#32;_Sent&gt;
+896 &#32;&#32;&#32;&#32;&#32;&#32;[[nodiscard]]
+897 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">constexpr</emphasis>&#32;_It
+898 &#32;&#32;&#32;&#32;&#32;&#32;operator()(_It&#32;__x,&#32;iter_difference_t&lt;_It&gt;&#32;__n,&#32;_Sent&#32;__bound)<emphasis role="keyword">&#32;const</emphasis>
+899 <emphasis role="keyword">&#32;&#32;&#32;&#32;&#32;&#32;</emphasis>{
+900 &#32;&#32;&#32;&#32;ranges::advance(__x,&#32;__n,&#32;__bound);
+901 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__x;
+902 &#32;&#32;&#32;&#32;&#32;&#32;}
+903 
+904 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>&#32;<link linkend="_namespaceglm_1aabdf68ef3b7be9c9b37d01227fa55a36">operator&amp;</link>()&#32;<emphasis role="keyword">const</emphasis>&#32;=&#32;<emphasis role="keyword">delete</emphasis>;
+905 &#32;&#32;};
+906 
+907 &#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keyword">constexpr</emphasis>&#32;__next_fn&#32;next{};
+908 
+909 &#32;&#32;<emphasis role="keyword">struct&#32;</emphasis>__prev_fn&#32;final
+910 &#32;&#32;{
+911 &#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;b<emphasis role="keywordtype">id</emphasis>irectional_iterator&#32;_It&gt;
+912 &#32;&#32;&#32;&#32;&#32;&#32;[[nodiscard]]
+913 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">constexpr</emphasis>&#32;_It
+914 &#32;&#32;&#32;&#32;&#32;&#32;operator()(_It&#32;__x)<emphasis role="keyword">&#32;const</emphasis>
+915 <emphasis role="keyword">&#32;&#32;&#32;&#32;&#32;&#32;</emphasis>{
+916 &#32;&#32;&#32;&#32;--__x;
+917 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__x;
+918 &#32;&#32;&#32;&#32;&#32;&#32;}
+919 
+920 &#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;b<emphasis role="keywordtype">id</emphasis>irectional_iterator&#32;_It&gt;
+921 &#32;&#32;&#32;&#32;&#32;&#32;[[nodiscard]]
+922 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">constexpr</emphasis>&#32;_It
+923 &#32;&#32;&#32;&#32;&#32;&#32;operator()(_It&#32;__x,&#32;iter_difference_t&lt;_It&gt;&#32;__n)<emphasis role="keyword">&#32;const</emphasis>
+924 <emphasis role="keyword">&#32;&#32;&#32;&#32;&#32;&#32;</emphasis>{
+925 &#32;&#32;&#32;&#32;ranges::advance(__x,&#32;-__n);
+926 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__x;
+927 &#32;&#32;&#32;&#32;&#32;&#32;}
+928 
+929 &#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;b<emphasis role="keywordtype">id</emphasis>irectional_iterator&#32;_It&gt;
+930 &#32;&#32;&#32;&#32;&#32;&#32;[[nodiscard]]
+931 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">constexpr</emphasis>&#32;_It
+932 &#32;&#32;&#32;&#32;&#32;&#32;operator()(_It&#32;__x,&#32;iter_difference_t&lt;_It&gt;&#32;__n,&#32;_It&#32;__bound)<emphasis role="keyword">&#32;const</emphasis>
+933 <emphasis role="keyword">&#32;&#32;&#32;&#32;&#32;&#32;</emphasis>{
+934 &#32;&#32;&#32;&#32;ranges::advance(__x,&#32;-__n,&#32;__bound);
+935 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__x;
+936 &#32;&#32;&#32;&#32;&#32;&#32;}
+937 
+938 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>&#32;<link linkend="_namespaceglm_1aabdf68ef3b7be9c9b37d01227fa55a36">operator&amp;</link>()&#32;<emphasis role="keyword">const</emphasis>&#32;=&#32;<emphasis role="keyword">delete</emphasis>;
+939 &#32;&#32;};
+940 
+941 &#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keyword">constexpr</emphasis>&#32;__prev_fn&#32;prev{};
+942 
+944 &#32;&#32;<emphasis role="keyword">struct&#32;</emphasis>dangling
+945 &#32;&#32;{
+946 &#32;&#32;&#32;&#32;<emphasis role="keyword">constexpr</emphasis>&#32;dangling()&#32;noexcept&#32;=&#32;default;
+947 &#32;&#32;&#32;&#32;template&lt;typename...&#32;_Args&gt;
+948 &#32;&#32;&#32;&#32;&#32;&#32;constexpr&#32;dangling(_Args&amp;&amp;...)&#32;noexcept&#32;{&#32;}
+949 &#32;&#32;};
+950 
+951 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;range&#32;_Range&gt;
+952 &#32;&#32;&#32;&#32;<emphasis role="keyword">using&#32;</emphasis>borrowed_iterator_t&#32;=&#32;__conditional_t&lt;borrowed_range&lt;_Range&gt;,
+953 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;iterator_t&lt;_Range&gt;,
+954 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;dangling&gt;;
+955 
+956 }&#32;<emphasis role="comment">//&#32;namespace&#32;ranges</emphasis>
+957 _GLIBCXX_END_NAMESPACE_VERSION
+958 }&#32;<emphasis role="comment">//&#32;namespace&#32;std</emphasis>
+959 <emphasis role="preprocessor">#endif&#32;</emphasis><emphasis role="comment">//&#32;library&#32;concepts</emphasis>
+960 <emphasis role="preprocessor">#endif&#32;</emphasis><emphasis role="comment">//&#32;C++20</emphasis>
+961 <emphasis role="preprocessor">#endif&#32;</emphasis><emphasis role="comment">//&#32;_GLIBCXX_RANGES_BASE_H</emphasis>
+</programlisting></section>

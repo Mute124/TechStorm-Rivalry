@@ -1,0 +1,119 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<section xmlns="http://docbook.org/ns/docbook" version="5.0" xmlns:xlink="http://www.w3.org/1999/xlink" xml:id="_lib_2glm_2glm_2simd_2integer_8h_source" xml:lang="en-US">
+<title>integer.h</title>
+<indexterm><primary>C:/Users/HP/Documents/GitHub/Minero-Game/lib/glm/glm/simd/integer.h</primary></indexterm>
+Go to the documentation of this file.<programlisting linenumbering="unnumbered">1 
+3 
+4 <emphasis role="preprocessor">#pragma&#32;once</emphasis>
+5 
+6 <emphasis role="preprocessor">#if&#32;GLM_ARCH&#32;&amp;&#32;GLM_ARCH_SSE2_BIT</emphasis>
+7 
+8 <link linkend="__classes_2lib_2glm_2glm_2detail_2setup_8hpp_1a33fdea6f91c5f834105f7415e2a64407">GLM_FUNC_QUALIFIER</link>&#32;glm_uvec4&#32;glm_i128_interleave(glm_uvec4&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1ac916c0825494ac3acd4457effd2823d2">x</link>)
+9 {
+10 &#32;&#32;&#32;&#32;glm_uvec4&#32;<emphasis role="keyword">const</emphasis>&#32;Mask4&#32;=&#32;_mm_set1_epi32(0x0000FFFF);
+11 &#32;&#32;&#32;&#32;glm_uvec4&#32;<emphasis role="keyword">const</emphasis>&#32;Mask3&#32;=&#32;_mm_set1_epi32(0x00FF00FF);
+12 &#32;&#32;&#32;&#32;glm_uvec4&#32;<emphasis role="keyword">const</emphasis>&#32;Mask2&#32;=&#32;_mm_set1_epi32(0x0F0F0F0F);
+13 &#32;&#32;&#32;&#32;glm_uvec4&#32;<emphasis role="keyword">const</emphasis>&#32;Mask1&#32;=&#32;_mm_set1_epi32(0x33333333);
+14 &#32;&#32;&#32;&#32;glm_uvec4&#32;<emphasis role="keyword">const</emphasis>&#32;Mask0&#32;=&#32;_mm_set1_epi32(0x55555555);
+15 
+16 &#32;&#32;&#32;&#32;glm_uvec4&#32;Reg1;
+17 &#32;&#32;&#32;&#32;glm_uvec4&#32;Reg2;
+18 
+19 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;REG1&#32;=&#32;x;</emphasis>
+20 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;REG2&#32;=&#32;y;</emphasis>
+21 &#32;&#32;&#32;&#32;<emphasis role="comment">//Reg1&#32;=&#32;_mm_unpacklo_epi64(x,&#32;y);</emphasis>
+22 &#32;&#32;&#32;&#32;Reg1&#32;=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1ac916c0825494ac3acd4457effd2823d2">x</link>;
+23 
+24 &#32;&#32;&#32;&#32;<emphasis role="comment">//REG1&#32;=&#32;((REG1&#32;&lt;&lt;&#32;16)&#32;|&#32;REG1)&#32;&amp;&#32;glm::uint64(0x0000FFFF0000FFFF);</emphasis>
+25 &#32;&#32;&#32;&#32;<emphasis role="comment">//REG2&#32;=&#32;((REG2&#32;&lt;&lt;&#32;16)&#32;|&#32;REG2)&#32;&amp;&#32;glm::uint64(0x0000FFFF0000FFFF);</emphasis>
+26 &#32;&#32;&#32;&#32;Reg2&#32;=&#32;<link linkend="__classes_2lib_2include_2emmintrin_8h_1a2091290bb42bdb544fbc4c652afc2751">_mm_slli_si128</link>(Reg1,&#32;2);
+27 &#32;&#32;&#32;&#32;Reg1&#32;=&#32;_mm_or_si128(Reg2,&#32;Reg1);
+28 &#32;&#32;&#32;&#32;Reg1&#32;=&#32;_mm_and_si128(Reg1,&#32;Mask4);
+29 
+30 &#32;&#32;&#32;&#32;<emphasis role="comment">//REG1&#32;=&#32;((REG1&#32;&lt;&lt;&#32;&#32;8)&#32;|&#32;REG1)&#32;&amp;&#32;glm::uint64(0x00FF00FF00FF00FF);</emphasis>
+31 &#32;&#32;&#32;&#32;<emphasis role="comment">//REG2&#32;=&#32;((REG2&#32;&lt;&lt;&#32;&#32;8)&#32;|&#32;REG2)&#32;&amp;&#32;glm::uint64(0x00FF00FF00FF00FF);</emphasis>
+32 &#32;&#32;&#32;&#32;Reg2&#32;=&#32;<link linkend="__classes_2lib_2include_2emmintrin_8h_1a2091290bb42bdb544fbc4c652afc2751">_mm_slli_si128</link>(Reg1,&#32;1);
+33 &#32;&#32;&#32;&#32;Reg1&#32;=&#32;_mm_or_si128(Reg2,&#32;Reg1);
+34 &#32;&#32;&#32;&#32;Reg1&#32;=&#32;_mm_and_si128(Reg1,&#32;Mask3);
+35 
+36 &#32;&#32;&#32;&#32;<emphasis role="comment">//REG1&#32;=&#32;((REG1&#32;&lt;&lt;&#32;&#32;4)&#32;|&#32;REG1)&#32;&amp;&#32;glm::uint64(0x0F0F0F0F0F0F0F0F);</emphasis>
+37 &#32;&#32;&#32;&#32;<emphasis role="comment">//REG2&#32;=&#32;((REG2&#32;&lt;&lt;&#32;&#32;4)&#32;|&#32;REG2)&#32;&amp;&#32;glm::uint64(0x0F0F0F0F0F0F0F0F);</emphasis>
+38 &#32;&#32;&#32;&#32;Reg2&#32;=&#32;_mm_slli_epi32(Reg1,&#32;4);
+39 &#32;&#32;&#32;&#32;Reg1&#32;=&#32;_mm_or_si128(Reg2,&#32;Reg1);
+40 &#32;&#32;&#32;&#32;Reg1&#32;=&#32;_mm_and_si128(Reg1,&#32;Mask2);
+41 
+42 &#32;&#32;&#32;&#32;<emphasis role="comment">//REG1&#32;=&#32;((REG1&#32;&lt;&lt;&#32;&#32;2)&#32;|&#32;REG1)&#32;&amp;&#32;glm::uint64(0x3333333333333333);</emphasis>
+43 &#32;&#32;&#32;&#32;<emphasis role="comment">//REG2&#32;=&#32;((REG2&#32;&lt;&lt;&#32;&#32;2)&#32;|&#32;REG2)&#32;&amp;&#32;glm::uint64(0x3333333333333333);</emphasis>
+44 &#32;&#32;&#32;&#32;Reg2&#32;=&#32;_mm_slli_epi32(Reg1,&#32;2);
+45 &#32;&#32;&#32;&#32;Reg1&#32;=&#32;_mm_or_si128(Reg2,&#32;Reg1);
+46 &#32;&#32;&#32;&#32;Reg1&#32;=&#32;_mm_and_si128(Reg1,&#32;Mask1);
+47 
+48 &#32;&#32;&#32;&#32;<emphasis role="comment">//REG1&#32;=&#32;((REG1&#32;&lt;&lt;&#32;&#32;1)&#32;|&#32;REG1)&#32;&amp;&#32;glm::uint64(0x5555555555555555);</emphasis>
+49 &#32;&#32;&#32;&#32;<emphasis role="comment">//REG2&#32;=&#32;((REG2&#32;&lt;&lt;&#32;&#32;1)&#32;|&#32;REG2)&#32;&amp;&#32;glm::uint64(0x5555555555555555);</emphasis>
+50 &#32;&#32;&#32;&#32;Reg2&#32;=&#32;_mm_slli_epi32(Reg1,&#32;1);
+51 &#32;&#32;&#32;&#32;Reg1&#32;=&#32;_mm_or_si128(Reg2,&#32;Reg1);
+52 &#32;&#32;&#32;&#32;Reg1&#32;=&#32;_mm_and_si128(Reg1,&#32;Mask0);
+53 
+54 &#32;&#32;&#32;&#32;<emphasis role="comment">//return&#32;REG1&#32;|&#32;(REG2&#32;&lt;&lt;&#32;1);</emphasis>
+55 &#32;&#32;&#32;&#32;Reg2&#32;=&#32;_mm_slli_epi32(Reg1,&#32;1);
+56 &#32;&#32;&#32;&#32;Reg2&#32;=&#32;<link linkend="__classes_2lib_2include_2emmintrin_8h_1a6184a7deed3960a115ba3b83ea370d44">_mm_srli_si128</link>(Reg2,&#32;8);
+57 &#32;&#32;&#32;&#32;Reg1&#32;=&#32;_mm_or_si128(Reg1,&#32;Reg2);
+58 
+59 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;Reg1;
+60 }
+61 
+62 <link linkend="__classes_2lib_2glm_2glm_2detail_2setup_8hpp_1a33fdea6f91c5f834105f7415e2a64407">GLM_FUNC_QUALIFIER</link>&#32;glm_uvec4&#32;glm_i128_interleave2(glm_uvec4&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1ac916c0825494ac3acd4457effd2823d2">x</link>,&#32;glm_uvec4&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a4f27f1eebce8c31db01bb39fab9ef561">y</link>)
+63 {
+64 &#32;&#32;&#32;&#32;glm_uvec4&#32;<emphasis role="keyword">const</emphasis>&#32;Mask4&#32;=&#32;_mm_set1_epi32(0x0000FFFF);
+65 &#32;&#32;&#32;&#32;glm_uvec4&#32;<emphasis role="keyword">const</emphasis>&#32;Mask3&#32;=&#32;_mm_set1_epi32(0x00FF00FF);
+66 &#32;&#32;&#32;&#32;glm_uvec4&#32;<emphasis role="keyword">const</emphasis>&#32;Mask2&#32;=&#32;_mm_set1_epi32(0x0F0F0F0F);
+67 &#32;&#32;&#32;&#32;glm_uvec4&#32;<emphasis role="keyword">const</emphasis>&#32;Mask1&#32;=&#32;_mm_set1_epi32(0x33333333);
+68 &#32;&#32;&#32;&#32;glm_uvec4&#32;<emphasis role="keyword">const</emphasis>&#32;Mask0&#32;=&#32;_mm_set1_epi32(0x55555555);
+69 
+70 &#32;&#32;&#32;&#32;glm_uvec4&#32;Reg1;
+71 &#32;&#32;&#32;&#32;glm_uvec4&#32;Reg2;
+72 
+73 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;REG1&#32;=&#32;x;</emphasis>
+74 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;REG2&#32;=&#32;y;</emphasis>
+75 &#32;&#32;&#32;&#32;Reg1&#32;=&#32;_mm_unpacklo_epi64(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1ac916c0825494ac3acd4457effd2823d2">x</link>,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a4f27f1eebce8c31db01bb39fab9ef561">y</link>);
+76 
+77 &#32;&#32;&#32;&#32;<emphasis role="comment">//REG1&#32;=&#32;((REG1&#32;&lt;&lt;&#32;16)&#32;|&#32;REG1)&#32;&amp;&#32;glm::uint64(0x0000FFFF0000FFFF);</emphasis>
+78 &#32;&#32;&#32;&#32;<emphasis role="comment">//REG2&#32;=&#32;((REG2&#32;&lt;&lt;&#32;16)&#32;|&#32;REG2)&#32;&amp;&#32;glm::uint64(0x0000FFFF0000FFFF);</emphasis>
+79 &#32;&#32;&#32;&#32;Reg2&#32;=&#32;<link linkend="__classes_2lib_2include_2emmintrin_8h_1a2091290bb42bdb544fbc4c652afc2751">_mm_slli_si128</link>(Reg1,&#32;2);
+80 &#32;&#32;&#32;&#32;Reg1&#32;=&#32;_mm_or_si128(Reg2,&#32;Reg1);
+81 &#32;&#32;&#32;&#32;Reg1&#32;=&#32;_mm_and_si128(Reg1,&#32;Mask4);
+82 
+83 &#32;&#32;&#32;&#32;<emphasis role="comment">//REG1&#32;=&#32;((REG1&#32;&lt;&lt;&#32;&#32;8)&#32;|&#32;REG1)&#32;&amp;&#32;glm::uint64(0x00FF00FF00FF00FF);</emphasis>
+84 &#32;&#32;&#32;&#32;<emphasis role="comment">//REG2&#32;=&#32;((REG2&#32;&lt;&lt;&#32;&#32;8)&#32;|&#32;REG2)&#32;&amp;&#32;glm::uint64(0x00FF00FF00FF00FF);</emphasis>
+85 &#32;&#32;&#32;&#32;Reg2&#32;=&#32;<link linkend="__classes_2lib_2include_2emmintrin_8h_1a2091290bb42bdb544fbc4c652afc2751">_mm_slli_si128</link>(Reg1,&#32;1);
+86 &#32;&#32;&#32;&#32;Reg1&#32;=&#32;_mm_or_si128(Reg2,&#32;Reg1);
+87 &#32;&#32;&#32;&#32;Reg1&#32;=&#32;_mm_and_si128(Reg1,&#32;Mask3);
+88 
+89 &#32;&#32;&#32;&#32;<emphasis role="comment">//REG1&#32;=&#32;((REG1&#32;&lt;&lt;&#32;&#32;4)&#32;|&#32;REG1)&#32;&amp;&#32;glm::uint64(0x0F0F0F0F0F0F0F0F);</emphasis>
+90 &#32;&#32;&#32;&#32;<emphasis role="comment">//REG2&#32;=&#32;((REG2&#32;&lt;&lt;&#32;&#32;4)&#32;|&#32;REG2)&#32;&amp;&#32;glm::uint64(0x0F0F0F0F0F0F0F0F);</emphasis>
+91 &#32;&#32;&#32;&#32;Reg2&#32;=&#32;_mm_slli_epi32(Reg1,&#32;4);
+92 &#32;&#32;&#32;&#32;Reg1&#32;=&#32;_mm_or_si128(Reg2,&#32;Reg1);
+93 &#32;&#32;&#32;&#32;Reg1&#32;=&#32;_mm_and_si128(Reg1,&#32;Mask2);
+94 
+95 &#32;&#32;&#32;&#32;<emphasis role="comment">//REG1&#32;=&#32;((REG1&#32;&lt;&lt;&#32;&#32;2)&#32;|&#32;REG1)&#32;&amp;&#32;glm::uint64(0x3333333333333333);</emphasis>
+96 &#32;&#32;&#32;&#32;<emphasis role="comment">//REG2&#32;=&#32;((REG2&#32;&lt;&lt;&#32;&#32;2)&#32;|&#32;REG2)&#32;&amp;&#32;glm::uint64(0x3333333333333333);</emphasis>
+97 &#32;&#32;&#32;&#32;Reg2&#32;=&#32;_mm_slli_epi32(Reg1,&#32;2);
+98 &#32;&#32;&#32;&#32;Reg1&#32;=&#32;_mm_or_si128(Reg2,&#32;Reg1);
+99 &#32;&#32;&#32;&#32;Reg1&#32;=&#32;_mm_and_si128(Reg1,&#32;Mask1);
+100 
+101 &#32;&#32;&#32;&#32;<emphasis role="comment">//REG1&#32;=&#32;((REG1&#32;&lt;&lt;&#32;&#32;1)&#32;|&#32;REG1)&#32;&amp;&#32;glm::uint64(0x5555555555555555);</emphasis>
+102 &#32;&#32;&#32;&#32;<emphasis role="comment">//REG2&#32;=&#32;((REG2&#32;&lt;&lt;&#32;&#32;1)&#32;|&#32;REG2)&#32;&amp;&#32;glm::uint64(0x5555555555555555);</emphasis>
+103 &#32;&#32;&#32;&#32;Reg2&#32;=&#32;_mm_slli_epi32(Reg1,&#32;1);
+104 &#32;&#32;&#32;&#32;Reg1&#32;=&#32;_mm_or_si128(Reg2,&#32;Reg1);
+105 &#32;&#32;&#32;&#32;Reg1&#32;=&#32;_mm_and_si128(Reg1,&#32;Mask0);
+106 
+107 &#32;&#32;&#32;&#32;<emphasis role="comment">//return&#32;REG1&#32;|&#32;(REG2&#32;&lt;&lt;&#32;1);</emphasis>
+108 &#32;&#32;&#32;&#32;Reg2&#32;=&#32;_mm_slli_epi32(Reg1,&#32;1);
+109 &#32;&#32;&#32;&#32;Reg2&#32;=&#32;<link linkend="__classes_2lib_2include_2emmintrin_8h_1a6184a7deed3960a115ba3b83ea370d44">_mm_srli_si128</link>(Reg2,&#32;8);
+110 &#32;&#32;&#32;&#32;Reg1&#32;=&#32;_mm_or_si128(Reg1,&#32;Reg2);
+111 
+112 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;Reg1;
+113 }
+114 
+115 <emphasis role="preprocessor">#endif</emphasis><emphasis role="comment">//GLM_ARCH&#32;&amp;&#32;GLM_ARCH_SSE2_BIT</emphasis>
+</programlisting></section>

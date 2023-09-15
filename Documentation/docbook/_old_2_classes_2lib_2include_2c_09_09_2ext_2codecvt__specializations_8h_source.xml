@@ -1,0 +1,513 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<section xmlns="http://docbook.org/ns/docbook" version="5.0" xmlns:xlink="http://www.w3.org/1999/xlink" xml:id="__old_2_classes_2lib_2include_2c_09_09_2ext_2codecvt__specializations_8h_source" xml:lang="en-US">
+<title>codecvt_specializations.h</title>
+<indexterm><primary>C:/Users/HP/Documents/GitHub/Minero-Game/Old/Classes/lib/include/c++/ext/codecvt_specializations.h</primary></indexterm>
+Go to the documentation of this file.<programlisting linenumbering="unnumbered">1 <emphasis role="comment">//&#32;Locale&#32;support&#32;(codecvt)&#32;-*-&#32;C++&#32;-*-</emphasis>
+2 
+3 <emphasis role="comment">//&#32;Copyright&#32;(C)&#32;2000-2022&#32;Free&#32;Software&#32;Foundation,&#32;Inc.</emphasis>
+4 <emphasis role="comment">//</emphasis>
+5 <emphasis role="comment">//&#32;This&#32;file&#32;is&#32;part&#32;of&#32;the&#32;GNU&#32;ISO&#32;C++&#32;Library.&#32;&#32;This&#32;library&#32;is&#32;free</emphasis>
+6 <emphasis role="comment">//&#32;software;&#32;you&#32;can&#32;redistribute&#32;it&#32;and/or&#32;modify&#32;it&#32;under&#32;the</emphasis>
+7 <emphasis role="comment">//&#32;terms&#32;of&#32;the&#32;GNU&#32;General&#32;Public&#32;License&#32;as&#32;published&#32;by&#32;the</emphasis>
+8 <emphasis role="comment">//&#32;Free&#32;Software&#32;Foundation;&#32;either&#32;version&#32;3,&#32;or&#32;(at&#32;your&#32;option)</emphasis>
+9 <emphasis role="comment">//&#32;any&#32;later&#32;version.</emphasis>
+10 
+11 <emphasis role="comment">//&#32;This&#32;library&#32;is&#32;distributed&#32;in&#32;the&#32;hope&#32;that&#32;it&#32;will&#32;be&#32;useful,</emphasis>
+12 <emphasis role="comment">//&#32;but&#32;WITHOUT&#32;ANY&#32;WARRANTY;&#32;without&#32;even&#32;the&#32;implied&#32;warranty&#32;of</emphasis>
+13 <emphasis role="comment">//&#32;MERCHANTABILITY&#32;or&#32;FITNESS&#32;FOR&#32;A&#32;PARTICULAR&#32;PURPOSE.&#32;&#32;See&#32;the</emphasis>
+14 <emphasis role="comment">//&#32;GNU&#32;General&#32;Public&#32;License&#32;for&#32;more&#32;details.</emphasis>
+15 
+16 <emphasis role="comment">//&#32;Under&#32;Section&#32;7&#32;of&#32;GPL&#32;version&#32;3,&#32;you&#32;are&#32;granted&#32;additional</emphasis>
+17 <emphasis role="comment">//&#32;permissions&#32;described&#32;in&#32;the&#32;GCC&#32;Runtime&#32;Library&#32;Exception,&#32;version</emphasis>
+18 <emphasis role="comment">//&#32;3.1,&#32;as&#32;published&#32;by&#32;the&#32;Free&#32;Software&#32;Foundation.</emphasis>
+19 
+20 <emphasis role="comment">//&#32;You&#32;should&#32;have&#32;received&#32;a&#32;copy&#32;of&#32;the&#32;GNU&#32;General&#32;Public&#32;License&#32;and</emphasis>
+21 <emphasis role="comment">//&#32;a&#32;copy&#32;of&#32;the&#32;GCC&#32;Runtime&#32;Library&#32;Exception&#32;along&#32;with&#32;this&#32;program;</emphasis>
+22 <emphasis role="comment">//&#32;see&#32;the&#32;files&#32;COPYING3&#32;and&#32;COPYING.RUNTIME&#32;respectively.&#32;&#32;If&#32;not,&#32;see</emphasis>
+23 <emphasis role="comment">//&#32;&lt;http://www.gnu.org/licenses/&gt;.</emphasis>
+24 
+25 <emphasis role="comment">//</emphasis>
+26 <emphasis role="comment">//&#32;ISO&#32;C++&#32;14882:&#32;22.2.1.5&#32;Template&#32;class&#32;codecvt</emphasis>
+27 <emphasis role="comment">//</emphasis>
+28 
+29 <emphasis role="comment">//&#32;Written&#32;by&#32;Benjamin&#32;Kosnik&#32;&lt;bkoz@redhat.com&gt;</emphasis>
+30 
+35 <emphasis role="preprocessor">#ifndef&#32;_EXT_CODECVT_SPECIALIZATIONS_H</emphasis>
+36 <emphasis role="preprocessor">#define&#32;_EXT_CODECVT_SPECIALIZATIONS_H&#32;1</emphasis>
+37 
+38 <emphasis role="preprocessor">#include&#32;&lt;bits/c++config.h&gt;</emphasis>
+39 <emphasis role="preprocessor">#include&#32;&lt;locale&gt;</emphasis>
+40 <emphasis role="preprocessor">#include&#32;&lt;iconv.h&gt;</emphasis>
+41 
+42 <emphasis role="keyword">namespace&#32;</emphasis><link linkend="_namespace____gnu__cxx">__gnu_cxx</link>&#32;<link linkend="__classes_2lib_2include_2c_09_09_2x86__64-w64-mingw32_2bits_2c_09_09config_8h_1a44377df0d3503f0b3d9ab316dd8ddf8b">_GLIBCXX_VISIBILITY</link>(default)
+43 {
+44 _GLIBCXX_BEGIN_NAMESPACE_VERSION
+45 _GLIBCXX_BEGIN_NAMESPACE_CXX11
+46 
+48 &#32;&#32;<emphasis role="comment">//&#32;This&#32;includes&#32;conversions&#32;and&#32;comparisons&#32;between&#32;various&#32;character</emphasis>
+49 &#32;&#32;<emphasis role="comment">//&#32;sets.&#32;&#32;This&#32;object&#32;encapsulates&#32;data&#32;that&#32;may&#32;need&#32;to&#32;be&#32;shared&#32;between</emphasis>
+50 &#32;&#32;<emphasis role="comment">//&#32;char_traits,&#32;codecvt&#32;and&#32;ctype.</emphasis>
+51 &#32;&#32;<emphasis role="keyword">class&#32;</emphasis>encoding_state
+52 &#32;&#32;{
+53 &#32;&#32;<emphasis role="keyword">public</emphasis>:
+54 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Types:&#32;</emphasis>
+55 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;NB:&#32;A&#32;conversion&#32;descriptor&#32;subsumes&#32;and&#32;enhances&#32;the</emphasis>
+56 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;functionality&#32;of&#32;a&#32;simple&#32;state&#32;type&#32;such&#32;as&#32;mbstate_t.</emphasis>
+57 &#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;iconv_t&#32;descriptor_type;
+58 &#32;&#32;&#32;&#32;
+59 &#32;&#32;<emphasis role="keyword">protected</emphasis>:
+60 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Name&#32;of&#32;internal&#32;character&#32;set&#32;encoding.</emphasis>
+61 &#32;&#32;&#32;&#32;std::string&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_M_int_enc;
+62 
+63 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Name&#32;of&#32;external&#32;character&#32;set&#32;encoding.</emphasis>
+64 &#32;&#32;&#32;&#32;std::string&#32;&#32;&#32;&#32;&#32;_M_ext_enc;
+65 
+66 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Conversion&#32;descriptor&#32;between&#32;external&#32;encoding&#32;to&#32;internal&#32;encoding.</emphasis>
+67 &#32;&#32;&#32;&#32;descriptor_type&#32;_M_in_desc;
+68 
+69 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Conversion&#32;descriptor&#32;between&#32;internal&#32;encoding&#32;to&#32;external&#32;encoding.</emphasis>
+70 &#32;&#32;&#32;&#32;descriptor_type&#32;_M_out_desc;
+71 
+72 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;The&#32;byte-order&#32;marker&#32;for&#32;the&#32;external&#32;encoding,&#32;if&#32;necessary.</emphasis>
+73 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_M_ext_bom;
+74 
+75 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;The&#32;byte-order&#32;marker&#32;for&#32;the&#32;internal&#32;encoding,&#32;if&#32;necessary.</emphasis>
+76 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_M_int_bom;
+77 
+78 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Number&#32;of&#32;external&#32;bytes&#32;needed&#32;to&#32;construct&#32;one&#32;complete</emphasis>
+79 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;character&#32;in&#32;the&#32;internal&#32;encoding.</emphasis>
+80 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;NB:&#32;-1&#32;indicates&#32;variable,&#32;or&#32;stateful,&#32;encodings.</emphasis>
+81 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_M_bytes;
+82 
+83 &#32;&#32;<emphasis role="keyword">public</emphasis>:
+84 &#32;&#32;&#32;&#32;<emphasis role="keyword">explicit</emphasis>&#32;
+85 &#32;&#32;&#32;&#32;encoding_state()&#32;
+86 &#32;&#32;&#32;&#32;:&#32;_M_in_desc(0),&#32;_M_out_desc(0),&#32;_M_ext_bom(0),&#32;_M_int_bom(0),&#32;_M_bytes(0)
+87 &#32;&#32;&#32;&#32;{&#32;}
+88 
+89 &#32;&#32;&#32;&#32;<emphasis role="keyword">explicit</emphasis>&#32;
+90 &#32;&#32;&#32;&#32;encoding_state(<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>*&#32;__int,&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>*&#32;__ext,&#32;
+91 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;__ibom&#32;=&#32;0,&#32;<emphasis role="keywordtype">int</emphasis>&#32;__ebom&#32;=&#32;0,&#32;<emphasis role="keywordtype">int</emphasis>&#32;__bytes&#32;=&#32;1)
+92 &#32;&#32;&#32;&#32;:&#32;_M_int_enc(__int),&#32;_M_ext_enc(__ext),&#32;_M_in_desc(0),&#32;_M_out_desc(0),&#32;
+93 &#32;&#32;&#32;&#32;&#32;&#32;_M_ext_bom(__ebom),&#32;_M_int_bom(__ibom),&#32;_M_bytes(__bytes)
+94 &#32;&#32;&#32;&#32;{&#32;init();&#32;}
+95 
+96 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;21.1.2&#32;traits&#32;typedefs</emphasis>
+97 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;p4</emphasis>
+98 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;typedef&#32;STATE_T&#32;state_type</emphasis>
+99 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;requires:&#32;state_type&#32;shall&#32;meet&#32;the&#32;requirements&#32;of</emphasis>
+100 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;CopyConstructible&#32;types&#32;(20.1.3)</emphasis>
+101 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;NB:&#32;This&#32;does&#32;not&#32;preserve&#32;the&#32;actual&#32;state&#32;of&#32;the&#32;conversion</emphasis>
+102 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;descriptor&#32;member,&#32;but&#32;it&#32;does&#32;duplicate&#32;the&#32;encoding</emphasis>
+103 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;information.</emphasis>
+104 &#32;&#32;&#32;&#32;encoding_state(<emphasis role="keyword">const</emphasis>&#32;encoding_state&amp;&#32;__obj)&#32;:&#32;_M_in_desc(0),&#32;_M_out_desc(0)
+105 &#32;&#32;&#32;&#32;{&#32;construct(__obj);&#32;}
+106 
+107 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Need&#32;assignment&#32;operator&#32;as&#32;well.</emphasis>
+108 &#32;&#32;&#32;&#32;encoding_state&amp;
+109 &#32;&#32;&#32;&#32;operator=(<emphasis role="keyword">const</emphasis>&#32;encoding_state&amp;&#32;__obj)
+110 &#32;&#32;&#32;&#32;{
+111 &#32;&#32;&#32;&#32;&#32;&#32;construct(__obj);
+112 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;*<emphasis role="keyword">this</emphasis>;
+113 &#32;&#32;&#32;&#32;}
+114 
+115 &#32;&#32;&#32;&#32;~encoding_state()
+116 &#32;&#32;&#32;&#32;{&#32;destroy();&#32;}&#32;
+117 
+118 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">bool</emphasis>
+119 &#32;&#32;&#32;&#32;good()&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordflow">throw</emphasis>()
+120 &#32;&#32;&#32;&#32;{&#32;
+121 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;descriptor_type&#32;__err&#32;=&#32;(iconv_t)(-1);
+122 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">bool</emphasis>&#32;__test&#32;=&#32;_M_in_desc&#32;&amp;&amp;&#32;_M_in_desc&#32;!=&#32;__err;&#32;
+123 &#32;&#32;&#32;&#32;&#32;&#32;__test&#32;&amp;=&#32;&#32;_M_out_desc&#32;&amp;&amp;&#32;_M_out_desc&#32;!=&#32;__err;
+124 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__test;
+125 &#32;&#32;&#32;&#32;}
+126 &#32;&#32;&#32;&#32;
+127 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>
+128 &#32;&#32;&#32;&#32;character_ratio()<emphasis role="keyword">&#32;const</emphasis>
+129 <emphasis role="keyword">&#32;&#32;&#32;&#32;</emphasis>{&#32;<emphasis role="keywordflow">return</emphasis>&#32;_M_bytes;&#32;}
+130 
+131 &#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;std::string
+132 &#32;&#32;&#32;&#32;internal_encoding()<emphasis role="keyword">&#32;const</emphasis>
+133 <emphasis role="keyword">&#32;&#32;&#32;&#32;</emphasis>{&#32;<emphasis role="keywordflow">return</emphasis>&#32;_M_int_enc;&#32;}
+134 
+135 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;
+136 &#32;&#32;&#32;&#32;internal_bom()<emphasis role="keyword">&#32;const</emphasis>
+137 <emphasis role="keyword">&#32;&#32;&#32;&#32;</emphasis>{&#32;<emphasis role="keywordflow">return</emphasis>&#32;_M_int_bom;&#32;}
+138 
+139 &#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;std::string
+140 &#32;&#32;&#32;&#32;external_encoding()<emphasis role="keyword">&#32;const</emphasis>
+141 <emphasis role="keyword">&#32;&#32;&#32;&#32;</emphasis>{&#32;<emphasis role="keywordflow">return</emphasis>&#32;_M_ext_enc;&#32;}
+142 
+143 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;
+144 &#32;&#32;&#32;&#32;external_bom()<emphasis role="keyword">&#32;const</emphasis>
+145 <emphasis role="keyword">&#32;&#32;&#32;&#32;</emphasis>{&#32;<emphasis role="keywordflow">return</emphasis>&#32;_M_ext_bom;&#32;}
+146 
+147 &#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;descriptor_type&amp;
+148 &#32;&#32;&#32;&#32;in_descriptor()<emphasis role="keyword">&#32;const</emphasis>
+149 <emphasis role="keyword">&#32;&#32;&#32;&#32;</emphasis>{&#32;<emphasis role="keywordflow">return</emphasis>&#32;_M_in_desc;&#32;}
+150 
+151 &#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;descriptor_type&amp;
+152 &#32;&#32;&#32;&#32;out_descriptor()<emphasis role="keyword">&#32;const</emphasis>
+153 <emphasis role="keyword">&#32;&#32;&#32;&#32;</emphasis>{&#32;<emphasis role="keywordflow">return</emphasis>&#32;_M_out_desc;&#32;}
+154 
+155 &#32;&#32;<emphasis role="keyword">protected</emphasis>:
+156 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+157 &#32;&#32;&#32;&#32;init()
+158 &#32;&#32;&#32;&#32;{
+159 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;descriptor_type&#32;__err&#32;=&#32;(iconv_t)(-1);
+160 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>&#32;__have_encodings&#32;=&#32;_M_int_enc.size()&#32;&amp;&amp;&#32;_M_ext_enc.size();
+161 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(!_M_in_desc&#32;&amp;&amp;&#32;__have_encodings)
+162 &#32;&#32;&#32;&#32;{
+163 &#32;&#32;&#32;&#32;&#32;&#32;_M_in_desc&#32;=&#32;iconv_open(_M_int_enc.c_str(),&#32;_M_ext_enc.c_str());
+164 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(_M_in_desc&#32;==&#32;__err)
+165 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;std::__throw_runtime_error(<link linkend="__classes_2lib_2include_2c_09_09_2x86__64-w64-mingw32_2bits_2c_09_09config_8h_1ad90b1fa000da1666f104c4dd9c0d7f9b">__N</link>(<emphasis role="stringliteral">&quot;encoding_state::_M_init&#32;&quot;</emphasis>
+166 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="stringliteral">&quot;creating&#32;iconv&#32;input&#32;descriptor&#32;failed&quot;</emphasis>));
+167 &#32;&#32;&#32;&#32;}
+168 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(!_M_out_desc&#32;&amp;&amp;&#32;__have_encodings)
+169 &#32;&#32;&#32;&#32;{
+170 &#32;&#32;&#32;&#32;&#32;&#32;_M_out_desc&#32;=&#32;iconv_open(_M_ext_enc.c_str(),&#32;_M_int_enc.c_str());
+171 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(_M_out_desc&#32;==&#32;__err)
+172 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;std::__throw_runtime_error(<link linkend="__classes_2lib_2include_2c_09_09_2x86__64-w64-mingw32_2bits_2c_09_09config_8h_1ad90b1fa000da1666f104c4dd9c0d7f9b">__N</link>(<emphasis role="stringliteral">&quot;encoding_state::_M_init&#32;&quot;</emphasis>
+173 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="stringliteral">&quot;creating&#32;iconv&#32;output&#32;descriptor&#32;failed&quot;</emphasis>));
+174 &#32;&#32;&#32;&#32;}
+175 &#32;&#32;&#32;&#32;}
+176 
+177 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+178 &#32;&#32;&#32;&#32;construct(<emphasis role="keyword">const</emphasis>&#32;encoding_state&amp;&#32;__obj)
+179 &#32;&#32;&#32;&#32;{
+180 &#32;&#32;&#32;&#32;&#32;&#32;destroy();
+181 &#32;&#32;&#32;&#32;&#32;&#32;_M_int_enc&#32;=&#32;__obj._M_int_enc;
+182 &#32;&#32;&#32;&#32;&#32;&#32;_M_ext_enc&#32;=&#32;__obj._M_ext_enc;
+183 &#32;&#32;&#32;&#32;&#32;&#32;_M_ext_bom&#32;=&#32;__obj._M_ext_bom;
+184 &#32;&#32;&#32;&#32;&#32;&#32;_M_int_bom&#32;=&#32;__obj._M_int_bom;
+185 &#32;&#32;&#32;&#32;&#32;&#32;_M_bytes&#32;=&#32;__obj._M_bytes;
+186 &#32;&#32;&#32;&#32;&#32;&#32;init();
+187 &#32;&#32;&#32;&#32;}
+188 
+189 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+190 &#32;&#32;&#32;&#32;destroy()&#32;<emphasis role="keywordflow">throw</emphasis>()
+191 &#32;&#32;&#32;&#32;{
+192 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;descriptor_type&#32;__err&#32;=&#32;(iconv_t)(-1);
+193 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(_M_in_desc&#32;&amp;&amp;&#32;_M_in_desc&#32;!=&#32;__err)&#32;
+194 &#32;&#32;&#32;&#32;{
+195 &#32;&#32;&#32;&#32;&#32;&#32;iconv_close(_M_in_desc);
+196 &#32;&#32;&#32;&#32;&#32;&#32;_M_in_desc&#32;=&#32;0;
+197 &#32;&#32;&#32;&#32;}
+198 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(_M_out_desc&#32;&amp;&amp;&#32;_M_out_desc&#32;!=&#32;__err)&#32;
+199 &#32;&#32;&#32;&#32;{
+200 &#32;&#32;&#32;&#32;&#32;&#32;iconv_close(_M_out_desc);
+201 &#32;&#32;&#32;&#32;&#32;&#32;_M_out_desc&#32;=&#32;0;
+202 &#32;&#32;&#32;&#32;}
+203 &#32;&#32;&#32;&#32;}
+204 &#32;&#32;};
+205 
+207 &#32;&#32;<emphasis role="comment">//&#32;Custom&#32;traits&#32;type&#32;with&#32;encoding_state&#32;for&#32;the&#32;state&#32;type,&#32;and&#32;the</emphasis>
+208 &#32;&#32;<emphasis role="comment">//&#32;associated&#32;fpos&lt;encoding_state&gt;&#32;for&#32;the&#32;position&#32;type,&#32;all&#32;other</emphasis>
+209 &#32;&#32;<emphasis role="comment">//&#32;bits&#32;equivalent&#32;to&#32;the&#32;required&#32;char_traits&#32;instantiations.</emphasis>
+210 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_CharT&gt;
+211 &#32;&#32;&#32;&#32;<emphasis role="keyword">struct&#32;</emphasis>encoding_char_traits
+212 &#32;&#32;&#32;&#32;:&#32;<emphasis role="keyword">public</emphasis>&#32;std::char_traits&lt;_CharT&gt;
+213 &#32;&#32;&#32;&#32;{
+214 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;encoding_state&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;state_type;
+215 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">typename</emphasis>&#32;std::fpos&lt;state_type&gt;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;pos_type;
+216 &#32;&#32;&#32;&#32;};
+217 
+218 _GLIBCXX_END_NAMESPACE_CXX11
+219 _GLIBCXX_END_NAMESPACE_VERSION
+220 }&#32;<emphasis role="comment">//&#32;namespace</emphasis>
+221 
+222 
+223 <emphasis role="keyword">namespace&#32;</emphasis><link linkend="_namespacestd">std</link>&#32;<link linkend="__classes_2lib_2include_2c_09_09_2x86__64-w64-mingw32_2bits_2c_09_09config_8h_1a44377df0d3503f0b3d9ab316dd8ddf8b">_GLIBCXX_VISIBILITY</link>(default)
+224 {
+225 _GLIBCXX_BEGIN_NAMESPACE_VERSION
+226 
+227 &#32;&#32;<emphasis role="keyword">using&#32;</emphasis>__gnu_cxx::encoding_state;
+228 
+230 &#32;&#32;<emphasis role="comment">//&#32;This&#32;partial&#32;specialization&#32;takes&#32;advantage&#32;of&#32;iconv&#32;to&#32;provide</emphasis>
+231 &#32;&#32;<emphasis role="comment">//&#32;code&#32;conversions&#32;between&#32;a&#32;large&#32;number&#32;of&#32;character&#32;encodings.</emphasis>
+232 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_InternT,&#32;<emphasis role="keyword">typename</emphasis>&#32;_ExternT&gt;
+233 &#32;&#32;&#32;&#32;<emphasis role="keyword">class&#32;</emphasis>codecvt&lt;_InternT,&#32;_ExternT,&#32;encoding_state&gt;
+234 &#32;&#32;&#32;&#32;:&#32;<emphasis role="keyword">public</emphasis>&#32;__codecvt_abstract_base&lt;_InternT,&#32;_ExternT,&#32;encoding_state&gt;
+235 &#32;&#32;&#32;&#32;{
+236 &#32;&#32;&#32;&#32;<emphasis role="keyword">public</emphasis>:&#32;&#32;&#32;&#32;&#32;&#32;
+237 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Types:</emphasis>
+238 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;codecvt_base::result&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2glm_2test_2core_2core__func__integer_8cpp_1a937d4dd628a8858b443a399410d2600b">result</link>;
+239 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;_InternT&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;intern_type;
+240 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;_ExternT&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;extern_type;
+241 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;__gnu_cxx::encoding_state&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;state_type;
+242 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;state_type::descriptor_type&#32;&#32;&#32;&#32;&#32;&#32;&#32;descriptor_type;
+243 
+244 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Data&#32;Members:</emphasis>
+245 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">static</emphasis>&#32;locale::id&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2external_2glfw_2src_2cocoa__platform_8h_1ae52362b10d585638f5b96140e90f1b7a">id</link>;
+246 
+247 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">explicit</emphasis>&#32;
+248 &#32;&#32;&#32;&#32;&#32;&#32;codecvt(<emphasis role="keywordtype">size_t</emphasis>&#32;__refs&#32;=&#32;0)
+249 &#32;&#32;&#32;&#32;&#32;&#32;:&#32;__codecvt_abstract_base&lt;intern_type,&#32;extern_type,&#32;state_type&gt;(__refs)
+250 &#32;&#32;&#32;&#32;&#32;&#32;{&#32;}
+251 
+252 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">explicit</emphasis>&#32;
+253 &#32;&#32;&#32;&#32;&#32;&#32;codecvt(state_type&amp;&#32;__enc,&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;__refs&#32;=&#32;0)
+254 &#32;&#32;&#32;&#32;&#32;&#32;:&#32;__codecvt_abstract_base&lt;intern_type,&#32;extern_type,&#32;state_type&gt;(__refs)
+255 &#32;&#32;&#32;&#32;&#32;&#32;{&#32;}
+256 
+257 &#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">protected</emphasis>:
+258 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">virtual</emphasis>&#32;
+259 &#32;&#32;&#32;&#32;&#32;&#32;~codecvt()&#32;{&#32;}
+260 
+261 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">virtual</emphasis>&#32;<link linkend="__classes_2lib_2glm_2test_2core_2core__func__integer_8cpp_1a937d4dd628a8858b443a399410d2600b">result</link>
+262 &#32;&#32;&#32;&#32;&#32;&#32;do_out(state_type&amp;&#32;__state,&#32;<emphasis role="keyword">const</emphasis>&#32;intern_type*&#32;__from,&#32;
+263 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;intern_type*&#32;__from_end,&#32;<emphasis role="keyword">const</emphasis>&#32;intern_type*&amp;&#32;__from_next,
+264 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;extern_type*&#32;__to,&#32;extern_type*&#32;__to_end,
+265 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;extern_type*&amp;&#32;__to_next)&#32;<emphasis role="keyword">const</emphasis>;
+266 
+267 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">virtual</emphasis>&#32;<link linkend="__classes_2lib_2glm_2test_2core_2core__func__integer_8cpp_1a937d4dd628a8858b443a399410d2600b">result</link>
+268 &#32;&#32;&#32;&#32;&#32;&#32;do_unshift(state_type&amp;&#32;__state,&#32;extern_type*&#32;__to,&#32;
+269 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;extern_type*&#32;__to_end,&#32;extern_type*&amp;&#32;__to_next)&#32;<emphasis role="keyword">const</emphasis>;
+270 
+271 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">virtual</emphasis>&#32;<link linkend="__classes_2lib_2glm_2test_2core_2core__func__integer_8cpp_1a937d4dd628a8858b443a399410d2600b">result</link>
+272 &#32;&#32;&#32;&#32;&#32;&#32;do_in(state_type&amp;&#32;__state,&#32;<emphasis role="keyword">const</emphasis>&#32;extern_type*&#32;__from,&#32;
+273 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;extern_type*&#32;__from_end,&#32;<emphasis role="keyword">const</emphasis>&#32;extern_type*&amp;&#32;__from_next,
+274 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;intern_type*&#32;__to,&#32;intern_type*&#32;__to_end,&#32;
+275 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;intern_type*&amp;&#32;__to_next)&#32;<emphasis role="keyword">const</emphasis>;
+276 
+277 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">virtual</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;
+278 &#32;&#32;&#32;&#32;&#32;&#32;do_encoding()&#32;<emphasis role="keyword">const</emphasis>&#32;throw();
+279 
+280 &#32;&#32;&#32;&#32;&#32;&#32;virtual&#32;<emphasis role="keywordtype">bool</emphasis>&#32;
+281 &#32;&#32;&#32;&#32;&#32;&#32;do_always_noconv()&#32;const&#32;throw();
+282 
+283 &#32;&#32;&#32;&#32;&#32;&#32;virtual&#32;<emphasis role="keywordtype">int</emphasis>&#32;
+284 &#32;&#32;&#32;&#32;&#32;&#32;do_length(state_type&amp;,&#32;const&#32;extern_type*&#32;__from,&#32;
+285 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;const&#32;extern_type*&#32;__end,&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;__max)&#32;const;
+286 
+287 &#32;&#32;&#32;&#32;&#32;&#32;virtual&#32;<emphasis role="keywordtype">int</emphasis>&#32;
+288 &#32;&#32;&#32;&#32;&#32;&#32;do_max_length()&#32;const&#32;throw();
+289 &#32;&#32;&#32;&#32;};
+290 
+291 &#32;&#32;template&lt;typename&#32;_InternT,&#32;typename&#32;_ExternT&gt;
+292 &#32;&#32;&#32;&#32;locale::<emphasis role="keywordtype">id</emphasis>&#32;
+293 &#32;&#32;&#32;&#32;codecvt&lt;_InternT,&#32;_ExternT,&#32;encoding_state&gt;::<emphasis role="keywordtype">id</emphasis>;
+294 
+295 &#32;&#32;<emphasis role="comment">//&#32;This&#32;adaptor&#32;works&#32;around&#32;the&#32;signature&#32;problems&#32;of&#32;the&#32;second</emphasis>
+296 &#32;&#32;<emphasis role="comment">//&#32;argument&#32;to&#32;iconv():&#32;&#32;SUSv2&#32;and&#32;others&#32;use&#32;&apos;const&#32;char**&apos;,&#32;but&#32;glibc&#32;2.2</emphasis>
+297 &#32;&#32;<emphasis role="comment">//&#32;uses&#32;&apos;char**&apos;,&#32;which&#32;matches&#32;the&#32;POSIX&#32;1003.1-2001&#32;standard.</emphasis>
+298 &#32;&#32;<emphasis role="comment">//&#32;Using&#32;this&#32;adaptor,&#32;g++&#32;will&#32;do&#32;the&#32;work&#32;for&#32;us.</emphasis>
+299 &#32;&#32;template&lt;typename&#32;_Tp&gt;
+300 &#32;&#32;&#32;&#32;inline&#32;<emphasis role="keywordtype">size_t</emphasis>
+301 &#32;&#32;&#32;&#32;__iconv_adaptor(<emphasis role="keywordtype">size_t</emphasis>(*__func)(iconv_t,&#32;_Tp,&#32;<emphasis role="keywordtype">size_t</emphasis>*,&#32;<emphasis role="keywordtype">char</emphasis>**,&#32;<emphasis role="keywordtype">size_t</emphasis>*),
+302 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;iconv_t&#32;__cd,&#32;<emphasis role="keywordtype">char</emphasis>**&#32;__inbuf,&#32;<emphasis role="keywordtype">size_t</emphasis>*&#32;__inbytes,
+303 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">char</emphasis>**&#32;__outbuf,&#32;<emphasis role="keywordtype">size_t</emphasis>*&#32;__outbytes)
+304 &#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;__func(__cd,&#32;(_Tp)__inbuf,&#32;__inbytes,&#32;__outbuf,&#32;__outbytes);&#32;}
+305 
+306 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_InternT,&#32;<emphasis role="keyword">typename</emphasis>&#32;_ExternT&gt;
+307 &#32;&#32;&#32;&#32;codecvt_base::result
+308 &#32;&#32;&#32;&#32;codecvt&lt;_InternT,&#32;_ExternT,&#32;encoding_state&gt;::
+309 &#32;&#32;&#32;&#32;do_out(state_type&amp;&#32;__state,&#32;<emphasis role="keyword">const</emphasis>&#32;intern_type*&#32;__from,&#32;
+310 &#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;intern_type*&#32;__from_end,&#32;<emphasis role="keyword">const</emphasis>&#32;intern_type*&amp;&#32;__from_next,
+311 &#32;&#32;&#32;&#32;&#32;&#32;&#32;extern_type*&#32;__to,&#32;extern_type*&#32;__to_end,
+312 &#32;&#32;&#32;&#32;&#32;&#32;&#32;extern_type*&amp;&#32;__to_next)<emphasis role="keyword">&#32;const</emphasis>
+313 <emphasis role="keyword">&#32;&#32;&#32;&#32;</emphasis>{
+314 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2glm_2test_2core_2core__func__integer_8cpp_1a937d4dd628a8858b443a399410d2600b">result</link>&#32;__ret&#32;=&#32;codecvt_base::error;
+315 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__state.good())
+316 &#32;&#32;&#32;&#32;{
+317 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;descriptor_type&amp;&#32;__desc&#32;=&#32;__state.out_descriptor();
+318 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;__fmultiple&#32;=&#32;<emphasis role="keyword">sizeof</emphasis>(intern_type);
+319 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;__fbytes&#32;=&#32;__fmultiple&#32;*&#32;(__from_end&#32;-&#32;__from);
+320 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;__tmultiple&#32;=&#32;<emphasis role="keyword">sizeof</emphasis>(extern_type);
+321 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;__tbytes&#32;=&#32;__tmultiple&#32;*&#32;(__to_end&#32;-&#32;__to);&#32;
+322 &#32;&#32;&#32;&#32;&#32;&#32;
+323 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Argument&#32;list&#32;for&#32;iconv&#32;specifies&#32;a&#32;byte&#32;sequence.&#32;Thus,</emphasis>
+324 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;all&#32;to/from&#32;arrays&#32;must&#32;be&#32;brutally&#32;casted&#32;to&#32;char*.</emphasis>
+325 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">char</emphasis>*&#32;__cto&#32;=&#32;<emphasis role="keyword">reinterpret_cast&lt;</emphasis><emphasis role="keywordtype">char</emphasis>*<emphasis role="keyword">&gt;</emphasis>(__to);
+326 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">char</emphasis>*&#32;__cfrom;
+327 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;__conv;
+328 
+329 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Some&#32;encodings&#32;need&#32;a&#32;byte&#32;order&#32;marker&#32;as&#32;the&#32;first&#32;item</emphasis>
+330 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;in&#32;the&#32;byte&#32;stream,&#32;to&#32;designate&#32;endian-ness.&#32;The&#32;default</emphasis>
+331 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;value&#32;for&#32;the&#32;byte&#32;order&#32;marker&#32;is&#32;NULL,&#32;so&#32;if&#32;this&#32;is</emphasis>
+332 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;the&#32;case,&#32;it&apos;s&#32;not&#32;necessary&#32;and&#32;we&#32;can&#32;just&#32;go&#32;on&#32;our</emphasis>
+333 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;merry&#32;way.</emphasis>
+334 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;__int_bom&#32;=&#32;__state.internal_bom();
+335 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__int_bom)
+336 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{&#32;&#32;&#32;&#32;&#32;
+337 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;__size&#32;=&#32;__from_end&#32;-&#32;__from;
+338 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;intern_type*&#32;__cfixed&#32;=&#32;<emphasis role="keyword">static_cast&lt;</emphasis>intern_type*<emphasis role="keyword">&gt;</emphasis>
+339 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;(__builtin_alloca(<emphasis role="keyword">sizeof</emphasis>(intern_type)&#32;*&#32;(__size&#32;+&#32;1)));
+340 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__cfixed[0]&#32;=&#32;<emphasis role="keyword">static_cast&lt;</emphasis>intern_type<emphasis role="keyword">&gt;</emphasis>(__int_bom);
+341 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;char_traits&lt;intern_type&gt;::copy(__cfixed&#32;+&#32;1,&#32;__from,&#32;__size);
+342 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__cfrom&#32;=&#32;<emphasis role="keyword">reinterpret_cast&lt;</emphasis><emphasis role="keywordtype">char</emphasis>*<emphasis role="keyword">&gt;</emphasis>(__cfixed);
+343 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__conv&#32;=&#32;__iconv_adaptor(iconv,&#32;__desc,&#32;&amp;__cfrom,
+344 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&amp;__fbytes,&#32;&amp;__cto,&#32;&amp;__tbytes);&#32;
+345 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+346 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>
+347 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+348 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;intern_type*&#32;__cfixed&#32;=&#32;<emphasis role="keyword">const_cast&lt;</emphasis>intern_type*<emphasis role="keyword">&gt;</emphasis>(__from);
+349 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__cfrom&#32;=&#32;<emphasis role="keyword">reinterpret_cast&lt;</emphasis><emphasis role="keywordtype">char</emphasis>*<emphasis role="keyword">&gt;</emphasis>(__cfixed);
+350 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__conv&#32;=&#32;__iconv_adaptor(iconv,&#32;__desc,&#32;&amp;__cfrom,&#32;&amp;__fbytes,&#32;
+351 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&amp;__cto,&#32;&amp;__tbytes);&#32;
+352 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+353 
+354 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__conv&#32;!=&#32;<emphasis role="keywordtype">size_t</emphasis>(-1))
+355 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+356 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__from_next&#32;=&#32;<emphasis role="keyword">reinterpret_cast&lt;</emphasis><emphasis role="keyword">const&#32;</emphasis>intern_type*<emphasis role="keyword">&gt;</emphasis>(__cfrom);
+357 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__to_next&#32;=&#32;<emphasis role="keyword">reinterpret_cast&lt;</emphasis>extern_type*<emphasis role="keyword">&gt;</emphasis>(__cto);
+358 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__ret&#32;=&#32;codecvt_base::ok;
+359 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+360 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>&#32;
+361 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+362 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__fbytes&#32;&lt;&#32;__fmultiple&#32;*&#32;(__from_end&#32;-&#32;__from))
+363 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+364 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__from_next&#32;=&#32;<emphasis role="keyword">reinterpret_cast&lt;</emphasis><emphasis role="keyword">const&#32;</emphasis>intern_type*<emphasis role="keyword">&gt;</emphasis>(__cfrom);
+365 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__to_next&#32;=&#32;<emphasis role="keyword">reinterpret_cast&lt;</emphasis>extern_type*<emphasis role="keyword">&gt;</emphasis>(__cto);
+366 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__ret&#32;=&#32;codecvt_base::partial;
+367 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+368 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>
+369 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__ret&#32;=&#32;codecvt_base::error;
+370 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+371 &#32;&#32;&#32;&#32;}
+372 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__ret;&#32;
+373 &#32;&#32;&#32;&#32;}
+374 
+375 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_InternT,&#32;<emphasis role="keyword">typename</emphasis>&#32;_ExternT&gt;
+376 &#32;&#32;&#32;&#32;codecvt_base::result
+377 &#32;&#32;&#32;&#32;codecvt&lt;_InternT,&#32;_ExternT,&#32;encoding_state&gt;::
+378 &#32;&#32;&#32;&#32;do_unshift(state_type&amp;&#32;__state,&#32;extern_type*&#32;__to,&#32;
+379 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;extern_type*&#32;__to_end,&#32;extern_type*&amp;&#32;__to_next)<emphasis role="keyword">&#32;const</emphasis>
+380 <emphasis role="keyword">&#32;&#32;&#32;&#32;</emphasis>{
+381 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2glm_2test_2core_2core__func__integer_8cpp_1a937d4dd628a8858b443a399410d2600b">result</link>&#32;__ret&#32;=&#32;codecvt_base::error;
+382 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__state.good())
+383 &#32;&#32;&#32;&#32;{
+384 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;descriptor_type&amp;&#32;__desc&#32;=&#32;__state.in_descriptor();
+385 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;__tmultiple&#32;=&#32;<emphasis role="keyword">sizeof</emphasis>(intern_type);
+386 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;__tlen&#32;=&#32;__tmultiple&#32;*&#32;(__to_end&#32;-&#32;__to);&#32;
+387 &#32;&#32;&#32;&#32;&#32;&#32;
+388 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Argument&#32;list&#32;for&#32;iconv&#32;specifies&#32;a&#32;byte&#32;sequence.&#32;Thus,</emphasis>
+389 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;all&#32;to/from&#32;arrays&#32;must&#32;be&#32;brutally&#32;casted&#32;to&#32;char*.</emphasis>
+390 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">char</emphasis>*&#32;__cto&#32;=&#32;<emphasis role="keyword">reinterpret_cast&lt;</emphasis><emphasis role="keywordtype">char</emphasis>*<emphasis role="keyword">&gt;</emphasis>(__to);
+391 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;__conv&#32;=&#32;__iconv_adaptor(iconv,__desc,&#32;0,&#32;0,
+392 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&amp;__cto,&#32;&amp;__tlen);&#32;
+393 &#32;&#32;&#32;&#32;&#32;&#32;
+394 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__conv&#32;!=&#32;<emphasis role="keywordtype">size_t</emphasis>(-1))
+395 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+396 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__to_next&#32;=&#32;<emphasis role="keyword">reinterpret_cast&lt;</emphasis>extern_type*<emphasis role="keyword">&gt;</emphasis>(__cto);
+397 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__tlen&#32;==&#32;__tmultiple&#32;*&#32;(__to_end&#32;-&#32;__to))
+398 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__ret&#32;=&#32;codecvt_base::noconv;
+399 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__tlen&#32;==&#32;0)
+400 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__ret&#32;=&#32;codecvt_base::ok;
+401 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>
+402 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__ret&#32;=&#32;codecvt_base::partial;
+403 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+404 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>&#32;
+405 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__ret&#32;=&#32;codecvt_base::error;
+406 &#32;&#32;&#32;&#32;}
+407 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__ret;&#32;
+408 &#32;&#32;&#32;&#32;}
+409 &#32;&#32;&#32;
+410 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_InternT,&#32;<emphasis role="keyword">typename</emphasis>&#32;_ExternT&gt;
+411 &#32;&#32;&#32;&#32;codecvt_base::result
+412 &#32;&#32;&#32;&#32;codecvt&lt;_InternT,&#32;_ExternT,&#32;encoding_state&gt;::
+413 &#32;&#32;&#32;&#32;do_in(state_type&amp;&#32;__state,&#32;<emphasis role="keyword">const</emphasis>&#32;extern_type*&#32;__from,&#32;
+414 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;extern_type*&#32;__from_end,&#32;<emphasis role="keyword">const</emphasis>&#32;extern_type*&amp;&#32;__from_next,
+415 &#32;&#32;&#32;&#32;&#32;&#32;intern_type*&#32;__to,&#32;intern_type*&#32;__to_end,&#32;
+416 &#32;&#32;&#32;&#32;&#32;&#32;intern_type*&amp;&#32;__to_next)<emphasis role="keyword">&#32;const</emphasis>
+417 <emphasis role="keyword">&#32;&#32;&#32;&#32;</emphasis>{&#32;
+418 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2glm_2test_2core_2core__func__integer_8cpp_1a937d4dd628a8858b443a399410d2600b">result</link>&#32;__ret&#32;=&#32;codecvt_base::error;
+419 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__state.good())
+420 &#32;&#32;&#32;&#32;{
+421 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;descriptor_type&amp;&#32;__desc&#32;=&#32;__state.in_descriptor();
+422 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;__fmultiple&#32;=&#32;<emphasis role="keyword">sizeof</emphasis>(extern_type);
+423 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;__flen&#32;=&#32;__fmultiple&#32;*&#32;(__from_end&#32;-&#32;__from);
+424 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;__tmultiple&#32;=&#32;<emphasis role="keyword">sizeof</emphasis>(intern_type);
+425 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;__tlen&#32;=&#32;__tmultiple&#32;*&#32;(__to_end&#32;-&#32;__to);&#32;
+426 &#32;&#32;&#32;&#32;&#32;&#32;
+427 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Argument&#32;list&#32;for&#32;iconv&#32;specifies&#32;a&#32;byte&#32;sequence.&#32;Thus,</emphasis>
+428 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;all&#32;to/from&#32;arrays&#32;must&#32;be&#32;brutally&#32;casted&#32;to&#32;char*.</emphasis>
+429 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">char</emphasis>*&#32;__cto&#32;=&#32;<emphasis role="keyword">reinterpret_cast&lt;</emphasis><emphasis role="keywordtype">char</emphasis>*<emphasis role="keyword">&gt;</emphasis>(__to);
+430 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">char</emphasis>*&#32;__cfrom;
+431 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;__conv;
+432 
+433 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Some&#32;encodings&#32;need&#32;a&#32;byte&#32;order&#32;marker&#32;as&#32;the&#32;first&#32;item</emphasis>
+434 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;in&#32;the&#32;byte&#32;stream,&#32;to&#32;designate&#32;endian-ness.&#32;The&#32;default</emphasis>
+435 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;value&#32;for&#32;the&#32;byte&#32;order&#32;marker&#32;is&#32;NULL,&#32;so&#32;if&#32;this&#32;is</emphasis>
+436 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;the&#32;case,&#32;it&apos;s&#32;not&#32;necessary&#32;and&#32;we&#32;can&#32;just&#32;go&#32;on&#32;our</emphasis>
+437 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;merry&#32;way.</emphasis>
+438 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;__ext_bom&#32;=&#32;__state.external_bom();
+439 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__ext_bom)
+440 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{&#32;&#32;&#32;&#32;&#32;
+441 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;__size&#32;=&#32;__from_end&#32;-&#32;__from;
+442 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;extern_type*&#32;__cfixed&#32;=&#32;&#32;<emphasis role="keyword">static_cast&lt;</emphasis>extern_type*<emphasis role="keyword">&gt;</emphasis>
+443 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;(__builtin_alloca(<emphasis role="keyword">sizeof</emphasis>(extern_type)&#32;*&#32;(__size&#32;+&#32;1)));
+444 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__cfixed[0]&#32;=&#32;<emphasis role="keyword">static_cast&lt;</emphasis>extern_type<emphasis role="keyword">&gt;</emphasis>(__ext_bom);
+445 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;char_traits&lt;extern_type&gt;::copy(__cfixed&#32;+&#32;1,&#32;__from,&#32;__size);
+446 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__cfrom&#32;=&#32;<emphasis role="keyword">reinterpret_cast&lt;</emphasis><emphasis role="keywordtype">char</emphasis>*<emphasis role="keyword">&gt;</emphasis>(__cfixed);
+447 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__conv&#32;=&#32;__iconv_adaptor(iconv,&#32;__desc,&#32;&amp;__cfrom,
+448 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&amp;__flen,&#32;&amp;__cto,&#32;&amp;__tlen);&#32;
+449 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+450 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>
+451 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+452 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;extern_type*&#32;__cfixed&#32;=&#32;<emphasis role="keyword">const_cast&lt;</emphasis>extern_type*<emphasis role="keyword">&gt;</emphasis>(__from);
+453 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__cfrom&#32;=&#32;<emphasis role="keyword">reinterpret_cast&lt;</emphasis><emphasis role="keywordtype">char</emphasis>*<emphasis role="keyword">&gt;</emphasis>(__cfixed);
+454 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__conv&#32;=&#32;__iconv_adaptor(iconv,&#32;__desc,&#32;&amp;__cfrom,
+455 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&amp;__flen,&#32;&amp;__cto,&#32;&amp;__tlen);&#32;
+456 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+457 
+458 &#32;&#32;&#32;&#32;&#32;&#32;
+459 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__conv&#32;!=&#32;<emphasis role="keywordtype">size_t</emphasis>(-1))
+460 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+461 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__from_next&#32;=&#32;<emphasis role="keyword">reinterpret_cast&lt;</emphasis><emphasis role="keyword">const&#32;</emphasis>extern_type*<emphasis role="keyword">&gt;</emphasis>(__cfrom);
+462 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__to_next&#32;=&#32;<emphasis role="keyword">reinterpret_cast&lt;</emphasis>intern_type*<emphasis role="keyword">&gt;</emphasis>(__cto);
+463 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__ret&#32;=&#32;codecvt_base::ok;
+464 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+465 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>&#32;
+466 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+467 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__flen&#32;&lt;&#32;<emphasis role="keyword">static_cast&lt;</emphasis><emphasis role="keywordtype">size_t</emphasis><emphasis role="keyword">&gt;</emphasis>(__from_end&#32;-&#32;__from))
+468 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+469 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__from_next&#32;=&#32;<emphasis role="keyword">reinterpret_cast&lt;</emphasis><emphasis role="keyword">const&#32;</emphasis>extern_type*<emphasis role="keyword">&gt;</emphasis>(__cfrom);
+470 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__to_next&#32;=&#32;<emphasis role="keyword">reinterpret_cast&lt;</emphasis>intern_type*<emphasis role="keyword">&gt;</emphasis>(__cto);
+471 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__ret&#32;=&#32;codecvt_base::partial;
+472 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+473 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>
+474 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__ret&#32;=&#32;codecvt_base::error;
+475 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+476 &#32;&#32;&#32;&#32;}
+477 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__ret;&#32;
+478 &#32;&#32;&#32;&#32;}
+479 &#32;&#32;
+480 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_InternT,&#32;<emphasis role="keyword">typename</emphasis>&#32;_ExternT&gt;
+481 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;
+482 &#32;&#32;&#32;&#32;codecvt&lt;_InternT,&#32;_ExternT,&#32;encoding_state&gt;::
+483 &#32;&#32;&#32;&#32;do_encoding()&#32;<emphasis role="keyword">const</emphasis>&#32;throw()
+484 &#32;&#32;&#32;&#32;{
+485 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;__ret&#32;=&#32;0;
+486 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(<emphasis role="keyword">sizeof</emphasis>(_ExternT)&#32;&lt;=&#32;<emphasis role="keyword">sizeof</emphasis>(_InternT))
+487 &#32;&#32;&#32;&#32;__ret&#32;=&#32;<emphasis role="keyword">sizeof</emphasis>(_InternT)&#32;/&#32;<emphasis role="keyword">sizeof</emphasis>(_ExternT);
+488 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__ret;&#32;
+489 &#32;&#32;&#32;&#32;}
+490 &#32;&#32;
+491 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_InternT,&#32;<emphasis role="keyword">typename</emphasis>&#32;_ExternT&gt;
+492 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">bool</emphasis>&#32;
+493 &#32;&#32;&#32;&#32;codecvt&lt;_InternT,&#32;_ExternT,&#32;encoding_state&gt;::
+494 &#32;&#32;&#32;&#32;do_always_noconv()&#32;<emphasis role="keyword">const</emphasis>&#32;throw()
+495 &#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;<emphasis role="keyword">false</emphasis>;&#32;}
+496 &#32;&#32;
+497 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_InternT,&#32;<emphasis role="keyword">typename</emphasis>&#32;_ExternT&gt;
+498 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;
+499 &#32;&#32;&#32;&#32;codecvt&lt;_InternT,&#32;_ExternT,&#32;encoding_state&gt;::
+500 &#32;&#32;&#32;&#32;do_length(state_type&amp;,&#32;<emphasis role="keyword">const</emphasis>&#32;extern_type*&#32;__from,&#32;
+501 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;extern_type*&#32;__end,&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;__max)<emphasis role="keyword">&#32;const</emphasis>
+502 <emphasis role="keyword">&#32;&#32;&#32;&#32;</emphasis>{&#32;<emphasis role="keywordflow">return</emphasis>&#32;std::min(__max,&#32;<emphasis role="keyword">static_cast&lt;</emphasis><emphasis role="keywordtype">size_t</emphasis><emphasis role="keyword">&gt;</emphasis>(__end&#32;-&#32;__from));&#32;}
+503 
+504 &#32;&#32;<emphasis role="comment">//&#32;_GLIBCXX_RESOLVE_LIB_DEFECTS</emphasis>
+505 &#32;&#32;<emphasis role="comment">//&#32;74.&#32;&#32;Garbled&#32;text&#32;for&#32;codecvt::do_max_length</emphasis>
+506 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_InternT,&#32;<emphasis role="keyword">typename</emphasis>&#32;_ExternT&gt;
+507 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;
+508 &#32;&#32;&#32;&#32;codecvt&lt;_InternT,&#32;_ExternT,&#32;encoding_state&gt;::
+509 &#32;&#32;&#32;&#32;do_max_length()&#32;<emphasis role="keyword">const</emphasis>&#32;throw()
+510 &#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;1;&#32;}
+511 
+512 _GLIBCXX_END_NAMESPACE_VERSION
+513 }&#32;<emphasis role="comment">//&#32;namespace</emphasis>
+514 
+515 <emphasis role="preprocessor">#endif</emphasis>
+</programlisting></section>

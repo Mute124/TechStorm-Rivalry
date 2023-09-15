@@ -1,0 +1,1164 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<section xmlns="http://docbook.org/ns/docbook" version="5.0" xmlns:xlink="http://www.w3.org/1999/xlink" xml:id="__classes_2lib_2include_2c_09_09_2pstl_2glue__algorithm__impl_8h_source" xml:lang="en-US">
+<title>glue_algorithm_impl.h</title>
+<indexterm><primary>C:/Users/HP/Documents/GitHub/Minero-Game/Classes/lib/include/c++/pstl/glue_algorithm_impl.h</primary></indexterm>
+Go to the documentation of this file.<programlisting linenumbering="unnumbered">1 <emphasis role="comment">//&#32;-*-&#32;C++&#32;-*-</emphasis>
+2 <emphasis role="comment">//===--&#32;glue_algorithm_impl.h&#32;---------------------------------------------===//</emphasis>
+3 <emphasis role="comment">//</emphasis>
+4 <emphasis role="comment">//&#32;Part&#32;of&#32;the&#32;LLVM&#32;Project,&#32;under&#32;the&#32;Apache&#32;License&#32;v2.0&#32;with&#32;LLVM&#32;Exceptions.</emphasis>
+5 <emphasis role="comment">//&#32;See&#32;https://llvm.org/LICENSE.txt&#32;for&#32;license&#32;information.</emphasis>
+6 <emphasis role="comment">//&#32;SPDX-License-Identifier:&#32;Apache-2.0&#32;WITH&#32;LLVM-exception</emphasis>
+7 <emphasis role="comment">//</emphasis>
+8 <emphasis role="comment">//===----------------------------------------------------------------------===//</emphasis>
+9 
+10 <emphasis role="preprocessor">#ifndef&#32;_PSTL_GLUE_ALGORITHM_IMPL_H</emphasis>
+11 <emphasis role="preprocessor">#define&#32;_PSTL_GLUE_ALGORITHM_IMPL_H</emphasis>
+12 
+13 <emphasis role="preprocessor">#include&#32;&lt;functional&gt;</emphasis>
+14 
+15 <emphasis role="preprocessor">#include&#32;&quot;<link linkend="__old_2_classes_2lib_2include_2c_09_09_2pstl_2execution__defs_8h">execution_defs.h</link>&quot;</emphasis>
+16 <emphasis role="preprocessor">#include&#32;&quot;<link linkend="__old_2_classes_2lib_2utils_8h">utils.h</link>&quot;</emphasis>
+17 <emphasis role="preprocessor">#include&#32;&quot;<link linkend="__old_2_classes_2lib_2include_2c_09_09_2pstl_2algorithm__fwd_8h">algorithm_fwd.h</link>&quot;</emphasis>
+18 <emphasis role="preprocessor">#include&#32;&quot;<link linkend="__old_2_classes_2lib_2include_2c_09_09_2pstl_2numeric__fwd_8h">numeric_fwd.h</link>&quot;</emphasis>&#32;<emphasis role="comment">/*&#32;count&#32;and&#32;count_if&#32;use&#32;__pattern_transform_reduce&#32;*/</emphasis>
+19 
+20 <emphasis role="keyword">namespace&#32;</emphasis><link linkend="_namespacestd">std</link>
+21 {
+22 
+23 <emphasis role="comment">//&#32;[alg.any_of]</emphasis>
+24 
+25 <emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">class</emphasis>&#32;_ExecutionPolicy,&#32;<emphasis role="keyword">class</emphasis>&#32;_ForwardIterator,&#32;<emphasis role="keyword">class</emphasis>&#32;_Predicate&gt;
+26 <link linkend="_namespace____pstl_1_1____internal_1a6955c3b3eeac7ccfa9a8ae5da85b9f2a">__pstl::__internal::__enable_if_execution_policy&lt;_ExecutionPolicy, bool&gt;</link>
+27 <link linkend="_namespacestd_1a9dc98b4fd1f056dcea526d7b9b90ba7f">any_of</link>(_ExecutionPolicy&amp;&amp;&#32;__exec,&#32;_ForwardIterator&#32;__first,&#32;_ForwardIterator&#32;__last,&#32;_Predicate&#32;__pred)
+28 {
+29 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="_namespace____pstl_1_1____internal_1abab9a13bd7c30a7e4c10aafb238323dd">__pstl::__internal::__pattern_any_of</link>(
+30 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;std::forward&lt;_ExecutionPolicy&gt;(__exec),&#32;__first,&#32;__last,&#32;__pred,
+31 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__pstl::__internal::__is_vectorization_preferred&lt;_ExecutionPolicy,&#32;_ForwardIterator&gt;(__exec),
+32 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__pstl::__internal::__is_parallelization_preferred&lt;_ExecutionPolicy,&#32;_ForwardIterator&gt;(__exec));
+33 }
+34 
+35 <emphasis role="comment">//&#32;[alg.all_of]</emphasis>
+36 
+37 <emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">class</emphasis>&#32;_ExecutionPolicy,&#32;<emphasis role="keyword">class</emphasis>&#32;_ForwardIterator,&#32;<emphasis role="keyword">class</emphasis>&#32;_Pred&gt;
+38 <link linkend="_namespace____pstl_1_1____internal_1a6955c3b3eeac7ccfa9a8ae5da85b9f2a">__pstl::__internal::__enable_if_execution_policy&lt;_ExecutionPolicy, bool&gt;</link>
+39 <link linkend="_namespacestd_1af69ea32ebd7865fb57714d6b5f12f26d">all_of</link>(_ExecutionPolicy&amp;&amp;&#32;__exec,&#32;_ForwardIterator&#32;__first,&#32;_ForwardIterator&#32;__last,&#32;_Pred&#32;__pred)
+40 {
+41 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;!<link linkend="_namespacestd_1a9dc98b4fd1f056dcea526d7b9b90ba7f">std::any_of</link>(std::forward&lt;_ExecutionPolicy&gt;(__exec),&#32;__first,&#32;__last,&#32;std::not_fn(__pred));
+42 }
+43 
+44 <emphasis role="comment">//&#32;[alg.none_of]</emphasis>
+45 
+46 <emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">class</emphasis>&#32;_ExecutionPolicy,&#32;<emphasis role="keyword">class</emphasis>&#32;_ForwardIterator,&#32;<emphasis role="keyword">class</emphasis>&#32;_Predicate&gt;
+47 <link linkend="_namespace____pstl_1_1____internal_1a6955c3b3eeac7ccfa9a8ae5da85b9f2a">__pstl::__internal::__enable_if_execution_policy&lt;_ExecutionPolicy, bool&gt;</link>
+48 <link linkend="_namespacestd_1a9ed705e7dfee41b5d879e6e0450cbc6c">none_of</link>(_ExecutionPolicy&amp;&amp;&#32;__exec,&#32;_ForwardIterator&#32;__first,&#32;_ForwardIterator&#32;__last,&#32;_Predicate&#32;__pred)
+49 {
+50 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;!<link linkend="_namespacestd_1a9dc98b4fd1f056dcea526d7b9b90ba7f">std::any_of</link>(std::forward&lt;_ExecutionPolicy&gt;(__exec),&#32;__first,&#32;__last,&#32;__pred);
+51 }
+52 
+53 <emphasis role="comment">//&#32;[alg.foreach]</emphasis>
+54 
+55 <emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">class</emphasis>&#32;_ExecutionPolicy,&#32;<emphasis role="keyword">class</emphasis>&#32;_ForwardIterator,&#32;<emphasis role="keyword">class</emphasis>&#32;_Function&gt;
+56 <link linkend="_namespace____pstl_1_1____internal_1a6955c3b3eeac7ccfa9a8ae5da85b9f2a">__pstl::__internal::__enable_if_execution_policy&lt;_ExecutionPolicy, void&gt;</link>
+57 <link linkend="_namespacestd_1aefb696460665211a0f32f8a15f444c57">for_each</link>(_ExecutionPolicy&amp;&amp;&#32;__exec,&#32;_ForwardIterator&#32;__first,&#32;_ForwardIterator&#32;__last,&#32;_Function&#32;__f)
+58 {
+59 &#32;&#32;&#32;&#32;<link linkend="_namespace____pstl_1_1____internal_1ab0763e7038c1a483b7905a47fb58f051">__pstl::__internal::__pattern_walk1</link>(
+60 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;std::forward&lt;_ExecutionPolicy&gt;(__exec),&#32;__first,&#32;__last,&#32;__f,
+61 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__pstl::__internal::__is_vectorization_preferred&lt;_ExecutionPolicy,&#32;_ForwardIterator&gt;(__exec),
+62 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__pstl::__internal::__is_parallelization_preferred&lt;_ExecutionPolicy,&#32;_ForwardIterator&gt;(__exec));
+63 }
+64 
+65 <emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">class</emphasis>&#32;_ExecutionPolicy,&#32;<emphasis role="keyword">class</emphasis>&#32;_ForwardIterator,&#32;<emphasis role="keyword">class</emphasis>&#32;_Size,&#32;<emphasis role="keyword">class</emphasis>&#32;_Function&gt;
+66 <link linkend="_namespace____pstl_1_1____internal_1a6955c3b3eeac7ccfa9a8ae5da85b9f2a">__pstl::__internal::__enable_if_execution_policy&lt;_ExecutionPolicy, _ForwardIterator&gt;</link>
+67 <link linkend="_namespacestd_1a5bd8d5cb6d63d354aff5188eb885e8b2">for_each_n</link>(_ExecutionPolicy&amp;&amp;&#32;__exec,&#32;_ForwardIterator&#32;__first,&#32;_Size&#32;__n,&#32;_Function&#32;__f)
+68 {
+69 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="_namespace____pstl_1_1____internal_1a11dfb059348e8a4ad07857209d99bc87">__pstl::__internal::__pattern_walk1_n</link>(
+70 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;std::forward&lt;_ExecutionPolicy&gt;(__exec),&#32;__first,&#32;__n,&#32;__f,
+71 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__pstl::__internal::__is_vectorization_preferred&lt;_ExecutionPolicy,&#32;_ForwardIterator&gt;(__exec),
+72 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__pstl::__internal::__is_parallelization_preferred&lt;_ExecutionPolicy,&#32;_ForwardIterator&gt;(__exec));
+73 }
+74 
+75 <emphasis role="comment">//&#32;[alg.find]</emphasis>
+76 
+77 <emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">class</emphasis>&#32;_ExecutionPolicy,&#32;<emphasis role="keyword">class</emphasis>&#32;_ForwardIterator,&#32;<emphasis role="keyword">class</emphasis>&#32;_Predicate&gt;
+78 <link linkend="_namespace____pstl_1_1____internal_1a6955c3b3eeac7ccfa9a8ae5da85b9f2a">__pstl::__internal::__enable_if_execution_policy&lt;_ExecutionPolicy, _ForwardIterator&gt;</link>
+79 <link linkend="_namespacestd_1a12540b98a8b3f5862173e50b92f1de81">find_if</link>(_ExecutionPolicy&amp;&amp;&#32;__exec,&#32;_ForwardIterator&#32;__first,&#32;_ForwardIterator&#32;__last,&#32;_Predicate&#32;__pred)
+80 {
+81 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="_namespace____pstl_1_1____internal_1a048b6c9be4b418a089e7e1de87722139">__pstl::__internal::__pattern_find_if</link>(
+82 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;std::forward&lt;_ExecutionPolicy&gt;(__exec),&#32;__first,&#32;__last,&#32;__pred,
+83 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__pstl::__internal::__is_vectorization_preferred&lt;_ExecutionPolicy,&#32;_ForwardIterator&gt;(__exec),
+84 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__pstl::__internal::__is_parallelization_preferred&lt;_ExecutionPolicy,&#32;_ForwardIterator&gt;(__exec));
+85 }
+86 
+87 <emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">class</emphasis>&#32;_ExecutionPolicy,&#32;<emphasis role="keyword">class</emphasis>&#32;_ForwardIterator,&#32;<emphasis role="keyword">class</emphasis>&#32;_Predicate&gt;
+88 <link linkend="_namespace____pstl_1_1____internal_1a6955c3b3eeac7ccfa9a8ae5da85b9f2a">__pstl::__internal::__enable_if_execution_policy&lt;_ExecutionPolicy, _ForwardIterator&gt;</link>
+89 <link linkend="_namespacestd_1ae19772fb8787d5b9c35285c98dfa5d79">find_if_not</link>(_ExecutionPolicy&amp;&amp;&#32;__exec,&#32;_ForwardIterator&#32;__first,&#32;_ForwardIterator&#32;__last,&#32;_Predicate&#32;__pred)
+90 {
+91 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="_namespacestd_1a12540b98a8b3f5862173e50b92f1de81">std::find_if</link>(std::forward&lt;_ExecutionPolicy&gt;(__exec),&#32;__first,&#32;__last,&#32;std::not_fn(__pred));
+92 }
+93 
+94 <emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">class</emphasis>&#32;_ExecutionPolicy,&#32;<emphasis role="keyword">class</emphasis>&#32;_ForwardIterator,&#32;<emphasis role="keyword">class</emphasis>&#32;_Tp&gt;
+95 <link linkend="_namespace____pstl_1_1____internal_1a6955c3b3eeac7ccfa9a8ae5da85b9f2a">__pstl::__internal::__enable_if_execution_policy&lt;_ExecutionPolicy, _ForwardIterator&gt;</link>
+96 <link linkend="_namespacestd_1ae3e398a3f38b0182e770944d57402701">find</link>(_ExecutionPolicy&amp;&amp;&#32;__exec,&#32;_ForwardIterator&#32;__first,&#32;_ForwardIterator&#32;__last,&#32;<emphasis role="keyword">const</emphasis>&#32;_Tp&amp;&#32;__value)
+97 {
+98 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="_namespacestd_1a12540b98a8b3f5862173e50b92f1de81">std::find_if</link>(std::forward&lt;_ExecutionPolicy&gt;(__exec),&#32;__first,&#32;__last,
+99 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____pstl_1_1____internal_1_1____equal__value">__pstl::__internal::__equal_value&lt;_Tp&gt;</link>(__value));
+100 }
+101 
+102 <emphasis role="comment">//&#32;[alg.find.end]</emphasis>
+103 <emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">class</emphasis>&#32;_ExecutionPolicy,&#32;<emphasis role="keyword">class</emphasis>&#32;_ForwardIterator1,&#32;<emphasis role="keyword">class</emphasis>&#32;_ForwardIterator2,&#32;<emphasis role="keyword">class</emphasis>&#32;_BinaryPredicate&gt;
+104 <link linkend="_namespace____pstl_1_1____internal_1a6955c3b3eeac7ccfa9a8ae5da85b9f2a">__pstl::__internal::__enable_if_execution_policy&lt;_ExecutionPolicy, _ForwardIterator1&gt;</link>
+105 <link linkend="_namespacestd_1aca2377528194645193c34ceb0f268ebc">find_end</link>(_ExecutionPolicy&amp;&amp;&#32;__exec,&#32;_ForwardIterator1&#32;__first,&#32;_ForwardIterator1&#32;__last,&#32;_ForwardIterator2&#32;__s_first,
+106 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_ForwardIterator2&#32;__s_last,&#32;_BinaryPredicate&#32;__pred)
+107 {
+108 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="_namespace____pstl_1_1____internal_1ab41e2c44c1a0b564c5f9e350dc98cd07">__pstl::__internal::__pattern_find_end</link>(
+109 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;std::forward&lt;_ExecutionPolicy&gt;(__exec),&#32;__first,&#32;__last,&#32;__s_first,&#32;__s_last,&#32;__pred,
+110 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__pstl::__internal::__is_vectorization_preferred&lt;_ExecutionPolicy,&#32;_ForwardIterator1,&#32;_ForwardIterator2&gt;(
+111 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__exec),
+112 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__pstl::__internal::__is_parallelization_preferred&lt;_ExecutionPolicy,&#32;_ForwardIterator1,&#32;_ForwardIterator2&gt;(
+113 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__exec));
+114 }
+115 
+116 <emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">class</emphasis>&#32;_ExecutionPolicy,&#32;<emphasis role="keyword">class</emphasis>&#32;_ForwardIterator1,&#32;<emphasis role="keyword">class</emphasis>&#32;_ForwardIterator2&gt;
+117 <link linkend="_namespace____pstl_1_1____internal_1a6955c3b3eeac7ccfa9a8ae5da85b9f2a">__pstl::__internal::__enable_if_execution_policy&lt;_ExecutionPolicy, _ForwardIterator1&gt;</link>
+118 <link linkend="_namespacestd_1aca2377528194645193c34ceb0f268ebc">find_end</link>(_ExecutionPolicy&amp;&amp;&#32;__exec,&#32;_ForwardIterator1&#32;__first,&#32;_ForwardIterator1&#32;__last,&#32;_ForwardIterator2&#32;__s_first,
+119 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_ForwardIterator2&#32;__s_last)
+120 {
+121 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="_namespacestd_1aca2377528194645193c34ceb0f268ebc">std::find_end</link>(std::forward&lt;_ExecutionPolicy&gt;(__exec),&#32;__first,&#32;__last,&#32;__s_first,&#32;__s_last,
+122 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;std::equal_to&lt;&gt;());
+123 }
+124 
+125 <emphasis role="comment">//&#32;[alg.find_first_of]</emphasis>
+126 <emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">class</emphasis>&#32;_ExecutionPolicy,&#32;<emphasis role="keyword">class</emphasis>&#32;_ForwardIterator1,&#32;<emphasis role="keyword">class</emphasis>&#32;_ForwardIterator2,&#32;<emphasis role="keyword">class</emphasis>&#32;_BinaryPredicate&gt;
+127 <link linkend="_namespace____pstl_1_1____internal_1a6955c3b3eeac7ccfa9a8ae5da85b9f2a">__pstl::__internal::__enable_if_execution_policy&lt;_ExecutionPolicy, _ForwardIterator1&gt;</link>
+128 <link linkend="_namespacestd_1af918ddff6ab7ea6140872b65660e9b16">find_first_of</link>(_ExecutionPolicy&amp;&amp;&#32;__exec,&#32;_ForwardIterator1&#32;__first,&#32;_ForwardIterator1&#32;__last,
+129 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_ForwardIterator2&#32;__s_first,&#32;_ForwardIterator2&#32;__s_last,&#32;_BinaryPredicate&#32;__pred)
+130 {
+131 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="_namespace____pstl_1_1____internal_1ab87ed0d016b76e9009330174d6dd604f">__pstl::__internal::__pattern_find_first_of</link>(
+132 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;std::forward&lt;_ExecutionPolicy&gt;(__exec),&#32;__first,&#32;__last,&#32;__s_first,&#32;__s_last,&#32;__pred,
+133 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__pstl::__internal::__is_vectorization_preferred&lt;_ExecutionPolicy,&#32;_ForwardIterator1,&#32;_ForwardIterator2&gt;(
+134 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__exec),
+135 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__pstl::__internal::__is_parallelization_preferred&lt;_ExecutionPolicy,&#32;_ForwardIterator1,&#32;_ForwardIterator2&gt;(
+136 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__exec));
+137 }
+138 
+139 <emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">class</emphasis>&#32;_ExecutionPolicy,&#32;<emphasis role="keyword">class</emphasis>&#32;_ForwardIterator1,&#32;<emphasis role="keyword">class</emphasis>&#32;_ForwardIterator2&gt;
+140 <link linkend="_namespace____pstl_1_1____internal_1a6955c3b3eeac7ccfa9a8ae5da85b9f2a">__pstl::__internal::__enable_if_execution_policy&lt;_ExecutionPolicy, _ForwardIterator1&gt;</link>
+141 <link linkend="_namespacestd_1af918ddff6ab7ea6140872b65660e9b16">find_first_of</link>(_ExecutionPolicy&amp;&amp;&#32;__exec,&#32;_ForwardIterator1&#32;__first,&#32;_ForwardIterator1&#32;__last,
+142 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_ForwardIterator2&#32;__s_first,&#32;_ForwardIterator2&#32;__s_last)
+143 {
+144 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="_namespacestd_1af918ddff6ab7ea6140872b65660e9b16">std::find_first_of</link>(std::forward&lt;_ExecutionPolicy&gt;(__exec),&#32;__first,&#32;__last,&#32;__s_first,&#32;__s_last,
+145 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;std::equal_to&lt;&gt;());
+146 }
+147 
+148 <emphasis role="comment">//&#32;[alg.adjacent_find]</emphasis>
+149 <emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">class</emphasis>&#32;_ExecutionPolicy,&#32;<emphasis role="keyword">class</emphasis>&#32;_ForwardIterator&gt;
+150 <link linkend="_namespace____pstl_1_1____internal_1a6955c3b3eeac7ccfa9a8ae5da85b9f2a">__pstl::__internal::__enable_if_execution_policy&lt;_ExecutionPolicy, _ForwardIterator&gt;</link>
+151 <link linkend="_namespacestd_1a2e464ead1e536b9225fdcd8e87438bc7">adjacent_find</link>(_ExecutionPolicy&amp;&amp;&#32;__exec,&#32;_ForwardIterator&#32;__first,&#32;_ForwardIterator&#32;__last)
+152 {
+153 &#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">typename</emphasis>&#32;iterator_traits&lt;_ForwardIterator&gt;::value_type&#32;_ValueType;
+154 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="_namespace____pstl_1_1____internal_1a6baa124378ed7fdc525b00a43af706ab">__pstl::__internal::__pattern_adjacent_find</link>(
+155 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;std::forward&lt;_ExecutionPolicy&gt;(__exec),&#32;__first,&#32;__last,&#32;std::equal_to&lt;_ValueType&gt;(),
+156 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__pstl::__internal::__is_parallelization_preferred&lt;_ExecutionPolicy,&#32;_ForwardIterator&gt;(__exec),
+157 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__pstl::__internal::__is_vectorization_preferred&lt;_ExecutionPolicy,&#32;_ForwardIterator&gt;(__exec),
+158 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">/*first_semantic*/</emphasis>&#32;<emphasis role="keyword">false</emphasis>);
+159 }
+160 
+161 <emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">class</emphasis>&#32;_ExecutionPolicy,&#32;<emphasis role="keyword">class</emphasis>&#32;_ForwardIterator,&#32;<emphasis role="keyword">class</emphasis>&#32;_BinaryPredicate&gt;
+162 <link linkend="_namespace____pstl_1_1____internal_1a6955c3b3eeac7ccfa9a8ae5da85b9f2a">__pstl::__internal::__enable_if_execution_policy&lt;_ExecutionPolicy, _ForwardIterator&gt;</link>
+163 <link linkend="_namespacestd_1a2e464ead1e536b9225fdcd8e87438bc7">adjacent_find</link>(_ExecutionPolicy&amp;&amp;&#32;__exec,&#32;_ForwardIterator&#32;__first,&#32;_ForwardIterator&#32;__last,&#32;_BinaryPredicate&#32;__pred)
+164 {
+165 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="_namespace____pstl_1_1____internal_1a6baa124378ed7fdc525b00a43af706ab">__pstl::__internal::__pattern_adjacent_find</link>(
+166 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;std::forward&lt;_ExecutionPolicy&gt;(__exec),&#32;__first,&#32;__last,&#32;__pred,
+167 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__pstl::__internal::__is_parallelization_preferred&lt;_ExecutionPolicy,&#32;_ForwardIterator&gt;(__exec),
+168 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__pstl::__internal::__is_vectorization_preferred&lt;_ExecutionPolicy,&#32;_ForwardIterator&gt;(__exec),
+169 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">/*first_semantic*/</emphasis>&#32;<emphasis role="keyword">false</emphasis>);
+170 }
+171 
+172 <emphasis role="comment">//&#32;[alg.count]</emphasis>
+173 
+174 <emphasis role="comment">//&#32;Implementation&#32;note:&#32;count&#32;and&#32;count_if&#32;call&#32;the&#32;pattern&#32;directly&#32;instead&#32;of&#32;calling&#32;std::transform_reduce</emphasis>
+175 <emphasis role="comment">//&#32;so&#32;that&#32;we&#32;do&#32;not&#32;have&#32;to&#32;include&#32;&lt;numeric&gt;.</emphasis>
+176 
+177 <emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">class</emphasis>&#32;_ExecutionPolicy,&#32;<emphasis role="keyword">class</emphasis>&#32;_ForwardIterator,&#32;<emphasis role="keyword">class</emphasis>&#32;_Tp&gt;
+178 <link linkend="_namespace____pstl_1_1____internal_1a6955c3b3eeac7ccfa9a8ae5da85b9f2a">__pstl::__internal::__enable_if_execution_policy</link>&lt;_ExecutionPolicy,
+179 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;iterator_traits&lt;_ForwardIterator&gt;::difference_type&gt;
+180 <link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a22486c0c8d9f7d79a07bf22ecffeeb2f">count</link>(_ExecutionPolicy&amp;&amp;&#32;__exec,&#32;_ForwardIterator&#32;__first,&#32;_ForwardIterator&#32;__last,&#32;<emphasis role="keyword">const</emphasis>&#32;_Tp&amp;&#32;__value)
+181 {
+182 &#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">typename</emphasis>&#32;iterator_traits&lt;_ForwardIterator&gt;::value_type&#32;_ValueType;
+183 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="_namespace____pstl_1_1____internal_1ab6c85c9e6daf1ae911a899fb47a2dac9">__pstl::__internal::__pattern_count</link>(
+184 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;std::forward&lt;_ExecutionPolicy&gt;(__exec),&#32;__first,&#32;__last,
+185 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;[&amp;__value](<emphasis role="keyword">const</emphasis>&#32;_ValueType&amp;&#32;__x)&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;__value&#32;==&#32;__x;&#32;},
+186 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__pstl::__internal::__is_parallelization_preferred&lt;_ExecutionPolicy,&#32;_ForwardIterator&gt;(__exec),
+187 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__pstl::__internal::__is_vectorization_preferred&lt;_ExecutionPolicy,&#32;_ForwardIterator&gt;(__exec));
+188 }
+189 
+190 <emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">class</emphasis>&#32;_ExecutionPolicy,&#32;<emphasis role="keyword">class</emphasis>&#32;_ForwardIterator,&#32;<emphasis role="keyword">class</emphasis>&#32;_Predicate&gt;
+191 <link linkend="_namespace____pstl_1_1____internal_1a6955c3b3eeac7ccfa9a8ae5da85b9f2a">__pstl::__internal::__enable_if_execution_policy</link>&lt;_ExecutionPolicy,
+192 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;iterator_traits&lt;_ForwardIterator&gt;::difference_type&gt;
+193 <link linkend="_namespacestd_1a3211beceffa7786771b08add1e4a7f9c">count_if</link>(_ExecutionPolicy&amp;&amp;&#32;__exec,&#32;_ForwardIterator&#32;__first,&#32;_ForwardIterator&#32;__last,&#32;_Predicate&#32;__pred)
+194 {
+195 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="_namespace____pstl_1_1____internal_1ab6c85c9e6daf1ae911a899fb47a2dac9">__pstl::__internal::__pattern_count</link>(
+196 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;std::forward&lt;_ExecutionPolicy&gt;(__exec),&#32;__first,&#32;__last,&#32;__pred,
+197 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__pstl::__internal::__is_parallelization_preferred&lt;_ExecutionPolicy,&#32;_ForwardIterator&gt;(__exec),
+198 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__pstl::__internal::__is_vectorization_preferred&lt;_ExecutionPolicy,&#32;_ForwardIterator&gt;(__exec));
+199 }
+200 
+201 <emphasis role="comment">//&#32;[alg.search]</emphasis>
+202 
+203 <emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">class</emphasis>&#32;_ExecutionPolicy,&#32;<emphasis role="keyword">class</emphasis>&#32;_ForwardIterator1,&#32;<emphasis role="keyword">class</emphasis>&#32;_ForwardIterator2,&#32;<emphasis role="keyword">class</emphasis>&#32;_BinaryPredicate&gt;
+204 <link linkend="_namespace____pstl_1_1____internal_1a6955c3b3eeac7ccfa9a8ae5da85b9f2a">__pstl::__internal::__enable_if_execution_policy&lt;_ExecutionPolicy, _ForwardIterator1&gt;</link>
+205 <link linkend="_namespacestd_1a5a4354dff231af6d172e1f24befda7f2">search</link>(_ExecutionPolicy&amp;&amp;&#32;__exec,&#32;_ForwardIterator1&#32;__first,&#32;_ForwardIterator1&#32;__last,&#32;_ForwardIterator2&#32;__s_first,
+206 &#32;&#32;&#32;&#32;&#32;&#32;&#32;_ForwardIterator2&#32;__s_last,&#32;_BinaryPredicate&#32;__pred)
+207 {
+208 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="_namespace____pstl_1_1____internal_1af101203bfce74b08bef3c56eaa652f97">__pstl::__internal::__pattern_search</link>(
+209 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;std::forward&lt;_ExecutionPolicy&gt;(__exec),&#32;__first,&#32;__last,&#32;__s_first,&#32;__s_last,&#32;__pred,
+210 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__pstl::__internal::__is_vectorization_preferred&lt;_ExecutionPolicy,&#32;_ForwardIterator1,&#32;_ForwardIterator2&gt;(
+211 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__exec),
+212 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__pstl::__internal::__is_parallelization_preferred&lt;_ExecutionPolicy,&#32;_ForwardIterator1,&#32;_ForwardIterator2&gt;(
+213 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__exec));
+214 }
+215 
+216 <emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">class</emphasis>&#32;_ExecutionPolicy,&#32;<emphasis role="keyword">class</emphasis>&#32;_ForwardIterator1,&#32;<emphasis role="keyword">class</emphasis>&#32;_ForwardIterator2&gt;
+217 <link linkend="_namespace____pstl_1_1____internal_1a6955c3b3eeac7ccfa9a8ae5da85b9f2a">__pstl::__internal::__enable_if_execution_policy&lt;_ExecutionPolicy, _ForwardIterator1&gt;</link>
+218 <link linkend="_namespacestd_1a5a4354dff231af6d172e1f24befda7f2">search</link>(_ExecutionPolicy&amp;&amp;&#32;__exec,&#32;_ForwardIterator1&#32;__first,&#32;_ForwardIterator1&#32;__last,&#32;_ForwardIterator2&#32;__s_first,
+219 &#32;&#32;&#32;&#32;&#32;&#32;&#32;_ForwardIterator2&#32;__s_last)
+220 {
+221 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="_namespacestd_1a5a4354dff231af6d172e1f24befda7f2">std::search</link>(std::forward&lt;_ExecutionPolicy&gt;(__exec),&#32;__first,&#32;__last,&#32;__s_first,&#32;__s_last,&#32;std::equal_to&lt;&gt;());
+222 }
+223 
+224 <emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">class</emphasis>&#32;_ExecutionPolicy,&#32;<emphasis role="keyword">class</emphasis>&#32;_ForwardIterator,&#32;<emphasis role="keyword">class</emphasis>&#32;_Size,&#32;<emphasis role="keyword">class</emphasis>&#32;_Tp,&#32;<emphasis role="keyword">class</emphasis>&#32;_BinaryPredicate&gt;
+225 <link linkend="_namespace____pstl_1_1____internal_1a6955c3b3eeac7ccfa9a8ae5da85b9f2a">__pstl::__internal::__enable_if_execution_policy&lt;_ExecutionPolicy, _ForwardIterator&gt;</link>
+226 <link linkend="_namespacestd_1a514f8e6fe1bd2905e5e94f231ce5255a">search_n</link>(_ExecutionPolicy&amp;&amp;&#32;__exec,&#32;_ForwardIterator&#32;__first,&#32;_ForwardIterator&#32;__last,&#32;_Size&#32;<link linkend="__classes_2lib_2include_2mmintrin_8h_1a7cee916b88079d74fdaf7856046abea3">__count</link>,
+227 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;_Tp&amp;&#32;__value,&#32;_BinaryPredicate&#32;__pred)
+228 {
+229 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="_namespace____pstl_1_1____internal_1aeee6ca536b74ecbe6543c70b07b0bbf4">__pstl::__internal::__pattern_search_n</link>(
+230 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;std::forward&lt;_ExecutionPolicy&gt;(__exec),&#32;__first,&#32;__last,&#32;<link linkend="__classes_2lib_2include_2mmintrin_8h_1a7cee916b88079d74fdaf7856046abea3">__count</link>,&#32;__value,&#32;__pred,
+231 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__pstl::__internal::__is_vectorization_preferred&lt;_ExecutionPolicy,&#32;_ForwardIterator&gt;(__exec),
+232 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__pstl::__internal::__is_parallelization_preferred&lt;_ExecutionPolicy,&#32;_ForwardIterator&gt;(__exec));
+233 }
+234 
+235 <emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">class</emphasis>&#32;_ExecutionPolicy,&#32;<emphasis role="keyword">class</emphasis>&#32;_ForwardIterator,&#32;<emphasis role="keyword">class</emphasis>&#32;_Size,&#32;<emphasis role="keyword">class</emphasis>&#32;_Tp&gt;
+236 <link linkend="_namespace____pstl_1_1____internal_1a6955c3b3eeac7ccfa9a8ae5da85b9f2a">__pstl::__internal::__enable_if_execution_policy&lt;_ExecutionPolicy, _ForwardIterator&gt;</link>
+237 <link linkend="_namespacestd_1a514f8e6fe1bd2905e5e94f231ce5255a">search_n</link>(_ExecutionPolicy&amp;&amp;&#32;__exec,&#32;_ForwardIterator&#32;__first,&#32;_ForwardIterator&#32;__last,&#32;_Size&#32;<link linkend="__classes_2lib_2include_2mmintrin_8h_1a7cee916b88079d74fdaf7856046abea3">__count</link>,
+238 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;_Tp&amp;&#32;__value)
+239 {
+240 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="_namespacestd_1a514f8e6fe1bd2905e5e94f231ce5255a">std::search_n</link>(std::forward&lt;_ExecutionPolicy&gt;(__exec),&#32;__first,&#32;__last,&#32;<link linkend="__classes_2lib_2include_2mmintrin_8h_1a7cee916b88079d74fdaf7856046abea3">__count</link>,&#32;__value,
+241 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;std::equal_to&lt;<emphasis role="keyword">typename</emphasis>&#32;iterator_traits&lt;_ForwardIterator&gt;::value_type&gt;());
+242 }
+243 
+244 <emphasis role="comment">//&#32;[alg.copy]</emphasis>
+245 
+246 <emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">class</emphasis>&#32;_ExecutionPolicy,&#32;<emphasis role="keyword">class</emphasis>&#32;_ForwardIterator1,&#32;<emphasis role="keyword">class</emphasis>&#32;_ForwardIterator2&gt;
+247 <link linkend="_namespace____pstl_1_1____internal_1a6955c3b3eeac7ccfa9a8ae5da85b9f2a">__pstl::__internal::__enable_if_execution_policy&lt;_ExecutionPolicy, _ForwardIterator2&gt;</link>
+248 <link linkend="_namespacestd_1a4e3366cc5ea1e47fac759952b877ed0d">copy</link>(_ExecutionPolicy&amp;&amp;&#32;__exec,&#32;_ForwardIterator1&#32;__first,&#32;_ForwardIterator1&#32;__last,&#32;_ForwardIterator2&#32;__result)
+249 {
+250 &#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keyword">auto</emphasis>&#32;__is_vector&#32;=
+251 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__pstl::__internal::__is_vectorization_preferred&lt;_ExecutionPolicy,&#32;_ForwardIterator1,&#32;_ForwardIterator2&gt;(
+252 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__exec);
+253 
+254 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="_namespace____pstl_1_1____internal_1a28e6956cf2cd3d8cfe4949d41a700cc5">__pstl::__internal::__pattern_walk2_brick</link>(
+255 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;std::forward&lt;_ExecutionPolicy&gt;(__exec),&#32;__first,&#32;__last,&#32;__result,
+256 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;[__is_vector](_ForwardIterator1&#32;__begin,&#32;_ForwardIterator1&#32;__end,&#32;_ForwardIterator2&#32;__res)&#32;{
+257 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="_namespace____pstl_1_1____internal_1afeb0a574201d45df430150e28155b9de">__pstl::__internal::__brick_copy</link>(__begin,&#32;__end,&#32;__res,&#32;__is_vector);
+258 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;},
+259 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__pstl::__internal::__is_parallelization_preferred&lt;_ExecutionPolicy,&#32;_ForwardIterator1,&#32;_ForwardIterator2&gt;(
+260 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__exec));
+261 }
+262 
+263 <emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">class</emphasis>&#32;_ExecutionPolicy,&#32;<emphasis role="keyword">class</emphasis>&#32;_ForwardIterator1,&#32;<emphasis role="keyword">class</emphasis>&#32;_Size,&#32;<emphasis role="keyword">class</emphasis>&#32;_ForwardIterator2&gt;
+264 <link linkend="_namespace____pstl_1_1____internal_1a6955c3b3eeac7ccfa9a8ae5da85b9f2a">__pstl::__internal::__enable_if_execution_policy&lt;_ExecutionPolicy, _ForwardIterator2&gt;</link>
+265 <link linkend="_namespacestd_1ad65e2656aa6e6ce70150b2dfa9669cde">copy_n</link>(_ExecutionPolicy&amp;&amp;&#32;__exec,&#32;_ForwardIterator1&#32;__first,&#32;_Size&#32;__n,&#32;_ForwardIterator2&#32;__result)
+266 {
+267 &#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keyword">auto</emphasis>&#32;__is_vector&#32;=
+268 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__pstl::__internal::__is_vectorization_preferred&lt;_ExecutionPolicy,&#32;_ForwardIterator1,&#32;_ForwardIterator2&gt;(
+269 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__exec);
+270 
+271 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="_namespace____pstl_1_1____internal_1af9995ae7f7807a02b57d84a9053eb599">__pstl::__internal::__pattern_walk2_brick_n</link>(
+272 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;std::forward&lt;_ExecutionPolicy&gt;(__exec),&#32;__first,&#32;__n,&#32;__result,
+273 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;[__is_vector](_ForwardIterator1&#32;__begin,&#32;_Size&#32;__sz,&#32;_ForwardIterator2&#32;__res)&#32;{
+274 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="_namespace____pstl_1_1____internal_1a1f4de244878be866aa77d89e4f80a941">__pstl::__internal::__brick_copy_n</link>(__begin,&#32;__sz,&#32;__res,&#32;__is_vector);
+275 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;},
+276 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__pstl::__internal::__is_parallelization_preferred&lt;_ExecutionPolicy,&#32;_ForwardIterator1,&#32;_ForwardIterator2&gt;(
+277 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__exec));
+278 }
+279 
+280 <emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">class</emphasis>&#32;_ExecutionPolicy,&#32;<emphasis role="keyword">class</emphasis>&#32;_ForwardIterator1,&#32;<emphasis role="keyword">class</emphasis>&#32;_ForwardIterator2,&#32;<emphasis role="keyword">class</emphasis>&#32;_Predicate&gt;
+281 <link linkend="_namespace____pstl_1_1____internal_1a6955c3b3eeac7ccfa9a8ae5da85b9f2a">__pstl::__internal::__enable_if_execution_policy&lt;_ExecutionPolicy, _ForwardIterator2&gt;</link>
+282 <link linkend="_namespacestd_1a05892b1ecb6a5d694a84a4567b1f77e1">copy_if</link>(_ExecutionPolicy&amp;&amp;&#32;__exec,&#32;_ForwardIterator1&#32;__first,&#32;_ForwardIterator1&#32;__last,&#32;_ForwardIterator2&#32;__result,
+283 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_Predicate&#32;__pred)
+284 {
+285 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="_namespace____pstl_1_1____internal_1a00b73000f7d2c9884939b67f41de7bb3">__pstl::__internal::__pattern_copy_if</link>(
+286 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;std::forward&lt;_ExecutionPolicy&gt;(__exec),&#32;__first,&#32;__last,&#32;__result,&#32;__pred,
+287 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__pstl::__internal::__is_vectorization_preferred&lt;_ExecutionPolicy,&#32;_ForwardIterator1,&#32;_ForwardIterator2&gt;(
+288 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__exec),
+289 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__pstl::__internal::__is_parallelization_preferred&lt;_ExecutionPolicy,&#32;_ForwardIterator1,&#32;_ForwardIterator2&gt;(
+290 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__exec));
+291 }
+292 
+293 <emphasis role="comment">//&#32;[alg.swap]</emphasis>
+294 
+295 <emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">class</emphasis>&#32;_ExecutionPolicy,&#32;<emphasis role="keyword">class</emphasis>&#32;_ForwardIterator1,&#32;<emphasis role="keyword">class</emphasis>&#32;_ForwardIterator2&gt;
+296 <link linkend="_namespace____pstl_1_1____internal_1a6955c3b3eeac7ccfa9a8ae5da85b9f2a">__pstl::__internal::__enable_if_execution_policy&lt;_ExecutionPolicy, _ForwardIterator2&gt;</link>
+297 <link linkend="_namespacestd_1ab5c0ba367019a22e04563f7ecbf2f200">swap_ranges</link>(_ExecutionPolicy&amp;&amp;&#32;__exec,&#32;_ForwardIterator1&#32;__first1,&#32;_ForwardIterator1&#32;__last1,
+298 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_ForwardIterator2&#32;__first2)
+299 {
+300 &#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">typename</emphasis>&#32;iterator_traits&lt;_ForwardIterator1&gt;::reference&#32;_ReferenceType1;
+301 &#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">typename</emphasis>&#32;iterator_traits&lt;_ForwardIterator2&gt;::reference&#32;_ReferenceType2;
+302 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="_namespace____pstl_1_1____internal_1a70065033fe2904641ef4cceafc92c7a0">__pstl::__internal::__pattern_walk2</link>(
+303 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;std::forward&lt;_ExecutionPolicy&gt;(__exec),&#32;__first1,&#32;__last1,&#32;__first2,
+304 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;[](_ReferenceType1&#32;__x,&#32;_ReferenceType2&#32;__y)&#32;{
+305 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">using&#32;</emphasis><link linkend="_namespacestd_1a3ece115a1c8ed9020a20f1d0b70efda8">std::swap</link>;
+306 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_namespacestd_1a3ece115a1c8ed9020a20f1d0b70efda8">swap</link>(__x,&#32;__y);
+307 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;},
+308 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__pstl::__internal::__is_vectorization_preferred&lt;_ExecutionPolicy,&#32;_ForwardIterator1,&#32;_ForwardIterator2&gt;(
+309 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__exec),
+310 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__pstl::__internal::__is_parallelization_preferred&lt;_ExecutionPolicy,&#32;_ForwardIterator1,&#32;_ForwardIterator2&gt;(
+311 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__exec));
+312 }
+313 
+314 <emphasis role="comment">//&#32;[alg.transform]</emphasis>
+315 
+316 <emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">class</emphasis>&#32;_ExecutionPolicy,&#32;<emphasis role="keyword">class</emphasis>&#32;_ForwardIterator1,&#32;<emphasis role="keyword">class</emphasis>&#32;_ForwardIterator2,&#32;<emphasis role="keyword">class</emphasis>&#32;_UnaryOperation&gt;
+317 <link linkend="_namespace____pstl_1_1____internal_1a6955c3b3eeac7ccfa9a8ae5da85b9f2a">__pstl::__internal::__enable_if_execution_policy&lt;_ExecutionPolicy, _ForwardIterator2&gt;</link>
+318 <link linkend="_namespacestd_1a83797c5677d80005911de218c819adab">transform</link>(_ExecutionPolicy&amp;&amp;&#32;__exec,&#32;_ForwardIterator1&#32;__first,&#32;_ForwardIterator1&#32;__last,&#32;_ForwardIterator2&#32;__result,
+319 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_UnaryOperation&#32;__op)
+320 {
+321 &#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">typename</emphasis>&#32;iterator_traits&lt;_ForwardIterator1&gt;::reference&#32;_InputType;
+322 &#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">typename</emphasis>&#32;iterator_traits&lt;_ForwardIterator2&gt;::reference&#32;_OutputType;
+323 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="_namespace____pstl_1_1____internal_1a70065033fe2904641ef4cceafc92c7a0">__pstl::__internal::__pattern_walk2</link>(
+324 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;std::forward&lt;_ExecutionPolicy&gt;(__exec),&#32;__first,&#32;__last,&#32;__result,
+325 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;[__op](_InputType&#32;__x,&#32;_OutputType&#32;__y)&#32;<emphasis role="keyword">mutable</emphasis>&#32;{&#32;__y&#32;=&#32;__op(__x);&#32;},
+326 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__pstl::__internal::__is_vectorization_preferred&lt;_ExecutionPolicy,&#32;_ForwardIterator1,&#32;_ForwardIterator2&gt;(
+327 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__exec),
+328 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__pstl::__internal::__is_parallelization_preferred&lt;_ExecutionPolicy,&#32;_ForwardIterator1,&#32;_ForwardIterator2&gt;(
+329 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__exec));
+330 }
+331 
+332 <emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">class&#32;</emphasis>_ExecutionPolicy,&#32;<emphasis role="keyword">class&#32;</emphasis>_ForwardIterator1,&#32;<emphasis role="keyword">class&#32;</emphasis>_ForwardIterator2,&#32;<emphasis role="keyword">class&#32;</emphasis>_ForwardIterator,
+333 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">class&#32;</emphasis>_BinaryOperation&gt;
+334 <link linkend="_namespace____pstl_1_1____internal_1a6955c3b3eeac7ccfa9a8ae5da85b9f2a">__pstl::__internal::__enable_if_execution_policy&lt;_ExecutionPolicy, _ForwardIterator&gt;</link>
+335 <link linkend="_namespacestd_1a83797c5677d80005911de218c819adab">transform</link>(_ExecutionPolicy&amp;&amp;&#32;__exec,&#32;_ForwardIterator1&#32;__first1,&#32;_ForwardIterator1&#32;__last1,&#32;_ForwardIterator2&#32;__first2,
+336 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_ForwardIterator&#32;__result,&#32;_BinaryOperation&#32;__op)
+337 {
+338 &#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">typename</emphasis>&#32;iterator_traits&lt;_ForwardIterator1&gt;::reference&#32;_Input1Type;
+339 &#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">typename</emphasis>&#32;iterator_traits&lt;_ForwardIterator2&gt;::reference&#32;_Input2Type;
+340 &#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">typename</emphasis>&#32;iterator_traits&lt;_ForwardIterator&gt;::reference&#32;_OutputType;
+341 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="_namespace____pstl_1_1____internal_1a618223855e120744a00b409ddfb37ea3">__pstl::__internal::__pattern_walk3</link>(
+342 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;std::forward&lt;_ExecutionPolicy&gt;(__exec),&#32;__first1,&#32;__last1,&#32;__first2,&#32;__result,
+343 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;[__op](_Input1Type&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1ac916c0825494ac3acd4457effd2823d2">x</link>,&#32;_Input2Type&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a4f27f1eebce8c31db01bb39fab9ef561">y</link>,&#32;_OutputType&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1ab26e6a0e7d142ed28ac773f12a73f458">z</link>)&#32;<emphasis role="keyword">mutable</emphasis>&#32;{&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1ab26e6a0e7d142ed28ac773f12a73f458">z</link>&#32;=&#32;__op(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1ac916c0825494ac3acd4457effd2823d2">x</link>,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a4f27f1eebce8c31db01bb39fab9ef561">y</link>);&#32;},
+344 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_namespace____pstl_1_1____internal_1aba53c2e534557bf2c817808fb3b3c269">__pstl::__internal::__is_vectorization_preferred</link>&lt;_ExecutionPolicy,&#32;_ForwardIterator1,&#32;_ForwardIterator2,
+345 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_ForwardIterator&gt;(__exec),
+346 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_namespace____pstl_1_1____internal_1a96278219a9b5139e6060c4a24235841c">__pstl::__internal::__is_parallelization_preferred</link>&lt;_ExecutionPolicy,&#32;_ForwardIterator1,&#32;_ForwardIterator2,
+347 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_ForwardIterator&gt;(__exec));
+348 }
+349 
+350 <emphasis role="comment">//&#32;[alg.replace]</emphasis>
+351 
+352 <emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">class</emphasis>&#32;_ExecutionPolicy,&#32;<emphasis role="keyword">class</emphasis>&#32;_ForwardIterator,&#32;<emphasis role="keyword">class</emphasis>&#32;_UnaryPredicate,&#32;<emphasis role="keyword">class</emphasis>&#32;_Tp&gt;
+353 <link linkend="_namespace____pstl_1_1____internal_1a6955c3b3eeac7ccfa9a8ae5da85b9f2a">__pstl::__internal::__enable_if_execution_policy&lt;_ExecutionPolicy, void&gt;</link>
+354 <link linkend="_namespacestd_1a9e0540c56b14e041d7db2a1c36b34fd7">replace_if</link>(_ExecutionPolicy&amp;&amp;&#32;__exec,&#32;_ForwardIterator&#32;__first,&#32;_ForwardIterator&#32;__last,&#32;_UnaryPredicate&#32;__pred,
+355 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;_Tp&amp;&#32;__new_value)
+356 {
+357 &#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">typename</emphasis>&#32;iterator_traits&lt;_ForwardIterator&gt;::reference&#32;_ElementType;
+358 &#32;&#32;&#32;&#32;<link linkend="_namespace____pstl_1_1____internal_1ab0763e7038c1a483b7905a47fb58f051">__pstl::__internal::__pattern_walk1</link>(
+359 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;std::forward&lt;_ExecutionPolicy&gt;(__exec),&#32;__first,&#32;__last,
+360 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;[&amp;__pred,&#32;&amp;__new_value](_ElementType&#32;__elem)&#32;{
+361 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__pred(__elem))
+362 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+363 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__elem&#32;=&#32;__new_value;
+364 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+365 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;},
+366 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__pstl::__internal::__is_vectorization_preferred&lt;_ExecutionPolicy,&#32;_ForwardIterator&gt;(__exec),
+367 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__pstl::__internal::__is_parallelization_preferred&lt;_ExecutionPolicy,&#32;_ForwardIterator&gt;(__exec));
+368 }
+369 
+370 <emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">class</emphasis>&#32;_ExecutionPolicy,&#32;<emphasis role="keyword">class</emphasis>&#32;_ForwardIterator,&#32;<emphasis role="keyword">class</emphasis>&#32;_Tp&gt;
+371 <link linkend="_namespace____pstl_1_1____internal_1a6955c3b3eeac7ccfa9a8ae5da85b9f2a">__pstl::__internal::__enable_if_execution_policy&lt;_ExecutionPolicy, void&gt;</link>
+372 <link linkend="_namespacestd_1ac844ba281c4c66f83f6aebc21498fc97">replace</link>(_ExecutionPolicy&amp;&amp;&#32;__exec,&#32;_ForwardIterator&#32;__first,&#32;_ForwardIterator&#32;__last,&#32;<emphasis role="keyword">const</emphasis>&#32;_Tp&amp;&#32;__old_value,
+373 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;_Tp&amp;&#32;__new_value)
+374 {
+375 &#32;&#32;&#32;&#32;<link linkend="_namespacestd_1a9e0540c56b14e041d7db2a1c36b34fd7">std::replace_if</link>(std::forward&lt;_ExecutionPolicy&gt;(__exec),&#32;__first,&#32;__last,
+376 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____pstl_1_1____internal_1_1____equal__value">__pstl::__internal::__equal_value&lt;_Tp&gt;</link>(__old_value),&#32;__new_value);
+377 }
+378 
+379 <emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">class</emphasis>&#32;_ExecutionPolicy,&#32;<emphasis role="keyword">class</emphasis>&#32;_ForwardIterator1,&#32;<emphasis role="keyword">class</emphasis>&#32;_ForwardIterator2,&#32;<emphasis role="keyword">class</emphasis>&#32;_UnaryPredicate,&#32;<emphasis role="keyword">class</emphasis>&#32;_Tp&gt;
+380 <link linkend="_namespace____pstl_1_1____internal_1a6955c3b3eeac7ccfa9a8ae5da85b9f2a">__pstl::__internal::__enable_if_execution_policy&lt;_ExecutionPolicy, _ForwardIterator2&gt;</link>
+381 <link linkend="_namespacestd_1a2923a872c909e0531e5db0309ad30a95">replace_copy_if</link>(_ExecutionPolicy&amp;&amp;&#32;__exec,&#32;_ForwardIterator1&#32;__first,&#32;_ForwardIterator1&#32;__last,
+382 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_ForwardIterator2&#32;__result,&#32;_UnaryPredicate&#32;__pred,&#32;<emphasis role="keyword">const</emphasis>&#32;_Tp&amp;&#32;__new_value)
+383 {
+384 &#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">typename</emphasis>&#32;iterator_traits&lt;_ForwardIterator1&gt;::reference&#32;_InputType;
+385 &#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">typename</emphasis>&#32;iterator_traits&lt;_ForwardIterator2&gt;::reference&#32;_OutputType;
+386 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="_namespace____pstl_1_1____internal_1a70065033fe2904641ef4cceafc92c7a0">__pstl::__internal::__pattern_walk2</link>(
+387 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;std::forward&lt;_ExecutionPolicy&gt;(__exec),&#32;__first,&#32;__last,&#32;__result,
+388 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;[__pred,&#32;&amp;__new_value](_InputType&#32;__x,&#32;_OutputType&#32;__y)&#32;<emphasis role="keyword">mutable</emphasis>&#32;{&#32;__y&#32;=&#32;__pred(__x)&#32;?&#32;__new_value&#32;:&#32;__x;&#32;},
+389 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__pstl::__internal::__is_vectorization_preferred&lt;_ExecutionPolicy,&#32;_ForwardIterator1,&#32;_ForwardIterator2&gt;(
+390 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__exec),
+391 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__pstl::__internal::__is_parallelization_preferred&lt;_ExecutionPolicy,&#32;_ForwardIterator1,&#32;_ForwardIterator2&gt;(
+392 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__exec));
+393 }
+394 
+395 <emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">class</emphasis>&#32;_ExecutionPolicy,&#32;<emphasis role="keyword">class</emphasis>&#32;_ForwardIterator1,&#32;<emphasis role="keyword">class</emphasis>&#32;_ForwardIterator2,&#32;<emphasis role="keyword">class</emphasis>&#32;_Tp&gt;
+396 <link linkend="_namespace____pstl_1_1____internal_1a6955c3b3eeac7ccfa9a8ae5da85b9f2a">__pstl::__internal::__enable_if_execution_policy&lt;_ExecutionPolicy, _ForwardIterator2&gt;</link>
+397 <link linkend="_namespacestd_1aa606c48e16f23e6c4f613d187cc3675c">replace_copy</link>(_ExecutionPolicy&amp;&amp;&#32;__exec,&#32;_ForwardIterator1&#32;__first,&#32;_ForwardIterator1&#32;__last,&#32;_ForwardIterator2&#32;__result,
+398 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;_Tp&amp;&#32;__old_value,&#32;<emphasis role="keyword">const</emphasis>&#32;_Tp&amp;&#32;__new_value)
+399 {
+400 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="_namespacestd_1a2923a872c909e0531e5db0309ad30a95">std::replace_copy_if</link>(std::forward&lt;_ExecutionPolicy&gt;(__exec),&#32;__first,&#32;__last,&#32;__result,
+401 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____pstl_1_1____internal_1_1____equal__value">__pstl::__internal::__equal_value&lt;_Tp&gt;</link>(__old_value),&#32;__new_value);
+402 }
+403 
+404 <emphasis role="comment">//&#32;[alg.fill]</emphasis>
+405 
+406 <emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">class</emphasis>&#32;_ExecutionPolicy,&#32;<emphasis role="keyword">class</emphasis>&#32;_ForwardIterator,&#32;<emphasis role="keyword">class</emphasis>&#32;_Tp&gt;
+407 <link linkend="_namespace____pstl_1_1____internal_1a6955c3b3eeac7ccfa9a8ae5da85b9f2a">__pstl::__internal::__enable_if_execution_policy&lt;_ExecutionPolicy, void&gt;</link>
+408 <link linkend="_namespacestd_1a9042ae744521b1770e868813f939b4b7">fill</link>(_ExecutionPolicy&amp;&amp;&#32;__exec,&#32;_ForwardIterator&#32;__first,&#32;_ForwardIterator&#32;__last,&#32;<emphasis role="keyword">const</emphasis>&#32;_Tp&amp;&#32;__value)
+409 {
+410 &#32;&#32;&#32;&#32;<link linkend="_namespace____pstl_1_1____internal_1aff16869e1f76cf88c7dcdd1baa6304a9">__pstl::__internal::__pattern_fill</link>(
+411 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;std::forward&lt;_ExecutionPolicy&gt;(__exec),&#32;__first,&#32;__last,&#32;__value,
+412 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__pstl::__internal::__is_parallelization_preferred&lt;_ExecutionPolicy,&#32;_ForwardIterator&gt;(__exec),
+413 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__pstl::__internal::__is_vectorization_preferred&lt;_ExecutionPolicy,&#32;_ForwardIterator&gt;(__exec));
+414 }
+415 
+416 <emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">class</emphasis>&#32;_ExecutionPolicy,&#32;<emphasis role="keyword">class</emphasis>&#32;_ForwardIterator,&#32;<emphasis role="keyword">class</emphasis>&#32;_Size,&#32;<emphasis role="keyword">class</emphasis>&#32;_Tp&gt;
+417 <link linkend="_namespace____pstl_1_1____internal_1a6955c3b3eeac7ccfa9a8ae5da85b9f2a">__pstl::__internal::__enable_if_execution_policy&lt;_ExecutionPolicy, _ForwardIterator&gt;</link>
+418 <link linkend="_namespacestd_1ad0962bae53d415481fe8bc9f90239d37">fill_n</link>(_ExecutionPolicy&amp;&amp;&#32;__exec,&#32;_ForwardIterator&#32;__first,&#32;_Size&#32;<link linkend="__classes_2lib_2include_2mmintrin_8h_1a7cee916b88079d74fdaf7856046abea3">__count</link>,&#32;<emphasis role="keyword">const</emphasis>&#32;_Tp&amp;&#32;__value)
+419 {
+420 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(<link linkend="__classes_2lib_2include_2mmintrin_8h_1a7cee916b88079d74fdaf7856046abea3">__count</link>&#32;&lt;=&#32;0)
+421 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__first;
+422 
+423 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="_namespace____pstl_1_1____internal_1ad46a2d1af24aa54224f2adc68ef625ce">__pstl::__internal::__pattern_fill_n</link>(
+424 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;std::forward&lt;_ExecutionPolicy&gt;(__exec),&#32;__first,&#32;<link linkend="__classes_2lib_2include_2mmintrin_8h_1a7cee916b88079d74fdaf7856046abea3">__count</link>,&#32;__value,
+425 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__pstl::__internal::__is_parallelization_preferred&lt;_ExecutionPolicy,&#32;_ForwardIterator&gt;(__exec),
+426 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__pstl::__internal::__is_vectorization_preferred&lt;_ExecutionPolicy,&#32;_ForwardIterator&gt;(__exec));
+427 }
+428 
+429 <emphasis role="comment">//&#32;[alg.generate]</emphasis>
+430 <emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">class</emphasis>&#32;_ExecutionPolicy,&#32;<emphasis role="keyword">class</emphasis>&#32;_ForwardIterator,&#32;<emphasis role="keyword">class</emphasis>&#32;_Generator&gt;
+431 <link linkend="_namespace____pstl_1_1____internal_1a6955c3b3eeac7ccfa9a8ae5da85b9f2a">__pstl::__internal::__enable_if_execution_policy&lt;_ExecutionPolicy, void&gt;</link>
+432 <link linkend="_namespacestd_1af6065e33e83259566f3eed5b4ab8c0c7">generate</link>(_ExecutionPolicy&amp;&amp;&#32;__exec,&#32;_ForwardIterator&#32;__first,&#32;_ForwardIterator&#32;__last,&#32;_Generator&#32;__g)
+433 {
+434 &#32;&#32;&#32;&#32;<link linkend="_namespace____pstl_1_1____internal_1a761ab81e053354013f7e051cca8bee7d">__pstl::__internal::__pattern_generate</link>(
+435 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;std::forward&lt;_ExecutionPolicy&gt;(__exec),&#32;__first,&#32;__last,&#32;__g,
+436 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__pstl::__internal::__is_parallelization_preferred&lt;_ExecutionPolicy,&#32;_ForwardIterator&gt;(__exec),
+437 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__pstl::__internal::__is_vectorization_preferred&lt;_ExecutionPolicy,&#32;_ForwardIterator&gt;(__exec));
+438 }
+439 
+440 <emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">class</emphasis>&#32;_ExecutionPolicy,&#32;<emphasis role="keyword">class</emphasis>&#32;_ForwardIterator,&#32;<emphasis role="keyword">class</emphasis>&#32;_Size,&#32;<emphasis role="keyword">class</emphasis>&#32;_Generator&gt;
+441 <link linkend="_namespace____pstl_1_1____internal_1a6955c3b3eeac7ccfa9a8ae5da85b9f2a">__pstl::__internal::__enable_if_execution_policy&lt;_ExecutionPolicy, _ForwardIterator&gt;</link>
+442 <link linkend="_namespacestd_1a81641e273e00fcf6a7109be182426757">generate_n</link>(_ExecutionPolicy&amp;&amp;&#32;__exec,&#32;_ForwardIterator&#32;__first,&#32;_Size&#32;<link linkend="__classes_2lib_2include_2mmintrin_8h_1a7cee916b88079d74fdaf7856046abea3">__count</link>,&#32;_Generator&#32;__g)
+443 {
+444 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(<link linkend="__classes_2lib_2include_2mmintrin_8h_1a7cee916b88079d74fdaf7856046abea3">__count</link>&#32;&lt;=&#32;0)
+445 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__first;
+446 
+447 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="_namespace____pstl_1_1____internal_1a89ba2dce127a80f7bc0578270c7fcb9c">__pstl::__internal::__pattern_generate_n</link>(
+448 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;std::forward&lt;_ExecutionPolicy&gt;(__exec),&#32;__first,&#32;<link linkend="__classes_2lib_2include_2mmintrin_8h_1a7cee916b88079d74fdaf7856046abea3">__count</link>,&#32;__g,
+449 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__pstl::__internal::__is_parallelization_preferred&lt;_ExecutionPolicy,&#32;_ForwardIterator&gt;(__exec),
+450 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__pstl::__internal::__is_vectorization_preferred&lt;_ExecutionPolicy,&#32;_ForwardIterator&gt;(__exec));
+451 }
+452 
+453 <emphasis role="comment">//&#32;[alg.remove]</emphasis>
+454 
+455 <emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">class</emphasis>&#32;_ExecutionPolicy,&#32;<emphasis role="keyword">class</emphasis>&#32;_ForwardIterator1,&#32;<emphasis role="keyword">class</emphasis>&#32;_ForwardIterator2,&#32;<emphasis role="keyword">class</emphasis>&#32;_Predicate&gt;
+456 <link linkend="_namespace____pstl_1_1____internal_1a6955c3b3eeac7ccfa9a8ae5da85b9f2a">__pstl::__internal::__enable_if_execution_policy&lt;_ExecutionPolicy, _ForwardIterator2&gt;</link>
+457 <link linkend="_namespacestd_1a11eaff910d723a0ea9707f30aead68c4">remove_copy_if</link>(_ExecutionPolicy&amp;&amp;&#32;__exec,&#32;_ForwardIterator1&#32;__first,&#32;_ForwardIterator1&#32;__last,
+458 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_ForwardIterator2&#32;__result,&#32;_Predicate&#32;__pred)
+459 {
+460 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="_namespacestd_1a05892b1ecb6a5d694a84a4567b1f77e1">std::copy_if</link>(std::forward&lt;_ExecutionPolicy&gt;(__exec),&#32;__first,&#32;__last,&#32;__result,&#32;std::not_fn(__pred));
+461 }
+462 
+463 <emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">class</emphasis>&#32;_ExecutionPolicy,&#32;<emphasis role="keyword">class</emphasis>&#32;_ForwardIterator1,&#32;<emphasis role="keyword">class</emphasis>&#32;_ForwardIterator2,&#32;<emphasis role="keyword">class</emphasis>&#32;_Tp&gt;
+464 <link linkend="_namespace____pstl_1_1____internal_1a6955c3b3eeac7ccfa9a8ae5da85b9f2a">__pstl::__internal::__enable_if_execution_policy&lt;_ExecutionPolicy, _ForwardIterator2&gt;</link>
+465 <link linkend="_namespacestd_1a6b787bee96a52b5b62d7fe8aa6f15fd8">remove_copy</link>(_ExecutionPolicy&amp;&amp;&#32;__exec,&#32;_ForwardIterator1&#32;__first,&#32;_ForwardIterator1&#32;__last,&#32;_ForwardIterator2&#32;__result,
+466 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;_Tp&amp;&#32;__value)
+467 {
+468 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="_namespacestd_1a05892b1ecb6a5d694a84a4567b1f77e1">std::copy_if</link>(std::forward&lt;_ExecutionPolicy&gt;(__exec),&#32;__first,&#32;__last,&#32;__result,
+469 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____pstl_1_1____internal_1_1____not__equal__value">__pstl::__internal::__not_equal_value&lt;_Tp&gt;</link>(__value));
+470 }
+471 
+472 <emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">class</emphasis>&#32;_ExecutionPolicy,&#32;<emphasis role="keyword">class</emphasis>&#32;_ForwardIterator,&#32;<emphasis role="keyword">class</emphasis>&#32;_UnaryPredicate&gt;
+473 <link linkend="_namespace____pstl_1_1____internal_1a6955c3b3eeac7ccfa9a8ae5da85b9f2a">__pstl::__internal::__enable_if_execution_policy&lt;_ExecutionPolicy, _ForwardIterator&gt;</link>
+474 <link linkend="_namespacestd_1af35a5645ec4634e402bf77d3edcaa908">remove_if</link>(_ExecutionPolicy&amp;&amp;&#32;__exec,&#32;_ForwardIterator&#32;__first,&#32;_ForwardIterator&#32;__last,&#32;_UnaryPredicate&#32;__pred)
+475 {
+476 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="_namespace____pstl_1_1____internal_1ab7a6c74a4cb2c2ee930c2da12b6cd686">__pstl::__internal::__pattern_remove_if</link>(
+477 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;std::forward&lt;_ExecutionPolicy&gt;(__exec),&#32;__first,&#32;__last,&#32;__pred,
+478 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__pstl::__internal::__is_vectorization_preferred&lt;_ExecutionPolicy,&#32;_ForwardIterator&gt;(__exec),
+479 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__pstl::__internal::__is_parallelization_preferred&lt;_ExecutionPolicy,&#32;_ForwardIterator&gt;(__exec));
+480 }
+481 
+482 <emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">class</emphasis>&#32;_ExecutionPolicy,&#32;<emphasis role="keyword">class</emphasis>&#32;_ForwardIterator,&#32;<emphasis role="keyword">class</emphasis>&#32;_Tp&gt;
+483 <link linkend="_namespace____pstl_1_1____internal_1a6955c3b3eeac7ccfa9a8ae5da85b9f2a">__pstl::__internal::__enable_if_execution_policy&lt;_ExecutionPolicy, _ForwardIterator&gt;</link>
+484 <link linkend="_namespacestd_1a4e25a1e93784cb07fd8a6e9a00be03a7">remove</link>(_ExecutionPolicy&amp;&amp;&#32;__exec,&#32;_ForwardIterator&#32;__first,&#32;_ForwardIterator&#32;__last,&#32;<emphasis role="keyword">const</emphasis>&#32;_Tp&amp;&#32;__value)
+485 {
+486 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="_namespacestd_1af35a5645ec4634e402bf77d3edcaa908">std::remove_if</link>(std::forward&lt;_ExecutionPolicy&gt;(__exec),&#32;__first,&#32;__last,
+487 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____pstl_1_1____internal_1_1____equal__value">__pstl::__internal::__equal_value&lt;_Tp&gt;</link>(__value));
+488 }
+489 
+490 <emphasis role="comment">//&#32;[alg.unique]</emphasis>
+491 
+492 <emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">class</emphasis>&#32;_ExecutionPolicy,&#32;<emphasis role="keyword">class</emphasis>&#32;_ForwardIterator,&#32;<emphasis role="keyword">class</emphasis>&#32;_BinaryPredicate&gt;
+493 <link linkend="_namespace____pstl_1_1____internal_1a6955c3b3eeac7ccfa9a8ae5da85b9f2a">__pstl::__internal::__enable_if_execution_policy&lt;_ExecutionPolicy, _ForwardIterator&gt;</link>
+494 <link linkend="_namespacestd_1a1a02827fc3005a9ac8b6e3d39478529b">unique</link>(_ExecutionPolicy&amp;&amp;&#32;__exec,&#32;_ForwardIterator&#32;__first,&#32;_ForwardIterator&#32;__last,&#32;_BinaryPredicate&#32;__pred)
+495 {
+496 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="_namespace____pstl_1_1____internal_1a7d71081d25f6bd099154a9d7ab2acc0b">__pstl::__internal::__pattern_unique</link>(
+497 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;std::forward&lt;_ExecutionPolicy&gt;(__exec),&#32;__first,&#32;__last,&#32;__pred,
+498 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__pstl::__internal::__is_vectorization_preferred&lt;_ExecutionPolicy,&#32;_ForwardIterator&gt;(__exec),
+499 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__pstl::__internal::__is_parallelization_preferred&lt;_ExecutionPolicy,&#32;_ForwardIterator&gt;(__exec));
+500 }
+501 
+502 <emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">class</emphasis>&#32;_ExecutionPolicy,&#32;<emphasis role="keyword">class</emphasis>&#32;_ForwardIterator&gt;
+503 <link linkend="_namespace____pstl_1_1____internal_1a6955c3b3eeac7ccfa9a8ae5da85b9f2a">__pstl::__internal::__enable_if_execution_policy&lt;_ExecutionPolicy, _ForwardIterator&gt;</link>
+504 <link linkend="_namespacestd_1a1a02827fc3005a9ac8b6e3d39478529b">unique</link>(_ExecutionPolicy&amp;&amp;&#32;__exec,&#32;_ForwardIterator&#32;__first,&#32;_ForwardIterator&#32;__last)
+505 {
+506 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="_namespacestd_1a1a02827fc3005a9ac8b6e3d39478529b">std::unique</link>(std::forward&lt;_ExecutionPolicy&gt;(__exec),&#32;__first,&#32;__last,&#32;std::equal_to&lt;&gt;());
+507 }
+508 
+509 <emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">class</emphasis>&#32;_ExecutionPolicy,&#32;<emphasis role="keyword">class</emphasis>&#32;_ForwardIterator1,&#32;<emphasis role="keyword">class</emphasis>&#32;_ForwardIterator2,&#32;<emphasis role="keyword">class</emphasis>&#32;_BinaryPredicate&gt;
+510 <link linkend="_namespace____pstl_1_1____internal_1a6955c3b3eeac7ccfa9a8ae5da85b9f2a">__pstl::__internal::__enable_if_execution_policy&lt;_ExecutionPolicy, _ForwardIterator2&gt;</link>
+511 <link linkend="_namespacestd_1a5dca0b0436966649ae7ffb41cf4c67d9">unique_copy</link>(_ExecutionPolicy&amp;&amp;&#32;__exec,&#32;_ForwardIterator1&#32;__first,&#32;_ForwardIterator1&#32;__last,&#32;_ForwardIterator2&#32;__result,
+512 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_BinaryPredicate&#32;__pred)
+513 {
+514 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="_namespace____pstl_1_1____internal_1ae5b4115f81569b63f8d0feb2bd3b90ec">__pstl::__internal::__pattern_unique_copy</link>(
+515 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;std::forward&lt;_ExecutionPolicy&gt;(__exec),&#32;__first,&#32;__last,&#32;__result,&#32;__pred,
+516 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__pstl::__internal::__is_vectorization_preferred&lt;_ExecutionPolicy,&#32;_ForwardIterator1,&#32;_ForwardIterator2&gt;(
+517 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__exec),
+518 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__pstl::__internal::__is_parallelization_preferred&lt;_ExecutionPolicy,&#32;_ForwardIterator1,&#32;_ForwardIterator2&gt;(
+519 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__exec));
+520 }
+521 
+522 <emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">class</emphasis>&#32;_ExecutionPolicy,&#32;<emphasis role="keyword">class</emphasis>&#32;_ForwardIterator1,&#32;<emphasis role="keyword">class</emphasis>&#32;_ForwardIterator2&gt;
+523 <link linkend="_namespace____pstl_1_1____internal_1a6955c3b3eeac7ccfa9a8ae5da85b9f2a">__pstl::__internal::__enable_if_execution_policy&lt;_ExecutionPolicy, _ForwardIterator2&gt;</link>
+524 <link linkend="_namespacestd_1a5dca0b0436966649ae7ffb41cf4c67d9">unique_copy</link>(_ExecutionPolicy&amp;&amp;&#32;__exec,&#32;_ForwardIterator1&#32;__first,&#32;_ForwardIterator1&#32;__last,&#32;_ForwardIterator2&#32;__result)
+525 {
+526 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="_namespacestd_1a5dca0b0436966649ae7ffb41cf4c67d9">std::unique_copy</link>(__exec,&#32;__first,&#32;__last,&#32;__result,&#32;std::equal_to&lt;&gt;());
+527 }
+528 
+529 <emphasis role="comment">//&#32;[alg.reverse]</emphasis>
+530 
+531 <emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">class</emphasis>&#32;_ExecutionPolicy,&#32;<emphasis role="keyword">class</emphasis>&#32;_B<emphasis role="keywordtype">id</emphasis>irectionalIterator&gt;
+532 <link linkend="_namespace____pstl_1_1____internal_1a6955c3b3eeac7ccfa9a8ae5da85b9f2a">__pstl::__internal::__enable_if_execution_policy&lt;_ExecutionPolicy, void&gt;</link>
+533 <link linkend="_namespacestd_1a66cd7f2a58b728c4a8f98ca025941719">reverse</link>(_ExecutionPolicy&amp;&amp;&#32;__exec,&#32;_BidirectionalIterator&#32;__first,&#32;_BidirectionalIterator&#32;__last)
+534 {
+535 &#32;&#32;&#32;&#32;<link linkend="_namespace____pstl_1_1____internal_1a5f2267ae5935da96528156e02f6f4303">__pstl::__internal::__pattern_reverse</link>(
+536 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;std::forward&lt;_ExecutionPolicy&gt;(__exec),&#32;__first,&#32;__last,
+537 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__pstl::__internal::__is_vectorization_preferred&lt;_ExecutionPolicy,&#32;_BidirectionalIterator&gt;(__exec),
+538 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__pstl::__internal::__is_parallelization_preferred&lt;_ExecutionPolicy,&#32;_BidirectionalIterator&gt;(__exec));
+539 }
+540 
+541 <emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">class</emphasis>&#32;_ExecutionPolicy,&#32;<emphasis role="keyword">class</emphasis>&#32;_B<emphasis role="keywordtype">id</emphasis>irectionalIterator,&#32;<emphasis role="keyword">class</emphasis>&#32;_ForwardIterator&gt;
+542 <link linkend="_namespace____pstl_1_1____internal_1a6955c3b3eeac7ccfa9a8ae5da85b9f2a">__pstl::__internal::__enable_if_execution_policy&lt;_ExecutionPolicy, _ForwardIterator&gt;</link>
+543 <link linkend="_namespacestd_1aa750b5b7ee58a0ba12515997f5066c49">reverse_copy</link>(_ExecutionPolicy&amp;&amp;&#32;__exec,&#32;_BidirectionalIterator&#32;__first,&#32;_BidirectionalIterator&#32;__last,
+544 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_ForwardIterator&#32;__d_first)
+545 {
+546 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="_namespace____pstl_1_1____internal_1af2c72d8af8666a15b6ddcdbd7756cce0">__pstl::__internal::__pattern_reverse_copy</link>(
+547 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;std::forward&lt;_ExecutionPolicy&gt;(__exec),&#32;__first,&#32;__last,&#32;__d_first,
+548 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__pstl::__internal::__is_vectorization_preferred&lt;_ExecutionPolicy,&#32;_BidirectionalIterator,&#32;_ForwardIterator&gt;(
+549 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__exec),
+550 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__pstl::__internal::__is_parallelization_preferred&lt;_ExecutionPolicy,&#32;_BidirectionalIterator,&#32;_ForwardIterator&gt;(
+551 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__exec));
+552 }
+553 
+554 <emphasis role="comment">//&#32;[alg.rotate]</emphasis>
+555 
+556 <emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">class</emphasis>&#32;_ExecutionPolicy,&#32;<emphasis role="keyword">class</emphasis>&#32;_ForwardIterator&gt;
+557 <link linkend="_namespace____pstl_1_1____internal_1a6955c3b3eeac7ccfa9a8ae5da85b9f2a">__pstl::__internal::__enable_if_execution_policy&lt;_ExecutionPolicy, _ForwardIterator&gt;</link>
+558 <link linkend="_namespacestd_1ac75ea63fabdb7cfcc58a907d7ac2ae8e">rotate</link>(_ExecutionPolicy&amp;&amp;&#32;__exec,&#32;_ForwardIterator&#32;__first,&#32;_ForwardIterator&#32;__middle,&#32;_ForwardIterator&#32;__last)
+559 {
+560 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="_namespace____pstl_1_1____internal_1aa1344d4c056259b28555671b7a23108d">__pstl::__internal::__pattern_rotate</link>(
+561 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;std::forward&lt;_ExecutionPolicy&gt;(__exec),&#32;__first,&#32;__middle,&#32;__last,
+562 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__pstl::__internal::__is_vectorization_preferred&lt;_ExecutionPolicy,&#32;_ForwardIterator&gt;(__exec),
+563 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__pstl::__internal::__is_parallelization_preferred&lt;_ExecutionPolicy,&#32;_ForwardIterator&gt;(__exec));
+564 }
+565 
+566 <emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">class</emphasis>&#32;_ExecutionPolicy,&#32;<emphasis role="keyword">class</emphasis>&#32;_ForwardIterator1,&#32;<emphasis role="keyword">class</emphasis>&#32;_ForwardIterator2&gt;
+567 <link linkend="_namespace____pstl_1_1____internal_1a6955c3b3eeac7ccfa9a8ae5da85b9f2a">__pstl::__internal::__enable_if_execution_policy&lt;_ExecutionPolicy, _ForwardIterator2&gt;</link>
+568 <link linkend="_namespacestd_1a6a632f2677de3977838e216e3a33338c">rotate_copy</link>(_ExecutionPolicy&amp;&amp;&#32;__exec,&#32;_ForwardIterator1&#32;__first,&#32;_ForwardIterator1&#32;__middle,&#32;_ForwardIterator1&#32;__last,
+569 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_ForwardIterator2&#32;__result)
+570 {
+571 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="_namespace____pstl_1_1____internal_1a6a5ba3b17e77b55a76e8ed1b6130f2e2">__pstl::__internal::__pattern_rotate_copy</link>(
+572 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;std::forward&lt;_ExecutionPolicy&gt;(__exec),&#32;__first,&#32;__middle,&#32;__last,&#32;__result,
+573 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__pstl::__internal::__is_vectorization_preferred&lt;_ExecutionPolicy,&#32;_ForwardIterator1,&#32;_ForwardIterator2&gt;(
+574 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__exec),
+575 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__pstl::__internal::__is_parallelization_preferred&lt;_ExecutionPolicy,&#32;_ForwardIterator1,&#32;_ForwardIterator2&gt;(
+576 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__exec));
+577 }
+578 
+579 <emphasis role="comment">//&#32;[alg.partitions]</emphasis>
+580 
+581 <emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">class</emphasis>&#32;_ExecutionPolicy,&#32;<emphasis role="keyword">class</emphasis>&#32;_ForwardIterator,&#32;<emphasis role="keyword">class</emphasis>&#32;_UnaryPredicate&gt;
+582 <link linkend="_namespace____pstl_1_1____internal_1a6955c3b3eeac7ccfa9a8ae5da85b9f2a">__pstl::__internal::__enable_if_execution_policy&lt;_ExecutionPolicy, bool&gt;</link>
+583 <link linkend="_namespacestd_1a1437bae2cd332f755a3e88e264a04525">is_partitioned</link>(_ExecutionPolicy&amp;&amp;&#32;__exec,&#32;_ForwardIterator&#32;__first,&#32;_ForwardIterator&#32;__last,&#32;_UnaryPredicate&#32;__pred)
+584 {
+585 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="_namespace____pstl_1_1____internal_1a3c61e6bb9156e92c5f8e13ad0c5e5e5b">__pstl::__internal::__pattern_is_partitioned</link>(
+586 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;std::forward&lt;_ExecutionPolicy&gt;(__exec),&#32;__first,&#32;__last,&#32;__pred,
+587 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__pstl::__internal::__is_vectorization_preferred&lt;_ExecutionPolicy,&#32;_ForwardIterator&gt;(__exec),
+588 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__pstl::__internal::__is_parallelization_preferred&lt;_ExecutionPolicy,&#32;_ForwardIterator&gt;(__exec));
+589 }
+590 
+591 <emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">class</emphasis>&#32;_ExecutionPolicy,&#32;<emphasis role="keyword">class</emphasis>&#32;_ForwardIterator,&#32;<emphasis role="keyword">class</emphasis>&#32;_UnaryPredicate&gt;
+592 <link linkend="_namespace____pstl_1_1____internal_1a6955c3b3eeac7ccfa9a8ae5da85b9f2a">__pstl::__internal::__enable_if_execution_policy&lt;_ExecutionPolicy, _ForwardIterator&gt;</link>
+593 <link linkend="_namespacestd_1a7dde62cf155d6b5bde1a1c0577a9a57f">partition</link>(_ExecutionPolicy&amp;&amp;&#32;__exec,&#32;_ForwardIterator&#32;__first,&#32;_ForwardIterator&#32;__last,&#32;_UnaryPredicate&#32;__pred)
+594 {
+595 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="_namespace____pstl_1_1____internal_1aad5bdaaadc2aee6f032d7188f9556523">__pstl::__internal::__pattern_partition</link>(
+596 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;std::forward&lt;_ExecutionPolicy&gt;(__exec),&#32;__first,&#32;__last,&#32;__pred,
+597 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__pstl::__internal::__is_vectorization_preferred&lt;_ExecutionPolicy,&#32;_ForwardIterator&gt;(__exec),
+598 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__pstl::__internal::__is_parallelization_preferred&lt;_ExecutionPolicy,&#32;_ForwardIterator&gt;(__exec));
+599 }
+600 
+601 <emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">class</emphasis>&#32;_ExecutionPolicy,&#32;<emphasis role="keyword">class</emphasis>&#32;_B<emphasis role="keywordtype">id</emphasis>irectionalIterator,&#32;<emphasis role="keyword">class</emphasis>&#32;_UnaryPredicate&gt;
+602 <link linkend="_namespace____pstl_1_1____internal_1a6955c3b3eeac7ccfa9a8ae5da85b9f2a">__pstl::__internal::__enable_if_execution_policy&lt;_ExecutionPolicy, _BidirectionalIterator&gt;</link>
+603 <link linkend="_namespacestd_1afd107e6f24ea89b04af2b04b929601b4">stable_partition</link>(_ExecutionPolicy&amp;&amp;&#32;__exec,&#32;_BidirectionalIterator&#32;__first,&#32;_BidirectionalIterator&#32;__last,
+604 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_UnaryPredicate&#32;__pred)
+605 {
+606 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="_namespace____pstl_1_1____internal_1a8c278dd40fdab60b98fd9a0046876130">__pstl::__internal::__pattern_stable_partition</link>(
+607 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;std::forward&lt;_ExecutionPolicy&gt;(__exec),&#32;__first,&#32;__last,&#32;__pred,
+608 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__pstl::__internal::__is_vectorization_preferred&lt;_ExecutionPolicy,&#32;_BidirectionalIterator&gt;(__exec),
+609 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__pstl::__internal::__is_parallelization_preferred&lt;_ExecutionPolicy,&#32;_BidirectionalIterator&gt;(__exec));
+610 }
+611 
+612 <emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">class&#32;</emphasis>_ExecutionPolicy,&#32;<emphasis role="keyword">class&#32;</emphasis>_ForwardIterator,&#32;<emphasis role="keyword">class&#32;</emphasis>_ForwardIterator1,&#32;<emphasis role="keyword">class&#32;</emphasis>_ForwardIterator2,
+613 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">class&#32;</emphasis>_UnaryPredicate&gt;
+614 <link linkend="_namespace____pstl_1_1____internal_1a6955c3b3eeac7ccfa9a8ae5da85b9f2a">__pstl::__internal::__enable_if_execution_policy&lt;_ExecutionPolicy, std::pair&lt;_ForwardIterator1, _ForwardIterator2&gt;</link>&gt;
+615 <link linkend="_namespacestd_1a7ecc1add6d1142770929cc97a10d801b">partition_copy</link>(_ExecutionPolicy&amp;&amp;&#32;__exec,&#32;_ForwardIterator&#32;__first,&#32;_ForwardIterator&#32;__last,
+616 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_ForwardIterator1&#32;__out_true,&#32;_ForwardIterator2&#32;__out_false,&#32;_UnaryPredicate&#32;__pred)
+617 {
+618 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="_namespace____pstl_1_1____internal_1a213f0e051dd1ea6261325ac6f2f65cb2">__pstl::__internal::__pattern_partition_copy</link>(
+619 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;std::forward&lt;_ExecutionPolicy&gt;(__exec),&#32;__first,&#32;__last,&#32;__out_true,&#32;__out_false,&#32;__pred,
+620 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_namespace____pstl_1_1____internal_1aba53c2e534557bf2c817808fb3b3c269">__pstl::__internal::__is_vectorization_preferred</link>&lt;_ExecutionPolicy,&#32;_ForwardIterator,&#32;_ForwardIterator1,
+621 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_ForwardIterator2&gt;(__exec),
+622 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_namespace____pstl_1_1____internal_1a96278219a9b5139e6060c4a24235841c">__pstl::__internal::__is_parallelization_preferred</link>&lt;_ExecutionPolicy,&#32;_ForwardIterator,&#32;_ForwardIterator1,
+623 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_ForwardIterator2&gt;(__exec));
+624 }
+625 
+626 <emphasis role="comment">//&#32;[alg.sort]</emphasis>
+627 
+628 <emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">class</emphasis>&#32;_ExecutionPolicy,&#32;<emphasis role="keyword">class</emphasis>&#32;_RandomAccessIterator,&#32;<emphasis role="keyword">class</emphasis>&#32;_Compare&gt;
+629 <link linkend="_namespace____pstl_1_1____internal_1a6955c3b3eeac7ccfa9a8ae5da85b9f2a">__pstl::__internal::__enable_if_execution_policy&lt;_ExecutionPolicy, void&gt;</link>
+630 <link linkend="_namespacestd_1a73a397864aa701b5bd48fae555f4f935">sort</link>(_ExecutionPolicy&amp;&amp;&#32;__exec,&#32;_RandomAccessIterator&#32;__first,&#32;_RandomAccessIterator&#32;__last,&#32;_Compare&#32;__comp)
+631 {
+632 &#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">typename</emphasis>&#32;iterator_traits&lt;_RandomAccessIterator&gt;::value_type&#32;_InputType;
+633 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="_namespace____pstl_1_1____internal_1a5ccc13fdf58da10d6d45be7770ad0a4c">__pstl::__internal::__pattern_sort</link>(
+634 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;std::forward&lt;_ExecutionPolicy&gt;(__exec),&#32;__first,&#32;__last,&#32;__comp,
+635 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__pstl::__internal::__is_vectorization_preferred&lt;_ExecutionPolicy,&#32;_RandomAccessIterator&gt;(__exec),
+636 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__pstl::__internal::__is_parallelization_preferred&lt;_ExecutionPolicy,&#32;_RandomAccessIterator&gt;(__exec),
+637 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;std::is_move_constructible&lt;_InputType&gt;::type());
+638 }
+639 
+640 <emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">class</emphasis>&#32;_ExecutionPolicy,&#32;<emphasis role="keyword">class</emphasis>&#32;_RandomAccessIterator&gt;
+641 <link linkend="_namespace____pstl_1_1____internal_1a6955c3b3eeac7ccfa9a8ae5da85b9f2a">__pstl::__internal::__enable_if_execution_policy&lt;_ExecutionPolicy, void&gt;</link>
+642 <link linkend="_namespacestd_1a73a397864aa701b5bd48fae555f4f935">sort</link>(_ExecutionPolicy&amp;&amp;&#32;__exec,&#32;_RandomAccessIterator&#32;__first,&#32;_RandomAccessIterator&#32;__last)
+643 {
+644 &#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">typename</emphasis>&#32;std::iterator_traits&lt;_RandomAccessIterator&gt;::value_type&#32;_InputType;
+645 &#32;&#32;&#32;&#32;<link linkend="_namespacestd_1a73a397864aa701b5bd48fae555f4f935">std::sort</link>(std::forward&lt;_ExecutionPolicy&gt;(__exec),&#32;__first,&#32;__last,&#32;std::less&lt;_InputType&gt;());
+646 }
+647 
+648 <emphasis role="comment">//&#32;[stable.sort]</emphasis>
+649 
+650 <emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">class</emphasis>&#32;_ExecutionPolicy,&#32;<emphasis role="keyword">class</emphasis>&#32;_RandomAccessIterator,&#32;<emphasis role="keyword">class</emphasis>&#32;_Compare&gt;
+651 <link linkend="_namespace____pstl_1_1____internal_1a6955c3b3eeac7ccfa9a8ae5da85b9f2a">__pstl::__internal::__enable_if_execution_policy&lt;_ExecutionPolicy, void&gt;</link>
+652 <link linkend="_namespacestd_1ac4ae475114c7f06297db807234405f8a">stable_sort</link>(_ExecutionPolicy&amp;&amp;&#32;__exec,&#32;_RandomAccessIterator&#32;__first,&#32;_RandomAccessIterator&#32;__last,&#32;_Compare&#32;__comp)
+653 {
+654 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="_namespace____pstl_1_1____internal_1aee8744385f4f206ef9dd2c11f1af9b48">__pstl::__internal::__pattern_stable_sort</link>(
+655 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;std::forward&lt;_ExecutionPolicy&gt;(__exec),&#32;__first,&#32;__last,&#32;__comp,
+656 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__pstl::__internal::__is_vectorization_preferred&lt;_ExecutionPolicy,&#32;_RandomAccessIterator&gt;(__exec),
+657 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__pstl::__internal::__is_parallelization_preferred&lt;_ExecutionPolicy,&#32;_RandomAccessIterator&gt;(__exec));
+658 }
+659 
+660 <emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">class</emphasis>&#32;_ExecutionPolicy,&#32;<emphasis role="keyword">class</emphasis>&#32;_RandomAccessIterator&gt;
+661 <link linkend="_namespace____pstl_1_1____internal_1a6955c3b3eeac7ccfa9a8ae5da85b9f2a">__pstl::__internal::__enable_if_execution_policy&lt;_ExecutionPolicy, void&gt;</link>
+662 <link linkend="_namespacestd_1ac4ae475114c7f06297db807234405f8a">stable_sort</link>(_ExecutionPolicy&amp;&amp;&#32;__exec,&#32;_RandomAccessIterator&#32;__first,&#32;_RandomAccessIterator&#32;__last)
+663 {
+664 &#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">typename</emphasis>&#32;std::iterator_traits&lt;_RandomAccessIterator&gt;::value_type&#32;_InputType;
+665 &#32;&#32;&#32;&#32;<link linkend="_namespacestd_1ac4ae475114c7f06297db807234405f8a">std::stable_sort</link>(__exec,&#32;__first,&#32;__last,&#32;std::less&lt;_InputType&gt;());
+666 }
+667 
+668 <emphasis role="comment">//&#32;[mismatch]</emphasis>
+669 
+670 <emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">class</emphasis>&#32;_ExecutionPolicy,&#32;<emphasis role="keyword">class</emphasis>&#32;_ForwardIterator1,&#32;<emphasis role="keyword">class</emphasis>&#32;_ForwardIterator2,&#32;<emphasis role="keyword">class</emphasis>&#32;_BinaryPredicate&gt;
+671 <link linkend="_namespace____pstl_1_1____internal_1a6955c3b3eeac7ccfa9a8ae5da85b9f2a">__pstl::__internal::__enable_if_execution_policy&lt;_ExecutionPolicy, std::pair&lt;_ForwardIterator1, _ForwardIterator2&gt;</link>&gt;
+672 <link linkend="_namespacestd_1a14e973b0980afe3afbceb376817e29f0">mismatch</link>(_ExecutionPolicy&amp;&amp;&#32;__exec,&#32;_ForwardIterator1&#32;__first1,&#32;_ForwardIterator1&#32;__last1,&#32;_ForwardIterator2&#32;__first2,
+673 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_ForwardIterator2&#32;__last2,&#32;_BinaryPredicate&#32;__pred)
+674 {
+675 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="_namespace____pstl_1_1____internal_1af94c79334ec95c8bccf8ce29d207f8b2">__pstl::__internal::__pattern_mismatch</link>(
+676 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;std::forward&lt;_ExecutionPolicy&gt;(__exec),&#32;__first1,&#32;__last1,&#32;__first2,&#32;__last2,&#32;__pred,
+677 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__pstl::__internal::__is_vectorization_preferred&lt;_ExecutionPolicy,&#32;_ForwardIterator1,&#32;_ForwardIterator2&gt;(
+678 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__exec),
+679 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__pstl::__internal::__is_parallelization_preferred&lt;_ExecutionPolicy,&#32;_ForwardIterator1,&#32;_ForwardIterator2&gt;(
+680 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__exec));
+681 }
+682 
+683 <emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">class</emphasis>&#32;_ExecutionPolicy,&#32;<emphasis role="keyword">class</emphasis>&#32;_ForwardIterator1,&#32;<emphasis role="keyword">class</emphasis>&#32;_ForwardIterator2,&#32;<emphasis role="keyword">class</emphasis>&#32;_BinaryPredicate&gt;
+684 <link linkend="_namespace____pstl_1_1____internal_1a6955c3b3eeac7ccfa9a8ae5da85b9f2a">__pstl::__internal::__enable_if_execution_policy&lt;_ExecutionPolicy, std::pair&lt;_ForwardIterator1, _ForwardIterator2&gt;</link>&gt;
+685 <link linkend="_namespacestd_1a14e973b0980afe3afbceb376817e29f0">mismatch</link>(_ExecutionPolicy&amp;&amp;&#32;__exec,&#32;_ForwardIterator1&#32;__first1,&#32;_ForwardIterator1&#32;__last1,&#32;_ForwardIterator2&#32;__first2,
+686 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_BinaryPredicate&#32;__pred)
+687 {
+688 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="_namespacestd_1a14e973b0980afe3afbceb376817e29f0">std::mismatch</link>(__exec,&#32;__first1,&#32;__last1,&#32;__first2,&#32;std::next(__first2,&#32;std::distance(__first1,&#32;__last1)),
+689 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__pred);
+690 }
+691 
+692 <emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">class</emphasis>&#32;_ExecutionPolicy,&#32;<emphasis role="keyword">class</emphasis>&#32;_ForwardIterator1,&#32;<emphasis role="keyword">class</emphasis>&#32;_ForwardIterator2&gt;
+693 <link linkend="_namespace____pstl_1_1____internal_1a6955c3b3eeac7ccfa9a8ae5da85b9f2a">__pstl::__internal::__enable_if_execution_policy&lt;_ExecutionPolicy, std::pair&lt;_ForwardIterator1, _ForwardIterator2&gt;</link>&gt;
+694 <link linkend="_namespacestd_1a14e973b0980afe3afbceb376817e29f0">mismatch</link>(_ExecutionPolicy&amp;&amp;&#32;__exec,&#32;_ForwardIterator1&#32;__first1,&#32;_ForwardIterator1&#32;__last1,&#32;_ForwardIterator2&#32;__first2,
+695 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_ForwardIterator2&#32;__last2)
+696 {
+697 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="_namespacestd_1a14e973b0980afe3afbceb376817e29f0">std::mismatch</link>(std::forward&lt;_ExecutionPolicy&gt;(__exec),&#32;__first1,&#32;__last1,&#32;__first2,&#32;__last2,
+698 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;std::equal_to&lt;&gt;());
+699 }
+700 
+701 <emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">class</emphasis>&#32;_ExecutionPolicy,&#32;<emphasis role="keyword">class</emphasis>&#32;_ForwardIterator1,&#32;<emphasis role="keyword">class</emphasis>&#32;_ForwardIterator2&gt;
+702 <link linkend="_namespace____pstl_1_1____internal_1a6955c3b3eeac7ccfa9a8ae5da85b9f2a">__pstl::__internal::__enable_if_execution_policy&lt;_ExecutionPolicy, std::pair&lt;_ForwardIterator1, _ForwardIterator2&gt;</link>&gt;
+703 <link linkend="_namespacestd_1a14e973b0980afe3afbceb376817e29f0">mismatch</link>(_ExecutionPolicy&amp;&amp;&#32;__exec,&#32;_ForwardIterator1&#32;__first1,&#32;_ForwardIterator1&#32;__last1,&#32;_ForwardIterator2&#32;__first2)
+704 {
+705 &#32;&#32;&#32;&#32;<emphasis role="comment">//TODO:&#32;to&#32;get&#32;rid&#32;of&#32;&quot;distance&quot;</emphasis>
+706 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="_namespacestd_1a14e973b0980afe3afbceb376817e29f0">std::mismatch</link>(std::forward&lt;_ExecutionPolicy&gt;(__exec),&#32;__first1,&#32;__last1,&#32;__first2,
+707 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;std::next(__first2,&#32;std::distance(__first1,&#32;__last1)));
+708 }
+709 
+710 <emphasis role="comment">//&#32;[alg.equal]</emphasis>
+711 
+712 <emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">class</emphasis>&#32;_ExecutionPolicy,&#32;<emphasis role="keyword">class</emphasis>&#32;_ForwardIterator1,&#32;<emphasis role="keyword">class</emphasis>&#32;_ForwardIterator2,&#32;<emphasis role="keyword">class</emphasis>&#32;_BinaryPredicate&gt;
+713 <link linkend="_namespace____pstl_1_1____internal_1a6955c3b3eeac7ccfa9a8ae5da85b9f2a">__pstl::__internal::__enable_if_execution_policy&lt;_ExecutionPolicy, bool&gt;</link>
+714 <link linkend="_namespacestd_1a94ada91841cca21a2327b0235f9a82cd">equal</link>(_ExecutionPolicy&amp;&amp;&#32;__exec,&#32;_ForwardIterator1&#32;__first1,&#32;_ForwardIterator1&#32;__last1,&#32;_ForwardIterator2&#32;__first2,
+715 &#32;&#32;&#32;&#32;&#32;&#32;_BinaryPredicate&#32;__p)
+716 {
+717 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="_namespace____pstl_1_1____internal_1a596361246dd948515acd5af4fffe2518">__pstl::__internal::__pattern_equal</link>(
+718 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;std::forward&lt;_ExecutionPolicy&gt;(__exec),&#32;__first1,&#32;__last1,&#32;__first2,&#32;__p,
+719 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__pstl::__internal::__is_vectorization_preferred&lt;_ExecutionPolicy,&#32;_ForwardIterator1&gt;(__exec),
+720 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__pstl::__internal::__is_parallelization_preferred&lt;_ExecutionPolicy,&#32;_ForwardIterator1&gt;(__exec));
+721 }
+722 
+723 <emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">class</emphasis>&#32;_ExecutionPolicy,&#32;<emphasis role="keyword">class</emphasis>&#32;_ForwardIterator1,&#32;<emphasis role="keyword">class</emphasis>&#32;_ForwardIterator2&gt;
+724 <link linkend="_namespace____pstl_1_1____internal_1a6955c3b3eeac7ccfa9a8ae5da85b9f2a">__pstl::__internal::__enable_if_execution_policy&lt;_ExecutionPolicy, bool&gt;</link>
+725 <link linkend="_namespacestd_1a94ada91841cca21a2327b0235f9a82cd">equal</link>(_ExecutionPolicy&amp;&amp;&#32;__exec,&#32;_ForwardIterator1&#32;__first1,&#32;_ForwardIterator1&#32;__last1,&#32;_ForwardIterator2&#32;__first2)
+726 {
+727 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="_namespacestd_1a94ada91841cca21a2327b0235f9a82cd">std::equal</link>(std::forward&lt;_ExecutionPolicy&gt;(__exec),&#32;__first1,&#32;__last1,&#32;__first2,&#32;std::equal_to&lt;&gt;());
+728 }
+729 
+730 <emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">class</emphasis>&#32;_ExecutionPolicy,&#32;<emphasis role="keyword">class</emphasis>&#32;_ForwardIterator1,&#32;<emphasis role="keyword">class</emphasis>&#32;_ForwardIterator2,&#32;<emphasis role="keyword">class</emphasis>&#32;_BinaryPredicate&gt;
+731 <link linkend="_namespace____pstl_1_1____internal_1a6955c3b3eeac7ccfa9a8ae5da85b9f2a">__pstl::__internal::__enable_if_execution_policy&lt;_ExecutionPolicy, bool&gt;</link>
+732 <link linkend="_namespacestd_1a94ada91841cca21a2327b0235f9a82cd">equal</link>(_ExecutionPolicy&amp;&amp;&#32;__exec,&#32;_ForwardIterator1&#32;__first1,&#32;_ForwardIterator1&#32;__last1,&#32;_ForwardIterator2&#32;__first2,
+733 &#32;&#32;&#32;&#32;&#32;&#32;_ForwardIterator2&#32;__last2,&#32;_BinaryPredicate&#32;__p)
+734 {
+735 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="_namespace____pstl_1_1____internal_1a596361246dd948515acd5af4fffe2518">__pstl::__internal::__pattern_equal</link>(
+736 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;std::forward&lt;_ExecutionPolicy&gt;(__exec),&#32;__first1,&#32;__last1,&#32;__first2,&#32;__last2,&#32;__p,
+737 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__pstl::__internal::__is_vectorization_preferred&lt;_ExecutionPolicy,&#32;_ForwardIterator1&gt;(__exec),
+738 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__pstl::__internal::__is_parallelization_preferred&lt;_ExecutionPolicy,&#32;_ForwardIterator1&gt;(__exec));
+739 }
+740 
+741 <emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">class</emphasis>&#32;_ExecutionPolicy,&#32;<emphasis role="keyword">class</emphasis>&#32;_ForwardIterator1,&#32;<emphasis role="keyword">class</emphasis>&#32;_ForwardIterator2&gt;
+742 <link linkend="_namespace____pstl_1_1____internal_1a6955c3b3eeac7ccfa9a8ae5da85b9f2a">__pstl::__internal::__enable_if_execution_policy&lt;_ExecutionPolicy, bool&gt;</link>
+743 <link linkend="_namespacestd_1a94ada91841cca21a2327b0235f9a82cd">equal</link>(_ExecutionPolicy&amp;&amp;&#32;__exec,&#32;_ForwardIterator1&#32;__first1,&#32;_ForwardIterator1&#32;__last1,&#32;_ForwardIterator2&#32;__first2,
+744 &#32;&#32;&#32;&#32;&#32;&#32;_ForwardIterator2&#32;__last2)
+745 {
+746 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="_namespacestd_1a94ada91841cca21a2327b0235f9a82cd">equal</link>(std::forward&lt;_ExecutionPolicy&gt;(__exec),&#32;__first1,&#32;__last1,&#32;__first2,&#32;__last2,&#32;std::equal_to&lt;&gt;());
+747 }
+748 
+749 <emphasis role="comment">//&#32;[alg.move]</emphasis>
+750 <emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">class</emphasis>&#32;_ExecutionPolicy,&#32;<emphasis role="keyword">class</emphasis>&#32;_ForwardIterator1,&#32;<emphasis role="keyword">class</emphasis>&#32;_ForwardIterator2&gt;
+751 <link linkend="_namespace____pstl_1_1____internal_1a6955c3b3eeac7ccfa9a8ae5da85b9f2a">__pstl::__internal::__enable_if_execution_policy&lt;_ExecutionPolicy, _ForwardIterator2&gt;</link>
+752 <link linkend="_namespacestd_1ac7095819f6a8da64d69b1ee3029c52be">move</link>(_ExecutionPolicy&amp;&amp;&#32;__exec,&#32;_ForwardIterator1&#32;__first,&#32;_ForwardIterator1&#32;__last,&#32;_ForwardIterator2&#32;__d_first)
+753 {
+754 &#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keyword">auto</emphasis>&#32;__is_vector&#32;=
+755 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__pstl::__internal::__is_vectorization_preferred&lt;_ExecutionPolicy,&#32;_ForwardIterator1,&#32;_ForwardIterator2&gt;(
+756 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__exec);
+757 
+758 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="_namespace____pstl_1_1____internal_1a28e6956cf2cd3d8cfe4949d41a700cc5">__pstl::__internal::__pattern_walk2_brick</link>(
+759 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;std::forward&lt;_ExecutionPolicy&gt;(__exec),&#32;__first,&#32;__last,&#32;__d_first,
+760 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;[__is_vector](_ForwardIterator1&#32;__begin,&#32;_ForwardIterator1&#32;__end,&#32;_ForwardIterator2&#32;__res)&#32;{
+761 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="_namespace____pstl_1_1____internal_1a6d4b0add6bd0d4764ea4e41cde92d975">__pstl::__internal::__brick_move</link>(__begin,&#32;__end,&#32;__res,&#32;__is_vector);
+762 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;},
+763 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__pstl::__internal::__is_parallelization_preferred&lt;_ExecutionPolicy,&#32;_ForwardIterator1,&#32;_ForwardIterator2&gt;(
+764 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__exec));
+765 }
+766 
+767 <emphasis role="comment">//&#32;[partial.sort]</emphasis>
+768 
+769 <emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">class</emphasis>&#32;_ExecutionPolicy,&#32;<emphasis role="keyword">class</emphasis>&#32;_RandomAccessIterator,&#32;<emphasis role="keyword">class</emphasis>&#32;_Compare&gt;
+770 <link linkend="_namespace____pstl_1_1____internal_1a6955c3b3eeac7ccfa9a8ae5da85b9f2a">__pstl::__internal::__enable_if_execution_policy&lt;_ExecutionPolicy, void&gt;</link>
+771 <link linkend="_namespacestd_1a52a9f99b3fdcc2a91f5984ac6a4a24bc">partial_sort</link>(_ExecutionPolicy&amp;&amp;&#32;__exec,&#32;_RandomAccessIterator&#32;__first,&#32;_RandomAccessIterator&#32;__middle,
+772 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_RandomAccessIterator&#32;__last,&#32;_Compare&#32;__comp)
+773 {
+774 &#32;&#32;&#32;&#32;<link linkend="_namespace____pstl_1_1____internal_1a913b070daf38b8f0c138c1c5df02f47c">__pstl::__internal::__pattern_partial_sort</link>(
+775 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;std::forward&lt;_ExecutionPolicy&gt;(__exec),&#32;__first,&#32;__middle,&#32;__last,&#32;__comp,
+776 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__pstl::__internal::__is_vectorization_preferred&lt;_ExecutionPolicy,&#32;_RandomAccessIterator&gt;(__exec),
+777 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__pstl::__internal::__is_parallelization_preferred&lt;_ExecutionPolicy,&#32;_RandomAccessIterator&gt;(__exec));
+778 }
+779 
+780 <emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">class</emphasis>&#32;_ExecutionPolicy,&#32;<emphasis role="keyword">class</emphasis>&#32;_RandomAccessIterator&gt;
+781 <link linkend="_namespace____pstl_1_1____internal_1a6955c3b3eeac7ccfa9a8ae5da85b9f2a">__pstl::__internal::__enable_if_execution_policy&lt;_ExecutionPolicy, void&gt;</link>
+782 <link linkend="_namespacestd_1a52a9f99b3fdcc2a91f5984ac6a4a24bc">partial_sort</link>(_ExecutionPolicy&amp;&amp;&#32;__exec,&#32;_RandomAccessIterator&#32;__first,&#32;_RandomAccessIterator&#32;__middle,
+783 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_RandomAccessIterator&#32;__last)
+784 {
+785 &#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">typename</emphasis>&#32;iterator_traits&lt;_RandomAccessIterator&gt;::value_type&#32;_InputType;
+786 &#32;&#32;&#32;&#32;<link linkend="_namespacestd_1a52a9f99b3fdcc2a91f5984ac6a4a24bc">std::partial_sort</link>(__exec,&#32;__first,&#32;__middle,&#32;__last,&#32;std::less&lt;_InputType&gt;());
+787 }
+788 
+789 <emphasis role="comment">//&#32;[partial.sort.copy]</emphasis>
+790 
+791 <emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">class</emphasis>&#32;_ExecutionPolicy,&#32;<emphasis role="keyword">class</emphasis>&#32;_ForwardIterator,&#32;<emphasis role="keyword">class</emphasis>&#32;_RandomAccessIterator,&#32;<emphasis role="keyword">class</emphasis>&#32;_Compare&gt;
+792 <link linkend="_namespace____pstl_1_1____internal_1a6955c3b3eeac7ccfa9a8ae5da85b9f2a">__pstl::__internal::__enable_if_execution_policy&lt;_ExecutionPolicy, _RandomAccessIterator&gt;</link>
+793 <link linkend="_namespacestd_1aede1625926fee2cb08e34aed9a057213">partial_sort_copy</link>(_ExecutionPolicy&amp;&amp;&#32;__exec,&#32;_ForwardIterator&#32;__first,&#32;_ForwardIterator&#32;__last,
+794 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_RandomAccessIterator&#32;__d_first,&#32;_RandomAccessIterator&#32;__d_last,&#32;_Compare&#32;__comp)
+795 {
+796 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="_namespace____pstl_1_1____internal_1ac7fa2ccc37779ff9c32374cab3d19453">__pstl::__internal::__pattern_partial_sort_copy</link>(
+797 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;std::forward&lt;_ExecutionPolicy&gt;(__exec),&#32;__first,&#32;__last,&#32;__d_first,&#32;__d_last,&#32;__comp,
+798 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__pstl::__internal::__is_vectorization_preferred&lt;_ExecutionPolicy,&#32;_ForwardIterator,&#32;_RandomAccessIterator&gt;(
+799 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__exec),
+800 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__pstl::__internal::__is_parallelization_preferred&lt;_ExecutionPolicy,&#32;_ForwardIterator,&#32;_RandomAccessIterator&gt;(
+801 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__exec));
+802 }
+803 
+804 <emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">class</emphasis>&#32;_ExecutionPolicy,&#32;<emphasis role="keyword">class</emphasis>&#32;_ForwardIterator,&#32;<emphasis role="keyword">class</emphasis>&#32;_RandomAccessIterator&gt;
+805 <link linkend="_namespace____pstl_1_1____internal_1a6955c3b3eeac7ccfa9a8ae5da85b9f2a">__pstl::__internal::__enable_if_execution_policy&lt;_ExecutionPolicy, _RandomAccessIterator&gt;</link>
+806 <link linkend="_namespacestd_1aede1625926fee2cb08e34aed9a057213">partial_sort_copy</link>(_ExecutionPolicy&amp;&amp;&#32;__exec,&#32;_ForwardIterator&#32;__first,&#32;_ForwardIterator&#32;__last,
+807 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_RandomAccessIterator&#32;__d_first,&#32;_RandomAccessIterator&#32;__d_last)
+808 {
+809 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="_namespacestd_1aede1625926fee2cb08e34aed9a057213">std::partial_sort_copy</link>(std::forward&lt;_ExecutionPolicy&gt;(__exec),&#32;__first,&#32;__last,&#32;__d_first,&#32;__d_last,
+810 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;std::less&lt;&gt;());
+811 }
+812 
+813 <emphasis role="comment">//&#32;[is.sorted]</emphasis>
+814 <emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">class</emphasis>&#32;_ExecutionPolicy,&#32;<emphasis role="keyword">class</emphasis>&#32;_ForwardIterator,&#32;<emphasis role="keyword">class</emphasis>&#32;_Compare&gt;
+815 <link linkend="_namespace____pstl_1_1____internal_1a6955c3b3eeac7ccfa9a8ae5da85b9f2a">__pstl::__internal::__enable_if_execution_policy&lt;_ExecutionPolicy, _ForwardIterator&gt;</link>
+816 <link linkend="_namespacestd_1afc42d9c3bc8c47863c93f03a9485dcc0">is_sorted_until</link>(_ExecutionPolicy&amp;&amp;&#32;__exec,&#32;_ForwardIterator&#32;__first,&#32;_ForwardIterator&#32;__last,&#32;_Compare&#32;__comp)
+817 {
+818 &#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;_ForwardIterator&#32;__res&#32;=&#32;<link linkend="_namespace____pstl_1_1____internal_1a6baa124378ed7fdc525b00a43af706ab">__pstl::__internal::__pattern_adjacent_find</link>(
+819 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;std::forward&lt;_ExecutionPolicy&gt;(__exec),&#32;__first,&#32;__last,&#32;<link linkend="_class____pstl_1_1____internal_1_1____reorder__pred">__pstl::__internal::__reorder_pred&lt;_Compare&gt;</link>(__comp),
+820 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__pstl::__internal::__is_parallelization_preferred&lt;_ExecutionPolicy,&#32;_ForwardIterator&gt;(__exec),
+821 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__pstl::__internal::__is_vectorization_preferred&lt;_ExecutionPolicy,&#32;_ForwardIterator&gt;(__exec),
+822 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">/*first_semantic*/</emphasis>&#32;<emphasis role="keyword">false</emphasis>);
+823 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__res&#32;==&#32;__last&#32;?&#32;__last&#32;:&#32;std::next(__res);
+824 }
+825 
+826 <emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">class</emphasis>&#32;_ExecutionPolicy,&#32;<emphasis role="keyword">class</emphasis>&#32;_ForwardIterator&gt;
+827 <link linkend="_namespace____pstl_1_1____internal_1a6955c3b3eeac7ccfa9a8ae5da85b9f2a">__pstl::__internal::__enable_if_execution_policy&lt;_ExecutionPolicy, _ForwardIterator&gt;</link>
+828 <link linkend="_namespacestd_1afc42d9c3bc8c47863c93f03a9485dcc0">is_sorted_until</link>(_ExecutionPolicy&amp;&amp;&#32;__exec,&#32;_ForwardIterator&#32;__first,&#32;_ForwardIterator&#32;__last)
+829 {
+830 &#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">typename</emphasis>&#32;std::iterator_traits&lt;_ForwardIterator&gt;::value_type&#32;_InputType;
+831 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="_namespacestd_1afc42d9c3bc8c47863c93f03a9485dcc0">is_sorted_until</link>(std::forward&lt;_ExecutionPolicy&gt;(__exec),&#32;__first,&#32;__last,&#32;std::less&lt;_InputType&gt;());
+832 }
+833 
+834 <emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">class</emphasis>&#32;_ExecutionPolicy,&#32;<emphasis role="keyword">class</emphasis>&#32;_ForwardIterator,&#32;<emphasis role="keyword">class</emphasis>&#32;_Compare&gt;
+835 <link linkend="_namespace____pstl_1_1____internal_1a6955c3b3eeac7ccfa9a8ae5da85b9f2a">__pstl::__internal::__enable_if_execution_policy&lt;_ExecutionPolicy, bool&gt;</link>
+836 <link linkend="_namespacestd_1a042892d225ddbeba3c9cbd839dba38a9">is_sorted</link>(_ExecutionPolicy&amp;&amp;&#32;__exec,&#32;_ForwardIterator&#32;__first,&#32;_ForwardIterator&#32;__last,&#32;_Compare&#32;__comp)
+837 {
+838 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="_namespace____pstl_1_1____internal_1a6baa124378ed7fdc525b00a43af706ab">__pstl::__internal::__pattern_adjacent_find</link>(
+839 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;std::forward&lt;_ExecutionPolicy&gt;(__exec),&#32;__first,&#32;__last,
+840 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____pstl_1_1____internal_1_1____reorder__pred">__pstl::__internal::__reorder_pred&lt;_Compare&gt;</link>(__comp),
+841 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__pstl::__internal::__is_parallelization_preferred&lt;_ExecutionPolicy,&#32;_ForwardIterator&gt;(__exec),
+842 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__pstl::__internal::__is_vectorization_preferred&lt;_ExecutionPolicy,&#32;_ForwardIterator&gt;(__exec),
+843 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">/*or_semantic*/</emphasis>&#32;<emphasis role="keyword">true</emphasis>)&#32;==&#32;__last;
+844 }
+845 
+846 <emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">class</emphasis>&#32;_ExecutionPolicy,&#32;<emphasis role="keyword">class</emphasis>&#32;_ForwardIterator&gt;
+847 <link linkend="_namespace____pstl_1_1____internal_1a6955c3b3eeac7ccfa9a8ae5da85b9f2a">__pstl::__internal::__enable_if_execution_policy&lt;_ExecutionPolicy, bool&gt;</link>
+848 <link linkend="_namespacestd_1a042892d225ddbeba3c9cbd839dba38a9">is_sorted</link>(_ExecutionPolicy&amp;&amp;&#32;__exec,&#32;_ForwardIterator&#32;__first,&#32;_ForwardIterator&#32;__last)
+849 {
+850 &#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">typename</emphasis>&#32;std::iterator_traits&lt;_ForwardIterator&gt;::value_type&#32;_InputType;
+851 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="_namespacestd_1a042892d225ddbeba3c9cbd839dba38a9">std::is_sorted</link>(std::forward&lt;_ExecutionPolicy&gt;(__exec),&#32;__first,&#32;__last,&#32;std::less&lt;_InputType&gt;());
+852 }
+853 
+854 <emphasis role="comment">//&#32;[alg.merge]</emphasis>
+855 <emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">class&#32;</emphasis>_ExecutionPolicy,&#32;<emphasis role="keyword">class&#32;</emphasis>_ForwardIterator1,&#32;<emphasis role="keyword">class&#32;</emphasis>_ForwardIterator2,&#32;<emphasis role="keyword">class&#32;</emphasis>_ForwardIterator,
+856 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">class&#32;</emphasis>_Compare&gt;
+857 <link linkend="_namespace____pstl_1_1____internal_1a6955c3b3eeac7ccfa9a8ae5da85b9f2a">__pstl::__internal::__enable_if_execution_policy&lt;_ExecutionPolicy, _ForwardIterator&gt;</link>
+858 <link linkend="_namespacestd_1a23f39d0444be06ebfa219bbfd4e3854f">merge</link>(_ExecutionPolicy&amp;&amp;&#32;__exec,&#32;_ForwardIterator1&#32;__first1,&#32;_ForwardIterator1&#32;__last1,&#32;_ForwardIterator2&#32;__first2,
+859 &#32;&#32;&#32;&#32;&#32;&#32;_ForwardIterator2&#32;__last2,&#32;_ForwardIterator&#32;__d_first,&#32;_Compare&#32;__comp)
+860 {
+861 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="_namespace____pstl_1_1____internal_1a76f9badc9cf4092c8e996b0564a8a8d2">__pstl::__internal::__pattern_merge</link>(
+862 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;std::forward&lt;_ExecutionPolicy&gt;(__exec),&#32;__first1,&#32;__last1,&#32;__first2,&#32;__last2,&#32;__d_first,&#32;__comp,
+863 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_namespace____pstl_1_1____internal_1aba53c2e534557bf2c817808fb3b3c269">__pstl::__internal::__is_vectorization_preferred</link>&lt;_ExecutionPolicy,&#32;_ForwardIterator1,&#32;_ForwardIterator2,
+864 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_ForwardIterator&gt;(__exec),
+865 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_namespace____pstl_1_1____internal_1a96278219a9b5139e6060c4a24235841c">__pstl::__internal::__is_parallelization_preferred</link>&lt;_ExecutionPolicy,&#32;_ForwardIterator1,&#32;_ForwardIterator2,
+866 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_ForwardIterator&gt;(__exec));
+867 }
+868 
+869 <emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">class</emphasis>&#32;_ExecutionPolicy,&#32;<emphasis role="keyword">class</emphasis>&#32;_ForwardIterator1,&#32;<emphasis role="keyword">class</emphasis>&#32;_ForwardIterator2,&#32;<emphasis role="keyword">class</emphasis>&#32;_ForwardIterator&gt;
+870 <link linkend="_namespace____pstl_1_1____internal_1a6955c3b3eeac7ccfa9a8ae5da85b9f2a">__pstl::__internal::__enable_if_execution_policy&lt;_ExecutionPolicy, _ForwardIterator&gt;</link>
+871 <link linkend="_namespacestd_1a23f39d0444be06ebfa219bbfd4e3854f">merge</link>(_ExecutionPolicy&amp;&amp;&#32;__exec,&#32;_ForwardIterator1&#32;__first1,&#32;_ForwardIterator1&#32;__last1,&#32;_ForwardIterator2&#32;__first2,
+872 &#32;&#32;&#32;&#32;&#32;&#32;_ForwardIterator2&#32;__last2,&#32;_ForwardIterator&#32;__d_first)
+873 {
+874 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="_namespacestd_1a23f39d0444be06ebfa219bbfd4e3854f">std::merge</link>(std::forward&lt;_ExecutionPolicy&gt;(__exec),&#32;__first1,&#32;__last1,&#32;__first2,&#32;__last2,&#32;__d_first,
+875 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;std::less&lt;&gt;());
+876 }
+877 
+878 <emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">class</emphasis>&#32;_ExecutionPolicy,&#32;<emphasis role="keyword">class</emphasis>&#32;_B<emphasis role="keywordtype">id</emphasis>irectionalIterator,&#32;<emphasis role="keyword">class</emphasis>&#32;_Compare&gt;
+879 <link linkend="_namespace____pstl_1_1____internal_1a6955c3b3eeac7ccfa9a8ae5da85b9f2a">__pstl::__internal::__enable_if_execution_policy&lt;_ExecutionPolicy, void&gt;</link>
+880 <link linkend="_namespacestd_1a1e57e7ac29f9c775cbcefa93feb3d2b1">inplace_merge</link>(_ExecutionPolicy&amp;&amp;&#32;__exec,&#32;_BidirectionalIterator&#32;__first,&#32;_BidirectionalIterator&#32;__middle,
+881 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_BidirectionalIterator&#32;__last,&#32;_Compare&#32;__comp)
+882 {
+883 &#32;&#32;&#32;&#32;<link linkend="_namespace____pstl_1_1____internal_1a28f4f64e2180b392ca4c226ee3c76d7c">__pstl::__internal::__pattern_inplace_merge</link>(
+884 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;std::forward&lt;_ExecutionPolicy&gt;(__exec),&#32;__first,&#32;__middle,&#32;__last,&#32;__comp,
+885 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__pstl::__internal::__is_vectorization_preferred&lt;_ExecutionPolicy,&#32;_BidirectionalIterator&gt;(__exec),
+886 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__pstl::__internal::__is_parallelization_preferred&lt;_ExecutionPolicy,&#32;_BidirectionalIterator&gt;(__exec));
+887 }
+888 
+889 <emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">class</emphasis>&#32;_ExecutionPolicy,&#32;<emphasis role="keyword">class</emphasis>&#32;_B<emphasis role="keywordtype">id</emphasis>irectionalIterator&gt;
+890 <link linkend="_namespace____pstl_1_1____internal_1a6955c3b3eeac7ccfa9a8ae5da85b9f2a">__pstl::__internal::__enable_if_execution_policy&lt;_ExecutionPolicy, void&gt;</link>
+891 <link linkend="_namespacestd_1a1e57e7ac29f9c775cbcefa93feb3d2b1">inplace_merge</link>(_ExecutionPolicy&amp;&amp;&#32;__exec,&#32;_BidirectionalIterator&#32;__first,&#32;_BidirectionalIterator&#32;__middle,
+892 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_BidirectionalIterator&#32;__last)
+893 {
+894 &#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">typename</emphasis>&#32;std::iterator_traits&lt;_BidirectionalIterator&gt;::value_type&#32;_InputType;
+895 &#32;&#32;&#32;&#32;<link linkend="_namespacestd_1a1e57e7ac29f9c775cbcefa93feb3d2b1">std::inplace_merge</link>(__exec,&#32;__first,&#32;__middle,&#32;__last,&#32;std::less&lt;_InputType&gt;());
+896 }
+897 
+898 <emphasis role="comment">//&#32;[includes]</emphasis>
+899 
+900 <emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">class</emphasis>&#32;_ExecutionPolicy,&#32;<emphasis role="keyword">class</emphasis>&#32;_ForwardIterator1,&#32;<emphasis role="keyword">class</emphasis>&#32;_ForwardIterator2,&#32;<emphasis role="keyword">class</emphasis>&#32;_Compare&gt;
+901 <link linkend="_namespace____pstl_1_1____internal_1a6955c3b3eeac7ccfa9a8ae5da85b9f2a">__pstl::__internal::__enable_if_execution_policy&lt;_ExecutionPolicy, bool&gt;</link>
+902 <link linkend="_namespacestd_1adb975e56185878896dee97fb7fb84156">includes</link>(_ExecutionPolicy&amp;&amp;&#32;__exec,&#32;_ForwardIterator1&#32;__first1,&#32;_ForwardIterator1&#32;__last1,&#32;_ForwardIterator2&#32;__first2,
+903 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_ForwardIterator2&#32;__last2,&#32;_Compare&#32;__comp)
+904 {
+905 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="_namespace____pstl_1_1____internal_1af4bd54f061b9f4a0d379383965a84e62">__pstl::__internal::__pattern_includes</link>(
+906 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;std::forward&lt;_ExecutionPolicy&gt;(__exec),&#32;__first1,&#32;__last1,&#32;__first2,&#32;__last2,&#32;__comp,
+907 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__pstl::__internal::__is_vectorization_preferred&lt;_ExecutionPolicy,&#32;_ForwardIterator1,&#32;_ForwardIterator2&gt;(
+908 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__exec),
+909 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__pstl::__internal::__is_parallelization_preferred&lt;_ExecutionPolicy,&#32;_ForwardIterator1,&#32;_ForwardIterator2&gt;(
+910 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__exec));
+911 }
+912 
+913 <emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">class</emphasis>&#32;_ExecutionPolicy,&#32;<emphasis role="keyword">class</emphasis>&#32;_ForwardIterator1,&#32;<emphasis role="keyword">class</emphasis>&#32;_ForwardIterator2&gt;
+914 <link linkend="_namespace____pstl_1_1____internal_1a6955c3b3eeac7ccfa9a8ae5da85b9f2a">__pstl::__internal::__enable_if_execution_policy&lt;_ExecutionPolicy, bool&gt;</link>
+915 <link linkend="_namespacestd_1adb975e56185878896dee97fb7fb84156">includes</link>(_ExecutionPolicy&amp;&amp;&#32;__exec,&#32;_ForwardIterator1&#32;__first1,&#32;_ForwardIterator1&#32;__last1,&#32;_ForwardIterator2&#32;__first2,
+916 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_ForwardIterator2&#32;__last2)
+917 {
+918 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="_namespacestd_1adb975e56185878896dee97fb7fb84156">std::includes</link>(std::forward&lt;_ExecutionPolicy&gt;(__exec),&#32;__first1,&#32;__last1,&#32;__first2,&#32;__last2,&#32;std::less&lt;&gt;());
+919 }
+920 
+921 <emphasis role="comment">//&#32;[set.union]</emphasis>
+922 
+923 <emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">class&#32;</emphasis>_ExecutionPolicy,&#32;<emphasis role="keyword">class&#32;</emphasis>_ForwardIterator1,&#32;<emphasis role="keyword">class&#32;</emphasis>_ForwardIterator2,&#32;<emphasis role="keyword">class&#32;</emphasis>_ForwardIterator,
+924 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">class&#32;</emphasis>_Compare&gt;
+925 <link linkend="_namespace____pstl_1_1____internal_1a6955c3b3eeac7ccfa9a8ae5da85b9f2a">__pstl::__internal::__enable_if_execution_policy&lt;_ExecutionPolicy, _ForwardIterator&gt;</link>
+926 <link linkend="_namespacestd_1a1a155557f687cee85bd20e448e8739c8">set_union</link>(_ExecutionPolicy&amp;&amp;&#32;__exec,&#32;_ForwardIterator1&#32;__first1,&#32;_ForwardIterator1&#32;__last1,&#32;_ForwardIterator2&#32;__first2,
+927 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_ForwardIterator2&#32;__last2,&#32;_ForwardIterator&#32;__result,&#32;_Compare&#32;__comp)
+928 {
+929 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="_namespace____pstl_1_1____internal_1a0b5347b92e571caa994698482c35535b">__pstl::__internal::__pattern_set_union</link>(
+930 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;std::forward&lt;_ExecutionPolicy&gt;(__exec),&#32;__first1,&#32;__last1,&#32;__first2,&#32;__last2,&#32;__result,&#32;__comp,
+931 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_namespace____pstl_1_1____internal_1aba53c2e534557bf2c817808fb3b3c269">__pstl::__internal::__is_vectorization_preferred</link>&lt;_ExecutionPolicy,&#32;_ForwardIterator1,&#32;_ForwardIterator2,
+932 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_ForwardIterator&gt;(__exec),
+933 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_namespace____pstl_1_1____internal_1a96278219a9b5139e6060c4a24235841c">__pstl::__internal::__is_parallelization_preferred</link>&lt;_ExecutionPolicy,&#32;_ForwardIterator1,&#32;_ForwardIterator2,
+934 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_ForwardIterator&gt;(__exec));
+935 }
+936 
+937 <emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">class</emphasis>&#32;_ExecutionPolicy,&#32;<emphasis role="keyword">class</emphasis>&#32;_ForwardIterator1,&#32;<emphasis role="keyword">class</emphasis>&#32;_ForwardIterator2,&#32;<emphasis role="keyword">class</emphasis>&#32;_ForwardIterator&gt;
+938 <link linkend="_namespace____pstl_1_1____internal_1a6955c3b3eeac7ccfa9a8ae5da85b9f2a">__pstl::__internal::__enable_if_execution_policy&lt;_ExecutionPolicy, _ForwardIterator&gt;</link>
+939 <link linkend="_namespacestd_1a1a155557f687cee85bd20e448e8739c8">set_union</link>(_ExecutionPolicy&amp;&amp;&#32;__exec,&#32;_ForwardIterator1&#32;__first1,&#32;_ForwardIterator1&#32;__last1,&#32;_ForwardIterator2&#32;__first2,
+940 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_ForwardIterator2&#32;__last2,&#32;_ForwardIterator&#32;__result)
+941 {
+942 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="_namespacestd_1a1a155557f687cee85bd20e448e8739c8">std::set_union</link>(std::forward&lt;_ExecutionPolicy&gt;(__exec),&#32;__first1,&#32;__last1,&#32;__first2,&#32;__last2,&#32;__result,
+943 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;std::less&lt;&gt;());
+944 }
+945 
+946 <emphasis role="comment">//&#32;[set.intersection]</emphasis>
+947 
+948 <emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">class&#32;</emphasis>_ExecutionPolicy,&#32;<emphasis role="keyword">class&#32;</emphasis>_ForwardIterator1,&#32;<emphasis role="keyword">class&#32;</emphasis>_ForwardIterator2,&#32;<emphasis role="keyword">class&#32;</emphasis>_ForwardIterator,
+949 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">class&#32;</emphasis>_Compare&gt;
+950 <link linkend="_namespace____pstl_1_1____internal_1a6955c3b3eeac7ccfa9a8ae5da85b9f2a">__pstl::__internal::__enable_if_execution_policy&lt;_ExecutionPolicy, _ForwardIterator&gt;</link>
+951 <link linkend="_namespacestd_1a1ea0f963e5844bd26cf0a784c6257cfa">set_intersection</link>(_ExecutionPolicy&amp;&amp;&#32;__exec,&#32;_ForwardIterator1&#32;__first1,&#32;_ForwardIterator1&#32;__last1,
+952 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_ForwardIterator2&#32;__first2,&#32;_ForwardIterator2&#32;__last2,&#32;_ForwardIterator&#32;__result,&#32;_Compare&#32;__comp)
+953 {
+954 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="_namespace____pstl_1_1____internal_1aa71f557e499f46f8fdfcb81c1ade34b3">__pstl::__internal::__pattern_set_intersection</link>(
+955 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;std::forward&lt;_ExecutionPolicy&gt;(__exec),&#32;__first1,&#32;__last1,&#32;__first2,&#32;__last2,&#32;__result,&#32;__comp,
+956 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_namespace____pstl_1_1____internal_1aba53c2e534557bf2c817808fb3b3c269">__pstl::__internal::__is_vectorization_preferred</link>&lt;_ExecutionPolicy,&#32;_ForwardIterator1,&#32;_ForwardIterator2,
+957 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_ForwardIterator&gt;(__exec),
+958 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_namespace____pstl_1_1____internal_1a96278219a9b5139e6060c4a24235841c">__pstl::__internal::__is_parallelization_preferred</link>&lt;_ExecutionPolicy,&#32;_ForwardIterator1,&#32;_ForwardIterator2,
+959 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_ForwardIterator&gt;(__exec));
+960 }
+961 
+962 <emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">class</emphasis>&#32;_ExecutionPolicy,&#32;<emphasis role="keyword">class</emphasis>&#32;_ForwardIterator1,&#32;<emphasis role="keyword">class</emphasis>&#32;_ForwardIterator2,&#32;<emphasis role="keyword">class</emphasis>&#32;_ForwardIterator&gt;
+963 <link linkend="_namespace____pstl_1_1____internal_1a6955c3b3eeac7ccfa9a8ae5da85b9f2a">__pstl::__internal::__enable_if_execution_policy&lt;_ExecutionPolicy, _ForwardIterator&gt;</link>
+964 <link linkend="_namespacestd_1a1ea0f963e5844bd26cf0a784c6257cfa">set_intersection</link>(_ExecutionPolicy&amp;&amp;&#32;__exec,&#32;_ForwardIterator1&#32;__first1,&#32;_ForwardIterator1&#32;__last1,
+965 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_ForwardIterator2&#32;__first2,&#32;_ForwardIterator2&#32;__last2,&#32;_ForwardIterator&#32;__result)
+966 {
+967 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="_namespacestd_1a1ea0f963e5844bd26cf0a784c6257cfa">std::set_intersection</link>(std::forward&lt;_ExecutionPolicy&gt;(__exec),&#32;__first1,&#32;__last1,&#32;__first2,&#32;__last2,&#32;__result,
+968 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;std::less&lt;&gt;());
+969 }
+970 
+971 <emphasis role="comment">//&#32;[set.difference]</emphasis>
+972 
+973 <emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">class&#32;</emphasis>_ExecutionPolicy,&#32;<emphasis role="keyword">class&#32;</emphasis>_ForwardIterator1,&#32;<emphasis role="keyword">class&#32;</emphasis>_ForwardIterator2,&#32;<emphasis role="keyword">class&#32;</emphasis>_ForwardIterator,
+974 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">class&#32;</emphasis>_Compare&gt;
+975 <link linkend="_namespace____pstl_1_1____internal_1a6955c3b3eeac7ccfa9a8ae5da85b9f2a">__pstl::__internal::__enable_if_execution_policy&lt;_ExecutionPolicy, _ForwardIterator&gt;</link>
+976 <link linkend="_namespacestd_1adb4e8e1785a2a6604b9f327ce4b7fd70">set_difference</link>(_ExecutionPolicy&amp;&amp;&#32;__exec,&#32;_ForwardIterator1&#32;__first1,&#32;_ForwardIterator1&#32;__last1,
+977 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_ForwardIterator2&#32;__first2,&#32;_ForwardIterator2&#32;__last2,&#32;_ForwardIterator&#32;__result,&#32;_Compare&#32;__comp)
+978 {
+979 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="_namespace____pstl_1_1____internal_1ae2ac09b3a487a7ba6061822478a08420">__pstl::__internal::__pattern_set_difference</link>(
+980 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;std::forward&lt;_ExecutionPolicy&gt;(__exec),&#32;__first1,&#32;__last1,&#32;__first2,&#32;__last2,&#32;__result,&#32;__comp,
+981 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_namespace____pstl_1_1____internal_1aba53c2e534557bf2c817808fb3b3c269">__pstl::__internal::__is_vectorization_preferred</link>&lt;_ExecutionPolicy,&#32;_ForwardIterator1,&#32;_ForwardIterator2,
+982 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_ForwardIterator&gt;(__exec),
+983 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_namespace____pstl_1_1____internal_1a96278219a9b5139e6060c4a24235841c">__pstl::__internal::__is_parallelization_preferred</link>&lt;_ExecutionPolicy,&#32;_ForwardIterator1,&#32;_ForwardIterator2,
+984 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_ForwardIterator&gt;(__exec));
+985 }
+986 
+987 <emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">class</emphasis>&#32;_ExecutionPolicy,&#32;<emphasis role="keyword">class</emphasis>&#32;_ForwardIterator1,&#32;<emphasis role="keyword">class</emphasis>&#32;_ForwardIterator2,&#32;<emphasis role="keyword">class</emphasis>&#32;_ForwardIterator&gt;
+988 <link linkend="_namespace____pstl_1_1____internal_1a6955c3b3eeac7ccfa9a8ae5da85b9f2a">__pstl::__internal::__enable_if_execution_policy&lt;_ExecutionPolicy, _ForwardIterator&gt;</link>
+989 <link linkend="_namespacestd_1adb4e8e1785a2a6604b9f327ce4b7fd70">set_difference</link>(_ExecutionPolicy&amp;&amp;&#32;__exec,&#32;_ForwardIterator1&#32;__first1,&#32;_ForwardIterator1&#32;__last1,
+990 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_ForwardIterator2&#32;__first2,&#32;_ForwardIterator2&#32;__last2,&#32;_ForwardIterator&#32;__result)
+991 {
+992 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="_namespacestd_1adb4e8e1785a2a6604b9f327ce4b7fd70">std::set_difference</link>(std::forward&lt;_ExecutionPolicy&gt;(__exec),&#32;__first1,&#32;__last1,&#32;__first2,&#32;__last2,&#32;__result,
+993 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;std::less&lt;&gt;());
+994 }
+995 
+996 <emphasis role="comment">//&#32;[set.symmetric.difference]</emphasis>
+997 
+998 <emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">class&#32;</emphasis>_ExecutionPolicy,&#32;<emphasis role="keyword">class&#32;</emphasis>_ForwardIterator1,&#32;<emphasis role="keyword">class&#32;</emphasis>_ForwardIterator2,&#32;<emphasis role="keyword">class&#32;</emphasis>_ForwardIterator,
+999 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">class&#32;</emphasis>_Compare&gt;
+1000 <link linkend="_namespace____pstl_1_1____internal_1a6955c3b3eeac7ccfa9a8ae5da85b9f2a">__pstl::__internal::__enable_if_execution_policy&lt;_ExecutionPolicy, _ForwardIterator&gt;</link>
+1001 <link linkend="_namespacestd_1ab9be505d384524d65c4cd4e07090db6c">set_symmetric_difference</link>(_ExecutionPolicy&amp;&amp;&#32;__exec,&#32;_ForwardIterator1&#32;__first1,&#32;_ForwardIterator1&#32;__last1,
+1002 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_ForwardIterator2&#32;__first2,&#32;_ForwardIterator2&#32;__last2,&#32;_ForwardIterator&#32;__result,
+1003 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_Compare&#32;__comp)
+1004 {
+1005 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="_namespace____pstl_1_1____internal_1a2468e1a5821a3180a4352135b4ac89c9">__pstl::__internal::__pattern_set_symmetric_difference</link>(
+1006 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;std::forward&lt;_ExecutionPolicy&gt;(__exec),&#32;__first1,&#32;__last1,&#32;__first2,&#32;__last2,&#32;__result,&#32;__comp,
+1007 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_namespace____pstl_1_1____internal_1aba53c2e534557bf2c817808fb3b3c269">__pstl::__internal::__is_vectorization_preferred</link>&lt;_ExecutionPolicy,&#32;_ForwardIterator1,&#32;_ForwardIterator2,
+1008 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_ForwardIterator&gt;(__exec),
+1009 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_namespace____pstl_1_1____internal_1a96278219a9b5139e6060c4a24235841c">__pstl::__internal::__is_parallelization_preferred</link>&lt;_ExecutionPolicy,&#32;_ForwardIterator1,&#32;_ForwardIterator2,
+1010 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_ForwardIterator&gt;(__exec));
+1011 }
+1012 
+1013 <emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">class</emphasis>&#32;_ExecutionPolicy,&#32;<emphasis role="keyword">class</emphasis>&#32;_ForwardIterator1,&#32;<emphasis role="keyword">class</emphasis>&#32;_ForwardIterator2,&#32;<emphasis role="keyword">class</emphasis>&#32;_ForwardIterator&gt;
+1014 <link linkend="_namespace____pstl_1_1____internal_1a6955c3b3eeac7ccfa9a8ae5da85b9f2a">__pstl::__internal::__enable_if_execution_policy&lt;_ExecutionPolicy, _ForwardIterator&gt;</link>
+1015 <link linkend="_namespacestd_1ab9be505d384524d65c4cd4e07090db6c">set_symmetric_difference</link>(_ExecutionPolicy&amp;&amp;&#32;__exec,&#32;_ForwardIterator1&#32;__first1,&#32;_ForwardIterator1&#32;__last1,
+1016 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_ForwardIterator2&#32;__first2,&#32;_ForwardIterator2&#32;__last2,&#32;_ForwardIterator&#32;__result)
+1017 {
+1018 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="_namespacestd_1ab9be505d384524d65c4cd4e07090db6c">std::set_symmetric_difference</link>(std::forward&lt;_ExecutionPolicy&gt;(__exec),&#32;__first1,&#32;__last1,&#32;__first2,&#32;__last2,
+1019 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__result,&#32;std::less&lt;&gt;());
+1020 }
+1021 
+1022 <emphasis role="comment">//&#32;[is.heap]</emphasis>
+1023 <emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">class</emphasis>&#32;_ExecutionPolicy,&#32;<emphasis role="keyword">class</emphasis>&#32;_RandomAccessIterator,&#32;<emphasis role="keyword">class</emphasis>&#32;_Compare&gt;
+1024 <link linkend="_namespace____pstl_1_1____internal_1a6955c3b3eeac7ccfa9a8ae5da85b9f2a">__pstl::__internal::__enable_if_execution_policy&lt;_ExecutionPolicy, _RandomAccessIterator&gt;</link>
+1025 <link linkend="_namespacestd_1ad64dc604fbb7c9f5f08518dfdf695dcf">is_heap_until</link>(_ExecutionPolicy&amp;&amp;&#32;__exec,&#32;_RandomAccessIterator&#32;__first,&#32;_RandomAccessIterator&#32;__last,&#32;_Compare&#32;__comp)
+1026 {
+1027 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="_namespace____pstl_1_1____internal_1a0fe7d90d58490eee0f9aa2f92a0a48e1">__pstl::__internal::__pattern_is_heap_until</link>(
+1028 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;std::forward&lt;_ExecutionPolicy&gt;(__exec),&#32;__first,&#32;__last,&#32;__comp,
+1029 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__pstl::__internal::__is_vectorization_preferred&lt;_ExecutionPolicy,&#32;_RandomAccessIterator&gt;(__exec),
+1030 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__pstl::__internal::__is_parallelization_preferred&lt;_ExecutionPolicy,&#32;_RandomAccessIterator&gt;(__exec));
+1031 }
+1032 
+1033 <emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">class</emphasis>&#32;_ExecutionPolicy,&#32;<emphasis role="keyword">class</emphasis>&#32;_RandomAccessIterator&gt;
+1034 <link linkend="_namespace____pstl_1_1____internal_1a6955c3b3eeac7ccfa9a8ae5da85b9f2a">__pstl::__internal::__enable_if_execution_policy&lt;_ExecutionPolicy, _RandomAccessIterator&gt;</link>
+1035 <link linkend="_namespacestd_1ad64dc604fbb7c9f5f08518dfdf695dcf">is_heap_until</link>(_ExecutionPolicy&amp;&amp;&#32;__exec,&#32;_RandomAccessIterator&#32;__first,&#32;_RandomAccessIterator&#32;__last)
+1036 {
+1037 &#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">typename</emphasis>&#32;std::iterator_traits&lt;_RandomAccessIterator&gt;::value_type&#32;_InputType;
+1038 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="_namespacestd_1ad64dc604fbb7c9f5f08518dfdf695dcf">std::is_heap_until</link>(std::forward&lt;_ExecutionPolicy&gt;(__exec),&#32;__first,&#32;__last,&#32;std::less&lt;_InputType&gt;());
+1039 }
+1040 
+1041 <emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">class</emphasis>&#32;_ExecutionPolicy,&#32;<emphasis role="keyword">class</emphasis>&#32;_RandomAccessIterator,&#32;<emphasis role="keyword">class</emphasis>&#32;_Compare&gt;
+1042 <link linkend="_namespace____pstl_1_1____internal_1a6955c3b3eeac7ccfa9a8ae5da85b9f2a">__pstl::__internal::__enable_if_execution_policy&lt;_ExecutionPolicy, bool&gt;</link>
+1043 <link linkend="_namespacestd_1aec7cee16cd32be74d90ce8f66f5a241d">is_heap</link>(_ExecutionPolicy&amp;&amp;&#32;__exec,&#32;_RandomAccessIterator&#32;__first,&#32;_RandomAccessIterator&#32;__last,&#32;_Compare&#32;__comp)
+1044 {
+1045 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="_namespacestd_1ad64dc604fbb7c9f5f08518dfdf695dcf">std::is_heap_until</link>(std::forward&lt;_ExecutionPolicy&gt;(__exec),&#32;__first,&#32;__last,&#32;__comp)&#32;==&#32;__last;
+1046 }
+1047 
+1048 <emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">class</emphasis>&#32;_ExecutionPolicy,&#32;<emphasis role="keyword">class</emphasis>&#32;_RandomAccessIterator&gt;
+1049 <link linkend="_namespace____pstl_1_1____internal_1a6955c3b3eeac7ccfa9a8ae5da85b9f2a">__pstl::__internal::__enable_if_execution_policy&lt;_ExecutionPolicy, bool&gt;</link>
+1050 <link linkend="_namespacestd_1aec7cee16cd32be74d90ce8f66f5a241d">is_heap</link>(_ExecutionPolicy&amp;&amp;&#32;__exec,&#32;_RandomAccessIterator&#32;__first,&#32;_RandomAccessIterator&#32;__last)
+1051 {
+1052 &#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">typename</emphasis>&#32;std::iterator_traits&lt;_RandomAccessIterator&gt;::value_type&#32;_InputType;
+1053 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="_namespacestd_1aec7cee16cd32be74d90ce8f66f5a241d">std::is_heap</link>(std::forward&lt;_ExecutionPolicy&gt;(__exec),&#32;__first,&#32;__last,&#32;std::less&lt;_InputType&gt;());
+1054 }
+1055 
+1056 <emphasis role="comment">//&#32;[alg.min.max]</emphasis>
+1057 
+1058 <emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">class</emphasis>&#32;_ExecutionPolicy,&#32;<emphasis role="keyword">class</emphasis>&#32;_ForwardIterator,&#32;<emphasis role="keyword">class</emphasis>&#32;_Compare&gt;
+1059 <link linkend="_namespace____pstl_1_1____internal_1a6955c3b3eeac7ccfa9a8ae5da85b9f2a">__pstl::__internal::__enable_if_execution_policy&lt;_ExecutionPolicy, _ForwardIterator&gt;</link>
+1060 <link linkend="_namespacestd_1af1620d34bc7426f2bafc5a3b1849588e">min_element</link>(_ExecutionPolicy&amp;&amp;&#32;__exec,&#32;_ForwardIterator&#32;__first,&#32;_ForwardIterator&#32;__last,&#32;_Compare&#32;__comp)
+1061 {
+1062 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="_namespace____pstl_1_1____internal_1afac22840ab45394d57a19b1b5c102a9b">__pstl::__internal::__pattern_min_element</link>(
+1063 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;std::forward&lt;_ExecutionPolicy&gt;(__exec),&#32;__first,&#32;__last,&#32;__comp,
+1064 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__pstl::__internal::__is_vectorization_preferred&lt;_ExecutionPolicy,&#32;_ForwardIterator&gt;(__exec),
+1065 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__pstl::__internal::__is_parallelization_preferred&lt;_ExecutionPolicy,&#32;_ForwardIterator&gt;(__exec));
+1066 }
+1067 
+1068 <emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">class</emphasis>&#32;_ExecutionPolicy,&#32;<emphasis role="keyword">class</emphasis>&#32;_ForwardIterator&gt;
+1069 <link linkend="_namespace____pstl_1_1____internal_1a6955c3b3eeac7ccfa9a8ae5da85b9f2a">__pstl::__internal::__enable_if_execution_policy&lt;_ExecutionPolicy, _ForwardIterator&gt;</link>
+1070 <link linkend="_namespacestd_1af1620d34bc7426f2bafc5a3b1849588e">min_element</link>(_ExecutionPolicy&amp;&amp;&#32;__exec,&#32;_ForwardIterator&#32;__first,&#32;_ForwardIterator&#32;__last)
+1071 {
+1072 &#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">typename</emphasis>&#32;std::iterator_traits&lt;_ForwardIterator&gt;::value_type&#32;_InputType;
+1073 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="_namespacestd_1af1620d34bc7426f2bafc5a3b1849588e">std::min_element</link>(std::forward&lt;_ExecutionPolicy&gt;(__exec),&#32;__first,&#32;__last,&#32;std::less&lt;_InputType&gt;());
+1074 }
+1075 
+1076 <emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">class</emphasis>&#32;_ExecutionPolicy,&#32;<emphasis role="keyword">class</emphasis>&#32;_ForwardIterator,&#32;<emphasis role="keyword">class</emphasis>&#32;_Compare&gt;
+1077 <link linkend="_namespace____pstl_1_1____internal_1a6955c3b3eeac7ccfa9a8ae5da85b9f2a">__pstl::__internal::__enable_if_execution_policy&lt;_ExecutionPolicy, _ForwardIterator&gt;</link>
+1078 <link linkend="_namespacestd_1aa1e6cdbc0afeb988a4d89d1dab4066d4">max_element</link>(_ExecutionPolicy&amp;&amp;&#32;__exec,&#32;_ForwardIterator&#32;__first,&#32;_ForwardIterator&#32;__last,&#32;_Compare&#32;__comp)
+1079 {
+1080 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="_namespacestd_1af1620d34bc7426f2bafc5a3b1849588e">min_element</link>(std::forward&lt;_ExecutionPolicy&gt;(__exec),&#32;__first,&#32;__last,
+1081 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____pstl_1_1____internal_1_1____reorder__pred">__pstl::__internal::__reorder_pred&lt;_Compare&gt;</link>(__comp));
+1082 }
+1083 
+1084 <emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">class</emphasis>&#32;_ExecutionPolicy,&#32;<emphasis role="keyword">class</emphasis>&#32;_ForwardIterator&gt;
+1085 <link linkend="_namespace____pstl_1_1____internal_1a6955c3b3eeac7ccfa9a8ae5da85b9f2a">__pstl::__internal::__enable_if_execution_policy&lt;_ExecutionPolicy, _ForwardIterator&gt;</link>
+1086 <link linkend="_namespacestd_1aa1e6cdbc0afeb988a4d89d1dab4066d4">max_element</link>(_ExecutionPolicy&amp;&amp;&#32;__exec,&#32;_ForwardIterator&#32;__first,&#32;_ForwardIterator&#32;__last)
+1087 {
+1088 &#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">typename</emphasis>&#32;std::iterator_traits&lt;_ForwardIterator&gt;::value_type&#32;_InputType;
+1089 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="_namespacestd_1af1620d34bc7426f2bafc5a3b1849588e">std::min_element</link>(std::forward&lt;_ExecutionPolicy&gt;(__exec),&#32;__first,&#32;__last,
+1090 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____pstl_1_1____internal_1_1____reorder__pred">__pstl::__internal::__reorder_pred</link>&lt;std::less&lt;_InputType&gt;&gt;(std::less&lt;_InputType&gt;()));
+1091 }
+1092 
+1093 <emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">class</emphasis>&#32;_ExecutionPolicy,&#32;<emphasis role="keyword">class</emphasis>&#32;_ForwardIterator,&#32;<emphasis role="keyword">class</emphasis>&#32;_Compare&gt;
+1094 <link linkend="_namespace____pstl_1_1____internal_1a6955c3b3eeac7ccfa9a8ae5da85b9f2a">__pstl::__internal::__enable_if_execution_policy&lt;_ExecutionPolicy, std::pair&lt;_ForwardIterator, _ForwardIterator&gt;</link>&gt;
+1095 <link linkend="_namespacestd_1a656914c176851f1d49d931e6953b90af">minmax_element</link>(_ExecutionPolicy&amp;&amp;&#32;__exec,&#32;_ForwardIterator&#32;__first,&#32;_ForwardIterator&#32;__last,&#32;_Compare&#32;__comp)
+1096 {
+1097 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="_namespace____pstl_1_1____internal_1ac0ba54f6df57a5a9f3dfb520b1dffd37">__pstl::__internal::__pattern_minmax_element</link>(
+1098 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;std::forward&lt;_ExecutionPolicy&gt;(__exec),&#32;__first,&#32;__last,&#32;__comp,
+1099 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__pstl::__internal::__is_vectorization_preferred&lt;_ExecutionPolicy,&#32;_ForwardIterator&gt;(__exec),
+1100 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__pstl::__internal::__is_parallelization_preferred&lt;_ExecutionPolicy,&#32;_ForwardIterator&gt;(__exec));
+1101 }
+1102 
+1103 <emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">class</emphasis>&#32;_ExecutionPolicy,&#32;<emphasis role="keyword">class</emphasis>&#32;_ForwardIterator&gt;
+1104 <link linkend="_namespace____pstl_1_1____internal_1a6955c3b3eeac7ccfa9a8ae5da85b9f2a">__pstl::__internal::__enable_if_execution_policy&lt;_ExecutionPolicy, std::pair&lt;_ForwardIterator, _ForwardIterator&gt;</link>&gt;
+1105 <link linkend="_namespacestd_1a656914c176851f1d49d931e6953b90af">minmax_element</link>(_ExecutionPolicy&amp;&amp;&#32;__exec,&#32;_ForwardIterator&#32;__first,&#32;_ForwardIterator&#32;__last)
+1106 {
+1107 &#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">typename</emphasis>&#32;iterator_traits&lt;_ForwardIterator&gt;::value_type&#32;_ValueType;
+1108 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="_namespacestd_1a656914c176851f1d49d931e6953b90af">std::minmax_element</link>(std::forward&lt;_ExecutionPolicy&gt;(__exec),&#32;__first,&#32;__last,&#32;std::less&lt;_ValueType&gt;());
+1109 }
+1110 
+1111 <emphasis role="comment">//&#32;[alg.nth.element]</emphasis>
+1112 
+1113 <emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">class</emphasis>&#32;_ExecutionPolicy,&#32;<emphasis role="keyword">class</emphasis>&#32;_RandomAccessIterator,&#32;<emphasis role="keyword">class</emphasis>&#32;_Compare&gt;
+1114 <link linkend="_namespace____pstl_1_1____internal_1a6955c3b3eeac7ccfa9a8ae5da85b9f2a">__pstl::__internal::__enable_if_execution_policy&lt;_ExecutionPolicy, void&gt;</link>
+1115 <link linkend="_namespacestd_1a9aedeebce40e8d85738b1e6f9ba8c919">nth_element</link>(_ExecutionPolicy&amp;&amp;&#32;__exec,&#32;_RandomAccessIterator&#32;__first,&#32;_RandomAccessIterator&#32;__nth,
+1116 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_RandomAccessIterator&#32;__last,&#32;_Compare&#32;__comp)
+1117 {
+1118 &#32;&#32;&#32;&#32;<link linkend="_namespace____pstl_1_1____internal_1a1d4194f0c17340011a1f84e4123b368a">__pstl::__internal::__pattern_nth_element</link>(
+1119 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;std::forward&lt;_ExecutionPolicy&gt;(__exec),&#32;__first,&#32;__nth,&#32;__last,&#32;__comp,
+1120 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__pstl::__internal::__is_vectorization_preferred&lt;_ExecutionPolicy,&#32;_RandomAccessIterator&gt;(__exec),
+1121 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__pstl::__internal::__is_parallelization_preferred&lt;_ExecutionPolicy,&#32;_RandomAccessIterator&gt;(__exec));
+1122 }
+1123 
+1124 <emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">class</emphasis>&#32;_ExecutionPolicy,&#32;<emphasis role="keyword">class</emphasis>&#32;_RandomAccessIterator&gt;
+1125 <link linkend="_namespace____pstl_1_1____internal_1a6955c3b3eeac7ccfa9a8ae5da85b9f2a">__pstl::__internal::__enable_if_execution_policy&lt;_ExecutionPolicy, void&gt;</link>
+1126 <link linkend="_namespacestd_1a9aedeebce40e8d85738b1e6f9ba8c919">nth_element</link>(_ExecutionPolicy&amp;&amp;&#32;__exec,&#32;_RandomAccessIterator&#32;__first,&#32;_RandomAccessIterator&#32;__nth,
+1127 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_RandomAccessIterator&#32;__last)
+1128 {
+1129 &#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">typename</emphasis>&#32;iterator_traits&lt;_RandomAccessIterator&gt;::value_type&#32;_InputType;
+1130 &#32;&#32;&#32;&#32;<link linkend="_namespacestd_1a9aedeebce40e8d85738b1e6f9ba8c919">std::nth_element</link>(std::forward&lt;_ExecutionPolicy&gt;(__exec),&#32;__first,&#32;__nth,&#32;__last,&#32;std::less&lt;_InputType&gt;());
+1131 }
+1132 
+1133 <emphasis role="comment">//&#32;[alg.lex.comparison]</emphasis>
+1134 
+1135 <emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">class</emphasis>&#32;_ExecutionPolicy,&#32;<emphasis role="keyword">class</emphasis>&#32;_ForwardIterator1,&#32;<emphasis role="keyword">class</emphasis>&#32;_ForwardIterator2,&#32;<emphasis role="keyword">class</emphasis>&#32;_Compare&gt;
+1136 <link linkend="_namespace____pstl_1_1____internal_1a6955c3b3eeac7ccfa9a8ae5da85b9f2a">__pstl::__internal::__enable_if_execution_policy&lt;_ExecutionPolicy, bool&gt;</link>
+1137 <link linkend="_namespacestd_1a076cfce541233dc2534e44d067d41ad4">lexicographical_compare</link>(_ExecutionPolicy&amp;&amp;&#32;__exec,&#32;_ForwardIterator1&#32;__first1,&#32;_ForwardIterator1&#32;__last1,
+1138 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_ForwardIterator2&#32;__first2,&#32;_ForwardIterator2&#32;__last2,&#32;_Compare&#32;__comp)
+1139 {
+1140 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="_namespace____pstl_1_1____internal_1a87963436503d6c04ddbae7eb6827f60c">__pstl::__internal::__pattern_lexicographical_compare</link>(
+1141 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;std::forward&lt;_ExecutionPolicy&gt;(__exec),&#32;__first1,&#32;__last1,&#32;__first2,&#32;__last2,&#32;__comp,
+1142 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__pstl::__internal::__is_vectorization_preferred&lt;_ExecutionPolicy,&#32;_ForwardIterator1,&#32;_ForwardIterator2&gt;(
+1143 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__exec),
+1144 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__pstl::__internal::__is_parallelization_preferred&lt;_ExecutionPolicy,&#32;_ForwardIterator1,&#32;_ForwardIterator2&gt;(
+1145 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__exec));
+1146 }
+1147 
+1148 <emphasis role="keyword">template</emphasis>&#32;&lt;<emphasis role="keyword">class</emphasis>&#32;_ExecutionPolicy,&#32;<emphasis role="keyword">class</emphasis>&#32;_ForwardIterator1,&#32;<emphasis role="keyword">class</emphasis>&#32;_ForwardIterator2&gt;
+1149 <link linkend="_namespace____pstl_1_1____internal_1a6955c3b3eeac7ccfa9a8ae5da85b9f2a">__pstl::__internal::__enable_if_execution_policy&lt;_ExecutionPolicy, bool&gt;</link>
+1150 <link linkend="_namespacestd_1a076cfce541233dc2534e44d067d41ad4">lexicographical_compare</link>(_ExecutionPolicy&amp;&amp;&#32;__exec,&#32;_ForwardIterator1&#32;__first1,&#32;_ForwardIterator1&#32;__last1,
+1151 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_ForwardIterator2&#32;__first2,&#32;_ForwardIterator2&#32;__last2)
+1152 {
+1153 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="_namespacestd_1a076cfce541233dc2534e44d067d41ad4">std::lexicographical_compare</link>(std::forward&lt;_ExecutionPolicy&gt;(__exec),&#32;__first1,&#32;__last1,&#32;__first2,&#32;__last2,
+1154 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;std::less&lt;&gt;());
+1155 }
+1156 
+1157 }&#32;<emphasis role="comment">//&#32;namespace&#32;std</emphasis>
+1158 
+1159 <emphasis role="preprocessor">#endif&#32;</emphasis><emphasis role="comment">/*&#32;_PSTL_GLUE_ALGORITHM_IMPL_H&#32;*/</emphasis><emphasis role="preprocessor"></emphasis>
+</programlisting></section>

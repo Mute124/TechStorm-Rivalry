@@ -1,0 +1,26 @@
+var structma__data__converter =
+[
+    [ "_ownsHeap", "structma__data__converter.html#a93f9e1dc2d1d31155954c3f5e42a89a3", null ],
+    [ "_pHeap", "structma__data__converter.html#a39341fd750b080f2251bfbcfb93167c1", null ],
+    [ "channelConverter", "structma__data__converter.html#a6d14867218dacb2dae1bb389a1a68c8e", null ],
+    [ "channelsIn", "structma__data__converter.html#a55aa0e4b12ea939d7c65e9bb8c2b23a5", null ],
+    [ "channelsOut", "structma__data__converter.html#a49b828e916c6d0268caa2409d79f1fe0", null ],
+    [ "config", "structma__data__converter.html#abe343a9c3ac7007ae63fa7e92f0d96d8", null ],
+    [ "ditherMode", "structma__data__converter.html#aa5372c94f8f14b6a439349ddacf0a56a", null ],
+    [ "executionPath", "structma__data__converter.html#ad92a60855caa2559159766ff24f1d965", null ],
+    [ "formatIn", "structma__data__converter.html#a682b7ddbdc66ffe6fd8ecdcb2f74587a", null ],
+    [ "formatOut", "structma__data__converter.html#a3999dce4d5a85e8c0607186bde67bcdd", null ],
+    [ "hasChannelConverter", "structma__data__converter.html#acdbd8ff691062ca015dc938f95b7eded", null ],
+    [ "hasChannelConverter", "structma__data__converter.html#acdbd8ff691062ca015dc938f95b7eded", null ],
+    [ "hasPostFormatConversion", "structma__data__converter.html#a921f2283e6192fbc646407e065bd6e49", null ],
+    [ "hasPostFormatConversion", "structma__data__converter.html#a921f2283e6192fbc646407e065bd6e49", null ],
+    [ "hasPreFormatConversion", "structma__data__converter.html#a1b2ed55e4c6494d6939b3de165f09c62", null ],
+    [ "hasPreFormatConversion", "structma__data__converter.html#a1b2ed55e4c6494d6939b3de165f09c62", null ],
+    [ "hasResampler", "structma__data__converter.html#ae0326bcbb3e3cb3134aeb3124201cad5", null ],
+    [ "hasResampler", "structma__data__converter.html#ae0326bcbb3e3cb3134aeb3124201cad5", null ],
+    [ "isPassthrough", "structma__data__converter.html#ae0cf54b59280d2e31f8b8e1446f7017d", null ],
+    [ "isPassthrough", "structma__data__converter.html#ae0cf54b59280d2e31f8b8e1446f7017d", null ],
+    [ "resampler", "structma__data__converter.html#abfb6bc088d90d8d133615f1e2ebd08d0", null ],
+    [ "sampleRateIn", "structma__data__converter.html#a81b72ca401828cd487fcacded77f0e6b", null ],
+    [ "sampleRateOut", "structma__data__converter.html#a34cfcc187877a32dfb86375771d483a1", null ]
+];

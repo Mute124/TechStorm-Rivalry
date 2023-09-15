@@ -1,0 +1,60 @@
+\doxysection{TQueue.\+h}
+\hypertarget{lib_2_smooth-_infinite-_voxel-_terrain-master_2_t_queue_8h_source}{}\label{lib_2_smooth-_infinite-_voxel-_terrain-master_2_t_queue_8h_source}\index{C:/Users/HP/Documents/GitHub/Minero-\/Game/lib/Smooth-\/Infinite-\/Voxel-\/Terrain-\/master/TQueue.h@{C:/Users/HP/Documents/GitHub/Minero-\/Game/lib/Smooth-\/Infinite-\/Voxel-\/Terrain-\/master/TQueue.h}}
+\mbox{\hyperlink{lib_2_smooth-_infinite-_voxel-_terrain-master_2_t_queue_8h}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{comment}{//\ class\ TQueue}}
+\DoxyCodeLine{00002\ \textcolor{preprocessor}{\#include\ <pthread.h>}}
+\DoxyCodeLine{00003\ \textcolor{preprocessor}{\#include\ <list>}}
+\DoxyCodeLine{00004\ \textcolor{keyword}{using\ namespace\ }\mbox{\hyperlink{namespacestd}{std}};}
+\DoxyCodeLine{00005\ }
+\DoxyCodeLine{00006\ \textcolor{keyword}{template}\ <\textcolor{keyword}{typename}\ T>\ \textcolor{keyword}{class\ }\mbox{\hyperlink{class_t_queue}{TQueue}}}
+\DoxyCodeLine{00007\ \{}
+\DoxyCodeLine{00008\ \ \ list<T>\ queue;}
+\DoxyCodeLine{00009\ \ \ \mbox{\hyperlink{_classes_2lib_2pthread_8h_a50d9d56f346ce3e4ce711d7d1acea193}{pthread\_mutex\_t}}\ mutex;}
+\DoxyCodeLine{00010\ \ \ \mbox{\hyperlink{_classes_2lib_2pthread_8h_a889b578630430003a00009eb9bc682f1}{pthread\_cond\_t}}\ conditionalVar;}
+\DoxyCodeLine{00011\ \ \ }
+\DoxyCodeLine{00012\ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00013\ \ \ }
+\DoxyCodeLine{00014\ \ \ \mbox{\hyperlink{class_t_queue_af1e5d6e6ba17c67c3ddc1c55735066be}{TQueue}}()\{}
+\DoxyCodeLine{00015\ \ \ \ \ \textcolor{comment}{//initialize\ the\ mutex\ and\ conditional\ variable}}
+\DoxyCodeLine{00016\ \ \ \ \ \mbox{\hyperlink{_classes_2lib_2pthread_8h_a766f78ccf9846265c8f379ee92852a2c}{pthread\_mutex\_init}}(\&mutex,\ \mbox{\hyperlink{_classes_2lib_2external_2miniaudio_8h_a070d2ce7b6bb7e5c05602aa8c308d0c4}{NULL}});}
+\DoxyCodeLine{00017\ \ \ \ \ \mbox{\hyperlink{_classes_2lib_2pthread_8h_a9ae7756a4d025b42386fc1835efa6975}{pthread\_cond\_init}}(\&conditionalVar,\ \mbox{\hyperlink{_classes_2lib_2external_2miniaudio_8h_a070d2ce7b6bb7e5c05602aa8c308d0c4}{NULL}});}
+\DoxyCodeLine{00018\ \ \ \}}
+\DoxyCodeLine{00019\ \ \ }
+\DoxyCodeLine{00020\ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{class_t_queue_a22a1a42324ee6951db125b207269ec59}{additem}}(T\ item)\{\ \textcolor{comment}{//should\ be\ called\ by\ the\ producer\ thread}}
+\DoxyCodeLine{00021\ \ \ \ \ \textcolor{comment}{//lock\ the\ queue\ to\ prevent\ competition\ between\ threads}}
+\DoxyCodeLine{00022\ \ \ \ \ \mbox{\hyperlink{_classes_2lib_2pthread_8h_a4ca880f3d1afbb33cea07c60934cc49a}{pthread\_mutex\_lock}}(\&mutex);}
+\DoxyCodeLine{00023\ \ \ \ \ queue.push\_back(item);\ \textcolor{comment}{//add\ item\ to\ the\ list}}
+\DoxyCodeLine{00024\ \ \ \ \ }
+\DoxyCodeLine{00025\ \ \ \ \ \textcolor{comment}{//use\ signal\ to\ wake\ up\ only\ one\ item}}
+\DoxyCodeLine{00026\ \ \ \ \ \mbox{\hyperlink{_classes_2lib_2pthread_8h_a4ba961fe959f9d2c2770e822ae51184f}{pthread\_cond\_signal}}(\&conditionalVar);}
+\DoxyCodeLine{00027\ \ \ \ \ \mbox{\hyperlink{_classes_2lib_2pthread_8h_a7e057138b5fb17da713695ebb25732e1}{pthread\_mutex\_unlock}}(\&mutex);}
+\DoxyCodeLine{00028\ \ \ \}}
+\DoxyCodeLine{00029\ \ \ }
+\DoxyCodeLine{00030\ \ \ T\ \mbox{\hyperlink{class_t_queue_ad0ea661e97b0ced1e7f0fe4fe212f10a}{removeItem}}()\{\ \textcolor{comment}{//should\ be\ called\ by\ the\ consumer\ thread}}
+\DoxyCodeLine{00031\ \ \ \ \ \mbox{\hyperlink{_classes_2lib_2pthread_8h_a4ca880f3d1afbb33cea07c60934cc49a}{pthread\_mutex\_lock}}(\&mutex);}
+\DoxyCodeLine{00032\ \ \ \ \ \textcolor{keywordflow}{while}(queue.size()\ ==\ 0)\{}
+\DoxyCodeLine{00033\ \ \ \ \ \ \ \textcolor{comment}{//tell\ the\ consumer\ thread\ to\ sleep\ and\ wait}}
+\DoxyCodeLine{00034\ \ \ \ \ \ \ \mbox{\hyperlink{_classes_2lib_2pthread_8h_a9eb8d1c21f8f6da4114b33e12dfcd069}{pthread\_cond\_wait}}(\&conditionalVariable,\ \&mutex);}
+\DoxyCodeLine{00035\ \ \ \ \ \}}
+\DoxyCodeLine{00036\ \ \ \ \ }
+\DoxyCodeLine{00037\ \ \ \ \ \textcolor{comment}{//get\ the\ item\ from\ the\ list\ and\ pop\ it\ out}}
+\DoxyCodeLine{00038\ \ \ \ \ T\ item\ =\ queue.front();}
+\DoxyCodeLine{00039\ \ \ \ \ queue.pop\_front();}
+\DoxyCodeLine{00040\ \ \ \ \ }
+\DoxyCodeLine{00041\ \ \ \ \ \mbox{\hyperlink{_classes_2lib_2pthread_8h_a7e057138b5fb17da713695ebb25732e1}{pthread\_mutex\_unlock}}(\&mutex);}
+\DoxyCodeLine{00042\ \ \ \ \ }
+\DoxyCodeLine{00043\ \ \ \ \ \textcolor{keywordflow}{return}\ item;}
+\DoxyCodeLine{00044\ \ \ \ \ }
+\DoxyCodeLine{00045\ \ \ \}}
+\DoxyCodeLine{00046\ \ \ }
+\DoxyCodeLine{00047\ \ \ \textcolor{keywordtype}{int}\ \mbox{\hyperlink{class_t_queue_aafb801eeba63430b1e61c463af2b87e3}{queue\_size}}()\{}
+\DoxyCodeLine{00048\ \ \ \ \ \mbox{\hyperlink{_classes_2lib_2pthread_8h_a4ca880f3d1afbb33cea07c60934cc49a}{pthread\_mutex\_lock}}(\&mutex);}
+\DoxyCodeLine{00049\ \ \ \ \ \textcolor{keywordtype}{int}\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_a3d1e3edfcf61ca2d831883e1afbad89e}{size}}\ =\ queue.size();}
+\DoxyCodeLine{00050\ \ \ \ \ \mbox{\hyperlink{_classes_2lib_2pthread_8h_a7e057138b5fb17da713695ebb25732e1}{pthread\_mutex\_unlock}}(\&mutex);}
+\DoxyCodeLine{00051\ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_a3d1e3edfcf61ca2d831883e1afbad89e}{size}};}
+\DoxyCodeLine{00052\ \ \ \}}
+\DoxyCodeLine{00053\ \ \ }
+\DoxyCodeLine{00054\ \}}
+
+\end{DoxyCode}

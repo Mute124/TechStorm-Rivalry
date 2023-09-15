@@ -1,0 +1,1711 @@
+\doxysection{ropeimpl.\+h}
+\hypertarget{_classes_2lib_2include_2c_09_09_2ext_2ropeimpl_8h_source}{}\label{_classes_2lib_2include_2c_09_09_2ext_2ropeimpl_8h_source}\index{C:/Users/HP/Documents/GitHub/Minero-\/Game/Classes/lib/include/c++/ext/ropeimpl.h@{C:/Users/HP/Documents/GitHub/Minero-\/Game/Classes/lib/include/c++/ext/ropeimpl.h}}
+\mbox{\hyperlink{_classes_2lib_2include_2c_09_09_2ext_2ropeimpl_8h}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{comment}{//\ SGI's\ rope\ class\ implementation\ -\/*-\/\ C++\ -\/*-\/}}
+\DoxyCodeLine{00002\ }
+\DoxyCodeLine{00003\ \textcolor{comment}{//\ Copyright\ (C)\ 2001-\/2022\ Free\ Software\ Foundation,\ Inc.}}
+\DoxyCodeLine{00004\ \textcolor{comment}{//}}
+\DoxyCodeLine{00005\ \textcolor{comment}{//\ This\ file\ is\ part\ of\ the\ GNU\ ISO\ C++\ Library.\ \ This\ library\ is\ free}}
+\DoxyCodeLine{00006\ \textcolor{comment}{//\ software;\ you\ can\ redistribute\ it\ and/or\ modify\ it\ under\ the}}
+\DoxyCodeLine{00007\ \textcolor{comment}{//\ terms\ of\ the\ GNU\ General\ Public\ License\ as\ published\ by\ the}}
+\DoxyCodeLine{00008\ \textcolor{comment}{//\ Free\ Software\ Foundation;\ either\ version\ 3,\ or\ (at\ your\ option)}}
+\DoxyCodeLine{00009\ \textcolor{comment}{//\ any\ later\ version.}}
+\DoxyCodeLine{00010\ }
+\DoxyCodeLine{00011\ \textcolor{comment}{//\ This\ library\ is\ distributed\ in\ the\ hope\ that\ it\ will\ be\ useful,}}
+\DoxyCodeLine{00012\ \textcolor{comment}{//\ but\ WITHOUT\ ANY\ WARRANTY;\ without\ even\ the\ implied\ warranty\ of}}
+\DoxyCodeLine{00013\ \textcolor{comment}{//\ MERCHANTABILITY\ or\ FITNESS\ FOR\ A\ PARTICULAR\ PURPOSE.\ \ See\ the}}
+\DoxyCodeLine{00014\ \textcolor{comment}{//\ GNU\ General\ Public\ License\ for\ more\ details.}}
+\DoxyCodeLine{00015\ }
+\DoxyCodeLine{00016\ \textcolor{comment}{//\ Under\ Section\ 7\ of\ GPL\ version\ 3,\ you\ are\ granted\ additional}}
+\DoxyCodeLine{00017\ \textcolor{comment}{//\ permissions\ described\ in\ the\ GCC\ Runtime\ Library\ Exception,\ version}}
+\DoxyCodeLine{00018\ \textcolor{comment}{//\ 3.1,\ as\ published\ by\ the\ Free\ Software\ Foundation.}}
+\DoxyCodeLine{00019\ }
+\DoxyCodeLine{00020\ \textcolor{comment}{//\ You\ should\ have\ received\ a\ copy\ of\ the\ GNU\ General\ Public\ License\ and}}
+\DoxyCodeLine{00021\ \textcolor{comment}{//\ a\ copy\ of\ the\ GCC\ Runtime\ Library\ Exception\ along\ with\ this\ program;}}
+\DoxyCodeLine{00022\ \textcolor{comment}{//\ see\ the\ files\ COPYING3\ and\ COPYING.RUNTIME\ respectively.\ \ If\ not,\ see}}
+\DoxyCodeLine{00023\ \textcolor{comment}{//\ <http://www.gnu.org/licenses/>.}}
+\DoxyCodeLine{00024\ }
+\DoxyCodeLine{00025\ \textcolor{comment}{/*}}
+\DoxyCodeLine{00026\ \textcolor{comment}{\ *\ Copyright\ (c)\ 1997}}
+\DoxyCodeLine{00027\ \textcolor{comment}{\ *\ Silicon\ Graphics\ Computer\ Systems,\ Inc.}}
+\DoxyCodeLine{00028\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00029\ \textcolor{comment}{\ *\ Permission\ to\ use,\ copy,\ modify,\ distribute\ and\ sell\ this\ software}}
+\DoxyCodeLine{00030\ \textcolor{comment}{\ *\ and\ its\ documentation\ for\ any\ purpose\ is\ hereby\ granted\ without\ fee,}}
+\DoxyCodeLine{00031\ \textcolor{comment}{\ *\ provided\ that\ the\ above\ copyright\ notice\ appear\ in\ all\ copies\ and}}
+\DoxyCodeLine{00032\ \textcolor{comment}{\ *\ that\ both\ that\ copyright\ notice\ and\ this\ permission\ notice\ appear}}
+\DoxyCodeLine{00033\ \textcolor{comment}{\ *\ in\ supporting\ documentation.\ \ Silicon\ Graphics\ makes\ no}}
+\DoxyCodeLine{00034\ \textcolor{comment}{\ *\ representations\ about\ the\ suitability\ of\ this\ software\ for\ any}}
+\DoxyCodeLine{00035\ \textcolor{comment}{\ *\ purpose.\ \ It\ is\ provided\ "{}as\ is"{}\ without\ express\ or\ implied\ warranty.}}
+\DoxyCodeLine{00036\ \textcolor{comment}{\ */}}
+\DoxyCodeLine{00037\ }
+\DoxyCodeLine{00043\ \textcolor{preprocessor}{\#include\ <cstdio>}}
+\DoxyCodeLine{00044\ \textcolor{preprocessor}{\#include\ <ostream>}}
+\DoxyCodeLine{00045\ \textcolor{preprocessor}{\#include\ <bits/functexcept.h>}}
+\DoxyCodeLine{00046\ }
+\DoxyCodeLine{00047\ \textcolor{preprocessor}{\#include\ <ext/algorithm>}\ \textcolor{comment}{//\ For\ copy\_n\ and\ lexicographical\_compare\_3way}}
+\DoxyCodeLine{00048\ \textcolor{preprocessor}{\#include\ <ext/memory>}\ \textcolor{comment}{//\ For\ uninitialized\_copy\_n}}
+\DoxyCodeLine{00049\ \textcolor{preprocessor}{\#include\ <ext/numeric>}\ \textcolor{comment}{//\ For\ power}}
+\DoxyCodeLine{00050\ }
+\DoxyCodeLine{00051\ \textcolor{keyword}{namespace\ }\mbox{\hyperlink{namespace____gnu__cxx}{\_\_gnu\_cxx}}\ \mbox{\hyperlink{_classes_2lib_2include_2c_09_09_2x86__64-w64-mingw32_2bits_2c_09_09config_8h_a44377df0d3503f0b3d9ab316dd8ddf8b}{\_GLIBCXX\_VISIBILITY}}(default)}
+\DoxyCodeLine{00052\ \{}
+\DoxyCodeLine{00053\ \_GLIBCXX\_BEGIN\_NAMESPACE\_VERSION}
+\DoxyCodeLine{00054\ }
+\DoxyCodeLine{00055\ \ \ \textcolor{comment}{//\ Set\ buf\_start,\ buf\_end,\ and\ buf\_ptr\ appropriately,\ filling\ tmp\_buf}}
+\DoxyCodeLine{00056\ \ \ \textcolor{comment}{//\ if\ necessary.\ \ Assumes\ \_M\_path\_end[leaf\_index]\ and\ leaf\_pos\ are\ correct.}}
+\DoxyCodeLine{00057\ \ \ \textcolor{comment}{//\ Results\ in\ a\ valid\ buf\_ptr\ if\ the\ iterator\ can\ be\ legitimately}}
+\DoxyCodeLine{00058\ \ \ \textcolor{comment}{//\ dereferenced.}}
+\DoxyCodeLine{00059\ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{class}\ \_CharT,\ \textcolor{keyword}{class}\ \_Alloc>}
+\DoxyCodeLine{00060\ \ \ \ \ \textcolor{keywordtype}{void}}
+\DoxyCodeLine{00061\ \ \ \ \ \_Rope\_iterator\_base<\_CharT,\ \_Alloc>::}
+\DoxyCodeLine{00062\ \ \ \ \ \_S\_setbuf(\_Rope\_iterator\_base<\_CharT,\ \_Alloc>\&\ \_\_x)}
+\DoxyCodeLine{00063\ \ \ \ \ \{}
+\DoxyCodeLine{00064\ \ \ \ \ \ \ \textcolor{keyword}{using\ }std::size\_t;}
+\DoxyCodeLine{00065\ \ \ \ \ \ \ \textcolor{keyword}{const}\ \_RopeRep*\ \_\_leaf\ =\ \_\_x.\_M\_path\_end[\_\_x.\_M\_leaf\_index];}
+\DoxyCodeLine{00066\ \ \ \ \ \ \ \textcolor{keywordtype}{size\_t}\ \_\_leaf\_pos\ =\ \_\_x.\_M\_leaf\_pos;}
+\DoxyCodeLine{00067\ \ \ \ \ \ \ \textcolor{keywordtype}{size\_t}\ \_\_pos\ =\ \_\_x.\_M\_current\_pos;}
+\DoxyCodeLine{00068\ }
+\DoxyCodeLine{00069\ \ \ \ \ \ \ \textcolor{keywordflow}{switch}(\_\_leaf-\/>\_M\_tag)}
+\DoxyCodeLine{00070\ \ \ \ \ \{}
+\DoxyCodeLine{00071\ \ \ \ \ \textcolor{keywordflow}{case}\ \_\_detail::\_S\_leaf:}
+\DoxyCodeLine{00072\ \ \ \ \ \ \ \_\_x.\_M\_buf\_start\ =\ ((\_Rope\_RopeLeaf<\_CharT,\ \_Alloc>*)\_\_leaf)-\/>\_M\_data;}
+\DoxyCodeLine{00073\ \ \ \ \ \ \ \_\_x.\_M\_buf\_ptr\ =\ \_\_x.\_M\_buf\_start\ +\ (\_\_pos\ -\/\ \_\_leaf\_pos);}
+\DoxyCodeLine{00074\ \ \ \ \ \ \ \_\_x.\_M\_buf\_end\ =\ \_\_x.\_M\_buf\_start\ +\ \_\_leaf-\/>\_M\_size;}
+\DoxyCodeLine{00075\ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{00076\ \ \ \ \ \textcolor{keywordflow}{case}\ \_\_detail::\_S\_function:}
+\DoxyCodeLine{00077\ \ \ \ \ \textcolor{keywordflow}{case}\ \_\_detail::\_S\_substringfn:}
+\DoxyCodeLine{00078\ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00079\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{size\_t}\ \_\_len\ =\ \_S\_iterator\_buf\_len;}
+\DoxyCodeLine{00080\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{size\_t}\ \_\_buf\_start\_pos\ =\ \_\_leaf\_pos;}
+\DoxyCodeLine{00081\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{size\_t}\ \_\_leaf\_end\ =\ \_\_leaf\_pos\ +\ \_\_leaf-\/>\_M\_size;}
+\DoxyCodeLine{00082\ \ \ \ \ \ \ \ \ char\_producer<\_CharT>*\ \_\_fn\ =\ ((\_Rope\_RopeFunction<\_CharT,}
+\DoxyCodeLine{00083\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_Alloc>*)\_\_leaf)-\/>\_M\_fn;}
+\DoxyCodeLine{00084\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\_\_buf\_start\_pos\ +\ \_\_len\ <=\ \_\_pos)}
+\DoxyCodeLine{00085\ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00086\ \ \ \ \ \ \ \ \ \_\_buf\_start\_pos\ =\ \_\_pos\ -\/\ \_\_len\ /\ 4;}
+\DoxyCodeLine{00087\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\_\_buf\_start\_pos\ +\ \_\_len\ >\ \_\_leaf\_end)}
+\DoxyCodeLine{00088\ \ \ \ \ \ \ \ \ \ \ \_\_buf\_start\_pos\ =\ \_\_leaf\_end\ -\/\ \_\_len;}
+\DoxyCodeLine{00089\ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00090\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\_\_buf\_start\_pos\ +\ \_\_len\ >\ \_\_leaf\_end)}
+\DoxyCodeLine{00091\ \ \ \ \ \ \ \ \ \ \ \_\_len\ =\ \_\_leaf\_end\ -\/\ \_\_buf\_start\_pos;}
+\DoxyCodeLine{00092\ \ \ \ \ \ \ \ \ (*\_\_fn)(\_\_buf\_start\_pos\ -\/\ \_\_leaf\_pos,\ \_\_len,\ \_\_x.\_M\_tmp\_buf);}
+\DoxyCodeLine{00093\ \ \ \ \ \ \ \ \ \_\_x.\_M\_buf\_ptr\ =\ \_\_x.\_M\_tmp\_buf\ +\ (\_\_pos\ -\/\ \_\_buf\_start\_pos);}
+\DoxyCodeLine{00094\ \ \ \ \ \ \ \ \ \_\_x.\_M\_buf\_start\ =\ \_\_x.\_M\_tmp\_buf;}
+\DoxyCodeLine{00095\ \ \ \ \ \ \ \ \ \_\_x.\_M\_buf\_end\ =\ \_\_x.\_M\_tmp\_buf\ +\ \_\_len;}
+\DoxyCodeLine{00096\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00097\ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{00098\ \ \ \ \ \textcolor{keywordflow}{default}:}
+\DoxyCodeLine{00099\ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{00100\ \ \ \ \ \}}
+\DoxyCodeLine{00101\ \ \ \ \ \}}
+\DoxyCodeLine{00102\ }
+\DoxyCodeLine{00103\ \ \ \textcolor{comment}{//\ Set\ path\ and\ buffer\ inside\ a\ rope\ iterator.\ \ We\ assume\ that}}
+\DoxyCodeLine{00104\ \ \ \textcolor{comment}{//\ pos\ and\ root\ are\ already\ set.}}
+\DoxyCodeLine{00105\ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{class}\ \_CharT,\ \textcolor{keyword}{class}\ \_Alloc>}
+\DoxyCodeLine{00106\ \ \ \ \ \textcolor{keywordtype}{void}}
+\DoxyCodeLine{00107\ \ \ \ \ \_Rope\_iterator\_base<\_CharT,\ \_Alloc>::}
+\DoxyCodeLine{00108\ \ \ \ \ \_S\_setcache(\_Rope\_iterator\_base<\_CharT,\ \_Alloc>\&\ \_\_x)}
+\DoxyCodeLine{00109\ \ \ \ \ \{}
+\DoxyCodeLine{00110\ \ \ \ \ \ \ \textcolor{keyword}{using\ }std::size\_t;}
+\DoxyCodeLine{00111\ \ \ \ \ \ \ \textcolor{keyword}{const}\ \_RopeRep*\ \_\_path[int(\_\_detail::\_S\_max\_rope\_depth)\ +\ 1];}
+\DoxyCodeLine{00112\ \ \ \ \ \ \ \textcolor{keyword}{const}\ \_RopeRep*\ \_\_curr\_rope;}
+\DoxyCodeLine{00113\ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ \_\_curr\_depth\ =\ -\/1;\ \ \textcolor{comment}{/*\ index\ into\ path\ \ \ \ */}}
+\DoxyCodeLine{00114\ \ \ \ \ \ \ \textcolor{keywordtype}{size\_t}\ \_\_curr\_start\_pos\ =\ 0;}
+\DoxyCodeLine{00115\ \ \ \ \ \ \ \textcolor{keywordtype}{size\_t}\ \_\_pos\ =\ \_\_x.\_M\_current\_pos;}
+\DoxyCodeLine{00116\ \ \ \ \ \ \ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{char}\ \_\_dirns\ =\ 0;\ \textcolor{comment}{//\ Bit\ vector\ marking\ right\ turns\ in\ the\ path}}
+\DoxyCodeLine{00117\ }
+\DoxyCodeLine{00118\ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\_\_pos\ >=\ \_\_x.\_M\_root-\/>\_M\_size)}
+\DoxyCodeLine{00119\ \ \ \ \ \{}
+\DoxyCodeLine{00120\ \ \ \ \ \ \ \_\_x.\_M\_buf\_ptr\ =\ 0;}
+\DoxyCodeLine{00121\ \ \ \ \ \ \ \textcolor{keywordflow}{return};}
+\DoxyCodeLine{00122\ \ \ \ \ \}}
+\DoxyCodeLine{00123\ \ \ \ \ \ \ \_\_curr\_rope\ =\ \_\_x.\_M\_root;}
+\DoxyCodeLine{00124\ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (0\ !=\ \_\_curr\_rope-\/>\_M\_c\_string)}
+\DoxyCodeLine{00125\ \ \ \ \ \{}
+\DoxyCodeLine{00126\ \ \ \ \ \ \ \textcolor{comment}{/*\ Treat\ the\ root\ as\ a\ leaf.\ */}}
+\DoxyCodeLine{00127\ \ \ \ \ \ \ \_\_x.\_M\_buf\_start\ =\ \_\_curr\_rope-\/>\_M\_c\_string;}
+\DoxyCodeLine{00128\ \ \ \ \ \ \ \_\_x.\_M\_buf\_end\ =\ \_\_curr\_rope-\/>\_M\_c\_string\ +\ \_\_curr\_rope-\/>\_M\_size;}
+\DoxyCodeLine{00129\ \ \ \ \ \ \ \_\_x.\_M\_buf\_ptr\ =\ \_\_curr\_rope-\/>\_M\_c\_string\ +\ \_\_pos;}
+\DoxyCodeLine{00130\ \ \ \ \ \ \ \_\_x.\_M\_path\_end[0]\ =\ \_\_curr\_rope;}
+\DoxyCodeLine{00131\ \ \ \ \ \ \ \_\_x.\_M\_leaf\_index\ =\ 0;}
+\DoxyCodeLine{00132\ \ \ \ \ \ \ \_\_x.\_M\_leaf\_pos\ =\ 0;}
+\DoxyCodeLine{00133\ \ \ \ \ \ \ \textcolor{keywordflow}{return};}
+\DoxyCodeLine{00134\ \ \ \ \ \}}
+\DoxyCodeLine{00135\ \ \ \ \ \ \ \textcolor{keywordflow}{for}(;;)}
+\DoxyCodeLine{00136\ \ \ \ \ \{}
+\DoxyCodeLine{00137\ \ \ \ \ \ \ ++\_\_curr\_depth;}
+\DoxyCodeLine{00138\ \ \ \ \ \ \ \_\_path[\_\_curr\_depth]\ =\ \_\_curr\_rope;}
+\DoxyCodeLine{00139\ \ \ \ \ \ \ \textcolor{keywordflow}{switch}(\_\_curr\_rope-\/>\_M\_tag)}
+\DoxyCodeLine{00140\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00141\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ \_\_detail::\_S\_leaf:}
+\DoxyCodeLine{00142\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ \_\_detail::\_S\_function:}
+\DoxyCodeLine{00143\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ \_\_detail::\_S\_substringfn:}
+\DoxyCodeLine{00144\ \ \ \ \ \ \ \ \ \ \ \_\_x.\_M\_leaf\_pos\ =\ \_\_curr\_start\_pos;}
+\DoxyCodeLine{00145\ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{goto}\ done;}
+\DoxyCodeLine{00146\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ \_\_detail::\_S\_concat:}
+\DoxyCodeLine{00147\ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00148\ \ \ \ \ \ \ \ \ \_Rope\_RopeConcatenation<\_CharT,\ \_Alloc>*\ \_\_c\ =}
+\DoxyCodeLine{00149\ \ \ \ \ \ \ \ \ \ \ (\_Rope\_RopeConcatenation<\_CharT,\ \_Alloc>*)\_\_curr\_rope;}
+\DoxyCodeLine{00150\ \ \ \ \ \ \ \ \ \_RopeRep*\ \_\_left\ =\ \_\_c-\/>\_M\_left;}
+\DoxyCodeLine{00151\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{size\_t}\ \_\_left\_len\ =\ \_\_left-\/>\_M\_size;}
+\DoxyCodeLine{00152\ }
+\DoxyCodeLine{00153\ \ \ \ \ \ \ \ \ \_\_dirns\ <<=\ 1;}
+\DoxyCodeLine{00154\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\_\_pos\ >=\ \_\_curr\_start\_pos\ +\ \_\_left\_len)}
+\DoxyCodeLine{00155\ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00156\ \ \ \ \ \ \ \ \ \ \ \ \ \_\_dirns\ |=\ 1;}
+\DoxyCodeLine{00157\ \ \ \ \ \ \ \ \ \ \ \ \ \_\_curr\_rope\ =\ \_\_c-\/>\_M\_right;}
+\DoxyCodeLine{00158\ \ \ \ \ \ \ \ \ \ \ \ \ \_\_curr\_start\_pos\ +=\ \_\_left\_len;}
+\DoxyCodeLine{00159\ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00160\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{00161\ \ \ \ \ \ \ \ \ \ \ \_\_curr\_rope\ =\ \_\_left;}
+\DoxyCodeLine{00162\ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00163\ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{00164\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00165\ \ \ \ \ \}}
+\DoxyCodeLine{00166\ \ \ \ \ done:}
+\DoxyCodeLine{00167\ \ \ \ \ \ \ \textcolor{comment}{//\ Copy\ last\ section\ of\ path\ into\ \_M\_path\_end.}}
+\DoxyCodeLine{00168\ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00169\ \ \ \ \ \textcolor{keywordtype}{int}\ \_\_i\ =\ -\/1;}
+\DoxyCodeLine{00170\ \ \ \ \ \textcolor{keywordtype}{int}\ \_\_j\ =\ \_\_curr\_depth\ +\ 1\ -\/\ int(\_S\_path\_cache\_len);}
+\DoxyCodeLine{00171\ }
+\DoxyCodeLine{00172\ \ \ \ \ \textcolor{keywordflow}{if}\ (\_\_j\ <\ 0)\ \_\_j\ =\ 0;}
+\DoxyCodeLine{00173\ \ \ \ \ \textcolor{keywordflow}{while}\ (\_\_j\ <=\ \_\_curr\_depth)}
+\DoxyCodeLine{00174\ \ \ \ \ \ \ \_\_x.\_M\_path\_end[++\_\_i]\ =\ \_\_path[\_\_j++];}
+\DoxyCodeLine{00175\ \ \ \ \ \_\_x.\_M\_leaf\_index\ =\ \_\_i;}
+\DoxyCodeLine{00176\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00177\ \ \ \ \ \ \ \_\_x.\_M\_path\_directions\ =\ \_\_dirns;}
+\DoxyCodeLine{00178\ \ \ \ \ \ \ \_S\_setbuf(\_\_x);}
+\DoxyCodeLine{00179\ \ \ \ \ \}}
+\DoxyCodeLine{00180\ }
+\DoxyCodeLine{00181\ \ \ \textcolor{comment}{//\ Specialized\ version\ of\ the\ above.\ \ Assumes\ that}}
+\DoxyCodeLine{00182\ \ \ \textcolor{comment}{//\ the\ path\ cache\ is\ valid\ for\ the\ previous\ position.}}
+\DoxyCodeLine{00183\ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{class}\ \_CharT,\ \textcolor{keyword}{class}\ \_Alloc>}
+\DoxyCodeLine{00184\ \ \ \ \ \textcolor{keywordtype}{void}}
+\DoxyCodeLine{00185\ \ \ \ \ \_Rope\_iterator\_base<\_CharT,\ \_Alloc>::}
+\DoxyCodeLine{00186\ \ \ \ \ \_S\_setcache\_for\_incr(\_Rope\_iterator\_base<\_CharT,\ \_Alloc>\&\ \_\_x)}
+\DoxyCodeLine{00187\ \ \ \ \ \{}
+\DoxyCodeLine{00188\ \ \ \ \ \ \ \textcolor{keyword}{using\ }std::size\_t;}
+\DoxyCodeLine{00189\ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ \_\_current\_index\ =\ \_\_x.\_M\_leaf\_index;}
+\DoxyCodeLine{00190\ \ \ \ \ \ \ \textcolor{keyword}{const}\ \_RopeRep*\ \_\_current\_node\ =\ \_\_x.\_M\_path\_end[\_\_current\_index];}
+\DoxyCodeLine{00191\ \ \ \ \ \ \ \textcolor{keywordtype}{size\_t}\ \_\_len\ =\ \_\_current\_node-\/>\_M\_size;}
+\DoxyCodeLine{00192\ \ \ \ \ \ \ \textcolor{keywordtype}{size\_t}\ \_\_node\_start\_pos\ =\ \_\_x.\_M\_leaf\_pos;}
+\DoxyCodeLine{00193\ \ \ \ \ \ \ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{char}\ \_\_dirns\ =\ \_\_x.\_M\_path\_directions;}
+\DoxyCodeLine{00194\ \ \ \ \ \ \ \_Rope\_RopeConcatenation<\_CharT,\ \_Alloc>*\ \_\_c;}
+\DoxyCodeLine{00195\ }
+\DoxyCodeLine{00196\ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\_\_x.\_M\_current\_pos\ -\/\ \_\_node\_start\_pos\ <\ \_\_len)}
+\DoxyCodeLine{00197\ \ \ \ \ \{}
+\DoxyCodeLine{00198\ \ \ \ \ \ \ \textcolor{comment}{/*\ More\ stuff\ in\ this\ leaf,\ we\ just\ didn't\ cache\ it.\ */}}
+\DoxyCodeLine{00199\ \ \ \ \ \ \ \_S\_setbuf(\_\_x);}
+\DoxyCodeLine{00200\ \ \ \ \ \ \ \textcolor{keywordflow}{return};}
+\DoxyCodeLine{00201\ \ \ \ \ \}}
+\DoxyCodeLine{00202\ \ \ \ \ \ \ \textcolor{comment}{//\ \ node\_start\_pos\ is\ starting\ position\ of\ last\_node.}}
+\DoxyCodeLine{00203\ \ \ \ \ \ \ \textcolor{keywordflow}{while}\ (-\/-\/\_\_current\_index\ >=\ 0)}
+\DoxyCodeLine{00204\ \ \ \ \ \{}
+\DoxyCodeLine{00205\ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (!(\_\_dirns\ \&\ 1)\ \textcolor{comment}{/*\ Path\ turned\ left\ */})}
+\DoxyCodeLine{00206\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{00207\ \ \ \ \ \ \ \_\_current\_node\ =\ \_\_x.\_M\_path\_end[\_\_current\_index];}
+\DoxyCodeLine{00208\ \ \ \ \ \ \ \_\_c\ =\ (\_Rope\_RopeConcatenation<\_CharT,\ \_Alloc>*)\_\_current\_node;}
+\DoxyCodeLine{00209\ \ \ \ \ \ \ \textcolor{comment}{//\ Otherwise\ we\ were\ in\ the\ right\ child.\ \ Thus\ we\ should\ pop}}
+\DoxyCodeLine{00210\ \ \ \ \ \ \ \textcolor{comment}{//\ the\ concatenation\ node.}}
+\DoxyCodeLine{00211\ \ \ \ \ \ \ \_\_node\_start\_pos\ -\/=\ \_\_c-\/>\_M\_left-\/>\_M\_size;}
+\DoxyCodeLine{00212\ \ \ \ \ \ \ \_\_dirns\ >>=\ 1;}
+\DoxyCodeLine{00213\ \ \ \ \ \}}
+\DoxyCodeLine{00214\ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\_\_current\_index\ <\ 0)}
+\DoxyCodeLine{00215\ \ \ \ \ \{}
+\DoxyCodeLine{00216\ \ \ \ \ \ \ \textcolor{comment}{//\ We\ underflowed\ the\ cache.\ Punt.}}
+\DoxyCodeLine{00217\ \ \ \ \ \ \ \_S\_setcache(\_\_x);}
+\DoxyCodeLine{00218\ \ \ \ \ \ \ \textcolor{keywordflow}{return};}
+\DoxyCodeLine{00219\ \ \ \ \ \}}
+\DoxyCodeLine{00220\ \ \ \ \ \ \ \_\_current\_node\ =\ \_\_x.\_M\_path\_end[\_\_current\_index];}
+\DoxyCodeLine{00221\ \ \ \ \ \ \ \_\_c\ =\ (\_Rope\_RopeConcatenation<\_CharT,\ \_Alloc>*)\_\_current\_node;}
+\DoxyCodeLine{00222\ \ \ \ \ \ \ \textcolor{comment}{//\ current\_node\ is\ a\ concatenation\ node.\ \ We\ are\ positioned\ on\ the\ first}}
+\DoxyCodeLine{00223\ \ \ \ \ \ \ \textcolor{comment}{//\ character\ in\ its\ right\ child.}}
+\DoxyCodeLine{00224\ \ \ \ \ \ \ \textcolor{comment}{//\ node\_start\_pos\ is\ starting\ position\ of\ current\_node.}}
+\DoxyCodeLine{00225\ \ \ \ \ \ \ \_\_node\_start\_pos\ +=\ \_\_c-\/>\_M\_left-\/>\_M\_size;}
+\DoxyCodeLine{00226\ \ \ \ \ \ \ \_\_current\_node\ =\ \_\_c-\/>\_M\_right;}
+\DoxyCodeLine{00227\ \ \ \ \ \ \ \_\_x.\_M\_path\_end[++\_\_current\_index]\ =\ \_\_current\_node;}
+\DoxyCodeLine{00228\ \ \ \ \ \ \ \_\_dirns\ |=\ 1;}
+\DoxyCodeLine{00229\ \ \ \ \ \ \ \textcolor{keywordflow}{while}\ (\_\_detail::\_S\_concat\ ==\ \_\_current\_node-\/>\_M\_tag)}
+\DoxyCodeLine{00230\ \ \ \ \ \{}
+\DoxyCodeLine{00231\ \ \ \ \ \ \ ++\_\_current\_index;}
+\DoxyCodeLine{00232\ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\textcolor{keywordtype}{int}(\_S\_path\_cache\_len)\ ==\ \_\_current\_index)}
+\DoxyCodeLine{00233\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00234\ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ \_\_i;}
+\DoxyCodeLine{00235\ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\_\_i\ =\ 0;\ \_\_i\ <\ int(\_S\_path\_cache\_len)\ -\/\ 1;\ \_\_i++)}
+\DoxyCodeLine{00236\ \ \ \ \ \ \ \ \ \_\_x.\_M\_path\_end[\_\_i]\ =\ \_\_x.\_M\_path\_end[\_\_i+1];}
+\DoxyCodeLine{00237\ \ \ \ \ \ \ \ \ \ \ -\/-\/\_\_current\_index;}
+\DoxyCodeLine{00238\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00239\ \ \ \ \ \ \ \_\_current\_node\ =}
+\DoxyCodeLine{00240\ \ \ \ \ \ \ \ \ ((\_Rope\_RopeConcatenation<\_CharT,\ \_Alloc>*)\_\_current\_node)-\/>\_M\_left;}
+\DoxyCodeLine{00241\ \ \ \ \ \ \ \_\_x.\_M\_path\_end[\_\_current\_index]\ =\ \_\_current\_node;}
+\DoxyCodeLine{00242\ \ \ \ \ \ \ \_\_dirns\ <<=\ 1;}
+\DoxyCodeLine{00243\ \ \ \ \ \ \ \textcolor{comment}{//\ node\_start\_pos\ is\ unchanged.}}
+\DoxyCodeLine{00244\ \ \ \ \ \}}
+\DoxyCodeLine{00245\ \ \ \ \ \ \ \_\_x.\_M\_leaf\_index\ =\ \_\_current\_index;}
+\DoxyCodeLine{00246\ \ \ \ \ \ \ \_\_x.\_M\_leaf\_pos\ =\ \_\_node\_start\_pos;}
+\DoxyCodeLine{00247\ \ \ \ \ \ \ \_\_x.\_M\_path\_directions\ =\ \_\_dirns;}
+\DoxyCodeLine{00248\ \ \ \ \ \ \ \_S\_setbuf(\_\_x);}
+\DoxyCodeLine{00249\ \ \ \ \ \}}
+\DoxyCodeLine{00250\ }
+\DoxyCodeLine{00251\ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{class}\ \_CharT,\ \textcolor{keyword}{class}\ \_Alloc>}
+\DoxyCodeLine{00252\ \ \ \ \ \textcolor{keywordtype}{void}}
+\DoxyCodeLine{00253\ \ \ \ \ \_Rope\_iterator\_base<\_CharT,\ \_Alloc>::}
+\DoxyCodeLine{00254\ \ \ \ \ \_M\_incr(std::size\_t\ \_\_n)}
+\DoxyCodeLine{00255\ \ \ \ \ \{}
+\DoxyCodeLine{00256\ \ \ \ \ \ \ \_M\_current\_pos\ +=\ \_\_n;}
+\DoxyCodeLine{00257\ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (0\ !=\ \_M\_buf\_ptr)}
+\DoxyCodeLine{00258\ \ \ \ \ \{}
+\DoxyCodeLine{00259\ \ \ \ \ \ \ std::size\_t\ \_\_chars\_left\ =\ \_M\_buf\_end\ -\/\ \_M\_buf\_ptr;}
+\DoxyCodeLine{00260\ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\_\_chars\_left\ >\ \_\_n)}
+\DoxyCodeLine{00261\ \ \ \ \ \ \ \ \ \_M\_buf\_ptr\ +=\ \_\_n;}
+\DoxyCodeLine{00262\ \ \ \ \ \ \ \textcolor{keywordflow}{else}\ \textcolor{keywordflow}{if}\ (\_\_chars\_left\ ==\ \_\_n)}
+\DoxyCodeLine{00263\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00264\ \ \ \ \ \ \ \ \ \ \ \_M\_buf\_ptr\ +=\ \_\_n;}
+\DoxyCodeLine{00265\ \ \ \ \ \ \ \ \ \ \ \_S\_setcache\_for\_incr(*\textcolor{keyword}{this});}
+\DoxyCodeLine{00266\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00267\ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{00268\ \ \ \ \ \ \ \ \ \_M\_buf\_ptr\ =\ 0;}
+\DoxyCodeLine{00269\ \ \ \ \ \}}
+\DoxyCodeLine{00270\ \ \ \ \ \}}
+\DoxyCodeLine{00271\ }
+\DoxyCodeLine{00272\ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{class}\ \_CharT,\ \textcolor{keyword}{class}\ \_Alloc>}
+\DoxyCodeLine{00273\ \ \ \ \ \textcolor{keywordtype}{void}}
+\DoxyCodeLine{00274\ \ \ \ \ \_Rope\_iterator\_base<\_CharT,\ \_Alloc>::}
+\DoxyCodeLine{00275\ \ \ \ \ \_M\_decr(std::size\_t\ \_\_n)}
+\DoxyCodeLine{00276\ \ \ \ \ \{}
+\DoxyCodeLine{00277\ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (0\ !=\ \_M\_buf\_ptr)}
+\DoxyCodeLine{00278\ \ \ \ \ \{}
+\DoxyCodeLine{00279\ \ \ \ \ \ \ std::size\_t\ \_\_chars\_left\ =\ \_M\_buf\_ptr\ -\/\ \_M\_buf\_start;}
+\DoxyCodeLine{00280\ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\_\_chars\_left\ >=\ \_\_n)}
+\DoxyCodeLine{00281\ \ \ \ \ \ \ \ \ \_M\_buf\_ptr\ -\/=\ \_\_n;}
+\DoxyCodeLine{00282\ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{00283\ \ \ \ \ \ \ \ \ \_M\_buf\_ptr\ =\ 0;}
+\DoxyCodeLine{00284\ \ \ \ \ \}}
+\DoxyCodeLine{00285\ \ \ \ \ \ \ \_M\_current\_pos\ -\/=\ \_\_n;}
+\DoxyCodeLine{00286\ \ \ \ \ \}}
+\DoxyCodeLine{00287\ }
+\DoxyCodeLine{00288\ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{class}\ \_CharT,\ \textcolor{keyword}{class}\ \_Alloc>}
+\DoxyCodeLine{00289\ \ \ \ \ \textcolor{keywordtype}{void}}
+\DoxyCodeLine{00290\ \ \ \ \ \_Rope\_iterator<\_CharT,\ \_Alloc>::}
+\DoxyCodeLine{00291\ \ \ \ \ \_M\_check()}
+\DoxyCodeLine{00292\ \ \ \ \ \{}
+\DoxyCodeLine{00293\ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\_M\_root\_rope-\/>\_M\_tree\_ptr\ !=\ this-\/>\_M\_root)}
+\DoxyCodeLine{00294\ \ \ \ \ \{}
+\DoxyCodeLine{00295\ \ \ \ \ \ \ \textcolor{comment}{//\ \_Rope\ was\ modified.\ \ Get\ things\ fixed\ up.}}
+\DoxyCodeLine{00296\ \ \ \ \ \ \ \_RopeRep::\_S\_unref(this-\/>\_M\_root);}
+\DoxyCodeLine{00297\ \ \ \ \ \ \ this-\/>\_M\_root\ =\ \_M\_root\_rope-\/>\_M\_tree\_ptr;}
+\DoxyCodeLine{00298\ \ \ \ \ \ \ \_RopeRep::\_S\_ref(this-\/>\_M\_root);}
+\DoxyCodeLine{00299\ \ \ \ \ \ \ this-\/>\_M\_buf\_ptr\ =\ 0;}
+\DoxyCodeLine{00300\ \ \ \ \ \}}
+\DoxyCodeLine{00301\ \ \ \ \ \}}
+\DoxyCodeLine{00302\ }
+\DoxyCodeLine{00303\ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{class}\ \_CharT,\ \textcolor{keyword}{class}\ \_Alloc>}
+\DoxyCodeLine{00304\ \ \ \ \ \textcolor{keyword}{inline}}
+\DoxyCodeLine{00305\ \ \ \ \ \_Rope\_const\_iterator<\_CharT,\ \_Alloc>::}
+\DoxyCodeLine{00306\ \ \ \ \ \_Rope\_const\_iterator(\textcolor{keyword}{const}\ \_Rope\_iterator<\_CharT,\ \_Alloc>\&\ \_\_x)}
+\DoxyCodeLine{00307\ \ \ \ \ :\ \_Rope\_iterator\_base<\_CharT,\ \_Alloc>(\_\_x)}
+\DoxyCodeLine{00308\ \ \ \ \ \{\ \}}
+\DoxyCodeLine{00309\ }
+\DoxyCodeLine{00310\ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{class}\ \_CharT,\ \textcolor{keyword}{class}\ \_Alloc>}
+\DoxyCodeLine{00311\ \ \ \ \ \textcolor{keyword}{inline}}
+\DoxyCodeLine{00312\ \ \ \ \ \_Rope\_iterator<\_CharT,\ \_Alloc>::}
+\DoxyCodeLine{00313\ \ \ \ \ \_Rope\_iterator(rope<\_CharT,\ \_Alloc>\&\ \_\_r,\ std::size\_t\ \_\_pos)}
+\DoxyCodeLine{00314\ \ \ \ \ :\ \_Rope\_iterator\_base<\_CharT,\_Alloc>(\_\_r.\_M\_tree\_ptr,\ \_\_pos),}
+\DoxyCodeLine{00315\ \ \ \ \ \ \ \_M\_root\_rope(\&\_\_r)}
+\DoxyCodeLine{00316\ \ \ \ \ \{\ \_RopeRep::\_S\_ref(this-\/>\_M\_root);\ \}}
+\DoxyCodeLine{00317\ }
+\DoxyCodeLine{00318\ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{class}\ \_CharT,\ \textcolor{keyword}{class}\ \_Alloc>}
+\DoxyCodeLine{00319\ \ \ \ \ \textcolor{keyword}{inline}\ std::size\_t}
+\DoxyCodeLine{00320\ \ \ \ \ rope<\_CharT,\ \_Alloc>::}
+\DoxyCodeLine{00321\ \ \ \ \ \_S\_char\_ptr\_len(\textcolor{keyword}{const}\ \_CharT*\ \_\_s)}
+\DoxyCodeLine{00322\ \ \ \ \ \{}
+\DoxyCodeLine{00323\ \ \ \ \ \ \ \textcolor{keyword}{const}\ \_CharT*\ \_\_p\ =\ \_\_s;}
+\DoxyCodeLine{00324\ \ \ \ \ \ \ }
+\DoxyCodeLine{00325\ \ \ \ \ \ \ \textcolor{keywordflow}{while}\ (!\_S\_is0(*\_\_p))}
+\DoxyCodeLine{00326\ \ \ \ \ ++\_\_p;}
+\DoxyCodeLine{00327\ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ (\_\_p\ -\/\ \_\_s);}
+\DoxyCodeLine{00328\ \ \ \ \ \}}
+\DoxyCodeLine{00329\ }
+\DoxyCodeLine{00330\ }
+\DoxyCodeLine{00331\ \textcolor{preprocessor}{\#ifndef\ \_\_GC}}
+\DoxyCodeLine{00332\ }
+\DoxyCodeLine{00333\ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{class}\ \_CharT,\ \textcolor{keyword}{class}\ \_Alloc>}
+\DoxyCodeLine{00334\ \ \ \ \ \textcolor{keyword}{inline}\ \textcolor{keywordtype}{void}}
+\DoxyCodeLine{00335\ \ \ \ \ \_Rope\_RopeRep<\_CharT,\ \_Alloc>::}
+\DoxyCodeLine{00336\ \ \ \ \ \_M\_free\_c\_string()}
+\DoxyCodeLine{00337\ \ \ \ \ \{}
+\DoxyCodeLine{00338\ \ \ \ \ \ \ \_CharT*\ \_\_cstr\ =\ \_M\_c\_string;}
+\DoxyCodeLine{00339\ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (0\ !=\ \_\_cstr)}
+\DoxyCodeLine{00340\ \ \ \ \ \{}
+\DoxyCodeLine{00341\ \ \ \ \ \ \ std::size\_t\ \_\_size\ =\ this-\/>\_M\_size\ +\ 1;}
+\DoxyCodeLine{00342\ \ \ \ \ \ \ std::\_Destroy(\_\_cstr,\ \_\_cstr\ +\ \_\_size,\ \_M\_get\_allocator());}
+\DoxyCodeLine{00343\ \ \ \ \ \ \ this-\/>\_Data\_deallocate(\_\_cstr,\ \_\_size);}
+\DoxyCodeLine{00344\ \ \ \ \ \}}
+\DoxyCodeLine{00345\ \ \ \ \ \}}
+\DoxyCodeLine{00346\ }
+\DoxyCodeLine{00347\ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{class}\ \_CharT,\ \textcolor{keyword}{class}\ \_Alloc>}
+\DoxyCodeLine{00348\ \ \ \ \ \textcolor{keyword}{inline}\ \textcolor{keywordtype}{void}}
+\DoxyCodeLine{00349\ \ \ \ \ \_Rope\_RopeRep<\_CharT,\ \_Alloc>::}
+\DoxyCodeLine{00350\ \ \ \ \ \_S\_free\_string(\_CharT*\ \_\_s,\ std::size\_t\ \_\_n,\ allocator\_type\&\ \_\_a)}
+\DoxyCodeLine{00351\ \ \ \ \ \{}
+\DoxyCodeLine{00352\ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (!\_S\_is\_basic\_char\_type((\_CharT*)0))}
+\DoxyCodeLine{00353\ \ \ \ \ std::\_Destroy(\_\_s,\ \_\_s\ +\ \_\_n,\ \_\_a);}
+\DoxyCodeLine{00354\ \ \ \ \ \ \ }
+\DoxyCodeLine{00355\ \ \ \ \ \ \ \textcolor{comment}{//\ \ This\ has\ to\ be\ a\ static\ member,\ so\ this\ gets\ a\ bit\ messy}}
+\DoxyCodeLine{00356\ \ \ \ \ \ \ \_\_a.deallocate(\_\_s,}
+\DoxyCodeLine{00357\ \ \ \ \ \ \ \ \ \ \ \ \ \ \_Rope\_RopeLeaf<\_CharT,\ \_Alloc>::\_S\_rounded\_up\_size(\_\_n));}
+\DoxyCodeLine{00358\ \ \ \ \ \}}
+\DoxyCodeLine{00359\ }
+\DoxyCodeLine{00360\ \ \ \textcolor{comment}{//\ \ There\ are\ several\ reasons\ for\ not\ doing\ this\ with\ virtual\ destructors}}
+\DoxyCodeLine{00361\ \ \ \textcolor{comment}{//\ \ and\ a\ class\ specific\ delete\ operator:}}
+\DoxyCodeLine{00362\ \ \ \textcolor{comment}{//\ \ -\/\ A\ class\ specific\ delete\ operator\ can't\ easily\ get\ access\ to}}
+\DoxyCodeLine{00363\ \ \ \textcolor{comment}{//\ \ \ \ allocator\ instances\ if\ we\ need\ them.}}
+\DoxyCodeLine{00364\ \ \ \textcolor{comment}{//\ \ -\/\ Any\ virtual\ function\ would\ need\ a\ 4\ or\ byte\ vtable\ pointer;}}
+\DoxyCodeLine{00365\ \ \ \textcolor{comment}{//\ \ \ \ this\ only\ requires\ a\ one\ byte\ tag\ per\ object.}}
+\DoxyCodeLine{00366\ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{class}\ \_CharT,\ \textcolor{keyword}{class}\ \_Alloc>}
+\DoxyCodeLine{00367\ \ \ \ \ \textcolor{keywordtype}{void}}
+\DoxyCodeLine{00368\ \ \ \ \ \_Rope\_RopeRep<\_CharT,\ \_Alloc>::}
+\DoxyCodeLine{00369\ \ \ \ \ \_M\_free\_tree()}
+\DoxyCodeLine{00370\ \ \ \ \ \{}
+\DoxyCodeLine{00371\ \ \ \ \ \ \ \textcolor{keywordflow}{switch}(\_M\_tag)}
+\DoxyCodeLine{00372\ \ \ \ \ \{}
+\DoxyCodeLine{00373\ \ \ \ \ \textcolor{keywordflow}{case}\ \_\_detail::\_S\_leaf:}
+\DoxyCodeLine{00374\ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00375\ \ \ \ \ \ \ \ \ \_Rope\_RopeLeaf<\_CharT,\ \_Alloc>*\ \_\_l}
+\DoxyCodeLine{00376\ \ \ \ \ \ \ \ \ \ \ =\ (\_Rope\_RopeLeaf<\_CharT,\ \_Alloc>*)\textcolor{keyword}{this};}
+\DoxyCodeLine{00377\ \ \ \ \ \ \ \ \ \_\_l-\/>\_Rope\_RopeLeaf<\_CharT,\ \_Alloc>::\string~\_Rope\_RopeLeaf();}
+\DoxyCodeLine{00378\ \ \ \ \ \ \ \ \ this-\/>\_L\_deallocate(\_\_l,\ 1);}
+\DoxyCodeLine{00379\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{00380\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00381\ \ \ \ \ \textcolor{keywordflow}{case}\ \_\_detail::\_S\_concat:}
+\DoxyCodeLine{00382\ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00383\ \ \ \ \ \ \ \ \ \_Rope\_RopeConcatenation<\_CharT,\_Alloc>*\ \_\_c}
+\DoxyCodeLine{00384\ \ \ \ \ \ \ \ \ \ \ =\ (\_Rope\_RopeConcatenation<\_CharT,\ \_Alloc>*)\textcolor{keyword}{this};}
+\DoxyCodeLine{00385\ \ \ \ \ \ \ \ \ \_\_c-\/>\_Rope\_RopeConcatenation<\_CharT,\ \_Alloc>::}
+\DoxyCodeLine{00386\ \ \ \ \ \ \ \ \ \ \ \string~\_Rope\_RopeConcatenation();}
+\DoxyCodeLine{00387\ \ \ \ \ \ \ \ \ this-\/>\_C\_deallocate(\_\_c,\ 1);}
+\DoxyCodeLine{00388\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{00389\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00390\ \ \ \ \ \textcolor{keywordflow}{case}\ \_\_detail::\_S\_function:}
+\DoxyCodeLine{00391\ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00392\ \ \ \ \ \ \ \ \ \_Rope\_RopeFunction<\_CharT,\ \_Alloc>*\ \_\_f}
+\DoxyCodeLine{00393\ \ \ \ \ \ \ \ \ \ \ =\ (\_Rope\_RopeFunction<\_CharT,\ \_Alloc>*)\textcolor{keyword}{this};}
+\DoxyCodeLine{00394\ \ \ \ \ \ \ \ \ \_\_f-\/>\_Rope\_RopeFunction<\_CharT,\ \_Alloc>::\string~\_Rope\_RopeFunction();}
+\DoxyCodeLine{00395\ \ \ \ \ \ \ \ \ this-\/>\_F\_deallocate(\_\_f,\ 1);}
+\DoxyCodeLine{00396\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{00397\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00398\ \ \ \ \ \textcolor{keywordflow}{case}\ \_\_detail::\_S\_substringfn:}
+\DoxyCodeLine{00399\ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00400\ \ \ \ \ \ \ \ \ \_Rope\_RopeSubstring<\_CharT,\ \_Alloc>*\ \_\_ss\ =}
+\DoxyCodeLine{00401\ \ \ \ \ \ \ \ \ \ \ (\_Rope\_RopeSubstring<\_CharT,\ \_Alloc>*)\textcolor{keyword}{this};}
+\DoxyCodeLine{00402\ \ \ \ \ \ \ \ \ \_\_ss-\/>\_Rope\_RopeSubstring<\_CharT,\ \_Alloc>::}
+\DoxyCodeLine{00403\ \ \ \ \ \ \ \ \ \ \ \string~\_Rope\_RopeSubstring();}
+\DoxyCodeLine{00404\ \ \ \ \ \ \ \ \ this-\/>\_S\_deallocate(\_\_ss,\ 1);}
+\DoxyCodeLine{00405\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{00406\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00407\ \ \ \ \ \}}
+\DoxyCodeLine{00408\ \ \ \ \ \}}
+\DoxyCodeLine{00409\ \textcolor{preprocessor}{\#else}}
+\DoxyCodeLine{00410\ }
+\DoxyCodeLine{00411\ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{class}\ \_CharT,\ \textcolor{keyword}{class}\ \_Alloc>}
+\DoxyCodeLine{00412\ \ \ \ \ \textcolor{keyword}{inline}\ \textcolor{keywordtype}{void}}
+\DoxyCodeLine{00413\ \ \ \ \ \_Rope\_RopeRep<\_CharT,\ \_Alloc>::}
+\DoxyCodeLine{00414\ \ \ \ \ \_S\_free\_string(\textcolor{keyword}{const}\ \_CharT*,\ std::size\_t,\ allocator\_type)}
+\DoxyCodeLine{00415\ \ \ \ \ \{\ \}}
+\DoxyCodeLine{00416\ }
+\DoxyCodeLine{00417\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00418\ }
+\DoxyCodeLine{00419\ \ \ \textcolor{comment}{//\ Concatenate\ a\ C\ string\ onto\ a\ leaf\ rope\ by\ copying\ the\ rope\ data.}}
+\DoxyCodeLine{00420\ \ \ \textcolor{comment}{//\ Used\ for\ short\ ropes.}}
+\DoxyCodeLine{00421\ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{class}\ \_CharT,\ \textcolor{keyword}{class}\ \_Alloc>}
+\DoxyCodeLine{00422\ \ \ \ \ \textcolor{keyword}{typename}\ rope<\_CharT,\ \_Alloc>::\_RopeLeaf*}
+\DoxyCodeLine{00423\ \ \ \ \ rope<\_CharT,\ \_Alloc>::}
+\DoxyCodeLine{00424\ \ \ \ \ \_S\_leaf\_concat\_char\_iter(\_RopeLeaf*\ \_\_r,\ \textcolor{keyword}{const}\ \_CharT*\ \_\_iter,}
+\DoxyCodeLine{00425\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::size\_t\ \_\_len)}
+\DoxyCodeLine{00426\ \ \ \ \ \{}
+\DoxyCodeLine{00427\ \ \ \ \ \ \ std::size\_t\ \_\_old\_len\ =\ \_\_r-\/>\_M\_size;}
+\DoxyCodeLine{00428\ \ \ \ \ \ \ \_CharT*\ \_\_new\_data\ =\ (\_CharT*)}
+\DoxyCodeLine{00429\ \ \ \ \ rope::\_Data\_allocate(\_S\_rounded\_up\_size(\_\_old\_len\ +\ \_\_len));}
+\DoxyCodeLine{00430\ \ \ \ \ \ \ \_RopeLeaf*\ \_\_result;}
+\DoxyCodeLine{00431\ }
+\DoxyCodeLine{00432\ \ \ \ \ \ \ uninitialized\_copy\_n(\_\_r-\/>\_M\_data,\ \_\_old\_len,\ \_\_new\_data);}
+\DoxyCodeLine{00433\ \ \ \ \ \ \ uninitialized\_copy\_n(\_\_iter,\ \_\_len,\ \_\_new\_data\ +\ \_\_old\_len);}
+\DoxyCodeLine{00434\ \ \ \ \ \ \ \_S\_cond\_store\_eos(\_\_new\_data[\_\_old\_len\ +\ \_\_len]);}
+\DoxyCodeLine{00435\ \ \ \ \ \ \ \mbox{\hyperlink{_classes_2lib_2include_2c_09_09_2bits_2exception__defines_8h_a130bf0cd31a0783cd03563f46b46915b}{\_\_try}}}
+\DoxyCodeLine{00436\ \ \ \ \ \{}
+\DoxyCodeLine{00437\ \ \ \ \ \ \ \_\_result\ =\ \_S\_new\_RopeLeaf(\_\_new\_data,\ \_\_old\_len\ +\ \_\_len,}
+\DoxyCodeLine{00438\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_\_r-\/>\_M\_get\_allocator());}
+\DoxyCodeLine{00439\ \ \ \ \ \}}
+\DoxyCodeLine{00440\ \ \ \ \ \ \ \mbox{\hyperlink{_classes_2lib_2include_2c_09_09_2bits_2exception__defines_8h_a9e51d2f324c18a996a3e4f9a6ba0f6c2}{\_\_catch}}(...)}
+\DoxyCodeLine{00441\ \ \ \ \ \{}
+\DoxyCodeLine{00442\ \ \ \ \ \ \ \_RopeRep::\_\_STL\_FREE\_STRING(\_\_new\_data,\ \_\_old\_len\ +\ \_\_len,}
+\DoxyCodeLine{00443\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_\_r-\/>\_M\_get\_allocator());}
+\DoxyCodeLine{00444\ \ \ \ \ \ \ \mbox{\hyperlink{_classes_2lib_2include_2c_09_09_2bits_2exception__defines_8h_a92ef03a5310b10a4243a6ec8f43494b5}{\_\_throw\_exception\_again}};}
+\DoxyCodeLine{00445\ \ \ \ \ \}}
+\DoxyCodeLine{00446\ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \_\_result;}
+\DoxyCodeLine{00447\ \ \ \ \ \}}
+\DoxyCodeLine{00448\ }
+\DoxyCodeLine{00449\ \textcolor{preprocessor}{\#ifndef\ \_\_GC}}
+\DoxyCodeLine{00450\ \ \ \textcolor{comment}{//\ As\ above,\ but\ it's\ OK\ to\ clobber\ original\ if\ refcount\ is\ 1}}
+\DoxyCodeLine{00451\ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{class}\ \_CharT,\ \textcolor{keyword}{class}\ \_Alloc>}
+\DoxyCodeLine{00452\ \ \ \ \ \textcolor{keyword}{typename}\ rope<\_CharT,\_Alloc>::\_RopeLeaf*}
+\DoxyCodeLine{00453\ \ \ \ \ rope<\_CharT,\ \_Alloc>::}
+\DoxyCodeLine{00454\ \ \ \ \ \_S\_destr\_leaf\_concat\_char\_iter(\_RopeLeaf*\ \_\_r,\ \textcolor{keyword}{const}\ \_CharT*\ \_\_iter,}
+\DoxyCodeLine{00455\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::size\_t\ \_\_len)}
+\DoxyCodeLine{00456\ \ \ \ \ \{}
+\DoxyCodeLine{00457\ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\_\_r-\/>\_M\_ref\_count\ >\ 1)}
+\DoxyCodeLine{00458\ \ \ \ \ \textcolor{keywordflow}{return}\ \_S\_leaf\_concat\_char\_iter(\_\_r,\ \_\_iter,\ \_\_len);}
+\DoxyCodeLine{00459\ \ \ \ \ \ \ std::size\_t\ \_\_old\_len\ =\ \_\_r-\/>\_M\_size;}
+\DoxyCodeLine{00460\ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\_S\_allocated\_capacity(\_\_old\_len)\ >=\ \_\_old\_len\ +\ \_\_len)}
+\DoxyCodeLine{00461\ \ \ \ \ \{}
+\DoxyCodeLine{00462\ \ \ \ \ \ \ \textcolor{comment}{//\ The\ space\ has\ been\ partially\ initialized\ for\ the\ standard}}
+\DoxyCodeLine{00463\ \ \ \ \ \ \ \textcolor{comment}{//\ character\ types.\ \ But\ that\ doesn't\ matter\ for\ those\ types.}}
+\DoxyCodeLine{00464\ \ \ \ \ \ \ uninitialized\_copy\_n(\_\_iter,\ \_\_len,\ \_\_r-\/>\_M\_data\ +\ \_\_old\_len);}
+\DoxyCodeLine{00465\ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\_S\_is\_basic\_char\_type((\_CharT*)0))}
+\DoxyCodeLine{00466\ \ \ \ \ \ \ \ \ \_S\_cond\_store\_eos(\_\_r-\/>\_M\_data[\_\_old\_len\ +\ \_\_len]);}
+\DoxyCodeLine{00467\ \ \ \ \ \ \ \textcolor{keywordflow}{else}\ \textcolor{keywordflow}{if}\ (\_\_r-\/>\_M\_c\_string\ !=\ \_\_r-\/>\_M\_data\ \&\&\ 0\ !=\ \_\_r-\/>\_M\_c\_string)}
+\DoxyCodeLine{00468\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00469\ \ \ \ \ \ \ \ \ \ \ \_\_r-\/>\_M\_free\_c\_string();}
+\DoxyCodeLine{00470\ \ \ \ \ \ \ \ \ \ \ \_\_r-\/>\_M\_c\_string\ =\ 0;}
+\DoxyCodeLine{00471\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00472\ \ \ \ \ \ \ \_\_r-\/>\_M\_size\ =\ \_\_old\_len\ +\ \_\_len;}
+\DoxyCodeLine{00473\ \ \ \ \ \ \ \_\_r-\/>\_M\_ref\_count\ =\ 2;}
+\DoxyCodeLine{00474\ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \_\_r;}
+\DoxyCodeLine{00475\ \ \ \ \ \}}
+\DoxyCodeLine{00476\ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{00477\ \ \ \ \ \{}
+\DoxyCodeLine{00478\ \ \ \ \ \ \ \_RopeLeaf*\ \_\_result\ =\ \_S\_leaf\_concat\_char\_iter(\_\_r,\ \_\_iter,\ \_\_len);}
+\DoxyCodeLine{00479\ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \_\_result;}
+\DoxyCodeLine{00480\ \ \ \ \ \}}
+\DoxyCodeLine{00481\ \ \ \ \ \}}
+\DoxyCodeLine{00482\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00483\ }
+\DoxyCodeLine{00484\ \ \ \textcolor{comment}{//\ Assumes\ left\ and\ right\ are\ not\ 0.}}
+\DoxyCodeLine{00485\ \ \ \textcolor{comment}{//\ Does\ not\ increment\ (nor\ decrement\ on\ exception)\ child\ reference\ counts.}}
+\DoxyCodeLine{00486\ \ \ \textcolor{comment}{//\ Result\ has\ ref\ count\ 1.}}
+\DoxyCodeLine{00487\ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{class}\ \_CharT,\ \textcolor{keyword}{class}\ \_Alloc>}
+\DoxyCodeLine{00488\ \ \ \ \ \textcolor{keyword}{typename}\ rope<\_CharT,\ \_Alloc>::\_RopeRep*}
+\DoxyCodeLine{00489\ \ \ \ \ rope<\_CharT,\ \_Alloc>::}
+\DoxyCodeLine{00490\ \ \ \ \ \_S\_tree\_concat(\_RopeRep*\ \_\_left,\ \_RopeRep*\ \_\_right)}
+\DoxyCodeLine{00491\ \ \ \ \ \{}
+\DoxyCodeLine{00492\ \ \ \ \ \ \ \textcolor{keyword}{using\ }std::size\_t;}
+\DoxyCodeLine{00493\ \ \ \ \ \ \ \_RopeConcatenation*\ \_\_result\ =\ \_S\_new\_RopeConcatenation(\_\_left,\ \_\_right,}
+\DoxyCodeLine{00494\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_\_left-\/>}
+\DoxyCodeLine{00495\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_M\_get\_allocator());}
+\DoxyCodeLine{00496\ \ \ \ \ \ \ \textcolor{keywordtype}{size\_t}\ \_\_depth\ =\ \_\_result-\/>\_M\_depth;}
+\DoxyCodeLine{00497\ \ \ \ \ \ \ }
+\DoxyCodeLine{00498\ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\_\_depth\ >\ 20}
+\DoxyCodeLine{00499\ \ \ \ \ \ \ \&\&\ (\_\_result-\/>\_M\_size\ <\ 1000}
+\DoxyCodeLine{00500\ \ \ \ \ \ \ \ \ \ \ ||\ \_\_depth\ >\ \textcolor{keywordtype}{size\_t}(\_\_detail::\_S\_max\_rope\_depth)))}
+\DoxyCodeLine{00501\ \ \ \ \ \{}
+\DoxyCodeLine{00502\ \ \ \ \ \ \ \_RopeRep*\ \_\_balanced;}
+\DoxyCodeLine{00503\ }
+\DoxyCodeLine{00504\ \ \ \ \ \ \ \mbox{\hyperlink{_classes_2lib_2include_2c_09_09_2bits_2exception__defines_8h_a130bf0cd31a0783cd03563f46b46915b}{\_\_try}}}
+\DoxyCodeLine{00505\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00506\ \ \ \ \ \ \ \ \ \ \ \_\_balanced\ =\ \_S\_balance(\_\_result);}
+\DoxyCodeLine{00507\ \ \ \ \ \ \ \ \ \ \ \_\_result-\/>\_M\_unref\_nonnil();}
+\DoxyCodeLine{00508\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00509\ \ \ \ \ \ \ \mbox{\hyperlink{_classes_2lib_2include_2c_09_09_2bits_2exception__defines_8h_a9e51d2f324c18a996a3e4f9a6ba0f6c2}{\_\_catch}}(...)}
+\DoxyCodeLine{00510\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00511\ \ \ \ \ \ \ \ \ \ \ rope::\_C\_deallocate(\_\_result,1);}
+\DoxyCodeLine{00512\ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{_classes_2lib_2include_2c_09_09_2bits_2exception__defines_8h_a92ef03a5310b10a4243a6ec8f43494b5}{\_\_throw\_exception\_again}};}
+\DoxyCodeLine{00513\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00514\ \ \ \ \ \ \ \textcolor{comment}{//\ In\ case\ of\ exception,\ we\ need\ to\ deallocate}}
+\DoxyCodeLine{00515\ \ \ \ \ \ \ \textcolor{comment}{//\ otherwise\ dangling\ result\ node.\ \ But\ caller}}
+\DoxyCodeLine{00516\ \ \ \ \ \ \ \textcolor{comment}{//\ still\ owns\ its\ children.\ \ Thus\ unref\ is}}
+\DoxyCodeLine{00517\ \ \ \ \ \ \ \textcolor{comment}{//\ inappropriate.}}
+\DoxyCodeLine{00518\ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \_\_balanced;}
+\DoxyCodeLine{00519\ \ \ \ \ \}}
+\DoxyCodeLine{00520\ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{00521\ \ \ \ \ \textcolor{keywordflow}{return}\ \_\_result;}
+\DoxyCodeLine{00522\ \ \ \ \ \}}
+\DoxyCodeLine{00523\ }
+\DoxyCodeLine{00524\ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{class}\ \_CharT,\ \textcolor{keyword}{class}\ \_Alloc>}
+\DoxyCodeLine{00525\ \ \ \ \ \textcolor{keyword}{typename}\ rope<\_CharT,\ \_Alloc>::\_RopeRep*}
+\DoxyCodeLine{00526\ \ \ \ \ rope<\_CharT,\ \_Alloc>::}
+\DoxyCodeLine{00527\ \ \ \ \ \_S\_concat\_char\_iter(\_RopeRep*\ \_\_r,\ \textcolor{keyword}{const}\ \_CharT*\_\_s,\ std::size\_t\ \_\_slen,}
+\DoxyCodeLine{00528\ \ \ \ \ \ \ \ \ \ \ \ \ allocator\_type\&\ \_\_a)}
+\DoxyCodeLine{00529\ \ \ \ \ \{}
+\DoxyCodeLine{00530\ \ \ \ \ \ \ \textcolor{keyword}{using\ }std::size\_t;}
+\DoxyCodeLine{00531\ \ \ \ \ \ \ \_RopeRep*\ \_\_result;}
+\DoxyCodeLine{00532\ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (0\ ==\ \_\_slen)}
+\DoxyCodeLine{00533\ \ \ \ \ \{}
+\DoxyCodeLine{00534\ \ \ \ \ \ \ \_S\_ref(\_\_r);}
+\DoxyCodeLine{00535\ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \_\_r;}
+\DoxyCodeLine{00536\ \ \ \ \ \}}
+\DoxyCodeLine{00537\ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (0\ ==\ \_\_r)}
+\DoxyCodeLine{00538\ \ \ \ \ \textcolor{keywordflow}{return}\ \_\_STL\_ROPE\_FROM\_UNOWNED\_CHAR\_PTR(\_\_s,\ \_\_slen,\ \_\_a);}
+\DoxyCodeLine{00539\ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\_\_r-\/>\_M\_tag\ ==\ \_\_detail::\_S\_leaf}
+\DoxyCodeLine{00540\ \ \ \ \ \ \ \&\&\ \_\_r-\/>\_M\_size\ +\ \_\_slen\ <=\ \textcolor{keywordtype}{size\_t}(\_S\_copy\_max))}
+\DoxyCodeLine{00541\ \ \ \ \ \{}
+\DoxyCodeLine{00542\ \ \ \ \ \ \ \_\_result\ =\ \_S\_leaf\_concat\_char\_iter((\_RopeLeaf*)\_\_r,\ \_\_s,\ \_\_slen);}
+\DoxyCodeLine{00543\ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \_\_result;}
+\DoxyCodeLine{00544\ \ \ \ \ \}}
+\DoxyCodeLine{00545\ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\_\_detail::\_S\_concat\ ==\ \_\_r-\/>\_M\_tag}
+\DoxyCodeLine{00546\ \ \ \ \ \ \ \&\&\ \_\_detail::\_S\_leaf\ ==\ ((\_RopeConcatenation*)\ \_\_r)-\/>\_M\_right-\/>\_M\_tag)}
+\DoxyCodeLine{00547\ \ \ \ \ \{}
+\DoxyCodeLine{00548\ \ \ \ \ \ \ \_RopeLeaf*\ \_\_right\ =}
+\DoxyCodeLine{00549\ \ \ \ \ \ \ \ \ (\_RopeLeaf*\ )(((\_RopeConcatenation*\ )\_\_r)-\/>\_M\_right);}
+\DoxyCodeLine{00550\ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\_\_right-\/>\_M\_size\ +\ \_\_slen\ <=\ \textcolor{keywordtype}{size\_t}(\_S\_copy\_max))}
+\DoxyCodeLine{00551\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00552\ \ \ \ \ \ \ \ \ \ \ \_RopeRep*\ \_\_left\ =\ ((\_RopeConcatenation*)\_\_r)-\/>\_M\_left;}
+\DoxyCodeLine{00553\ \ \ \ \ \ \ \ \ \ \ \_RopeRep*\ \_\_nright\ =}
+\DoxyCodeLine{00554\ \ \ \ \ \ \ \ \ \_S\_leaf\_concat\_char\_iter((\_RopeLeaf*)\_\_right,\ \_\_s,\ \_\_slen);}
+\DoxyCodeLine{00555\ \ \ \ \ \ \ \ \ \ \ \_\_left-\/>\_M\_ref\_nonnil();}
+\DoxyCodeLine{00556\ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{_classes_2lib_2include_2c_09_09_2bits_2exception__defines_8h_a130bf0cd31a0783cd03563f46b46915b}{\_\_try}}}
+\DoxyCodeLine{00557\ \ \ \ \ \ \ \ \ \{\ \_\_result\ =\ \_S\_tree\_concat(\_\_left,\ \_\_nright);\ \}}
+\DoxyCodeLine{00558\ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{_classes_2lib_2include_2c_09_09_2bits_2exception__defines_8h_a9e51d2f324c18a996a3e4f9a6ba0f6c2}{\_\_catch}}(...)}
+\DoxyCodeLine{00559\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00560\ \ \ \ \ \ \ \ \ \ \ \_S\_unref(\_\_left);}
+\DoxyCodeLine{00561\ \ \ \ \ \ \ \ \ \ \ \_S\_unref(\_\_nright);}
+\DoxyCodeLine{00562\ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{_classes_2lib_2include_2c_09_09_2bits_2exception__defines_8h_a92ef03a5310b10a4243a6ec8f43494b5}{\_\_throw\_exception\_again}};}
+\DoxyCodeLine{00563\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00564\ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \_\_result;}
+\DoxyCodeLine{00565\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00566\ \ \ \ \ \}}
+\DoxyCodeLine{00567\ \ \ \ \ \ \ \_RopeRep*\ \_\_nright\ =\ \_\_STL\_ROPE\_FROM\_UNOWNED\_CHAR\_PTR(\_\_s,\ \_\_slen,\ \_\_a);}
+\DoxyCodeLine{00568\ \ \ \ \ \ \ \mbox{\hyperlink{_classes_2lib_2include_2c_09_09_2bits_2exception__defines_8h_a130bf0cd31a0783cd03563f46b46915b}{\_\_try}}}
+\DoxyCodeLine{00569\ \ \ \ \ \{}
+\DoxyCodeLine{00570\ \ \ \ \ \ \ \_\_r-\/>\_M\_ref\_nonnil();}
+\DoxyCodeLine{00571\ \ \ \ \ \ \ \_\_result\ =\ \_S\_tree\_concat(\_\_r,\ \_\_nright);}
+\DoxyCodeLine{00572\ \ \ \ \ \}}
+\DoxyCodeLine{00573\ \ \ \ \ \ \ \mbox{\hyperlink{_classes_2lib_2include_2c_09_09_2bits_2exception__defines_8h_a9e51d2f324c18a996a3e4f9a6ba0f6c2}{\_\_catch}}(...)}
+\DoxyCodeLine{00574\ \ \ \ \ \{}
+\DoxyCodeLine{00575\ \ \ \ \ \ \ \_S\_unref(\_\_r);}
+\DoxyCodeLine{00576\ \ \ \ \ \ \ \_S\_unref(\_\_nright);}
+\DoxyCodeLine{00577\ \ \ \ \ \ \ \mbox{\hyperlink{_classes_2lib_2include_2c_09_09_2bits_2exception__defines_8h_a92ef03a5310b10a4243a6ec8f43494b5}{\_\_throw\_exception\_again}};}
+\DoxyCodeLine{00578\ \ \ \ \ \}}
+\DoxyCodeLine{00579\ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \_\_result;}
+\DoxyCodeLine{00580\ \ \ \ \ \}}
+\DoxyCodeLine{00581\ }
+\DoxyCodeLine{00582\ \textcolor{preprocessor}{\#ifndef\ \_\_GC}}
+\DoxyCodeLine{00583\ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{class}\ \_CharT,\ \textcolor{keyword}{class}\ \_Alloc>}
+\DoxyCodeLine{00584\ \ \ \ \ \textcolor{keyword}{typename}\ rope<\_CharT,\_Alloc>::\_RopeRep*}
+\DoxyCodeLine{00585\ \ \ \ \ rope<\_CharT,\_Alloc>::}
+\DoxyCodeLine{00586\ \ \ \ \ \_S\_destr\_concat\_char\_iter(\_RopeRep*\ \_\_r,\ \textcolor{keyword}{const}\ \_CharT*\ \_\_s,}
+\DoxyCodeLine{00587\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::size\_t\ \_\_slen,\ allocator\_type\&\ \_\_a)}
+\DoxyCodeLine{00588\ \ \ \ \ \{}
+\DoxyCodeLine{00589\ \ \ \ \ \ \ \textcolor{keyword}{using\ }std::size\_t;}
+\DoxyCodeLine{00590\ \ \ \ \ \ \ \_RopeRep*\ \_\_result;}
+\DoxyCodeLine{00591\ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (0\ ==\ \_\_r)}
+\DoxyCodeLine{00592\ \ \ \ \ \textcolor{keywordflow}{return}\ \_\_STL\_ROPE\_FROM\_UNOWNED\_CHAR\_PTR(\_\_s,\ \_\_slen,\ \_\_a);}
+\DoxyCodeLine{00593\ \ \ \ \ \ \ \textcolor{keywordtype}{size\_t}\ \mbox{\hyperlink{_classes_2lib_2include_2mmintrin_8h_a7cee916b88079d74fdaf7856046abea3}{\_\_count}}\ =\ \_\_r-\/>\_M\_ref\_count;}
+\DoxyCodeLine{00594\ \ \ \ \ \ \ \textcolor{keywordtype}{size\_t}\ \_\_orig\_size\ =\ \_\_r-\/>\_M\_size;}
+\DoxyCodeLine{00595\ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{_classes_2lib_2include_2mmintrin_8h_a7cee916b88079d74fdaf7856046abea3}{\_\_count}}\ >\ 1)}
+\DoxyCodeLine{00596\ \ \ \ \ \textcolor{keywordflow}{return}\ \_S\_concat\_char\_iter(\_\_r,\ \_\_s,\ \_\_slen,\ \_\_a);}
+\DoxyCodeLine{00597\ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (0\ ==\ \_\_slen)}
+\DoxyCodeLine{00598\ \ \ \ \ \{}
+\DoxyCodeLine{00599\ \ \ \ \ \ \ \_\_r-\/>\_M\_ref\_count\ =\ 2;\ \ \ \ \ \ \textcolor{comment}{//\ One\ more\ than\ before}}
+\DoxyCodeLine{00600\ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \_\_r;}
+\DoxyCodeLine{00601\ \ \ \ \ \}}
+\DoxyCodeLine{00602\ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\_\_orig\_size\ +\ \_\_slen\ <=\ \textcolor{keywordtype}{size\_t}(\_S\_copy\_max)}
+\DoxyCodeLine{00603\ \ \ \ \ \ \ \&\&\ \_\_detail::\_S\_leaf\ ==\ \_\_r-\/>\_M\_tag)}
+\DoxyCodeLine{00604\ \ \ \ \ \{}
+\DoxyCodeLine{00605\ \ \ \ \ \ \ \_\_result\ =\ \_S\_destr\_leaf\_concat\_char\_iter((\_RopeLeaf*)\_\_r,\ \_\_s,\ }
+\DoxyCodeLine{00606\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_\_slen);}
+\DoxyCodeLine{00607\ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \_\_result;}
+\DoxyCodeLine{00608\ \ \ \ \ \}}
+\DoxyCodeLine{00609\ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\_\_detail::\_S\_concat\ ==\ \_\_r-\/>\_M\_tag)}
+\DoxyCodeLine{00610\ \ \ \ \ \{}
+\DoxyCodeLine{00611\ \ \ \ \ \ \ \_RopeLeaf*\ \_\_right\ =\ (\_RopeLeaf*)(((\_RopeConcatenation*)}
+\DoxyCodeLine{00612\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_\_r)-\/>\_M\_right);}
+\DoxyCodeLine{00613\ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\_\_detail::\_S\_leaf\ ==\ \_\_right-\/>\_M\_tag}
+\DoxyCodeLine{00614\ \ \ \ \ \ \ \ \ \ \ \&\&\ \_\_right-\/>\_M\_size\ +\ \_\_slen\ <=\ \textcolor{keywordtype}{size\_t}(\_S\_copy\_max))}
+\DoxyCodeLine{00615\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00616\ \ \ \ \ \ \ \ \ \ \ \_RopeRep*\ \_\_new\_right\ =}
+\DoxyCodeLine{00617\ \ \ \ \ \ \ \ \ \_S\_destr\_leaf\_concat\_char\_iter(\_\_right,\ \_\_s,\ \_\_slen);}
+\DoxyCodeLine{00618\ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\_\_right\ ==\ \_\_new\_right)}
+\DoxyCodeLine{00619\ \ \ \ \ \ \ \ \ \_\_new\_right-\/>\_M\_ref\_count\ =\ 1;}
+\DoxyCodeLine{00620\ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{00621\ \ \ \ \ \ \ \ \ \_\_right-\/>\_M\_unref\_nonnil();}
+\DoxyCodeLine{00622\ \ \ \ \ \ \ \ \ \ \ \_\_r-\/>\_M\_ref\_count\ =\ 2;\ \ \ \ \textcolor{comment}{//\ One\ more\ than\ before.}}
+\DoxyCodeLine{00623\ \ \ \ \ \ \ \ \ \ \ ((\_RopeConcatenation*)\_\_r)-\/>\_M\_right\ =\ \_\_new\_right;}
+\DoxyCodeLine{00624\ \ \ \ \ \ \ \ \ \ \ \_\_r-\/>\_M\_size\ =\ \_\_orig\_size\ +\ \_\_slen;}
+\DoxyCodeLine{00625\ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (0\ !=\ \_\_r-\/>\_M\_c\_string)}
+\DoxyCodeLine{00626\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00627\ \ \ \ \ \ \ \ \ \ \ \_\_r-\/>\_M\_free\_c\_string();}
+\DoxyCodeLine{00628\ \ \ \ \ \ \ \ \ \ \ \_\_r-\/>\_M\_c\_string\ =\ 0;}
+\DoxyCodeLine{00629\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00630\ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \_\_r;}
+\DoxyCodeLine{00631\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00632\ \ \ \ \ \}}
+\DoxyCodeLine{00633\ \ \ \ \ \ \ \_RopeRep*\ \_\_right\ =\ \_\_STL\_ROPE\_FROM\_UNOWNED\_CHAR\_PTR(\_\_s,\ \_\_slen,\ \_\_a);}
+\DoxyCodeLine{00634\ \ \ \ \ \ \ \_\_r-\/>\_M\_ref\_nonnil();}
+\DoxyCodeLine{00635\ \ \ \ \ \ \ \mbox{\hyperlink{_classes_2lib_2include_2c_09_09_2bits_2exception__defines_8h_a130bf0cd31a0783cd03563f46b46915b}{\_\_try}}}
+\DoxyCodeLine{00636\ \ \ \ \ \{\ \_\_result\ =\ \_S\_tree\_concat(\_\_r,\ \_\_right);\ \}}
+\DoxyCodeLine{00637\ \ \ \ \ \ \ \mbox{\hyperlink{_classes_2lib_2include_2c_09_09_2bits_2exception__defines_8h_a9e51d2f324c18a996a3e4f9a6ba0f6c2}{\_\_catch}}(...)}
+\DoxyCodeLine{00638\ \ \ \ \ \{}
+\DoxyCodeLine{00639\ \ \ \ \ \ \ \_S\_unref(\_\_r);}
+\DoxyCodeLine{00640\ \ \ \ \ \ \ \_S\_unref(\_\_right);}
+\DoxyCodeLine{00641\ \ \ \ \ \ \ \mbox{\hyperlink{_classes_2lib_2include_2c_09_09_2bits_2exception__defines_8h_a92ef03a5310b10a4243a6ec8f43494b5}{\_\_throw\_exception\_again}};}
+\DoxyCodeLine{00642\ \ \ \ \ \}}
+\DoxyCodeLine{00643\ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \_\_result;}
+\DoxyCodeLine{00644\ \ \ \ \ \}}
+\DoxyCodeLine{00645\ \textcolor{preprocessor}{\#endif\ }\textcolor{comment}{/*\ !\_\_GC\ */}\textcolor{preprocessor}{}}
+\DoxyCodeLine{00646\ \ \ }
+\DoxyCodeLine{00647\ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{class}\ \_CharT,\ \textcolor{keyword}{class}\ \_Alloc>}
+\DoxyCodeLine{00648\ \ \ \ \ \textcolor{keyword}{typename}\ rope<\_CharT,\ \_Alloc>::\_RopeRep*}
+\DoxyCodeLine{00649\ \ \ \ \ rope<\_CharT,\ \_Alloc>::}
+\DoxyCodeLine{00650\ \ \ \ \ \_S\_concat(\_RopeRep*\ \_\_left,\ \_RopeRep*\ \_\_right)}
+\DoxyCodeLine{00651\ \ \ \ \ \{}
+\DoxyCodeLine{00652\ \ \ \ \ \ \ \textcolor{keyword}{using\ }std::size\_t;}
+\DoxyCodeLine{00653\ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (0\ ==\ \_\_left)}
+\DoxyCodeLine{00654\ \ \ \ \ \{}
+\DoxyCodeLine{00655\ \ \ \ \ \ \ \_S\_ref(\_\_right);}
+\DoxyCodeLine{00656\ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \_\_right;}
+\DoxyCodeLine{00657\ \ \ \ \ \}}
+\DoxyCodeLine{00658\ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (0\ ==\ \_\_right)}
+\DoxyCodeLine{00659\ \ \ \ \ \{}
+\DoxyCodeLine{00660\ \ \ \ \ \ \ \_\_left-\/>\_M\_ref\_nonnil();}
+\DoxyCodeLine{00661\ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \_\_left;}
+\DoxyCodeLine{00662\ \ \ \ \ \}}
+\DoxyCodeLine{00663\ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\_\_detail::\_S\_leaf\ ==\ \_\_right-\/>\_M\_tag)}
+\DoxyCodeLine{00664\ \ \ \ \ \{}
+\DoxyCodeLine{00665\ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\_\_detail::\_S\_leaf\ ==\ \_\_left-\/>\_M\_tag)}
+\DoxyCodeLine{00666\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00667\ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\_\_right-\/>\_M\_size\ +\ \_\_left-\/>\_M\_size\ <=\ \textcolor{keywordtype}{size\_t}(\_S\_copy\_max))}
+\DoxyCodeLine{00668\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \_S\_leaf\_concat\_char\_iter((\_RopeLeaf*)\_\_left,}
+\DoxyCodeLine{00669\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ((\_RopeLeaf*)\_\_right)-\/>\_M\_data,}
+\DoxyCodeLine{00670\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_\_right-\/>\_M\_size);}
+\DoxyCodeLine{00671\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00672\ \ \ \ \ \ \ \textcolor{keywordflow}{else}\ \textcolor{keywordflow}{if}\ (\_\_detail::\_S\_concat\ ==\ \_\_left-\/>\_M\_tag}
+\DoxyCodeLine{00673\ \ \ \ \ \ \ \ \ \ \ \ \&\&\ \_\_detail::\_S\_leaf\ ==\ ((\_RopeConcatenation*)}
+\DoxyCodeLine{00674\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_\_left)-\/>\_M\_right-\/>\_M\_tag)}
+\DoxyCodeLine{00675\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00676\ \ \ \ \ \ \ \ \ \ \ \_RopeLeaf*\ \_\_leftright\ =}
+\DoxyCodeLine{00677\ \ \ \ \ \ \ \ \ (\_RopeLeaf*)(((\_RopeConcatenation*)\_\_left)-\/>\_M\_right);}
+\DoxyCodeLine{00678\ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\_\_leftright-\/>\_M\_size}
+\DoxyCodeLine{00679\ \ \ \ \ \ \ \ \ \ \ +\ \_\_right-\/>\_M\_size\ <=\ \textcolor{keywordtype}{size\_t}(\_S\_copy\_max))}
+\DoxyCodeLine{00680\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00681\ \ \ \ \ \ \ \ \ \ \ \_RopeRep*\ \_\_leftleft\ =\ ((\_RopeConcatenation*)\_\_left)-\/>\_M\_left;}
+\DoxyCodeLine{00682\ \ \ \ \ \ \ \ \ \ \ \_RopeRep*\ \_\_rest\ =\ \_S\_leaf\_concat\_char\_iter(\_\_leftright,}
+\DoxyCodeLine{00683\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ((\_RopeLeaf*)}
+\DoxyCodeLine{00684\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_\_right)-\/>}
+\DoxyCodeLine{00685\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_M\_data,}
+\DoxyCodeLine{00686\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_\_right-\/>\_M\_size);}
+\DoxyCodeLine{00687\ \ \ \ \ \ \ \ \ \ \ \_\_leftleft-\/>\_M\_ref\_nonnil();}
+\DoxyCodeLine{00688\ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{_classes_2lib_2include_2c_09_09_2bits_2exception__defines_8h_a130bf0cd31a0783cd03563f46b46915b}{\_\_try}}}
+\DoxyCodeLine{00689\ \ \ \ \ \ \ \ \ \ \ \ \ \{\ \textcolor{keywordflow}{return}(\_S\_tree\_concat(\_\_leftleft,\ \_\_rest));\ \}}
+\DoxyCodeLine{00690\ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{_classes_2lib_2include_2c_09_09_2bits_2exception__defines_8h_a9e51d2f324c18a996a3e4f9a6ba0f6c2}{\_\_catch}}(...)}
+\DoxyCodeLine{00691\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00692\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_S\_unref(\_\_leftleft);}
+\DoxyCodeLine{00693\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_S\_unref(\_\_rest);}
+\DoxyCodeLine{00694\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{_classes_2lib_2include_2c_09_09_2bits_2exception__defines_8h_a92ef03a5310b10a4243a6ec8f43494b5}{\_\_throw\_exception\_again}};}
+\DoxyCodeLine{00695\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00696\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00697\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00698\ \ \ \ \ \}}
+\DoxyCodeLine{00699\ \ \ \ \ \ \ \_\_left-\/>\_M\_ref\_nonnil();}
+\DoxyCodeLine{00700\ \ \ \ \ \ \ \_\_right-\/>\_M\_ref\_nonnil();}
+\DoxyCodeLine{00701\ \ \ \ \ \ \ \mbox{\hyperlink{_classes_2lib_2include_2c_09_09_2bits_2exception__defines_8h_a130bf0cd31a0783cd03563f46b46915b}{\_\_try}}}
+\DoxyCodeLine{00702\ \ \ \ \ \{\ \textcolor{keywordflow}{return}(\_S\_tree\_concat(\_\_left,\ \_\_right));\ \}}
+\DoxyCodeLine{00703\ \ \ \ \ \ \ \mbox{\hyperlink{_classes_2lib_2include_2c_09_09_2bits_2exception__defines_8h_a9e51d2f324c18a996a3e4f9a6ba0f6c2}{\_\_catch}}(...)}
+\DoxyCodeLine{00704\ \ \ \ \ \{}
+\DoxyCodeLine{00705\ \ \ \ \ \ \ \_S\_unref(\_\_left);}
+\DoxyCodeLine{00706\ \ \ \ \ \ \ \_S\_unref(\_\_right);}
+\DoxyCodeLine{00707\ \ \ \ \ \ \ \mbox{\hyperlink{_classes_2lib_2include_2c_09_09_2bits_2exception__defines_8h_a92ef03a5310b10a4243a6ec8f43494b5}{\_\_throw\_exception\_again}};}
+\DoxyCodeLine{00708\ \ \ \ \ \}}
+\DoxyCodeLine{00709\ \ \ \ \ \}}
+\DoxyCodeLine{00710\ }
+\DoxyCodeLine{00711\ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{class}\ \_CharT,\ \textcolor{keyword}{class}\ \_Alloc>}
+\DoxyCodeLine{00712\ \ \ \ \ \textcolor{keyword}{typename}\ rope<\_CharT,\ \_Alloc>::\_RopeRep*}
+\DoxyCodeLine{00713\ \ \ \ \ rope<\_CharT,\ \_Alloc>::}
+\DoxyCodeLine{00714\ \ \ \ \ \_S\_substring(\_RopeRep*\ \_\_base,\ std::size\_t\ \_\_start,\ std::size\_t\ \_\_endp1)}
+\DoxyCodeLine{00715\ \ \ \ \ \{}
+\DoxyCodeLine{00716\ \ \ \ \ \ \ \textcolor{keyword}{using\ }std::size\_t;}
+\DoxyCodeLine{00717\ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (0\ ==\ \_\_base)}
+\DoxyCodeLine{00718\ \ \ \ \ \textcolor{keywordflow}{return}\ 0;}
+\DoxyCodeLine{00719\ \ \ \ \ \ \ \textcolor{keywordtype}{size\_t}\ \_\_len\ =\ \_\_base-\/>\_M\_size;}
+\DoxyCodeLine{00720\ \ \ \ \ \ \ \textcolor{keywordtype}{size\_t}\ \_\_adj\_endp1;}
+\DoxyCodeLine{00721\ \ \ \ \ \ \ \textcolor{keyword}{const}\ \textcolor{keywordtype}{size\_t}\ \_\_lazy\_threshold\ =\ 128;}
+\DoxyCodeLine{00722\ \ \ \ \ \ \ }
+\DoxyCodeLine{00723\ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\_\_endp1\ >=\ \_\_len)}
+\DoxyCodeLine{00724\ \ \ \ \ \{}
+\DoxyCodeLine{00725\ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (0\ ==\ \_\_start)}
+\DoxyCodeLine{00726\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00727\ \ \ \ \ \ \ \ \ \ \ \_\_base-\/>\_M\_ref\_nonnil();}
+\DoxyCodeLine{00728\ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \_\_base;}
+\DoxyCodeLine{00729\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00730\ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{00731\ \ \ \ \ \ \ \ \ \_\_adj\_endp1\ =\ \_\_len;}
+\DoxyCodeLine{00732\ \ \ \ \ \ \ }
+\DoxyCodeLine{00733\ \ \ \ \ \}}
+\DoxyCodeLine{00734\ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{00735\ \ \ \ \ \_\_adj\_endp1\ =\ \_\_endp1;}
+\DoxyCodeLine{00736\ }
+\DoxyCodeLine{00737\ \ \ \ \ \ \ \textcolor{keywordflow}{switch}(\_\_base-\/>\_M\_tag)}
+\DoxyCodeLine{00738\ \ \ \ \ \{}
+\DoxyCodeLine{00739\ \ \ \ \ \textcolor{keywordflow}{case}\ \_\_detail::\_S\_concat:}
+\DoxyCodeLine{00740\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00741\ \ \ \ \ \ \ \ \ \ \ \_RopeConcatenation*\ \_\_c\ =\ (\_RopeConcatenation*)\_\_base;}
+\DoxyCodeLine{00742\ \ \ \ \ \ \ \ \ \ \ \_RopeRep*\ \_\_left\ =\ \_\_c-\/>\_M\_left;}
+\DoxyCodeLine{00743\ \ \ \ \ \ \ \ \ \ \ \_RopeRep*\ \_\_right\ =\ \_\_c-\/>\_M\_right;}
+\DoxyCodeLine{00744\ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{size\_t}\ \_\_left\_len\ =\ \_\_left-\/>\_M\_size;}
+\DoxyCodeLine{00745\ \ \ \ \ \ \ \ \ \ \ \_RopeRep*\ \_\_result;}
+\DoxyCodeLine{00746\ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00747\ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\_\_adj\_endp1\ <=\ \_\_left\_len)}
+\DoxyCodeLine{00748\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \_S\_substring(\_\_left,\ \_\_start,\ \_\_endp1);}
+\DoxyCodeLine{00749\ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}\ \textcolor{keywordflow}{if}\ (\_\_start\ >=\ \_\_left\_len)}
+\DoxyCodeLine{00750\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \_S\_substring(\_\_right,\ \_\_start\ -\/\ \_\_left\_len,}
+\DoxyCodeLine{00751\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_\_adj\_endp1\ -\/\ \_\_left\_len);}
+\DoxyCodeLine{00752\ \ \ \ \ \ \ \ \ \ \ \_Self\_destruct\_ptr\ \_\_left\_result(\_S\_substring(\_\_left,}
+\DoxyCodeLine{00753\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_\_start,}
+\DoxyCodeLine{00754\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_\_left\_len));}
+\DoxyCodeLine{00755\ \ \ \ \ \ \ \ \ \ \ \_Self\_destruct\_ptr\ \_\_right\_result(\_S\_substring(\_\_right,\ 0,}
+\DoxyCodeLine{00756\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_\_endp1\ }
+\DoxyCodeLine{00757\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ -\/\ \_\_left\_len));}
+\DoxyCodeLine{00758\ \ \ \ \ \ \ \ \ \ \ \_\_result\ =\ \_S\_concat(\_\_left\_result,\ \_\_right\_result);}
+\DoxyCodeLine{00759\ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \_\_result;}
+\DoxyCodeLine{00760\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00761\ \ \ \ \ \textcolor{keywordflow}{case}\ \_\_detail::\_S\_leaf:}
+\DoxyCodeLine{00762\ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00763\ \ \ \ \ \ \ \ \ \_RopeLeaf*\ \_\_l\ =\ (\_RopeLeaf*)\_\_base;}
+\DoxyCodeLine{00764\ \ \ \ \ \ \ \ \ \_RopeLeaf*\ \_\_result;}
+\DoxyCodeLine{00765\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{size\_t}\ \_\_result\_len;}
+\DoxyCodeLine{00766\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\_\_start\ >=\ \_\_adj\_endp1)}
+\DoxyCodeLine{00767\ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ 0;}
+\DoxyCodeLine{00768\ \ \ \ \ \ \ \ \ \_\_result\_len\ =\ \_\_adj\_endp1\ -\/\ \_\_start;}
+\DoxyCodeLine{00769\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\_\_result\_len\ >\ \_\_lazy\_threshold)}
+\DoxyCodeLine{00770\ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{goto}\ lazy;}
+\DoxyCodeLine{00771\ \textcolor{preprocessor}{\#ifdef\ \_\_GC}}
+\DoxyCodeLine{00772\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \_CharT*\ \_\_section\ =\ \_\_l-\/>\_M\_data\ +\ \_\_start;}
+\DoxyCodeLine{00773\ \ \ \ \ \ \ \ \ \_\_result\ =\ \_S\_new\_RopeLeaf(\_\_section,\ \_\_result\_len,}
+\DoxyCodeLine{00774\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_\_base-\/>\_M\_get\_allocator());}
+\DoxyCodeLine{00775\ \ \ \ \ \ \ \ \ \_\_result-\/>\_M\_c\_string\ =\ 0;\ \ \textcolor{comment}{//\ Not\ eos\ terminated.}}
+\DoxyCodeLine{00776\ \textcolor{preprocessor}{\#else}}
+\DoxyCodeLine{00777\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ We\ should\ sometimes\ create\ substring\ node\ instead.}}
+\DoxyCodeLine{00778\ \ \ \ \ \ \ \ \ \_\_result\ =\ \_\_STL\_ROPE\_FROM\_UNOWNED\_CHAR\_PTR(\_\_l-\/>\_M\_data\ +\ \_\_start,}
+\DoxyCodeLine{00779\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_\_result\_len,}
+\DoxyCodeLine{00780\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_\_base-\/>}
+\DoxyCodeLine{00781\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_M\_get\_allocator());}
+\DoxyCodeLine{00782\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00783\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \_\_result;}
+\DoxyCodeLine{00784\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00785\ \ \ \ \ \textcolor{keywordflow}{case}\ \_\_detail::\_S\_substringfn:}
+\DoxyCodeLine{00786\ \ \ \ \ \ \ \textcolor{comment}{//\ Avoid\ introducing\ multiple\ layers\ of\ substring\ nodes.}}
+\DoxyCodeLine{00787\ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00788\ \ \ \ \ \ \ \ \ \_RopeSubstring*\ \_\_old\ =\ (\_RopeSubstring*)\_\_base;}
+\DoxyCodeLine{00789\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{size\_t}\ \_\_result\_len;}
+\DoxyCodeLine{00790\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\_\_start\ >=\ \_\_adj\_endp1)}
+\DoxyCodeLine{00791\ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ 0;}
+\DoxyCodeLine{00792\ \ \ \ \ \ \ \ \ \_\_result\_len\ =\ \_\_adj\_endp1\ -\/\ \_\_start;}
+\DoxyCodeLine{00793\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\_\_result\_len\ >\ \_\_lazy\_threshold)}
+\DoxyCodeLine{00794\ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00795\ \ \ \ \ \ \ \ \ \_RopeSubstring*\ \_\_result\ =}
+\DoxyCodeLine{00796\ \ \ \ \ \ \ \ \ \ \ \_S\_new\_RopeSubstring(\_\_old-\/>\_M\_base,}
+\DoxyCodeLine{00797\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_\_start\ +\ \_\_old-\/>\_M\_start,}
+\DoxyCodeLine{00798\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_\_adj\_endp1\ -\/\ \_\_start,}
+\DoxyCodeLine{00799\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_\_base-\/>\_M\_get\_allocator());}
+\DoxyCodeLine{00800\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \_\_result;}
+\DoxyCodeLine{00801\ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00802\ \ \ \ \ \ \ \ \ \ \ \}\ \textcolor{comment}{//\ ***\ else\ fall\ through:\ ***}}
+\DoxyCodeLine{00803\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00804\ \ \ \ \ \textcolor{keywordflow}{case}\ \_\_detail::\_S\_function:}
+\DoxyCodeLine{00805\ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00806\ \ \ \ \ \ \ \ \ \_RopeFunction*\ \_\_f\ =\ (\_RopeFunction*)\_\_base;}
+\DoxyCodeLine{00807\ \ \ \ \ \ \ \ \ \_CharT*\ \_\_section;}
+\DoxyCodeLine{00808\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{size\_t}\ \_\_result\_len;}
+\DoxyCodeLine{00809\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\_\_start\ >=\ \_\_adj\_endp1)}
+\DoxyCodeLine{00810\ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ 0;}
+\DoxyCodeLine{00811\ \ \ \ \ \ \ \ \ \_\_result\_len\ =\ \_\_adj\_endp1\ -\/\ \_\_start;}
+\DoxyCodeLine{00812\ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00813\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\_\_result\_len\ >\ \_\_lazy\_threshold)}
+\DoxyCodeLine{00814\ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{goto}\ lazy;}
+\DoxyCodeLine{00815\ \ \ \ \ \ \ \ \ \_\_section\ =\ (\_CharT*)}
+\DoxyCodeLine{00816\ \ \ \ \ \ \ \ \ \ \ rope::\_Data\_allocate(\_S\_rounded\_up\_size(\_\_result\_len));}
+\DoxyCodeLine{00817\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{_classes_2lib_2include_2c_09_09_2bits_2exception__defines_8h_a130bf0cd31a0783cd03563f46b46915b}{\_\_try}}}
+\DoxyCodeLine{00818\ \ \ \ \ \ \ \ \ \ \ \{\ (*(\_\_f-\/>\_M\_fn))(\_\_start,\ \_\_result\_len,\ \_\_section);\ \}}
+\DoxyCodeLine{00819\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{_classes_2lib_2include_2c_09_09_2bits_2exception__defines_8h_a9e51d2f324c18a996a3e4f9a6ba0f6c2}{\_\_catch}}(...)}
+\DoxyCodeLine{00820\ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00821\ \ \ \ \ \ \ \ \ \_RopeRep::\_\_STL\_FREE\_STRING(\_\_section,\ \_\_result\_len,}
+\DoxyCodeLine{00822\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_\_base-\/>\_M\_get\_allocator());}
+\DoxyCodeLine{00823\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{_classes_2lib_2include_2c_09_09_2bits_2exception__defines_8h_a92ef03a5310b10a4243a6ec8f43494b5}{\_\_throw\_exception\_again}};}
+\DoxyCodeLine{00824\ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00825\ \ \ \ \ \ \ \ \ \_S\_cond\_store\_eos(\_\_section[\_\_result\_len]);}
+\DoxyCodeLine{00826\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \_S\_new\_RopeLeaf(\_\_section,\ \_\_result\_len,}
+\DoxyCodeLine{00827\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_\_base-\/>\_M\_get\_allocator());}
+\DoxyCodeLine{00828\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00829\ \ \ \ \ \}}
+\DoxyCodeLine{00830\ \ \ \ \ lazy:}
+\DoxyCodeLine{00831\ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00832\ \ \ \ \ \textcolor{comment}{//\ Create\ substring\ node.}}
+\DoxyCodeLine{00833\ \ \ \ \ \textcolor{keywordflow}{return}\ \_S\_new\_RopeSubstring(\_\_base,\ \_\_start,\ \_\_adj\_endp1\ -\/\ \_\_start,}
+\DoxyCodeLine{00834\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_\_base-\/>\_M\_get\_allocator());}
+\DoxyCodeLine{00835\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00836\ \ \ \ \ \}}
+\DoxyCodeLine{00837\ }
+\DoxyCodeLine{00838\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{class}\ \_CharT>}
+\DoxyCodeLine{00839\ \ \ \ \ \textcolor{keyword}{class\ }\_Rope\_flatten\_char\_consumer}
+\DoxyCodeLine{00840\ \ \ \ \ :\ \textcolor{keyword}{public}\ \_Rope\_char\_consumer<\_CharT>}
+\DoxyCodeLine{00841\ \ \ \ \ \{}
+\DoxyCodeLine{00842\ \ \ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00843\ \ \ \ \ \ \ \_CharT*\ \_M\_buf\_ptr;}
+\DoxyCodeLine{00844\ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00845\ \ \ \ \ \ \ }
+\DoxyCodeLine{00846\ \ \ \ \ \ \ \_Rope\_flatten\_char\_consumer(\_CharT*\ \_\_buffer)}
+\DoxyCodeLine{00847\ \ \ \ \ \ \ \{\ \_M\_buf\_ptr\ =\ \_\_buffer;\ \}}
+\DoxyCodeLine{00848\ }
+\DoxyCodeLine{00849\ \ \ \ \ \ \ \string~\_Rope\_flatten\_char\_consumer()\ \{\}}
+\DoxyCodeLine{00850\ \ \ \ \ \ \ }
+\DoxyCodeLine{00851\ \ \ \ \ \ \ \textcolor{keywordtype}{bool}}
+\DoxyCodeLine{00852\ \ \ \ \ \ \ operator()(\textcolor{keyword}{const}\ \_CharT*\ \_\_leaf,\ std::size\_t\ \_\_n)}
+\DoxyCodeLine{00853\ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00854\ \ \ \ \ uninitialized\_copy\_n(\_\_leaf,\ \_\_n,\ \_M\_buf\_ptr);}
+\DoxyCodeLine{00855\ \ \ \ \ \_M\_buf\_ptr\ +=\ \_\_n;}
+\DoxyCodeLine{00856\ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{00857\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00858\ \ \ \ \ \};}
+\DoxyCodeLine{00859\ }
+\DoxyCodeLine{00860\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{class}\ \_CharT>}
+\DoxyCodeLine{00861\ \ \ \ \ \textcolor{keyword}{class\ }\_Rope\_find\_char\_char\_consumer}
+\DoxyCodeLine{00862\ \ \ \ \ :\ \textcolor{keyword}{public}\ \_Rope\_char\_consumer<\_CharT>}
+\DoxyCodeLine{00863\ \ \ \ \ \{}
+\DoxyCodeLine{00864\ \ \ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00865\ \ \ \ \ \ \ \_CharT\ \_M\_pattern;}
+\DoxyCodeLine{00866\ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00867\ \ \ \ \ \ \ std::size\_t\ \_M\_count;\ \ \textcolor{comment}{//\ Number\ of\ nonmatching\ characters}}
+\DoxyCodeLine{00868\ \ \ \ \ \ \ }
+\DoxyCodeLine{00869\ \ \ \ \ \ \ \_Rope\_find\_char\_char\_consumer(\_CharT\ \_\_p)}
+\DoxyCodeLine{00870\ \ \ \ \ \ \ :\ \_M\_pattern(\_\_p),\ \_M\_count(0)\ \{\}}
+\DoxyCodeLine{00871\ \ \ \ \ }
+\DoxyCodeLine{00872\ \ \ \ \ \ \ \string~\_Rope\_find\_char\_char\_consumer()\ \{\}}
+\DoxyCodeLine{00873\ \ \ \ \ \ \ }
+\DoxyCodeLine{00874\ \ \ \ \ \ \ \textcolor{keywordtype}{bool}}
+\DoxyCodeLine{00875\ \ \ \ \ \ \ operator()(\textcolor{keyword}{const}\ \_CharT*\ \_\_leaf,\ std::size\_t\ \_\_n)}
+\DoxyCodeLine{00876\ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00877\ \ \ \ \ std::size\_t\ \_\_i;}
+\DoxyCodeLine{00878\ \ \ \ \ \textcolor{keywordflow}{for}\ (\_\_i\ =\ 0;\ \_\_i\ <\ \_\_n;\ \_\_i++)}
+\DoxyCodeLine{00879\ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00880\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\_\_leaf[\_\_i]\ ==\ \_M\_pattern)}
+\DoxyCodeLine{00881\ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00882\ \ \ \ \ \ \ \ \ \_M\_count\ +=\ \_\_i;}
+\DoxyCodeLine{00883\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{00884\ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00885\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00886\ \ \ \ \ \_M\_count\ +=\ \_\_n;\ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{00887\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00888\ \ \ \ \ \};}
+\DoxyCodeLine{00889\ }
+\DoxyCodeLine{00890\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{class}\ \_CharT,\ \textcolor{keyword}{class}\ \_Traits>}
+\DoxyCodeLine{00891\ \ \ \textcolor{comment}{//\ Here\ \_CharT\ is\ both\ the\ stream\ and\ rope\ character\ type.}}
+\DoxyCodeLine{00892\ \ \ \ \ \textcolor{keyword}{class\ }\_Rope\_insert\_char\_consumer}
+\DoxyCodeLine{00893\ \ \ \ \ :\ \textcolor{keyword}{public}\ \_Rope\_char\_consumer<\_CharT>}
+\DoxyCodeLine{00894\ \ \ \ \ \{}
+\DoxyCodeLine{00895\ \ \ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00896\ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ std::basic\_ostream<\_CharT,\_Traits>\ \_Insert\_ostream;}
+\DoxyCodeLine{00897\ \ \ \ \ \ \ \_Insert\_ostream\&\ \_M\_o;}
+\DoxyCodeLine{00898\ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00899\ \ \ \ \ \ \ \_Rope\_insert\_char\_consumer(\_Insert\_ostream\&\ \_\_writer)}
+\DoxyCodeLine{00900\ \ \ \ \ :\ \_M\_o(\_\_writer)\ \{\}}
+\DoxyCodeLine{00901\ \ \ \ \ \ \ \string~\_Rope\_insert\_char\_consumer()\ \{\ \}}
+\DoxyCodeLine{00902\ \ \ \ \ \ \ \textcolor{comment}{//\ Caller\ is\ presumed\ to\ own\ the\ ostream}}
+\DoxyCodeLine{00903\ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ operator()\ (\textcolor{keyword}{const}\ \_CharT*\ \_\_leaf,\ std::size\_t\ \_\_n);}
+\DoxyCodeLine{00904\ \ \ \ \ \ \ \textcolor{comment}{//\ Returns\ true\ to\ continue\ traversal.}}
+\DoxyCodeLine{00905\ \ \ \ \ \};}
+\DoxyCodeLine{00906\ }
+\DoxyCodeLine{00907\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{class}\ \_CharT,\ \textcolor{keyword}{class}\ \_Traits>}
+\DoxyCodeLine{00908\ \ \ \ \ \textcolor{keywordtype}{bool}}
+\DoxyCodeLine{00909\ \ \ \ \ \_Rope\_insert\_char\_consumer<\_CharT,\ \_Traits>::}
+\DoxyCodeLine{00910\ \ \ \ \ operator()(\textcolor{keyword}{const}\ \_CharT*\ \_\_leaf,\ std::size\_t\ \_\_n)}
+\DoxyCodeLine{00911\ \ \ \ \ \{}
+\DoxyCodeLine{00912\ \ \ \ \ \ \ std::size\_t\ \_\_i;}
+\DoxyCodeLine{00913\ \ \ \ \ \ \ \textcolor{comment}{//\ \ We\ assume\ that\ formatting\ is\ set\ up\ correctly\ for\ each\ element.}}
+\DoxyCodeLine{00914\ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\_\_i\ =\ 0;\ \_\_i\ <\ \_\_n;\ \_\_i++)}
+\DoxyCodeLine{00915\ \ \ \ \ \_M\_o.put(\_\_leaf[\_\_i]);}
+\DoxyCodeLine{00916\ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{00917\ \ \ \ \ \}}
+\DoxyCodeLine{00918\ }
+\DoxyCodeLine{00919\ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{class}\ \_CharT,\ \textcolor{keyword}{class}\ \_Alloc>}
+\DoxyCodeLine{00920\ \ \ \ \ \textcolor{keywordtype}{bool}}
+\DoxyCodeLine{00921\ \ \ \ \ rope<\_CharT,\ \_Alloc>::}
+\DoxyCodeLine{00922\ \ \ \ \ \_S\_apply\_to\_pieces(\_Rope\_char\_consumer<\_CharT>\&\ \_\_c,\ \textcolor{keyword}{const}\ \_RopeRep*\ \_\_r,}
+\DoxyCodeLine{00923\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::size\_t\ \_\_begin,\ std::size\_t\ \_\_end)}
+\DoxyCodeLine{00924\ \ \ \ \ \{}
+\DoxyCodeLine{00925\ \ \ \ \ \ \ \textcolor{keyword}{using\ }std::size\_t;}
+\DoxyCodeLine{00926\ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (0\ ==\ \_\_r)}
+\DoxyCodeLine{00927\ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{00928\ \ \ \ \ \ \ \textcolor{keywordflow}{switch}(\_\_r-\/>\_M\_tag)}
+\DoxyCodeLine{00929\ \ \ \ \ \{}
+\DoxyCodeLine{00930\ \ \ \ \ \textcolor{keywordflow}{case}\ \_\_detail::\_S\_concat:}
+\DoxyCodeLine{00931\ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00932\ \ \ \ \ \ \ \ \ \_RopeConcatenation*\ \_\_conc\ =\ (\_RopeConcatenation*)\_\_r;}
+\DoxyCodeLine{00933\ \ \ \ \ \ \ \ \ \_RopeRep*\ \_\_left\ =\ \ \_\_conc-\/>\_M\_left;}
+\DoxyCodeLine{00934\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{size\_t}\ \_\_left\_len\ =\ \_\_left-\/>\_M\_size;}
+\DoxyCodeLine{00935\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\_\_begin\ <\ \_\_left\_len)}
+\DoxyCodeLine{00936\ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00937\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{size\_t}\ \_\_left\_end\ =\ std::min(\_\_left\_len,\ \_\_end);}
+\DoxyCodeLine{00938\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (!\_S\_apply\_to\_pieces(\_\_c,\ \_\_left,\ \_\_begin,\ \_\_left\_end))}
+\DoxyCodeLine{00939\ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{00940\ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00941\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\_\_end\ >\ \_\_left\_len)}
+\DoxyCodeLine{00942\ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00943\ \ \ \ \ \ \ \ \ \_RopeRep*\ \_\_right\ =\ \ \_\_conc-\/>\_M\_right;}
+\DoxyCodeLine{00944\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{size\_t}\ \_\_right\_start\ =\ std::max(\_\_left\_len,\ \_\_begin);}
+\DoxyCodeLine{00945\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (!\_S\_apply\_to\_pieces(\_\_c,\ \_\_right,}
+\DoxyCodeLine{00946\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_\_right\_start\ -\/\ \_\_left\_len,}
+\DoxyCodeLine{00947\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_\_end\ -\/\ \_\_left\_len))}
+\DoxyCodeLine{00948\ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{00949\ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00950\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00951\ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{00952\ \ \ \ \ \textcolor{keywordflow}{case}\ \_\_detail::\_S\_leaf:}
+\DoxyCodeLine{00953\ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00954\ \ \ \ \ \ \ \ \ \_RopeLeaf*\ \_\_l\ =\ (\_RopeLeaf*)\_\_r;}
+\DoxyCodeLine{00955\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \_\_c(\_\_l-\/>\_M\_data\ +\ \_\_begin,\ \_\_end\ -\/\ \_\_begin);}
+\DoxyCodeLine{00956\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00957\ \ \ \ \ \textcolor{keywordflow}{case}\ \_\_detail::\_S\_function:}
+\DoxyCodeLine{00958\ \ \ \ \ \textcolor{keywordflow}{case}\ \_\_detail::\_S\_substringfn:}
+\DoxyCodeLine{00959\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00960\ \ \ \ \ \ \ \ \ \ \ \_RopeFunction*\ \_\_f\ =\ (\_RopeFunction*)\_\_r;}
+\DoxyCodeLine{00961\ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{size\_t}\ \_\_len\ =\ \_\_end\ -\/\ \_\_begin;}
+\DoxyCodeLine{00962\ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ \_\_result;}
+\DoxyCodeLine{00963\ \ \ \ \ \ \ \ \ \ \ \_CharT*\ \_\_buffer\ =}
+\DoxyCodeLine{00964\ \ \ \ \ \ \ \ \ (\_CharT*)\_Alloc().allocate(\_\_len\ *\ \textcolor{keyword}{sizeof}(\_CharT));}
+\DoxyCodeLine{00965\ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{_classes_2lib_2include_2c_09_09_2bits_2exception__defines_8h_a130bf0cd31a0783cd03563f46b46915b}{\_\_try}}}
+\DoxyCodeLine{00966\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00967\ \ \ \ \ \ \ \ \ \ \ (*(\_\_f-\/>\_M\_fn))(\_\_begin,\ \_\_len,\ \_\_buffer);}
+\DoxyCodeLine{00968\ \ \ \ \ \ \ \ \ \ \ \_\_result\ =\ \_\_c(\_\_buffer,\ \_\_len);}
+\DoxyCodeLine{00969\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_Alloc().deallocate(\_\_buffer,\ \_\_len\ *\ \textcolor{keyword}{sizeof}(\_CharT));}
+\DoxyCodeLine{00970\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00971\ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{_classes_2lib_2include_2c_09_09_2bits_2exception__defines_8h_a9e51d2f324c18a996a3e4f9a6ba0f6c2}{\_\_catch}}(...)}
+\DoxyCodeLine{00972\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00973\ \ \ \ \ \ \ \ \ \ \ \_Alloc().deallocate(\_\_buffer,\ \_\_len\ *\ \textcolor{keyword}{sizeof}(\_CharT));}
+\DoxyCodeLine{00974\ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{_classes_2lib_2include_2c_09_09_2bits_2exception__defines_8h_a92ef03a5310b10a4243a6ec8f43494b5}{\_\_throw\_exception\_again}};}
+\DoxyCodeLine{00975\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00976\ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \_\_result;}
+\DoxyCodeLine{00977\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00978\ \ \ \ \ \textcolor{keywordflow}{default}:}
+\DoxyCodeLine{00979\ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{00980\ \ \ \ \ \}}
+\DoxyCodeLine{00981\ \ \ \ \ \}}
+\DoxyCodeLine{00982\ }
+\DoxyCodeLine{00983\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{class}\ \_CharT,\ \textcolor{keyword}{class}\ \_Traits>}
+\DoxyCodeLine{00984\ \ \ \ \ \textcolor{keyword}{inline}\ \textcolor{keywordtype}{void}}
+\DoxyCodeLine{00985\ \ \ \ \ \_Rope\_fill(std::basic\_ostream<\_CharT,\ \_Traits>\&\ \_\_o,\ std::size\_t\ \_\_n)}
+\DoxyCodeLine{00986\ \ \ \ \ \{}
+\DoxyCodeLine{00987\ \ \ \ \ \ \ \textcolor{keywordtype}{char}\ \_\_f\ =\ \_\_o.fill();}
+\DoxyCodeLine{00988\ \ \ \ \ \ \ std::size\_t\ \_\_i;}
+\DoxyCodeLine{00989\ \ \ \ \ \ \ }
+\DoxyCodeLine{00990\ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\_\_i\ =\ 0;\ \_\_i\ <\ \_\_n;\ \_\_i++)}
+\DoxyCodeLine{00991\ \ \ \ \ \_\_o.put(\_\_f);}
+\DoxyCodeLine{00992\ \ \ \ \ \}}
+\DoxyCodeLine{00993\ }
+\DoxyCodeLine{00994\ }
+\DoxyCodeLine{00995\ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{class}\ \_CharT>}
+\DoxyCodeLine{00996\ \ \ \ \ \textcolor{keyword}{inline}\ \textcolor{keywordtype}{bool}}
+\DoxyCodeLine{00997\ \ \ \ \ \_Rope\_is\_simple(\_CharT*)}
+\DoxyCodeLine{00998\ \ \ \ \ \{\ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};\ \}}
+\DoxyCodeLine{00999\ }
+\DoxyCodeLine{01000\ \ \ \textcolor{keyword}{inline}\ \textcolor{keywordtype}{bool}}
+\DoxyCodeLine{01001\ \ \ \_Rope\_is\_simple(\textcolor{keywordtype}{char}*)}
+\DoxyCodeLine{01002\ \ \ \{\ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};\ \}}
+\DoxyCodeLine{01003\ }
+\DoxyCodeLine{01004\ \ \ \textcolor{keyword}{inline}\ \textcolor{keywordtype}{bool}}
+\DoxyCodeLine{01005\ \ \ \_Rope\_is\_simple(\textcolor{keywordtype}{wchar\_t}*)}
+\DoxyCodeLine{01006\ \ \ \{\ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};\ \}}
+\DoxyCodeLine{01007\ }
+\DoxyCodeLine{01008\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{class}\ \_CharT,\ \textcolor{keyword}{class}\ \_Traits,\ \textcolor{keyword}{class}\ \_Alloc>}
+\DoxyCodeLine{01009\ \ \ \ \ std::basic\_ostream<\_CharT,\ \_Traits>\&}
+\DoxyCodeLine{01010\ \ \ \ \ \mbox{\hyperlink{forward__declarations_8h_ade7e3bc03b39cb3b5684a4c302832e3c}{operator<<}}(std::basic\_ostream<\_CharT,\ \_Traits>\&\ \_\_o,}
+\DoxyCodeLine{01011\ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ rope<\_CharT,\ \_Alloc>\&\ \_\_r)}
+\DoxyCodeLine{01012\ \ \ \ \ \{}
+\DoxyCodeLine{01013\ \ \ \ \ \ \ \textcolor{keyword}{using\ }std::size\_t;}
+\DoxyCodeLine{01014\ \ \ \ \ \ \ \textcolor{keywordtype}{size\_t}\ \_\_w\ =\ \_\_o.width();}
+\DoxyCodeLine{01015\ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ \_\_left\ =\ \mbox{\hyperlink{_classes_2lib_2include_2stdbool_8h_abb452686968e48b67397da5f97445f5b}{bool}}(\_\_o.flags()\ \&\ std::ios::left);}
+\DoxyCodeLine{01016\ \ \ \ \ \ \ \textcolor{keywordtype}{size\_t}\ \_\_pad\_len;}
+\DoxyCodeLine{01017\ \ \ \ \ \ \ \textcolor{keywordtype}{size\_t}\ \_\_rope\_len\ =\ \_\_r.size();}
+\DoxyCodeLine{01018\ \ \ \ \ \ \ \_Rope\_insert\_char\_consumer<\_CharT,\ \_Traits>\ \_\_c(\_\_o);}
+\DoxyCodeLine{01019\ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ \_\_is\_simple\ =\ \_Rope\_is\_simple((\_CharT*)0);}
+\DoxyCodeLine{01020\ \ \ \ \ \ \ }
+\DoxyCodeLine{01021\ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\_\_rope\_len\ <\ \_\_w)}
+\DoxyCodeLine{01022\ \ \ \ \ \_\_pad\_len\ =\ \_\_w\ -\/\ \_\_rope\_len;}
+\DoxyCodeLine{01023\ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{01024\ \ \ \ \ \_\_pad\_len\ =\ 0;}
+\DoxyCodeLine{01025\ }
+\DoxyCodeLine{01026\ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (!\_\_is\_simple)}
+\DoxyCodeLine{01027\ \ \ \ \ \_\_o.width(\_\_w\ /\ \_\_rope\_len);}
+\DoxyCodeLine{01028\ \ \ \ \ \ \ \mbox{\hyperlink{_classes_2lib_2include_2c_09_09_2bits_2exception__defines_8h_a130bf0cd31a0783cd03563f46b46915b}{\_\_try}}}
+\DoxyCodeLine{01029\ \ \ \ \ \{}
+\DoxyCodeLine{01030\ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\_\_is\_simple\ \&\&\ !\_\_left\ \&\&\ \_\_pad\_len\ >\ 0)}
+\DoxyCodeLine{01031\ \ \ \ \ \ \ \ \ \_Rope\_fill(\_\_o,\ \_\_pad\_len);}
+\DoxyCodeLine{01032\ \ \ \ \ \ \ \_\_r.apply\_to\_pieces(0,\ \_\_r.size(),\ \_\_c);}
+\DoxyCodeLine{01033\ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\_\_is\_simple\ \&\&\ \_\_left\ \&\&\ \_\_pad\_len\ >\ 0)}
+\DoxyCodeLine{01034\ \ \ \ \ \ \ \ \ \_Rope\_fill(\_\_o,\ \_\_pad\_len);}
+\DoxyCodeLine{01035\ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (!\_\_is\_simple)}
+\DoxyCodeLine{01036\ \ \ \ \ \ \ \ \ \_\_o.width(\_\_w);}
+\DoxyCodeLine{01037\ \ \ \ \ \}}
+\DoxyCodeLine{01038\ \ \ \ \ \ \ \mbox{\hyperlink{_classes_2lib_2include_2c_09_09_2bits_2exception__defines_8h_a9e51d2f324c18a996a3e4f9a6ba0f6c2}{\_\_catch}}(...)}
+\DoxyCodeLine{01039\ \ \ \ \ \{}
+\DoxyCodeLine{01040\ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (!\_\_is\_simple)}
+\DoxyCodeLine{01041\ \ \ \ \ \ \ \ \ \_\_o.width(\_\_w);}
+\DoxyCodeLine{01042\ \ \ \ \ \ \ \mbox{\hyperlink{_classes_2lib_2include_2c_09_09_2bits_2exception__defines_8h_a92ef03a5310b10a4243a6ec8f43494b5}{\_\_throw\_exception\_again}};}
+\DoxyCodeLine{01043\ \ \ \ \ \}}
+\DoxyCodeLine{01044\ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \_\_o;}
+\DoxyCodeLine{01045\ \ \ \ \ \}}
+\DoxyCodeLine{01046\ }
+\DoxyCodeLine{01047\ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{class}\ \_CharT,\ \textcolor{keyword}{class}\ \_Alloc>}
+\DoxyCodeLine{01048\ \ \ \ \ \_CharT*}
+\DoxyCodeLine{01049\ \ \ \ \ rope<\_CharT,\ \_Alloc>::}
+\DoxyCodeLine{01050\ \ \ \ \ \_S\_flatten(\_RopeRep*\ \_\_r,\ std::size\_t\ \_\_start,\ std::size\_t\ \_\_len,}
+\DoxyCodeLine{01051\ \ \ \ \ \ \ \ \ \ \ \ \_CharT*\ \_\_buffer)}
+\DoxyCodeLine{01052\ \ \ \ \ \{}
+\DoxyCodeLine{01053\ \ \ \ \ \ \ \_Rope\_flatten\_char\_consumer<\_CharT>\ \_\_c(\_\_buffer);}
+\DoxyCodeLine{01054\ \ \ \ \ \ \ \_S\_apply\_to\_pieces(\_\_c,\ \_\_r,\ \_\_start,\ \_\_start\ +\ \_\_len);}
+\DoxyCodeLine{01055\ \ \ \ \ \ \ \textcolor{keywordflow}{return}(\_\_buffer\ +\ \_\_len);}
+\DoxyCodeLine{01056\ \ \ \ \ \}}
+\DoxyCodeLine{01057\ }
+\DoxyCodeLine{01058\ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{class}\ \_CharT,\ \textcolor{keyword}{class}\ \_Alloc>}
+\DoxyCodeLine{01059\ \ \ \ \ std::size\_t}
+\DoxyCodeLine{01060\ \ \ \ \ rope<\_CharT,\ \_Alloc>::}
+\DoxyCodeLine{01061\ \ \ \ \ find(\_CharT\ \_\_pattern,\ std::size\_t\ \_\_start)\textcolor{keyword}{\ const}}
+\DoxyCodeLine{01062\ \textcolor{keyword}{\ \ \ \ }\{}
+\DoxyCodeLine{01063\ \ \ \ \ \ \ \_Rope\_find\_char\_char\_consumer<\_CharT>\ \_\_c(\_\_pattern);}
+\DoxyCodeLine{01064\ \ \ \ \ \ \ \_S\_apply\_to\_pieces(\_\_c,\ this-\/>\_M\_tree\_ptr,\ \_\_start,\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_a3d1e3edfcf61ca2d831883e1afbad89e}{size}}());}
+\DoxyCodeLine{01065\ \ \ \ \ \ \ size\_type\ \_\_result\_pos\ =\ \_\_start\ +\ \_\_c.\_M\_count;}
+\DoxyCodeLine{01066\ \textcolor{preprocessor}{\#ifndef\ \_\_STL\_OLD\_ROPE\_SEMANTICS}}
+\DoxyCodeLine{01067\ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\_\_result\_pos\ ==\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_a3d1e3edfcf61ca2d831883e1afbad89e}{size}}())}
+\DoxyCodeLine{01068\ \ \ \ \ \_\_result\_pos\ =\ npos;}
+\DoxyCodeLine{01069\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{01070\ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \_\_result\_pos;}
+\DoxyCodeLine{01071\ \ \ \ \ \}}
+\DoxyCodeLine{01072\ }
+\DoxyCodeLine{01073\ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{class}\ \_CharT,\ \textcolor{keyword}{class}\ \_Alloc>}
+\DoxyCodeLine{01074\ \ \ \ \ \_CharT*}
+\DoxyCodeLine{01075\ \ \ \ \ rope<\_CharT,\ \_Alloc>::}
+\DoxyCodeLine{01076\ \ \ \ \ \_S\_flatten(\_RopeRep*\ \_\_r,\ \_CharT*\ \_\_buffer)}
+\DoxyCodeLine{01077\ \ \ \ \ \{}
+\DoxyCodeLine{01078\ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (0\ ==\ \_\_r)}
+\DoxyCodeLine{01079\ \ \ \ \ \textcolor{keywordflow}{return}\ \_\_buffer;}
+\DoxyCodeLine{01080\ \ \ \ \ \ \ \textcolor{keywordflow}{switch}(\_\_r-\/>\_M\_tag)}
+\DoxyCodeLine{01081\ \ \ \ \ \{}
+\DoxyCodeLine{01082\ \ \ \ \ \textcolor{keywordflow}{case}\ \_\_detail::\_S\_concat:}
+\DoxyCodeLine{01083\ \ \ \ \ \ \ \{}
+\DoxyCodeLine{01084\ \ \ \ \ \ \ \ \ \_RopeConcatenation*\ \_\_c\ =\ (\_RopeConcatenation*)\_\_r;}
+\DoxyCodeLine{01085\ \ \ \ \ \ \ \ \ \_RopeRep*\ \_\_left\ =\ \_\_c-\/>\_M\_left;}
+\DoxyCodeLine{01086\ \ \ \ \ \ \ \ \ \_RopeRep*\ \_\_right\ =\ \_\_c-\/>\_M\_right;}
+\DoxyCodeLine{01087\ \ \ \ \ \ \ \ \ \_CharT*\ \_\_rest\ =\ \_S\_flatten(\_\_left,\ \_\_buffer);}
+\DoxyCodeLine{01088\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \_S\_flatten(\_\_right,\ \_\_rest);}
+\DoxyCodeLine{01089\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{01090\ \ \ \ \ \textcolor{keywordflow}{case}\ \_\_detail::\_S\_leaf:}
+\DoxyCodeLine{01091\ \ \ \ \ \ \ \{}
+\DoxyCodeLine{01092\ \ \ \ \ \ \ \ \ \_RopeLeaf*\ \_\_l\ =\ (\_RopeLeaf*)\_\_r;}
+\DoxyCodeLine{01093\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ copy\_n(\_\_l-\/>\_M\_data,\ \_\_l-\/>\_M\_size,\ \_\_buffer).second;}
+\DoxyCodeLine{01094\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{01095\ \ \ \ \ \textcolor{keywordflow}{case}\ \_\_detail::\_S\_function:}
+\DoxyCodeLine{01096\ \ \ \ \ \textcolor{keywordflow}{case}\ \_\_detail::\_S\_substringfn:}
+\DoxyCodeLine{01097\ \ \ \ \ \ \ \textcolor{comment}{//\ We\ don't\ yet\ do\ anything\ with\ substring\ nodes.}}
+\DoxyCodeLine{01098\ \ \ \ \ \ \ \textcolor{comment}{//\ This\ needs\ to\ be\ fixed\ before\ ropefiles\ will\ work\ well.}}
+\DoxyCodeLine{01099\ \ \ \ \ \ \ \{}
+\DoxyCodeLine{01100\ \ \ \ \ \ \ \ \ \_RopeFunction*\ \_\_f\ =\ (\_RopeFunction*)\_\_r;}
+\DoxyCodeLine{01101\ \ \ \ \ \ \ \ \ (*(\_\_f-\/>\_M\_fn))(0,\ \_\_f-\/>\_M\_size,\ \_\_buffer);}
+\DoxyCodeLine{01102\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \_\_buffer\ +\ \_\_f-\/>\_M\_size;}
+\DoxyCodeLine{01103\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{01104\ \ \ \ \ \textcolor{keywordflow}{default}:}
+\DoxyCodeLine{01105\ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ 0;}
+\DoxyCodeLine{01106\ \ \ \ \ \}}
+\DoxyCodeLine{01107\ \ \ \ \ \}}
+\DoxyCodeLine{01108\ }
+\DoxyCodeLine{01109\ \ \ \textcolor{comment}{//\ This\ needs\ work\ for\ \_CharT\ !=\ char}}
+\DoxyCodeLine{01110\ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{class}\ \_CharT,\ \textcolor{keyword}{class}\ \_Alloc>}
+\DoxyCodeLine{01111\ \ \ \ \ \textcolor{keywordtype}{void}}
+\DoxyCodeLine{01112\ \ \ \ \ rope<\_CharT,\ \_Alloc>::}
+\DoxyCodeLine{01113\ \ \ \ \ \_S\_dump(\_RopeRep*\ \_\_r,\ \textcolor{keywordtype}{int}\ \_\_indent)}
+\DoxyCodeLine{01114\ \ \ \ \ \{}
+\DoxyCodeLine{01115\ \ \ \ \ \ \ \textcolor{keyword}{using\ }std::printf;}
+\DoxyCodeLine{01116\ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{int}\ \_\_i\ =\ 0;\ \_\_i\ <\ \_\_indent;\ \_\_i++)}
+\DoxyCodeLine{01117\ \ \ \ \ putchar(\textcolor{charliteral}{'\ '});}
+\DoxyCodeLine{01118\ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (0\ ==\ \_\_r)}
+\DoxyCodeLine{01119\ \ \ \ \ \{}
+\DoxyCodeLine{01120\ \ \ \ \ \ \ printf(\textcolor{stringliteral}{"{}NULL\(\backslash\)n"{}});}
+\DoxyCodeLine{01121\ \ \ \ \ \ \ \textcolor{keywordflow}{return};}
+\DoxyCodeLine{01122\ \ \ \ \ \}}
+\DoxyCodeLine{01123\ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\_\_detail::\_S\_concat\ ==\ \_\_r-\/>\_M\_tag)}
+\DoxyCodeLine{01124\ \ \ \ \ \{}
+\DoxyCodeLine{01125\ \ \ \ \ \ \ \_RopeConcatenation*\ \_\_c\ =\ (\_RopeConcatenation*)\_\_r;}
+\DoxyCodeLine{01126\ \ \ \ \ \ \ \_RopeRep*\ \_\_left\ =\ \_\_c-\/>\_M\_left;}
+\DoxyCodeLine{01127\ \ \ \ \ \ \ \_RopeRep*\ \_\_right\ =\ \_\_c-\/>\_M\_right;}
+\DoxyCodeLine{01128\ \ \ \ \ \ \ }
+\DoxyCodeLine{01129\ \textcolor{preprocessor}{\#ifdef\ \_\_GC}}
+\DoxyCodeLine{01130\ \ \ \ \ \ \ printf(\textcolor{stringliteral}{"{}Concatenation\ \%p\ (depth\ =\ \%d,\ len\ =\ \%ld,\ \%s\ balanced)\(\backslash\)n"{}},}
+\DoxyCodeLine{01131\ \ \ \ \ \ \ \ \ \ \_\_r,\ \_\_r-\/>\_M\_depth,\ \_\_r-\/>\_M\_size,}
+\DoxyCodeLine{01132\ \ \ \ \ \ \ \ \ \ \_\_r-\/>\_M\_is\_balanced?\ \textcolor{stringliteral}{"{}"{}}\ :\ \textcolor{stringliteral}{"{}not"{}});}
+\DoxyCodeLine{01133\ \textcolor{preprocessor}{\#else}}
+\DoxyCodeLine{01134\ \ \ \ \ \ \ printf(\textcolor{stringliteral}{"{}Concatenation\ \%p\ (rc\ =\ \%ld,\ depth\ =\ \%d,\ "{}}}
+\DoxyCodeLine{01135\ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}len\ =\ \%ld,\ \%s\ balanced)\(\backslash\)n"{}},}
+\DoxyCodeLine{01136\ \ \ \ \ \ \ \ \ \ \_\_r,\ \_\_r-\/>\_M\_ref\_count,\ \_\_r-\/>\_M\_depth,\ \_\_r-\/>\_M\_size,}
+\DoxyCodeLine{01137\ \ \ \ \ \ \ \ \ \ \_\_r-\/>\_M\_is\_balanced?\ \textcolor{stringliteral}{"{}"{}}\ :\ \textcolor{stringliteral}{"{}not"{}});}
+\DoxyCodeLine{01138\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{01139\ \ \ \ \ \ \ \_S\_dump(\_\_left,\ \_\_indent\ +\ 2);}
+\DoxyCodeLine{01140\ \ \ \ \ \ \ \_S\_dump(\_\_right,\ \_\_indent\ +\ 2);}
+\DoxyCodeLine{01141\ \ \ \ \ \ \ \textcolor{keywordflow}{return};}
+\DoxyCodeLine{01142\ \ \ \ \ \}}
+\DoxyCodeLine{01143\ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{01144\ \ \ \ \ \{}
+\DoxyCodeLine{01145\ \ \ \ \ \ \ \textcolor{keyword}{const}\ \textcolor{keywordtype}{char}*\ \_\_kind;}
+\DoxyCodeLine{01146\ \ \ \ \ \ \ }
+\DoxyCodeLine{01147\ \ \ \ \ \ \ \textcolor{keywordflow}{switch}\ (\_\_r-\/>\_M\_tag)}
+\DoxyCodeLine{01148\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{01149\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ \_\_detail::\_S\_leaf:}
+\DoxyCodeLine{01150\ \ \ \ \ \ \ \ \ \ \ \_\_kind\ =\ \textcolor{stringliteral}{"{}Leaf"{}};}
+\DoxyCodeLine{01151\ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{01152\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ \_\_detail::\_S\_function:}
+\DoxyCodeLine{01153\ \ \ \ \ \ \ \ \ \ \ \_\_kind\ =\ \textcolor{stringliteral}{"{}Function"{}};}
+\DoxyCodeLine{01154\ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{01155\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ \_\_detail::\_S\_substringfn:}
+\DoxyCodeLine{01156\ \ \ \ \ \ \ \ \ \ \ \_\_kind\ =\ \textcolor{stringliteral}{"{}Function\ representing\ substring"{}};}
+\DoxyCodeLine{01157\ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{01158\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{default}:}
+\DoxyCodeLine{01159\ \ \ \ \ \ \ \ \ \ \ \_\_kind\ =\ \textcolor{stringliteral}{"{}(corrupted\ kind\ field!)"{}};}
+\DoxyCodeLine{01160\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{01161\ \textcolor{preprocessor}{\#ifdef\ \_\_GC}}
+\DoxyCodeLine{01162\ \ \ \ \ \ \ printf(\textcolor{stringliteral}{"{}\%s\ \%p\ (depth\ =\ \%d,\ len\ =\ \%ld)\ "{}},}
+\DoxyCodeLine{01163\ \ \ \ \ \ \ \ \ \ \_\_kind,\ \_\_r,\ \_\_r-\/>\_M\_depth,\ \_\_r-\/>\_M\_size);}
+\DoxyCodeLine{01164\ \textcolor{preprocessor}{\#else}}
+\DoxyCodeLine{01165\ \ \ \ \ \ \ printf(\textcolor{stringliteral}{"{}\%s\ \%p\ (rc\ =\ \%ld,\ depth\ =\ \%d,\ len\ =\ \%ld)\ "{}},}
+\DoxyCodeLine{01166\ \ \ \ \ \ \ \ \ \ \_\_kind,\ \_\_r,\ \_\_r-\/>\_M\_ref\_count,\ \_\_r-\/>\_M\_depth,\ \_\_r-\/>\_M\_size);}
+\DoxyCodeLine{01167\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{01168\ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\_S\_is\_one\_byte\_char\_type((\_CharT*)0))}
+\DoxyCodeLine{01169\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{01170\ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \textcolor{keywordtype}{int}\ \_\_max\_len\ =\ 40;}
+\DoxyCodeLine{01171\ \ \ \ \ \ \ \ \ \ \ \_Self\_destruct\_ptr\ \_\_prefix(\_S\_substring(\_\_r,\ 0,\ \_\_max\_len));}
+\DoxyCodeLine{01172\ \ \ \ \ \ \ \ \ \ \ \_CharT\ \_\_buffer[\_\_max\_len\ +\ 1];}
+\DoxyCodeLine{01173\ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ \_\_too\_big\ =\ \_\_r-\/>\_M\_size\ >\ \_\_prefix-\/>\_M\_size;}
+\DoxyCodeLine{01174\ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{01175\ \ \ \ \ \ \ \ \ \ \ \_S\_flatten(\_\_prefix,\ \_\_buffer);}
+\DoxyCodeLine{01176\ \ \ \ \ \ \ \ \ \ \ \_\_buffer[\_\_prefix-\/>\_M\_size]\ =\ \_S\_eos((\_CharT*)0);}
+\DoxyCodeLine{01177\ \ \ \ \ \ \ \ \ \ \ printf(\textcolor{stringliteral}{"{}\%s\%s\(\backslash\)n"{}},\ (\textcolor{keywordtype}{char}*)\_\_buffer,}
+\DoxyCodeLine{01178\ \ \ \ \ \ \ \ \ \ \ \ \ \ \_\_too\_big?\ \textcolor{stringliteral}{"{}...\(\backslash\)n"{}}\ :\ \textcolor{stringliteral}{"{}\(\backslash\)n"{}});}
+\DoxyCodeLine{01179\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{01180\ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{01181\ \ \ \ \ \ \ \ \ printf(\textcolor{stringliteral}{"{}\(\backslash\)n"{}});}
+\DoxyCodeLine{01182\ \ \ \ \ \}}
+\DoxyCodeLine{01183\ \ \ \ \ \}}
+\DoxyCodeLine{01184\ }
+\DoxyCodeLine{01185\ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{class}\ \_CharT,\ \textcolor{keyword}{class}\ \_Alloc>}
+\DoxyCodeLine{01186\ \ \ \ \ \textcolor{keyword}{const}\ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{long}}
+\DoxyCodeLine{01187\ \ \ \ \ rope<\_CharT,\ \_Alloc>::}
+\DoxyCodeLine{01188\ \ \ \ \ \_S\_min\_len[int(\_\_detail::\_S\_max\_rope\_depth)\ +\ 1]\ =\ \{}
+\DoxyCodeLine{01189\ \ \ \ \ \ \ \textcolor{comment}{/*\ 0\ */}1,\ \textcolor{comment}{/*\ 1\ */}2,\ \textcolor{comment}{/*\ 2\ */}3,\ \textcolor{comment}{/*\ 3\ */}5,\ \textcolor{comment}{/*\ 4\ */}8,\ \textcolor{comment}{/*\ 5\ */}13,\ \textcolor{comment}{/*\ 6\ */}21,}
+\DoxyCodeLine{01190\ \ \ \ \ \ \ \textcolor{comment}{/*\ 7\ */}34,\ \textcolor{comment}{/*\ 8\ */}55,\ \textcolor{comment}{/*\ 9\ */}89,\ \textcolor{comment}{/*\ 10\ */}144,\ \textcolor{comment}{/*\ 11\ */}233,\ \textcolor{comment}{/*\ 12\ */}377,}
+\DoxyCodeLine{01191\ \ \ \ \ \ \ \textcolor{comment}{/*\ 13\ */}610,\ \textcolor{comment}{/*\ 14\ */}987,\ \textcolor{comment}{/*\ 15\ */}1597,\ \textcolor{comment}{/*\ 16\ */}2584,\ \textcolor{comment}{/*\ 17\ */}4181,}
+\DoxyCodeLine{01192\ \ \ \ \ \ \ \textcolor{comment}{/*\ 18\ */}6765,\ \textcolor{comment}{/*\ 19\ */}10946,\ \textcolor{comment}{/*\ 20\ */}17711,\ \textcolor{comment}{/*\ 21\ */}28657,\ \textcolor{comment}{/*\ 22\ */}46368,}
+\DoxyCodeLine{01193\ \ \ \ \ \ \ \textcolor{comment}{/*\ 23\ */}75025,\ \textcolor{comment}{/*\ 24\ */}121393,\ \textcolor{comment}{/*\ 25\ */}196418,\ \textcolor{comment}{/*\ 26\ */}317811,}
+\DoxyCodeLine{01194\ \ \ \ \ \ \ \textcolor{comment}{/*\ 27\ */}514229,\ \textcolor{comment}{/*\ 28\ */}832040,\ \textcolor{comment}{/*\ 29\ */}1346269,\ \textcolor{comment}{/*\ 30\ */}2178309,}
+\DoxyCodeLine{01195\ \ \ \ \ \ \ \textcolor{comment}{/*\ 31\ */}3524578,\ \textcolor{comment}{/*\ 32\ */}5702887,\ \textcolor{comment}{/*\ 33\ */}9227465,\ \textcolor{comment}{/*\ 34\ */}14930352,}
+\DoxyCodeLine{01196\ \ \ \ \ \ \ \textcolor{comment}{/*\ 35\ */}24157817,\ \textcolor{comment}{/*\ 36\ */}39088169,\ \textcolor{comment}{/*\ 37\ */}63245986,\ \textcolor{comment}{/*\ 38\ */}102334155,}
+\DoxyCodeLine{01197\ \ \ \ \ \ \ \textcolor{comment}{/*\ 39\ */}165580141,\ \textcolor{comment}{/*\ 40\ */}267914296,\ \textcolor{comment}{/*\ 41\ */}433494437,}
+\DoxyCodeLine{01198\ \ \ \ \ \ \ \textcolor{comment}{/*\ 42\ */}701408733,\ \textcolor{comment}{/*\ 43\ */}1134903170,\ \textcolor{comment}{/*\ 44\ */}1836311903,}
+\DoxyCodeLine{01199\ \ \ \ \ \ \ \textcolor{comment}{/*\ 45\ */}2971215073u\ \};}
+\DoxyCodeLine{01200\ \ \ \textcolor{comment}{//\ These\ are\ Fibonacci\ numbers\ <\ 2**32.}}
+\DoxyCodeLine{01201\ }
+\DoxyCodeLine{01202\ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{class}\ \_CharT,\ \textcolor{keyword}{class}\ \_Alloc>}
+\DoxyCodeLine{01203\ \ \ \ \ \textcolor{keyword}{typename}\ rope<\_CharT,\ \_Alloc>::\_RopeRep*}
+\DoxyCodeLine{01204\ \ \ \ \ rope<\_CharT,\ \_Alloc>::}
+\DoxyCodeLine{01205\ \ \ \ \ \_S\_balance(\_RopeRep*\ \_\_r)}
+\DoxyCodeLine{01206\ \ \ \ \ \{}
+\DoxyCodeLine{01207\ \ \ \ \ \ \ \_RopeRep*\ \_\_forest[int(\_\_detail::\_S\_max\_rope\_depth)\ +\ 1];}
+\DoxyCodeLine{01208\ \ \ \ \ \ \ \_RopeRep*\ \_\_result\ =\ 0;}
+\DoxyCodeLine{01209\ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ \_\_i;}
+\DoxyCodeLine{01210\ \ \ \ \ \ \ \textcolor{comment}{//\ Invariant:}}
+\DoxyCodeLine{01211\ \ \ \ \ \ \ \textcolor{comment}{//\ The\ concatenation\ of\ forest\ in\ descending\ order\ is\ equal\ to\ \_\_r.}}
+\DoxyCodeLine{01212\ \ \ \ \ \ \ \textcolor{comment}{//\ \_\_forest[\_\_i].\_M\_size\ >=\ \_S\_min\_len[\_\_i]}}
+\DoxyCodeLine{01213\ \ \ \ \ \ \ \textcolor{comment}{//\ \_\_forest[\_\_i].\_M\_depth\ =\ \_\_i}}
+\DoxyCodeLine{01214\ \ \ \ \ \ \ \textcolor{comment}{//\ References\ from\ forest\ are\ included\ in\ refcount.}}
+\DoxyCodeLine{01215\ \ \ \ \ \ \ }
+\DoxyCodeLine{01216\ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\_\_i\ =\ 0;\ \_\_i\ <=\ int(\_\_detail::\_S\_max\_rope\_depth);\ ++\_\_i)}
+\DoxyCodeLine{01217\ \ \ \ \ \_\_forest[\_\_i]\ =\ 0;}
+\DoxyCodeLine{01218\ \ \ \ \ \ \ \mbox{\hyperlink{_classes_2lib_2include_2c_09_09_2bits_2exception__defines_8h_a130bf0cd31a0783cd03563f46b46915b}{\_\_try}}}
+\DoxyCodeLine{01219\ \ \ \ \ \{}
+\DoxyCodeLine{01220\ \ \ \ \ \ \ \_S\_add\_to\_forest(\_\_r,\ \_\_forest);}
+\DoxyCodeLine{01221\ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\_\_i\ =\ 0;\ \_\_i\ <=\ int(\_\_detail::\_S\_max\_rope\_depth);\ ++\_\_i)}
+\DoxyCodeLine{01222\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (0\ !=\ \_\_forest[\_\_i])}
+\DoxyCodeLine{01223\ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{01224\ \textcolor{preprocessor}{\#ifndef\ \_\_GC}}
+\DoxyCodeLine{01225\ \ \ \ \ \ \ \ \ \_Self\_destruct\_ptr\ \_\_old(\_\_result);}
+\DoxyCodeLine{01226\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{01227\ \ \ \ \ \ \ \ \ \_\_result\ =\ \_S\_concat(\_\_forest[\_\_i],\ \_\_result);}
+\DoxyCodeLine{01228\ \ \ \ \ \ \ \ \ \_\_forest[\_\_i]-\/>\_M\_unref\_nonnil();}
+\DoxyCodeLine{01229\ \textcolor{preprocessor}{\#if\ !defined(\_\_GC)\ \&\&\ \_\_cpp\_exceptions}}
+\DoxyCodeLine{01230\ \ \ \ \ \ \ \ \ \_\_forest[\_\_i]\ =\ 0;}
+\DoxyCodeLine{01231\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{01232\ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{01233\ \ \ \ \ \}}
+\DoxyCodeLine{01234\ \ \ \ \ \ \ \mbox{\hyperlink{_classes_2lib_2include_2c_09_09_2bits_2exception__defines_8h_a9e51d2f324c18a996a3e4f9a6ba0f6c2}{\_\_catch}}(...)}
+\DoxyCodeLine{01235\ \ \ \ \ \{}
+\DoxyCodeLine{01236\ \ \ \ \ \ \ \textcolor{keywordflow}{for}(\_\_i\ =\ 0;\ \_\_i\ <=\ int(\_\_detail::\_S\_max\_rope\_depth);\ \_\_i++)}
+\DoxyCodeLine{01237\ \ \ \ \ \ \ \ \ \_S\_unref(\_\_forest[\_\_i]);}
+\DoxyCodeLine{01238\ \ \ \ \ \ \ \mbox{\hyperlink{_classes_2lib_2include_2c_09_09_2bits_2exception__defines_8h_a92ef03a5310b10a4243a6ec8f43494b5}{\_\_throw\_exception\_again}};}
+\DoxyCodeLine{01239\ \ \ \ \ \}}
+\DoxyCodeLine{01240\ \ \ \ \ \ \ }
+\DoxyCodeLine{01241\ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\_\_result-\/>\_M\_depth\ >\ \textcolor{keywordtype}{int}(\_\_detail::\_S\_max\_rope\_depth))}
+\DoxyCodeLine{01242\ \ \ \ \ std::\_\_throw\_length\_error(\mbox{\hyperlink{_classes_2lib_2include_2c_09_09_2x86__64-w64-mingw32_2bits_2c_09_09config_8h_ad90b1fa000da1666f104c4dd9c0d7f9b}{\_\_N}}(\textcolor{stringliteral}{"{}rope::\_S\_balance"{}}));}
+\DoxyCodeLine{01243\ \ \ \ \ \ \ \textcolor{keywordflow}{return}(\_\_result);}
+\DoxyCodeLine{01244\ \ \ \ \ \}}
+\DoxyCodeLine{01245\ }
+\DoxyCodeLine{01246\ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{class}\ \_CharT,\ \textcolor{keyword}{class}\ \_Alloc>}
+\DoxyCodeLine{01247\ \ \ \ \ \textcolor{keywordtype}{void}}
+\DoxyCodeLine{01248\ \ \ \ \ rope<\_CharT,\ \_Alloc>::}
+\DoxyCodeLine{01249\ \ \ \ \ \_S\_add\_to\_forest(\_RopeRep*\ \_\_r,\ \_RopeRep**\ \_\_forest)}
+\DoxyCodeLine{01250\ \ \ \ \ \{}
+\DoxyCodeLine{01251\ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\_\_r-\/>\_M\_is\_balanced)}
+\DoxyCodeLine{01252\ \ \ \ \ \{}
+\DoxyCodeLine{01253\ \ \ \ \ \ \ \_S\_add\_leaf\_to\_forest(\_\_r,\ \_\_forest);}
+\DoxyCodeLine{01254\ \ \ \ \ \ \ \textcolor{keywordflow}{return};}
+\DoxyCodeLine{01255\ \ \ \ \ \}}
+\DoxyCodeLine{01256\ }
+\DoxyCodeLine{01257\ \ \ \ \ \ \ \{}
+\DoxyCodeLine{01258\ \ \ \ \ \_RopeConcatenation*\ \_\_c\ =\ (\_RopeConcatenation*)\_\_r;}
+\DoxyCodeLine{01259\ \ \ \ \ }
+\DoxyCodeLine{01260\ \ \ \ \ \_S\_add\_to\_forest(\_\_c-\/>\_M\_left,\ \_\_forest);}
+\DoxyCodeLine{01261\ \ \ \ \ \_S\_add\_to\_forest(\_\_c-\/>\_M\_right,\ \_\_forest);}
+\DoxyCodeLine{01262\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{01263\ \ \ \ \ \}}
+\DoxyCodeLine{01264\ }
+\DoxyCodeLine{01265\ }
+\DoxyCodeLine{01266\ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{class}\ \_CharT,\ \textcolor{keyword}{class}\ \_Alloc>}
+\DoxyCodeLine{01267\ \ \ \ \ \textcolor{keywordtype}{void}}
+\DoxyCodeLine{01268\ \ \ \ \ rope<\_CharT,\ \_Alloc>::}
+\DoxyCodeLine{01269\ \ \ \ \ \_S\_add\_leaf\_to\_forest(\_RopeRep*\ \_\_r,\ \_RopeRep**\ \_\_forest)}
+\DoxyCodeLine{01270\ \ \ \ \ \{}
+\DoxyCodeLine{01271\ \ \ \ \ \ \ \_RopeRep*\ \_\_insertee;\ \ \ \ \ \textcolor{comment}{//\ included\ in\ refcount}}
+\DoxyCodeLine{01272\ \ \ \ \ \ \ \_RopeRep*\ \_\_too\_tiny\ =\ 0;\ \ \ \ \ \textcolor{comment}{//\ included\ in\ refcount}}
+\DoxyCodeLine{01273\ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ \_\_i;\ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ forest[0..\_\_i-\/1]\ is\ empty}}
+\DoxyCodeLine{01274\ \ \ \ \ \ \ std::size\_t\ \_\_s\ =\ \_\_r-\/>\_M\_size;}
+\DoxyCodeLine{01275\ \ \ \ \ \ \ }
+\DoxyCodeLine{01276\ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\_\_i\ =\ 0;\ \_\_s\ >=\ \_S\_min\_len[\_\_i+1]\textcolor{comment}{/*\ not\ this\ bucket\ */};\ ++\_\_i)}
+\DoxyCodeLine{01277\ \ \ \ \ \{}
+\DoxyCodeLine{01278\ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (0\ !=\ \_\_forest[\_\_i])}
+\DoxyCodeLine{01279\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{01280\ \textcolor{preprocessor}{\#ifndef\ \_\_GC}}
+\DoxyCodeLine{01281\ \ \ \ \ \ \ \ \ \ \ \_Self\_destruct\_ptr\ \_\_old(\_\_too\_tiny);}
+\DoxyCodeLine{01282\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{01283\ \ \ \ \ \ \ \ \ \ \ \_\_too\_tiny\ =\ \_S\_concat\_and\_set\_balanced(\_\_forest[\_\_i],}
+\DoxyCodeLine{01284\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_\_too\_tiny);}
+\DoxyCodeLine{01285\ \ \ \ \ \ \ \ \ \ \ \_\_forest[\_\_i]-\/>\_M\_unref\_nonnil();}
+\DoxyCodeLine{01286\ \ \ \ \ \ \ \ \ \ \ \_\_forest[\_\_i]\ =\ 0;}
+\DoxyCodeLine{01287\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{01288\ \ \ \ \ \}}
+\DoxyCodeLine{01289\ \ \ \ \ \ \ \{}
+\DoxyCodeLine{01290\ \textcolor{preprocessor}{\#ifndef\ \_\_GC}}
+\DoxyCodeLine{01291\ \ \ \ \ \_Self\_destruct\_ptr\ \_\_old(\_\_too\_tiny);}
+\DoxyCodeLine{01292\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{01293\ \ \ \ \ \_\_insertee\ =\ \_S\_concat\_and\_set\_balanced(\_\_too\_tiny,\ \_\_r);}
+\DoxyCodeLine{01294\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{01295\ \ \ \ \ \ \ \textcolor{comment}{//\ Too\_tiny\ dead,\ and\ no\ longer\ included\ in\ refcount.}}
+\DoxyCodeLine{01296\ \ \ \ \ \ \ \textcolor{comment}{//\ Insertee\ is\ live\ and\ included.}}
+\DoxyCodeLine{01297\ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (;;\ ++\_\_i)}
+\DoxyCodeLine{01298\ \ \ \ \ \{}
+\DoxyCodeLine{01299\ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (0\ !=\ \_\_forest[\_\_i])}
+\DoxyCodeLine{01300\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{01301\ \textcolor{preprocessor}{\#ifndef\ \_\_GC}}
+\DoxyCodeLine{01302\ \ \ \ \ \ \ \ \ \ \ \_Self\_destruct\_ptr\ \_\_old(\_\_insertee);}
+\DoxyCodeLine{01303\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{01304\ \ \ \ \ \ \ \ \ \ \ \_\_insertee\ =\ \_S\_concat\_and\_set\_balanced(\_\_forest[\_\_i],}
+\DoxyCodeLine{01305\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_\_insertee);}
+\DoxyCodeLine{01306\ \ \ \ \ \ \ \ \ \ \ \_\_forest[\_\_i]-\/>\_M\_unref\_nonnil();}
+\DoxyCodeLine{01307\ \ \ \ \ \ \ \ \ \ \ \_\_forest[\_\_i]\ =\ 0;}
+\DoxyCodeLine{01308\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{01309\ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\_\_i\ ==\ \textcolor{keywordtype}{int}(\_\_detail::\_S\_max\_rope\_depth)}
+\DoxyCodeLine{01310\ \ \ \ \ \ \ \ \ \ \ ||\ \_\_insertee-\/>\_M\_size\ <\ \_S\_min\_len[\_\_i+1])}
+\DoxyCodeLine{01311\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{01312\ \ \ \ \ \ \ \ \ \ \ \_\_forest[\_\_i]\ =\ \_\_insertee;}
+\DoxyCodeLine{01313\ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ refcount\ is\ OK\ since\ \_\_insertee\ is\ now\ dead.}}
+\DoxyCodeLine{01314\ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return};}
+\DoxyCodeLine{01315\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{01316\ \ \ \ \ \}}
+\DoxyCodeLine{01317\ \ \ \ \ \}}
+\DoxyCodeLine{01318\ }
+\DoxyCodeLine{01319\ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{class}\ \_CharT,\ \textcolor{keyword}{class}\ \_Alloc>}
+\DoxyCodeLine{01320\ \ \ \ \ \_CharT}
+\DoxyCodeLine{01321\ \ \ \ \ rope<\_CharT,\ \_Alloc>::}
+\DoxyCodeLine{01322\ \ \ \ \ \_S\_fetch(\_RopeRep*\ \_\_r,\ size\_type\ \_\_i)}
+\DoxyCodeLine{01323\ \ \ \ \ \{}
+\DoxyCodeLine{01324\ \ \ \ \ \ \ \_\_GC\_CONST\ \_CharT*\ \_\_cstr\ =\ \_\_r-\/>\_M\_c\_string;}
+\DoxyCodeLine{01325\ \ \ \ \ \ \ }
+\DoxyCodeLine{01326\ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (0\ !=\ \_\_cstr)}
+\DoxyCodeLine{01327\ \ \ \ \ \textcolor{keywordflow}{return}\ \_\_cstr[\_\_i];}
+\DoxyCodeLine{01328\ \ \ \ \ \ \ \textcolor{keywordflow}{for}(;;)}
+\DoxyCodeLine{01329\ \ \ \ \ \{}
+\DoxyCodeLine{01330\ \ \ \ \ \ \ \textcolor{keywordflow}{switch}(\_\_r-\/>\_M\_tag)}
+\DoxyCodeLine{01331\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{01332\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ \_\_detail::\_S\_concat:}
+\DoxyCodeLine{01333\ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{01334\ \ \ \ \ \ \ \ \ \_RopeConcatenation*\ \_\_c\ =\ (\_RopeConcatenation*)\_\_r;}
+\DoxyCodeLine{01335\ \ \ \ \ \ \ \ \ \_RopeRep*\ \_\_left\ =\ \_\_c-\/>\_M\_left;}
+\DoxyCodeLine{01336\ \ \ \ \ \ \ \ \ std::size\_t\ \_\_left\_len\ =\ \_\_left-\/>\_M\_size;}
+\DoxyCodeLine{01337\ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{01338\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\_\_i\ >=\ \_\_left\_len)}
+\DoxyCodeLine{01339\ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{01340\ \ \ \ \ \ \ \ \ \ \ \ \ \_\_i\ -\/=\ \_\_left\_len;}
+\DoxyCodeLine{01341\ \ \ \ \ \ \ \ \ \ \ \ \ \_\_r\ =\ \_\_c-\/>\_M\_right;}
+\DoxyCodeLine{01342\ \ \ \ \ \ \ \ \ \ \ \}\ }
+\DoxyCodeLine{01343\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{01344\ \ \ \ \ \ \ \ \ \ \ \_\_r\ =\ \_\_left;}
+\DoxyCodeLine{01345\ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{01346\ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{01347\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ \_\_detail::\_S\_leaf:}
+\DoxyCodeLine{01348\ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{01349\ \ \ \ \ \ \ \ \ \_RopeLeaf*\ \_\_l\ =\ (\_RopeLeaf*)\_\_r;}
+\DoxyCodeLine{01350\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \_\_l-\/>\_M\_data[\_\_i];}
+\DoxyCodeLine{01351\ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{01352\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ \_\_detail::\_S\_function:}
+\DoxyCodeLine{01353\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ \_\_detail::\_S\_substringfn:}
+\DoxyCodeLine{01354\ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{01355\ \ \ \ \ \ \ \ \ \_RopeFunction*\ \_\_f\ =\ (\_RopeFunction*)\_\_r;}
+\DoxyCodeLine{01356\ \ \ \ \ \ \ \ \ \_CharT\ \_\_result;}
+\DoxyCodeLine{01357\ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{01358\ \ \ \ \ \ \ \ \ (*(\_\_f-\/>\_M\_fn))(\_\_i,\ 1,\ \&\_\_result);}
+\DoxyCodeLine{01359\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \_\_result;}
+\DoxyCodeLine{01360\ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{01361\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{01362\ \ \ \ \ \}}
+\DoxyCodeLine{01363\ \ \ \ \ \}}
+\DoxyCodeLine{01364\ \ \ }
+\DoxyCodeLine{01365\ \textcolor{preprocessor}{\#ifndef\ \_\_GC}}
+\DoxyCodeLine{01366\ \ \ \textcolor{comment}{//\ Return\ a\ uniquely\ referenced\ character\ slot\ for\ the\ given}}
+\DoxyCodeLine{01367\ \ \ \textcolor{comment}{//\ position,\ or\ 0\ if\ that's\ not\ possible.}}
+\DoxyCodeLine{01368\ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{class}\ \_CharT,\ \textcolor{keyword}{class}\ \_Alloc>}
+\DoxyCodeLine{01369\ \ \ \ \ \_CharT*}
+\DoxyCodeLine{01370\ \ \ \ \ rope<\_CharT,\ \_Alloc>::}
+\DoxyCodeLine{01371\ \ \ \ \ \_S\_fetch\_ptr(\_RopeRep*\ \_\_r,\ size\_type\ \_\_i)}
+\DoxyCodeLine{01372\ \ \ \ \ \{}
+\DoxyCodeLine{01373\ \ \ \ \ \ \ \_RopeRep*\ \_\_clrstack[\_\_detail::\_S\_max\_rope\_depth];}
+\DoxyCodeLine{01374\ \ \ \ \ \ \ std::size\_t\ \_\_csptr\ =\ 0;}
+\DoxyCodeLine{01375\ \ \ \ \ \ \ }
+\DoxyCodeLine{01376\ \ \ \ \ \ \ \textcolor{keywordflow}{for}(;;)}
+\DoxyCodeLine{01377\ \ \ \ \ \{}
+\DoxyCodeLine{01378\ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\_\_r-\/>\_M\_ref\_count\ >\ 1)}
+\DoxyCodeLine{01379\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ 0;}
+\DoxyCodeLine{01380\ \ \ \ \ \ \ \textcolor{keywordflow}{switch}(\_\_r-\/>\_M\_tag)}
+\DoxyCodeLine{01381\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{01382\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ \_\_detail::\_S\_concat:}
+\DoxyCodeLine{01383\ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{01384\ \ \ \ \ \ \ \ \ \_RopeConcatenation*\ \_\_c\ =\ (\_RopeConcatenation*)\_\_r;}
+\DoxyCodeLine{01385\ \ \ \ \ \ \ \ \ \_RopeRep*\ \_\_left\ =\ \_\_c-\/>\_M\_left;}
+\DoxyCodeLine{01386\ \ \ \ \ \ \ \ \ std::size\_t\ \_\_left\_len\ =\ \_\_left-\/>\_M\_size;}
+\DoxyCodeLine{01387\ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{01388\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\_\_c-\/>\_M\_c\_string\ !=\ 0)}
+\DoxyCodeLine{01389\ \ \ \ \ \ \ \ \ \ \ \_\_clrstack[\_\_csptr++]\ =\ \_\_c;}
+\DoxyCodeLine{01390\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\_\_i\ >=\ \_\_left\_len)}
+\DoxyCodeLine{01391\ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{01392\ \ \ \ \ \ \ \ \ \ \ \ \ \_\_i\ -\/=\ \_\_left\_len;}
+\DoxyCodeLine{01393\ \ \ \ \ \ \ \ \ \ \ \ \ \_\_r\ =\ \_\_c-\/>\_M\_right;}
+\DoxyCodeLine{01394\ \ \ \ \ \ \ \ \ \ \ \}\ }
+\DoxyCodeLine{01395\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{01396\ \ \ \ \ \ \ \ \ \ \ \_\_r\ =\ \_\_left;}
+\DoxyCodeLine{01397\ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{01398\ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{01399\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ \_\_detail::\_S\_leaf:}
+\DoxyCodeLine{01400\ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{01401\ \ \ \ \ \ \ \ \ \_RopeLeaf*\ \_\_l\ =\ (\_RopeLeaf*)\_\_r;}
+\DoxyCodeLine{01402\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\_\_l-\/>\_M\_c\_string\ !=\ \_\_l-\/>\_M\_data\ \&\&\ \_\_l-\/>\_M\_c\_string\ !=\ 0)}
+\DoxyCodeLine{01403\ \ \ \ \ \ \ \ \ \ \ \_\_clrstack[\_\_csptr++]\ =\ \_\_l;}
+\DoxyCodeLine{01404\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{while}\ (\_\_csptr\ >\ 0)}
+\DoxyCodeLine{01405\ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{01406\ \ \ \ \ \ \ \ \ \ \ \ \ -\/-\/\ \_\_csptr;}
+\DoxyCodeLine{01407\ \ \ \ \ \ \ \ \ \ \ \ \ \_RopeRep*\ \_\_d\ =\ \_\_clrstack[\_\_csptr];}
+\DoxyCodeLine{01408\ \ \ \ \ \ \ \ \ \ \ \ \ \_\_d-\/>\_M\_free\_c\_string();}
+\DoxyCodeLine{01409\ \ \ \ \ \ \ \ \ \ \ \ \ \_\_d-\/>\_M\_c\_string\ =\ 0;}
+\DoxyCodeLine{01410\ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{01411\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \_\_l-\/>\_M\_data\ +\ \_\_i;}
+\DoxyCodeLine{01412\ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{01413\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ \_\_detail::\_S\_function:}
+\DoxyCodeLine{01414\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ \_\_detail::\_S\_substringfn:}
+\DoxyCodeLine{01415\ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ 0;}
+\DoxyCodeLine{01416\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{01417\ \ \ \ \ \}}
+\DoxyCodeLine{01418\ \ \ \ \ \}}
+\DoxyCodeLine{01419\ \textcolor{preprocessor}{\#endif\ }\textcolor{comment}{/*\ \_\_GC\ */}\textcolor{preprocessor}{}}
+\DoxyCodeLine{01420\ }
+\DoxyCodeLine{01421\ \ \ \textcolor{comment}{//\ The\ following\ could\ be\ implemented\ trivially\ using}}
+\DoxyCodeLine{01422\ \ \ \textcolor{comment}{//\ lexicographical\_compare\_3way.}}
+\DoxyCodeLine{01423\ \ \ \textcolor{comment}{//\ We\ do\ a\ little\ more\ work\ to\ avoid\ dealing\ with\ rope\ iterators\ for}}
+\DoxyCodeLine{01424\ \ \ \textcolor{comment}{//\ flat\ strings.}}
+\DoxyCodeLine{01425\ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{class}\ \_CharT,\ \textcolor{keyword}{class}\ \_Alloc>}
+\DoxyCodeLine{01426\ \ \ \ \ \textcolor{keywordtype}{int}}
+\DoxyCodeLine{01427\ \ \ \ \ rope<\_CharT,\ \_Alloc>::}
+\DoxyCodeLine{01428\ \ \ \ \ \_S\_compare\ (\textcolor{keyword}{const}\ \_RopeRep*\ \_\_left,\ \textcolor{keyword}{const}\ \_RopeRep*\ \_\_right)}
+\DoxyCodeLine{01429\ \ \ \ \ \{}
+\DoxyCodeLine{01430\ \ \ \ \ \ \ std::size\_t\ \_\_left\_len;}
+\DoxyCodeLine{01431\ \ \ \ \ \ \ std::size\_t\ \_\_right\_len;}
+\DoxyCodeLine{01432\ \ \ \ \ \ \ }
+\DoxyCodeLine{01433\ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (0\ ==\ \_\_right)}
+\DoxyCodeLine{01434\ \ \ \ \ \textcolor{keywordflow}{return}\ 0\ !=\ \_\_left;}
+\DoxyCodeLine{01435\ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (0\ ==\ \_\_left)}
+\DoxyCodeLine{01436\ \ \ \ \ \textcolor{keywordflow}{return}\ -\/1;}
+\DoxyCodeLine{01437\ \ \ \ \ \ \ \_\_left\_len\ =\ \_\_left-\/>\_M\_size;}
+\DoxyCodeLine{01438\ \ \ \ \ \ \ \_\_right\_len\ =\ \_\_right-\/>\_M\_size;}
+\DoxyCodeLine{01439\ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\_\_detail::\_S\_leaf\ ==\ \_\_left-\/>\_M\_tag)}
+\DoxyCodeLine{01440\ \ \ \ \ \{}
+\DoxyCodeLine{01441\ \ \ \ \ \ \ \_RopeLeaf*\ \_\_l\ =\ (\_RopeLeaf*)\ \_\_left;}
+\DoxyCodeLine{01442\ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\_\_detail::\_S\_leaf\ ==\ \_\_right-\/>\_M\_tag)}
+\DoxyCodeLine{01443\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{01444\ \ \ \ \ \ \ \ \ \ \ \_RopeLeaf*\ \_\_r\ =\ (\_RopeLeaf*)\ \_\_right;}
+\DoxyCodeLine{01445\ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ lexicographical\_compare\_3way(\_\_l-\/>\_M\_data,}
+\DoxyCodeLine{01446\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_\_l-\/>\_M\_data\ +\ \_\_left\_len,}
+\DoxyCodeLine{01447\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_\_r-\/>\_M\_data,\ \_\_r-\/>\_M\_data}
+\DoxyCodeLine{01448\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ +\ \_\_right\_len);}
+\DoxyCodeLine{01449\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{01450\ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{01451\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{01452\ \ \ \ \ \ \ \ \ \ \ const\_iterator\ \_\_rstart(\_\_right,\ 0);}
+\DoxyCodeLine{01453\ \ \ \ \ \ \ \ \ \ \ const\_iterator\ \_\_rend(\_\_right,\ \_\_right\_len);}
+\DoxyCodeLine{01454\ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ lexicographical\_compare\_3way(\_\_l-\/>\_M\_data,\ \_\_l-\/>\_M\_data}
+\DoxyCodeLine{01455\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ +\ \_\_left\_len,}
+\DoxyCodeLine{01456\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_\_rstart,\ \_\_rend);}
+\DoxyCodeLine{01457\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{01458\ \ \ \ \ \}}
+\DoxyCodeLine{01459\ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{01460\ \ \ \ \ \{}
+\DoxyCodeLine{01461\ \ \ \ \ \ \ const\_iterator\ \_\_lstart(\_\_left,\ 0);}
+\DoxyCodeLine{01462\ \ \ \ \ \ \ const\_iterator\ \_\_lend(\_\_left,\ \_\_left\_len);}
+\DoxyCodeLine{01463\ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\_\_detail::\_S\_leaf\ ==\ \_\_right-\/>\_M\_tag)}
+\DoxyCodeLine{01464\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{01465\ \ \ \ \ \ \ \ \ \ \ \_RopeLeaf*\ \_\_r\ =\ (\_RopeLeaf*)\ \_\_right;}
+\DoxyCodeLine{01466\ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ lexicographical\_compare\_3way(\_\_lstart,\ \_\_lend,}
+\DoxyCodeLine{01467\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_\_r-\/>\_M\_data,\ \_\_r-\/>\_M\_data}
+\DoxyCodeLine{01468\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ +\ \_\_right\_len);}
+\DoxyCodeLine{01469\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{01470\ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{01471\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{01472\ \ \ \ \ \ \ \ \ \ \ const\_iterator\ \_\_rstart(\_\_right,\ 0);}
+\DoxyCodeLine{01473\ \ \ \ \ \ \ \ \ \ \ const\_iterator\ \_\_rend(\_\_right,\ \_\_right\_len);}
+\DoxyCodeLine{01474\ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ lexicographical\_compare\_3way(\_\_lstart,\ \_\_lend,}
+\DoxyCodeLine{01475\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_\_rstart,\ \_\_rend);}
+\DoxyCodeLine{01476\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{01477\ \ \ \ \ \}}
+\DoxyCodeLine{01478\ \ \ \ \ \}}
+\DoxyCodeLine{01479\ }
+\DoxyCodeLine{01480\ \ \ \textcolor{comment}{//\ Assignment\ to\ reference\ proxies.}}
+\DoxyCodeLine{01481\ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{class}\ \_CharT,\ \textcolor{keyword}{class}\ \_Alloc>}
+\DoxyCodeLine{01482\ \ \ \ \ \_Rope\_char\_ref\_proxy<\_CharT,\ \_Alloc>\&}
+\DoxyCodeLine{01483\ \ \ \ \ \_Rope\_char\_ref\_proxy<\_CharT,\ \_Alloc>::}
+\DoxyCodeLine{01484\ \ \ \ \ operator=(\_CharT\ \_\_c)}
+\DoxyCodeLine{01485\ \ \ \ \ \{}
+\DoxyCodeLine{01486\ \ \ \ \ \ \ \_RopeRep*\ \_\_old\ =\ \_M\_root-\/>\_M\_tree\_ptr;}
+\DoxyCodeLine{01487\ \textcolor{preprocessor}{\#ifndef\ \_\_GC}}
+\DoxyCodeLine{01488\ \ \ \ \ \ \ \textcolor{comment}{//\ First\ check\ for\ the\ case\ in\ which\ everything\ is\ uniquely}}
+\DoxyCodeLine{01489\ \ \ \ \ \ \ \textcolor{comment}{//\ referenced.\ \ In\ that\ case\ we\ can\ do\ this\ destructively.}}
+\DoxyCodeLine{01490\ \ \ \ \ \ \ \_CharT*\ \_\_ptr\ =\ \_My\_rope::\_S\_fetch\_ptr(\_\_old,\ \_M\_pos);}
+\DoxyCodeLine{01491\ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (0\ !=\ \_\_ptr)}
+\DoxyCodeLine{01492\ \ \ \ \ \{}
+\DoxyCodeLine{01493\ \ \ \ \ \ \ *\_\_ptr\ =\ \_\_c;}
+\DoxyCodeLine{01494\ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ *\textcolor{keyword}{this};}
+\DoxyCodeLine{01495\ \ \ \ \ \}}
+\DoxyCodeLine{01496\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{01497\ \ \ \ \ \ \ \_Self\_destruct\_ptr\ \_\_left(\_My\_rope::\_S\_substring(\_\_old,\ 0,\ \_M\_pos));}
+\DoxyCodeLine{01498\ \ \ \ \ \ \ \_Self\_destruct\_ptr\ \_\_right(\_My\_rope::\_S\_substring(\_\_old,\ \_M\_pos\ +\ 1,}
+\DoxyCodeLine{01499\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_\_old-\/>\_M\_size));}
+\DoxyCodeLine{01500\ \ \ \ \ \ \ \textcolor{keyword}{typename}\ \_RopeRep::allocator\_type\ \_\_a\ =\ \_M\_root-\/>\_M\_get\_allocator();}
+\DoxyCodeLine{01501\ \ \ \ \ \ \ \_Self\_destruct\_ptr\ \_\_result\_left(\_My\_rope::}
+\DoxyCodeLine{01502\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_S\_destr\_concat\_char\_iter(\_\_left,}
+\DoxyCodeLine{01503\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \&\_\_c,\ 1,}
+\DoxyCodeLine{01504\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_\_a));}
+\DoxyCodeLine{01505\ }
+\DoxyCodeLine{01506\ \ \ \ \ \ \ \_RopeRep*\ \_\_result\ =\ \_My\_rope::\_S\_concat(\_\_result\_left,\ \_\_right);}
+\DoxyCodeLine{01507\ \textcolor{preprocessor}{\#ifndef\ \_\_GC}}
+\DoxyCodeLine{01508\ \ \ \ \ \ \ \_RopeRep::\_S\_unref(\_\_old);}
+\DoxyCodeLine{01509\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{01510\ \ \ \ \ \ \ \_M\_root-\/>\_M\_tree\_ptr\ =\ \_\_result;}
+\DoxyCodeLine{01511\ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ *\textcolor{keyword}{this};}
+\DoxyCodeLine{01512\ \ \ \ \ \}}
+\DoxyCodeLine{01513\ }
+\DoxyCodeLine{01514\ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{class}\ \_CharT,\ \textcolor{keyword}{class}\ \_Alloc>}
+\DoxyCodeLine{01515\ \ \ \ \ \textcolor{keyword}{inline}\ \_Rope\_char\_ref\_proxy<\_CharT,\ \_Alloc>::}
+\DoxyCodeLine{01516\ \ \ \ \ operator\ \_CharT()\textcolor{keyword}{\ const}}
+\DoxyCodeLine{01517\ \textcolor{keyword}{\ \ \ \ }\{}
+\DoxyCodeLine{01518\ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\_M\_current\_valid)}
+\DoxyCodeLine{01519\ \ \ \ \ \textcolor{keywordflow}{return}\ \_M\_current;}
+\DoxyCodeLine{01520\ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{01521\ \ \ \ \ \textcolor{keywordflow}{return}\ \_My\_rope::\_S\_fetch(\_M\_root-\/>\_M\_tree\_ptr,\ \_M\_pos);}
+\DoxyCodeLine{01522\ \ \ \ \ \}}
+\DoxyCodeLine{01523\ }
+\DoxyCodeLine{01524\ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{class}\ \_CharT,\ \textcolor{keyword}{class}\ \_Alloc>}
+\DoxyCodeLine{01525\ \ \ \ \ \_Rope\_char\_ptr\_proxy<\_CharT,\ \_Alloc>}
+\DoxyCodeLine{01526\ \ \ \ \ \_Rope\_char\_ref\_proxy<\_CharT,\ \_Alloc>::}
+\DoxyCodeLine{01527\ \ \ \ \ operator\&()\textcolor{keyword}{\ const}}
+\DoxyCodeLine{01528\ \textcolor{keyword}{\ \ \ \ }\{\ \textcolor{keywordflow}{return}\ \_Rope\_char\_ptr\_proxy<\_CharT,\ \_Alloc>(*\textcolor{keyword}{this});\ \}}
+\DoxyCodeLine{01529\ }
+\DoxyCodeLine{01530\ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{class}\ \_CharT,\ \textcolor{keyword}{class}\ \_Alloc>}
+\DoxyCodeLine{01531\ \ \ \ \ rope<\_CharT,\ \_Alloc>::}
+\DoxyCodeLine{01532\ \ \ \ \ rope(std::size\_t\ \_\_n,\ \_CharT\ \_\_c,\ \textcolor{keyword}{const}\ allocator\_type\&\ \_\_a)}
+\DoxyCodeLine{01533\ \ \ \ \ :\ \_Base(\_\_a)}
+\DoxyCodeLine{01534\ \ \ \ \ \{}
+\DoxyCodeLine{01535\ \ \ \ \ \ \ \textcolor{keyword}{using\ }std::\_\_uninitialized\_fill\_n\_a;}
+\DoxyCodeLine{01536\ }
+\DoxyCodeLine{01537\ \ \ \ \ \ \ rope<\_CharT,\_Alloc>\ \_\_result;}
+\DoxyCodeLine{01538\ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::size\_t\ \_\_exponentiate\_threshold\ =\ 32;}
+\DoxyCodeLine{01539\ \ \ \ \ \ \ std::size\_t\ \_\_exponent;}
+\DoxyCodeLine{01540\ \ \ \ \ \ \ std::size\_t\ \_\_rest;}
+\DoxyCodeLine{01541\ \ \ \ \ \ \ \_CharT*\ \_\_rest\_buffer;}
+\DoxyCodeLine{01542\ \ \ \ \ \ \ \_RopeRep*\ \_\_remainder;}
+\DoxyCodeLine{01543\ \ \ \ \ \ \ rope<\_CharT,\ \_Alloc>\ \_\_remainder\_rope;}
+\DoxyCodeLine{01544\ }
+\DoxyCodeLine{01545\ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (0\ ==\ \_\_n)}
+\DoxyCodeLine{01546\ \ \ \ \ \textcolor{keywordflow}{return};}
+\DoxyCodeLine{01547\ }
+\DoxyCodeLine{01548\ \ \ \ \ \ \ \_\_exponent\ =\ \_\_n\ /\ \_\_exponentiate\_threshold;}
+\DoxyCodeLine{01549\ \ \ \ \ \ \ \_\_rest\ =\ \_\_n\ \%\ \_\_exponentiate\_threshold;}
+\DoxyCodeLine{01550\ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (0\ ==\ \_\_rest)}
+\DoxyCodeLine{01551\ \ \ \ \ \_\_remainder\ =\ 0;}
+\DoxyCodeLine{01552\ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{01553\ \ \ \ \ \{}
+\DoxyCodeLine{01554\ \ \ \ \ \ \ \_\_rest\_buffer\ =\ this-\/>\_Data\_allocate(\_S\_rounded\_up\_size(\_\_rest));}
+\DoxyCodeLine{01555\ \ \ \ \ \ \ \_\_uninitialized\_fill\_n\_a(\_\_rest\_buffer,\ \_\_rest,\ \_\_c,}
+\DoxyCodeLine{01556\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_M\_get\_allocator());}
+\DoxyCodeLine{01557\ \ \ \ \ \ \ \_S\_cond\_store\_eos(\_\_rest\_buffer[\_\_rest]);}
+\DoxyCodeLine{01558\ \ \ \ \ \ \ \mbox{\hyperlink{_classes_2lib_2include_2c_09_09_2bits_2exception__defines_8h_a130bf0cd31a0783cd03563f46b46915b}{\_\_try}}}
+\DoxyCodeLine{01559\ \ \ \ \ \ \ \ \ \{\ \_\_remainder\ =\ \_S\_new\_RopeLeaf(\_\_rest\_buffer,\ \_\_rest,}
+\DoxyCodeLine{01560\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_M\_get\_allocator());\ \}}
+\DoxyCodeLine{01561\ \ \ \ \ \ \ \mbox{\hyperlink{_classes_2lib_2include_2c_09_09_2bits_2exception__defines_8h_a9e51d2f324c18a996a3e4f9a6ba0f6c2}{\_\_catch}}(...)}
+\DoxyCodeLine{01562\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{01563\ \ \ \ \ \ \ \ \ \ \ \_RopeRep::\_\_STL\_FREE\_STRING(\_\_rest\_buffer,\ \_\_rest,}
+\DoxyCodeLine{01564\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_M\_get\_allocator());}
+\DoxyCodeLine{01565\ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{_classes_2lib_2include_2c_09_09_2bits_2exception__defines_8h_a92ef03a5310b10a4243a6ec8f43494b5}{\_\_throw\_exception\_again}};}
+\DoxyCodeLine{01566\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{01567\ \ \ \ \ \}}
+\DoxyCodeLine{01568\ \ \ \ \ \ \ \_\_remainder\_rope.\_M\_tree\_ptr\ =\ \_\_remainder;}
+\DoxyCodeLine{01569\ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\_\_exponent\ !=\ 0)}
+\DoxyCodeLine{01570\ \ \ \ \ \{}
+\DoxyCodeLine{01571\ \ \ \ \ \ \ \_CharT*\ \_\_base\_buffer\ =}
+\DoxyCodeLine{01572\ \ \ \ \ \ \ \ \ this-\/>\_Data\_allocate(\_S\_rounded\_up\_size(\_\_exponentiate\_threshold));}
+\DoxyCodeLine{01573\ \ \ \ \ \ \ \_RopeLeaf*\ \_\_base\_leaf;}
+\DoxyCodeLine{01574\ \ \ \ \ \ \ rope\ \_\_base\_rope;}
+\DoxyCodeLine{01575\ \ \ \ \ \ \ \_\_uninitialized\_fill\_n\_a(\_\_base\_buffer,\ \_\_exponentiate\_threshold,\ \_\_c,}
+\DoxyCodeLine{01576\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_M\_get\_allocator());}
+\DoxyCodeLine{01577\ \ \ \ \ \ \ \_S\_cond\_store\_eos(\_\_base\_buffer[\_\_exponentiate\_threshold]);}
+\DoxyCodeLine{01578\ \ \ \ \ \ \ \mbox{\hyperlink{_classes_2lib_2include_2c_09_09_2bits_2exception__defines_8h_a130bf0cd31a0783cd03563f46b46915b}{\_\_try}}}
+\DoxyCodeLine{01579\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{01580\ \ \ \ \ \ \ \ \ \ \ \_\_base\_leaf\ =\ \_S\_new\_RopeLeaf(\_\_base\_buffer,}
+\DoxyCodeLine{01581\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_\_exponentiate\_threshold,}
+\DoxyCodeLine{01582\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_M\_get\_allocator());}
+\DoxyCodeLine{01583\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{01584\ \ \ \ \ \ \ \mbox{\hyperlink{_classes_2lib_2include_2c_09_09_2bits_2exception__defines_8h_a9e51d2f324c18a996a3e4f9a6ba0f6c2}{\_\_catch}}(...)}
+\DoxyCodeLine{01585\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{01586\ \ \ \ \ \ \ \ \ \ \ \_RopeRep::\_\_STL\_FREE\_STRING(\_\_base\_buffer,}
+\DoxyCodeLine{01587\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_\_exponentiate\_threshold,}
+\DoxyCodeLine{01588\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_M\_get\_allocator());}
+\DoxyCodeLine{01589\ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{_classes_2lib_2include_2c_09_09_2bits_2exception__defines_8h_a92ef03a5310b10a4243a6ec8f43494b5}{\_\_throw\_exception\_again}};}
+\DoxyCodeLine{01590\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{01591\ \ \ \ \ \ \ \_\_base\_rope.\_M\_tree\_ptr\ =\ \_\_base\_leaf;}
+\DoxyCodeLine{01592\ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (1\ ==\ \_\_exponent)}
+\DoxyCodeLine{01593\ \ \ \ \ \ \ \ \ \_\_result\ =\ \_\_base\_rope;}
+\DoxyCodeLine{01594\ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{01595\ \ \ \ \ \ \ \ \ \_\_result\ =\ power(\_\_base\_rope,\ \_\_exponent,}
+\DoxyCodeLine{01596\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_Rope\_Concat\_fn<\_CharT,\ \_Alloc>());}
+\DoxyCodeLine{01597\ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{01598\ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (0\ !=\ \_\_remainder)}
+\DoxyCodeLine{01599\ \ \ \ \ \ \ \ \ \_\_result\ +=\ \_\_remainder\_rope;}
+\DoxyCodeLine{01600\ \ \ \ \ \}}
+\DoxyCodeLine{01601\ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{01602\ \ \ \ \ \_\_result\ =\ \_\_remainder\_rope;}
+\DoxyCodeLine{01603\ \ \ \ \ \ \ }
+\DoxyCodeLine{01604\ \ \ \ \ \ \ this-\/>\_M\_tree\_ptr\ =\ \_\_result.\_M\_tree\_ptr;}
+\DoxyCodeLine{01605\ \ \ \ \ \ \ this-\/>\_M\_tree\_ptr-\/>\_M\_ref\_nonnil();}
+\DoxyCodeLine{01606\ \ \ \ \ \}}
+\DoxyCodeLine{01607\ \ \ \ \ \ \ }
+\DoxyCodeLine{01608\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{class}\ \_CharT,\ \textcolor{keyword}{class}\ \_Alloc>}
+\DoxyCodeLine{01609\ \ \ \ \ \_CharT}
+\DoxyCodeLine{01610\ \ \ \ \ rope<\_CharT,\ \_Alloc>::\_S\_empty\_c\_str[1];}
+\DoxyCodeLine{01611\ \ \ \ \ \ \ }
+\DoxyCodeLine{01612\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{class}\ \_CharT,\ \textcolor{keyword}{class}\ \_Alloc>}
+\DoxyCodeLine{01613\ \ \ \ \ \textcolor{keyword}{const}\ \_CharT*}
+\DoxyCodeLine{01614\ \ \ \ \ rope<\_CharT,\ \_Alloc>::}
+\DoxyCodeLine{01615\ \ \ \ \ c\_str()\textcolor{keyword}{\ const}}
+\DoxyCodeLine{01616\ \textcolor{keyword}{\ \ \ \ }\{}
+\DoxyCodeLine{01617\ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (0\ ==\ this-\/>\_M\_tree\_ptr)}
+\DoxyCodeLine{01618\ \ \ \ \ \{}
+\DoxyCodeLine{01619\ \ \ \ \ \ \ \_S\_empty\_c\_str[0]\ =\ \_S\_eos((\_CharT*)0);\ \ \textcolor{comment}{//\ Possibly\ redundant,}}
+\DoxyCodeLine{01620\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ but\ probably\ fast.}}
+\DoxyCodeLine{01621\ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \_S\_empty\_c\_str;}
+\DoxyCodeLine{01622\ \ \ \ \ \}}
+\DoxyCodeLine{01623\ \ \ \ \ \ \ \_\_gthread\_mutex\_lock\ (\&this-\/>\_M\_tree\_ptr-\/>\_M\_c\_string\_lock);}
+\DoxyCodeLine{01624\ \ \ \ \ \ \ \_\_GC\_CONST\ \_CharT*\ \_\_result\ =\ this-\/>\_M\_tree\_ptr-\/>\_M\_c\_string;}
+\DoxyCodeLine{01625\ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (0\ ==\ \_\_result)}
+\DoxyCodeLine{01626\ \ \ \ \ \{}
+\DoxyCodeLine{01627\ \ \ \ \ \ \ std::size\_t\ \_\_s\ =\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_a3d1e3edfcf61ca2d831883e1afbad89e}{size}}();}
+\DoxyCodeLine{01628\ \ \ \ \ \ \ \_\_result\ =\ this-\/>\_Data\_allocate(\_\_s\ +\ 1);}
+\DoxyCodeLine{01629\ \ \ \ \ \ \ \_S\_flatten(this-\/>\_M\_tree\_ptr,\ \_\_result);}
+\DoxyCodeLine{01630\ \ \ \ \ \ \ \_\_result[\_\_s]\ =\ \_S\_eos((\_CharT*)0);}
+\DoxyCodeLine{01631\ \ \ \ \ \ \ this-\/>\_M\_tree\_ptr-\/>\_M\_c\_string\ =\ \_\_result;}
+\DoxyCodeLine{01632\ \ \ \ \ \}}
+\DoxyCodeLine{01633\ \ \ \ \ \ \ \_\_gthread\_mutex\_unlock\ (\&this-\/>\_M\_tree\_ptr-\/>\_M\_c\_string\_lock);}
+\DoxyCodeLine{01634\ \ \ \ \ \ \ \textcolor{keywordflow}{return}(\_\_result);}
+\DoxyCodeLine{01635\ \ \ \ \ \}}
+\DoxyCodeLine{01636\ \ \ }
+\DoxyCodeLine{01637\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{class}\ \_CharT,\ \textcolor{keyword}{class}\ \_Alloc>}
+\DoxyCodeLine{01638\ \ \ \ \ \textcolor{keyword}{const}\ \_CharT*\ rope<\_CharT,\ \_Alloc>::}
+\DoxyCodeLine{01639\ \ \ \ \ replace\_with\_c\_str()}
+\DoxyCodeLine{01640\ \ \ \ \ \{}
+\DoxyCodeLine{01641\ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (0\ ==\ this-\/>\_M\_tree\_ptr)}
+\DoxyCodeLine{01642\ \ \ \ \ \{}
+\DoxyCodeLine{01643\ \ \ \ \ \ \ \_S\_empty\_c\_str[0]\ =\ \_S\_eos((\_CharT*)0);}
+\DoxyCodeLine{01644\ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \_S\_empty\_c\_str;}
+\DoxyCodeLine{01645\ \ \ \ \ \}}
+\DoxyCodeLine{01646\ \ \ \ \ \ \ \_\_GC\_CONST\ \_CharT*\ \_\_old\_c\_string\ =\ this-\/>\_M\_tree\_ptr-\/>\_M\_c\_string;}
+\DoxyCodeLine{01647\ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\_\_detail::\_S\_leaf\ ==\ this-\/>\_M\_tree\_ptr-\/>\_M\_tag}
+\DoxyCodeLine{01648\ \ \ \ \ \ \ \&\&\ 0\ !=\ \_\_old\_c\_string)}
+\DoxyCodeLine{01649\ \ \ \ \ \textcolor{keywordflow}{return}(\_\_old\_c\_string);}
+\DoxyCodeLine{01650\ \ \ \ \ \ \ std::size\_t\ \_\_s\ =\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_a3d1e3edfcf61ca2d831883e1afbad89e}{size}}();}
+\DoxyCodeLine{01651\ \ \ \ \ \ \ \_CharT*\ \_\_result\ =\ this-\/>\_Data\_allocate(\_S\_rounded\_up\_size(\_\_s));}
+\DoxyCodeLine{01652\ \ \ \ \ \ \ \_S\_flatten(this-\/>\_M\_tree\_ptr,\ \_\_result);}
+\DoxyCodeLine{01653\ \ \ \ \ \ \ \_\_result[\_\_s]\ =\ \_S\_eos((\_CharT*)0);}
+\DoxyCodeLine{01654\ \ \ \ \ \ \ this-\/>\_M\_tree\_ptr-\/>\_M\_unref\_nonnil();}
+\DoxyCodeLine{01655\ \ \ \ \ \ \ this-\/>\_M\_tree\_ptr\ =\ \_S\_new\_RopeLeaf(\_\_result,\ \_\_s,}
+\DoxyCodeLine{01656\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ this-\/>\_M\_get\_allocator());}
+\DoxyCodeLine{01657\ \ \ \ \ \ \ \textcolor{keywordflow}{return}(\_\_result);}
+\DoxyCodeLine{01658\ \ \ \ \ \}}
+\DoxyCodeLine{01659\ }
+\DoxyCodeLine{01660\ \ \ \textcolor{comment}{//\ Algorithm\ specializations.\ \ More\ should\ be\ added.}}
+\DoxyCodeLine{01661\ \ \ }
+\DoxyCodeLine{01662\ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{class}\ \_Rope\_iterator>\ \ \textcolor{comment}{//\ was\ templated\ on\ CharT\ and\ Alloc}}
+\DoxyCodeLine{01663\ \ \ \ \ \textcolor{keywordtype}{void}\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ VC++\ workaround}}
+\DoxyCodeLine{01664\ \ \ \ \ \_Rope\_rotate(\_Rope\_iterator\ \_\_first,}
+\DoxyCodeLine{01665\ \ \ \ \ \ \ \ \ \ \_Rope\_iterator\ \_\_middle,}
+\DoxyCodeLine{01666\ \ \ \ \ \ \ \ \ \ \_Rope\_iterator\ \_\_last)}
+\DoxyCodeLine{01667\ \ \ \ \ \{}
+\DoxyCodeLine{01668\ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ \textcolor{keyword}{typename}\ \_Rope\_iterator::value\_type\ \_CharT;}
+\DoxyCodeLine{01669\ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ \textcolor{keyword}{typename}\ \_Rope\_iterator::\_allocator\_type\ \_Alloc;}
+\DoxyCodeLine{01670\ \ \ \ \ \ \ }
+\DoxyCodeLine{01671\ \ \ \ \ \ \ rope<\_CharT,\ \_Alloc>\&\ \_\_r(\_\_first.container());}
+\DoxyCodeLine{01672\ \ \ \ \ \ \ rope<\_CharT,\ \_Alloc>\ \_\_prefix\ =\ \_\_r.substr(0,\ \_\_first.index());}
+\DoxyCodeLine{01673\ \ \ \ \ \ \ rope<\_CharT,\ \_Alloc>\ \_\_suffix\ =}
+\DoxyCodeLine{01674\ \ \ \ \ \_\_r.substr(\_\_last.index(),\ \_\_r.size()\ -\/\ \_\_last.index());}
+\DoxyCodeLine{01675\ \ \ \ \ \ \ rope<\_CharT,\ \_Alloc>\ \_\_part1\ =}
+\DoxyCodeLine{01676\ \ \ \ \ \_\_r.substr(\_\_middle.index(),\ \_\_last.index()\ -\/\ \_\_middle.index());}
+\DoxyCodeLine{01677\ \ \ \ \ \ \ rope<\_CharT,\ \_Alloc>\ \_\_part2\ =}
+\DoxyCodeLine{01678\ \ \ \ \ \_\_r.substr(\_\_first.index(),\ \_\_middle.index()\ -\/\ \_\_first.index());}
+\DoxyCodeLine{01679\ \ \ \ \ \ \ \_\_r\ =\ \_\_prefix;}
+\DoxyCodeLine{01680\ \ \ \ \ \ \ \_\_r\ +=\ \_\_part1;}
+\DoxyCodeLine{01681\ \ \ \ \ \ \ \_\_r\ +=\ \_\_part2;}
+\DoxyCodeLine{01682\ \ \ \ \ \ \ \_\_r\ +=\ \_\_suffix;}
+\DoxyCodeLine{01683\ \ \ \ \ \}}
+\DoxyCodeLine{01684\ }
+\DoxyCodeLine{01685\ \textcolor{preprocessor}{\#if\ !defined(\_\_GNUC\_\_)}}
+\DoxyCodeLine{01686\ \ \ \textcolor{comment}{//\ Appears\ to\ confuse\ g++}}
+\DoxyCodeLine{01687\ \ \ \textcolor{keyword}{inline}\ \textcolor{keywordtype}{void}}
+\DoxyCodeLine{01688\ \ \ rotate(\_Rope\_iterator<\textcolor{keywordtype}{char},\ \_\_STL\_DEFAULT\_ALLOCATOR(\textcolor{keywordtype}{char})>\ \_\_first,}
+\DoxyCodeLine{01689\ \ \ \ \ \ \_Rope\_iterator<\textcolor{keywordtype}{char},\ \_\_STL\_DEFAULT\_ALLOCATOR(\textcolor{keywordtype}{char})>\ \_\_middle,}
+\DoxyCodeLine{01690\ \ \ \ \ \ \_Rope\_iterator<\textcolor{keywordtype}{char},\ \_\_STL\_DEFAULT\_ALLOCATOR(\textcolor{keywordtype}{char})>\ \_\_last)}
+\DoxyCodeLine{01691\ \ \ \{\ \_Rope\_rotate(\_\_first,\ \_\_middle,\ \_\_last);\ \}}
+\DoxyCodeLine{01692\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{01693\ }
+\DoxyCodeLine{01694\ \textcolor{preprocessor}{\#\ if\ 0}}
+\DoxyCodeLine{01695\ \ \ \textcolor{comment}{//\ Probably\ not\ useful\ for\ several\ reasons:}}
+\DoxyCodeLine{01696\ \ \ \textcolor{comment}{//\ -\/\ for\ SGIs\ 7.1\ compiler\ and\ probably\ some\ others,}}
+\DoxyCodeLine{01697\ \ \ \textcolor{comment}{//\ \ \ this\ forces\ lots\ of\ rope<wchar\_t,\ ...>\ instantiations,\ creating\ a}}
+\DoxyCodeLine{01698\ \ \ \textcolor{comment}{//\ \ \ code\ bloat\ and\ compile\ time\ problem.\ \ (Fixed\ in\ 7.2.)}}
+\DoxyCodeLine{01699\ \ \ \textcolor{comment}{//\ -\/\ wchar\_t\ is\ 4\ bytes\ wide\ on\ most\ UNIX\ platforms,\ making\ it}}
+\DoxyCodeLine{01700\ \ \ \textcolor{comment}{//\ \ \ unattractive\ for\ unicode\ strings.\ \ Unsigned\ short\ may\ be\ a\ better}}
+\DoxyCodeLine{01701\ \ \ \textcolor{comment}{//\ \ \ character\ type.}}
+\DoxyCodeLine{01702\ \ \ \textcolor{keyword}{inline}\ \textcolor{keywordtype}{void}}
+\DoxyCodeLine{01703\ \ \ rotate(\_Rope\_iterator<\textcolor{keywordtype}{wchar\_t},\ \_\_STL\_DEFAULT\_ALLOCATOR(\textcolor{keywordtype}{char})>\ \_\_first,}
+\DoxyCodeLine{01704\ \ \ \ \ \ \_Rope\_iterator<\textcolor{keywordtype}{wchar\_t},\ \_\_STL\_DEFAULT\_ALLOCATOR(\textcolor{keywordtype}{char})>\ \_\_middle,}
+\DoxyCodeLine{01705\ \ \ \ \ \ \_Rope\_iterator<\textcolor{keywordtype}{wchar\_t},\ \_\_STL\_DEFAULT\_ALLOCATOR(\textcolor{keywordtype}{char})>\ \_\_last)}
+\DoxyCodeLine{01706\ \ \ \{\ \_Rope\_rotate(\_\_first,\ \_\_middle,\ \_\_last);\ \}}
+\DoxyCodeLine{01707\ \textcolor{preprocessor}{\#\ endif}}
+\DoxyCodeLine{01708\ }
+\DoxyCodeLine{01709\ \_GLIBCXX\_END\_NAMESPACE\_VERSION}
+\DoxyCodeLine{01710\ \}\ \textcolor{comment}{//\ namespace}}
+
+\end{DoxyCode}

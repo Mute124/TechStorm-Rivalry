@@ -1,0 +1,935 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<section xmlns="http://docbook.org/ns/docbook" version="5.0" xmlns:xlink="http://www.w3.org/1999/xlink" xml:id="__classes_2lib_2_raylib_erosion_standalone-main_2raylib_2src_2external_2rgif_8h_source" xml:lang="en-US">
+<title>rgif.h</title>
+<indexterm><primary>C:/Users/HP/Documents/GitHub/Minero-Game/Classes/lib/RaylibErosionStandalone-main/raylib/src/external/rgif.h</primary></indexterm>
+Go to the documentation of this file.<programlisting linenumbering="unnumbered">1 <emphasis role="comment">/**********************************************************************************************</emphasis>
+2 <emphasis role="comment">*</emphasis>
+3 <emphasis role="comment">*&#32;&#32;&#32;rgif.h&#32;v0.5</emphasis>
+4 <emphasis role="comment">*</emphasis>
+5 <emphasis role="comment">*&#32;&#32;&#32;Original&#32;implementation&#32;(gif.h)&#32;by&#32;Charlie&#32;Tangora&#32;[ctangora&#32;-at-&#32;gmail&#32;-dot-&#32;com]</emphasis>
+6 <emphasis role="comment">*&#32;&#32;&#32;adapted&#32;to&#32;C99,&#32;reformatted&#32;and&#32;renamed&#32;by&#32;Ramon&#32;Santamaria&#32;(@raysan5)</emphasis>
+7 <emphasis role="comment">*</emphasis>
+8 <emphasis role="comment">*&#32;&#32;&#32;This&#32;file&#32;offers&#32;a&#32;simple,&#32;very&#32;limited&#32;way&#32;to&#32;create&#32;animated&#32;GIFs&#32;directly&#32;in&#32;code.</emphasis>
+9 <emphasis role="comment">*</emphasis>
+10 <emphasis role="comment">*&#32;&#32;&#32;Those&#32;looking&#32;for&#32;particular&#32;cleverness&#32;are&#32;likely&#32;to&#32;be&#32;disappointed;&#32;it&apos;s&#32;pretty&#32;</emphasis>
+11 <emphasis role="comment">*&#32;&#32;&#32;much&#32;a&#32;straight-ahead&#32;implementation&#32;of&#32;the&#32;GIF&#32;format&#32;with&#32;optional&#32;Floyd-Steinberg&#32;</emphasis>
+12 <emphasis role="comment">*&#32;&#32;&#32;dithering.&#32;(It&#32;does&#32;at&#32;least&#32;use&#32;delta&#32;encoding&#32;-&#32;only&#32;the&#32;changed&#32;portions&#32;of&#32;each&#32;</emphasis>
+13 <emphasis role="comment">*&#32;&#32;&#32;frame&#32;are&#32;saved.)&#32;</emphasis>
+14 <emphasis role="comment">*</emphasis>
+15 <emphasis role="comment">*&#32;&#32;&#32;So&#32;resulting&#32;files&#32;are&#32;often&#32;quite&#32;large.&#32;The&#32;hope&#32;is&#32;that&#32;it&#32;will&#32;be&#32;handy&#32;nonetheless</emphasis>
+16 <emphasis role="comment">*&#32;&#32;&#32;as&#32;a&#32;quick&#32;and&#32;easily-integrated&#32;way&#32;for&#32;programs&#32;to&#32;spit&#32;out&#32;animations.</emphasis>
+17 <emphasis role="comment">*</emphasis>
+18 <emphasis role="comment">*&#32;&#32;&#32;Only&#32;RGBA8&#32;is&#32;currently&#32;supported&#32;as&#32;an&#32;input&#32;format.&#32;(The&#32;alpha&#32;is&#32;ignored.)</emphasis>
+19 <emphasis role="comment">*</emphasis>
+20 <emphasis role="comment">*&#32;&#32;&#32;CONFIGURATION:</emphasis>
+21 <emphasis role="comment">*</emphasis>
+22 <emphasis role="comment">*&#32;&#32;&#32;#define&#32;RGIF_IMPLEMENTATION</emphasis>
+23 <emphasis role="comment">*&#32;&#32;&#32;&#32;&#32;&#32;&#32;Generates&#32;the&#32;implementation&#32;of&#32;the&#32;library&#32;into&#32;the&#32;included&#32;file.</emphasis>
+24 <emphasis role="comment">*&#32;&#32;&#32;&#32;&#32;&#32;&#32;If&#32;not&#32;defined,&#32;the&#32;library&#32;is&#32;in&#32;header&#32;only&#32;mode&#32;and&#32;can&#32;be&#32;included&#32;in&#32;other&#32;headers</emphasis>
+25 <emphasis role="comment">*&#32;&#32;&#32;&#32;&#32;&#32;&#32;or&#32;source&#32;files&#32;without&#32;problems.&#32;But&#32;only&#32;ONE&#32;file&#32;should&#32;hold&#32;the&#32;implementation.</emphasis>
+26 <emphasis role="comment">*</emphasis>
+27 <emphasis role="comment">*&#32;&#32;&#32;USAGE:</emphasis>
+28 <emphasis role="comment">*&#32;&#32;&#32;&#32;&#32;&#32;&#32;1)&#32;Create&#32;a&#32;GifWriter&#32;struct.&#32;Pass&#32;it&#32;to&#32;GifBegin()&#32;to&#32;initialize&#32;and&#32;write&#32;the&#32;header.</emphasis>
+29 <emphasis role="comment">*&#32;&#32;&#32;&#32;&#32;&#32;&#32;2)&#32;Pass&#32;subsequent&#32;frames&#32;to&#32;GifWriteFrame().</emphasis>
+30 <emphasis role="comment">*&#32;&#32;&#32;&#32;&#32;&#32;&#32;3)&#32;Finally,&#32;call&#32;GifEnd()&#32;to&#32;close&#32;the&#32;file&#32;handle&#32;and&#32;free&#32;memory.</emphasis>
+31 <emphasis role="comment">*</emphasis>
+32 <emphasis role="comment">*</emphasis>
+33 <emphasis role="comment">*&#32;&#32;&#32;LICENSE:&#32;This&#32;software&#32;is&#32;available&#32;under&#32;2&#32;licenses&#32;--&#32;choose&#32;whichever&#32;you&#32;prefer</emphasis>
+34 <emphasis role="comment">*</emphasis>
+35 <emphasis role="comment">*&#32;&#32;&#32;ALTERNATIVE&#32;A&#32;-&#32;MIT&#32;License</emphasis>
+36 <emphasis role="comment">*</emphasis>
+37 <emphasis role="comment">*&#32;&#32;&#32;Copyright&#32;(c)&#32;2017-2019&#32;Ramon&#32;Santamaria&#32;(@raysan5)</emphasis>
+38 <emphasis role="comment">*</emphasis>
+39 <emphasis role="comment">*&#32;&#32;&#32;Permission&#32;is&#32;hereby&#32;granted,&#32;free&#32;of&#32;charge,&#32;to&#32;any&#32;person&#32;obtaining&#32;a&#32;copy&#32;of&#32;</emphasis>
+40 <emphasis role="comment">*&#32;&#32;&#32;this&#32;software&#32;and&#32;associated&#32;documentation&#32;files&#32;(the&#32;&quot;Software&quot;),&#32;to&#32;deal&#32;in&#32;</emphasis>
+41 <emphasis role="comment">*&#32;&#32;&#32;the&#32;Software&#32;without&#32;restriction,&#32;including&#32;without&#32;limitation&#32;the&#32;rights&#32;to&#32;</emphasis>
+42 <emphasis role="comment">*&#32;&#32;&#32;use,&#32;copy,&#32;modify,&#32;merge,&#32;publish,&#32;distribute,&#32;sublicense,&#32;and/or&#32;sell&#32;copies&#32;</emphasis>
+43 <emphasis role="comment">*&#32;&#32;&#32;of&#32;the&#32;Software,&#32;and&#32;to&#32;permit&#32;persons&#32;to&#32;whom&#32;the&#32;Software&#32;is&#32;furnished&#32;to&#32;do&#32;</emphasis>
+44 <emphasis role="comment">*&#32;&#32;&#32;so,&#32;subject&#32;to&#32;the&#32;following&#32;conditions:</emphasis>
+45 <emphasis role="comment">*</emphasis>
+46 <emphasis role="comment">*&#32;&#32;&#32;The&#32;above&#32;copyright&#32;notice&#32;and&#32;this&#32;permission&#32;notice&#32;shall&#32;be&#32;included&#32;in&#32;all&#32;</emphasis>
+47 <emphasis role="comment">*&#32;&#32;&#32;copies&#32;or&#32;substantial&#32;portions&#32;of&#32;the&#32;Software.</emphasis>
+48 <emphasis role="comment">*</emphasis>
+49 <emphasis role="comment">*&#32;&#32;&#32;THE&#32;SOFTWARE&#32;IS&#32;PROVIDED&#32;&quot;AS&#32;IS&quot;,&#32;WITHOUT&#32;WARRANTY&#32;OF&#32;ANY&#32;KIND,&#32;EXPRESS&#32;OR&#32;</emphasis>
+50 <emphasis role="comment">*&#32;&#32;&#32;IMPLIED,&#32;INCLUDING&#32;BUT&#32;NOT&#32;LIMITED&#32;TO&#32;THE&#32;WARRANTIES&#32;OF&#32;MERCHANTABILITY,&#32;</emphasis>
+51 <emphasis role="comment">*&#32;&#32;&#32;FITNESS&#32;FOR&#32;A&#32;PARTICULAR&#32;PURPOSE&#32;AND&#32;NONINFRINGEMENT.&#32;IN&#32;NO&#32;EVENT&#32;SHALL&#32;THE&#32;</emphasis>
+52 <emphasis role="comment">*&#32;&#32;&#32;AUTHORS&#32;OR&#32;COPYRIGHT&#32;HOLDERS&#32;BE&#32;LIABLE&#32;FOR&#32;ANY&#32;CLAIM,&#32;DAMAGES&#32;OR&#32;OTHER&#32;</emphasis>
+53 <emphasis role="comment">*&#32;&#32;&#32;LIABILITY,&#32;WHETHER&#32;IN&#32;AN&#32;ACTION&#32;OF&#32;CONTRACT,&#32;TORT&#32;OR&#32;OTHERWISE,&#32;ARISING&#32;FROM,&#32;</emphasis>
+54 <emphasis role="comment">*&#32;&#32;&#32;OUT&#32;OF&#32;OR&#32;IN&#32;CONNECTION&#32;WITH&#32;THE&#32;SOFTWARE&#32;OR&#32;THE&#32;USE&#32;OR&#32;OTHER&#32;DEALINGS&#32;IN&#32;THE&#32;SOFTWARE.</emphasis>
+55 <emphasis role="comment">*</emphasis>
+56 <emphasis role="comment">*&#32;&#32;&#32;------------------------------------------------------------------------------</emphasis>
+57 <emphasis role="comment">*</emphasis>
+58 <emphasis role="comment">*&#32;&#32;&#32;ALTERNATIVE&#32;B&#32;-&#32;public&#32;domain&#32;(www.unlicense.org)</emphasis>
+59 <emphasis role="comment">*</emphasis>
+60 <emphasis role="comment">*&#32;&#32;&#32;This&#32;is&#32;free&#32;and&#32;unencumbered&#32;software&#32;released&#32;into&#32;the&#32;public&#32;domain.</emphasis>
+61 <emphasis role="comment">*&#32;&#32;&#32;Anyone&#32;is&#32;free&#32;to&#32;copy,&#32;modify,&#32;publish,&#32;use,&#32;compile,&#32;sell,&#32;or&#32;distribute&#32;this</emphasis>
+62 <emphasis role="comment">*&#32;&#32;&#32;software,&#32;either&#32;in&#32;source&#32;code&#32;form&#32;or&#32;as&#32;a&#32;compiled&#32;binary,&#32;for&#32;any&#32;purpose,</emphasis>
+63 <emphasis role="comment">*&#32;&#32;&#32;commercial&#32;or&#32;non-commercial,&#32;and&#32;by&#32;any&#32;means.</emphasis>
+64 <emphasis role="comment">*&#32;&#32;&#32;</emphasis>
+65 <emphasis role="comment">*&#32;&#32;&#32;In&#32;jurisdictions&#32;that&#32;recognize&#32;copyright&#32;laws,&#32;the&#32;author&#32;or&#32;authors&#32;of&#32;this</emphasis>
+66 <emphasis role="comment">*&#32;&#32;&#32;software&#32;dedicate&#32;any&#32;and&#32;all&#32;copyright&#32;interest&#32;in&#32;the&#32;software&#32;to&#32;the&#32;public</emphasis>
+67 <emphasis role="comment">*&#32;&#32;&#32;domain.&#32;We&#32;make&#32;this&#32;dedication&#32;for&#32;the&#32;benefit&#32;of&#32;the&#32;public&#32;at&#32;large&#32;and&#32;to</emphasis>
+68 <emphasis role="comment">*&#32;&#32;&#32;the&#32;detriment&#32;of&#32;our&#32;heirs&#32;and&#32;successors.&#32;We&#32;intend&#32;this&#32;dedication&#32;to&#32;be&#32;an</emphasis>
+69 <emphasis role="comment">*&#32;&#32;&#32;overt&#32;act&#32;of&#32;relinquishment&#32;in&#32;perpetuity&#32;of&#32;all&#32;present&#32;and&#32;future&#32;rights&#32;to</emphasis>
+70 <emphasis role="comment">*&#32;&#32;&#32;this&#32;software&#32;under&#32;copyright&#32;law.</emphasis>
+71 <emphasis role="comment">*&#32;&#32;&#32;</emphasis>
+72 <emphasis role="comment">*&#32;&#32;&#32;THE&#32;SOFTWARE&#32;IS&#32;PROVIDED&#32;&quot;AS&#32;IS&quot;,&#32;WITHOUT&#32;WARRANTY&#32;OF&#32;ANY&#32;KIND,&#32;EXPRESS&#32;OR</emphasis>
+73 <emphasis role="comment">*&#32;&#32;&#32;IMPLIED,&#32;INCLUDING&#32;BUT&#32;NOT&#32;LIMITED&#32;TO&#32;THE&#32;WARRANTIES&#32;OF&#32;MERCHANTABILITY,</emphasis>
+74 <emphasis role="comment">*&#32;&#32;&#32;FITNESS&#32;FOR&#32;A&#32;PARTICULAR&#32;PURPOSE&#32;AND&#32;NONINFRINGEMENT.&#32;IN&#32;NO&#32;EVENT&#32;SHALL&#32;THE</emphasis>
+75 <emphasis role="comment">*&#32;&#32;&#32;AUTHORS&#32;BE&#32;LIABLE&#32;FOR&#32;ANY&#32;CLAIM,&#32;DAMAGES&#32;OR&#32;OTHER&#32;LIABILITY,&#32;WHETHER&#32;IN&#32;AN</emphasis>
+76 <emphasis role="comment">*&#32;&#32;&#32;ACTION&#32;OF&#32;CONTRACT,&#32;TORT&#32;OR&#32;OTHERWISE,&#32;ARISING&#32;FROM,&#32;OUT&#32;OF&#32;OR&#32;IN&#32;CONNECTION</emphasis>
+77 <emphasis role="comment">*&#32;&#32;&#32;WITH&#32;THE&#32;SOFTWARE&#32;OR&#32;THE&#32;USE&#32;OR&#32;OTHER&#32;DEALINGS&#32;IN&#32;THE&#32;SOFTWARE.</emphasis>
+78 <emphasis role="comment">*</emphasis>
+79 <emphasis role="comment">**********************************************************************************************/</emphasis>
+80 
+81 <emphasis role="preprocessor">#ifndef&#32;RGIF_H</emphasis>
+82 <emphasis role="preprocessor">#define&#32;RGIF_H</emphasis>
+83 
+84 <emphasis role="preprocessor">#include&#32;&lt;stdio.h&gt;</emphasis>&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Required&#32;for:&#32;FILE</emphasis>
+85 
+86 <emphasis role="comment">//#define&#32;RGIF_STATIC</emphasis>
+87 <emphasis role="preprocessor">#ifdef&#32;RGIF_STATIC</emphasis>
+88 <emphasis role="preprocessor">&#32;&#32;&#32;&#32;#define&#32;RGIFDEF&#32;static&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;</emphasis><emphasis role="comment">//&#32;Functions&#32;just&#32;visible&#32;to&#32;module&#32;including&#32;this&#32;file</emphasis>
+89 <emphasis role="preprocessor">#else</emphasis>
+90 <emphasis role="preprocessor">&#32;&#32;&#32;&#32;#ifdef&#32;__cplusplus</emphasis>
+91 <emphasis role="preprocessor">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;#define&#32;RGIFDEF&#32;extern&#32;&quot;C&quot;&#32;&#32;&#32;&#32;&#32;&#32;</emphasis><emphasis role="comment">//&#32;Functions&#32;visible&#32;from&#32;other&#32;files&#32;(no&#32;name&#32;mangling&#32;of&#32;functions&#32;in&#32;C++)</emphasis>
+92 <emphasis role="preprocessor">&#32;&#32;&#32;&#32;#else</emphasis>
+93 <emphasis role="preprocessor">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;#define&#32;RGIFDEF&#32;extern&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;</emphasis><emphasis role="comment">//&#32;Functions&#32;visible&#32;from&#32;other&#32;files</emphasis>
+94 <emphasis role="preprocessor">&#32;&#32;&#32;&#32;#endif</emphasis>
+95 <emphasis role="preprocessor">#endif</emphasis>
+96 
+97 <emphasis role="comment">//----------------------------------------------------------------------------------</emphasis>
+98 <emphasis role="comment">//&#32;Module&#32;Functions&#32;Declaration</emphasis>
+99 <emphasis role="comment">//----------------------------------------------------------------------------------</emphasis>
+100 
+101 <emphasis role="comment">//&#32;NOTE:&#32;By&#32;default&#32;use&#32;bitDepth&#32;=&#32;8,&#32;dither&#32;=&#32;false</emphasis>
+102 <link linkend="__classes_2lib_2raylib_2src_2external_2rgif_8h_1a5b3382717bb4b95d275b2b31a0478cc2">RGIFDEF</link>&#32;<emphasis role="keywordtype">bool</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2rgif_8h_1a950134ef8ecb24caef9a3ba0f0d01c54">GifBegin</link>(<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>&#32;*<link linkend="__classes_2lib_2m_i_n_i-master_2tests_2testhuge_8cpp_1a42a21beb8018ac623f4d09db1343b9cf">filename</link>,&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a3ce386e55bbeb900c1b23e064b89bd04">width</link>,&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1aedd0ea77029b98ce91e47c19addcb68f">height</link>,&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;delay,&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;bitDepth,&#32;<emphasis role="keywordtype">bool</emphasis>&#32;dither);
+103 <link linkend="__classes_2lib_2raylib_2src_2external_2rgif_8h_1a5b3382717bb4b95d275b2b31a0478cc2">RGIFDEF</link>&#32;<emphasis role="keywordtype">bool</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2rgif_8h_1a1adc40041fb88ebc70770e74981d5e83">GifWriteFrame</link>(<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>&#32;*<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a0a221b005894579fea3b9eb7bfc2ee71">image</link>,&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a3ce386e55bbeb900c1b23e064b89bd04">width</link>,&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1aedd0ea77029b98ce91e47c19addcb68f">height</link>,&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;delay,&#32;<emphasis role="keywordtype">int</emphasis>&#32;bitDepth,&#32;<emphasis role="keywordtype">bool</emphasis>&#32;dither);
+104 <link linkend="__classes_2lib_2raylib_2src_2external_2rgif_8h_1a5b3382717bb4b95d275b2b31a0478cc2">RGIFDEF</link>&#32;<emphasis role="keywordtype">bool</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2rgif_8h_1a507dc6e654a007379baea679b1ff64ec">GifEnd</link>();
+105 
+106 <emphasis role="preprocessor">#endif&#32;</emphasis><emphasis role="comment">//&#32;RGIF_H</emphasis>
+107 
+108 
+109 <emphasis role="comment">/***********************************************************************************</emphasis>
+110 <emphasis role="comment">*</emphasis>
+111 <emphasis role="comment">&#32;*&#32;&#32;GIF&#32;IMPLEMENTATION</emphasis>
+112 <emphasis role="comment">*</emphasis>
+113 <emphasis role="comment">************************************************************************************/</emphasis>
+114 
+115 <emphasis role="preprocessor">#if&#32;defined(RGIF_IMPLEMENTATION)</emphasis>
+116 
+117 <emphasis role="preprocessor">#include&#32;&lt;stdio.h&gt;</emphasis>&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Required&#32;for:&#32;FILE,&#32;fopen(),&#32;fclose()</emphasis>
+118 <emphasis role="preprocessor">#include&#32;&lt;string.h&gt;</emphasis>&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Required&#32;for:&#32;memcpy()</emphasis>
+119 
+120 <emphasis role="comment">//&#32;Check&#32;if&#32;custom&#32;malloc/free&#32;functions&#32;defined,&#32;if&#32;not,&#32;using&#32;standard&#32;ones</emphasis>
+121 <emphasis role="comment">//&#32;RGIF_MALLOC&#32;and&#32;RGIF_FREE&#32;are&#32;used&#32;only&#32;by&#32;GifBegin&#32;and&#32;GifEnd&#32;respectively,&#32;</emphasis>
+122 <emphasis role="comment">//&#32;to&#32;allocate&#32;a&#32;buffer&#32;the&#32;size&#32;of&#32;the&#32;image,&#32;which&#32;is&#32;used&#32;to&#32;find&#32;changed&#32;pixels&#32;for&#32;delta-encoding.</emphasis>
+123 <emphasis role="preprocessor">#if&#32;!defined(RGIF_MALLOC)</emphasis>
+124 <emphasis role="preprocessor">&#32;&#32;&#32;&#32;#include&#32;&lt;stdlib.h&gt;</emphasis>&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Required&#32;for:&#32;malloc(),&#32;free()</emphasis>
+125 
+126 <emphasis role="preprocessor">&#32;&#32;&#32;&#32;#define&#32;RGIF_MALLOC(size)&#32;&#32;malloc(size)</emphasis>
+127 <emphasis role="preprocessor">&#32;&#32;&#32;&#32;#define&#32;RGIF_FREE(ptr)&#32;&#32;&#32;&#32;&#32;free(ptr)</emphasis>
+128 <emphasis role="preprocessor">#endif</emphasis>
+129 
+130 <emphasis role="comment">//----------------------------------------------------------------------------------</emphasis>
+131 <emphasis role="comment">//&#32;Defines&#32;and&#32;Macros</emphasis>
+132 <emphasis role="comment">//----------------------------------------------------------------------------------</emphasis>
+133 <emphasis role="preprocessor">#define&#32;GIFMIN(a,&#32;b)&#32;(((a)&lt;(b))?(a):(b))</emphasis>
+134 <emphasis role="preprocessor">#define&#32;GIFMAX(a,&#32;b)&#32;(((a)&gt;(b))?(a):(b))</emphasis>
+135 <emphasis role="preprocessor">#define&#32;GIFABS(x)&#32;((x)&lt;0?-(x):(x))</emphasis>
+136 
+137 <emphasis role="comment">//----------------------------------------------------------------------------------</emphasis>
+138 <emphasis role="comment">//&#32;Types&#32;and&#32;Structures&#32;Definition</emphasis>
+139 <emphasis role="comment">//----------------------------------------------------------------------------------</emphasis>
+140 
+141 <emphasis role="comment">//&#32;Gif&#32;palette&#32;structure</emphasis>
+142 <emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">struct&#32;</emphasis>GifPalette&#32;{
+143 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;bitDepth;
+144 
+145 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1abe08814c2f72843fde4d8df41440d5a0">r</link>[256];
+146 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a9cd653b1648845554169fbc3a3f6d37a">g</link>[256];
+147 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a6eba317e3cf44d6d26c04a5a8f197dcb">b</link>[256];
+148 &#32;&#32;&#32;&#32;
+149 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;k-d&#32;tree&#32;over&#32;RGB&#32;space,&#32;organized&#32;in&#32;heap&#32;fashion</emphasis>
+150 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;i.e.&#32;left&#32;child&#32;of&#32;node&#32;i&#32;is&#32;node&#32;i*2,&#32;right&#32;child&#32;is&#32;node&#32;i*2&#32;+&#32;1</emphasis>
+151 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;nodes&#32;256-511&#32;are&#32;implicitly&#32;the&#32;leaves,&#32;containing&#32;a&#32;color</emphasis>
+152 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>&#32;treeSplitElt[255];
+153 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>&#32;treeSplit[255];
+154 }&#32;GifPalette;
+155 
+156 
+157 <emphasis role="comment">//&#32;Simple&#32;structure&#32;to&#32;write&#32;out&#32;the&#32;LZW-compressed&#32;</emphasis>
+158 <emphasis role="comment">//&#32;portion&#32;of&#32;the&#32;imageone&#32;bit&#32;at&#32;a&#32;time</emphasis>
+159 <emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">struct&#32;</emphasis>GifBitStatus&#32;{
+160 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>&#32;bitIndex;&#32;&#32;<emphasis role="comment">//&#32;how&#32;many&#32;bits&#32;in&#32;the&#32;partial&#32;byte&#32;written&#32;so&#32;far</emphasis>
+161 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2rlgl_8h_1a0c8186d9b9b7880309c27230bbb5e69d">byte</link>;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;current&#32;partial&#32;byte</emphasis>
+162 &#32;&#32;&#32;&#32;
+163 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;chunkIndex;
+164 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>&#32;<link linkend="_namespace_catch_1_1_generators_1acb4654b4e840e438e3bc204ac4d8e157">chunk</link>[256];&#32;&#32;&#32;<emphasis role="comment">//&#32;bytes&#32;are&#32;written&#32;in&#32;here&#32;until&#32;we&#32;have&#32;256&#32;of&#32;them,&#32;then&#32;written&#32;to&#32;the&#32;file</emphasis>
+165 }&#32;GifBitStatus;
+166 
+167 <emphasis role="comment">//&#32;The&#32;LZW&#32;dictionary&#32;is&#32;a&#32;256-ary&#32;tree&#32;constructed&#32;</emphasis>
+168 <emphasis role="comment">//&#32;as&#32;the&#32;file&#32;is&#32;encoded,&#32;this&#32;is&#32;one&#32;node</emphasis>
+169 <emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">struct&#32;</emphasis>GifLzwNode&#32;{
+170 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">short</emphasis>&#32;m_next[256];
+171 }&#32;GifLzwNode;
+172 
+173 <emphasis role="comment">//----------------------------------------------------------------------------------</emphasis>
+174 <emphasis role="comment">//&#32;Global&#32;Variables&#32;Definition</emphasis>
+175 <emphasis role="comment">//----------------------------------------------------------------------------------</emphasis>
+176 <emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;gifTransparentIndex&#32;=&#32;0;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Transparent&#32;color&#32;index</emphasis>
+177 
+178 <emphasis role="keyword">static</emphasis>&#32;FILE&#32;*gifFile&#32;=&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>;
+179 <emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>&#32;*gifFrame;
+180 
+181 <emphasis role="comment">//----------------------------------------------------------------------------------</emphasis>
+182 <emphasis role="comment">//&#32;Module&#32;specific&#32;Functions&#32;Declaration</emphasis>
+183 <emphasis role="comment">//----------------------------------------------------------------------------------</emphasis>
+184 <emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>&#32;GifGetClosestPaletteColor(GifPalette&#32;*pPal,&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1abe08814c2f72843fde4d8df41440d5a0">r</link>,&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a9cd653b1648845554169fbc3a3f6d37a">g</link>,&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a6eba317e3cf44d6d26c04a5a8f197dcb">b</link>,&#32;<emphasis role="keywordtype">int</emphasis>&#32;*bestInd,&#32;<emphasis role="keywordtype">int</emphasis>&#32;*bestDiff,&#32;<emphasis role="keywordtype">int</emphasis>&#32;treeRoot);
+185 <emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>&#32;GifSwapPixels(<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>&#32;*<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a0a221b005894579fea3b9eb7bfc2ee71">image</link>,&#32;<emphasis role="keywordtype">int</emphasis>&#32;pixA,&#32;<emphasis role="keywordtype">int</emphasis>&#32;pixB);
+186 <emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;GifPartition(<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>&#32;*<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a0a221b005894579fea3b9eb7bfc2ee71">image</link>,&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;left,&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;right,&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;elt,&#32;<emphasis role="keywordtype">int</emphasis>&#32;pivotIndex);
+187 <emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>&#32;GifPartitionByMedian(<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>&#32;*<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a0a221b005894579fea3b9eb7bfc2ee71">image</link>,&#32;<emphasis role="keywordtype">int</emphasis>&#32;left,&#32;<emphasis role="keywordtype">int</emphasis>&#32;right,&#32;<emphasis role="keywordtype">int</emphasis>&#32;com,&#32;<emphasis role="keywordtype">int</emphasis>&#32;neededCenter);
+188 <emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>&#32;GifSplitPalette(<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>&#32;*<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a0a221b005894579fea3b9eb7bfc2ee71">image</link>,&#32;<emphasis role="keywordtype">int</emphasis>&#32;numPixels,&#32;<emphasis role="keywordtype">int</emphasis>&#32;firstElt,&#32;<emphasis role="keywordtype">int</emphasis>&#32;lastElt,&#32;<emphasis role="keywordtype">int</emphasis>&#32;splitElt,&#32;<emphasis role="keywordtype">int</emphasis>&#32;splitDist,&#32;<emphasis role="keywordtype">int</emphasis>&#32;treeNode,&#32;<emphasis role="keywordtype">bool</emphasis>&#32;buildForDither,&#32;GifPalette&#32;*pal);
+189 <emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;GifPickChangedPixels(<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>&#32;*lastFrame,&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>&#32;*frame,&#32;<emphasis role="keywordtype">int</emphasis>&#32;numPixels);
+190 <emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>&#32;GifMakePalette(<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>&#32;*lastFrame,&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>&#32;*nextFrame,&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a3ce386e55bbeb900c1b23e064b89bd04">width</link>,&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1aedd0ea77029b98ce91e47c19addcb68f">height</link>,&#32;<emphasis role="keywordtype">int</emphasis>&#32;bitDepth,&#32;<emphasis role="keywordtype">bool</emphasis>&#32;buildForDither,&#32;GifPalette&#32;*pPal);
+191 <emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>&#32;GifDitherImage(<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>&#32;*lastFrame,&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>&#32;*nextFrame,&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>&#32;*outFrame,&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a3ce386e55bbeb900c1b23e064b89bd04">width</link>,&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1aedd0ea77029b98ce91e47c19addcb68f">height</link>,&#32;GifPalette&#32;*pPal);
+192 <emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>&#32;GifThresholdImage(<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>&#32;*lastFrame,&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>&#32;*nextFrame,&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>&#32;*outFrame,&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a3ce386e55bbeb900c1b23e064b89bd04">width</link>,&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1aedd0ea77029b98ce91e47c19addcb68f">height</link>,&#32;GifPalette&#32;*pPal);
+193 <emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>&#32;GifWriteBit(GifBitStatus&#32;*stat,&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;bit);
+194 
+195 <emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>&#32;GifWriteChunk(FILE&#32;*<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a0fdda94b8b7e64884690244028f455ba">f</link>,&#32;GifBitStatus&#32;*stat);
+196 <emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>&#32;GifWritePalette(FILE&#32;*<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a0fdda94b8b7e64884690244028f455ba">f</link>,&#32;<emphasis role="keyword">const</emphasis>&#32;GifPalette&#32;*pPal);
+197 <emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>&#32;GifWriteCode(FILE&#32;*<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a0fdda94b8b7e64884690244028f455ba">f</link>,&#32;GifBitStatus&#32;*stat,&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;code,&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="_namespacelength">length</link>);
+198 <emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>&#32;GifWriteLzwImage(FILE&#32;*<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a0fdda94b8b7e64884690244028f455ba">f</link>,&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>&#32;*<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a0a221b005894579fea3b9eb7bfc2ee71">image</link>,&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;left,&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;top,&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a3ce386e55bbeb900c1b23e064b89bd04">width</link>,&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1aedd0ea77029b98ce91e47c19addcb68f">height</link>,&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;delay,&#32;GifPalette&#32;*pPal);
+199 
+200 <emphasis role="comment">//----------------------------------------------------------------------------------</emphasis>
+201 <emphasis role="comment">//&#32;Module&#32;Functions&#32;Definition</emphasis>
+202 <emphasis role="comment">//----------------------------------------------------------------------------------</emphasis>
+203 
+204 <emphasis role="comment">//&#32;Creates&#32;a&#32;gif&#32;file</emphasis>
+205 <emphasis role="comment">//&#32;NOTE:&#32;Initializes&#32;internal&#32;file&#32;pointer&#32;(only&#32;one&#32;gif&#32;recording&#32;at&#32;a&#32;time)</emphasis>
+206 <emphasis role="comment">//&#32;The&#32;delay&#32;value&#32;is&#32;the&#32;time&#32;between&#32;frames&#32;in&#32;hundredths&#32;of&#32;a&#32;second&#32;-&#32;note&#32;that&#32;not&#32;all&#32;viewers&#32;pay&#32;much&#32;attention&#32;to&#32;this&#32;value.</emphasis>
+207 <link linkend="__classes_2lib_2raylib_2src_2external_2rgif_8h_1a5b3382717bb4b95d275b2b31a0478cc2">RGIFDEF</link>&#32;<emphasis role="keywordtype">bool</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2rgif_8h_1a950134ef8ecb24caef9a3ba0f0d01c54">GifBegin</link>(<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>&#32;*<link linkend="__classes_2lib_2m_i_n_i-master_2tests_2testhuge_8cpp_1a42a21beb8018ac623f4d09db1343b9cf">filename</link>,&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a3ce386e55bbeb900c1b23e064b89bd04">width</link>,&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1aedd0ea77029b98ce91e47c19addcb68f">height</link>,&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;delay,&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;bitDepth,&#32;<emphasis role="keywordtype">bool</emphasis>&#32;dither)
+208 {
+209 <emphasis role="preprocessor">#if&#32;_MSC_VER&#32;&gt;=&#32;1400</emphasis>
+210 &#32;&#32;&#32;&#32;gifFile&#32;=&#32;0;
+211 &#32;&#32;&#32;&#32;fopen_s(&amp;gifFile,&#32;<link linkend="__classes_2lib_2m_i_n_i-master_2tests_2testhuge_8cpp_1a42a21beb8018ac623f4d09db1343b9cf">filename</link>,&#32;<emphasis role="stringliteral">&quot;wb&quot;</emphasis>);
+212 <emphasis role="preprocessor">#else</emphasis>
+213 &#32;&#32;&#32;&#32;gifFile&#32;=&#32;fopen(<link linkend="__classes_2lib_2m_i_n_i-master_2tests_2testhuge_8cpp_1a42a21beb8018ac623f4d09db1343b9cf">filename</link>,&#32;<emphasis role="stringliteral">&quot;wb&quot;</emphasis>);
+214 <emphasis role="preprocessor">#endif</emphasis>
+215 
+216 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(!gifFile)&#32;<emphasis role="keywordflow">return</emphasis>&#32;<emphasis role="keyword">false</emphasis>;
+217 &#32;&#32;&#32;&#32;
+218 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Allocate&#32;space&#32;for&#32;one&#32;gif&#32;frame</emphasis>
+219 &#32;&#32;&#32;&#32;gifFrame&#32;=&#32;(<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>&#32;*)RGIF_MALLOC(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a3ce386e55bbeb900c1b23e064b89bd04">width</link>*<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1aedd0ea77029b98ce91e47c19addcb68f">height</link>*4);
+220 &#32;&#32;&#32;&#32;
+221 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;GIF&#32;Header</emphasis>
+222 &#32;&#32;&#32;&#32;fputs(<emphasis role="stringliteral">&quot;GIF89a&quot;</emphasis>,gifFile);
+223 &#32;&#32;&#32;&#32;
+224 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Reference:&#32;http://www.onicos.com/staff/iz/formats/gif.html</emphasis>
+225 &#32;&#32;&#32;&#32;
+226 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;GIF&#32;Screen&#32;Descriptor</emphasis>
+227 &#32;&#32;&#32;&#32;fputc(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a3ce386e55bbeb900c1b23e064b89bd04">width</link>&#32;&amp;&#32;0xff,&#32;gifFile);
+228 &#32;&#32;&#32;&#32;fputc((<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a3ce386e55bbeb900c1b23e064b89bd04">width</link>&#32;&gt;&gt;&#32;8)&#32;&amp;&#32;0xff,&#32;gifFile);&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Screen&#32;width&#32;(2&#32;byte)</emphasis>
+229 &#32;&#32;&#32;&#32;fputc(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1aedd0ea77029b98ce91e47c19addcb68f">height</link>&#32;&amp;&#32;0xff,&#32;gifFile);
+230 &#32;&#32;&#32;&#32;fputc((<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1aedd0ea77029b98ce91e47c19addcb68f">height</link>&#32;&gt;&gt;&#32;8)&#32;&amp;&#32;0xff,&#32;gifFile);&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Screen&#32;height&#32;(2&#32;byte)</emphasis>
+231 &#32;&#32;&#32;&#32;
+232 &#32;&#32;&#32;&#32;fputc(0xf0,&#32;gifFile);&#32;&#32;<emphasis role="comment">//&#32;Color&#32;table&#32;flags:&#32;unsorted&#32;global&#32;color&#32;table&#32;of&#32;2&#32;entries&#32;(1&#32;byte,&#32;bit-flags)</emphasis>
+233 &#32;&#32;&#32;&#32;fputc(0,&#32;gifFile);&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Background&#32;color&#32;index</emphasis>
+234 &#32;&#32;&#32;&#32;fputc(0,&#32;gifFile);&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Pixel&#32;Aspect&#32;Ratio&#32;(square,&#32;we&#32;need&#32;to&#32;specify&#32;this&#32;because&#32;it&apos;s&#32;1989)</emphasis>
+235 &#32;&#32;&#32;&#32;
+236 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;GIF&#32;Global&#32;Color&#32;table&#32;(just&#32;a&#32;dummy&#32;palette)</emphasis>
+237 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Color&#32;0:&#32;black</emphasis>
+238 &#32;&#32;&#32;&#32;fputc(0,&#32;gifFile);
+239 &#32;&#32;&#32;&#32;fputc(0,&#32;gifFile);&#32;
+240 &#32;&#32;&#32;&#32;fputc(0,&#32;gifFile);
+241 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Color&#32;1:&#32;also&#32;black</emphasis>
+242 &#32;&#32;&#32;&#32;fputc(0,&#32;gifFile);
+243 &#32;&#32;&#32;&#32;fputc(0,&#32;gifFile);
+244 &#32;&#32;&#32;&#32;fputc(0,&#32;gifFile);
+245 &#32;&#32;&#32;&#32;
+246 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(delay&#32;!=&#32;0)
+247 &#32;&#32;&#32;&#32;{
+248 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Application&#32;Extension&#32;Block&#32;(19&#32;bytes&#32;long)</emphasis>
+249 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;fputc(0x21,&#32;gifFile);&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;GIF&#32;Extension&#32;code</emphasis>
+250 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;fputc(0xff,&#32;gifFile);&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Application&#32;Extension&#32;Label</emphasis>
+251 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;fputc(11,&#32;gifFile);&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Length&#32;of&#32;Application&#32;Block&#32;(11&#32;byte)</emphasis>
+252 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;fputs(<emphasis role="stringliteral">&quot;NETSCAPE2.0&quot;</emphasis>,&#32;gifFile);&#32;<emphasis role="comment">//&#32;Application&#32;Identifier&#32;(Netscape&#32;2.0&#32;block)</emphasis>
+253 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;
+254 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;fputc(0x03,&#32;gifFile);&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Length&#32;of&#32;Data&#32;Sub-Block&#32;(3&#32;bytes)</emphasis>
+255 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;fputc(0x01,&#32;gifFile);&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;0x01</emphasis>
+256 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;fputc(0x00,&#32;gifFile);&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;This&#32;specifies&#32;the&#32;number&#32;of&#32;times,&#32;&#32;</emphasis>
+257 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;fputc(0x00,&#32;gifFile);&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;the&#32;loop&#32;should&#32;be&#32;executed&#32;(infinitely)</emphasis>
+258 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;
+259 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;fputc(0x00,&#32;gifFile);&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Data&#32;Sub-Block&#32;Terminator.</emphasis>
+260 &#32;&#32;&#32;&#32;}
+261 &#32;&#32;&#32;&#32;
+262 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<emphasis role="keyword">true</emphasis>;
+263 }
+264 
+265 <emphasis role="comment">//&#32;Writes&#32;out&#32;a&#32;new&#32;frame&#32;to&#32;a&#32;GIF&#32;in&#32;progress.</emphasis>
+266 <emphasis role="comment">//&#32;NOTE:&#32;gifFile&#32;should&#32;have&#32;been&#32;initialized&#32;with&#32;GifBegin()</emphasis>
+267 <emphasis role="comment">//&#32;AFAIK,&#32;it&#32;is&#32;legal&#32;to&#32;use&#32;different&#32;bit&#32;depths&#32;for&#32;different&#32;frames&#32;of&#32;an&#32;image&#32;-</emphasis>
+268 <emphasis role="comment">//&#32;this&#32;may&#32;be&#32;handy&#32;to&#32;save&#32;bits&#32;in&#32;animations&#32;that&#32;don&apos;t&#32;change&#32;much.</emphasis>
+269 <link linkend="__classes_2lib_2raylib_2src_2external_2rgif_8h_1a5b3382717bb4b95d275b2b31a0478cc2">RGIFDEF</link>&#32;<emphasis role="keywordtype">bool</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2rgif_8h_1a1adc40041fb88ebc70770e74981d5e83">GifWriteFrame</link>(<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>&#32;*<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a0a221b005894579fea3b9eb7bfc2ee71">image</link>,&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a3ce386e55bbeb900c1b23e064b89bd04">width</link>,&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1aedd0ea77029b98ce91e47c19addcb68f">height</link>,&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;delay,&#32;<emphasis role="keywordtype">int</emphasis>&#32;bitDepth,&#32;<emphasis role="keywordtype">bool</emphasis>&#32;dither)
+270 {
+271 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(!gifFile)&#32;<emphasis role="keywordflow">return</emphasis>&#32;<emphasis role="keyword">false</emphasis>;
+272 &#32;&#32;&#32;&#32;
+273 &#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>&#32;*oldImage&#32;=&#32;gifFrame;
+274 &#32;&#32;&#32;&#32;
+275 &#32;&#32;&#32;&#32;GifPalette&#32;pal;
+276 &#32;&#32;&#32;&#32;GifMakePalette((dither&#32;?&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>&#32;:&#32;oldImage),&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a0a221b005894579fea3b9eb7bfc2ee71">image</link>,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a3ce386e55bbeb900c1b23e064b89bd04">width</link>,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1aedd0ea77029b98ce91e47c19addcb68f">height</link>,&#32;bitDepth,&#32;dither,&#32;&amp;pal);
+277 &#32;&#32;&#32;&#32;
+278 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(dither)&#32;GifDitherImage(oldImage,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a0a221b005894579fea3b9eb7bfc2ee71">image</link>,&#32;gifFrame,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a3ce386e55bbeb900c1b23e064b89bd04">width</link>,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1aedd0ea77029b98ce91e47c19addcb68f">height</link>,&#32;&amp;pal);
+279 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>&#32;GifThresholdImage(oldImage,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a0a221b005894579fea3b9eb7bfc2ee71">image</link>,&#32;gifFrame,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a3ce386e55bbeb900c1b23e064b89bd04">width</link>,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1aedd0ea77029b98ce91e47c19addcb68f">height</link>,&#32;&amp;pal);
+280 &#32;&#32;&#32;&#32;
+281 &#32;&#32;&#32;&#32;GifWriteLzwImage(gifFile,&#32;gifFrame,&#32;0,&#32;0,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a3ce386e55bbeb900c1b23e064b89bd04">width</link>,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1aedd0ea77029b98ce91e47c19addcb68f">height</link>,&#32;delay,&#32;&amp;pal);
+282 &#32;&#32;&#32;&#32;
+283 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<emphasis role="keyword">true</emphasis>;
+284 }
+285 
+286 <emphasis role="comment">//&#32;Writes&#32;the&#32;EOF&#32;code,&#32;closes&#32;the&#32;file&#32;handle,&#32;and&#32;frees&#32;temp&#32;memory&#32;used&#32;by&#32;a&#32;GIF.</emphasis>
+287 <emphasis role="comment">//&#32;Many&#32;if&#32;not&#32;most&#32;viewers&#32;will&#32;still&#32;display&#32;a&#32;GIF&#32;properly&#32;if&#32;the&#32;EOF&#32;code&#32;is&#32;missing,</emphasis>
+288 <emphasis role="comment">//&#32;but&#32;it&apos;s&#32;still&#32;a&#32;good&#32;idea&#32;to&#32;write&#32;it&#32;out.</emphasis>
+289 <link linkend="__classes_2lib_2raylib_2src_2external_2rgif_8h_1a5b3382717bb4b95d275b2b31a0478cc2">RGIFDEF</link>&#32;<emphasis role="keywordtype">bool</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2rgif_8h_1a507dc6e654a007379baea679b1ff64ec">GifEnd</link>()
+290 {
+291 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(!gifFile)&#32;<emphasis role="keywordflow">return</emphasis>&#32;<emphasis role="keyword">false</emphasis>;
+292 &#32;&#32;&#32;&#32;
+293 &#32;&#32;&#32;&#32;fputc(0x3b,&#32;gifFile);&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Trailer&#32;(end&#32;of&#32;file)</emphasis>
+294 &#32;&#32;&#32;&#32;fclose(gifFile);
+295 &#32;&#32;&#32;&#32;
+296 &#32;&#32;&#32;&#32;RGIF_FREE(gifFrame);
+297 &#32;&#32;&#32;&#32;
+298 &#32;&#32;&#32;&#32;gifFile&#32;=&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>;
+299 &#32;&#32;&#32;&#32;gifFrame&#32;=&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>;
+300 &#32;&#32;&#32;&#32;
+301 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<emphasis role="keyword">true</emphasis>;
+302 }
+303 
+304 <emphasis role="comment">//----------------------------------------------------------------------------------</emphasis>
+305 <emphasis role="comment">//&#32;Module&#32;specific&#32;Functions&#32;Definition</emphasis>
+306 <emphasis role="comment">//----------------------------------------------------------------------------------</emphasis>
+307 <emphasis role="comment">//&#32;walks&#32;the&#32;k-d&#32;tree&#32;to&#32;pick&#32;the&#32;palette&#32;entry&#32;for&#32;a&#32;desired&#32;color.</emphasis>
+308 <emphasis role="comment">//&#32;Takes&#32;as&#32;in/out&#32;parameters&#32;the&#32;current&#32;best&#32;color&#32;and&#32;its&#32;error&#32;-</emphasis>
+309 <emphasis role="comment">//&#32;only&#32;changes&#32;them&#32;if&#32;it&#32;finds&#32;a&#32;better&#32;color&#32;in&#32;its&#32;subtree.</emphasis>
+310 <emphasis role="comment">//&#32;this&#32;is&#32;the&#32;major&#32;hotspot&#32;in&#32;the&#32;code&#32;at&#32;the&#32;moment.</emphasis>
+311 <emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>&#32;GifGetClosestPaletteColor(GifPalette&#32;*pPal,&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1abe08814c2f72843fde4d8df41440d5a0">r</link>,&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a9cd653b1648845554169fbc3a3f6d37a">g</link>,&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a6eba317e3cf44d6d26c04a5a8f197dcb">b</link>,&#32;<emphasis role="keywordtype">int</emphasis>&#32;*bestInd,&#32;<emphasis role="keywordtype">int</emphasis>&#32;*bestDiff,&#32;<emphasis role="keywordtype">int</emphasis>&#32;treeRoot)
+312 {
+313 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;base&#32;case,&#32;reached&#32;the&#32;bottom&#32;of&#32;the&#32;tree</emphasis>
+314 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(treeRoot&#32;&gt;&#32;(1&lt;&lt;pPal-&gt;bitDepth)-1)
+315 &#32;&#32;&#32;&#32;{
+316 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;ind&#32;=&#32;treeRoot-(1&lt;&lt;pPal-&gt;bitDepth);
+317 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(ind&#32;==&#32;gifTransparentIndex)&#32;<emphasis role="keywordflow">return</emphasis>;
+318 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;
+319 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;check&#32;whether&#32;this&#32;color&#32;is&#32;better&#32;than&#32;the&#32;current&#32;winner</emphasis>
+320 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;r_err&#32;=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1abe08814c2f72843fde4d8df41440d5a0">r</link>&#32;-&#32;((int)pPal-&gt;r[ind]);
+321 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;g_err&#32;=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a9cd653b1648845554169fbc3a3f6d37a">g</link>&#32;-&#32;((int)pPal-&gt;g[ind]);
+322 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;b_err&#32;=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a6eba317e3cf44d6d26c04a5a8f197dcb">b</link>&#32;-&#32;((int)pPal-&gt;b[ind]);
+323 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;diff&#32;=&#32;GIFABS(r_err)+GIFABS(g_err)+GIFABS(b_err);
+324 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;
+325 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(diff&#32;&lt;&#32;*bestDiff)
+326 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+327 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;*bestInd&#32;=&#32;ind;
+328 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;*bestDiff&#32;=&#32;diff;
+329 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+330 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;
+331 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>;
+332 &#32;&#32;&#32;&#32;}
+333 &#32;&#32;&#32;&#32;
+334 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;take&#32;the&#32;appropriate&#32;color&#32;(r,&#32;g,&#32;or&#32;b)&#32;for&#32;this&#32;node&#32;of&#32;the&#32;k-d&#32;tree</emphasis>
+335 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;comps[3];&#32;comps[0]&#32;=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1abe08814c2f72843fde4d8df41440d5a0">r</link>;&#32;comps[1]&#32;=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a9cd653b1648845554169fbc3a3f6d37a">g</link>;&#32;comps[2]&#32;=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a6eba317e3cf44d6d26c04a5a8f197dcb">b</link>;
+336 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;splitComp&#32;=&#32;comps[pPal-&gt;treeSplitElt[treeRoot]];
+337 &#32;&#32;&#32;&#32;
+338 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;splitPos&#32;=&#32;pPal-&gt;treeSplit[treeRoot];
+339 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(splitPos&#32;&gt;&#32;splitComp)
+340 &#32;&#32;&#32;&#32;{
+341 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;check&#32;the&#32;left&#32;subtree</emphasis>
+342 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;GifGetClosestPaletteColor(pPal,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1abe08814c2f72843fde4d8df41440d5a0">r</link>,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a9cd653b1648845554169fbc3a3f6d37a">g</link>,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a6eba317e3cf44d6d26c04a5a8f197dcb">b</link>,&#32;bestInd,&#32;bestDiff,&#32;treeRoot*2);
+343 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;
+344 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(*bestDiff&#32;&gt;&#32;(splitPos&#32;-&#32;splitComp))
+345 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+346 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;cannot&#32;prove&#32;there&apos;s&#32;not&#32;a&#32;better&#32;value&#32;in&#32;the&#32;right&#32;subtree,&#32;check&#32;that&#32;too</emphasis>
+347 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;GifGetClosestPaletteColor(pPal,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1abe08814c2f72843fde4d8df41440d5a0">r</link>,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a9cd653b1648845554169fbc3a3f6d37a">g</link>,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a6eba317e3cf44d6d26c04a5a8f197dcb">b</link>,&#32;bestInd,&#32;bestDiff,&#32;treeRoot*2&#32;+&#32;1);
+348 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+349 &#32;&#32;&#32;&#32;}
+350 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>
+351 &#32;&#32;&#32;&#32;{
+352 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;GifGetClosestPaletteColor(pPal,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1abe08814c2f72843fde4d8df41440d5a0">r</link>,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a9cd653b1648845554169fbc3a3f6d37a">g</link>,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a6eba317e3cf44d6d26c04a5a8f197dcb">b</link>,&#32;bestInd,&#32;bestDiff,&#32;treeRoot*2&#32;+&#32;1);
+353 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;
+354 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(*bestDiff&#32;&gt;&#32;splitComp&#32;-&#32;splitPos)
+355 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+356 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;GifGetClosestPaletteColor(pPal,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1abe08814c2f72843fde4d8df41440d5a0">r</link>,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a9cd653b1648845554169fbc3a3f6d37a">g</link>,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a6eba317e3cf44d6d26c04a5a8f197dcb">b</link>,&#32;bestInd,&#32;bestDiff,&#32;treeRoot*2);
+357 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+358 &#32;&#32;&#32;&#32;}
+359 }
+360 
+361 <emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>&#32;GifSwapPixels(<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>&#32;*<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a0a221b005894579fea3b9eb7bfc2ee71">image</link>,&#32;<emphasis role="keywordtype">int</emphasis>&#32;pixA,&#32;<emphasis role="keywordtype">int</emphasis>&#32;pixB)
+362 {
+363 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>&#32;rA&#32;=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a0a221b005894579fea3b9eb7bfc2ee71">image</link>[pixA*4];
+364 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>&#32;gA&#32;=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a0a221b005894579fea3b9eb7bfc2ee71">image</link>[pixA*4&#32;+&#32;1];
+365 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>&#32;bA&#32;=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a0a221b005894579fea3b9eb7bfc2ee71">image</link>[pixA*4+2];
+366 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>&#32;aA&#32;=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a0a221b005894579fea3b9eb7bfc2ee71">image</link>[pixA*4+3];
+367 &#32;&#32;&#32;&#32;
+368 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>&#32;rB&#32;=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a0a221b005894579fea3b9eb7bfc2ee71">image</link>[pixB*4];
+369 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>&#32;gB&#32;=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a0a221b005894579fea3b9eb7bfc2ee71">image</link>[pixB*4&#32;+&#32;1];
+370 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>&#32;bB&#32;=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a0a221b005894579fea3b9eb7bfc2ee71">image</link>[pixB*4+2];
+371 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>&#32;aB&#32;=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a0a221b005894579fea3b9eb7bfc2ee71">image</link>[pixA*4+3];
+372 &#32;&#32;&#32;&#32;
+373 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a0a221b005894579fea3b9eb7bfc2ee71">image</link>[pixA*4]&#32;=&#32;rB;
+374 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a0a221b005894579fea3b9eb7bfc2ee71">image</link>[pixA*4&#32;+&#32;1]&#32;=&#32;gB;
+375 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a0a221b005894579fea3b9eb7bfc2ee71">image</link>[pixA*4+2]&#32;=&#32;bB;
+376 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a0a221b005894579fea3b9eb7bfc2ee71">image</link>[pixA*4+3]&#32;=&#32;aB;
+377 &#32;&#32;&#32;&#32;
+378 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a0a221b005894579fea3b9eb7bfc2ee71">image</link>[pixB*4]&#32;=&#32;rA;
+379 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a0a221b005894579fea3b9eb7bfc2ee71">image</link>[pixB*4&#32;+&#32;1]&#32;=&#32;gA;
+380 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a0a221b005894579fea3b9eb7bfc2ee71">image</link>[pixB*4+2]&#32;=&#32;bA;
+381 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a0a221b005894579fea3b9eb7bfc2ee71">image</link>[pixB*4+3]&#32;=&#32;aA;
+382 }
+383 
+384 <emphasis role="comment">//&#32;just&#32;the&#32;partition&#32;operation&#32;from&#32;quicksort</emphasis>
+385 <emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;GifPartition(<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>&#32;*<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a0a221b005894579fea3b9eb7bfc2ee71">image</link>,&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;left,&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;right,&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;elt,&#32;<emphasis role="keywordtype">int</emphasis>&#32;pivotIndex)
+386 {
+387 &#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;pivotValue&#32;=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a0a221b005894579fea3b9eb7bfc2ee71">image</link>[(pivotIndex)*4+elt];
+388 &#32;&#32;&#32;&#32;GifSwapPixels(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a0a221b005894579fea3b9eb7bfc2ee71">image</link>,&#32;pivotIndex,&#32;right-1);
+389 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;storeIndex&#32;=&#32;left;
+390 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">bool</emphasis>&#32;split&#32;=&#32;0;
+391 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(<emphasis role="keywordtype">int</emphasis>&#32;ii=left;&#32;ii&lt;right-1;&#32;++ii)
+392 &#32;&#32;&#32;&#32;{
+393 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;arrayVal&#32;=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a0a221b005894579fea3b9eb7bfc2ee71">image</link>[ii*4+elt];
+394 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(arrayVal&#32;&lt;&#32;pivotValue)
+395 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+396 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;GifSwapPixels(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a0a221b005894579fea3b9eb7bfc2ee71">image</link>,&#32;ii,&#32;storeIndex);
+397 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;++storeIndex;
+398 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+399 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>&#32;<emphasis role="keywordflow">if</emphasis>&#32;(arrayVal&#32;==&#32;pivotValue)
+400 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+401 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(split)
+402 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+403 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;GifSwapPixels(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a0a221b005894579fea3b9eb7bfc2ee71">image</link>,&#32;ii,&#32;storeIndex);
+404 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;++storeIndex;
+405 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+406 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;split&#32;=&#32;!split;
+407 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+408 &#32;&#32;&#32;&#32;}
+409 &#32;&#32;&#32;&#32;GifSwapPixels(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a0a221b005894579fea3b9eb7bfc2ee71">image</link>,&#32;storeIndex,&#32;right-1);
+410 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;storeIndex;
+411 }
+412 
+413 <emphasis role="comment">//&#32;Perform&#32;an&#32;incomplete&#32;sort,&#32;finding&#32;all&#32;elements&#32;above&#32;and&#32;below&#32;the&#32;desired&#32;median</emphasis>
+414 <emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>&#32;GifPartitionByMedian(<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>&#32;*<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a0a221b005894579fea3b9eb7bfc2ee71">image</link>,&#32;<emphasis role="keywordtype">int</emphasis>&#32;left,&#32;<emphasis role="keywordtype">int</emphasis>&#32;right,&#32;<emphasis role="keywordtype">int</emphasis>&#32;com,&#32;<emphasis role="keywordtype">int</emphasis>&#32;neededCenter)
+415 {
+416 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(left&#32;&lt;&#32;right-1)
+417 &#32;&#32;&#32;&#32;{
+418 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;pivotIndex&#32;=&#32;left&#32;+&#32;(right-left)/2;
+419 &#32;&#32;&#32;&#32;
+420 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;pivotIndex&#32;=&#32;GifPartition(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a0a221b005894579fea3b9eb7bfc2ee71">image</link>,&#32;left,&#32;right,&#32;com,&#32;pivotIndex);
+421 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;
+422 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Only&#32;&quot;sort&quot;&#32;the&#32;section&#32;of&#32;the&#32;array&#32;that&#32;contains&#32;the&#32;median</emphasis>
+423 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(pivotIndex&#32;&gt;&#32;neededCenter)
+424 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;GifPartitionByMedian(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a0a221b005894579fea3b9eb7bfc2ee71">image</link>,&#32;left,&#32;pivotIndex,&#32;com,&#32;neededCenter);
+425 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;
+426 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(pivotIndex&#32;&lt;&#32;neededCenter)
+427 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;GifPartitionByMedian(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a0a221b005894579fea3b9eb7bfc2ee71">image</link>,&#32;pivotIndex&#32;+&#32;1,&#32;right,&#32;com,&#32;neededCenter);
+428 &#32;&#32;&#32;&#32;}
+429 }
+430 
+431 <emphasis role="comment">//&#32;Builds&#32;a&#32;palette&#32;by&#32;creating&#32;a&#32;balanced&#32;k-d&#32;tree&#32;of&#32;all&#32;pixels&#32;in&#32;the&#32;image</emphasis>
+432 <emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>&#32;GifSplitPalette(<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>&#32;*<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a0a221b005894579fea3b9eb7bfc2ee71">image</link>,&#32;<emphasis role="keywordtype">int</emphasis>&#32;numPixels,&#32;<emphasis role="keywordtype">int</emphasis>&#32;firstElt,&#32;<emphasis role="keywordtype">int</emphasis>&#32;lastElt,&#32;<emphasis role="keywordtype">int</emphasis>&#32;splitElt,&#32;<emphasis role="keywordtype">int</emphasis>&#32;splitDist,&#32;
+433 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;treeNode,&#32;<emphasis role="keywordtype">bool</emphasis>&#32;buildForDither,&#32;GifPalette&#32;*pal)
+434 {
+435 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(lastElt&#32;&lt;=&#32;firstElt&#32;||&#32;numPixels&#32;==&#32;0)
+436 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>;
+437 &#32;&#32;&#32;&#32;
+438 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;base&#32;case,&#32;bottom&#32;of&#32;the&#32;tree</emphasis>
+439 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(lastElt&#32;==&#32;firstElt&#32;+&#32;1)
+440 &#32;&#32;&#32;&#32;{
+441 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(buildForDither)
+442 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+443 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Dithering&#32;needs&#32;at&#32;least&#32;one&#32;color&#32;as&#32;dark&#32;as&#32;anything</emphasis>
+444 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;in&#32;the&#32;image&#32;and&#32;at&#32;least&#32;one&#32;brightest&#32;color&#32;-</emphasis>
+445 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;otherwise&#32;it&#32;builds&#32;up&#32;error&#32;and&#32;produces&#32;strange&#32;artifacts</emphasis>
+446 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(firstElt&#32;==&#32;1)
+447 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+448 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;special&#32;case:&#32;the&#32;darkest&#32;color&#32;in&#32;the&#32;image</emphasis>
+449 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1abe08814c2f72843fde4d8df41440d5a0">r</link>=255,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a9cd653b1648845554169fbc3a3f6d37a">g</link>=255,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a6eba317e3cf44d6d26c04a5a8f197dcb">b</link>=255;
+450 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(<emphasis role="keywordtype">int</emphasis>&#32;ii=0;&#32;ii&lt;numPixels;&#32;++ii)
+451 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+452 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1abe08814c2f72843fde4d8df41440d5a0">r</link>&#32;=&#32;GIFMIN(<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1abe08814c2f72843fde4d8df41440d5a0">r</link>,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a0a221b005894579fea3b9eb7bfc2ee71">image</link>[ii*4+0]);
+453 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a9cd653b1648845554169fbc3a3f6d37a">g</link>&#32;=&#32;GIFMIN(<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a9cd653b1648845554169fbc3a3f6d37a">g</link>,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a0a221b005894579fea3b9eb7bfc2ee71">image</link>[ii*4&#32;+&#32;1]);
+454 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a6eba317e3cf44d6d26c04a5a8f197dcb">b</link>&#32;=&#32;GIFMIN(<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a6eba317e3cf44d6d26c04a5a8f197dcb">b</link>,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a0a221b005894579fea3b9eb7bfc2ee71">image</link>[ii*4+2]);
+455 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+456 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;
+457 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;pal-&gt;r[firstElt]&#32;=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1abe08814c2f72843fde4d8df41440d5a0">r</link>;
+458 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;pal-&gt;g[firstElt]&#32;=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a9cd653b1648845554169fbc3a3f6d37a">g</link>;
+459 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;pal-&gt;b[firstElt]&#32;=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a6eba317e3cf44d6d26c04a5a8f197dcb">b</link>;
+460 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;
+461 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>;
+462 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+463 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;
+464 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(firstElt&#32;==&#32;(1&#32;&lt;&lt;&#32;pal-&gt;bitDepth)-1)
+465 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+466 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;special&#32;case:&#32;the&#32;lightest&#32;color&#32;in&#32;the&#32;image</emphasis>
+467 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1abe08814c2f72843fde4d8df41440d5a0">r</link>=0,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a9cd653b1648845554169fbc3a3f6d37a">g</link>=0,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a6eba317e3cf44d6d26c04a5a8f197dcb">b</link>=0;
+468 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(<emphasis role="keywordtype">int</emphasis>&#32;ii=0;&#32;ii&lt;numPixels;&#32;++ii)
+469 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+470 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1abe08814c2f72843fde4d8df41440d5a0">r</link>&#32;=&#32;GIFMAX(<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1abe08814c2f72843fde4d8df41440d5a0">r</link>,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a0a221b005894579fea3b9eb7bfc2ee71">image</link>[ii*4+0]);
+471 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a9cd653b1648845554169fbc3a3f6d37a">g</link>&#32;=&#32;GIFMAX(<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a9cd653b1648845554169fbc3a3f6d37a">g</link>,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a0a221b005894579fea3b9eb7bfc2ee71">image</link>[ii*4&#32;+&#32;1]);
+472 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a6eba317e3cf44d6d26c04a5a8f197dcb">b</link>&#32;=&#32;GIFMAX(<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a6eba317e3cf44d6d26c04a5a8f197dcb">b</link>,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a0a221b005894579fea3b9eb7bfc2ee71">image</link>[ii*4+2]);
+473 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+474 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;
+475 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;pal-&gt;r[firstElt]&#32;=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1abe08814c2f72843fde4d8df41440d5a0">r</link>;
+476 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;pal-&gt;g[firstElt]&#32;=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a9cd653b1648845554169fbc3a3f6d37a">g</link>;
+477 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;pal-&gt;b[firstElt]&#32;=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a6eba317e3cf44d6d26c04a5a8f197dcb">b</link>;
+478 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;
+479 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>;
+480 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+481 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+482 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;
+483 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;otherwise,&#32;take&#32;the&#32;average&#32;of&#32;all&#32;colors&#32;in&#32;this&#32;subcube</emphasis>
+484 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">long</emphasis>&#32;<emphasis role="keywordtype">long</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1abe08814c2f72843fde4d8df41440d5a0">r</link>=0,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a9cd653b1648845554169fbc3a3f6d37a">g</link>=0,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a6eba317e3cf44d6d26c04a5a8f197dcb">b</link>=0;
+485 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(<emphasis role="keywordtype">int</emphasis>&#32;ii=0;&#32;ii&lt;numPixels;&#32;++ii)
+486 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+487 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1abe08814c2f72843fde4d8df41440d5a0">r</link>&#32;+=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a0a221b005894579fea3b9eb7bfc2ee71">image</link>[ii*4+0];
+488 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a9cd653b1648845554169fbc3a3f6d37a">g</link>&#32;+=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a0a221b005894579fea3b9eb7bfc2ee71">image</link>[ii*4&#32;+&#32;1];
+489 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a6eba317e3cf44d6d26c04a5a8f197dcb">b</link>&#32;+=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a0a221b005894579fea3b9eb7bfc2ee71">image</link>[ii*4+2];
+490 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+491 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;
+492 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1abe08814c2f72843fde4d8df41440d5a0">r</link>&#32;+=&#32;numPixels&#32;/&#32;2;&#32;&#32;<emphasis role="comment">//&#32;round&#32;to&#32;nearest</emphasis>
+493 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a9cd653b1648845554169fbc3a3f6d37a">g</link>&#32;+=&#32;numPixels&#32;/&#32;2;
+494 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a6eba317e3cf44d6d26c04a5a8f197dcb">b</link>&#32;+=&#32;numPixels&#32;/&#32;2;
+495 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;
+496 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1abe08814c2f72843fde4d8df41440d5a0">r</link>&#32;/=&#32;numPixels;
+497 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a9cd653b1648845554169fbc3a3f6d37a">g</link>&#32;/=&#32;numPixels;
+498 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a6eba317e3cf44d6d26c04a5a8f197dcb">b</link>&#32;/=&#32;numPixels;
+499 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;
+500 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;pal-&gt;r[firstElt]&#32;=&#32;(<emphasis role="keywordtype">unsigned</emphasis>&#32;char)<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1abe08814c2f72843fde4d8df41440d5a0">r</link>;
+501 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;pal-&gt;g[firstElt]&#32;=&#32;(<emphasis role="keywordtype">unsigned</emphasis>&#32;char)<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a9cd653b1648845554169fbc3a3f6d37a">g</link>;
+502 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;pal-&gt;b[firstElt]&#32;=&#32;(<emphasis role="keywordtype">unsigned</emphasis>&#32;char)<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a6eba317e3cf44d6d26c04a5a8f197dcb">b</link>;
+503 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;
+504 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>;
+505 &#32;&#32;&#32;&#32;}
+506 &#32;&#32;&#32;&#32;
+507 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Find&#32;the&#32;axis&#32;with&#32;the&#32;largest&#32;range</emphasis>
+508 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;minR&#32;=&#32;255,&#32;maxR&#32;=&#32;0;
+509 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;minG&#32;=&#32;255,&#32;maxG&#32;=&#32;0;
+510 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;minB&#32;=&#32;255,&#32;maxB&#32;=&#32;0;
+511 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(<emphasis role="keywordtype">int</emphasis>&#32;ii=0;&#32;ii&lt;numPixels;&#32;++ii)
+512 &#32;&#32;&#32;&#32;{
+513 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1abe08814c2f72843fde4d8df41440d5a0">r</link>&#32;=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a0a221b005894579fea3b9eb7bfc2ee71">image</link>[ii*4+0];
+514 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a9cd653b1648845554169fbc3a3f6d37a">g</link>&#32;=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a0a221b005894579fea3b9eb7bfc2ee71">image</link>[ii*4&#32;+&#32;1];
+515 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a6eba317e3cf44d6d26c04a5a8f197dcb">b</link>&#32;=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a0a221b005894579fea3b9eb7bfc2ee71">image</link>[ii*4+2];
+516 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;
+517 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1abe08814c2f72843fde4d8df41440d5a0">r</link>&#32;&gt;&#32;maxR)&#32;maxR&#32;=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1abe08814c2f72843fde4d8df41440d5a0">r</link>;
+518 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1abe08814c2f72843fde4d8df41440d5a0">r</link>&#32;&lt;&#32;minR)&#32;minR&#32;=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1abe08814c2f72843fde4d8df41440d5a0">r</link>;
+519 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;
+520 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a9cd653b1648845554169fbc3a3f6d37a">g</link>&#32;&gt;&#32;maxG)&#32;maxG&#32;=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a9cd653b1648845554169fbc3a3f6d37a">g</link>;
+521 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a9cd653b1648845554169fbc3a3f6d37a">g</link>&#32;&lt;&#32;minG)&#32;minG&#32;=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a9cd653b1648845554169fbc3a3f6d37a">g</link>;
+522 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;
+523 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a6eba317e3cf44d6d26c04a5a8f197dcb">b</link>&#32;&gt;&#32;maxB)&#32;maxB&#32;=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a6eba317e3cf44d6d26c04a5a8f197dcb">b</link>;
+524 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a6eba317e3cf44d6d26c04a5a8f197dcb">b</link>&#32;&lt;&#32;minB)&#32;minB&#32;=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a6eba317e3cf44d6d26c04a5a8f197dcb">b</link>;
+525 &#32;&#32;&#32;&#32;}
+526 &#32;&#32;&#32;&#32;
+527 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;rRange&#32;=&#32;maxR&#32;-&#32;minR;
+528 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;gRange&#32;=&#32;maxG&#32;-&#32;minG;
+529 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;bRange&#32;=&#32;maxB&#32;-&#32;minB;
+530 &#32;&#32;&#32;&#32;
+531 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;and&#32;split&#32;along&#32;that&#32;axis.&#32;(incidentally,&#32;this&#32;means&#32;this&#32;isn&apos;t&#32;a&#32;&quot;proper&quot;&#32;k-d&#32;tree&#32;but&#32;I&#32;don&apos;t&#32;know&#32;what&#32;else&#32;to&#32;call&#32;it)</emphasis>
+532 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;splitCom&#32;=&#32;1;
+533 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(bRange&#32;&gt;&#32;gRange)&#32;splitCom&#32;=&#32;2;
+534 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(rRange&#32;&gt;&#32;bRange&#32;&amp;&amp;&#32;rRange&#32;&gt;&#32;gRange)&#32;splitCom&#32;=&#32;0;
+535 &#32;&#32;&#32;&#32;
+536 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;subPixelsA&#32;=&#32;numPixels&#32;&#32;*(splitElt&#32;-&#32;firstElt)&#32;/&#32;(lastElt&#32;-&#32;firstElt);
+537 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;subPixelsB&#32;=&#32;numPixels-subPixelsA;
+538 &#32;&#32;&#32;&#32;
+539 &#32;&#32;&#32;&#32;GifPartitionByMedian(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a0a221b005894579fea3b9eb7bfc2ee71">image</link>,&#32;0,&#32;numPixels,&#32;splitCom,&#32;subPixelsA);
+540 &#32;&#32;&#32;&#32;
+541 &#32;&#32;&#32;&#32;pal-&gt;treeSplitElt[treeNode]&#32;=&#32;splitCom;
+542 &#32;&#32;&#32;&#32;pal-&gt;treeSplit[treeNode]&#32;=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a0a221b005894579fea3b9eb7bfc2ee71">image</link>[subPixelsA*4+splitCom];
+543 &#32;&#32;&#32;&#32;
+544 &#32;&#32;&#32;&#32;GifSplitPalette(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a0a221b005894579fea3b9eb7bfc2ee71">image</link>,&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;subPixelsA,&#32;firstElt,&#32;splitElt,&#32;splitElt-splitDist,&#32;splitDist/2,&#32;treeNode*2,&#32;&#32;&#32;buildForDither,&#32;pal);
+545 &#32;&#32;&#32;&#32;GifSplitPalette(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a0a221b005894579fea3b9eb7bfc2ee71">image</link>+subPixelsA*4,&#32;subPixelsB,&#32;splitElt,&#32;lastElt,&#32;&#32;splitElt+splitDist,&#32;splitDist/2,&#32;treeNode*2&#32;+&#32;1,&#32;buildForDither,&#32;pal);
+546 }
+547 
+548 <emphasis role="comment">//&#32;Finds&#32;all&#32;pixels&#32;that&#32;have&#32;changed&#32;from&#32;the&#32;previous&#32;image&#32;and</emphasis>
+549 <emphasis role="comment">//&#32;moves&#32;them&#32;to&#32;the&#32;fromt&#32;of&#32;th&#32;buffer.</emphasis>
+550 <emphasis role="comment">//&#32;This&#32;allows&#32;us&#32;to&#32;build&#32;a&#32;palette&#32;optimized&#32;for&#32;the&#32;colors&#32;of&#32;the</emphasis>
+551 <emphasis role="comment">//&#32;changed&#32;pixels&#32;only.</emphasis>
+552 <emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;GifPickChangedPixels(<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>&#32;*lastFrame,&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>&#32;*frame,&#32;<emphasis role="keywordtype">int</emphasis>&#32;numPixels)
+553 {
+554 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;numChanged&#32;=&#32;0;
+555 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>&#32;*writeIter&#32;=&#32;frame;
+556 &#32;&#32;&#32;&#32;
+557 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(<emphasis role="keywordtype">int</emphasis>&#32;ii=0;&#32;ii&lt;numPixels;&#32;++ii)
+558 &#32;&#32;&#32;&#32;{
+559 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(lastFrame[0]&#32;!=&#32;frame[0]&#32;||
+560 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;lastFrame[1]&#32;!=&#32;frame[1]&#32;||
+561 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;lastFrame[2]&#32;!=&#32;frame[2])
+562 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+563 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;writeIter[0]&#32;=&#32;frame[0];
+564 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;writeIter[1]&#32;=&#32;frame[1];
+565 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;writeIter[2]&#32;=&#32;frame[2];
+566 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;++numChanged;
+567 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;writeIter&#32;+=&#32;4;
+568 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+569 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;lastFrame&#32;+=&#32;4;
+570 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;frame&#32;+=&#32;4;
+571 &#32;&#32;&#32;&#32;}
+572 &#32;&#32;&#32;&#32;
+573 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;numChanged;
+574 }
+575 
+576 <emphasis role="comment">//&#32;Creates&#32;a&#32;palette&#32;by&#32;placing&#32;all&#32;the&#32;image&#32;pixels&#32;in&#32;a&#32;k-d&#32;tree&#32;and&#32;then&#32;averaging&#32;the&#32;blocks&#32;at&#32;the&#32;bottom.</emphasis>
+577 <emphasis role="comment">//&#32;This&#32;is&#32;known&#32;as&#32;the&#32;&quot;modified&#32;median&#32;split&quot;&#32;technique</emphasis>
+578 <emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>&#32;GifMakePalette(<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>&#32;*lastFrame,&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>&#32;*nextFrame,&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a3ce386e55bbeb900c1b23e064b89bd04">width</link>,&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1aedd0ea77029b98ce91e47c19addcb68f">height</link>,&#32;<emphasis role="keywordtype">int</emphasis>&#32;bitDepth,&#32;<emphasis role="keywordtype">bool</emphasis>&#32;buildForDither,&#32;GifPalette&#32;*pPal)
+579 {
+580 &#32;&#32;&#32;&#32;pPal-&gt;bitDepth&#32;=&#32;bitDepth;
+581 &#32;&#32;&#32;&#32;
+582 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;SplitPalette&#32;is&#32;destructive&#32;(it&#32;sorts&#32;the&#32;pixels&#32;by&#32;color)&#32;so</emphasis>
+583 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;we&#32;must&#32;create&#32;a&#32;copy&#32;of&#32;the&#32;image&#32;for&#32;it&#32;to&#32;destroy</emphasis>
+584 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a2f5934b61dbd601db8002b6a7bd2d13f">imageSize</link>&#32;=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a3ce386e55bbeb900c1b23e064b89bd04">width</link>*<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1aedd0ea77029b98ce91e47c19addcb68f">height</link>*4*<emphasis role="keyword">sizeof</emphasis>(<emphasis role="keywordtype">unsigned</emphasis>&#32;char);
+585 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>&#32;*destroyableImage&#32;=&#32;(<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>*)RGIF_MALLOC(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a2f5934b61dbd601db8002b6a7bd2d13f">imageSize</link>);
+586 &#32;&#32;&#32;&#32;memcpy(destroyableImage,&#32;nextFrame,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a2f5934b61dbd601db8002b6a7bd2d13f">imageSize</link>);
+587 &#32;&#32;&#32;&#32;
+588 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;numPixels&#32;=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a3ce386e55bbeb900c1b23e064b89bd04">width</link>*<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1aedd0ea77029b98ce91e47c19addcb68f">height</link>;
+589 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(lastFrame)
+590 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;numPixels&#32;=&#32;GifPickChangedPixels(lastFrame,&#32;destroyableImage,&#32;numPixels);
+591 &#32;&#32;&#32;&#32;
+592 &#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;lastElt&#32;=&#32;1&#32;&lt;&lt;&#32;bitDepth;
+593 &#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;splitElt&#32;=&#32;lastElt/2;
+594 &#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;splitDist&#32;=&#32;splitElt/2;
+595 &#32;&#32;&#32;&#32;
+596 &#32;&#32;&#32;&#32;GifSplitPalette(destroyableImage,&#32;numPixels,&#32;1,&#32;lastElt,&#32;splitElt,&#32;splitDist,&#32;1,&#32;buildForDither,&#32;pPal);
+597 &#32;&#32;&#32;&#32;
+598 &#32;&#32;&#32;&#32;RGIF_FREE(destroyableImage);
+599 &#32;&#32;&#32;&#32;
+600 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;add&#32;the&#32;bottom&#32;node&#32;for&#32;the&#32;transparency&#32;index</emphasis>
+601 &#32;&#32;&#32;&#32;pPal-&gt;treeSplit[1&#32;&lt;&lt;&#32;(bitDepth-1)]&#32;=&#32;0;
+602 &#32;&#32;&#32;&#32;pPal-&gt;treeSplitElt[1&#32;&lt;&lt;&#32;(bitDepth-1)]&#32;=&#32;0;
+603 &#32;&#32;&#32;&#32;
+604 &#32;&#32;&#32;&#32;pPal-&gt;r[0]&#32;=&#32;pPal-&gt;g[0]&#32;=&#32;pPal-&gt;b[0]&#32;=&#32;0;
+605 }
+606 
+607 <emphasis role="comment">//&#32;Implements&#32;Floyd-Steinberg&#32;dithering,&#32;writes&#32;palette&#32;value&#32;to&#32;alpha</emphasis>
+608 <emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>&#32;GifDitherImage(<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>&#32;*lastFrame,&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>&#32;*nextFrame,&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>&#32;*outFrame,&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a3ce386e55bbeb900c1b23e064b89bd04">width</link>,&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1aedd0ea77029b98ce91e47c19addcb68f">height</link>,&#32;GifPalette&#32;*pPal)
+609 {
+610 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;numPixels&#32;=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a3ce386e55bbeb900c1b23e064b89bd04">width</link>*<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1aedd0ea77029b98ce91e47c19addcb68f">height</link>;
+611 &#32;&#32;&#32;&#32;
+612 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;quantPixels&#32;initially&#32;holds&#32;color*256&#32;for&#32;all&#32;pixels</emphasis>
+613 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;The&#32;extra&#32;8&#32;bits&#32;of&#32;precision&#32;allow&#32;for&#32;sub-single-color&#32;error&#32;values</emphasis>
+614 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;to&#32;be&#32;propagated</emphasis>
+615 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;*quantPixels&#32;=&#32;(<emphasis role="keywordtype">int</emphasis>*)RGIF_MALLOC(<emphasis role="keyword">sizeof</emphasis>(<emphasis role="keywordtype">int</emphasis>)*numPixels*4);
+616 &#32;&#32;&#32;&#32;
+617 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(<emphasis role="keywordtype">int</emphasis>&#32;ii=0;&#32;ii&lt;numPixels*4;&#32;++ii)
+618 &#32;&#32;&#32;&#32;{
+619 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>&#32;pix&#32;=&#32;nextFrame[ii];
+620 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;pix16&#32;=&#32;(int)pix*256;
+621 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;quantPixels[ii]&#32;=&#32;pix16;
+622 &#32;&#32;&#32;&#32;}
+623 &#32;&#32;&#32;&#32;
+624 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;yy=0;&#32;<link linkend="_namespaceglm_1a055d351d6ac0244db35245ad1228e8d3">yy</link>&lt;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1aedd0ea77029b98ce91e47c19addcb68f">height</link>;&#32;++<link linkend="_namespaceglm_1a055d351d6ac0244db35245ad1228e8d3">yy</link>)
+625 &#32;&#32;&#32;&#32;{
+626 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;xx=0;&#32;<link linkend="_namespaceglm_1acdf40cc185659932dfa4d7c9cb0f1771">xx</link>&lt;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a3ce386e55bbeb900c1b23e064b89bd04">width</link>;&#32;++<link linkend="_namespaceglm_1acdf40cc185659932dfa4d7c9cb0f1771">xx</link>)
+627 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+628 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;*nextPix&#32;=&#32;quantPixels&#32;+&#32;4*(<link linkend="_namespaceglm_1a055d351d6ac0244db35245ad1228e8d3">yy</link>*<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a3ce386e55bbeb900c1b23e064b89bd04">width</link>+<link linkend="_namespaceglm_1acdf40cc185659932dfa4d7c9cb0f1771">xx</link>);
+629 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>&#32;*lastPix&#32;=&#32;lastFrame?&#32;lastFrame&#32;+&#32;4*(<link linkend="_namespaceglm_1a055d351d6ac0244db35245ad1228e8d3">yy</link>*<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a3ce386e55bbeb900c1b23e064b89bd04">width</link>+<link linkend="_namespaceglm_1acdf40cc185659932dfa4d7c9cb0f1771">xx</link>)&#32;:&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>;
+630 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;
+631 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Compute&#32;the&#32;colors&#32;we&#32;want&#32;(rounding&#32;to&#32;nearest)</emphasis>
+632 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;rr&#32;=&#32;(nextPix[0]&#32;+&#32;127)&#32;/&#32;256;
+633 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;gg&#32;=&#32;(nextPix[1]&#32;+&#32;127)&#32;/&#32;256;
+634 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;bb&#32;=&#32;(nextPix[2]&#32;+&#32;127)&#32;/&#32;256;
+635 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;
+636 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;if&#32;it&#32;happens&#32;that&#32;we&#32;want&#32;the&#32;color&#32;from&#32;last&#32;frame,&#32;then&#32;just&#32;write&#32;out</emphasis>
+637 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;a&#32;transparent&#32;pixel</emphasis>
+638 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(lastFrame&#32;&amp;&amp;
+639 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;lastPix[0]&#32;==&#32;rr&#32;&amp;&amp;
+640 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;lastPix[1]&#32;==&#32;gg&#32;&amp;&amp;
+641 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;lastPix[2]&#32;==&#32;bb)
+642 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+643 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;nextPix[0]&#32;=&#32;rr;
+644 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;nextPix[1]&#32;=&#32;gg;
+645 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;nextPix[2]&#32;=&#32;bb;
+646 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;nextPix[3]&#32;=&#32;gifTransparentIndex;
+647 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">continue</emphasis>;
+648 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+649 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;
+650 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;bestDiff&#32;=&#32;1000000;
+651 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;bestInd&#32;=&#32;gifTransparentIndex;
+652 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;
+653 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Search&#32;the&#32;palete</emphasis>
+654 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;GifGetClosestPaletteColor(pPal,&#32;rr,&#32;gg,&#32;bb,&#32;&amp;bestInd,&#32;&amp;bestDiff,&#32;1);
+655 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;
+656 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Write&#32;the&#32;result&#32;to&#32;the&#32;temp&#32;buffer</emphasis>
+657 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;r_err&#32;=&#32;nextPix[0]&#32;-&#32;(int)(pPal-&gt;r[bestInd])*256;
+658 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;g_err&#32;=&#32;nextPix[1]&#32;-&#32;(int)(pPal-&gt;g[bestInd])*256;
+659 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;b_err&#32;=&#32;nextPix[2]&#32;-&#32;(int)(pPal-&gt;b[bestInd])*256;
+660 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;
+661 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;nextPix[0]&#32;=&#32;pPal-&gt;r[bestInd];
+662 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;nextPix[1]&#32;=&#32;pPal-&gt;g[bestInd];
+663 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;nextPix[2]&#32;=&#32;pPal-&gt;b[bestInd];
+664 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;nextPix[3]&#32;=&#32;bestInd;
+665 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;
+666 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Propagate&#32;the&#32;error&#32;to&#32;the&#32;four&#32;adjacent&#32;locations</emphasis>
+667 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;that&#32;we&#32;haven&apos;t&#32;touched&#32;yet</emphasis>
+668 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;quantloc_7&#32;=&#32;(<link linkend="_namespaceglm_1a055d351d6ac0244db35245ad1228e8d3">yy</link>*<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a3ce386e55bbeb900c1b23e064b89bd04">width</link>+<link linkend="_namespaceglm_1acdf40cc185659932dfa4d7c9cb0f1771">xx</link>&#32;+&#32;1);
+669 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;quantloc_3&#32;=&#32;(<link linkend="_namespaceglm_1a055d351d6ac0244db35245ad1228e8d3">yy</link>*<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a3ce386e55bbeb900c1b23e064b89bd04">width</link>+<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a3ce386e55bbeb900c1b23e064b89bd04">width</link>+<link linkend="_namespaceglm_1acdf40cc185659932dfa4d7c9cb0f1771">xx</link>-1);
+670 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;quantloc_5&#32;=&#32;(<link linkend="_namespaceglm_1a055d351d6ac0244db35245ad1228e8d3">yy</link>*<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a3ce386e55bbeb900c1b23e064b89bd04">width</link>+<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a3ce386e55bbeb900c1b23e064b89bd04">width</link>+<link linkend="_namespaceglm_1acdf40cc185659932dfa4d7c9cb0f1771">xx</link>);
+671 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;quantloc_1&#32;=&#32;(<link linkend="_namespaceglm_1a055d351d6ac0244db35245ad1228e8d3">yy</link>*<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a3ce386e55bbeb900c1b23e064b89bd04">width</link>+<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a3ce386e55bbeb900c1b23e064b89bd04">width</link>+<link linkend="_namespaceglm_1acdf40cc185659932dfa4d7c9cb0f1771">xx</link>&#32;+&#32;1);
+672 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;
+673 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(quantloc_7&#32;&lt;&#32;numPixels)
+674 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+675 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;*pix7&#32;=&#32;quantPixels+4*quantloc_7;
+676 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;pix7[0]&#32;+=&#32;GIFMAX(-pix7[0],&#32;r_err*7&#32;/&#32;16);
+677 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;pix7[1]&#32;+=&#32;GIFMAX(-pix7[1],&#32;g_err*7&#32;/&#32;16);
+678 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;pix7[2]&#32;+=&#32;GIFMAX(-pix7[2],&#32;b_err*7&#32;/&#32;16);
+679 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+680 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;
+681 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(quantloc_3&#32;&lt;&#32;numPixels)
+682 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+683 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;*pix3&#32;=&#32;quantPixels+4*quantloc_3;
+684 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;pix3[0]&#32;+=&#32;GIFMAX(-pix3[0],&#32;r_err*3&#32;/&#32;16);
+685 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;pix3[1]&#32;+=&#32;GIFMAX(-pix3[1],&#32;g_err*3&#32;/&#32;16);
+686 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;pix3[2]&#32;+=&#32;GIFMAX(-pix3[2],&#32;b_err*3&#32;/&#32;16);
+687 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+688 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;
+689 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(quantloc_5&#32;&lt;&#32;numPixels)
+690 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+691 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;*pix5&#32;=&#32;quantPixels+4*quantloc_5;
+692 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;pix5[0]&#32;+=&#32;GIFMAX(-pix5[0],&#32;r_err*5&#32;/&#32;16);
+693 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;pix5[1]&#32;+=&#32;GIFMAX(-pix5[1],&#32;g_err*5&#32;/&#32;16);
+694 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;pix5[2]&#32;+=&#32;GIFMAX(-pix5[2],&#32;b_err*5&#32;/&#32;16);
+695 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+696 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;
+697 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(quantloc_1&#32;&lt;&#32;numPixels)
+698 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+699 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;*pix1&#32;=&#32;quantPixels+4*quantloc_1;
+700 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;pix1[0]&#32;+=&#32;GIFMAX(-pix1[0],&#32;r_err&#32;/&#32;16);
+701 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;pix1[1]&#32;+=&#32;GIFMAX(-pix1[1],&#32;g_err&#32;/&#32;16);
+702 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;pix1[2]&#32;+=&#32;GIFMAX(-pix1[2],&#32;b_err&#32;/&#32;16);
+703 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+704 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+705 &#32;&#32;&#32;&#32;}
+706 &#32;&#32;&#32;&#32;
+707 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Copy&#32;the&#32;palettized&#32;result&#32;to&#32;the&#32;output&#32;buffer</emphasis>
+708 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(<emphasis role="keywordtype">int</emphasis>&#32;ii=0;&#32;ii&lt;numPixels*4;&#32;++ii)
+709 &#32;&#32;&#32;&#32;{
+710 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;outFrame[ii]&#32;=&#32;quantPixels[ii];
+711 &#32;&#32;&#32;&#32;}
+712 &#32;&#32;&#32;&#32;
+713 &#32;&#32;&#32;&#32;RGIF_FREE(quantPixels);
+714 }
+715 
+716 <emphasis role="comment">//&#32;Picks&#32;palette&#32;colors&#32;for&#32;the&#32;image&#32;using&#32;simple&#32;thresholding,&#32;no&#32;dithering</emphasis>
+717 <emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>&#32;GifThresholdImage(<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>&#32;*lastFrame,&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>&#32;*nextFrame,&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>&#32;*outFrame,&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a3ce386e55bbeb900c1b23e064b89bd04">width</link>,&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1aedd0ea77029b98ce91e47c19addcb68f">height</link>,&#32;GifPalette&#32;*pPal)
+718 {
+719 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;numPixels&#32;=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a3ce386e55bbeb900c1b23e064b89bd04">width</link>*<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1aedd0ea77029b98ce91e47c19addcb68f">height</link>;
+720 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;ii=0;&#32;ii&lt;numPixels;&#32;++ii)
+721 &#32;&#32;&#32;&#32;{
+722 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;if&#32;a&#32;previous&#32;color&#32;is&#32;available,&#32;and&#32;it&#32;matches&#32;the&#32;current&#32;color,</emphasis>
+723 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;set&#32;the&#32;pixel&#32;to&#32;transparent</emphasis>
+724 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(lastFrame&#32;&amp;&amp;
+725 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;lastFrame[0]&#32;==&#32;nextFrame[0]&#32;&amp;&amp;
+726 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;lastFrame[1]&#32;==&#32;nextFrame[1]&#32;&amp;&amp;
+727 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;lastFrame[2]&#32;==&#32;nextFrame[2])
+728 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+729 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;outFrame[0]&#32;=&#32;lastFrame[0];
+730 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;outFrame[1]&#32;=&#32;lastFrame[1];
+731 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;outFrame[2]&#32;=&#32;lastFrame[2];
+732 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;outFrame[3]&#32;=&#32;gifTransparentIndex;
+733 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+734 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>
+735 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+736 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;palettize&#32;the&#32;pixel</emphasis>
+737 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;bestDiff&#32;=&#32;1000000;
+738 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;bestInd&#32;=&#32;1;
+739 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;GifGetClosestPaletteColor(pPal,&#32;nextFrame[0],&#32;nextFrame[1],&#32;nextFrame[2],&#32;&amp;bestInd,&#32;&amp;bestDiff,&#32;1);
+740 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;
+741 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Write&#32;the&#32;resulting&#32;color&#32;to&#32;the&#32;output&#32;buffer</emphasis>
+742 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;outFrame[0]&#32;=&#32;pPal-&gt;r[bestInd];
+743 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;outFrame[1]&#32;=&#32;pPal-&gt;g[bestInd];
+744 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;outFrame[2]&#32;=&#32;pPal-&gt;b[bestInd];
+745 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;outFrame[3]&#32;=&#32;bestInd;
+746 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+747 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;
+748 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(lastFrame)&#32;lastFrame&#32;+=&#32;4;
+749 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;outFrame&#32;+=&#32;4;
+750 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;nextFrame&#32;+=&#32;4;
+751 &#32;&#32;&#32;&#32;}
+752 }
+753 
+754 
+755 <emphasis role="comment">//&#32;insert&#32;a&#32;single&#32;bit</emphasis>
+756 <emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>&#32;GifWriteBit(GifBitStatus&#32;*stat,&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;bit)
+757 {
+758 &#32;&#32;&#32;&#32;bit&#32;=&#32;bit&#32;&amp;&#32;1;
+759 &#32;&#32;&#32;&#32;bit&#32;=&#32;bit&#32;&lt;&lt;&#32;stat-&gt;bitIndex;
+760 &#32;&#32;&#32;&#32;stat-&gt;byte&#32;|=&#32;bit;
+761 &#32;&#32;&#32;&#32;
+762 &#32;&#32;&#32;&#32;++stat-&gt;bitIndex;
+763 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(stat-&gt;bitIndex&#32;&gt;&#32;7)
+764 &#32;&#32;&#32;&#32;{
+765 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;move&#32;the&#32;newly-finished&#32;byte&#32;to&#32;the&#32;chunk&#32;buffer&#32;</emphasis>
+766 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;stat-&gt;chunk[stat-&gt;chunkIndex++]&#32;=&#32;stat-&gt;byte;
+767 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;and&#32;start&#32;a&#32;new&#32;byte</emphasis>
+768 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;stat-&gt;bitIndex&#32;=&#32;0;
+769 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;stat-&gt;byte&#32;=&#32;0;
+770 &#32;&#32;&#32;&#32;}
+771 }
+772 
+773 <emphasis role="comment">//&#32;write&#32;all&#32;bytes&#32;so&#32;far&#32;to&#32;the&#32;file</emphasis>
+774 <emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>&#32;GifWriteChunk(FILE&#32;*<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a0fdda94b8b7e64884690244028f455ba">f</link>,&#32;GifBitStatus&#32;*stat)
+775 {
+776 &#32;&#32;&#32;&#32;fputc(stat-&gt;chunkIndex,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a0fdda94b8b7e64884690244028f455ba">f</link>);
+777 &#32;&#32;&#32;&#32;fwrite(stat-&gt;chunk,&#32;1,&#32;stat-&gt;chunkIndex,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a0fdda94b8b7e64884690244028f455ba">f</link>);
+778 &#32;&#32;&#32;&#32;
+779 &#32;&#32;&#32;&#32;stat-&gt;bitIndex&#32;=&#32;0;
+780 &#32;&#32;&#32;&#32;stat-&gt;byte&#32;=&#32;0;
+781 &#32;&#32;&#32;&#32;stat-&gt;chunkIndex&#32;=&#32;0;
+782 }
+783 
+784 <emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>&#32;GifWriteCode(FILE&#32;*<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a0fdda94b8b7e64884690244028f455ba">f</link>,&#32;GifBitStatus&#32;*stat,&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;code,&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="_namespacelength">length</link>)
+785 {
+786 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;ii=0;&#32;ii&lt;<link linkend="_namespacelength">length</link>;&#32;++ii)
+787 &#32;&#32;&#32;&#32;{
+788 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;GifWriteBit(stat,&#32;code);
+789 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;code&#32;=&#32;code&#32;&gt;&gt;&#32;1;
+790 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;
+791 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(stat-&gt;chunkIndex&#32;==&#32;255)
+792 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+793 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;GifWriteChunk(<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a0fdda94b8b7e64884690244028f455ba">f</link>,&#32;stat);
+794 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+795 &#32;&#32;&#32;&#32;}
+796 }
+797 
+798 <emphasis role="comment">//&#32;write&#32;a&#32;256-color&#32;(8-bit)&#32;image&#32;palette&#32;to&#32;the&#32;file</emphasis>
+799 <emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>&#32;GifWritePalette(FILE&#32;*<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a0fdda94b8b7e64884690244028f455ba">f</link>,&#32;<emphasis role="keyword">const</emphasis>&#32;GifPalette&#32;*pPal)
+800 {
+801 &#32;&#32;&#32;&#32;fputc(0,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a0fdda94b8b7e64884690244028f455ba">f</link>);&#32;&#32;<emphasis role="comment">//&#32;first&#32;color:&#32;transparency</emphasis>
+802 &#32;&#32;&#32;&#32;fputc(0,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a0fdda94b8b7e64884690244028f455ba">f</link>);
+803 &#32;&#32;&#32;&#32;fputc(0,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a0fdda94b8b7e64884690244028f455ba">f</link>);
+804 &#32;&#32;&#32;&#32;
+805 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(<emphasis role="keywordtype">int</emphasis>&#32;ii=1;&#32;ii&lt;(1&#32;&lt;&lt;&#32;pPal-&gt;bitDepth);&#32;++ii)
+806 &#32;&#32;&#32;&#32;{
+807 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1abe08814c2f72843fde4d8df41440d5a0">r</link>&#32;=&#32;pPal-&gt;r[ii];
+808 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a9cd653b1648845554169fbc3a3f6d37a">g</link>&#32;=&#32;pPal-&gt;g[ii];
+809 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a6eba317e3cf44d6d26c04a5a8f197dcb">b</link>&#32;=&#32;pPal-&gt;b[ii];
+810 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;
+811 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;fputc(<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1abe08814c2f72843fde4d8df41440d5a0">r</link>,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a0fdda94b8b7e64884690244028f455ba">f</link>);
+812 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;fputc(<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a9cd653b1648845554169fbc3a3f6d37a">g</link>,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a0fdda94b8b7e64884690244028f455ba">f</link>);
+813 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;fputc(<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a6eba317e3cf44d6d26c04a5a8f197dcb">b</link>,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a0fdda94b8b7e64884690244028f455ba">f</link>);
+814 &#32;&#32;&#32;&#32;}
+815 }
+816 
+817 <emphasis role="comment">//&#32;write&#32;the&#32;image&#32;header,&#32;LZW-compress&#32;and&#32;write&#32;out&#32;the&#32;image</emphasis>
+818 <emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>&#32;GifWriteLzwImage(FILE&#32;*<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a0fdda94b8b7e64884690244028f455ba">f</link>,&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>&#32;*<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a0a221b005894579fea3b9eb7bfc2ee71">image</link>,&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;left,&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;top,&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a3ce386e55bbeb900c1b23e064b89bd04">width</link>,&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1aedd0ea77029b98ce91e47c19addcb68f">height</link>,&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;delay,&#32;GifPalette&#32;*pPal)
+819 {
+820 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;graphics&#32;control&#32;extension</emphasis>
+821 &#32;&#32;&#32;&#32;fputc(0x21,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a0fdda94b8b7e64884690244028f455ba">f</link>);
+822 &#32;&#32;&#32;&#32;fputc(0xf9,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a0fdda94b8b7e64884690244028f455ba">f</link>);
+823 &#32;&#32;&#32;&#32;fputc(0x04,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a0fdda94b8b7e64884690244028f455ba">f</link>);
+824 &#32;&#32;&#32;&#32;fputc(0x05,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a0fdda94b8b7e64884690244028f455ba">f</link>);&#32;<emphasis role="comment">//&#32;leave&#32;prev&#32;frame&#32;in&#32;place,&#32;this&#32;frame&#32;has&#32;transparency</emphasis>
+825 &#32;&#32;&#32;&#32;fputc(delay&#32;&amp;&#32;0xff,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a0fdda94b8b7e64884690244028f455ba">f</link>);
+826 &#32;&#32;&#32;&#32;fputc((delay&#32;&gt;&gt;&#32;8)&#32;&amp;&#32;0xff,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a0fdda94b8b7e64884690244028f455ba">f</link>);
+827 &#32;&#32;&#32;&#32;fputc(gifTransparentIndex,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a0fdda94b8b7e64884690244028f455ba">f</link>);&#32;<emphasis role="comment">//&#32;transparent&#32;color&#32;index</emphasis>
+828 &#32;&#32;&#32;&#32;fputc(0,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a0fdda94b8b7e64884690244028f455ba">f</link>);
+829 &#32;&#32;&#32;&#32;
+830 &#32;&#32;&#32;&#32;fputc(0x2c,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a0fdda94b8b7e64884690244028f455ba">f</link>);&#32;<emphasis role="comment">//&#32;image&#32;descriptor&#32;block</emphasis>
+831 &#32;&#32;&#32;&#32;
+832 &#32;&#32;&#32;&#32;fputc(left&#32;&amp;&#32;0xff,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a0fdda94b8b7e64884690244028f455ba">f</link>);&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;corner&#32;of&#32;image&#32;in&#32;canvas&#32;space</emphasis>
+833 &#32;&#32;&#32;&#32;fputc((left&#32;&gt;&gt;&#32;8)&#32;&amp;&#32;0xff,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a0fdda94b8b7e64884690244028f455ba">f</link>);
+834 &#32;&#32;&#32;&#32;fputc(top&#32;&amp;&#32;0xff,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a0fdda94b8b7e64884690244028f455ba">f</link>);
+835 &#32;&#32;&#32;&#32;fputc((top&#32;&gt;&gt;&#32;8)&#32;&amp;&#32;0xff,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a0fdda94b8b7e64884690244028f455ba">f</link>);
+836 &#32;&#32;&#32;&#32;
+837 &#32;&#32;&#32;&#32;fputc(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a3ce386e55bbeb900c1b23e064b89bd04">width</link>&#32;&amp;&#32;0xff,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a0fdda94b8b7e64884690244028f455ba">f</link>);&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;width&#32;and&#32;height&#32;of&#32;image</emphasis>
+838 &#32;&#32;&#32;&#32;fputc((<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a3ce386e55bbeb900c1b23e064b89bd04">width</link>&#32;&gt;&gt;&#32;8)&#32;&amp;&#32;0xff,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a0fdda94b8b7e64884690244028f455ba">f</link>);
+839 &#32;&#32;&#32;&#32;fputc(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1aedd0ea77029b98ce91e47c19addcb68f">height</link>&#32;&amp;&#32;0xff,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a0fdda94b8b7e64884690244028f455ba">f</link>);
+840 &#32;&#32;&#32;&#32;fputc((<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1aedd0ea77029b98ce91e47c19addcb68f">height</link>&#32;&gt;&gt;&#32;8)&#32;&amp;&#32;0xff,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a0fdda94b8b7e64884690244028f455ba">f</link>);
+841 &#32;&#32;&#32;&#32;
+842 &#32;&#32;&#32;&#32;<emphasis role="comment">//fputc(0,&#32;f);&#32;//&#32;no&#32;local&#32;color&#32;table,&#32;no&#32;transparency</emphasis>
+843 &#32;&#32;&#32;&#32;<emphasis role="comment">//fputc(0x80,&#32;f);&#32;//&#32;no&#32;local&#32;color&#32;table,&#32;but&#32;transparency</emphasis>
+844 &#32;&#32;&#32;&#32;
+845 &#32;&#32;&#32;&#32;fputc(0x80&#32;+&#32;pPal-&gt;bitDepth-1,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a0fdda94b8b7e64884690244028f455ba">f</link>);&#32;<emphasis role="comment">//&#32;local&#32;color&#32;table&#32;present,&#32;2&#32;^&#32;bitDepth&#32;entries</emphasis>
+846 &#32;&#32;&#32;&#32;GifWritePalette(<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a0fdda94b8b7e64884690244028f455ba">f</link>,&#32;pPal);
+847 &#32;&#32;&#32;&#32;
+848 &#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;minCodeSize&#32;=&#32;pPal-&gt;bitDepth;
+849 &#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;clearCode&#32;=&#32;1&#32;&lt;&lt;&#32;pPal-&gt;bitDepth;
+850 &#32;&#32;&#32;&#32;
+851 &#32;&#32;&#32;&#32;fputc(minCodeSize,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a0fdda94b8b7e64884690244028f455ba">f</link>);&#32;<emphasis role="comment">//&#32;min&#32;code&#32;size&#32;8&#32;bits</emphasis>
+852 &#32;&#32;&#32;&#32;
+853 &#32;&#32;&#32;&#32;GifLzwNode&#32;*codetree&#32;=&#32;(GifLzwNode&#32;*)RGIF_MALLOC(<emphasis role="keyword">sizeof</emphasis>(GifLzwNode)*4096);
+854 &#32;&#32;&#32;&#32;
+855 &#32;&#32;&#32;&#32;memset(codetree,&#32;0,&#32;<emphasis role="keyword">sizeof</emphasis>(GifLzwNode)*4096);
+856 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;curCode&#32;=&#32;-1;
+857 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;codeSize&#32;=&#32;minCodeSize&#32;+&#32;1;
+858 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;maxCode&#32;=&#32;clearCode&#32;+&#32;1;
+859 &#32;&#32;&#32;&#32;
+860 &#32;&#32;&#32;&#32;GifBitStatus&#32;stat;
+861 &#32;&#32;&#32;&#32;stat.byte&#32;=&#32;0;
+862 &#32;&#32;&#32;&#32;stat.bitIndex&#32;=&#32;0;
+863 &#32;&#32;&#32;&#32;stat.chunkIndex&#32;=&#32;0;
+864 &#32;&#32;&#32;&#32;
+865 &#32;&#32;&#32;&#32;GifWriteCode(<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a0fdda94b8b7e64884690244028f455ba">f</link>,&#32;&amp;stat,&#32;clearCode,&#32;codeSize);&#32;&#32;<emphasis role="comment">//&#32;start&#32;with&#32;a&#32;fresh&#32;LZW&#32;dictionary</emphasis>
+866 &#32;&#32;&#32;&#32;
+867 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;yy=0;&#32;<link linkend="_namespaceglm_1a055d351d6ac0244db35245ad1228e8d3">yy</link>&lt;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1aedd0ea77029b98ce91e47c19addcb68f">height</link>;&#32;++<link linkend="_namespaceglm_1a055d351d6ac0244db35245ad1228e8d3">yy</link>)
+868 &#32;&#32;&#32;&#32;{
+869 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;xx=0;&#32;<link linkend="_namespaceglm_1acdf40cc185659932dfa4d7c9cb0f1771">xx</link>&lt;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a3ce386e55bbeb900c1b23e064b89bd04">width</link>;&#32;++<link linkend="_namespaceglm_1acdf40cc185659932dfa4d7c9cb0f1771">xx</link>)
+870 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+871 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>&#32;nextValue&#32;=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a0a221b005894579fea3b9eb7bfc2ee71">image</link>[(<link linkend="_namespaceglm_1a055d351d6ac0244db35245ad1228e8d3">yy</link>*<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a3ce386e55bbeb900c1b23e064b89bd04">width</link>+<link linkend="_namespaceglm_1acdf40cc185659932dfa4d7c9cb0f1771">xx</link>)*4+3];
+872 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;
+873 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;&quot;loser&#32;mode&quot;&#32;-&#32;no&#32;compression,&#32;every&#32;single&#32;code&#32;is&#32;followed&#32;immediately&#32;by&#32;a&#32;clear</emphasis>
+874 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//WriteCode(f,&#32;stat,&#32;nextValue,&#32;codeSize);</emphasis>
+875 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//WriteCode(f,&#32;stat,&#32;256,&#32;codeSize);</emphasis>
+876 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;
+877 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(curCode&#32;&lt;&#32;0)
+878 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+879 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;first&#32;value&#32;in&#32;a&#32;new&#32;run</emphasis>
+880 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;curCode&#32;=&#32;nextValue;
+881 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+882 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>&#32;<emphasis role="keywordflow">if</emphasis>&#32;(codetree[curCode].m_next[nextValue])
+883 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+884 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;current&#32;run&#32;already&#32;in&#32;the&#32;dictionary</emphasis>
+885 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;curCode&#32;=&#32;codetree[curCode].m_next[nextValue];
+886 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+887 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>
+888 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+889 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;finish&#32;the&#32;current&#32;run,&#32;write&#32;a&#32;code</emphasis>
+890 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;GifWriteCode(<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a0fdda94b8b7e64884690244028f455ba">f</link>,&#32;&amp;stat,&#32;curCode,&#32;codeSize);
+891 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;
+892 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;insert&#32;the&#32;new&#32;run&#32;into&#32;the&#32;dictionary</emphasis>
+893 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;codetree[curCode].m_next[nextValue]&#32;=&#32;++maxCode;
+894 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;
+895 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(maxCode&#32;&gt;=&#32;(1ul&#32;&lt;&lt;&#32;codeSize))
+896 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+897 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;dictionary&#32;entry&#32;count&#32;has&#32;broken&#32;a&#32;size&#32;barrier,</emphasis>
+898 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;we&#32;need&#32;more&#32;bits&#32;for&#32;codes</emphasis>
+899 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;codeSize++;
+900 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+901 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(maxCode&#32;==&#32;4095)
+902 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+903 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;the&#32;dictionary&#32;is&#32;full,&#32;clear&#32;it&#32;out&#32;and&#32;begin&#32;anew</emphasis>
+904 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;GifWriteCode(<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a0fdda94b8b7e64884690244028f455ba">f</link>,&#32;&amp;stat,&#32;clearCode,&#32;codeSize);&#32;<emphasis role="comment">//&#32;clear&#32;tree</emphasis>
+905 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;
+906 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;memset(codetree,&#32;0,&#32;<emphasis role="keyword">sizeof</emphasis>(GifLzwNode)*4096);
+907 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;codeSize&#32;=&#32;minCodeSize&#32;+&#32;1;
+908 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;maxCode&#32;=&#32;clearCode&#32;+&#32;1;
+909 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+910 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;
+911 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;curCode&#32;=&#32;nextValue;
+912 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+913 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+914 &#32;&#32;&#32;&#32;}
+915 &#32;&#32;&#32;&#32;
+916 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;compression&#32;footer</emphasis>
+917 &#32;&#32;&#32;&#32;GifWriteCode(<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a0fdda94b8b7e64884690244028f455ba">f</link>,&#32;&amp;stat,&#32;curCode,&#32;codeSize);
+918 &#32;&#32;&#32;&#32;GifWriteCode(<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a0fdda94b8b7e64884690244028f455ba">f</link>,&#32;&amp;stat,&#32;clearCode,&#32;codeSize);
+919 &#32;&#32;&#32;&#32;GifWriteCode(<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a0fdda94b8b7e64884690244028f455ba">f</link>,&#32;&amp;stat,&#32;clearCode&#32;+&#32;1,&#32;minCodeSize&#32;+&#32;1);
+920 &#32;&#32;&#32;&#32;
+921 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;write&#32;out&#32;the&#32;last&#32;partial&#32;chunk</emphasis>
+922 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">while</emphasis>&#32;(stat.bitIndex)&#32;GifWriteBit(&amp;stat,&#32;0);
+923 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(stat.chunkIndex)&#32;GifWriteChunk(<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a0fdda94b8b7e64884690244028f455ba">f</link>,&#32;&amp;stat);
+924 &#32;&#32;&#32;&#32;
+925 &#32;&#32;&#32;&#32;fputc(0,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a0fdda94b8b7e64884690244028f455ba">f</link>);&#32;<emphasis role="comment">//&#32;image&#32;block&#32;terminator</emphasis>
+926 &#32;&#32;&#32;&#32;
+927 &#32;&#32;&#32;&#32;RGIF_FREE(codetree);
+928 }
+929 
+930 <emphasis role="preprocessor">#endif&#32;</emphasis><emphasis role="comment">//&#32;RGIF_IMPLEMENTATION</emphasis>
+</programlisting></section>

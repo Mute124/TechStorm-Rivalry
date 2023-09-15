@@ -1,0 +1,565 @@
+\doxysection{gestures.\+h}
+\hypertarget{lib_2_raylib_erosion_standalone-main_2raylib_2src_2gestures_8h_source}{}\label{lib_2_raylib_erosion_standalone-main_2raylib_2src_2gestures_8h_source}\index{C:/Users/HP/Documents/GitHub/Minero-\/Game/lib/RaylibErosionStandalone-\/main/raylib/src/gestures.h@{C:/Users/HP/Documents/GitHub/Minero-\/Game/lib/RaylibErosionStandalone-\/main/raylib/src/gestures.h}}
+\mbox{\hyperlink{lib_2_raylib_erosion_standalone-main_2raylib_2src_2gestures_8h}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{comment}{/**********************************************************************************************}}
+\DoxyCodeLine{00002\ \textcolor{comment}{*}}
+\DoxyCodeLine{00003\ \textcolor{comment}{*\ \ \ raylib.gestures\ -\/\ Gestures\ system,\ gestures\ processing\ based\ on\ input\ events\ (touch/mouse)}}
+\DoxyCodeLine{00004\ \textcolor{comment}{*}}
+\DoxyCodeLine{00005\ \textcolor{comment}{*\ \ \ NOTE:\ Memory\ footprint\ of\ this\ library\ is\ aproximately\ 128\ bytes\ (global\ variables)}}
+\DoxyCodeLine{00006\ \textcolor{comment}{*}}
+\DoxyCodeLine{00007\ \textcolor{comment}{*\ \ \ CONFIGURATION:}}
+\DoxyCodeLine{00008\ \textcolor{comment}{*}}
+\DoxyCodeLine{00009\ \textcolor{comment}{*\ \ \ \#define\ GESTURES\_IMPLEMENTATION}}
+\DoxyCodeLine{00010\ \textcolor{comment}{*\ \ \ \ \ \ \ Generates\ the\ implementation\ of\ the\ library\ into\ the\ included\ file.}}
+\DoxyCodeLine{00011\ \textcolor{comment}{*\ \ \ \ \ \ \ If\ not\ defined,\ the\ library\ is\ in\ header\ only\ mode\ and\ can\ be\ included\ in\ other\ headers}}
+\DoxyCodeLine{00012\ \textcolor{comment}{*\ \ \ \ \ \ \ or\ source\ files\ without\ problems.\ But\ only\ ONE\ file\ should\ hold\ the\ implementation.}}
+\DoxyCodeLine{00013\ \textcolor{comment}{*}}
+\DoxyCodeLine{00014\ \textcolor{comment}{*\ \ \ \#define\ GESTURES\_STANDALONE}}
+\DoxyCodeLine{00015\ \textcolor{comment}{*\ \ \ \ \ \ \ If\ defined,\ the\ library\ can\ be\ used\ as\ standalone\ to\ process\ gesture\ events\ with}}
+\DoxyCodeLine{00016\ \textcolor{comment}{*\ \ \ \ \ \ \ no\ external\ dependencies.}}
+\DoxyCodeLine{00017\ \textcolor{comment}{*}}
+\DoxyCodeLine{00018\ \textcolor{comment}{*\ \ \ CONTRIBUTORS:}}
+\DoxyCodeLine{00019\ \textcolor{comment}{*\ \ \ \ \ \ \ Marc\ Palau:\ \ \ \ \ \ \ \ \ Initial\ implementation\ (2014)}}
+\DoxyCodeLine{00020\ \textcolor{comment}{*\ \ \ \ \ \ \ Albert\ Martos:\ \ \ \ \ \ Complete\ redesign\ and\ testing\ (2015)}}
+\DoxyCodeLine{00021\ \textcolor{comment}{*\ \ \ \ \ \ \ Ian\ Eito:\ \ \ \ \ \ \ \ \ \ \ Complete\ redesign\ and\ testing\ (2015)}}
+\DoxyCodeLine{00022\ \textcolor{comment}{*\ \ \ \ \ \ \ Ramon\ Santamaria:\ \ \ Supervision,\ review,\ update\ and\ maintenance}}
+\DoxyCodeLine{00023\ \textcolor{comment}{*}}
+\DoxyCodeLine{00024\ \textcolor{comment}{*}}
+\DoxyCodeLine{00025\ \textcolor{comment}{*\ \ \ LICENSE:\ zlib/libpng}}
+\DoxyCodeLine{00026\ \textcolor{comment}{*}}
+\DoxyCodeLine{00027\ \textcolor{comment}{*\ \ \ Copyright\ (c)\ 2014-\/2020\ Ramon\ Santamaria\ (@raysan5)}}
+\DoxyCodeLine{00028\ \textcolor{comment}{*}}
+\DoxyCodeLine{00029\ \textcolor{comment}{*\ \ \ This\ software\ is\ provided\ "{}as-\/is"{},\ without\ any\ express\ or\ implied\ warranty.\ In\ no\ event}}
+\DoxyCodeLine{00030\ \textcolor{comment}{*\ \ \ will\ the\ authors\ be\ held\ liable\ for\ any\ damages\ arising\ from\ the\ use\ of\ this\ software.}}
+\DoxyCodeLine{00031\ \textcolor{comment}{*}}
+\DoxyCodeLine{00032\ \textcolor{comment}{*\ \ \ Permission\ is\ granted\ to\ anyone\ to\ use\ this\ software\ for\ any\ purpose,\ including\ commercial}}
+\DoxyCodeLine{00033\ \textcolor{comment}{*\ \ \ applications,\ and\ to\ alter\ it\ and\ redistribute\ it\ freely,\ subject\ to\ the\ following\ restrictions:}}
+\DoxyCodeLine{00034\ \textcolor{comment}{*}}
+\DoxyCodeLine{00035\ \textcolor{comment}{*\ \ \ \ \ 1.\ The\ origin\ of\ this\ software\ must\ not\ be\ misrepresented;\ you\ must\ not\ claim\ that\ you}}
+\DoxyCodeLine{00036\ \textcolor{comment}{*\ \ \ \ \ wrote\ the\ original\ software.\ If\ you\ use\ this\ software\ in\ a\ product,\ an\ acknowledgment}}
+\DoxyCodeLine{00037\ \textcolor{comment}{*\ \ \ \ \ in\ the\ product\ documentation\ would\ be\ appreciated\ but\ is\ not\ required.}}
+\DoxyCodeLine{00038\ \textcolor{comment}{*}}
+\DoxyCodeLine{00039\ \textcolor{comment}{*\ \ \ \ \ 2.\ Altered\ source\ versions\ must\ be\ plainly\ marked\ as\ such,\ and\ must\ not\ be\ misrepresented}}
+\DoxyCodeLine{00040\ \textcolor{comment}{*\ \ \ \ \ as\ being\ the\ original\ software.}}
+\DoxyCodeLine{00041\ \textcolor{comment}{*}}
+\DoxyCodeLine{00042\ \textcolor{comment}{*\ \ \ \ \ 3.\ This\ notice\ may\ not\ be\ removed\ or\ altered\ from\ any\ source\ distribution.}}
+\DoxyCodeLine{00043\ \textcolor{comment}{*}}
+\DoxyCodeLine{00044\ \textcolor{comment}{**********************************************************************************************/}}
+\DoxyCodeLine{00045\ }
+\DoxyCodeLine{00046\ \textcolor{preprocessor}{\#ifndef\ GESTURES\_H}}
+\DoxyCodeLine{00047\ \textcolor{preprocessor}{\#define\ GESTURES\_H}}
+\DoxyCodeLine{00048\ }
+\DoxyCodeLine{00049\ \textcolor{preprocessor}{\#ifndef\ PI}}
+\DoxyCodeLine{00050\ \textcolor{preprocessor}{\ \ \ \ \#define\ PI\ 3.14159265358979323846}}
+\DoxyCodeLine{00051\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00052\ }
+\DoxyCodeLine{00053\ \textcolor{comment}{//-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/}}
+\DoxyCodeLine{00054\ \textcolor{comment}{//\ Defines\ and\ Macros}}
+\DoxyCodeLine{00055\ \textcolor{comment}{//-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/}}
+\DoxyCodeLine{00056\ \textcolor{comment}{//...}}
+\DoxyCodeLine{00057\ }
+\DoxyCodeLine{00058\ \textcolor{comment}{//-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/}}
+\DoxyCodeLine{00059\ \textcolor{comment}{//\ Types\ and\ Structures\ Definition}}
+\DoxyCodeLine{00060\ \textcolor{comment}{//\ NOTE:\ Below\ types\ are\ required\ for\ GESTURES\_STANDALONE\ usage}}
+\DoxyCodeLine{00061\ \textcolor{comment}{//-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/}}
+\DoxyCodeLine{00062\ \textcolor{preprocessor}{\#if\ defined(GESTURES\_STANDALONE)}}
+\DoxyCodeLine{00063\ \textcolor{preprocessor}{\ \ \ \ \#ifndef\ \_\_cplusplus}}
+\DoxyCodeLine{00064\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ Boolean\ type}}
+\DoxyCodeLine{00065\ \ \ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ \textcolor{keyword}{enum}\ \{\ \textcolor{keyword}{false},\ \textcolor{keyword}{true}\ \}\ \mbox{\hyperlink{_classes_2lib_2include_2stdbool_8h_abb452686968e48b67397da5f97445f5b}{bool}};}
+\DoxyCodeLine{00066\ \textcolor{preprocessor}{\ \ \ \ \#endif}}
+\DoxyCodeLine{00067\ }
+\DoxyCodeLine{00068\ \ \ \ \ \textcolor{comment}{//\ Vector2\ type}}
+\DoxyCodeLine{00069\ \ \ \ \ \textcolor{keyword}{typedef}\ \textcolor{keyword}{struct\ }\mbox{\hyperlink{struct_vector2}{Vector2}}\ \{}
+\DoxyCodeLine{00070\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{float}\ \mbox{\hyperlink{struct_vector2_a046bb8d17a876acc49415128dc0502f2}{x}};}
+\DoxyCodeLine{00071\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{float}\ \mbox{\hyperlink{struct_vector2_a0e07bad05f01ed811b909a2eef97f9e2}{y}};}
+\DoxyCodeLine{00072\ \ \ \ \ \}\ \mbox{\hyperlink{struct_vector2}{Vector2}};}
+\DoxyCodeLine{00073\ }
+\DoxyCodeLine{00074\ \ \ \ \ \textcolor{comment}{//\ Gestures\ type}}
+\DoxyCodeLine{00075\ \ \ \ \ \textcolor{comment}{//\ NOTE:\ It\ could\ be\ used\ as\ flags\ to\ enable\ only\ some\ gestures}}
+\DoxyCodeLine{00076\ \ \ \ \ \textcolor{keyword}{typedef}\ \textcolor{keyword}{enum}\ \{}
+\DoxyCodeLine{00077\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{_classes_2lib_2raylib_8h_a4c115a495b9dd6dfa20244e79f4fdc12abc76c50ba9bf454600d15eb73e991b6b}{GESTURE\_NONE}}\ \ \ \ \ \ \ \ =\ 0,}
+\DoxyCodeLine{00078\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{_classes_2lib_2raylib_8h_a4c115a495b9dd6dfa20244e79f4fdc12aa6ea36cd5cdb1a323cc2428937fb1692}{GESTURE\_TAP}}\ \ \ \ \ \ \ \ \ =\ 1,}
+\DoxyCodeLine{00079\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{_classes_2lib_2raylib_8h_a4c115a495b9dd6dfa20244e79f4fdc12a8b5d655a878adcc18c6ef37367c75943}{GESTURE\_DOUBLETAP}}\ \ \ =\ 2,}
+\DoxyCodeLine{00080\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{_classes_2lib_2raylib_8h_a4c115a495b9dd6dfa20244e79f4fdc12a3cf4fecd9e89c7a8d5ff7e67c3a41898}{GESTURE\_HOLD}}\ \ \ \ \ \ \ \ =\ 4,}
+\DoxyCodeLine{00081\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{_classes_2lib_2raylib_8h_a4c115a495b9dd6dfa20244e79f4fdc12a0870d36d1d24c36809fbe1320fd5ee5e}{GESTURE\_DRAG}}\ \ \ \ \ \ \ \ =\ 8,}
+\DoxyCodeLine{00082\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{_classes_2lib_2raylib_8h_a4c115a495b9dd6dfa20244e79f4fdc12a337cfdf346943f1ba19c3b668234860e}{GESTURE\_SWIPE\_RIGHT}}\ =\ 16,}
+\DoxyCodeLine{00083\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{_classes_2lib_2raylib_8h_a4c115a495b9dd6dfa20244e79f4fdc12a6ce54903fd831fdc6364471eadaacb9c}{GESTURE\_SWIPE\_LEFT}}\ \ =\ 32,}
+\DoxyCodeLine{00084\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{_classes_2lib_2raylib_8h_a4c115a495b9dd6dfa20244e79f4fdc12a64bda7d6d0dc201f3f195297c0c45d70}{GESTURE\_SWIPE\_UP}}\ \ \ \ =\ 64,}
+\DoxyCodeLine{00085\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{_classes_2lib_2raylib_8h_a4c115a495b9dd6dfa20244e79f4fdc12accf621e170b4d2e51966bd72ec053fc2}{GESTURE\_SWIPE\_DOWN}}\ \ =\ 128,}
+\DoxyCodeLine{00086\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{_classes_2lib_2raylib_8h_a4c115a495b9dd6dfa20244e79f4fdc12a4c029381b3757f0143cbcc687449bad6}{GESTURE\_PINCH\_IN}}\ \ \ \ =\ 256,}
+\DoxyCodeLine{00087\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{_classes_2lib_2raylib_8h_a4c115a495b9dd6dfa20244e79f4fdc12adb71607a217fbb056bf654af46bc9384}{GESTURE\_PINCH\_OUT}}\ \ \ =\ 512}
+\DoxyCodeLine{00088\ \ \ \ \ \}\ Gestures;}
+\DoxyCodeLine{00089\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00090\ }
+\DoxyCodeLine{00091\ \textcolor{keyword}{typedef}\ \textcolor{keyword}{enum}\ \{\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2gestures_8h_aea0a0ccf904a1074665eaa7a71eee6e9a90884c2f9baa25f5107bfa334297fce3}{TOUCH\_UP}},\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2gestures_8h_aea0a0ccf904a1074665eaa7a71eee6e9a9b9626b3c6c2fb5d2731f3751a0f42d5}{TOUCH\_DOWN}},\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2gestures_8h_aea0a0ccf904a1074665eaa7a71eee6e9a744fb6f69db9d3e132fe29477c6b8e93}{TOUCH\_MOVE}}\ \}\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2gestures_8h_aea0a0ccf904a1074665eaa7a71eee6e9}{TouchAction}};}
+\DoxyCodeLine{00092\ }
+\DoxyCodeLine{00093\ \textcolor{comment}{//\ Gesture\ events}}
+\DoxyCodeLine{00094\ \textcolor{comment}{//\ NOTE:\ MAX\_TOUCH\_POINTS\ fixed\ to\ 4}}
+\DoxyCodeLine{00095\ \textcolor{keyword}{typedef}\ \textcolor{keyword}{struct\ }\{}
+\DoxyCodeLine{00096\ \ \ \ \ \textcolor{keywordtype}{int}\ touchAction;}
+\DoxyCodeLine{00097\ \ \ \ \ \textcolor{keywordtype}{int}\ pointCount;}
+\DoxyCodeLine{00098\ \ \ \ \ \textcolor{keywordtype}{int}\ pointerId[4];}
+\DoxyCodeLine{00099\ \ \ \ \ \mbox{\hyperlink{struct_vector2}{Vector2}}\ \mbox{\hyperlink{main_8cpp_a76777b356ab2a080225682528119c4fe}{position}}[4];}
+\DoxyCodeLine{00100\ \}\ \mbox{\hyperlink{struct_gesture_event}{GestureEvent}};}
+\DoxyCodeLine{00101\ }
+\DoxyCodeLine{00102\ \textcolor{preprocessor}{\#ifdef\ \_\_cplusplus}}
+\DoxyCodeLine{00103\ \textcolor{keyword}{extern}\ \textcolor{stringliteral}{"{}C"{}}\ \{\ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ Prevents\ name\ mangling\ of\ functions}}
+\DoxyCodeLine{00104\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00105\ }
+\DoxyCodeLine{00106\ \textcolor{comment}{//-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/}}
+\DoxyCodeLine{00107\ \textcolor{comment}{//\ Global\ Variables\ Definition}}
+\DoxyCodeLine{00108\ \textcolor{comment}{//-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/}}
+\DoxyCodeLine{00109\ \textcolor{comment}{//...}}
+\DoxyCodeLine{00110\ }
+\DoxyCodeLine{00111\ \textcolor{comment}{//-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/}}
+\DoxyCodeLine{00112\ \textcolor{comment}{//\ Module\ Functions\ Declaration}}
+\DoxyCodeLine{00113\ \textcolor{comment}{//-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/}}
+\DoxyCodeLine{00114\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2gestures_8h_a5deba7e45ec5eb1bdb6da834d3a3ee09}{ProcessGestureEvent}}(\mbox{\hyperlink{struct_gesture_event}{GestureEvent}}\ event);\ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ Process\ gesture\ event\ and\ translate\ it\ into\ gestures}}
+\DoxyCodeLine{00115\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2gestures_8h_a628850a03d5f85e55c0f067788badc24}{UpdateGestures}}(\textcolor{keywordtype}{void});\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ Update\ gestures\ detected\ (must\ be\ called\ every\ frame)}}
+\DoxyCodeLine{00116\ }
+\DoxyCodeLine{00117\ \textcolor{preprocessor}{\#if\ defined(GESTURES\_STANDALONE)}}
+\DoxyCodeLine{00118\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{_classes_2lib_2raylib_8h_aa898903158e991388598c5579afbf8b4}{SetGesturesEnabled}}(\textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ gestureFlags);\ \ \ \ \ \textcolor{comment}{//\ Enable\ a\ set\ of\ gestures\ using\ flags}}
+\DoxyCodeLine{00119\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{_classes_2lib_2raylib_8h_ac651be90036f1680d9e5c9ef718dfe1d}{IsGestureDetected}}(\textcolor{keywordtype}{int}\ gesture);\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ Check\ if\ a\ gesture\ have\ been\ detected}}
+\DoxyCodeLine{00120\ \textcolor{keywordtype}{int}\ \mbox{\hyperlink{_classes_2lib_2raylib_8h_a0f070ca4a33f9e8bcadbe9ea8f1f09d7}{GetGestureDetected}}(\textcolor{keywordtype}{void});\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ Get\ latest\ detected\ gesture}}
+\DoxyCodeLine{00121\ \textcolor{keywordtype}{int}\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2raylib_8h_a09eaa7a0236828e4e7ff567eaa103c0f}{GetTouchPointsCount}}(\textcolor{keywordtype}{void});\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ Get\ touch\ points\ count}}
+\DoxyCodeLine{00122\ \textcolor{keywordtype}{float}\ \mbox{\hyperlink{_classes_2lib_2raylib_8h_a6d1b4db504365dfb4b1e1f345075e7de}{GetGestureHoldDuration}}(\textcolor{keywordtype}{void});\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ Get\ gesture\ hold\ time\ in\ milliseconds}}
+\DoxyCodeLine{00123\ \mbox{\hyperlink{struct_vector2}{Vector2}}\ \mbox{\hyperlink{_classes_2lib_2raylib_8h_a8b647fad066d251cbe72cddc612f4ecd}{GetGestureDragVector}}(\textcolor{keywordtype}{void});\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ Get\ gesture\ drag\ vector}}
+\DoxyCodeLine{00124\ \textcolor{keywordtype}{float}\ \mbox{\hyperlink{_classes_2lib_2raylib_8h_aa6d8169205c4f6e8cfbd6f39f98943d2}{GetGestureDragAngle}}(\textcolor{keywordtype}{void});\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ Get\ gesture\ drag\ angle}}
+\DoxyCodeLine{00125\ \mbox{\hyperlink{struct_vector2}{Vector2}}\ \mbox{\hyperlink{_classes_2lib_2raylib_8h_a85b0053a8ccc10862b000aa2bc5404c9}{GetGesturePinchVector}}(\textcolor{keywordtype}{void});\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ Get\ gesture\ pinch\ delta}}
+\DoxyCodeLine{00126\ \textcolor{keywordtype}{float}\ \mbox{\hyperlink{_classes_2lib_2raylib_8h_a8215af8efd6dc55081f44d13b99161bf}{GetGesturePinchAngle}}(\textcolor{keywordtype}{void});\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ Get\ gesture\ pinch\ angle}}
+\DoxyCodeLine{00127\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00128\ }
+\DoxyCodeLine{00129\ \textcolor{preprocessor}{\#ifdef\ \_\_cplusplus}}
+\DoxyCodeLine{00130\ \}}
+\DoxyCodeLine{00131\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00132\ }
+\DoxyCodeLine{00133\ \textcolor{preprocessor}{\#endif\ }\textcolor{comment}{//\ GESTURES\_H}}
+\DoxyCodeLine{00134\ }
+\DoxyCodeLine{00135\ \textcolor{comment}{/***********************************************************************************}}
+\DoxyCodeLine{00136\ \textcolor{comment}{*}}
+\DoxyCodeLine{00137\ \textcolor{comment}{*\ \ \ GESTURES\ IMPLEMENTATION}}
+\DoxyCodeLine{00138\ \textcolor{comment}{*}}
+\DoxyCodeLine{00139\ \textcolor{comment}{************************************************************************************/}}
+\DoxyCodeLine{00140\ }
+\DoxyCodeLine{00141\ \textcolor{preprocessor}{\#if\ defined(GESTURES\_IMPLEMENTATION)}}
+\DoxyCodeLine{00142\ }
+\DoxyCodeLine{00143\ \textcolor{preprocessor}{\#if\ defined(\_WIN32)}}
+\DoxyCodeLine{00144\ \ \ \ \ \textcolor{comment}{//\ Functions\ required\ to\ query\ time\ on\ Windows}}
+\DoxyCodeLine{00145\ \ \ \ \ \textcolor{keywordtype}{int}\ \_\_stdcall\ QueryPerformanceCounter(\textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{long}\ \textcolor{keywordtype}{long}\ \textcolor{keywordtype}{int}\ *lpPerformanceCount);}
+\DoxyCodeLine{00146\ \ \ \ \ \textcolor{keywordtype}{int}\ \_\_stdcall\ QueryPerformanceFrequency(\textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{long}\ \textcolor{keywordtype}{long}\ \textcolor{keywordtype}{int}\ *lpFrequency);}
+\DoxyCodeLine{00147\ \textcolor{preprocessor}{\#elif\ defined(\_\_linux\_\_)}}
+\DoxyCodeLine{00148\ \textcolor{preprocessor}{\ \ \ \ \#if\ \_POSIX\_C\_SOURCE\ <\ 199309L}}
+\DoxyCodeLine{00149\ \textcolor{preprocessor}{\ \ \ \ \ \ \ \ \#undef\ \_POSIX\_C\_SOURCE}}
+\DoxyCodeLine{00150\ \textcolor{preprocessor}{\ \ \ \ \ \ \ \ \#define\ \_POSIX\_C\_SOURCE\ 199309L\ }\textcolor{comment}{//\ Required\ for\ CLOCK\_MONOTONIC\ if\ compiled\ with\ c99\ without\ gnu\ ext.}}
+\DoxyCodeLine{00151\ \textcolor{preprocessor}{\ \ \ \ \#endif}}
+\DoxyCodeLine{00152\ \textcolor{preprocessor}{\ \ \ \ \#include\ <sys/time.h>}\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ Required\ for:\ timespec}}
+\DoxyCodeLine{00153\ \textcolor{preprocessor}{\ \ \ \ \#include\ <time.h>}\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ Required\ for:\ clock\_gettime()}}
+\DoxyCodeLine{00154\ }
+\DoxyCodeLine{00155\ \textcolor{preprocessor}{\ \ \ \ \#include\ <math.h>}\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ Required\ for:\ sqrtf(),\ atan2f()}}
+\DoxyCodeLine{00156\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00157\ }
+\DoxyCodeLine{00158\ \textcolor{preprocessor}{\#if\ defined(\_\_APPLE\_\_)\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ }\textcolor{comment}{//\ macOS\ also\ defines\ \_\_MACH\_\_}}
+\DoxyCodeLine{00159\ \textcolor{preprocessor}{\ \ \ \ \#include\ <mach/clock.h>}\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ Required\ for:\ clock\_get\_time()}}
+\DoxyCodeLine{00160\ \textcolor{preprocessor}{\ \ \ \ \#include\ <mach/mach.h>}\ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ Required\ for:\ mach\_timespec\_t}}
+\DoxyCodeLine{00161\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00162\ }
+\DoxyCodeLine{00163\ \textcolor{comment}{//-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/}}
+\DoxyCodeLine{00164\ \textcolor{comment}{//\ Defines\ and\ Macros}}
+\DoxyCodeLine{00165\ \textcolor{comment}{//-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/}}
+\DoxyCodeLine{00166\ \textcolor{preprocessor}{\#define\ FORCE\_TO\_SWIPE\ \ \ \ \ \ 0.0005f\ \ \ \ \ }\textcolor{comment}{//\ Measured\ in\ normalized\ screen\ units/time}}
+\DoxyCodeLine{00167\ \textcolor{preprocessor}{\#define\ MINIMUM\_DRAG\ \ \ \ \ \ \ \ 0.015f\ \ \ \ \ \ }\textcolor{comment}{//\ Measured\ in\ normalized\ screen\ units\ (0.0f\ to\ 1.0f)}}
+\DoxyCodeLine{00168\ \textcolor{preprocessor}{\#define\ MINIMUM\_PINCH\ \ \ \ \ \ \ 0.005f\ \ \ \ \ \ }\textcolor{comment}{//\ Measured\ in\ normalized\ screen\ units\ (0.0f\ to\ 1.0f)}}
+\DoxyCodeLine{00169\ \textcolor{preprocessor}{\#define\ TAP\_TIMEOUT\ \ \ \ \ \ \ \ \ 300\ \ \ \ \ \ \ \ \ }\textcolor{comment}{//\ Time\ in\ milliseconds}}
+\DoxyCodeLine{00170\ \textcolor{preprocessor}{\#define\ PINCH\_TIMEOUT\ \ \ \ \ \ \ 300\ \ \ \ \ \ \ \ \ }\textcolor{comment}{//\ Time\ in\ milliseconds}}
+\DoxyCodeLine{00171\ \textcolor{preprocessor}{\#define\ DOUBLETAP\_RANGE\ \ \ \ \ 0.03f\ \ \ \ \ \ \ }\textcolor{comment}{//\ Measured\ in\ normalized\ screen\ units\ (0.0f\ to\ 1.0f)}}
+\DoxyCodeLine{00172\ }
+\DoxyCodeLine{00173\ \textcolor{comment}{//-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/}}
+\DoxyCodeLine{00174\ \textcolor{comment}{//\ Types\ and\ Structures\ Definition}}
+\DoxyCodeLine{00175\ \textcolor{comment}{//-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/}}
+\DoxyCodeLine{00176\ }
+\DoxyCodeLine{00177\ \textcolor{keyword}{typedef}\ \textcolor{keyword}{struct\ }\{}
+\DoxyCodeLine{00178\ \ \ \ \ \textcolor{keywordtype}{int}\ current;\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ Current\ detected\ gesture}}
+\DoxyCodeLine{00179\ \ \ \ \ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ enabledFlags;\ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ Enabled\ gestures\ flags}}
+\DoxyCodeLine{00180\ \ \ \ \ \textcolor{keyword}{struct\ }\{}
+\DoxyCodeLine{00181\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ firstId;\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ Touch\ id\ for\ first\ touch\ point}}
+\DoxyCodeLine{00182\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ pointCount;\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ Touch\ points\ counter}}
+\DoxyCodeLine{00183\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{double}\ eventTime;\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ Time\ stamp\ when\ an\ event\ happened}}
+\DoxyCodeLine{00184\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{struct_vector2}{Vector2}}\ upPosition;\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ Touch\ up\ position}}
+\DoxyCodeLine{00185\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{struct_vector2}{Vector2}}\ downPositionA;\ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ First\ touch\ down\ position}}
+\DoxyCodeLine{00186\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{struct_vector2}{Vector2}}\ downPositionB;\ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ Second\ touch\ down\ position}}
+\DoxyCodeLine{00187\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{struct_vector2}{Vector2}}\ downDragPosition;\ \ \ \ \ \ \ \textcolor{comment}{//\ Touch\ drag\ position}}
+\DoxyCodeLine{00188\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{struct_vector2}{Vector2}}\ moveDownPositionA;\ \ \ \ \ \ \textcolor{comment}{//\ First\ touch\ down\ position\ on\ move}}
+\DoxyCodeLine{00189\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{struct_vector2}{Vector2}}\ moveDownPositionB;\ \ \ \ \ \ \textcolor{comment}{//\ Second\ touch\ down\ position\ on\ move}}
+\DoxyCodeLine{00190\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ tapCounter;\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ TAP\ counter\ (one\ tap\ implies\ TOUCH\_DOWN\ and\ TOUCH\_UP\ actions)}}
+\DoxyCodeLine{00191\ \ \ \ \ \}\ Touch;}
+\DoxyCodeLine{00192\ \ \ \ \ \textcolor{keyword}{struct\ }\{}
+\DoxyCodeLine{00193\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ resetRequired;\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ HOLD\ reset\ to\ get\ first\ touch\ point\ again}}
+\DoxyCodeLine{00194\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{double}\ timeDuration;\ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ HOLD\ duration\ in\ milliseconds}}
+\DoxyCodeLine{00195\ \ \ \ \ \}\ Hold;}
+\DoxyCodeLine{00196\ \ \ \ \ \textcolor{keyword}{struct\ }\{}
+\DoxyCodeLine{00197\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{struct_vector2}{Vector2}}\ vector;\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ DRAG\ vector\ (between\ initial\ and\ current\ position)}}
+\DoxyCodeLine{00198\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{float}\ \mbox{\hyperlink{group__ext__quaternion__trigonometric_ga8aa248b31d5ade470c87304df5eb7bd8}{angle}};\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ DRAG\ angle\ (relative\ to\ x-\/axis)}}
+\DoxyCodeLine{00199\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{float}\ \mbox{\hyperlink{namespacedistance}{distance}};\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ DRAG\ distance\ (from\ initial\ touch\ point\ to\ final)\ (normalized\ [0..1])}}
+\DoxyCodeLine{00200\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{float}\ intensity;\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ DRAG\ intensity,\ how\ far\ why\ did\ the\ DRAG\ (pixels\ per\ frame)}}
+\DoxyCodeLine{00201\ \ \ \ \ \}\ Drag;}
+\DoxyCodeLine{00202\ \ \ \ \ \textcolor{keyword}{struct\ }\{}
+\DoxyCodeLine{00203\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2glad_8h_ac55adc720a3098c1b454d2a4647f4361}{start}};\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ SWIPE\ used\ to\ define\ when\ start\ measuring\ GESTURES.Swipe.timeDuration}}
+\DoxyCodeLine{00204\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{double}\ timeDuration;\ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ SWIPE\ time\ to\ calculate\ drag\ intensity}}
+\DoxyCodeLine{00205\ \ \ \ \ \}\ Swipe;}
+\DoxyCodeLine{00206\ \ \ \ \ \textcolor{keyword}{struct\ }\{}
+\DoxyCodeLine{00207\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{struct_vector2}{Vector2}}\ vector;\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ PINCH\ vector\ (between\ first\ and\ second\ touch\ points)}}
+\DoxyCodeLine{00208\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{float}\ \mbox{\hyperlink{group__ext__quaternion__trigonometric_ga8aa248b31d5ade470c87304df5eb7bd8}{angle}};\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ PINCH\ angle\ (relative\ to\ x-\/axis)}}
+\DoxyCodeLine{00209\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{float}\ \mbox{\hyperlink{namespacedistance}{distance}};\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ PINCH\ displacement\ distance\ (normalized\ [0..1])}}
+\DoxyCodeLine{00210\ \ \ \ \ \}\ Pinch;}
+\DoxyCodeLine{00211\ \}\ GesturesData;}
+\DoxyCodeLine{00212\ }
+\DoxyCodeLine{00213\ \textcolor{comment}{//-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/}}
+\DoxyCodeLine{00214\ \textcolor{comment}{//\ Global\ Variables\ Definition}}
+\DoxyCodeLine{00215\ \textcolor{comment}{//-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/}}
+\DoxyCodeLine{00216\ \textcolor{keyword}{static}\ GesturesData\ GESTURES\ =\ \{}
+\DoxyCodeLine{00217\ \ \ \ \ .Touch.firstId\ =\ -\/1,}
+\DoxyCodeLine{00218\ \ \ \ \ .current\ =\ \mbox{\hyperlink{_classes_2lib_2raylib_8h_a4c115a495b9dd6dfa20244e79f4fdc12abc76c50ba9bf454600d15eb73e991b6b}{GESTURE\_NONE}},}
+\DoxyCodeLine{00219\ \ \ \ \ .enabledFlags\ =\ 0b0000001111111111\ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ All\ gestures\ enabled\ by\ default}}
+\DoxyCodeLine{00220\ \};}
+\DoxyCodeLine{00221\ }
+\DoxyCodeLine{00222\ \textcolor{comment}{//-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/}}
+\DoxyCodeLine{00223\ \textcolor{comment}{//\ Module\ specific\ Functions\ Declaration}}
+\DoxyCodeLine{00224\ \textcolor{comment}{//-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/}}
+\DoxyCodeLine{00225\ \textcolor{preprocessor}{\#if\ defined(GESTURES\_STANDALONE)}}
+\DoxyCodeLine{00226\ \textcolor{comment}{//\ Some\ required\ math\ functions\ provided\ by\ raymath.h}}
+\DoxyCodeLine{00227\ \textcolor{keyword}{static}\ \textcolor{keywordtype}{float}\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2raymath_8h_a45d90af29bab5673f90ac6f51d3c1f06}{Vector2Angle}}(\mbox{\hyperlink{struct_vector2}{Vector2}}\ initialPosition,\ \mbox{\hyperlink{struct_vector2}{Vector2}}\ finalPosition);}
+\DoxyCodeLine{00228\ \textcolor{keyword}{static}\ \textcolor{keywordtype}{float}\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2raymath_8h_a2e16f8f7553aa565422cf9aff49ab852}{Vector2Distance}}(\mbox{\hyperlink{struct_vector2}{Vector2}}\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2glad_8h_a0779c3b73f9aa3a0ac5b0139b5d291d9}{v1}},\ \mbox{\hyperlink{struct_vector2}{Vector2}}\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2glad_8h_a9a09a1837922b2b806f4589096a52049}{v2}});}
+\DoxyCodeLine{00229\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00230\ \textcolor{keyword}{static}\ \textcolor{keywordtype}{double}\ GetCurrentTime(\textcolor{keywordtype}{void});}
+\DoxyCodeLine{00231\ }
+\DoxyCodeLine{00232\ \textcolor{comment}{//-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/}}
+\DoxyCodeLine{00233\ \textcolor{comment}{//\ Module\ Functions\ Definition}}
+\DoxyCodeLine{00234\ \textcolor{comment}{//-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/}}
+\DoxyCodeLine{00235\ }
+\DoxyCodeLine{00236\ \textcolor{comment}{//\ Enable\ only\ desired\ getures\ to\ be\ detected}}
+\DoxyCodeLine{00237\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{_classes_2lib_2raylib_8h_aa898903158e991388598c5579afbf8b4}{SetGesturesEnabled}}(\textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ gestureFlags)}
+\DoxyCodeLine{00238\ \{}
+\DoxyCodeLine{00239\ \ \ \ \ GESTURES.enabledFlags\ =\ gestureFlags;}
+\DoxyCodeLine{00240\ \}}
+\DoxyCodeLine{00241\ }
+\DoxyCodeLine{00242\ \textcolor{comment}{//\ Check\ if\ a\ gesture\ have\ been\ detected}}
+\DoxyCodeLine{00243\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{_classes_2lib_2raylib_8h_ac651be90036f1680d9e5c9ef718dfe1d}{IsGestureDetected}}(\textcolor{keywordtype}{int}\ gesture)}
+\DoxyCodeLine{00244\ \{}
+\DoxyCodeLine{00245\ \ \ \ \ \textcolor{keywordflow}{if}\ ((GESTURES.enabledFlags\ \&\ GESTURES.current)\ ==\ gesture)\ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{00246\ \ \ \ \ \textcolor{keywordflow}{else}\ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{00247\ \}}
+\DoxyCodeLine{00248\ }
+\DoxyCodeLine{00249\ \textcolor{comment}{//\ Process\ gesture\ event\ and\ translate\ it\ into\ gestures}}
+\DoxyCodeLine{00250\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2gestures_8h_a5deba7e45ec5eb1bdb6da834d3a3ee09}{ProcessGestureEvent}}(\mbox{\hyperlink{struct_gesture_event}{GestureEvent}}\ event)}
+\DoxyCodeLine{00251\ \{}
+\DoxyCodeLine{00252\ \ \ \ \ \textcolor{comment}{//\ Reset\ required\ variables}}
+\DoxyCodeLine{00253\ \ \ \ \ GESTURES.Touch.pointCount\ =\ \textcolor{keyword}{event}.pointCount;\ \ \ \ \ \ \textcolor{comment}{//\ Required\ on\ UpdateGestures()}}
+\DoxyCodeLine{00254\ }
+\DoxyCodeLine{00255\ \ \ \ \ \textcolor{keywordflow}{if}\ (GESTURES.Touch.pointCount\ <\ 2)}
+\DoxyCodeLine{00256\ \ \ \ \ \{}
+\DoxyCodeLine{00257\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (event.\mbox{\hyperlink{struct_gesture_event_a2b74620f0afd9398d93b330e3ca958d9}{touchAction}}\ ==\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2gestures_8h_aea0a0ccf904a1074665eaa7a71eee6e9a9b9626b3c6c2fb5d2731f3751a0f42d5}{TOUCH\_DOWN}})}
+\DoxyCodeLine{00258\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00259\ \ \ \ \ \ \ \ \ \ \ \ \ GESTURES.Touch.tapCounter++;\ \ \ \ \textcolor{comment}{//\ Tap\ counter}}
+\DoxyCodeLine{00260\ }
+\DoxyCodeLine{00261\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ Detect\ GESTURE\_DOUBLE\_TAP}}
+\DoxyCodeLine{00262\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ ((GESTURES.current\ ==\ \mbox{\hyperlink{_classes_2lib_2raylib_8h_a4c115a495b9dd6dfa20244e79f4fdc12abc76c50ba9bf454600d15eb73e991b6b}{GESTURE\_NONE}})\ \&\&\ (GESTURES.Touch.tapCounter\ >=\ 2)\ \&\&\ ((GetCurrentTime()\ -\/\ GESTURES.Touch.eventTime)\ <\ TAP\_TIMEOUT)\ \&\&\ (\mbox{\hyperlink{_classes_2lib_2raylib_2src_2raymath_8h_a2e16f8f7553aa565422cf9aff49ab852}{Vector2Distance}}(GESTURES.Touch.downPositionA,\ event.\mbox{\hyperlink{struct_gesture_event_a0671722c15eccf2fe2add25aab71b83c}{position}}[0])\ <\ DOUBLETAP\_RANGE))}
+\DoxyCodeLine{00263\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00264\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ GESTURES.current\ =\ \mbox{\hyperlink{_classes_2lib_2raylib_8h_a4c115a495b9dd6dfa20244e79f4fdc12a8b5d655a878adcc18c6ef37367c75943}{GESTURE\_DOUBLETAP}};}
+\DoxyCodeLine{00265\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ GESTURES.Touch.tapCounter\ =\ 0;}
+\DoxyCodeLine{00266\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00267\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}\ \ \ \ \textcolor{comment}{//\ Detect\ GESTURE\_TAP}}
+\DoxyCodeLine{00268\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00269\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ GESTURES.Touch.tapCounter\ =\ 1;}
+\DoxyCodeLine{00270\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ GESTURES.current\ =\ \mbox{\hyperlink{_classes_2lib_2raylib_8h_a4c115a495b9dd6dfa20244e79f4fdc12aa6ea36cd5cdb1a323cc2428937fb1692}{GESTURE\_TAP}};}
+\DoxyCodeLine{00271\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00272\ }
+\DoxyCodeLine{00273\ \ \ \ \ \ \ \ \ \ \ \ \ GESTURES.Touch.downPositionA\ =\ \textcolor{keyword}{event}.position[0];}
+\DoxyCodeLine{00274\ \ \ \ \ \ \ \ \ \ \ \ \ GESTURES.Touch.downDragPosition\ =\ \textcolor{keyword}{event}.position[0];}
+\DoxyCodeLine{00275\ }
+\DoxyCodeLine{00276\ \ \ \ \ \ \ \ \ \ \ \ \ GESTURES.Touch.upPosition\ =\ GESTURES.Touch.downPositionA;}
+\DoxyCodeLine{00277\ \ \ \ \ \ \ \ \ \ \ \ \ GESTURES.Touch.eventTime\ =\ GetCurrentTime();}
+\DoxyCodeLine{00278\ }
+\DoxyCodeLine{00279\ \ \ \ \ \ \ \ \ \ \ \ \ GESTURES.Touch.firstId\ =\ \textcolor{keyword}{event}.pointerId[0];}
+\DoxyCodeLine{00280\ }
+\DoxyCodeLine{00281\ \ \ \ \ \ \ \ \ \ \ \ \ GESTURES.Drag.vector\ =\ (\mbox{\hyperlink{struct_vector2}{Vector2}})\{\ 0.0f,\ 0.0f\ \};}
+\DoxyCodeLine{00282\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00283\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}\ \textcolor{keywordflow}{if}\ (event.\mbox{\hyperlink{struct_gesture_event_a2b74620f0afd9398d93b330e3ca958d9}{touchAction}}\ ==\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2gestures_8h_aea0a0ccf904a1074665eaa7a71eee6e9a90884c2f9baa25f5107bfa334297fce3}{TOUCH\_UP}})}
+\DoxyCodeLine{00284\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00285\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (GESTURES.current\ ==\ \mbox{\hyperlink{_classes_2lib_2raylib_8h_a4c115a495b9dd6dfa20244e79f4fdc12a0870d36d1d24c36809fbe1320fd5ee5e}{GESTURE\_DRAG}})\ GESTURES.Touch.upPosition\ =\ \textcolor{keyword}{event}.position[0];}
+\DoxyCodeLine{00286\ }
+\DoxyCodeLine{00287\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ NOTE:\ GESTURES.Drag.intensity\ dependend\ on\ the\ resolution\ of\ the\ screen}}
+\DoxyCodeLine{00288\ \ \ \ \ \ \ \ \ \ \ \ \ GESTURES.Drag.distance\ =\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2raymath_8h_a2e16f8f7553aa565422cf9aff49ab852}{Vector2Distance}}(GESTURES.Touch.downPositionA,\ GESTURES.Touch.upPosition);}
+\DoxyCodeLine{00289\ \ \ \ \ \ \ \ \ \ \ \ \ GESTURES.Drag.intensity\ =\ GESTURES.Drag.distance/(float)((GetCurrentTime()\ -\/\ GESTURES.Swipe.timeDuration));}
+\DoxyCodeLine{00290\ }
+\DoxyCodeLine{00291\ \ \ \ \ \ \ \ \ \ \ \ \ GESTURES.Swipe.start\ =\ \textcolor{keyword}{false};}
+\DoxyCodeLine{00292\ }
+\DoxyCodeLine{00293\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ Detect\ GESTURE\_SWIPE}}
+\DoxyCodeLine{00294\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ ((GESTURES.Drag.intensity\ >\ FORCE\_TO\_SWIPE)\ \&\&\ (GESTURES.Touch.firstId\ ==\ \textcolor{keyword}{event}.pointerId[0]))}
+\DoxyCodeLine{00295\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00296\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ NOTE:\ Angle\ should\ be\ inverted\ in\ Y}}
+\DoxyCodeLine{00297\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ GESTURES.Drag.angle\ =\ 360.0f\ -\/\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2raymath_8h_a45d90af29bab5673f90ac6f51d3c1f06}{Vector2Angle}}(GESTURES.Touch.downPositionA,\ GESTURES.Touch.upPosition);}
+\DoxyCodeLine{00298\ }
+\DoxyCodeLine{00299\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ ((GESTURES.Drag.angle\ <\ 30)\ ||\ (GESTURES.Drag.angle\ >\ 330))\ GESTURES.current\ =\ \mbox{\hyperlink{_classes_2lib_2raylib_8h_a4c115a495b9dd6dfa20244e79f4fdc12a337cfdf346943f1ba19c3b668234860e}{GESTURE\_SWIPE\_RIGHT}};\ \ \ \ \ \ \ \ \textcolor{comment}{//\ Right}}
+\DoxyCodeLine{00300\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}\ \textcolor{keywordflow}{if}\ ((GESTURES.Drag.angle\ >\ 30)\ \&\&\ (GESTURES.Drag.angle\ <\ 120))\ GESTURES.current\ =\ \mbox{\hyperlink{_classes_2lib_2raylib_8h_a4c115a495b9dd6dfa20244e79f4fdc12a64bda7d6d0dc201f3f195297c0c45d70}{GESTURE\_SWIPE\_UP}};\ \ \ \ \ \ \textcolor{comment}{//\ Up}}
+\DoxyCodeLine{00301\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}\ \textcolor{keywordflow}{if}\ ((GESTURES.Drag.angle\ >\ 120)\ \&\&\ (GESTURES.Drag.angle\ <\ 210))\ GESTURES.current\ =\ \mbox{\hyperlink{_classes_2lib_2raylib_8h_a4c115a495b9dd6dfa20244e79f4fdc12a6ce54903fd831fdc6364471eadaacb9c}{GESTURE\_SWIPE\_LEFT}};\ \ \ \textcolor{comment}{//\ Left}}
+\DoxyCodeLine{00302\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}\ \textcolor{keywordflow}{if}\ ((GESTURES.Drag.angle\ >\ 210)\ \&\&\ (GESTURES.Drag.angle\ <\ 300))\ GESTURES.current\ =\ \mbox{\hyperlink{_classes_2lib_2raylib_8h_a4c115a495b9dd6dfa20244e79f4fdc12accf621e170b4d2e51966bd72ec053fc2}{GESTURE\_SWIPE\_DOWN}};\ \ \ \textcolor{comment}{//\ Down}}
+\DoxyCodeLine{00303\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}\ GESTURES.current\ =\ \mbox{\hyperlink{_classes_2lib_2raylib_8h_a4c115a495b9dd6dfa20244e79f4fdc12abc76c50ba9bf454600d15eb73e991b6b}{GESTURE\_NONE}};}
+\DoxyCodeLine{00304\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00305\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{00306\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00307\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ GESTURES.Drag.distance\ =\ 0.0f;}
+\DoxyCodeLine{00308\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ GESTURES.Drag.intensity\ =\ 0.0f;}
+\DoxyCodeLine{00309\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ GESTURES.Drag.angle\ =\ 0.0f;}
+\DoxyCodeLine{00310\ }
+\DoxyCodeLine{00311\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ GESTURES.current\ =\ \mbox{\hyperlink{_classes_2lib_2raylib_8h_a4c115a495b9dd6dfa20244e79f4fdc12abc76c50ba9bf454600d15eb73e991b6b}{GESTURE\_NONE}};}
+\DoxyCodeLine{00312\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00313\ }
+\DoxyCodeLine{00314\ \ \ \ \ \ \ \ \ \ \ \ \ GESTURES.Touch.downDragPosition\ =\ (\mbox{\hyperlink{struct_vector2}{Vector2}})\{\ 0.0f,\ 0.0f\ \};}
+\DoxyCodeLine{00315\ \ \ \ \ \ \ \ \ \ \ \ \ GESTURES.Touch.pointCount\ =\ 0;}
+\DoxyCodeLine{00316\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00317\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}\ \textcolor{keywordflow}{if}\ (event.\mbox{\hyperlink{struct_gesture_event_a2b74620f0afd9398d93b330e3ca958d9}{touchAction}}\ ==\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2gestures_8h_aea0a0ccf904a1074665eaa7a71eee6e9a744fb6f69db9d3e132fe29477c6b8e93}{TOUCH\_MOVE}})}
+\DoxyCodeLine{00318\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00319\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (GESTURES.current\ ==\ \mbox{\hyperlink{_classes_2lib_2raylib_8h_a4c115a495b9dd6dfa20244e79f4fdc12a0870d36d1d24c36809fbe1320fd5ee5e}{GESTURE\_DRAG}})\ GESTURES.Touch.eventTime\ =\ GetCurrentTime();}
+\DoxyCodeLine{00320\ }
+\DoxyCodeLine{00321\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (!GESTURES.Swipe.start)}
+\DoxyCodeLine{00322\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00323\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ GESTURES.Swipe.timeDuration\ =\ GetCurrentTime();}
+\DoxyCodeLine{00324\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ GESTURES.Swipe.start\ =\ \textcolor{keyword}{true};}
+\DoxyCodeLine{00325\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00326\ }
+\DoxyCodeLine{00327\ \ \ \ \ \ \ \ \ \ \ \ \ GESTURES.Touch.moveDownPositionA\ =\ \textcolor{keyword}{event}.position[0];}
+\DoxyCodeLine{00328\ }
+\DoxyCodeLine{00329\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (GESTURES.current\ ==\ \mbox{\hyperlink{_classes_2lib_2raylib_8h_a4c115a495b9dd6dfa20244e79f4fdc12a3cf4fecd9e89c7a8d5ff7e67c3a41898}{GESTURE\_HOLD}})}
+\DoxyCodeLine{00330\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00331\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (GESTURES.Hold.resetRequired)\ GESTURES.Touch.downPositionA\ =\ \textcolor{keyword}{event}.position[0];}
+\DoxyCodeLine{00332\ }
+\DoxyCodeLine{00333\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ GESTURES.Hold.resetRequired\ =\ \textcolor{keyword}{false};}
+\DoxyCodeLine{00334\ }
+\DoxyCodeLine{00335\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ Detect\ GESTURE\_DRAG}}
+\DoxyCodeLine{00336\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{_classes_2lib_2raylib_2src_2raymath_8h_a2e16f8f7553aa565422cf9aff49ab852}{Vector2Distance}}(GESTURES.Touch.downPositionA,\ GESTURES.Touch.moveDownPositionA)\ >=\ MINIMUM\_DRAG)}
+\DoxyCodeLine{00337\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00338\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ GESTURES.Touch.eventTime\ =\ GetCurrentTime();}
+\DoxyCodeLine{00339\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ GESTURES.current\ =\ \mbox{\hyperlink{_classes_2lib_2raylib_8h_a4c115a495b9dd6dfa20244e79f4fdc12a0870d36d1d24c36809fbe1320fd5ee5e}{GESTURE\_DRAG}};}
+\DoxyCodeLine{00340\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00341\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00342\ }
+\DoxyCodeLine{00343\ \ \ \ \ \ \ \ \ \ \ \ \ GESTURES.Drag.vector.x\ =\ GESTURES.Touch.moveDownPositionA.x\ -\/\ GESTURES.Touch.downDragPosition.x;}
+\DoxyCodeLine{00344\ \ \ \ \ \ \ \ \ \ \ \ \ GESTURES.Drag.vector.y\ =\ GESTURES.Touch.moveDownPositionA.y\ -\/\ GESTURES.Touch.downDragPosition.y;}
+\DoxyCodeLine{00345\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00346\ \ \ \ \ \}}
+\DoxyCodeLine{00347\ \ \ \ \ \textcolor{keywordflow}{else}\ \ \ \ \textcolor{comment}{//\ Two\ touch\ points}}
+\DoxyCodeLine{00348\ \ \ \ \ \{}
+\DoxyCodeLine{00349\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (event.\mbox{\hyperlink{struct_gesture_event_a2b74620f0afd9398d93b330e3ca958d9}{touchAction}}\ ==\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2gestures_8h_aea0a0ccf904a1074665eaa7a71eee6e9a9b9626b3c6c2fb5d2731f3751a0f42d5}{TOUCH\_DOWN}})}
+\DoxyCodeLine{00350\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00351\ \ \ \ \ \ \ \ \ \ \ \ \ GESTURES.Touch.downPositionA\ =\ \textcolor{keyword}{event}.position[0];}
+\DoxyCodeLine{00352\ \ \ \ \ \ \ \ \ \ \ \ \ GESTURES.Touch.downPositionB\ =\ \textcolor{keyword}{event}.position[1];}
+\DoxyCodeLine{00353\ }
+\DoxyCodeLine{00354\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//GESTURES.Pinch.distance\ =\ Vector2Distance(GESTURES.Touch.downPositionA,\ GESTURES.Touch.downPositionB);}}
+\DoxyCodeLine{00355\ }
+\DoxyCodeLine{00356\ \ \ \ \ \ \ \ \ \ \ \ \ GESTURES.Pinch.vector.x\ =\ GESTURES.Touch.downPositionB.x\ -\/\ GESTURES.Touch.downPositionA.x;}
+\DoxyCodeLine{00357\ \ \ \ \ \ \ \ \ \ \ \ \ GESTURES.Pinch.vector.y\ =\ GESTURES.Touch.downPositionB.y\ -\/\ GESTURES.Touch.downPositionA.y;}
+\DoxyCodeLine{00358\ }
+\DoxyCodeLine{00359\ \ \ \ \ \ \ \ \ \ \ \ \ GESTURES.current\ =\ \mbox{\hyperlink{_classes_2lib_2raylib_8h_a4c115a495b9dd6dfa20244e79f4fdc12a3cf4fecd9e89c7a8d5ff7e67c3a41898}{GESTURE\_HOLD}};}
+\DoxyCodeLine{00360\ \ \ \ \ \ \ \ \ \ \ \ \ GESTURES.Hold.timeDuration\ =\ GetCurrentTime();}
+\DoxyCodeLine{00361\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00362\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}\ \textcolor{keywordflow}{if}\ (event.\mbox{\hyperlink{struct_gesture_event_a2b74620f0afd9398d93b330e3ca958d9}{touchAction}}\ ==\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2gestures_8h_aea0a0ccf904a1074665eaa7a71eee6e9a744fb6f69db9d3e132fe29477c6b8e93}{TOUCH\_MOVE}})}
+\DoxyCodeLine{00363\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00364\ \ \ \ \ \ \ \ \ \ \ \ \ GESTURES.Pinch.distance\ =\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2raymath_8h_a2e16f8f7553aa565422cf9aff49ab852}{Vector2Distance}}(GESTURES.Touch.moveDownPositionA,\ GESTURES.Touch.moveDownPositionB);}
+\DoxyCodeLine{00365\ }
+\DoxyCodeLine{00366\ \ \ \ \ \ \ \ \ \ \ \ \ GESTURES.Touch.downPositionA\ =\ GESTURES.Touch.moveDownPositionA;}
+\DoxyCodeLine{00367\ \ \ \ \ \ \ \ \ \ \ \ \ GESTURES.Touch.downPositionB\ =\ GESTURES.Touch.moveDownPositionB;}
+\DoxyCodeLine{00368\ }
+\DoxyCodeLine{00369\ \ \ \ \ \ \ \ \ \ \ \ \ GESTURES.Touch.moveDownPositionA\ =\ \textcolor{keyword}{event}.position[0];}
+\DoxyCodeLine{00370\ \ \ \ \ \ \ \ \ \ \ \ \ GESTURES.Touch.moveDownPositionB\ =\ \textcolor{keyword}{event}.position[1];}
+\DoxyCodeLine{00371\ }
+\DoxyCodeLine{00372\ \ \ \ \ \ \ \ \ \ \ \ \ GESTURES.Pinch.vector.x\ =\ GESTURES.Touch.moveDownPositionB.x\ -\/\ GESTURES.Touch.moveDownPositionA.x;}
+\DoxyCodeLine{00373\ \ \ \ \ \ \ \ \ \ \ \ \ GESTURES.Pinch.vector.y\ =\ GESTURES.Touch.moveDownPositionB.y\ -\/\ GESTURES.Touch.moveDownPositionA.y;}
+\DoxyCodeLine{00374\ }
+\DoxyCodeLine{00375\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ ((\mbox{\hyperlink{_classes_2lib_2raylib_2src_2raymath_8h_a2e16f8f7553aa565422cf9aff49ab852}{Vector2Distance}}(GESTURES.Touch.downPositionA,\ GESTURES.Touch.moveDownPositionA)\ >=\ MINIMUM\_PINCH)\ ||\ (\mbox{\hyperlink{_classes_2lib_2raylib_2src_2raymath_8h_a2e16f8f7553aa565422cf9aff49ab852}{Vector2Distance}}(GESTURES.Touch.downPositionB,\ GESTURES.Touch.moveDownPositionB)\ >=\ MINIMUM\_PINCH))}
+\DoxyCodeLine{00376\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00377\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ ((\mbox{\hyperlink{_classes_2lib_2raylib_2src_2raymath_8h_a2e16f8f7553aa565422cf9aff49ab852}{Vector2Distance}}(GESTURES.Touch.moveDownPositionA,\ GESTURES.Touch.moveDownPositionB)\ -\/\ GESTURES.Pinch.distance)\ <\ 0)\ GESTURES.current\ =\ \mbox{\hyperlink{_classes_2lib_2raylib_8h_a4c115a495b9dd6dfa20244e79f4fdc12a4c029381b3757f0143cbcc687449bad6}{GESTURE\_PINCH\_IN}};}
+\DoxyCodeLine{00378\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}\ GESTURES.current\ =\ \mbox{\hyperlink{_classes_2lib_2raylib_8h_a4c115a495b9dd6dfa20244e79f4fdc12adb71607a217fbb056bf654af46bc9384}{GESTURE\_PINCH\_OUT}};}
+\DoxyCodeLine{00379\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00380\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{00381\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00382\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ GESTURES.current\ =\ \mbox{\hyperlink{_classes_2lib_2raylib_8h_a4c115a495b9dd6dfa20244e79f4fdc12a3cf4fecd9e89c7a8d5ff7e67c3a41898}{GESTURE\_HOLD}};}
+\DoxyCodeLine{00383\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ GESTURES.Hold.timeDuration\ =\ GetCurrentTime();}
+\DoxyCodeLine{00384\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00385\ }
+\DoxyCodeLine{00386\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ NOTE:\ Angle\ should\ be\ inverted\ in\ Y}}
+\DoxyCodeLine{00387\ \ \ \ \ \ \ \ \ \ \ \ \ GESTURES.Pinch.angle\ =\ 360.0f\ -\/\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2raymath_8h_a45d90af29bab5673f90ac6f51d3c1f06}{Vector2Angle}}(GESTURES.Touch.moveDownPositionA,\ GESTURES.Touch.moveDownPositionB);}
+\DoxyCodeLine{00388\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00389\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}\ \textcolor{keywordflow}{if}\ (event.\mbox{\hyperlink{struct_gesture_event_a2b74620f0afd9398d93b330e3ca958d9}{touchAction}}\ ==\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2gestures_8h_aea0a0ccf904a1074665eaa7a71eee6e9a90884c2f9baa25f5107bfa334297fce3}{TOUCH\_UP}})}
+\DoxyCodeLine{00390\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00391\ \ \ \ \ \ \ \ \ \ \ \ \ GESTURES.Pinch.distance\ =\ 0.0f;}
+\DoxyCodeLine{00392\ \ \ \ \ \ \ \ \ \ \ \ \ GESTURES.Pinch.angle\ =\ 0.0f;}
+\DoxyCodeLine{00393\ \ \ \ \ \ \ \ \ \ \ \ \ GESTURES.Pinch.vector\ =\ (\mbox{\hyperlink{struct_vector2}{Vector2}})\{\ 0.0f,\ 0.0f\ \};}
+\DoxyCodeLine{00394\ \ \ \ \ \ \ \ \ \ \ \ \ GESTURES.Touch.pointCount\ =\ 0;}
+\DoxyCodeLine{00395\ }
+\DoxyCodeLine{00396\ \ \ \ \ \ \ \ \ \ \ \ \ GESTURES.current\ =\ \mbox{\hyperlink{_classes_2lib_2raylib_8h_a4c115a495b9dd6dfa20244e79f4fdc12abc76c50ba9bf454600d15eb73e991b6b}{GESTURE\_NONE}};}
+\DoxyCodeLine{00397\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00398\ \ \ \ \ \}}
+\DoxyCodeLine{00399\ \}}
+\DoxyCodeLine{00400\ }
+\DoxyCodeLine{00401\ \textcolor{comment}{//\ Update\ gestures\ detected\ (must\ be\ called\ every\ frame)}}
+\DoxyCodeLine{00402\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2gestures_8h_a628850a03d5f85e55c0f067788badc24}{UpdateGestures}}(\textcolor{keywordtype}{void})}
+\DoxyCodeLine{00403\ \{}
+\DoxyCodeLine{00404\ \ \ \ \ \textcolor{comment}{//\ NOTE:\ Gestures\ are\ processed\ through\ system\ callbacks\ on\ touch\ events}}
+\DoxyCodeLine{00405\ }
+\DoxyCodeLine{00406\ \ \ \ \ \textcolor{comment}{//\ Detect\ GESTURE\_HOLD}}
+\DoxyCodeLine{00407\ \ \ \ \ \textcolor{keywordflow}{if}\ (((GESTURES.current\ ==\ \mbox{\hyperlink{_classes_2lib_2raylib_8h_a4c115a495b9dd6dfa20244e79f4fdc12aa6ea36cd5cdb1a323cc2428937fb1692}{GESTURE\_TAP}})\ ||\ (GESTURES.current\ ==\ \mbox{\hyperlink{_classes_2lib_2raylib_8h_a4c115a495b9dd6dfa20244e79f4fdc12a8b5d655a878adcc18c6ef37367c75943}{GESTURE\_DOUBLETAP}}))\ \&\&\ (GESTURES.Touch.pointCount\ <\ 2))}
+\DoxyCodeLine{00408\ \ \ \ \ \{}
+\DoxyCodeLine{00409\ \ \ \ \ \ \ \ \ GESTURES.current\ =\ \mbox{\hyperlink{_classes_2lib_2raylib_8h_a4c115a495b9dd6dfa20244e79f4fdc12a3cf4fecd9e89c7a8d5ff7e67c3a41898}{GESTURE\_HOLD}};}
+\DoxyCodeLine{00410\ \ \ \ \ \ \ \ \ GESTURES.Hold.timeDuration\ =\ GetCurrentTime();}
+\DoxyCodeLine{00411\ \ \ \ \ \}}
+\DoxyCodeLine{00412\ }
+\DoxyCodeLine{00413\ \ \ \ \ \textcolor{keywordflow}{if}\ (((GetCurrentTime()\ -\/\ GESTURES.Touch.eventTime)\ >\ TAP\_TIMEOUT)\ \&\&\ (GESTURES.current\ ==\ \mbox{\hyperlink{_classes_2lib_2raylib_8h_a4c115a495b9dd6dfa20244e79f4fdc12a0870d36d1d24c36809fbe1320fd5ee5e}{GESTURE\_DRAG}})\ \&\&\ (GESTURES.Touch.pointCount\ <\ 2))}
+\DoxyCodeLine{00414\ \ \ \ \ \{}
+\DoxyCodeLine{00415\ \ \ \ \ \ \ \ \ GESTURES.current\ =\ \mbox{\hyperlink{_classes_2lib_2raylib_8h_a4c115a495b9dd6dfa20244e79f4fdc12a3cf4fecd9e89c7a8d5ff7e67c3a41898}{GESTURE\_HOLD}};}
+\DoxyCodeLine{00416\ \ \ \ \ \ \ \ \ GESTURES.Hold.timeDuration\ =\ GetCurrentTime();}
+\DoxyCodeLine{00417\ \ \ \ \ \ \ \ \ GESTURES.Hold.resetRequired\ =\ \textcolor{keyword}{true};}
+\DoxyCodeLine{00418\ \ \ \ \ \}}
+\DoxyCodeLine{00419\ }
+\DoxyCodeLine{00420\ \ \ \ \ \textcolor{comment}{//\ Detect\ GESTURE\_NONE}}
+\DoxyCodeLine{00421\ \ \ \ \ \textcolor{keywordflow}{if}\ ((GESTURES.current\ ==\ \mbox{\hyperlink{_classes_2lib_2raylib_8h_a4c115a495b9dd6dfa20244e79f4fdc12a337cfdf346943f1ba19c3b668234860e}{GESTURE\_SWIPE\_RIGHT}})\ ||\ (GESTURES.current\ ==\ \mbox{\hyperlink{_classes_2lib_2raylib_8h_a4c115a495b9dd6dfa20244e79f4fdc12a64bda7d6d0dc201f3f195297c0c45d70}{GESTURE\_SWIPE\_UP}})\ ||\ (GESTURES.current\ ==\ \mbox{\hyperlink{_classes_2lib_2raylib_8h_a4c115a495b9dd6dfa20244e79f4fdc12a6ce54903fd831fdc6364471eadaacb9c}{GESTURE\_SWIPE\_LEFT}})\ ||\ (GESTURES.current\ ==\ \mbox{\hyperlink{_classes_2lib_2raylib_8h_a4c115a495b9dd6dfa20244e79f4fdc12accf621e170b4d2e51966bd72ec053fc2}{GESTURE\_SWIPE\_DOWN}}))}
+\DoxyCodeLine{00422\ \ \ \ \ \{}
+\DoxyCodeLine{00423\ \ \ \ \ \ \ \ \ GESTURES.current\ =\ \mbox{\hyperlink{_classes_2lib_2raylib_8h_a4c115a495b9dd6dfa20244e79f4fdc12abc76c50ba9bf454600d15eb73e991b6b}{GESTURE\_NONE}};}
+\DoxyCodeLine{00424\ \ \ \ \ \}}
+\DoxyCodeLine{00425\ \}}
+\DoxyCodeLine{00426\ }
+\DoxyCodeLine{00427\ \textcolor{comment}{//\ Get\ number\ of\ touch\ points}}
+\DoxyCodeLine{00428\ \textcolor{keywordtype}{int}\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2raylib_8h_a09eaa7a0236828e4e7ff567eaa103c0f}{GetTouchPointsCount}}(\textcolor{keywordtype}{void})}
+\DoxyCodeLine{00429\ \{}
+\DoxyCodeLine{00430\ \ \ \ \ \textcolor{comment}{//\ NOTE:\ point\ count\ is\ calculated\ when\ ProcessGestureEvent(GestureEvent\ event)\ is\ called}}
+\DoxyCodeLine{00431\ }
+\DoxyCodeLine{00432\ \ \ \ \ \textcolor{keywordflow}{return}\ GESTURES.Touch.pointCount;}
+\DoxyCodeLine{00433\ \}}
+\DoxyCodeLine{00434\ }
+\DoxyCodeLine{00435\ \textcolor{comment}{//\ Get\ latest\ detected\ gesture}}
+\DoxyCodeLine{00436\ \textcolor{keywordtype}{int}\ \mbox{\hyperlink{_classes_2lib_2raylib_8h_a0f070ca4a33f9e8bcadbe9ea8f1f09d7}{GetGestureDetected}}(\textcolor{keywordtype}{void})}
+\DoxyCodeLine{00437\ \{}
+\DoxyCodeLine{00438\ \ \ \ \ \textcolor{comment}{//\ Get\ current\ gesture\ only\ if\ enabled}}
+\DoxyCodeLine{00439\ \ \ \ \ \textcolor{keywordflow}{return}\ (GESTURES.enabledFlags\ \&\ GESTURES.current);}
+\DoxyCodeLine{00440\ \}}
+\DoxyCodeLine{00441\ }
+\DoxyCodeLine{00442\ \textcolor{comment}{//\ Hold\ time\ measured\ in\ ms}}
+\DoxyCodeLine{00443\ \textcolor{keywordtype}{float}\ \mbox{\hyperlink{_classes_2lib_2raylib_8h_a6d1b4db504365dfb4b1e1f345075e7de}{GetGestureHoldDuration}}(\textcolor{keywordtype}{void})}
+\DoxyCodeLine{00444\ \{}
+\DoxyCodeLine{00445\ \ \ \ \ \textcolor{comment}{//\ NOTE:\ time\ is\ calculated\ on\ current\ gesture\ HOLD}}
+\DoxyCodeLine{00446\ }
+\DoxyCodeLine{00447\ \ \ \ \ \textcolor{keywordtype}{double}\ \mbox{\hyperlink{structtime}{time}}\ =\ 0.0;}
+\DoxyCodeLine{00448\ }
+\DoxyCodeLine{00449\ \ \ \ \ \textcolor{keywordflow}{if}\ (GESTURES.current\ ==\ \mbox{\hyperlink{_classes_2lib_2raylib_8h_a4c115a495b9dd6dfa20244e79f4fdc12a3cf4fecd9e89c7a8d5ff7e67c3a41898}{GESTURE\_HOLD}})\ \mbox{\hyperlink{structtime}{time}}\ =\ GetCurrentTime()\ -\/\ GESTURES.Hold.timeDuration;}
+\DoxyCodeLine{00450\ }
+\DoxyCodeLine{00451\ \ \ \ \ \textcolor{keywordflow}{return}\ (\textcolor{keywordtype}{float})\mbox{\hyperlink{structtime}{time}};}
+\DoxyCodeLine{00452\ \}}
+\DoxyCodeLine{00453\ }
+\DoxyCodeLine{00454\ \textcolor{comment}{//\ Get\ drag\ vector\ (between\ initial\ touch\ point\ to\ current)}}
+\DoxyCodeLine{00455\ \mbox{\hyperlink{struct_vector2}{Vector2}}\ \mbox{\hyperlink{_classes_2lib_2raylib_8h_a8b647fad066d251cbe72cddc612f4ecd}{GetGestureDragVector}}(\textcolor{keywordtype}{void})}
+\DoxyCodeLine{00456\ \{}
+\DoxyCodeLine{00457\ \ \ \ \ \textcolor{comment}{//\ NOTE:\ drag\ vector\ is\ calculated\ on\ one\ touch\ points\ TOUCH\_MOVE}}
+\DoxyCodeLine{00458\ }
+\DoxyCodeLine{00459\ \ \ \ \ \textcolor{keywordflow}{return}\ GESTURES.Drag.vector;}
+\DoxyCodeLine{00460\ \}}
+\DoxyCodeLine{00461\ }
+\DoxyCodeLine{00462\ \textcolor{comment}{//\ Get\ drag\ angle}}
+\DoxyCodeLine{00463\ \textcolor{comment}{//\ NOTE:\ Angle\ in\ degrees,\ horizontal-\/right\ is\ 0,\ counterclock-\/wise}}
+\DoxyCodeLine{00464\ \textcolor{keywordtype}{float}\ \mbox{\hyperlink{_classes_2lib_2raylib_8h_aa6d8169205c4f6e8cfbd6f39f98943d2}{GetGestureDragAngle}}(\textcolor{keywordtype}{void})}
+\DoxyCodeLine{00465\ \{}
+\DoxyCodeLine{00466\ \ \ \ \ \textcolor{comment}{//\ NOTE:\ drag\ angle\ is\ calculated\ on\ one\ touch\ points\ TOUCH\_UP}}
+\DoxyCodeLine{00467\ }
+\DoxyCodeLine{00468\ \ \ \ \ \textcolor{keywordflow}{return}\ GESTURES.Drag.angle;}
+\DoxyCodeLine{00469\ \}}
+\DoxyCodeLine{00470\ }
+\DoxyCodeLine{00471\ \textcolor{comment}{//\ Get\ distance\ between\ two\ pinch\ points}}
+\DoxyCodeLine{00472\ \mbox{\hyperlink{struct_vector2}{Vector2}}\ \mbox{\hyperlink{_classes_2lib_2raylib_8h_a85b0053a8ccc10862b000aa2bc5404c9}{GetGesturePinchVector}}(\textcolor{keywordtype}{void})}
+\DoxyCodeLine{00473\ \{}
+\DoxyCodeLine{00474\ \ \ \ \ \textcolor{comment}{//\ NOTE:\ The\ position\ values\ used\ for\ GESTURES.Pinch.distance\ are\ not\ modified\ like\ the\ position\ values\ of\ [core.c]-\/-\/>GetTouchPosition(int\ index)}}
+\DoxyCodeLine{00475\ \ \ \ \ \textcolor{comment}{//\ NOTE:\ pinch\ distance\ is\ calculated\ on\ two\ touch\ points\ TOUCH\_MOVE}}
+\DoxyCodeLine{00476\ }
+\DoxyCodeLine{00477\ \ \ \ \ \textcolor{keywordflow}{return}\ GESTURES.Pinch.vector;}
+\DoxyCodeLine{00478\ \}}
+\DoxyCodeLine{00479\ }
+\DoxyCodeLine{00480\ \textcolor{comment}{//\ Get\ angle\ beween\ two\ pinch\ points}}
+\DoxyCodeLine{00481\ \textcolor{comment}{//\ NOTE:\ Angle\ in\ degrees,\ horizontal-\/right\ is\ 0,\ counterclock-\/wise}}
+\DoxyCodeLine{00482\ \textcolor{keywordtype}{float}\ \mbox{\hyperlink{_classes_2lib_2raylib_8h_a8215af8efd6dc55081f44d13b99161bf}{GetGesturePinchAngle}}(\textcolor{keywordtype}{void})}
+\DoxyCodeLine{00483\ \{}
+\DoxyCodeLine{00484\ \ \ \ \ \textcolor{comment}{//\ NOTE:\ pinch\ angle\ is\ calculated\ on\ two\ touch\ points\ TOUCH\_MOVE}}
+\DoxyCodeLine{00485\ }
+\DoxyCodeLine{00486\ \ \ \ \ \textcolor{keywordflow}{return}\ GESTURES.Pinch.angle;}
+\DoxyCodeLine{00487\ \}}
+\DoxyCodeLine{00488\ }
+\DoxyCodeLine{00489\ \textcolor{comment}{//-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/}}
+\DoxyCodeLine{00490\ \textcolor{comment}{//\ Module\ specific\ Functions\ Definition}}
+\DoxyCodeLine{00491\ \textcolor{comment}{//-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/}}
+\DoxyCodeLine{00492\ \textcolor{preprocessor}{\#if\ defined(GESTURES\_STANDALONE)}}
+\DoxyCodeLine{00493\ \textcolor{comment}{//\ Returns\ angle\ from\ two-\/points\ vector\ with\ X-\/axis}}
+\DoxyCodeLine{00494\ \textcolor{keyword}{static}\ \textcolor{keywordtype}{float}\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2raymath_8h_a45d90af29bab5673f90ac6f51d3c1f06}{Vector2Angle}}(\mbox{\hyperlink{struct_vector2}{Vector2}}\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2glad_8h_a0779c3b73f9aa3a0ac5b0139b5d291d9}{v1}},\ \mbox{\hyperlink{struct_vector2}{Vector2}}\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2glad_8h_a9a09a1837922b2b806f4589096a52049}{v2}})}
+\DoxyCodeLine{00495\ \{}
+\DoxyCodeLine{00496\ \ \ \ \ \textcolor{keywordtype}{float}\ \mbox{\hyperlink{group__ext__quaternion__trigonometric_ga8aa248b31d5ade470c87304df5eb7bd8}{angle}}\ =\ atan2f(\mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2glad_8h_a9a09a1837922b2b806f4589096a52049}{v2}}.y\ -\/\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2glad_8h_a0779c3b73f9aa3a0ac5b0139b5d291d9}{v1}}.y,\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2glad_8h_a9a09a1837922b2b806f4589096a52049}{v2}}.x\ -\/\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2glad_8h_a0779c3b73f9aa3a0ac5b0139b5d291d9}{v1}}.x)*(180.0f/\mbox{\hyperlink{_classes_2lib_2raylib_2src_2gestures_8h_a598a3330b3c21701223ee0ca14316eca}{PI}});}
+\DoxyCodeLine{00497\ }
+\DoxyCodeLine{00498\ \ \ \ \ \textcolor{keywordflow}{if}\ (angle\ <\ 0)\ \mbox{\hyperlink{group__ext__quaternion__trigonometric_ga8aa248b31d5ade470c87304df5eb7bd8}{angle}}\ +=\ 360.0f;}
+\DoxyCodeLine{00499\ }
+\DoxyCodeLine{00500\ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{group__ext__quaternion__trigonometric_ga8aa248b31d5ade470c87304df5eb7bd8}{angle}};}
+\DoxyCodeLine{00501\ \}}
+\DoxyCodeLine{00502\ }
+\DoxyCodeLine{00503\ \textcolor{comment}{//\ Calculate\ distance\ between\ two\ Vector2}}
+\DoxyCodeLine{00504\ \textcolor{keyword}{static}\ \textcolor{keywordtype}{float}\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2raymath_8h_a2e16f8f7553aa565422cf9aff49ab852}{Vector2Distance}}(\mbox{\hyperlink{struct_vector2}{Vector2}}\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2glad_8h_a0779c3b73f9aa3a0ac5b0139b5d291d9}{v1}},\ \mbox{\hyperlink{struct_vector2}{Vector2}}\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2glad_8h_a9a09a1837922b2b806f4589096a52049}{v2}})}
+\DoxyCodeLine{00505\ \{}
+\DoxyCodeLine{00506\ \ \ \ \ \textcolor{keywordtype}{float}\ \mbox{\hyperlink{_classes_2lib_2glm_2test_2core_2core__func__integer_8cpp_a937d4dd628a8858b443a399410d2600b}{result}};}
+\DoxyCodeLine{00507\ }
+\DoxyCodeLine{00508\ \ \ \ \ \textcolor{keywordtype}{float}\ dx\ =\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2glad_8h_a9a09a1837922b2b806f4589096a52049}{v2}}.x\ -\/\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2glad_8h_a0779c3b73f9aa3a0ac5b0139b5d291d9}{v1}}.x;}
+\DoxyCodeLine{00509\ \ \ \ \ \textcolor{keywordtype}{float}\ dy\ =\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2glad_8h_a9a09a1837922b2b806f4589096a52049}{v2}}.y\ -\/\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2glad_8h_a0779c3b73f9aa3a0ac5b0139b5d291d9}{v1}}.y;}
+\DoxyCodeLine{00510\ }
+\DoxyCodeLine{00511\ \ \ \ \ \mbox{\hyperlink{_classes_2lib_2glm_2test_2core_2core__func__integer_8cpp_a937d4dd628a8858b443a399410d2600b}{result}}\ =\ (float)\mbox{\hyperlink{_classes_2lib_2include_2tgmath_8h_a86ab780bf1de516c739da6893b2e303a}{sqrt}}(dx*dx\ +\ dy*dy);}
+\DoxyCodeLine{00512\ }
+\DoxyCodeLine{00513\ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{_classes_2lib_2glm_2test_2core_2core__func__integer_8cpp_a937d4dd628a8858b443a399410d2600b}{result}};}
+\DoxyCodeLine{00514\ \}}
+\DoxyCodeLine{00515\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00516\ }
+\DoxyCodeLine{00517\ \textcolor{comment}{//\ Time\ measure\ returned\ are\ milliseconds}}
+\DoxyCodeLine{00518\ \textcolor{keyword}{static}\ \textcolor{keywordtype}{double}\ GetCurrentTime(\textcolor{keywordtype}{void})}
+\DoxyCodeLine{00519\ \{}
+\DoxyCodeLine{00520\ \ \ \ \ \textcolor{keywordtype}{double}\ \mbox{\hyperlink{structtime}{time}}\ =\ 0;}
+\DoxyCodeLine{00521\ }
+\DoxyCodeLine{00522\ \textcolor{preprocessor}{\#if\ defined(\_WIN32)}}
+\DoxyCodeLine{00523\ \ \ \ \ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{long}\ \textcolor{keywordtype}{long}\ \textcolor{keywordtype}{int}\ clockFrequency,\ currentTime;}
+\DoxyCodeLine{00524\ }
+\DoxyCodeLine{00525\ \ \ \ \ QueryPerformanceFrequency(\&clockFrequency);\ \ \ \ \ \textcolor{comment}{//\ BE\ CAREFUL:\ Costly\ operation!}}
+\DoxyCodeLine{00526\ \ \ \ \ QueryPerformanceCounter(\&currentTime);}
+\DoxyCodeLine{00527\ }
+\DoxyCodeLine{00528\ \ \ \ \ \mbox{\hyperlink{structtime}{time}}\ =\ (double)currentTime/clockFrequency*1000.0f;\ \ \textcolor{comment}{//\ Time\ in\ miliseconds}}
+\DoxyCodeLine{00529\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00530\ }
+\DoxyCodeLine{00531\ \textcolor{preprocessor}{\#if\ defined(\_\_linux\_\_)}}
+\DoxyCodeLine{00532\ \ \ \ \ \textcolor{comment}{//\ NOTE:\ Only\ for\ Linux-\/based\ systems}}
+\DoxyCodeLine{00533\ \ \ \ \ \textcolor{keyword}{struct\ }timespec\ now;}
+\DoxyCodeLine{00534\ \ \ \ \ \mbox{\hyperlink{_classes_2lib_2pthread__time_8h_a907d36e3ac946c73f25cc3d4cbf44c7a}{clock\_gettime}}(\mbox{\hyperlink{_classes_2lib_2pthread__time_8h_a6fb83f5e91e704391ff796553d5e0f46}{CLOCK\_MONOTONIC}},\ \&now);}
+\DoxyCodeLine{00535\ \ \ \ \ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{long}\ \textcolor{keywordtype}{long}\ \textcolor{keywordtype}{int}\ nowTime\ =\ (\textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{long}\ \textcolor{keywordtype}{long}\ int)now.tv\_sec*1000000000LLU\ +\ (\textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{long}\ \textcolor{keywordtype}{long}\ \textcolor{keywordtype}{int})now.tv\_nsec;\ \ \ \ \ \textcolor{comment}{//\ Time\ in\ nanoseconds}}
+\DoxyCodeLine{00536\ }
+\DoxyCodeLine{00537\ \ \ \ \ \mbox{\hyperlink{structtime}{time}}\ =\ ((double)nowTime/1000000.0);\ \ \ \ \ \textcolor{comment}{//\ Time\ in\ miliseconds}}
+\DoxyCodeLine{00538\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00539\ }
+\DoxyCodeLine{00540\ \textcolor{preprocessor}{\#if\ defined(\_\_APPLE\_\_)}}
+\DoxyCodeLine{00541\ \ \ \ \ \textcolor{comment}{//\#define\ CLOCK\_REALTIME\ \ CALENDAR\_CLOCK\ \ \ \ //\ returns\ UTC\ time\ since\ 1970-\/01-\/01}}
+\DoxyCodeLine{00542\ \ \ \ \ \textcolor{comment}{//\#define\ CLOCK\_MONOTONIC\ SYSTEM\_CLOCK\ \ \ \ \ \ //\ returns\ the\ time\ since\ boot\ time}}
+\DoxyCodeLine{00543\ }
+\DoxyCodeLine{00544\ \ \ \ \ clock\_serv\_t\ cclock;}
+\DoxyCodeLine{00545\ \ \ \ \ mach\_timespec\_t\ now;}
+\DoxyCodeLine{00546\ \ \ \ \ host\_get\_clock\_service(mach\_host\_self(),\ SYSTEM\_CLOCK,\ \&cclock);}
+\DoxyCodeLine{00547\ }
+\DoxyCodeLine{00548\ \ \ \ \ \textcolor{comment}{//\ NOTE:\ OS\ X\ does\ not\ have\ clock\_gettime(),\ using\ clock\_get\_time()}}
+\DoxyCodeLine{00549\ \ \ \ \ clock\_get\_time(cclock,\ \&now);}
+\DoxyCodeLine{00550\ \ \ \ \ mach\_port\_deallocate(mach\_task\_self(),\ cclock);}
+\DoxyCodeLine{00551\ \ \ \ \ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{long}\ \textcolor{keywordtype}{long}\ \textcolor{keywordtype}{int}\ nowTime\ =\ (\textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{long}\ \textcolor{keywordtype}{long}\ int)now.tv\_sec*1000000000LLU\ +\ (\textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{long}\ \textcolor{keywordtype}{long}\ \textcolor{keywordtype}{int})now.tv\_nsec;\ \ \ \ \ \textcolor{comment}{//\ Time\ in\ nanoseconds}}
+\DoxyCodeLine{00552\ }
+\DoxyCodeLine{00553\ \ \ \ \ \mbox{\hyperlink{structtime}{time}}\ =\ ((double)nowTime/1000000.0);\ \ \ \ \ \textcolor{comment}{//\ Time\ in\ miliseconds}}
+\DoxyCodeLine{00554\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00555\ }
+\DoxyCodeLine{00556\ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{structtime}{time}};}
+\DoxyCodeLine{00557\ \}}
+\DoxyCodeLine{00558\ }
+\DoxyCodeLine{00559\ \textcolor{preprocessor}{\#endif\ }\textcolor{comment}{//\ GESTURES\_IMPLEMENTATION}}
+
+\end{DoxyCode}

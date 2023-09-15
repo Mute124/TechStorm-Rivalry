@@ -1,0 +1,5 @@
+var _old_2_classes_2lib_2include_2c_09_09_2ext_2pb__ds_2detail_2resize__policy_2hash__load__check__resize__trigger__size__base_8hpp =
+[
+    [ "__gnu_pbds::detail::hash_load_check_resize_trigger_size_base< Size_Type, true >", "class____gnu__pbds_1_1detail_1_1hash__load__check__resize__trigger__size__base_3_01_size___type_00_01true_01_4.html", "class____gnu__pbds_1_1detail_1_1hash__load__check__resize__trigger__size__base_3_01_size___type_00_01true_01_4" ],
+    [ "__gnu_pbds::detail::hash_load_check_resize_trigger_size_base< Size_Type, false >", "class____gnu__pbds_1_1detail_1_1hash__load__check__resize__trigger__size__base_3_01_size___type_00_01false_01_4.html", "class____gnu__pbds_1_1detail_1_1hash__load__check__resize__trigger__size__base_3_01_size___type_00_01false_01_4" ]
+];

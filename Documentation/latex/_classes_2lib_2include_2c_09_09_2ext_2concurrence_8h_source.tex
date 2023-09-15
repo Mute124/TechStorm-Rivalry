@@ -1,0 +1,316 @@
+\doxysection{concurrence.\+h}
+\hypertarget{_classes_2lib_2include_2c_09_09_2ext_2concurrence_8h_source}{}\label{_classes_2lib_2include_2c_09_09_2ext_2concurrence_8h_source}\index{C:/Users/HP/Documents/GitHub/Minero-\/Game/Classes/lib/include/c++/ext/concurrence.h@{C:/Users/HP/Documents/GitHub/Minero-\/Game/Classes/lib/include/c++/ext/concurrence.h}}
+\mbox{\hyperlink{_classes_2lib_2include_2c_09_09_2ext_2concurrence_8h}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{comment}{//\ Support\ for\ concurrent\ programing\ -\/*-\/\ C++\ -\/*-\/}}
+\DoxyCodeLine{00002\ }
+\DoxyCodeLine{00003\ \textcolor{comment}{//\ Copyright\ (C)\ 2003-\/2022\ Free\ Software\ Foundation,\ Inc.}}
+\DoxyCodeLine{00004\ \textcolor{comment}{//}}
+\DoxyCodeLine{00005\ \textcolor{comment}{//\ This\ file\ is\ part\ of\ the\ GNU\ ISO\ C++\ Library.\ \ This\ library\ is\ free}}
+\DoxyCodeLine{00006\ \textcolor{comment}{//\ software;\ you\ can\ redistribute\ it\ and/or\ modify\ it\ under\ the}}
+\DoxyCodeLine{00007\ \textcolor{comment}{//\ terms\ of\ the\ GNU\ General\ Public\ License\ as\ published\ by\ the}}
+\DoxyCodeLine{00008\ \textcolor{comment}{//\ Free\ Software\ Foundation;\ either\ version\ 3,\ or\ (at\ your\ option)}}
+\DoxyCodeLine{00009\ \textcolor{comment}{//\ any\ later\ version.}}
+\DoxyCodeLine{00010\ }
+\DoxyCodeLine{00011\ \textcolor{comment}{//\ This\ library\ is\ distributed\ in\ the\ hope\ that\ it\ will\ be\ useful,}}
+\DoxyCodeLine{00012\ \textcolor{comment}{//\ but\ WITHOUT\ ANY\ WARRANTY;\ without\ even\ the\ implied\ warranty\ of}}
+\DoxyCodeLine{00013\ \textcolor{comment}{//\ MERCHANTABILITY\ or\ FITNESS\ FOR\ A\ PARTICULAR\ PURPOSE.\ \ See\ the}}
+\DoxyCodeLine{00014\ \textcolor{comment}{//\ GNU\ General\ Public\ License\ for\ more\ details.}}
+\DoxyCodeLine{00015\ }
+\DoxyCodeLine{00016\ \textcolor{comment}{//\ Under\ Section\ 7\ of\ GPL\ version\ 3,\ you\ are\ granted\ additional}}
+\DoxyCodeLine{00017\ \textcolor{comment}{//\ permissions\ described\ in\ the\ GCC\ Runtime\ Library\ Exception,\ version}}
+\DoxyCodeLine{00018\ \textcolor{comment}{//\ 3.1,\ as\ published\ by\ the\ Free\ Software\ Foundation.}}
+\DoxyCodeLine{00019\ }
+\DoxyCodeLine{00020\ \textcolor{comment}{//\ You\ should\ have\ received\ a\ copy\ of\ the\ GNU\ General\ Public\ License\ and}}
+\DoxyCodeLine{00021\ \textcolor{comment}{//\ a\ copy\ of\ the\ GCC\ Runtime\ Library\ Exception\ along\ with\ this\ program;}}
+\DoxyCodeLine{00022\ \textcolor{comment}{//\ see\ the\ files\ COPYING3\ and\ COPYING.RUNTIME\ respectively.\ \ If\ not,\ see}}
+\DoxyCodeLine{00023\ \textcolor{comment}{//\ <http://www.gnu.org/licenses/>.}}
+\DoxyCodeLine{00024\ }
+\DoxyCodeLine{00029\ \textcolor{preprocessor}{\#ifndef\ \_CONCURRENCE\_H}}
+\DoxyCodeLine{00030\ \textcolor{preprocessor}{\#define\ \_CONCURRENCE\_H\ 1}}
+\DoxyCodeLine{00031\ }
+\DoxyCodeLine{00032\ \textcolor{preprocessor}{\#pragma\ GCC\ system\_header}}
+\DoxyCodeLine{00033\ }
+\DoxyCodeLine{00034\ \textcolor{preprocessor}{\#include\ <exception>}}
+\DoxyCodeLine{00035\ \textcolor{preprocessor}{\#include\ <bits/gthr.h>}\ }
+\DoxyCodeLine{00036\ \textcolor{preprocessor}{\#include\ <bits/functexcept.h>}}
+\DoxyCodeLine{00037\ \textcolor{preprocessor}{\#include\ <bits/cpp\_type\_traits.h>}}
+\DoxyCodeLine{00038\ \textcolor{preprocessor}{\#include\ <ext/type\_traits.h>}}
+\DoxyCodeLine{00039\ }
+\DoxyCodeLine{00040\ \textcolor{keyword}{namespace\ }\mbox{\hyperlink{namespace____gnu__cxx}{\_\_gnu\_cxx}}\ \mbox{\hyperlink{_classes_2lib_2include_2c_09_09_2x86__64-w64-mingw32_2bits_2c_09_09config_8h_a44377df0d3503f0b3d9ab316dd8ddf8b}{\_GLIBCXX\_VISIBILITY}}(default)}
+\DoxyCodeLine{00041\ \{}
+\DoxyCodeLine{00042\ \_GLIBCXX\_BEGIN\_NAMESPACE\_VERSION}
+\DoxyCodeLine{00043\ }
+\DoxyCodeLine{00044\ \ \ \textcolor{comment}{//\ Available\ locking\ policies:}}
+\DoxyCodeLine{00045\ \ \ \textcolor{comment}{//\ \_S\_single\ \ \ \ single-\/threaded\ code\ that\ doesn't\ need\ to\ be\ locked.}}
+\DoxyCodeLine{00046\ \ \ \textcolor{comment}{//\ \_S\_mutex\ \ \ \ \ multi-\/threaded\ code\ that\ requires\ additional\ support}}
+\DoxyCodeLine{00047\ \ \ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \ \ \ \ \ from\ gthr.h\ or\ abstraction\ layers\ in\ concurrence.h.}}
+\DoxyCodeLine{00048\ \ \ \textcolor{comment}{//\ \_S\_atomic\ \ \ \ multi-\/threaded\ code\ using\ atomic\ operations.}}
+\DoxyCodeLine{00049\ \ \ \textcolor{keyword}{enum}\ \_Lock\_policy\ \{\ \_S\_single,\ \_S\_mutex,\ \_S\_atomic\ \};\ }
+\DoxyCodeLine{00050\ }
+\DoxyCodeLine{00051\ \ \ \textcolor{comment}{//\ Compile\ time\ constant\ that\ indicates\ prefered\ locking\ policy\ in}}
+\DoxyCodeLine{00052\ \ \ \textcolor{comment}{//\ the\ current\ configuration.}}
+\DoxyCodeLine{00053\ \ \ \textcolor{keyword}{static}\ \textcolor{keyword}{const}\ \_Lock\_policy\ \_\_default\_lock\_policy\ =\ }
+\DoxyCodeLine{00054\ \textcolor{preprocessor}{\#ifndef\ \_\_GTHREADS}}
+\DoxyCodeLine{00055\ \ \ \_S\_single;}
+\DoxyCodeLine{00056\ \textcolor{preprocessor}{\#elif\ defined\ \_GLIBCXX\_HAVE\_ATOMIC\_LOCK\_POLICY}}
+\DoxyCodeLine{00057\ \ \ \_S\_atomic;}
+\DoxyCodeLine{00058\ \textcolor{preprocessor}{\#else}}
+\DoxyCodeLine{00059\ \ \ \_S\_mutex;}
+\DoxyCodeLine{00060\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00061\ }
+\DoxyCodeLine{00062\ \ \ \textcolor{comment}{//\ NB:\ As\ this\ is\ used\ in\ libsupc++,\ need\ to\ only\ depend\ on}}
+\DoxyCodeLine{00063\ \ \ \textcolor{comment}{//\ exception.\ No\ stdexception\ classes,\ no\ use\ of\ std::string.}}
+\DoxyCodeLine{00064\ \ \ \textcolor{keyword}{class\ }\_\_concurrence\_lock\_error\ :\ \textcolor{keyword}{public}\ \mbox{\hyperlink{classstd_1_1exception}{std::exception}}}
+\DoxyCodeLine{00065\ \ \ \{}
+\DoxyCodeLine{00066\ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00067\ \ \ \ \ \textcolor{keyword}{virtual}\ \textcolor{keywordtype}{char}\ \textcolor{keyword}{const}*}
+\DoxyCodeLine{00068\ \ \ \ \ what()\ \textcolor{keyword}{const}\ \textcolor{keywordflow}{throw}()}
+\DoxyCodeLine{00069\ \ \ \ \ \{\ \textcolor{keywordflow}{return}\ \textcolor{stringliteral}{"{}\_\_gnu\_cxx::\_\_concurrence\_lock\_error"{}};\ \}}
+\DoxyCodeLine{00070\ \ \ \};}
+\DoxyCodeLine{00071\ }
+\DoxyCodeLine{00072\ \ \ \textcolor{keyword}{class\ }\_\_concurrence\_unlock\_error\ :\ \textcolor{keyword}{public}\ \mbox{\hyperlink{classstd_1_1exception}{std::exception}}}
+\DoxyCodeLine{00073\ \ \ \{}
+\DoxyCodeLine{00074\ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00075\ \ \ \ \ \textcolor{keyword}{virtual}\ \textcolor{keywordtype}{char}\ \textcolor{keyword}{const}*}
+\DoxyCodeLine{00076\ \ \ \ \ what()\ \textcolor{keyword}{const}\ \textcolor{keywordflow}{throw}()}
+\DoxyCodeLine{00077\ \ \ \ \ \{\ \textcolor{keywordflow}{return}\ \textcolor{stringliteral}{"{}\_\_gnu\_cxx::\_\_concurrence\_unlock\_error"{}};\ \}}
+\DoxyCodeLine{00078\ \ \ \};}
+\DoxyCodeLine{00079\ }
+\DoxyCodeLine{00080\ \ \ \textcolor{keyword}{class\ }\_\_concurrence\_broadcast\_error\ :\ \textcolor{keyword}{public}\ \mbox{\hyperlink{classstd_1_1exception}{std::exception}}}
+\DoxyCodeLine{00081\ \ \ \{}
+\DoxyCodeLine{00082\ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00083\ \ \ \ \ \textcolor{keyword}{virtual}\ \textcolor{keywordtype}{char}\ \textcolor{keyword}{const}*}
+\DoxyCodeLine{00084\ \ \ \ \ what()\ \textcolor{keyword}{const}\ \textcolor{keywordflow}{throw}()}
+\DoxyCodeLine{00085\ \ \ \ \ \{\ \textcolor{keywordflow}{return}\ \textcolor{stringliteral}{"{}\_\_gnu\_cxx::\_\_concurrence\_broadcast\_error"{}};\ \}}
+\DoxyCodeLine{00086\ \ \ \};}
+\DoxyCodeLine{00087\ }
+\DoxyCodeLine{00088\ \ \ \textcolor{keyword}{class\ }\_\_concurrence\_wait\_error\ :\ \textcolor{keyword}{public}\ \mbox{\hyperlink{classstd_1_1exception}{std::exception}}}
+\DoxyCodeLine{00089\ \ \ \{}
+\DoxyCodeLine{00090\ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00091\ \ \ \ \ \textcolor{keyword}{virtual}\ \textcolor{keywordtype}{char}\ \textcolor{keyword}{const}*}
+\DoxyCodeLine{00092\ \ \ \ \ what()\ \textcolor{keyword}{const}\ \textcolor{keywordflow}{throw}()}
+\DoxyCodeLine{00093\ \ \ \ \ \{\ \textcolor{keywordflow}{return}\ \textcolor{stringliteral}{"{}\_\_gnu\_cxx::\_\_concurrence\_wait\_error"{}};\ \}}
+\DoxyCodeLine{00094\ \ \ \};}
+\DoxyCodeLine{00095\ }
+\DoxyCodeLine{00096\ \ \ \textcolor{comment}{//\ Substitute\ for\ concurrence\_error\ object\ in\ the\ case\ of\ -\/fno-\/exceptions.}}
+\DoxyCodeLine{00097\ \ \ \textcolor{keyword}{inline}\ \textcolor{keywordtype}{void}}
+\DoxyCodeLine{00098\ \ \ \_\_throw\_concurrence\_lock\_error()}
+\DoxyCodeLine{00099\ \ \ \{\ \_GLIBCXX\_THROW\_OR\_ABORT(\_\_concurrence\_lock\_error());\ \}}
+\DoxyCodeLine{00100\ }
+\DoxyCodeLine{00101\ \ \ \textcolor{keyword}{inline}\ \textcolor{keywordtype}{void}}
+\DoxyCodeLine{00102\ \ \ \_\_throw\_concurrence\_unlock\_error()}
+\DoxyCodeLine{00103\ \ \ \{\ \_GLIBCXX\_THROW\_OR\_ABORT(\_\_concurrence\_unlock\_error());\ \}}
+\DoxyCodeLine{00104\ }
+\DoxyCodeLine{00105\ \textcolor{preprocessor}{\#ifdef\ \_\_GTHREAD\_HAS\_COND}}
+\DoxyCodeLine{00106\ \ \ \textcolor{keyword}{inline}\ \textcolor{keywordtype}{void}}
+\DoxyCodeLine{00107\ \ \ \_\_throw\_concurrence\_broadcast\_error()}
+\DoxyCodeLine{00108\ \ \ \{\ \_GLIBCXX\_THROW\_OR\_ABORT(\_\_concurrence\_broadcast\_error());\ \}}
+\DoxyCodeLine{00109\ }
+\DoxyCodeLine{00110\ \ \ \textcolor{keyword}{inline}\ \textcolor{keywordtype}{void}}
+\DoxyCodeLine{00111\ \ \ \_\_throw\_concurrence\_wait\_error()}
+\DoxyCodeLine{00112\ \ \ \{\ \_GLIBCXX\_THROW\_OR\_ABORT(\_\_concurrence\_wait\_error());\ \}}
+\DoxyCodeLine{00113\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00114\ \ }
+\DoxyCodeLine{00115\ \ \ \textcolor{keyword}{class\ }\_\_mutex\ }
+\DoxyCodeLine{00116\ \ \ \{}
+\DoxyCodeLine{00117\ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00118\ \textcolor{preprocessor}{\#if\ \_\_GTHREADS\ \&\&\ defined\ \_\_GTHREAD\_MUTEX\_INIT}}
+\DoxyCodeLine{00119\ \ \ \ \ \mbox{\hyperlink{_classes_2lib_2include_2c_09_09_2x86__64-w64-mingw32_2bits_2gthr-default_8h_a97856e6b17fbc2936d96d8ea2962eda3}{\_\_gthread\_mutex\_t}}\ \_M\_mutex\ =\ \mbox{\hyperlink{_classes_2lib_2include_2c_09_09_2x86__64-w64-mingw32_2bits_2gthr-default_8h_abb270f4094b49eb30073f9b92a3bf8a2}{\_\_GTHREAD\_MUTEX\_INIT}};}
+\DoxyCodeLine{00120\ \textcolor{preprocessor}{\#else}}
+\DoxyCodeLine{00121\ \ \ \ \ \mbox{\hyperlink{_classes_2lib_2include_2c_09_09_2x86__64-w64-mingw32_2bits_2gthr-default_8h_a97856e6b17fbc2936d96d8ea2962eda3}{\_\_gthread\_mutex\_t}}\ \_M\_mutex;}
+\DoxyCodeLine{00122\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00123\ }
+\DoxyCodeLine{00124\ \ \ \ \ \_\_mutex(\textcolor{keyword}{const}\ \_\_mutex\&);}
+\DoxyCodeLine{00125\ \ \ \ \ \_\_mutex\&\ operator=(\textcolor{keyword}{const}\ \_\_mutex\&);}
+\DoxyCodeLine{00126\ }
+\DoxyCodeLine{00127\ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00128\ \ \ \ \ \_\_mutex()\ }
+\DoxyCodeLine{00129\ \ \ \ \ \{\ }
+\DoxyCodeLine{00130\ \textcolor{preprocessor}{\#if\ \_\_GTHREADS\ \&\&\ !\ defined\ \_\_GTHREAD\_MUTEX\_INIT}}
+\DoxyCodeLine{00131\ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\_\_gthread\_active\_p())}
+\DoxyCodeLine{00132\ \ \ \ \ \mbox{\hyperlink{_classes_2lib_2include_2c_09_09_2x86__64-w64-mingw32_2bits_2gthr-default_8h_ad44274417fe2cdb160bdb57fa9405e17}{\_\_GTHREAD\_MUTEX\_INIT\_FUNCTION}}(\&\_M\_mutex);}
+\DoxyCodeLine{00133\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00134\ \ \ \ \ \}}
+\DoxyCodeLine{00135\ }
+\DoxyCodeLine{00136\ \textcolor{preprocessor}{\#if\ \_\_GTHREADS\ \&\&\ !\ defined\ \_\_GTHREAD\_MUTEX\_INIT}}
+\DoxyCodeLine{00137\ \ \ \ \ \string~\_\_mutex()\ }
+\DoxyCodeLine{00138\ \ \ \ \ \{\ }
+\DoxyCodeLine{00139\ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\_\_gthread\_active\_p())}
+\DoxyCodeLine{00140\ \ \ \ \ \_\_gthread\_mutex\_destroy(\&\_M\_mutex);\ }
+\DoxyCodeLine{00141\ \ \ \ \ \}}
+\DoxyCodeLine{00142\ \textcolor{preprocessor}{\#endif\ }}
+\DoxyCodeLine{00143\ }
+\DoxyCodeLine{00144\ \ \ \ \ \textcolor{keywordtype}{void}\ lock()}
+\DoxyCodeLine{00145\ \ \ \ \ \{}
+\DoxyCodeLine{00146\ \textcolor{preprocessor}{\#if\ \_\_GTHREADS}}
+\DoxyCodeLine{00147\ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\_\_gthread\_active\_p())}
+\DoxyCodeLine{00148\ \ \ \ \ \{}
+\DoxyCodeLine{00149\ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\_\_gthread\_mutex\_lock(\&\_M\_mutex)\ !=\ 0)}
+\DoxyCodeLine{00150\ \ \ \ \ \ \ \ \ \_\_throw\_concurrence\_lock\_error();}
+\DoxyCodeLine{00151\ \ \ \ \ \}}
+\DoxyCodeLine{00152\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00153\ \ \ \ \ \}}
+\DoxyCodeLine{00154\ \ \ \ \ }
+\DoxyCodeLine{00155\ \ \ \ \ \textcolor{keywordtype}{void}\ unlock()}
+\DoxyCodeLine{00156\ \ \ \ \ \{}
+\DoxyCodeLine{00157\ \textcolor{preprocessor}{\#if\ \_\_GTHREADS}}
+\DoxyCodeLine{00158\ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\_\_gthread\_active\_p())}
+\DoxyCodeLine{00159\ \ \ \ \ \{}
+\DoxyCodeLine{00160\ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\_\_gthread\_mutex\_unlock(\&\_M\_mutex)\ !=\ 0)}
+\DoxyCodeLine{00161\ \ \ \ \ \ \ \ \ \_\_throw\_concurrence\_unlock\_error();}
+\DoxyCodeLine{00162\ \ \ \ \ \}}
+\DoxyCodeLine{00163\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00164\ \ \ \ \ \}}
+\DoxyCodeLine{00165\ }
+\DoxyCodeLine{00166\ \ \ \ \ \mbox{\hyperlink{_classes_2lib_2include_2c_09_09_2x86__64-w64-mingw32_2bits_2gthr-default_8h_a97856e6b17fbc2936d96d8ea2962eda3}{\_\_gthread\_mutex\_t}}*\ gthread\_mutex(\textcolor{keywordtype}{void})}
+\DoxyCodeLine{00167\ \ \ \ \ \ \ \{\ \textcolor{keywordflow}{return}\ \&\_M\_mutex;\ \}}
+\DoxyCodeLine{00168\ \ \ \};}
+\DoxyCodeLine{00169\ }
+\DoxyCodeLine{00170\ \ \ \textcolor{keyword}{class\ }\_\_recursive\_mutex\ }
+\DoxyCodeLine{00171\ \ \ \{}
+\DoxyCodeLine{00172\ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00173\ \textcolor{preprocessor}{\#if\ \_\_GTHREADS\ \&\&\ defined\ \_\_GTHREAD\_RECURSIVE\_MUTEX\_INIT}}
+\DoxyCodeLine{00174\ \ \ \ \ \mbox{\hyperlink{_classes_2lib_2include_2c_09_09_2x86__64-w64-mingw32_2bits_2gthr-default_8h_a3c90aae862e464058c70dcf114373851}{\_\_gthread\_recursive\_mutex\_t}}\ \_M\_mutex\ =\ \mbox{\hyperlink{_classes_2lib_2include_2c_09_09_2x86__64-w64-mingw32_2bits_2gthr-single_8h_acb188e8871c9b082efa99a63afc9b24a}{\_\_GTHREAD\_RECURSIVE\_MUTEX\_INIT}};}
+\DoxyCodeLine{00175\ \textcolor{preprocessor}{\#else}}
+\DoxyCodeLine{00176\ \ \ \ \ \mbox{\hyperlink{_classes_2lib_2include_2c_09_09_2x86__64-w64-mingw32_2bits_2gthr-default_8h_a3c90aae862e464058c70dcf114373851}{\_\_gthread\_recursive\_mutex\_t}}\ \_M\_mutex;}
+\DoxyCodeLine{00177\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00178\ }
+\DoxyCodeLine{00179\ \ \ \ \ \_\_recursive\_mutex(\textcolor{keyword}{const}\ \_\_recursive\_mutex\&);}
+\DoxyCodeLine{00180\ \ \ \ \ \_\_recursive\_mutex\&\ operator=(\textcolor{keyword}{const}\ \_\_recursive\_mutex\&);}
+\DoxyCodeLine{00181\ }
+\DoxyCodeLine{00182\ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00183\ \ \ \ \ \_\_recursive\_mutex()\ }
+\DoxyCodeLine{00184\ \ \ \ \ \{\ }
+\DoxyCodeLine{00185\ \textcolor{preprocessor}{\#if\ \_\_GTHREADS\ \&\&\ !\ defined\ \_\_GTHREAD\_RECURSIVE\_MUTEX\_INIT}}
+\DoxyCodeLine{00186\ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\_\_gthread\_active\_p())}
+\DoxyCodeLine{00187\ \ \ \ \ \mbox{\hyperlink{_classes_2lib_2include_2c_09_09_2x86__64-w64-mingw32_2bits_2gthr-default_8h_a70b3a42bde7503c4f303115d20020aa2}{\_\_GTHREAD\_RECURSIVE\_MUTEX\_INIT\_FUNCTION}}(\&\_M\_mutex);}
+\DoxyCodeLine{00188\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00189\ \ \ \ \ \}}
+\DoxyCodeLine{00190\ }
+\DoxyCodeLine{00191\ \textcolor{preprocessor}{\#if\ \_\_GTHREADS\ \&\&\ !\ defined\ \_\_GTHREAD\_RECURSIVE\_MUTEX\_INIT}}
+\DoxyCodeLine{00192\ \ \ \ \ \string~\_\_recursive\_mutex()}
+\DoxyCodeLine{00193\ \ \ \ \ \{}
+\DoxyCodeLine{00194\ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\_\_gthread\_active\_p())}
+\DoxyCodeLine{00195\ \ \ \ \ \_\_gthread\_recursive\_mutex\_destroy(\&\_M\_mutex);}
+\DoxyCodeLine{00196\ \ \ \ \ \}}
+\DoxyCodeLine{00197\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00198\ }
+\DoxyCodeLine{00199\ \ \ \ \ \textcolor{keywordtype}{void}\ lock()}
+\DoxyCodeLine{00200\ \ \ \ \ \{\ }
+\DoxyCodeLine{00201\ \textcolor{preprocessor}{\#if\ \_\_GTHREADS}}
+\DoxyCodeLine{00202\ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\_\_gthread\_active\_p())}
+\DoxyCodeLine{00203\ \ \ \ \ \{}
+\DoxyCodeLine{00204\ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\_\_gthread\_recursive\_mutex\_lock(\&\_M\_mutex)\ !=\ 0)}
+\DoxyCodeLine{00205\ \ \ \ \ \ \ \ \ \_\_throw\_concurrence\_lock\_error();}
+\DoxyCodeLine{00206\ \ \ \ \ \}}
+\DoxyCodeLine{00207\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00208\ \ \ \ \ \}}
+\DoxyCodeLine{00209\ \ \ \ \ }
+\DoxyCodeLine{00210\ \ \ \ \ \textcolor{keywordtype}{void}\ unlock()}
+\DoxyCodeLine{00211\ \ \ \ \ \{\ }
+\DoxyCodeLine{00212\ \textcolor{preprocessor}{\#if\ \_\_GTHREADS}}
+\DoxyCodeLine{00213\ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\_\_gthread\_active\_p())}
+\DoxyCodeLine{00214\ \ \ \ \ \{}
+\DoxyCodeLine{00215\ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\_\_gthread\_recursive\_mutex\_unlock(\&\_M\_mutex)\ !=\ 0)}
+\DoxyCodeLine{00216\ \ \ \ \ \ \ \ \ \_\_throw\_concurrence\_unlock\_error();}
+\DoxyCodeLine{00217\ \ \ \ \ \}}
+\DoxyCodeLine{00218\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00219\ \ \ \ \ \}}
+\DoxyCodeLine{00220\ }
+\DoxyCodeLine{00221\ \ \ \ \ \mbox{\hyperlink{_classes_2lib_2include_2c_09_09_2x86__64-w64-mingw32_2bits_2gthr-default_8h_a3c90aae862e464058c70dcf114373851}{\_\_gthread\_recursive\_mutex\_t}}*\ gthread\_recursive\_mutex(\textcolor{keywordtype}{void})}
+\DoxyCodeLine{00222\ \ \ \ \ \{\ \textcolor{keywordflow}{return}\ \&\_M\_mutex;\ \}}
+\DoxyCodeLine{00223\ \ \ \};}
+\DoxyCodeLine{00224\ }
+\DoxyCodeLine{00226\ \ \ \textcolor{comment}{//\ Acquire\ the\ mutex\ here\ with\ a\ constructor\ call,\ then\ release\ with}}
+\DoxyCodeLine{00227\ \ \ \textcolor{comment}{//\ the\ destructor\ call\ in\ accordance\ with\ RAII\ style.}}
+\DoxyCodeLine{00228\ \ \ \textcolor{keyword}{class\ }\_\_scoped\_lock}
+\DoxyCodeLine{00229\ \ \ \{}
+\DoxyCodeLine{00230\ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00231\ \ \ \ \ \textcolor{keyword}{typedef}\ \_\_mutex\ \_\_mutex\_type;}
+\DoxyCodeLine{00232\ }
+\DoxyCodeLine{00233\ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00234\ \ \ \ \ \_\_mutex\_type\&\ \_M\_device;}
+\DoxyCodeLine{00235\ }
+\DoxyCodeLine{00236\ \ \ \ \ \_\_scoped\_lock(\textcolor{keyword}{const}\ \_\_scoped\_lock\&);}
+\DoxyCodeLine{00237\ \ \ \ \ \_\_scoped\_lock\&\ operator=(\textcolor{keyword}{const}\ \_\_scoped\_lock\&);}
+\DoxyCodeLine{00238\ }
+\DoxyCodeLine{00239\ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00240\ \ \ \ \ \textcolor{keyword}{explicit}\ \_\_scoped\_lock(\_\_mutex\_type\&\ \_\_name)\ :\ \_M\_device(\_\_name)}
+\DoxyCodeLine{00241\ \ \ \ \ \{\ \_M\_device.lock();\ \}}
+\DoxyCodeLine{00242\ }
+\DoxyCodeLine{00243\ \ \ \ \ \string~\_\_scoped\_lock()\ \textcolor{keywordflow}{throw}()}
+\DoxyCodeLine{00244\ \ \ \ \ \{\ \_M\_device.unlock();\ \}}
+\DoxyCodeLine{00245\ \ \ \};}
+\DoxyCodeLine{00246\ }
+\DoxyCodeLine{00247\ \textcolor{preprocessor}{\#ifdef\ \_\_GTHREAD\_HAS\_COND}}
+\DoxyCodeLine{00248\ \ \ \textcolor{keyword}{class\ }\_\_cond}
+\DoxyCodeLine{00249\ \ \ \{}
+\DoxyCodeLine{00250\ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00251\ \textcolor{preprocessor}{\#if\ \_\_GTHREADS\ \&\&\ defined\ \_\_GTHREAD\_COND\_INIT}}
+\DoxyCodeLine{00252\ \ \ \ \ \mbox{\hyperlink{_classes_2lib_2include_2c_09_09_2x86__64-w64-mingw32_2bits_2gthr-default_8h_ae8dd15b5bc8c82f0d61fa4063122fdc8}{\_\_gthread\_cond\_t}}\ \_M\_cond\ =\ \mbox{\hyperlink{_classes_2lib_2include_2c_09_09_2x86__64-w64-mingw32_2bits_2gthr-default_8h_ac8442c6588cdf543eb13d58d151ad7c0}{\_\_GTHREAD\_COND\_INIT}};}
+\DoxyCodeLine{00253\ \textcolor{preprocessor}{\#else}}
+\DoxyCodeLine{00254\ \ \ \ \ \mbox{\hyperlink{_classes_2lib_2include_2c_09_09_2x86__64-w64-mingw32_2bits_2gthr-default_8h_ae8dd15b5bc8c82f0d61fa4063122fdc8}{\_\_gthread\_cond\_t}}\ \_M\_cond;}
+\DoxyCodeLine{00255\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00256\ }
+\DoxyCodeLine{00257\ \ \ \ \ \_\_cond(\textcolor{keyword}{const}\ \_\_cond\&);}
+\DoxyCodeLine{00258\ \ \ \ \ \_\_cond\&\ operator=(\textcolor{keyword}{const}\ \_\_cond\&);}
+\DoxyCodeLine{00259\ }
+\DoxyCodeLine{00260\ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00261\ \ \ \ \ \_\_cond()\ }
+\DoxyCodeLine{00262\ \ \ \ \ \{\ }
+\DoxyCodeLine{00263\ \textcolor{preprocessor}{\#if\ \_\_GTHREADS\ \&\&\ !\ defined\ \_\_GTHREAD\_COND\_INIT}}
+\DoxyCodeLine{00264\ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\_\_gthread\_active\_p())}
+\DoxyCodeLine{00265\ \ \ \ \ \_\_GTHREAD\_COND\_INIT\_FUNCTION(\&\_M\_cond);}
+\DoxyCodeLine{00266\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00267\ \ \ \ \ \}}
+\DoxyCodeLine{00268\ }
+\DoxyCodeLine{00269\ \textcolor{preprocessor}{\#if\ \_\_GTHREADS\ \&\&\ !\ defined\ \_\_GTHREAD\_COND\_INIT}}
+\DoxyCodeLine{00270\ \ \ \ \ \string~\_\_cond()\ }
+\DoxyCodeLine{00271\ \ \ \ \ \{\ }
+\DoxyCodeLine{00272\ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\_\_gthread\_active\_p())}
+\DoxyCodeLine{00273\ \ \ \ \ \_\_gthread\_cond\_destroy(\&\_M\_cond);\ }
+\DoxyCodeLine{00274\ \ \ \ \ \}}
+\DoxyCodeLine{00275\ \textcolor{preprocessor}{\#endif\ }}
+\DoxyCodeLine{00276\ }
+\DoxyCodeLine{00277\ \ \ \ \ \textcolor{keywordtype}{void}\ broadcast()}
+\DoxyCodeLine{00278\ \ \ \ \ \{}
+\DoxyCodeLine{00279\ \textcolor{preprocessor}{\#if\ \_\_GTHREADS}}
+\DoxyCodeLine{00280\ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\_\_gthread\_active\_p())}
+\DoxyCodeLine{00281\ \ \ \ \ \{}
+\DoxyCodeLine{00282\ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\_\_gthread\_cond\_broadcast(\&\_M\_cond)\ !=\ 0)}
+\DoxyCodeLine{00283\ \ \ \ \ \ \ \ \ \_\_throw\_concurrence\_broadcast\_error();}
+\DoxyCodeLine{00284\ \ \ \ \ \}}
+\DoxyCodeLine{00285\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00286\ \ \ \ \ \}}
+\DoxyCodeLine{00287\ }
+\DoxyCodeLine{00288\ \ \ \ \ \textcolor{keywordtype}{void}\ wait(\_\_mutex\ *mutex)}
+\DoxyCodeLine{00289\ \ \ \ \ \{}
+\DoxyCodeLine{00290\ \textcolor{preprocessor}{\#if\ \_\_GTHREADS}}
+\DoxyCodeLine{00291\ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00292\ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\_\_gthread\_cond\_wait(\&\_M\_cond,\ mutex-\/>gthread\_mutex())\ !=\ 0)}
+\DoxyCodeLine{00293\ \ \ \ \ \ \ \ \ \_\_throw\_concurrence\_wait\_error();}
+\DoxyCodeLine{00294\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00295\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00296\ \ \ \ \ \}}
+\DoxyCodeLine{00297\ }
+\DoxyCodeLine{00298\ \ \ \ \ \textcolor{keywordtype}{void}\ wait\_recursive(\_\_recursive\_mutex\ *mutex)}
+\DoxyCodeLine{00299\ \ \ \ \ \{}
+\DoxyCodeLine{00300\ \textcolor{preprocessor}{\#if\ \_\_GTHREADS}}
+\DoxyCodeLine{00301\ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00302\ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\_\_gthread\_cond\_wait\_recursive(\&\_M\_cond,}
+\DoxyCodeLine{00303\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ mutex-\/>gthread\_recursive\_mutex())}
+\DoxyCodeLine{00304\ \ \ \ \ \ \ \ \ \ \ !=\ 0)}
+\DoxyCodeLine{00305\ \ \ \ \ \ \ \ \ \_\_throw\_concurrence\_wait\_error();}
+\DoxyCodeLine{00306\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00307\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00308\ \ \ \ \ \}}
+\DoxyCodeLine{00309\ \ \ \};}
+\DoxyCodeLine{00310\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00311\ }
+\DoxyCodeLine{00312\ \_GLIBCXX\_END\_NAMESPACE\_VERSION}
+\DoxyCodeLine{00313\ \}\ \textcolor{comment}{//\ namespace}}
+\DoxyCodeLine{00314\ }
+\DoxyCodeLine{00315\ \textcolor{preprocessor}{\#endif}}
+
+\end{DoxyCode}

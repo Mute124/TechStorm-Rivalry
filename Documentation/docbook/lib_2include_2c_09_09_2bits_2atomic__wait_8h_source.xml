@@ -1,0 +1,478 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<section xmlns="http://docbook.org/ns/docbook" version="5.0" xmlns:xlink="http://www.w3.org/1999/xlink" xml:id="_lib_2include_2c_09_09_2bits_2atomic__wait_8h_source" xml:lang="en-US">
+<title>atomic_wait.h</title>
+<indexterm><primary>C:/Users/HP/Documents/GitHub/Minero-Game/lib/include/c++/bits/atomic_wait.h</primary></indexterm>
+Go to the documentation of this file.<programlisting linenumbering="unnumbered">1 <emphasis role="comment">//&#32;-*-&#32;C++&#32;-*-&#32;header.</emphasis>
+2 
+3 <emphasis role="comment">//&#32;Copyright&#32;(C)&#32;2020-2022&#32;Free&#32;Software&#32;Foundation,&#32;Inc.</emphasis>
+4 <emphasis role="comment">//</emphasis>
+5 <emphasis role="comment">//&#32;This&#32;file&#32;is&#32;part&#32;of&#32;the&#32;GNU&#32;ISO&#32;C++&#32;Library.&#32;&#32;This&#32;library&#32;is&#32;free</emphasis>
+6 <emphasis role="comment">//&#32;software;&#32;you&#32;can&#32;redistribute&#32;it&#32;and/or&#32;modify&#32;it&#32;under&#32;the</emphasis>
+7 <emphasis role="comment">//&#32;terms&#32;of&#32;the&#32;GNU&#32;General&#32;Public&#32;License&#32;as&#32;published&#32;by&#32;the</emphasis>
+8 <emphasis role="comment">//&#32;Free&#32;Software&#32;Foundation;&#32;either&#32;version&#32;3,&#32;or&#32;(at&#32;your&#32;option)</emphasis>
+9 <emphasis role="comment">//&#32;any&#32;later&#32;version.</emphasis>
+10 
+11 <emphasis role="comment">//&#32;This&#32;library&#32;is&#32;distributed&#32;in&#32;the&#32;hope&#32;that&#32;it&#32;will&#32;be&#32;useful,</emphasis>
+12 <emphasis role="comment">//&#32;but&#32;WITHOUT&#32;ANY&#32;WARRANTY;&#32;without&#32;even&#32;the&#32;implied&#32;warranty&#32;of</emphasis>
+13 <emphasis role="comment">//&#32;MERCHANTABILITY&#32;or&#32;FITNESS&#32;FOR&#32;A&#32;PARTICULAR&#32;PURPOSE.&#32;&#32;See&#32;the</emphasis>
+14 <emphasis role="comment">//&#32;GNU&#32;General&#32;Public&#32;License&#32;for&#32;more&#32;details.</emphasis>
+15 
+16 <emphasis role="comment">//&#32;Under&#32;Section&#32;7&#32;of&#32;GPL&#32;version&#32;3,&#32;you&#32;are&#32;granted&#32;additional</emphasis>
+17 <emphasis role="comment">//&#32;permissions&#32;described&#32;in&#32;the&#32;GCC&#32;Runtime&#32;Library&#32;Exception,&#32;version</emphasis>
+18 <emphasis role="comment">//&#32;3.1,&#32;as&#32;published&#32;by&#32;the&#32;Free&#32;Software&#32;Foundation.</emphasis>
+19 
+20 <emphasis role="comment">//&#32;You&#32;should&#32;have&#32;received&#32;a&#32;copy&#32;of&#32;the&#32;GNU&#32;General&#32;Public&#32;License&#32;and</emphasis>
+21 <emphasis role="comment">//&#32;a&#32;copy&#32;of&#32;the&#32;GCC&#32;Runtime&#32;Library&#32;Exception&#32;along&#32;with&#32;this&#32;program;</emphasis>
+22 <emphasis role="comment">//&#32;see&#32;the&#32;files&#32;COPYING3&#32;and&#32;COPYING.RUNTIME&#32;respectively.&#32;&#32;If&#32;not,&#32;see</emphasis>
+23 <emphasis role="comment">//&#32;&lt;http://www.gnu.org/licenses/&gt;.</emphasis>
+24 
+30 <emphasis role="preprocessor">#ifndef&#32;_GLIBCXX_ATOMIC_WAIT_H</emphasis>
+31 <emphasis role="preprocessor">#define&#32;_GLIBCXX_ATOMIC_WAIT_H&#32;1</emphasis>
+32 
+33 <emphasis role="preprocessor">#pragma&#32;GCC&#32;system_header</emphasis>
+34 
+35 <emphasis role="preprocessor">#include&#32;&lt;bits/c++config.h&gt;</emphasis>
+36 <emphasis role="preprocessor">#if&#32;defined&#32;_GLIBCXX_HAS_GTHREADS&#32;||&#32;defined&#32;_GLIBCXX_HAVE_LINUX_FUTEX</emphasis>
+37 <emphasis role="preprocessor">#include&#32;&lt;bits/functional_hash.h&gt;</emphasis>
+38 <emphasis role="preprocessor">#include&#32;&lt;bits/gthr.h&gt;</emphasis>
+39 <emphasis role="preprocessor">#include&#32;&lt;ext/numeric_traits.h&gt;</emphasis>
+40 
+41 <emphasis role="preprocessor">#ifdef&#32;_GLIBCXX_HAVE_LINUX_FUTEX</emphasis>
+42 <emphasis role="preprocessor">#&#32;include&#32;&lt;cerrno&gt;</emphasis>
+43 <emphasis role="preprocessor">#&#32;include&#32;&lt;climits&gt;</emphasis>
+44 <emphasis role="preprocessor">#&#32;include&#32;&lt;unistd.h&gt;</emphasis>
+45 <emphasis role="preprocessor">#&#32;include&#32;&lt;syscall.h&gt;</emphasis>
+46 <emphasis role="preprocessor">#&#32;include&#32;&lt;bits/functexcept.h&gt;</emphasis>
+47 <emphasis role="preprocessor">#endif</emphasis>
+48 
+49 <emphasis role="preprocessor">#&#32;include&#32;&lt;bits/std_mutex.h&gt;</emphasis>&#32;&#32;<emphasis role="comment">//&#32;std::mutex,&#32;std::__condvar</emphasis>
+50 
+51 <emphasis role="preprocessor">#define&#32;__cpp_lib_atomic_wait&#32;201907L</emphasis>
+52 
+53 <emphasis role="keyword">namespace&#32;</emphasis><link linkend="_namespacestd">std</link>&#32;<link linkend="__classes_2lib_2include_2c_09_09_2x86__64-w64-mingw32_2bits_2c_09_09config_8h_1a44377df0d3503f0b3d9ab316dd8ddf8b">_GLIBCXX_VISIBILITY</link>(default)
+54 {
+55 _GLIBCXX_BEGIN_NAMESPACE_VERSION
+56 &#32;&#32;<emphasis role="keyword">namespace&#32;</emphasis>__detail
+57 &#32;&#32;{
+58 <emphasis role="preprocessor">#ifdef&#32;_GLIBCXX_HAVE_LINUX_FUTEX</emphasis>
+59 <emphasis role="preprocessor">#define&#32;_GLIBCXX_HAVE_PLATFORM_WAIT&#32;1</emphasis>
+60 &#32;&#32;&#32;&#32;<emphasis role="keyword">using&#32;</emphasis>__platform_wait_t&#32;=&#32;int;
+61 &#32;&#32;&#32;&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keyword">constexpr</emphasis>&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;__platform_wait_alignment&#32;=&#32;4;
+62 <emphasis role="preprocessor">#else</emphasis>
+63 <emphasis role="comment">//&#32;define&#32;_GLIBCX_HAVE_PLATFORM_WAIT&#32;and&#32;implement&#32;__platform_wait()</emphasis>
+64 <emphasis role="comment">//&#32;and&#32;__platform_notify()&#32;if&#32;there&#32;is&#32;a&#32;more&#32;efficient&#32;primitive&#32;supported</emphasis>
+65 <emphasis role="comment">//&#32;by&#32;the&#32;platform&#32;(e.g.&#32;__ulock_wait()/__ulock_wake())&#32;which&#32;is&#32;better&#32;than</emphasis>
+66 <emphasis role="comment">//&#32;a&#32;mutex/condvar&#32;based&#32;wait.</emphasis>
+67 &#32;&#32;&#32;&#32;<emphasis role="keyword">using&#32;</emphasis>__platform_wait_t&#32;=&#32;<link linkend="__classes_2lib_2external_2glfw_2deps_2vs2008_2stdint_8h_1aec6fcb673ff035718c238c8c9d544c47">uint64_t</link>;
+68 &#32;&#32;&#32;&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keyword">constexpr</emphasis>&#32;<emphasis role="keywordtype">size_t</emphasis>&#32;__platform_wait_alignment
+69 &#32;&#32;&#32;&#32;&#32;&#32;=&#32;__alignof__(__platform_wait_t);
+70 <emphasis role="preprocessor">#endif</emphasis>
+71 &#32;&#32;}&#32;<emphasis role="comment">//&#32;namespace&#32;__detail</emphasis>
+72 
+73 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+74 &#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keyword">constexpr</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>&#32;__platform_wait_uses_type
+75 <emphasis role="preprocessor">#ifdef&#32;_GLIBCXX_HAVE_PLATFORM_WAIT</emphasis>
+76 &#32;&#32;&#32;&#32;&#32;&#32;=&#32;is_scalar_v&lt;_Tp&gt;
+77 &#32;&#32;&#32;&#32;&amp;&amp;&#32;((<emphasis role="keyword">sizeof</emphasis>(_Tp)&#32;==&#32;<emphasis role="keyword">sizeof</emphasis>(__detail::__platform_wait_t))
+78 &#32;&#32;&#32;&#32;&amp;&amp;&#32;(<emphasis role="keyword">alignof</emphasis>(_Tp*)&#32;&gt;=&#32;__detail::__platform_wait_alignment));
+79 <emphasis role="preprocessor">#else</emphasis>
+80 &#32;&#32;&#32;&#32;&#32;&#32;=&#32;<emphasis role="keyword">false</emphasis>;
+81 <emphasis role="preprocessor">#endif</emphasis>
+82 
+83 &#32;&#32;<emphasis role="keyword">namespace&#32;</emphasis>__detail
+84 &#32;&#32;{
+85 <emphasis role="preprocessor">#ifdef&#32;_GLIBCXX_HAVE_LINUX_FUTEX</emphasis>
+86 &#32;&#32;&#32;&#32;<emphasis role="keyword">enum&#32;class</emphasis>&#32;__futex_wait_flags&#32;:&#32;<emphasis role="keywordtype">int</emphasis>
+87 &#32;&#32;&#32;&#32;{
+88 <emphasis role="preprocessor">#ifdef&#32;_GLIBCXX_HAVE_LINUX_FUTEX_PRIVATE</emphasis>
+89 &#32;&#32;&#32;&#32;&#32;&#32;__private_flag&#32;=&#32;128,
+90 <emphasis role="preprocessor">#else</emphasis>
+91 &#32;&#32;&#32;&#32;&#32;&#32;__private_flag&#32;=&#32;0,
+92 <emphasis role="preprocessor">#endif</emphasis>
+93 &#32;&#32;&#32;&#32;&#32;&#32;__wait&#32;=&#32;0,
+94 &#32;&#32;&#32;&#32;&#32;&#32;__wake&#32;=&#32;1,
+95 &#32;&#32;&#32;&#32;&#32;&#32;__wait_bitset&#32;=&#32;9,
+96 &#32;&#32;&#32;&#32;&#32;&#32;__wake_bitset&#32;=&#32;10,
+97 &#32;&#32;&#32;&#32;&#32;&#32;__wait_private&#32;=&#32;__wait&#32;|&#32;__private_flag,
+98 &#32;&#32;&#32;&#32;&#32;&#32;__wake_private&#32;=&#32;__wake&#32;|&#32;__private_flag,
+99 &#32;&#32;&#32;&#32;&#32;&#32;__wait_bitset_private&#32;=&#32;__wait_bitset&#32;|&#32;__private_flag,
+100 &#32;&#32;&#32;&#32;&#32;&#32;__wake_bitset_private&#32;=&#32;__wake_bitset&#32;|&#32;__private_flag,
+101 &#32;&#32;&#32;&#32;&#32;&#32;__bitset_match_any&#32;=&#32;-1
+102 &#32;&#32;&#32;&#32;};
+103 
+104 &#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+105 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+106 &#32;&#32;&#32;&#32;&#32;&#32;__platform_wait(<emphasis role="keyword">const</emphasis>&#32;_Tp*&#32;__addr,&#32;__platform_wait_t&#32;<link linkend="__classes_2lib_2include_2stdatomic_8h_1a15181bfd16829c92971879064b9d8dbb">__val</link>)&#32;<emphasis role="keyword">noexcept</emphasis>
+107 &#32;&#32;&#32;&#32;&#32;&#32;{
+108 &#32;&#32;&#32;&#32;<emphasis role="keyword">auto</emphasis>&#32;__e&#32;=&#32;syscall&#32;(SYS_futex,&#32;<emphasis role="keyword">static_cast&lt;</emphasis><emphasis role="keyword">const&#32;</emphasis><emphasis role="keywordtype">void</emphasis>*<emphasis role="keyword">&gt;</emphasis>(__addr),
+109 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">static_cast&lt;</emphasis><emphasis role="keywordtype">int</emphasis><emphasis role="keyword">&gt;</emphasis>(__futex_wait_flags::__wait_private),
+110 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2stdatomic_8h_1a15181bfd16829c92971879064b9d8dbb">__val</link>,&#32;<emphasis role="keyword">nullptr</emphasis>);
+111 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(!__e&#32;||&#32;errno&#32;==&#32;EAGAIN)
+112 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>;
+113 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(errno&#32;!=&#32;EINTR)
+114 &#32;&#32;&#32;&#32;&#32;&#32;__throw_system_error(errno);
+115 &#32;&#32;&#32;&#32;&#32;&#32;}
+116 
+117 &#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+118 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+119 &#32;&#32;&#32;&#32;&#32;&#32;__platform_notify(<emphasis role="keyword">const</emphasis>&#32;_Tp*&#32;__addr,&#32;<emphasis role="keywordtype">bool</emphasis>&#32;__all)&#32;<emphasis role="keyword">noexcept</emphasis>
+120 &#32;&#32;&#32;&#32;&#32;&#32;{
+121 &#32;&#32;&#32;&#32;syscall&#32;(SYS_futex,&#32;<emphasis role="keyword">static_cast&lt;</emphasis><emphasis role="keyword">const&#32;</emphasis><emphasis role="keywordtype">void</emphasis>*<emphasis role="keyword">&gt;</emphasis>(__addr),
+122 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">static_cast&lt;</emphasis><emphasis role="keywordtype">int</emphasis><emphasis role="keyword">&gt;</emphasis>(__futex_wait_flags::__wake_private),
+123 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__all&#32;?&#32;INT_MAX&#32;:&#32;1);
+124 &#32;&#32;&#32;&#32;&#32;&#32;}
+125 <emphasis role="preprocessor">#endif</emphasis>
+126 
+127 &#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>
+128 &#32;&#32;&#32;&#32;__thread_yield()&#32;noexcept
+129 &#32;&#32;&#32;&#32;{
+130 <emphasis role="preprocessor">#if&#32;defined&#32;_GLIBCXX_HAS_GTHREADS&#32;&amp;&amp;&#32;defined&#32;_GLIBCXX_USE_SCHED_YIELD</emphasis>
+131 &#32;&#32;&#32;&#32;&#32;__gthread_yield();
+132 <emphasis role="preprocessor">#endif</emphasis>
+133 &#32;&#32;&#32;&#32;}
+134 
+135 &#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>
+136 &#32;&#32;&#32;&#32;__thread_relax()&#32;noexcept
+137 &#32;&#32;&#32;&#32;{
+138 <emphasis role="preprocessor">#if&#32;defined&#32;__i386__&#32;||&#32;defined&#32;__x86_64__</emphasis>
+139 &#32;&#32;&#32;&#32;&#32;&#32;__builtin_ia32_pause();
+140 <emphasis role="preprocessor">#else</emphasis>
+141 &#32;&#32;&#32;&#32;&#32;&#32;__thread_yield();
+142 <emphasis role="preprocessor">#endif</emphasis>
+143 &#32;&#32;&#32;&#32;}
+144 
+145 &#32;&#32;&#32;&#32;<emphasis role="keyword">constexpr</emphasis>&#32;<emphasis role="keyword">auto</emphasis>&#32;__atomic_spin_count_relax&#32;=&#32;12;
+146 &#32;&#32;&#32;&#32;<emphasis role="keyword">constexpr</emphasis>&#32;<emphasis role="keyword">auto</emphasis>&#32;__atomic_spin_count&#32;=&#32;16;
+147 
+148 &#32;&#32;&#32;&#32;<emphasis role="keyword">struct&#32;</emphasis>__default_spin_policy
+149 &#32;&#32;&#32;&#32;{
+150 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">bool</emphasis>
+151 &#32;&#32;&#32;&#32;&#32;&#32;operator()()&#32;const&#32;noexcept
+152 &#32;&#32;&#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;<emphasis role="keyword">false</emphasis>;&#32;}
+153 &#32;&#32;&#32;&#32;};
+154 
+155 &#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Pred,
+156 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;_Spin&#32;=&#32;__default_spin_policy&gt;
+157 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">bool</emphasis>
+158 &#32;&#32;&#32;&#32;&#32;&#32;__atomic_spin(_Pred&amp;&#32;__pred,&#32;_Spin&#32;__spin&#32;=&#32;_Spin{&#32;})&#32;<emphasis role="keyword">noexcept</emphasis>
+159 &#32;&#32;&#32;&#32;&#32;&#32;{
+160 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(<emphasis role="keyword">auto</emphasis>&#32;__i&#32;=&#32;0;&#32;__i&#32;&lt;&#32;__atomic_spin_count;&#32;++__i)
+161 &#32;&#32;&#32;&#32;&#32;&#32;{
+162 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__pred())
+163 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<emphasis role="keyword">true</emphasis>;
+164 
+165 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__i&#32;&lt;&#32;__atomic_spin_count_relax)
+166 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__detail::__thread_relax();
+167 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>
+168 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__detail::__thread_yield();
+169 &#32;&#32;&#32;&#32;&#32;&#32;}
+170 
+171 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">while</emphasis>&#32;(__spin())
+172 &#32;&#32;&#32;&#32;&#32;&#32;{
+173 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__pred())
+174 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<emphasis role="keyword">true</emphasis>;
+175 &#32;&#32;&#32;&#32;&#32;&#32;}
+176 
+177 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<emphasis role="keyword">false</emphasis>;
+178 &#32;&#32;&#32;&#32;&#32;&#32;}
+179 
+180 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;return&#32;true&#32;if&#32;equal</emphasis>
+181 &#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+182 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">bool</emphasis>&#32;__atomic_compare(<emphasis role="keyword">const</emphasis>&#32;_Tp&amp;&#32;__a,&#32;<emphasis role="keyword">const</emphasis>&#32;_Tp&amp;&#32;__b)
+183 &#32;&#32;&#32;&#32;&#32;&#32;{
+184 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;TODO&#32;make&#32;this&#32;do&#32;the&#32;correct&#32;padding&#32;bit&#32;ignoring&#32;comparison</emphasis>
+185 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__builtin_memcmp(&amp;__a,&#32;&amp;__b,&#32;<emphasis role="keyword">sizeof</emphasis>(_Tp))&#32;==&#32;0;
+186 &#32;&#32;&#32;&#32;&#32;&#32;}
+187 
+188 &#32;&#32;&#32;&#32;<emphasis role="keyword">struct&#32;</emphasis>__waiter_pool_base
+189 &#32;&#32;&#32;&#32;{
+190 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Don&apos;t&#32;use&#32;std::hardware_destructive_interference_size&#32;here&#32;because&#32;we</emphasis>
+191 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;don&apos;t&#32;want&#32;the&#32;layout&#32;of&#32;library&#32;types&#32;to&#32;depend&#32;on&#32;compiler&#32;options.</emphasis>
+192 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keyword">constexpr</emphasis>&#32;<emphasis role="keyword">auto</emphasis>&#32;_S_align&#32;=&#32;64;
+193 
+194 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">alignas</emphasis>(_S_align)&#32;__platform_wait_t&#32;_M_wait&#32;=&#32;0;
+195 
+196 <emphasis role="preprocessor">#ifndef&#32;_GLIBCXX_HAVE_PLATFORM_WAIT</emphasis>
+197 &#32;&#32;&#32;&#32;&#32;&#32;mutex&#32;_M_mtx;
+198 <emphasis role="preprocessor">#endif</emphasis>
+199 
+200 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">alignas</emphasis>(_S_align)&#32;__platform_wait_t&#32;_M_ver&#32;=&#32;0;
+201 
+202 <emphasis role="preprocessor">#ifndef&#32;_GLIBCXX_HAVE_PLATFORM_WAIT</emphasis>
+203 &#32;&#32;&#32;&#32;&#32;&#32;__condvar&#32;_M_cv;
+204 <emphasis role="preprocessor">#endif</emphasis>
+205 &#32;&#32;&#32;&#32;&#32;&#32;__waiter_pool_base()&#32;=&#32;<emphasis role="keywordflow">default</emphasis>;
+206 
+207 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+208 &#32;&#32;&#32;&#32;&#32;&#32;_M_enter_wait()&#32;noexcept
+209 &#32;&#32;&#32;&#32;&#32;&#32;{&#32;__atomic_fetch_add(&amp;_M_wait,&#32;1,&#32;__ATOMIC_SEQ_CST);&#32;}
+210 
+211 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+212 &#32;&#32;&#32;&#32;&#32;&#32;_M_leave_wait()&#32;noexcept
+213 &#32;&#32;&#32;&#32;&#32;&#32;{&#32;__atomic_fetch_sub(&amp;_M_wait,&#32;1,&#32;__ATOMIC_RELEASE);&#32;}
+214 
+215 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">bool</emphasis>
+216 &#32;&#32;&#32;&#32;&#32;&#32;_M_waiting()&#32;const&#32;noexcept
+217 &#32;&#32;&#32;&#32;&#32;&#32;{
+218 &#32;&#32;&#32;&#32;__platform_wait_t&#32;__res;
+219 &#32;&#32;&#32;&#32;__atomic_load(&amp;_M_wait,&#32;&amp;__res,&#32;__ATOMIC_SEQ_CST);
+220 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__res&#32;!=&#32;0;
+221 &#32;&#32;&#32;&#32;&#32;&#32;}
+222 
+223 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+224 &#32;&#32;&#32;&#32;&#32;&#32;_M_notify(<emphasis role="keyword">const</emphasis>&#32;__platform_wait_t*&#32;__addr,&#32;<emphasis role="keywordtype">bool</emphasis>&#32;__all,&#32;<emphasis role="keywordtype">bool</emphasis>&#32;__bare)&#32;<emphasis role="keyword">noexcept</emphasis>
+225 &#32;&#32;&#32;&#32;&#32;&#32;{
+226 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(!(__bare&#32;||&#32;_M_waiting()))
+227 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>;
+228 
+229 <emphasis role="preprocessor">#ifdef&#32;_GLIBCXX_HAVE_PLATFORM_WAIT</emphasis>
+230 &#32;&#32;&#32;&#32;__platform_notify(__addr,&#32;__all);
+231 <emphasis role="preprocessor">#else</emphasis>
+232 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__all)
+233 &#32;&#32;&#32;&#32;&#32;&#32;_M_cv.notify_all();
+234 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>
+235 &#32;&#32;&#32;&#32;&#32;&#32;_M_cv.notify_one();
+236 <emphasis role="preprocessor">#endif</emphasis>
+237 &#32;&#32;&#32;&#32;&#32;&#32;}
+238 
+239 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">static</emphasis>&#32;__waiter_pool_base&amp;
+240 &#32;&#32;&#32;&#32;&#32;&#32;_S_for(<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>*&#32;__addr)&#32;<emphasis role="keyword">noexcept</emphasis>
+241 &#32;&#32;&#32;&#32;&#32;&#32;{
+242 &#32;&#32;&#32;&#32;<emphasis role="keyword">constexpr</emphasis>&#32;<link linkend="__classes_2lib_2external_2glfw_2deps_2vs2008_2stdint_8h_1a31b85deecb45924320becd11d3ee16ce">uintptr_t</link>&#32;__ct&#32;=&#32;16;
+243 &#32;&#32;&#32;&#32;<emphasis role="keyword">static</emphasis>&#32;__waiter_pool_base&#32;__w[__ct];
+244 &#32;&#32;&#32;&#32;<emphasis role="keyword">auto</emphasis>&#32;__key&#32;=&#32;(<link linkend="__classes_2lib_2external_2glfw_2deps_2vs2008_2stdint_8h_1a31b85deecb45924320becd11d3ee16ce">uintptr_t</link>(__addr)&#32;&gt;&gt;&#32;2)&#32;%&#32;__ct;
+245 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__w[__key];
+246 &#32;&#32;&#32;&#32;&#32;&#32;}
+247 &#32;&#32;&#32;&#32;};
+248 
+249 &#32;&#32;&#32;&#32;<emphasis role="keyword">struct&#32;</emphasis>__waiter_pool&#32;:&#32;__waiter_pool_base
+250 &#32;&#32;&#32;&#32;{
+251 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+252 &#32;&#32;&#32;&#32;&#32;&#32;_M_do_wait(<emphasis role="keyword">const</emphasis>&#32;__platform_wait_t*&#32;__addr,&#32;__platform_wait_t&#32;__old)&#32;<emphasis role="keyword">noexcept</emphasis>
+253 &#32;&#32;&#32;&#32;&#32;&#32;{
+254 <emphasis role="preprocessor">#ifdef&#32;_GLIBCXX_HAVE_PLATFORM_WAIT</emphasis>
+255 &#32;&#32;&#32;&#32;__platform_wait(__addr,&#32;__old);
+256 <emphasis role="preprocessor">#else</emphasis>
+257 &#32;&#32;&#32;&#32;__platform_wait_t&#32;<link linkend="__classes_2lib_2include_2stdatomic_8h_1a15181bfd16829c92971879064b9d8dbb">__val</link>;
+258 &#32;&#32;&#32;&#32;__atomic_load(__addr,&#32;&amp;<link linkend="__classes_2lib_2include_2stdatomic_8h_1a15181bfd16829c92971879064b9d8dbb">__val</link>,&#32;__ATOMIC_SEQ_CST);
+259 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(<link linkend="__classes_2lib_2include_2stdatomic_8h_1a15181bfd16829c92971879064b9d8dbb">__val</link>&#32;==&#32;__old)
+260 &#32;&#32;&#32;&#32;&#32;&#32;{
+261 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;lock_guard&lt;mutex&gt;&#32;__l(_M_mtx);
+262 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_M_cv.wait(_M_mtx);
+263 &#32;&#32;&#32;&#32;&#32;&#32;}
+264 <emphasis role="preprocessor">#endif&#32;</emphasis><emphasis role="comment">//&#32;__GLIBCXX_HAVE_PLATFORM_WAIT</emphasis>
+265 &#32;&#32;&#32;&#32;&#32;&#32;}
+266 &#32;&#32;&#32;&#32;};
+267 
+268 &#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+269 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">struct&#32;</emphasis>__waiter_base
+270 &#32;&#32;&#32;&#32;&#32;&#32;{
+271 &#32;&#32;&#32;&#32;<emphasis role="keyword">using&#32;</emphasis>__waiter_type&#32;=&#32;_Tp;
+272 
+273 &#32;&#32;&#32;&#32;__waiter_type&amp;&#32;_M_w;
+274 &#32;&#32;&#32;&#32;__platform_wait_t*&#32;_M_addr;
+275 
+276 &#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Up&gt;
+277 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">static</emphasis>&#32;__platform_wait_t*
+278 &#32;&#32;&#32;&#32;&#32;&#32;_S_wait_addr(<emphasis role="keyword">const</emphasis>&#32;_Up*&#32;__a,&#32;__platform_wait_t*&#32;__b)
+279 &#32;&#32;&#32;&#32;&#32;&#32;{
+280 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;<emphasis role="keyword">constexpr</emphasis>&#32;(__platform_wait_uses_type&lt;_Up&gt;)
+281 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<emphasis role="keyword">reinterpret_cast&lt;</emphasis>__platform_wait_t*<emphasis role="keyword">&gt;</emphasis>(<emphasis role="keyword">const_cast&lt;</emphasis>_Up*<emphasis role="keyword">&gt;</emphasis>(__a));
+282 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>
+283 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__b;
+284 &#32;&#32;&#32;&#32;&#32;&#32;}
+285 
+286 &#32;&#32;&#32;&#32;<emphasis role="keyword">static</emphasis>&#32;__waiter_type&amp;
+287 &#32;&#32;&#32;&#32;_S_for(<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>*&#32;__addr)&#32;<emphasis role="keyword">noexcept</emphasis>
+288 &#32;&#32;&#32;&#32;{
+289 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">static_assert</emphasis>(<emphasis role="keyword">sizeof</emphasis>(__waiter_type)&#32;==&#32;<emphasis role="keyword">sizeof</emphasis>(__waiter_pool_base));
+290 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">auto</emphasis>&amp;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a1dbb21208b9047cc8031ca9c840d3c2f">res</link>&#32;=&#32;__waiter_pool_base::_S_for(__addr);
+291 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<emphasis role="keyword">reinterpret_cast&lt;</emphasis>__waiter_type&amp;<emphasis role="keyword">&gt;</emphasis>(<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a1dbb21208b9047cc8031ca9c840d3c2f">res</link>);
+292 &#32;&#32;&#32;&#32;}
+293 
+294 &#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Up&gt;
+295 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">explicit</emphasis>&#32;__waiter_base(<emphasis role="keyword">const</emphasis>&#32;_Up*&#32;__addr)&#32;noexcept
+296 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;:&#32;_M_w(_S_for(__addr))
+297 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;,&#32;_M_addr(_S_wait_addr(__addr,&#32;&amp;_M_w._M_ver))
+298 &#32;&#32;&#32;&#32;&#32;&#32;{&#32;}
+299 
+300 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">bool</emphasis>
+301 &#32;&#32;&#32;&#32;_M_laundered()<emphasis role="keyword">&#32;const</emphasis>
+302 <emphasis role="keyword">&#32;&#32;&#32;&#32;</emphasis>{&#32;<emphasis role="keywordflow">return</emphasis>&#32;_M_addr&#32;==&#32;&amp;_M_w._M_ver;&#32;}
+303 
+304 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+305 &#32;&#32;&#32;&#32;_M_notify(<emphasis role="keywordtype">bool</emphasis>&#32;__all,&#32;<emphasis role="keywordtype">bool</emphasis>&#32;__bare&#32;=&#32;<emphasis role="keyword">false</emphasis>)
+306 &#32;&#32;&#32;&#32;{
+307 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(_M_laundered())
+308 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+309 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__atomic_fetch_add(_M_addr,&#32;1,&#32;__ATOMIC_SEQ_CST);
+310 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__all&#32;=&#32;<emphasis role="keyword">true</emphasis>;
+311 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+312 &#32;&#32;&#32;&#32;&#32;&#32;_M_w._M_notify(_M_addr,&#32;__all,&#32;__bare);
+313 &#32;&#32;&#32;&#32;}
+314 
+315 &#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Up,&#32;<emphasis role="keyword">typename</emphasis>&#32;_ValFn,
+316 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;_Spin&#32;=&#32;__default_spin_policy&gt;
+317 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>
+318 &#32;&#32;&#32;&#32;&#32;&#32;_S_do_spin_v(__platform_wait_t*&#32;__addr,
+319 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;_Up&amp;&#32;__old,&#32;_ValFn&#32;__vfn,
+320 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__platform_wait_t&amp;&#32;<link linkend="__classes_2lib_2include_2stdatomic_8h_1a15181bfd16829c92971879064b9d8dbb">__val</link>,
+321 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_Spin&#32;__spin&#32;=&#32;_Spin{&#32;})
+322 &#32;&#32;&#32;&#32;&#32;&#32;{
+323 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">auto</emphasis>&#32;<emphasis role="keyword">const</emphasis>&#32;__pred&#32;=&#32;[=]
+324 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;!__detail::__atomic_compare(__old,&#32;__vfn());&#32;};
+325 
+326 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;<emphasis role="keyword">constexpr</emphasis>&#32;(__platform_wait_uses_type&lt;_Up&gt;)
+327 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+328 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__builtin_memcpy(&amp;<link linkend="__classes_2lib_2include_2stdatomic_8h_1a15181bfd16829c92971879064b9d8dbb">__val</link>,&#32;&amp;__old,&#32;<emphasis role="keyword">sizeof</emphasis>(<link linkend="__classes_2lib_2include_2stdatomic_8h_1a15181bfd16829c92971879064b9d8dbb">__val</link>));
+329 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+330 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>
+331 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+332 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__atomic_load(__addr,&#32;&amp;<link linkend="__classes_2lib_2include_2stdatomic_8h_1a15181bfd16829c92971879064b9d8dbb">__val</link>,&#32;__ATOMIC_ACQUIRE);
+333 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+334 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__atomic_spin(__pred,&#32;__spin);
+335 &#32;&#32;&#32;&#32;&#32;&#32;}
+336 
+337 &#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Up,&#32;<emphasis role="keyword">typename</emphasis>&#32;_ValFn,
+338 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;_Spin&#32;=&#32;__default_spin_policy&gt;
+339 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">bool</emphasis>
+340 &#32;&#32;&#32;&#32;&#32;&#32;_M_do_spin_v(<emphasis role="keyword">const</emphasis>&#32;_Up&amp;&#32;__old,&#32;_ValFn&#32;__vfn,
+341 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__platform_wait_t&amp;&#32;<link linkend="__classes_2lib_2include_2stdatomic_8h_1a15181bfd16829c92971879064b9d8dbb">__val</link>,
+342 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_Spin&#32;__spin&#32;=&#32;_Spin{&#32;})
+343 &#32;&#32;&#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;_S_do_spin_v(_M_addr,&#32;__old,&#32;__vfn,&#32;<link linkend="__classes_2lib_2include_2stdatomic_8h_1a15181bfd16829c92971879064b9d8dbb">__val</link>,&#32;__spin);&#32;}
+344 
+345 &#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Pred,
+346 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;_Spin&#32;=&#32;__default_spin_policy&gt;
+347 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>
+348 &#32;&#32;&#32;&#32;&#32;&#32;_S_do_spin(<emphasis role="keyword">const</emphasis>&#32;__platform_wait_t*&#32;__addr,
+349 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_Pred&#32;__pred,
+350 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__platform_wait_t&amp;&#32;<link linkend="__classes_2lib_2include_2stdatomic_8h_1a15181bfd16829c92971879064b9d8dbb">__val</link>,
+351 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_Spin&#32;__spin&#32;=&#32;_Spin{&#32;})
+352 &#32;&#32;&#32;&#32;&#32;&#32;{
+353 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__atomic_load(__addr,&#32;&amp;<link linkend="__classes_2lib_2include_2stdatomic_8h_1a15181bfd16829c92971879064b9d8dbb">__val</link>,&#32;__ATOMIC_ACQUIRE);
+354 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__atomic_spin(__pred,&#32;__spin);
+355 &#32;&#32;&#32;&#32;&#32;&#32;}
+356 
+357 &#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Pred,
+358 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;_Spin&#32;=&#32;__default_spin_policy&gt;
+359 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">bool</emphasis>
+360 &#32;&#32;&#32;&#32;&#32;&#32;_M_do_spin(_Pred&#32;__pred,&#32;__platform_wait_t&amp;&#32;<link linkend="__classes_2lib_2include_2stdatomic_8h_1a15181bfd16829c92971879064b9d8dbb">__val</link>,
+361 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_Spin&#32;__spin&#32;=&#32;_Spin{&#32;})
+362 &#32;&#32;&#32;&#32;&#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;_S_do_spin(_M_addr,&#32;__pred,&#32;<link linkend="__classes_2lib_2include_2stdatomic_8h_1a15181bfd16829c92971879064b9d8dbb">__val</link>,&#32;__spin);&#32;}
+363 &#32;&#32;&#32;&#32;&#32;&#32;};
+364 
+365 &#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_EntersWait&gt;
+366 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">struct&#32;</emphasis>__waiter&#32;:&#32;__waiter_base&lt;__waiter_pool&gt;
+367 &#32;&#32;&#32;&#32;&#32;&#32;{
+368 &#32;&#32;&#32;&#32;<emphasis role="keyword">using&#32;</emphasis>__base_type&#32;=&#32;__waiter_base&lt;__waiter_pool&gt;;
+369 
+370 &#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+371 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">explicit</emphasis>&#32;__waiter(<emphasis role="keyword">const</emphasis>&#32;_Tp*&#32;__addr)&#32;noexcept
+372 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;:&#32;__base_type(__addr)
+373 &#32;&#32;&#32;&#32;&#32;&#32;{
+374 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;<emphasis role="keyword">constexpr</emphasis>&#32;(_EntersWait::value)
+375 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_M_w._M_enter_wait();
+376 &#32;&#32;&#32;&#32;&#32;&#32;}
+377 
+378 &#32;&#32;&#32;&#32;~__waiter()
+379 &#32;&#32;&#32;&#32;{
+380 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;<emphasis role="keyword">constexpr</emphasis>&#32;(_EntersWait::value)
+381 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_M_w._M_leave_wait();
+382 &#32;&#32;&#32;&#32;}
+383 
+384 &#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp,&#32;<emphasis role="keyword">typename</emphasis>&#32;_ValFn&gt;
+385 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+386 &#32;&#32;&#32;&#32;&#32;&#32;_M_do_wait_v(_Tp&#32;__old,&#32;_ValFn&#32;__vfn)
+387 &#32;&#32;&#32;&#32;&#32;&#32;{
+388 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">do</emphasis>
+389 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+390 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__platform_wait_t&#32;<link linkend="__classes_2lib_2include_2stdatomic_8h_1a15181bfd16829c92971879064b9d8dbb">__val</link>;
+391 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__base_type::_M_do_spin_v(__old,&#32;__vfn,&#32;<link linkend="__classes_2lib_2include_2stdatomic_8h_1a15181bfd16829c92971879064b9d8dbb">__val</link>))
+392 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>;
+393 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__base_type::_M_w._M_do_wait(__base_type::_M_addr,&#32;<link linkend="__classes_2lib_2include_2stdatomic_8h_1a15181bfd16829c92971879064b9d8dbb">__val</link>);
+394 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+395 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">while</emphasis>&#32;(__detail::__atomic_compare(__old,&#32;__vfn()));
+396 &#32;&#32;&#32;&#32;&#32;&#32;}
+397 
+398 &#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Pred&gt;
+399 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+400 &#32;&#32;&#32;&#32;&#32;&#32;_M_do_wait(_Pred&#32;__pred)&#32;<emphasis role="keyword">noexcept</emphasis>
+401 &#32;&#32;&#32;&#32;&#32;&#32;{
+402 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">do</emphasis>
+403 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+404 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__platform_wait_t&#32;<link linkend="__classes_2lib_2include_2stdatomic_8h_1a15181bfd16829c92971879064b9d8dbb">__val</link>;
+405 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__base_type::_M_do_spin(__pred,&#32;<link linkend="__classes_2lib_2include_2stdatomic_8h_1a15181bfd16829c92971879064b9d8dbb">__val</link>))
+406 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>;
+407 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__base_type::_M_w._M_do_wait(__base_type::_M_addr,&#32;<link linkend="__classes_2lib_2include_2stdatomic_8h_1a15181bfd16829c92971879064b9d8dbb">__val</link>);
+408 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+409 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">while</emphasis>&#32;(!__pred());
+410 &#32;&#32;&#32;&#32;&#32;&#32;}
+411 &#32;&#32;&#32;&#32;&#32;&#32;};
+412 
+413 &#32;&#32;&#32;&#32;<emphasis role="keyword">using&#32;</emphasis>__enters_wait&#32;=&#32;__waiter&lt;std::true_type&gt;;
+414 &#32;&#32;&#32;&#32;<emphasis role="keyword">using&#32;</emphasis>__bare_wait&#32;=&#32;__waiter&lt;std::false_type&gt;;
+415 &#32;&#32;}&#32;<emphasis role="comment">//&#32;namespace&#32;__detail</emphasis>
+416 
+417 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp,&#32;<emphasis role="keyword">typename</emphasis>&#32;_ValFn&gt;
+418 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+419 &#32;&#32;&#32;&#32;__atomic_wait_address_v(<emphasis role="keyword">const</emphasis>&#32;_Tp*&#32;__addr,&#32;_Tp&#32;__old,
+420 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_ValFn&#32;__vfn)&#32;<emphasis role="keyword">noexcept</emphasis>
+421 &#32;&#32;&#32;&#32;{
+422 &#32;&#32;&#32;&#32;&#32;&#32;__detail::__enters_wait&#32;__w(__addr);
+423 &#32;&#32;&#32;&#32;&#32;&#32;__w._M_do_wait_v(__old,&#32;__vfn);
+424 &#32;&#32;&#32;&#32;}
+425 
+426 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp,&#32;<emphasis role="keyword">typename</emphasis>&#32;_Pred&gt;
+427 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+428 &#32;&#32;&#32;&#32;__atomic_wait_address(<emphasis role="keyword">const</emphasis>&#32;_Tp*&#32;__addr,&#32;_Pred&#32;__pred)&#32;<emphasis role="keyword">noexcept</emphasis>
+429 &#32;&#32;&#32;&#32;{
+430 &#32;&#32;&#32;&#32;&#32;&#32;__detail::__enters_wait&#32;__w(__addr);
+431 &#32;&#32;&#32;&#32;&#32;&#32;__w._M_do_wait(__pred);
+432 &#32;&#32;&#32;&#32;}
+433 
+434 &#32;&#32;<emphasis role="comment">//&#32;This&#32;call&#32;is&#32;to&#32;be&#32;used&#32;by&#32;atomic&#32;types&#32;which&#32;track&#32;contention&#32;externally</emphasis>
+435 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Pred&gt;
+436 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+437 &#32;&#32;&#32;&#32;__atomic_wait_address_bare(<emphasis role="keyword">const</emphasis>&#32;__detail::__platform_wait_t*&#32;__addr,
+438 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_Pred&#32;__pred)&#32;<emphasis role="keyword">noexcept</emphasis>
+439 &#32;&#32;&#32;&#32;{
+440 <emphasis role="preprocessor">#ifdef&#32;_GLIBCXX_HAVE_PLATFORM_WAIT</emphasis>
+441 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">do</emphasis>
+442 &#32;&#32;&#32;&#32;{
+443 &#32;&#32;&#32;&#32;&#32;&#32;__detail::__platform_wait_t&#32;<link linkend="__classes_2lib_2include_2stdatomic_8h_1a15181bfd16829c92971879064b9d8dbb">__val</link>;
+444 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__detail::__bare_wait::_S_do_spin(__addr,&#32;__pred,&#32;<link linkend="__classes_2lib_2include_2stdatomic_8h_1a15181bfd16829c92971879064b9d8dbb">__val</link>))
+445 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>;
+446 &#32;&#32;&#32;&#32;&#32;&#32;__detail::__platform_wait(__addr,&#32;<link linkend="__classes_2lib_2include_2stdatomic_8h_1a15181bfd16829c92971879064b9d8dbb">__val</link>);
+447 &#32;&#32;&#32;&#32;}
+448 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">while</emphasis>&#32;(!__pred());
+449 <emphasis role="preprocessor">#else&#32;</emphasis><emphasis role="comment">//&#32;!_GLIBCXX_HAVE_PLATFORM_WAIT</emphasis>
+450 &#32;&#32;&#32;&#32;&#32;&#32;__detail::__bare_wait&#32;__w(__addr);
+451 &#32;&#32;&#32;&#32;&#32;&#32;__w._M_do_wait(__pred);
+452 <emphasis role="preprocessor">#endif</emphasis>
+453 &#32;&#32;&#32;&#32;}
+454 
+455 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_Tp&gt;
+456 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+457 &#32;&#32;&#32;&#32;__atomic_notify_address(<emphasis role="keyword">const</emphasis>&#32;_Tp*&#32;__addr,&#32;<emphasis role="keywordtype">bool</emphasis>&#32;__all)&#32;<emphasis role="keyword">noexcept</emphasis>
+458 &#32;&#32;&#32;&#32;{
+459 &#32;&#32;&#32;&#32;&#32;&#32;__detail::__bare_wait&#32;__w(__addr);
+460 &#32;&#32;&#32;&#32;&#32;&#32;__w._M_notify(__all);
+461 &#32;&#32;&#32;&#32;}
+462 
+463 &#32;&#32;<emphasis role="comment">//&#32;This&#32;call&#32;is&#32;to&#32;be&#32;used&#32;by&#32;atomic&#32;types&#32;which&#32;track&#32;contention&#32;externally</emphasis>
+464 &#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>
+465 &#32;&#32;__atomic_notify_address_bare(<emphasis role="keyword">const</emphasis>&#32;__detail::__platform_wait_t*&#32;__addr,
+466 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">bool</emphasis>&#32;__all)&#32;<emphasis role="keyword">noexcept</emphasis>
+467 &#32;&#32;{
+468 <emphasis role="preprocessor">#ifdef&#32;_GLIBCXX_HAVE_PLATFORM_WAIT</emphasis>
+469 &#32;&#32;&#32;&#32;__detail::__platform_notify(__addr,&#32;__all);
+470 <emphasis role="preprocessor">#else</emphasis>
+471 &#32;&#32;&#32;&#32;__detail::__bare_wait&#32;__w(__addr);
+472 &#32;&#32;&#32;&#32;__w._M_notify(__all,&#32;<emphasis role="keyword">true</emphasis>);
+473 <emphasis role="preprocessor">#endif</emphasis>
+474 &#32;&#32;}
+475 _GLIBCXX_END_NAMESPACE_VERSION
+476 }&#32;<emphasis role="comment">//&#32;namespace&#32;std</emphasis>
+477 <emphasis role="preprocessor">#endif&#32;</emphasis><emphasis role="comment">//&#32;GTHREADS&#32;||&#32;LINUX_FUTEX</emphasis>
+478 <emphasis role="preprocessor">#endif&#32;</emphasis><emphasis role="comment">//&#32;_GLIBCXX_ATOMIC_WAIT_H</emphasis>
+</programlisting></section>

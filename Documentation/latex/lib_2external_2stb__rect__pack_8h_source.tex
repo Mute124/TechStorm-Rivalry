@@ -1,0 +1,626 @@
+\doxysection{stb\+\_\+rect\+\_\+pack.\+h}
+\hypertarget{lib_2external_2stb__rect__pack_8h_source}{}\label{lib_2external_2stb__rect__pack_8h_source}\index{C:/Users/HP/Documents/GitHub/Minero-\/Game/lib/external/stb\_rect\_pack.h@{C:/Users/HP/Documents/GitHub/Minero-\/Game/lib/external/stb\_rect\_pack.h}}
+\mbox{\hyperlink{lib_2external_2stb__rect__pack_8h}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{comment}{//\ stb\_rect\_pack.h\ -\/\ v1.01\ -\/\ public\ domain\ -\/\ rectangle\ packing}}
+\DoxyCodeLine{00002\ \textcolor{comment}{//\ Sean\ Barrett\ 2014}}
+\DoxyCodeLine{00003\ \textcolor{comment}{//}}
+\DoxyCodeLine{00004\ \textcolor{comment}{//\ Useful\ for\ e.g.\ packing\ rectangular\ textures\ into\ an\ atlas.}}
+\DoxyCodeLine{00005\ \textcolor{comment}{//\ Does\ not\ do\ rotation.}}
+\DoxyCodeLine{00006\ \textcolor{comment}{//}}
+\DoxyCodeLine{00007\ \textcolor{comment}{//\ Before\ \#including,}}
+\DoxyCodeLine{00008\ \textcolor{comment}{//}}
+\DoxyCodeLine{00009\ \textcolor{comment}{//\ \ \ \ \#define\ STB\_RECT\_PACK\_IMPLEMENTATION}}
+\DoxyCodeLine{00010\ \textcolor{comment}{//}}
+\DoxyCodeLine{00011\ \textcolor{comment}{//\ in\ the\ file\ that\ you\ want\ to\ have\ the\ implementation.}}
+\DoxyCodeLine{00012\ \textcolor{comment}{//}}
+\DoxyCodeLine{00013\ \textcolor{comment}{//\ Not\ necessarily\ the\ awesomest\ packing\ method,\ but\ better\ than}}
+\DoxyCodeLine{00014\ \textcolor{comment}{//\ the\ totally\ naive\ one\ in\ stb\_truetype\ (which\ is\ primarily\ what}}
+\DoxyCodeLine{00015\ \textcolor{comment}{//\ this\ is\ meant\ to\ replace).}}
+\DoxyCodeLine{00016\ \textcolor{comment}{//}}
+\DoxyCodeLine{00017\ \textcolor{comment}{//\ Has\ only\ had\ a\ few\ tests\ run,\ may\ have\ issues.}}
+\DoxyCodeLine{00018\ \textcolor{comment}{//}}
+\DoxyCodeLine{00019\ \textcolor{comment}{//\ More\ docs\ to\ come.}}
+\DoxyCodeLine{00020\ \textcolor{comment}{//}}
+\DoxyCodeLine{00021\ \textcolor{comment}{//\ No\ memory\ allocations;\ uses\ qsort()\ and\ assert()\ from\ stdlib.}}
+\DoxyCodeLine{00022\ \textcolor{comment}{//\ Can\ override\ those\ by\ defining\ STBRP\_SORT\ and\ STBRP\_ASSERT.}}
+\DoxyCodeLine{00023\ \textcolor{comment}{//}}
+\DoxyCodeLine{00024\ \textcolor{comment}{//\ This\ library\ currently\ uses\ the\ Skyline\ Bottom-\/Left\ algorithm.}}
+\DoxyCodeLine{00025\ \textcolor{comment}{//}}
+\DoxyCodeLine{00026\ \textcolor{comment}{//\ Please\ note:\ better\ rectangle\ packers\ are\ welcome!\ Please}}
+\DoxyCodeLine{00027\ \textcolor{comment}{//\ implement\ them\ to\ the\ same\ API,\ but\ with\ a\ different\ init}}
+\DoxyCodeLine{00028\ \textcolor{comment}{//\ function.}}
+\DoxyCodeLine{00029\ \textcolor{comment}{//}}
+\DoxyCodeLine{00030\ \textcolor{comment}{//\ Credits}}
+\DoxyCodeLine{00031\ \textcolor{comment}{//}}
+\DoxyCodeLine{00032\ \textcolor{comment}{//\ \ Library}}
+\DoxyCodeLine{00033\ \textcolor{comment}{//\ \ \ \ Sean\ Barrett}}
+\DoxyCodeLine{00034\ \textcolor{comment}{//\ \ Minor\ features}}
+\DoxyCodeLine{00035\ \textcolor{comment}{//\ \ \ \ Martins\ Mozeiko}}
+\DoxyCodeLine{00036\ \textcolor{comment}{//\ \ \ \ github:IntellectualKitty}}
+\DoxyCodeLine{00037\ \textcolor{comment}{//}}
+\DoxyCodeLine{00038\ \textcolor{comment}{//\ \ Bugfixes\ /\ warning\ fixes}}
+\DoxyCodeLine{00039\ \textcolor{comment}{//\ \ \ \ Jeremy\ Jaussaud}}
+\DoxyCodeLine{00040\ \textcolor{comment}{//\ \ \ \ Fabian\ Giesen}}
+\DoxyCodeLine{00041\ \textcolor{comment}{//}}
+\DoxyCodeLine{00042\ \textcolor{comment}{//\ Version\ history:}}
+\DoxyCodeLine{00043\ \textcolor{comment}{//}}
+\DoxyCodeLine{00044\ \textcolor{comment}{//\ \ \ \ \ 1.01\ \ (2021-\/07-\/11)\ \ always\ use\ large\ rect\ mode,\ expose\ STBRP\_\_MAXVAL\ in\ public\ section}}
+\DoxyCodeLine{00045\ \textcolor{comment}{//\ \ \ \ \ 1.00\ \ (2019-\/02-\/25)\ \ avoid\ small\ space\ waste;\ gracefully\ fail\ too-\/wide\ rectangles}}
+\DoxyCodeLine{00046\ \textcolor{comment}{//\ \ \ \ \ 0.99\ \ (2019-\/02-\/07)\ \ warning\ fixes}}
+\DoxyCodeLine{00047\ \textcolor{comment}{//\ \ \ \ \ 0.11\ \ (2017-\/03-\/03)\ \ return\ packing\ success/fail\ result}}
+\DoxyCodeLine{00048\ \textcolor{comment}{//\ \ \ \ \ 0.10\ \ (2016-\/10-\/25)\ \ remove\ cast-\/away-\/const\ to\ avoid\ warnings}}
+\DoxyCodeLine{00049\ \textcolor{comment}{//\ \ \ \ \ 0.09\ \ (2016-\/08-\/27)\ \ fix\ compiler\ warnings}}
+\DoxyCodeLine{00050\ \textcolor{comment}{//\ \ \ \ \ 0.08\ \ (2015-\/09-\/13)\ \ really\ fix\ bug\ with\ empty\ rects\ (w=0\ or\ h=0)}}
+\DoxyCodeLine{00051\ \textcolor{comment}{//\ \ \ \ \ 0.07\ \ (2015-\/09-\/13)\ \ fix\ bug\ with\ empty\ rects\ (w=0\ or\ h=0)}}
+\DoxyCodeLine{00052\ \textcolor{comment}{//\ \ \ \ \ 0.06\ \ (2015-\/04-\/15)\ \ added\ STBRP\_SORT\ to\ allow\ replacing\ qsort}}
+\DoxyCodeLine{00053\ \textcolor{comment}{//\ \ \ \ \ 0.05:\ \ added\ STBRP\_ASSERT\ to\ allow\ replacing\ assert}}
+\DoxyCodeLine{00054\ \textcolor{comment}{//\ \ \ \ \ 0.04:\ \ fixed\ minor\ bug\ in\ STBRP\_LARGE\_RECTS\ support}}
+\DoxyCodeLine{00055\ \textcolor{comment}{//\ \ \ \ \ 0.01:\ \ initial\ release}}
+\DoxyCodeLine{00056\ \textcolor{comment}{//}}
+\DoxyCodeLine{00057\ \textcolor{comment}{//\ LICENSE}}
+\DoxyCodeLine{00058\ \textcolor{comment}{//}}
+\DoxyCodeLine{00059\ \textcolor{comment}{//\ \ \ See\ end\ of\ file\ for\ license\ information.}}
+\DoxyCodeLine{00060\ }
+\DoxyCodeLine{00062\ \textcolor{comment}{//}}
+\DoxyCodeLine{00063\ \textcolor{comment}{//\ \ \ \ \ \ \ INCLUDE\ SECTION}}
+\DoxyCodeLine{00064\ \textcolor{comment}{//}}
+\DoxyCodeLine{00065\ }
+\DoxyCodeLine{00066\ \textcolor{preprocessor}{\#ifndef\ STB\_INCLUDE\_STB\_RECT\_PACK\_H}}
+\DoxyCodeLine{00067\ \textcolor{preprocessor}{\#define\ STB\_INCLUDE\_STB\_RECT\_PACK\_H}}
+\DoxyCodeLine{00068\ }
+\DoxyCodeLine{00069\ \textcolor{preprocessor}{\#define\ STB\_RECT\_PACK\_VERSION\ \ 1}}
+\DoxyCodeLine{00070\ }
+\DoxyCodeLine{00071\ \textcolor{preprocessor}{\#ifdef\ STBRP\_STATIC}}
+\DoxyCodeLine{00072\ \textcolor{preprocessor}{\#define\ STBRP\_DEF\ static}}
+\DoxyCodeLine{00073\ \textcolor{preprocessor}{\#else}}
+\DoxyCodeLine{00074\ \textcolor{preprocessor}{\#define\ STBRP\_DEF\ extern}}
+\DoxyCodeLine{00075\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00076\ }
+\DoxyCodeLine{00077\ \textcolor{preprocessor}{\#ifdef\ \_\_cplusplus}}
+\DoxyCodeLine{00078\ \textcolor{keyword}{extern}\ \textcolor{stringliteral}{"{}C"{}}\ \{}
+\DoxyCodeLine{00079\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00080\ }
+\DoxyCodeLine{00081\ \textcolor{keyword}{typedef}\ \textcolor{keyword}{struct\ }\mbox{\hyperlink{structstbrp__context}{stbrp\_context}}\ \mbox{\hyperlink{structstbrp__context}{stbrp\_context}};}
+\DoxyCodeLine{00082\ \textcolor{keyword}{typedef}\ \textcolor{keyword}{struct\ }\mbox{\hyperlink{structstbrp__node}{stbrp\_node}}\ \ \ \ \mbox{\hyperlink{structstbrp__node}{stbrp\_node}};}
+\DoxyCodeLine{00083\ \textcolor{keyword}{typedef}\ \textcolor{keyword}{struct\ }\mbox{\hyperlink{structstbrp__rect}{stbrp\_rect}}\ \ \ \ \mbox{\hyperlink{structstbrp__rect}{stbrp\_rect}};}
+\DoxyCodeLine{00084\ }
+\DoxyCodeLine{00085\ \textcolor{keyword}{typedef}\ \textcolor{keywordtype}{int}\ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{_classes_2lib_2external_2stb__rect__pack_8h_a4a396a45893c12de32e2d598abd6b302}{stbrp\_coord}};}
+\DoxyCodeLine{00086\ }
+\DoxyCodeLine{00087\ \textcolor{preprocessor}{\#define\ STBRP\_\_MAXVAL\ \ 0x7fffffff}}
+\DoxyCodeLine{00088\ \textcolor{comment}{//\ Mostly\ for\ internal\ use,\ but\ this\ is\ the\ maximum\ supported\ coordinate\ value.}}
+\DoxyCodeLine{00089\ }
+\DoxyCodeLine{00090\ \mbox{\hyperlink{_classes_2lib_2external_2stb__rect__pack_8h_a0b73f2d2521fb81afc056a823e3ca753}{STBRP\_DEF}}\ \textcolor{keywordtype}{int}\ \mbox{\hyperlink{_classes_2lib_2external_2stb__rect__pack_8h_af038ae1b98573f24736c9a3eed0478ba}{stbrp\_pack\_rects}}\ (\mbox{\hyperlink{structstbrp__context}{stbrp\_context}}\ *context,\ \mbox{\hyperlink{structstbrp__rect}{stbrp\_rect}}\ *\mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_ac34ca70e63c2ed89e7bf6ba3b4b62f1b}{rects}},\ \textcolor{keywordtype}{int}\ num\_rects);}
+\DoxyCodeLine{00091\ \textcolor{comment}{//\ Assign\ packed\ locations\ to\ rectangles.\ The\ rectangles\ are\ of\ type}}
+\DoxyCodeLine{00092\ \textcolor{comment}{//\ 'stbrp\_rect'\ defined\ below,\ stored\ in\ the\ array\ 'rects',\ and\ there}}
+\DoxyCodeLine{00093\ \textcolor{comment}{//\ are\ 'num\_rects'\ many\ of\ them.}}
+\DoxyCodeLine{00094\ \textcolor{comment}{//}}
+\DoxyCodeLine{00095\ \textcolor{comment}{//\ Rectangles\ which\ are\ successfully\ packed\ have\ the\ 'was\_packed'\ flag}}
+\DoxyCodeLine{00096\ \textcolor{comment}{//\ set\ to\ a\ non-\/zero\ value\ and\ 'x'\ and\ 'y'\ store\ the\ minimum\ location}}
+\DoxyCodeLine{00097\ \textcolor{comment}{//\ on\ each\ axis\ (i.e.\ bottom-\/left\ in\ cartesian\ coordinates,\ top-\/left}}
+\DoxyCodeLine{00098\ \textcolor{comment}{//\ if\ you\ imagine\ y\ increasing\ downwards).\ Rectangles\ which\ do\ not\ fit}}
+\DoxyCodeLine{00099\ \textcolor{comment}{//\ have\ the\ 'was\_packed'\ flag\ set\ to\ 0.}}
+\DoxyCodeLine{00100\ \textcolor{comment}{//}}
+\DoxyCodeLine{00101\ \textcolor{comment}{//\ You\ should\ not\ try\ to\ access\ the\ 'rects'\ array\ from\ another\ thread}}
+\DoxyCodeLine{00102\ \textcolor{comment}{//\ while\ this\ function\ is\ running,\ as\ the\ function\ temporarily\ reorders}}
+\DoxyCodeLine{00103\ \textcolor{comment}{//\ the\ array\ while\ it\ executes.}}
+\DoxyCodeLine{00104\ \textcolor{comment}{//}}
+\DoxyCodeLine{00105\ \textcolor{comment}{//\ To\ pack\ into\ another\ rectangle,\ you\ need\ to\ call\ stbrp\_init\_target}}
+\DoxyCodeLine{00106\ \textcolor{comment}{//\ again.\ To\ continue\ packing\ into\ the\ same\ rectangle,\ you\ can\ call}}
+\DoxyCodeLine{00107\ \textcolor{comment}{//\ this\ function\ again.\ Calling\ this\ multiple\ times\ with\ multiple\ rect}}
+\DoxyCodeLine{00108\ \textcolor{comment}{//\ arrays\ will\ probably\ produce\ worse\ packing\ results\ than\ calling\ it}}
+\DoxyCodeLine{00109\ \textcolor{comment}{//\ a\ single\ time\ with\ the\ full\ rectangle\ array,\ but\ the\ option\ is}}
+\DoxyCodeLine{00110\ \textcolor{comment}{//\ available.}}
+\DoxyCodeLine{00111\ \textcolor{comment}{//}}
+\DoxyCodeLine{00112\ \textcolor{comment}{//\ The\ function\ returns\ 1\ if\ all\ of\ the\ rectangles\ were\ successfully}}
+\DoxyCodeLine{00113\ \textcolor{comment}{//\ packed\ and\ 0\ otherwise.}}
+\DoxyCodeLine{00114\ }
+\DoxyCodeLine{00115\ \textcolor{keyword}{struct\ }\mbox{\hyperlink{structstbrp__rect}{stbrp\_rect}}}
+\DoxyCodeLine{00116\ \{}
+\DoxyCodeLine{00117\ \ \ \ \textcolor{comment}{//\ reserved\ for\ your\ use:}}
+\DoxyCodeLine{00118\ \ \ \ \textcolor{keywordtype}{int}\ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{structstbrp__rect_a92da8626bc99df041c0c3bfd01c25f7a}{id}};}
+\DoxyCodeLine{00119\ }
+\DoxyCodeLine{00120\ \ \ \ \textcolor{comment}{//\ input:}}
+\DoxyCodeLine{00121\ \ \ \ \mbox{\hyperlink{_classes_2lib_2external_2stb__rect__pack_8h_a4a396a45893c12de32e2d598abd6b302}{stbrp\_coord}}\ \ \ \ \mbox{\hyperlink{structstbrp__rect_a248d43f1eb979c1e7b92ba6df431dec5}{w}},\ \mbox{\hyperlink{structstbrp__rect_af68de2dadc7972b7c089d5e0c0558398}{h}};}
+\DoxyCodeLine{00122\ }
+\DoxyCodeLine{00123\ \ \ \ \textcolor{comment}{//\ output:}}
+\DoxyCodeLine{00124\ \ \ \ \mbox{\hyperlink{_classes_2lib_2external_2stb__rect__pack_8h_a4a396a45893c12de32e2d598abd6b302}{stbrp\_coord}}\ \ \ \ \mbox{\hyperlink{structstbrp__rect_a4cc623a3e29f0bc0d3375f6645c84d18}{x}},\ \mbox{\hyperlink{structstbrp__rect_ae3034c1fbf86043b568f5a4dddf946fa}{y}};}
+\DoxyCodeLine{00125\ \ \ \ \textcolor{keywordtype}{int}\ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{structstbrp__rect_a74ba347755ce17f2f8a2ea66c612af49}{was\_packed}};\ \ \textcolor{comment}{//\ non-\/zero\ if\ valid\ packing}}
+\DoxyCodeLine{00126\ }
+\DoxyCodeLine{00127\ \};\ \textcolor{comment}{//\ 16\ bytes,\ nominally}}
+\DoxyCodeLine{00128\ }
+\DoxyCodeLine{00129\ }
+\DoxyCodeLine{00130\ \mbox{\hyperlink{_classes_2lib_2external_2stb__rect__pack_8h_a0b73f2d2521fb81afc056a823e3ca753}{STBRP\_DEF}}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{_classes_2lib_2external_2stb__rect__pack_8h_a8b32f5ad458f614f5d419ef26cef5b3c}{stbrp\_init\_target}}\ (\mbox{\hyperlink{structstbrp__context}{stbrp\_context}}\ *context,\ \textcolor{keywordtype}{int}\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_a3ce386e55bbeb900c1b23e064b89bd04}{width}},\ \textcolor{keywordtype}{int}\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_aedd0ea77029b98ce91e47c19addcb68f}{height}},\ \mbox{\hyperlink{structstbrp__node}{stbrp\_node}}\ *nodes,\ \textcolor{keywordtype}{int}\ num\_nodes);}
+\DoxyCodeLine{00131\ \textcolor{comment}{//\ Initialize\ a\ rectangle\ packer\ to:}}
+\DoxyCodeLine{00132\ \textcolor{comment}{//\ \ \ \ pack\ a\ rectangle\ that\ is\ 'width'\ by\ 'height'\ in\ dimensions}}
+\DoxyCodeLine{00133\ \textcolor{comment}{//\ \ \ \ using\ temporary\ storage\ provided\ by\ the\ array\ 'nodes',\ which\ is\ 'num\_nodes'\ long}}
+\DoxyCodeLine{00134\ \textcolor{comment}{//}}
+\DoxyCodeLine{00135\ \textcolor{comment}{//\ You\ must\ call\ this\ function\ every\ time\ you\ start\ packing\ into\ a\ new\ target.}}
+\DoxyCodeLine{00136\ \textcolor{comment}{//}}
+\DoxyCodeLine{00137\ \textcolor{comment}{//\ There\ is\ no\ "{}shutdown"{}\ function.\ The\ 'nodes'\ memory\ must\ stay\ valid\ for}}
+\DoxyCodeLine{00138\ \textcolor{comment}{//\ the\ following\ stbrp\_pack\_rects()\ call\ (or\ calls),\ but\ can\ be\ freed\ after}}
+\DoxyCodeLine{00139\ \textcolor{comment}{//\ the\ call\ (or\ calls)\ finish.}}
+\DoxyCodeLine{00140\ \textcolor{comment}{//}}
+\DoxyCodeLine{00141\ \textcolor{comment}{//\ Note:\ to\ guarantee\ best\ results,\ either:}}
+\DoxyCodeLine{00142\ \textcolor{comment}{//\ \ \ \ \ \ \ 1.\ make\ sure\ 'num\_nodes'\ >=\ 'width'}}
+\DoxyCodeLine{00143\ \textcolor{comment}{//\ \ \ or\ \ 2.\ call\ stbrp\_allow\_out\_of\_mem()\ defined\ below\ with\ 'allow\_out\_of\_mem\ =\ 1'}}
+\DoxyCodeLine{00144\ \textcolor{comment}{//}}
+\DoxyCodeLine{00145\ \textcolor{comment}{//\ If\ you\ don't\ do\ either\ of\ the\ above\ things,\ widths\ will\ be\ quantized\ to\ multiples}}
+\DoxyCodeLine{00146\ \textcolor{comment}{//\ of\ small\ integers\ to\ guarantee\ the\ algorithm\ doesn't\ run\ out\ of\ temporary\ storage.}}
+\DoxyCodeLine{00147\ \textcolor{comment}{//}}
+\DoxyCodeLine{00148\ \textcolor{comment}{//\ If\ you\ do\ \#2,\ then\ the\ non-\/quantized\ algorithm\ will\ be\ used,\ but\ the\ algorithm}}
+\DoxyCodeLine{00149\ \textcolor{comment}{//\ may\ run\ out\ of\ temporary\ storage\ and\ be\ unable\ to\ pack\ some\ rectangles.}}
+\DoxyCodeLine{00150\ }
+\DoxyCodeLine{00151\ \mbox{\hyperlink{_classes_2lib_2external_2stb__rect__pack_8h_a0b73f2d2521fb81afc056a823e3ca753}{STBRP\_DEF}}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{_classes_2lib_2external_2stb__rect__pack_8h_a1babd70b223e571305fd9753a83a4fda}{stbrp\_setup\_allow\_out\_of\_mem}}\ (\mbox{\hyperlink{structstbrp__context}{stbrp\_context}}\ *context,\ \textcolor{keywordtype}{int}\ allow\_out\_of\_mem);}
+\DoxyCodeLine{00152\ \textcolor{comment}{//\ Optionally\ call\ this\ function\ after\ init\ but\ before\ doing\ any\ packing\ to}}
+\DoxyCodeLine{00153\ \textcolor{comment}{//\ change\ the\ handling\ of\ the\ out-\/of-\/temp-\/memory\ scenario,\ described\ above.}}
+\DoxyCodeLine{00154\ \textcolor{comment}{//\ If\ you\ call\ init\ again,\ this\ will\ be\ reset\ to\ the\ default\ (false).}}
+\DoxyCodeLine{00155\ }
+\DoxyCodeLine{00156\ }
+\DoxyCodeLine{00157\ \mbox{\hyperlink{_classes_2lib_2external_2stb__rect__pack_8h_a0b73f2d2521fb81afc056a823e3ca753}{STBRP\_DEF}}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{_classes_2lib_2external_2stb__rect__pack_8h_a5a8223866c146933da3e152066bf61a1}{stbrp\_setup\_heuristic}}\ (\mbox{\hyperlink{structstbrp__context}{stbrp\_context}}\ *context,\ \textcolor{keywordtype}{int}\ heuristic);}
+\DoxyCodeLine{00158\ \textcolor{comment}{//\ Optionally\ select\ which\ packing\ heuristic\ the\ library\ should\ use.\ Different}}
+\DoxyCodeLine{00159\ \textcolor{comment}{//\ heuristics\ will\ produce\ better/worse\ results\ for\ different\ data\ sets.}}
+\DoxyCodeLine{00160\ \textcolor{comment}{//\ If\ you\ call\ init\ again,\ this\ will\ be\ reset\ to\ the\ default.}}
+\DoxyCodeLine{00161\ }
+\DoxyCodeLine{00162\ \textcolor{keyword}{enum}}
+\DoxyCodeLine{00163\ \{}
+\DoxyCodeLine{00164\ \ \ \ \mbox{\hyperlink{_classes_2lib_2external_2stb__rect__pack_8h_a85c7862086c1f92e4fb4108e176d8140a5e4dd0b1cbee654bbfeebc5311f03525}{STBRP\_HEURISTIC\_Skyline\_default}}=0,}
+\DoxyCodeLine{00165\ \ \ \ \mbox{\hyperlink{_classes_2lib_2external_2stb__rect__pack_8h_a85c7862086c1f92e4fb4108e176d8140a13530b067fb1f9707dc0f9d51f8b074a}{STBRP\_HEURISTIC\_Skyline\_BL\_sortHeight}}\ =\ \mbox{\hyperlink{_classes_2lib_2external_2stb__rect__pack_8h_a85c7862086c1f92e4fb4108e176d8140a5e4dd0b1cbee654bbfeebc5311f03525}{STBRP\_HEURISTIC\_Skyline\_default}},}
+\DoxyCodeLine{00166\ \ \ \ \mbox{\hyperlink{_classes_2lib_2external_2stb__rect__pack_8h_a85c7862086c1f92e4fb4108e176d8140a11d62749c4405a231a6fd1dd9d46615c}{STBRP\_HEURISTIC\_Skyline\_BF\_sortHeight}}}
+\DoxyCodeLine{00167\ \};}
+\DoxyCodeLine{00168\ }
+\DoxyCodeLine{00169\ }
+\DoxyCodeLine{00171\ \textcolor{comment}{//}}
+\DoxyCodeLine{00172\ \textcolor{comment}{//\ the\ details\ of\ the\ following\ structures\ don't\ matter\ to\ you,\ but\ they\ must}}
+\DoxyCodeLine{00173\ \textcolor{comment}{//\ be\ visible\ so\ you\ can\ handle\ the\ memory\ allocations\ for\ them}}
+\DoxyCodeLine{00174\ }
+\DoxyCodeLine{00175\ \textcolor{keyword}{struct\ }\mbox{\hyperlink{structstbrp__node}{stbrp\_node}}}
+\DoxyCodeLine{00176\ \{}
+\DoxyCodeLine{00177\ \ \ \ \mbox{\hyperlink{_classes_2lib_2external_2stb__rect__pack_8h_a4a396a45893c12de32e2d598abd6b302}{stbrp\_coord}}\ \ \mbox{\hyperlink{structstbrp__node_a45ab31a88025db27d08040d715b129ea}{x}},\mbox{\hyperlink{structstbrp__node_ad0415cb102a4f37aa45073653307e67e}{y}};}
+\DoxyCodeLine{00178\ \ \ \ \mbox{\hyperlink{structstbrp__node}{stbrp\_node}}\ \ *\mbox{\hyperlink{structstbrp__node_a3c4a162b9ebf156eeae37a63ac587ac7}{next}};}
+\DoxyCodeLine{00179\ \};}
+\DoxyCodeLine{00180\ }
+\DoxyCodeLine{00181\ \textcolor{keyword}{struct\ }\mbox{\hyperlink{structstbrp__context}{stbrp\_context}}}
+\DoxyCodeLine{00182\ \{}
+\DoxyCodeLine{00183\ \ \ \ \textcolor{keywordtype}{int}\ \mbox{\hyperlink{structstbrp__context_a70cfcb2044ce8397cc440d28b30c09b2}{width}};}
+\DoxyCodeLine{00184\ \ \ \ \textcolor{keywordtype}{int}\ \mbox{\hyperlink{structstbrp__context_af3715a6f3faecfb4fac8f6ccbb71f9c7}{height}};}
+\DoxyCodeLine{00185\ \ \ \ \textcolor{keywordtype}{int}\ \mbox{\hyperlink{structstbrp__context_ae36053e2001a725aec2b5756dc990481}{align}};}
+\DoxyCodeLine{00186\ \ \ \ \textcolor{keywordtype}{int}\ \mbox{\hyperlink{structstbrp__context_a007509feee322404083034e4c2d3dc5d}{init\_mode}};}
+\DoxyCodeLine{00187\ \ \ \ \textcolor{keywordtype}{int}\ \mbox{\hyperlink{structstbrp__context_a4b61a7f94e50a54c075e2a8f99f6503a}{heuristic}};}
+\DoxyCodeLine{00188\ \ \ \ \textcolor{keywordtype}{int}\ \mbox{\hyperlink{structstbrp__context_afa8105d4ef6d3e0ae5aaf8e1ed4b2c58}{num\_nodes}};}
+\DoxyCodeLine{00189\ \ \ \ \mbox{\hyperlink{structstbrp__node}{stbrp\_node}}\ *\mbox{\hyperlink{structstbrp__context_a920d5f646912f75e3c87c652210ab2ba}{active\_head}};}
+\DoxyCodeLine{00190\ \ \ \ \mbox{\hyperlink{structstbrp__node}{stbrp\_node}}\ *\mbox{\hyperlink{structstbrp__context_a8cfe2d49dad3d7af0951e04cc1ca7369}{free\_head}};}
+\DoxyCodeLine{00191\ \ \ \ \mbox{\hyperlink{structstbrp__node}{stbrp\_node}}\ \mbox{\hyperlink{structstbrp__context_ac16f33a537bfa13a664cfb50e3aab37e}{extra}}[2];\ \textcolor{comment}{//\ we\ allocate\ two\ extra\ nodes\ so\ optimal\ user-\/node-\/count\ is\ 'width'\ not\ 'width+2'}}
+\DoxyCodeLine{00192\ \};}
+\DoxyCodeLine{00193\ }
+\DoxyCodeLine{00194\ \textcolor{preprocessor}{\#ifdef\ \_\_cplusplus}}
+\DoxyCodeLine{00195\ \}}
+\DoxyCodeLine{00196\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00197\ }
+\DoxyCodeLine{00198\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00199\ }
+\DoxyCodeLine{00201\ \textcolor{comment}{//}}
+\DoxyCodeLine{00202\ \textcolor{comment}{//\ \ \ \ \ IMPLEMENTATION\ SECTION}}
+\DoxyCodeLine{00203\ \textcolor{comment}{//}}
+\DoxyCodeLine{00204\ }
+\DoxyCodeLine{00205\ \textcolor{preprocessor}{\#ifdef\ STB\_RECT\_PACK\_IMPLEMENTATION}}
+\DoxyCodeLine{00206\ \textcolor{preprocessor}{\#ifndef\ STBRP\_SORT}}
+\DoxyCodeLine{00207\ \textcolor{preprocessor}{\#include\ <stdlib.h>}}
+\DoxyCodeLine{00208\ \textcolor{preprocessor}{\#define\ STBRP\_SORT\ qsort}}
+\DoxyCodeLine{00209\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00210\ }
+\DoxyCodeLine{00211\ \textcolor{preprocessor}{\#ifndef\ STBRP\_ASSERT}}
+\DoxyCodeLine{00212\ \textcolor{preprocessor}{\#include\ <assert.h>}}
+\DoxyCodeLine{00213\ \textcolor{preprocessor}{\#define\ STBRP\_ASSERT\ assert}}
+\DoxyCodeLine{00214\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00215\ }
+\DoxyCodeLine{00216\ \textcolor{preprocessor}{\#ifdef\ \_MSC\_VER}}
+\DoxyCodeLine{00217\ \textcolor{preprocessor}{\#define\ STBRP\_\_NOTUSED(v)\ \ (void)(v)}}
+\DoxyCodeLine{00218\ \textcolor{preprocessor}{\#define\ STBRP\_\_CDECL\ \ \ \ \ \ \ \_\_cdecl}}
+\DoxyCodeLine{00219\ \textcolor{preprocessor}{\#else}}
+\DoxyCodeLine{00220\ \textcolor{preprocessor}{\#define\ STBRP\_\_NOTUSED(v)\ \ (void)sizeof(v)}}
+\DoxyCodeLine{00221\ \textcolor{preprocessor}{\#define\ STBRP\_\_CDECL}}
+\DoxyCodeLine{00222\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00223\ }
+\DoxyCodeLine{00224\ \textcolor{keyword}{enum}}
+\DoxyCodeLine{00225\ \{}
+\DoxyCodeLine{00226\ \ \ \ STBRP\_\_INIT\_skyline\ =\ 1}
+\DoxyCodeLine{00227\ \};}
+\DoxyCodeLine{00228\ }
+\DoxyCodeLine{00229\ \mbox{\hyperlink{_classes_2lib_2external_2stb__rect__pack_8h_a0b73f2d2521fb81afc056a823e3ca753}{STBRP\_DEF}}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{_classes_2lib_2external_2stb__rect__pack_8h_a5a8223866c146933da3e152066bf61a1}{stbrp\_setup\_heuristic}}(\mbox{\hyperlink{structstbrp__context}{stbrp\_context}}\ *context,\ \textcolor{keywordtype}{int}\ heuristic)}
+\DoxyCodeLine{00230\ \{}
+\DoxyCodeLine{00231\ \ \ \ \textcolor{keywordflow}{switch}\ (context-\/>\mbox{\hyperlink{structstbrp__context_a007509feee322404083034e4c2d3dc5d}{init\_mode}})\ \{}
+\DoxyCodeLine{00232\ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ STBRP\_\_INIT\_skyline:}
+\DoxyCodeLine{00233\ \ \ \ \ \ \ \ \ \ STBRP\_ASSERT(heuristic\ ==\ \mbox{\hyperlink{_classes_2lib_2external_2stb__rect__pack_8h_a85c7862086c1f92e4fb4108e176d8140a13530b067fb1f9707dc0f9d51f8b074a}{STBRP\_HEURISTIC\_Skyline\_BL\_sortHeight}}\ ||\ heuristic\ ==\ \mbox{\hyperlink{_classes_2lib_2external_2stb__rect__pack_8h_a85c7862086c1f92e4fb4108e176d8140a11d62749c4405a231a6fd1dd9d46615c}{STBRP\_HEURISTIC\_Skyline\_BF\_sortHeight}});}
+\DoxyCodeLine{00234\ \ \ \ \ \ \ \ \ \ context-\/>\mbox{\hyperlink{structstbrp__context_a4b61a7f94e50a54c075e2a8f99f6503a}{heuristic}}\ =\ \mbox{\hyperlink{namespace____gnu__parallel_abfff682f83a1eacf1b43ad2b33a1954fa7ebd97084fc43d5c74ee94f143b01a10}{heuristic}};}
+\DoxyCodeLine{00235\ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{00236\ \ \ \ \ \ \ \textcolor{keywordflow}{default}:}
+\DoxyCodeLine{00237\ \ \ \ \ \ \ \ \ \ STBRP\_ASSERT(0);}
+\DoxyCodeLine{00238\ \ \ \ \}}
+\DoxyCodeLine{00239\ \}}
+\DoxyCodeLine{00240\ }
+\DoxyCodeLine{00241\ \mbox{\hyperlink{_classes_2lib_2external_2stb__rect__pack_8h_a0b73f2d2521fb81afc056a823e3ca753}{STBRP\_DEF}}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{_classes_2lib_2external_2stb__rect__pack_8h_a1babd70b223e571305fd9753a83a4fda}{stbrp\_setup\_allow\_out\_of\_mem}}(\mbox{\hyperlink{structstbrp__context}{stbrp\_context}}\ *context,\ \textcolor{keywordtype}{int}\ allow\_out\_of\_mem)}
+\DoxyCodeLine{00242\ \{}
+\DoxyCodeLine{00243\ \ \ \ \textcolor{keywordflow}{if}\ (allow\_out\_of\_mem)}
+\DoxyCodeLine{00244\ \ \ \ \ \ \ \textcolor{comment}{//\ if\ it's\ ok\ to\ run\ out\ of\ memory,\ then\ don't\ bother\ aligning\ them;}}
+\DoxyCodeLine{00245\ \ \ \ \ \ \ \textcolor{comment}{//\ this\ gives\ better\ packing,\ but\ may\ fail\ due\ to\ OOM\ (even\ though}}
+\DoxyCodeLine{00246\ \ \ \ \ \ \ \textcolor{comment}{//\ the\ rectangles\ easily\ fit).\ @TODO\ a\ smarter\ approach\ would\ be\ to\ only}}
+\DoxyCodeLine{00247\ \ \ \ \ \ \ \textcolor{comment}{//\ quantize\ once\ we've\ hit\ OOM,\ then\ we\ could\ get\ rid\ of\ this\ parameter.}}
+\DoxyCodeLine{00248\ \ \ \ \ \ \ context-\/>\mbox{\hyperlink{structstbrp__context_ae36053e2001a725aec2b5756dc990481}{align}}\ =\ 1;}
+\DoxyCodeLine{00249\ \ \ \ \textcolor{keywordflow}{else}\ \{}
+\DoxyCodeLine{00250\ \ \ \ \ \ \ \textcolor{comment}{//\ if\ it's\ not\ ok\ to\ run\ out\ of\ memory,\ then\ quantize\ the\ widths}}
+\DoxyCodeLine{00251\ \ \ \ \ \ \ \textcolor{comment}{//\ so\ that\ num\_nodes\ is\ always\ enough\ nodes.}}
+\DoxyCodeLine{00252\ \ \ \ \ \ \ \textcolor{comment}{//}}
+\DoxyCodeLine{00253\ \ \ \ \ \ \ \textcolor{comment}{//\ I.e.\ num\_nodes\ *\ align\ >=\ width}}
+\DoxyCodeLine{00254\ \ \ \ \ \ \ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ align\ >=\ width\ /\ num\_nodes}}
+\DoxyCodeLine{00255\ \ \ \ \ \ \ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ align\ =\ ceil(width/num\_nodes)}}
+\DoxyCodeLine{00256\ }
+\DoxyCodeLine{00257\ \ \ \ \ \ \ context-\/>\mbox{\hyperlink{structstbrp__context_ae36053e2001a725aec2b5756dc990481}{align}}\ =\ (context-\/>\mbox{\hyperlink{structstbrp__context_a70cfcb2044ce8397cc440d28b30c09b2}{width}}\ +\ context-\/>\mbox{\hyperlink{structstbrp__context_afa8105d4ef6d3e0ae5aaf8e1ed4b2c58}{num\_nodes}}-\/1)\ /\ context-\/>\mbox{\hyperlink{structstbrp__context_afa8105d4ef6d3e0ae5aaf8e1ed4b2c58}{num\_nodes}};}
+\DoxyCodeLine{00258\ \ \ \ \}}
+\DoxyCodeLine{00259\ \}}
+\DoxyCodeLine{00260\ }
+\DoxyCodeLine{00261\ \mbox{\hyperlink{_classes_2lib_2external_2stb__rect__pack_8h_a0b73f2d2521fb81afc056a823e3ca753}{STBRP\_DEF}}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{_classes_2lib_2external_2stb__rect__pack_8h_a8b32f5ad458f614f5d419ef26cef5b3c}{stbrp\_init\_target}}(\mbox{\hyperlink{structstbrp__context}{stbrp\_context}}\ *context,\ \textcolor{keywordtype}{int}\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_a3ce386e55bbeb900c1b23e064b89bd04}{width}},\ \textcolor{keywordtype}{int}\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_aedd0ea77029b98ce91e47c19addcb68f}{height}},\ \mbox{\hyperlink{structstbrp__node}{stbrp\_node}}\ *nodes,\ \textcolor{keywordtype}{int}\ num\_nodes)}
+\DoxyCodeLine{00262\ \{}
+\DoxyCodeLine{00263\ \ \ \ \textcolor{keywordtype}{int}\ i;}
+\DoxyCodeLine{00264\ }
+\DoxyCodeLine{00265\ \ \ \ \textcolor{keywordflow}{for}\ (i=0;\ i\ <\ num\_nodes-\/1;\ ++i)}
+\DoxyCodeLine{00266\ \ \ \ \ \ \ nodes[i].next\ =\ \&nodes[i+1];}
+\DoxyCodeLine{00267\ \ \ \ nodes[i].\mbox{\hyperlink{structstbrp__node_a3c4a162b9ebf156eeae37a63ac587ac7}{next}}\ =\ \mbox{\hyperlink{_classes_2lib_2external_2miniaudio_8h_a070d2ce7b6bb7e5c05602aa8c308d0c4}{NULL}};}
+\DoxyCodeLine{00268\ \ \ \ context-\/>\mbox{\hyperlink{structstbrp__context_a007509feee322404083034e4c2d3dc5d}{init\_mode}}\ =\ STBRP\_\_INIT\_skyline;}
+\DoxyCodeLine{00269\ \ \ \ context-\/>\mbox{\hyperlink{structstbrp__context_a4b61a7f94e50a54c075e2a8f99f6503a}{heuristic}}\ =\ \mbox{\hyperlink{_classes_2lib_2external_2stb__rect__pack_8h_a85c7862086c1f92e4fb4108e176d8140a5e4dd0b1cbee654bbfeebc5311f03525}{STBRP\_HEURISTIC\_Skyline\_default}};}
+\DoxyCodeLine{00270\ \ \ \ context-\/>\mbox{\hyperlink{structstbrp__context_a8cfe2d49dad3d7af0951e04cc1ca7369}{free\_head}}\ =\ \&nodes[0];}
+\DoxyCodeLine{00271\ \ \ \ context-\/>\mbox{\hyperlink{structstbrp__context_a920d5f646912f75e3c87c652210ab2ba}{active\_head}}\ =\ \&context-\/>\mbox{\hyperlink{structstbrp__context_ac16f33a537bfa13a664cfb50e3aab37e}{extra}}[0];}
+\DoxyCodeLine{00272\ \ \ \ context-\/>\mbox{\hyperlink{structstbrp__context_a70cfcb2044ce8397cc440d28b30c09b2}{width}}\ =\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_a3ce386e55bbeb900c1b23e064b89bd04}{width}};}
+\DoxyCodeLine{00273\ \ \ \ context-\/>\mbox{\hyperlink{structstbrp__context_af3715a6f3faecfb4fac8f6ccbb71f9c7}{height}}\ =\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_aedd0ea77029b98ce91e47c19addcb68f}{height}};}
+\DoxyCodeLine{00274\ \ \ \ context-\/>\mbox{\hyperlink{structstbrp__context_afa8105d4ef6d3e0ae5aaf8e1ed4b2c58}{num\_nodes}}\ =\ num\_nodes;}
+\DoxyCodeLine{00275\ \ \ \ \mbox{\hyperlink{_classes_2lib_2external_2stb__rect__pack_8h_a1babd70b223e571305fd9753a83a4fda}{stbrp\_setup\_allow\_out\_of\_mem}}(context,\ 0);}
+\DoxyCodeLine{00276\ }
+\DoxyCodeLine{00277\ \ \ \ \textcolor{comment}{//\ node\ 0\ is\ the\ full\ width,\ node\ 1\ is\ the\ sentinel\ (lets\ us\ not\ store\ width\ explicitly)}}
+\DoxyCodeLine{00278\ \ \ \ context-\/>\mbox{\hyperlink{structstbrp__context_ac16f33a537bfa13a664cfb50e3aab37e}{extra}}[0].\mbox{\hyperlink{structstbrp__node_a45ab31a88025db27d08040d715b129ea}{x}}\ =\ 0;}
+\DoxyCodeLine{00279\ \ \ \ context-\/>\mbox{\hyperlink{structstbrp__context_ac16f33a537bfa13a664cfb50e3aab37e}{extra}}[0].\mbox{\hyperlink{structstbrp__node_ad0415cb102a4f37aa45073653307e67e}{y}}\ =\ 0;}
+\DoxyCodeLine{00280\ \ \ \ context-\/>\mbox{\hyperlink{structstbrp__context_ac16f33a537bfa13a664cfb50e3aab37e}{extra}}[0].\mbox{\hyperlink{structstbrp__node_a3c4a162b9ebf156eeae37a63ac587ac7}{next}}\ =\ \&context-\/>\mbox{\hyperlink{structstbrp__context_ac16f33a537bfa13a664cfb50e3aab37e}{extra}}[1];}
+\DoxyCodeLine{00281\ \ \ \ context-\/>\mbox{\hyperlink{structstbrp__context_ac16f33a537bfa13a664cfb50e3aab37e}{extra}}[1].\mbox{\hyperlink{structstbrp__node_a45ab31a88025db27d08040d715b129ea}{x}}\ =\ (\mbox{\hyperlink{_classes_2lib_2external_2stb__rect__pack_8h_a4a396a45893c12de32e2d598abd6b302}{stbrp\_coord}})\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_a3ce386e55bbeb900c1b23e064b89bd04}{width}};}
+\DoxyCodeLine{00282\ \ \ \ context-\/>\mbox{\hyperlink{structstbrp__context_ac16f33a537bfa13a664cfb50e3aab37e}{extra}}[1].\mbox{\hyperlink{structstbrp__node_ad0415cb102a4f37aa45073653307e67e}{y}}\ =\ (1<<30);}
+\DoxyCodeLine{00283\ \ \ \ context-\/>\mbox{\hyperlink{structstbrp__context_ac16f33a537bfa13a664cfb50e3aab37e}{extra}}[1].\mbox{\hyperlink{structstbrp__node_a3c4a162b9ebf156eeae37a63ac587ac7}{next}}\ =\ \mbox{\hyperlink{_classes_2lib_2external_2miniaudio_8h_a070d2ce7b6bb7e5c05602aa8c308d0c4}{NULL}};}
+\DoxyCodeLine{00284\ \}}
+\DoxyCodeLine{00285\ }
+\DoxyCodeLine{00286\ \textcolor{comment}{//\ find\ minimum\ y\ position\ if\ it\ starts\ at\ x1}}
+\DoxyCodeLine{00287\ \textcolor{keyword}{static}\ \textcolor{keywordtype}{int}\ stbrp\_\_skyline\_find\_min\_y(\mbox{\hyperlink{structstbrp__context}{stbrp\_context}}\ *c,\ \mbox{\hyperlink{structstbrp__node}{stbrp\_node}}\ *\mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_ada771a798be00a696d20928c9a3371e7}{first}},\ \textcolor{keywordtype}{int}\ x0,\ \textcolor{keywordtype}{int}\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_a3ce386e55bbeb900c1b23e064b89bd04}{width}},\ \textcolor{keywordtype}{int}\ *pwaste)}
+\DoxyCodeLine{00288\ \{}
+\DoxyCodeLine{00289\ \ \ \ \mbox{\hyperlink{structstbrp__node}{stbrp\_node}}\ *node\ =\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_ada771a798be00a696d20928c9a3371e7}{first}};}
+\DoxyCodeLine{00290\ \ \ \ \textcolor{keywordtype}{int}\ x1\ =\ x0\ +\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_a3ce386e55bbeb900c1b23e064b89bd04}{width}};}
+\DoxyCodeLine{00291\ \ \ \ \textcolor{keywordtype}{int}\ min\_y,\ visited\_width,\ waste\_area;}
+\DoxyCodeLine{00292\ }
+\DoxyCodeLine{00293\ \ \ \ STBRP\_\_NOTUSED(c);}
+\DoxyCodeLine{00294\ }
+\DoxyCodeLine{00295\ \ \ \ STBRP\_ASSERT(\mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_ada771a798be00a696d20928c9a3371e7}{first}}-\/>x\ <=\ x0);}
+\DoxyCodeLine{00296\ }
+\DoxyCodeLine{00297\ \textcolor{preprocessor}{\ \ \ \#if\ 0}}
+\DoxyCodeLine{00298\ \ \ \ \textcolor{comment}{//\ skip\ in\ case\ we're\ past\ the\ node}}
+\DoxyCodeLine{00299\ \ \ \ \textcolor{keywordflow}{while}\ (node-\/>\mbox{\hyperlink{structstbrp__node_a3c4a162b9ebf156eeae37a63ac587ac7}{next}}-\/>\mbox{\hyperlink{structstbrp__node_a45ab31a88025db27d08040d715b129ea}{x}}\ <=\ x0)}
+\DoxyCodeLine{00300\ \ \ \ \ \ \ ++node;}
+\DoxyCodeLine{00301\ \textcolor{preprocessor}{\ \ \ \#else}}
+\DoxyCodeLine{00302\ \ \ \ STBRP\_ASSERT(node-\/>\mbox{\hyperlink{structstbrp__node_a3c4a162b9ebf156eeae37a63ac587ac7}{next}}-\/>\mbox{\hyperlink{structstbrp__node_a45ab31a88025db27d08040d715b129ea}{x}}\ >\ x0);\ \textcolor{comment}{//\ we\ ended\ up\ handling\ this\ in\ the\ caller\ for\ efficiency}}
+\DoxyCodeLine{00303\ \textcolor{preprocessor}{\ \ \ \#endif}}
+\DoxyCodeLine{00304\ }
+\DoxyCodeLine{00305\ \ \ \ STBRP\_ASSERT(node-\/>\mbox{\hyperlink{structstbrp__node_a45ab31a88025db27d08040d715b129ea}{x}}\ <=\ x0);}
+\DoxyCodeLine{00306\ }
+\DoxyCodeLine{00307\ \ \ \ min\_y\ =\ 0;}
+\DoxyCodeLine{00308\ \ \ \ waste\_area\ =\ 0;}
+\DoxyCodeLine{00309\ \ \ \ visited\_width\ =\ 0;}
+\DoxyCodeLine{00310\ \ \ \ \textcolor{keywordflow}{while}\ (node-\/>\mbox{\hyperlink{structstbrp__node_a45ab31a88025db27d08040d715b129ea}{x}}\ <\ x1)\ \{}
+\DoxyCodeLine{00311\ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (node-\/>\mbox{\hyperlink{structstbrp__node_ad0415cb102a4f37aa45073653307e67e}{y}}\ >\ min\_y)\ \{}
+\DoxyCodeLine{00312\ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ raise\ min\_y\ higher.}}
+\DoxyCodeLine{00313\ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ we've\ accounted\ for\ all\ waste\ up\ to\ min\_y,}}
+\DoxyCodeLine{00314\ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ but\ we'll\ now\ add\ more\ waste\ for\ everything\ we've\ visted}}
+\DoxyCodeLine{00315\ \ \ \ \ \ \ \ \ \ waste\_area\ +=\ visited\_width\ *\ (node-\/>\mbox{\hyperlink{structstbrp__node_ad0415cb102a4f37aa45073653307e67e}{y}}\ -\/\ min\_y);}
+\DoxyCodeLine{00316\ \ \ \ \ \ \ \ \ \ min\_y\ =\ node-\/>\mbox{\hyperlink{structstbrp__node_ad0415cb102a4f37aa45073653307e67e}{y}};}
+\DoxyCodeLine{00317\ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ the\ first\ time\ through,\ visited\_width\ might\ be\ reduced}}
+\DoxyCodeLine{00318\ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (node-\/>\mbox{\hyperlink{structstbrp__node_a45ab31a88025db27d08040d715b129ea}{x}}\ <\ x0)}
+\DoxyCodeLine{00319\ \ \ \ \ \ \ \ \ \ \ \ \ visited\_width\ +=\ node-\/>\mbox{\hyperlink{structstbrp__node_a3c4a162b9ebf156eeae37a63ac587ac7}{next}}-\/>\mbox{\hyperlink{structstbrp__node_a45ab31a88025db27d08040d715b129ea}{x}}\ -\/\ x0;}
+\DoxyCodeLine{00320\ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{00321\ \ \ \ \ \ \ \ \ \ \ \ \ visited\_width\ +=\ node-\/>\mbox{\hyperlink{structstbrp__node_a3c4a162b9ebf156eeae37a63ac587ac7}{next}}-\/>\mbox{\hyperlink{structstbrp__node_a45ab31a88025db27d08040d715b129ea}{x}}\ -\/\ node-\/>\mbox{\hyperlink{structstbrp__node_a45ab31a88025db27d08040d715b129ea}{x}};}
+\DoxyCodeLine{00322\ \ \ \ \ \ \ \}\ \textcolor{keywordflow}{else}\ \{}
+\DoxyCodeLine{00323\ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ add\ waste\ area}}
+\DoxyCodeLine{00324\ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ under\_width\ =\ node-\/>\mbox{\hyperlink{structstbrp__node_a3c4a162b9ebf156eeae37a63ac587ac7}{next}}-\/>\mbox{\hyperlink{structstbrp__node_a45ab31a88025db27d08040d715b129ea}{x}}\ -\/\ node-\/>\mbox{\hyperlink{structstbrp__node_a45ab31a88025db27d08040d715b129ea}{x}};}
+\DoxyCodeLine{00325\ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (under\_width\ +\ visited\_width\ >\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_a3ce386e55bbeb900c1b23e064b89bd04}{width}})}
+\DoxyCodeLine{00326\ \ \ \ \ \ \ \ \ \ \ \ \ under\_width\ =\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_a3ce386e55bbeb900c1b23e064b89bd04}{width}}\ -\/\ visited\_width;}
+\DoxyCodeLine{00327\ \ \ \ \ \ \ \ \ \ waste\_area\ +=\ under\_width\ *\ (min\_y\ -\/\ node-\/>\mbox{\hyperlink{structstbrp__node_ad0415cb102a4f37aa45073653307e67e}{y}});}
+\DoxyCodeLine{00328\ \ \ \ \ \ \ \ \ \ visited\_width\ +=\ under\_width;}
+\DoxyCodeLine{00329\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00330\ \ \ \ \ \ \ node\ =\ node-\/>\mbox{\hyperlink{structstbrp__node_a3c4a162b9ebf156eeae37a63ac587ac7}{next}};}
+\DoxyCodeLine{00331\ \ \ \ \}}
+\DoxyCodeLine{00332\ }
+\DoxyCodeLine{00333\ \ \ \ *pwaste\ =\ waste\_area;}
+\DoxyCodeLine{00334\ \ \ \ \textcolor{keywordflow}{return}\ min\_y;}
+\DoxyCodeLine{00335\ \}}
+\DoxyCodeLine{00336\ }
+\DoxyCodeLine{00337\ \textcolor{keyword}{typedef}\ \textcolor{keyword}{struct}}
+\DoxyCodeLine{00338\ \{}
+\DoxyCodeLine{00339\ \ \ \ \textcolor{keywordtype}{int}\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_ac916c0825494ac3acd4457effd2823d2}{x}},\mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_a4f27f1eebce8c31db01bb39fab9ef561}{y}};}
+\DoxyCodeLine{00340\ \ \ \ \mbox{\hyperlink{structstbrp__node}{stbrp\_node}}\ **prev\_link;}
+\DoxyCodeLine{00341\ \}\ stbrp\_\_findresult;}
+\DoxyCodeLine{00342\ }
+\DoxyCodeLine{00343\ \textcolor{keyword}{static}\ stbrp\_\_findresult\ stbrp\_\_skyline\_find\_best\_pos(\mbox{\hyperlink{structstbrp__context}{stbrp\_context}}\ *c,\ \textcolor{keywordtype}{int}\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_a3ce386e55bbeb900c1b23e064b89bd04}{width}},\ \textcolor{keywordtype}{int}\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_aedd0ea77029b98ce91e47c19addcb68f}{height}})}
+\DoxyCodeLine{00344\ \{}
+\DoxyCodeLine{00345\ \ \ \ \textcolor{keywordtype}{int}\ best\_waste\ =\ (1<<30),\ best\_x,\ best\_y\ =\ (1\ <<\ 30);}
+\DoxyCodeLine{00346\ \ \ \ stbrp\_\_findresult\ fr;}
+\DoxyCodeLine{00347\ \ \ \ \mbox{\hyperlink{structstbrp__node}{stbrp\_node}}\ **prev,\ *node,\ *tail,\ **best\ =\ \mbox{\hyperlink{_classes_2lib_2external_2miniaudio_8h_a070d2ce7b6bb7e5c05602aa8c308d0c4}{NULL}};}
+\DoxyCodeLine{00348\ }
+\DoxyCodeLine{00349\ \ \ \ \textcolor{comment}{//\ align\ to\ multiple\ of\ c-\/>align}}
+\DoxyCodeLine{00350\ \ \ \ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_a3ce386e55bbeb900c1b23e064b89bd04}{width}}\ =\ (\mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_a3ce386e55bbeb900c1b23e064b89bd04}{width}}\ +\ c-\/>\mbox{\hyperlink{structstbrp__context_ae36053e2001a725aec2b5756dc990481}{align}}\ -\/\ 1);}
+\DoxyCodeLine{00351\ \ \ \ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_a3ce386e55bbeb900c1b23e064b89bd04}{width}}\ -\/=\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_a3ce386e55bbeb900c1b23e064b89bd04}{width}}\ \%\ c-\/>\mbox{\hyperlink{structstbrp__context_ae36053e2001a725aec2b5756dc990481}{align}};}
+\DoxyCodeLine{00352\ \ \ \ STBRP\_ASSERT(\mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_a3ce386e55bbeb900c1b23e064b89bd04}{width}}\ \%\ c-\/>\mbox{\hyperlink{structstbrp__context_ae36053e2001a725aec2b5756dc990481}{align}}\ ==\ 0);}
+\DoxyCodeLine{00353\ }
+\DoxyCodeLine{00354\ \ \ \ \textcolor{comment}{//\ if\ it\ can't\ possibly\ fit,\ bail\ immediately}}
+\DoxyCodeLine{00355\ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_a3ce386e55bbeb900c1b23e064b89bd04}{width}}\ >\ c-\/>\mbox{\hyperlink{structstbrp__context_a70cfcb2044ce8397cc440d28b30c09b2}{width}}\ ||\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_aedd0ea77029b98ce91e47c19addcb68f}{height}}\ >\ c-\/>\mbox{\hyperlink{structstbrp__context_af3715a6f3faecfb4fac8f6ccbb71f9c7}{height}})\ \{}
+\DoxyCodeLine{00356\ \ \ \ \ \ \ fr.prev\_link\ =\ \mbox{\hyperlink{_classes_2lib_2external_2miniaudio_8h_a070d2ce7b6bb7e5c05602aa8c308d0c4}{NULL}};}
+\DoxyCodeLine{00357\ \ \ \ \ \ \ fr.x\ =\ fr.y\ =\ 0;}
+\DoxyCodeLine{00358\ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ fr;}
+\DoxyCodeLine{00359\ \ \ \ \}}
+\DoxyCodeLine{00360\ }
+\DoxyCodeLine{00361\ \ \ \ node\ =\ c-\/>\mbox{\hyperlink{structstbrp__context_a920d5f646912f75e3c87c652210ab2ba}{active\_head}};}
+\DoxyCodeLine{00362\ \ \ \ prev\ =\ \&c-\/>\mbox{\hyperlink{structstbrp__context_a920d5f646912f75e3c87c652210ab2ba}{active\_head}};}
+\DoxyCodeLine{00363\ \ \ \ \textcolor{keywordflow}{while}\ (node-\/>\mbox{\hyperlink{structstbrp__node_a45ab31a88025db27d08040d715b129ea}{x}}\ +\ width\ <=\ c-\/>\mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_a3ce386e55bbeb900c1b23e064b89bd04}{width}})\ \{}
+\DoxyCodeLine{00364\ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_a4f27f1eebce8c31db01bb39fab9ef561}{y}},waste;}
+\DoxyCodeLine{00365\ \ \ \ \ \ \ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_a4f27f1eebce8c31db01bb39fab9ef561}{y}}\ =\ stbrp\_\_skyline\_find\_min\_y(c,\ node,\ node-\/>\mbox{\hyperlink{structstbrp__node_a45ab31a88025db27d08040d715b129ea}{x}},\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_a3ce386e55bbeb900c1b23e064b89bd04}{width}},\ \&waste);}
+\DoxyCodeLine{00366\ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (c-\/>\mbox{\hyperlink{structstbrp__context_a4b61a7f94e50a54c075e2a8f99f6503a}{heuristic}}\ ==\ \mbox{\hyperlink{_classes_2lib_2external_2stb__rect__pack_8h_a85c7862086c1f92e4fb4108e176d8140a13530b067fb1f9707dc0f9d51f8b074a}{STBRP\_HEURISTIC\_Skyline\_BL\_sortHeight}})\ \{\ \textcolor{comment}{//\ actually\ just\ want\ to\ test\ BL}}
+\DoxyCodeLine{00367\ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ bottom\ left}}
+\DoxyCodeLine{00368\ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_a4f27f1eebce8c31db01bb39fab9ef561}{y}}\ <\ best\_y)\ \{}
+\DoxyCodeLine{00369\ \ \ \ \ \ \ \ \ \ \ \ \ best\_y\ =\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_a4f27f1eebce8c31db01bb39fab9ef561}{y}};}
+\DoxyCodeLine{00370\ \ \ \ \ \ \ \ \ \ \ \ \ best\ =\ prev;}
+\DoxyCodeLine{00371\ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00372\ \ \ \ \ \ \ \}\ \textcolor{keywordflow}{else}\ \{}
+\DoxyCodeLine{00373\ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ best-\/fit}}
+\DoxyCodeLine{00374\ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_a4f27f1eebce8c31db01bb39fab9ef561}{y}}\ +\ height\ <=\ c-\/>\mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_aedd0ea77029b98ce91e47c19addcb68f}{height}})\ \{}
+\DoxyCodeLine{00375\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ can\ only\ use\ it\ if\ it\ first\ vertically}}
+\DoxyCodeLine{00376\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_a4f27f1eebce8c31db01bb39fab9ef561}{y}}\ <\ best\_y\ ||\ (\mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_a4f27f1eebce8c31db01bb39fab9ef561}{y}}\ ==\ best\_y\ \&\&\ waste\ <\ best\_waste))\ \{}
+\DoxyCodeLine{00377\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ best\_y\ =\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_a4f27f1eebce8c31db01bb39fab9ef561}{y}};}
+\DoxyCodeLine{00378\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ best\_waste\ =\ waste;}
+\DoxyCodeLine{00379\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ best\ =\ prev;}
+\DoxyCodeLine{00380\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00381\ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00382\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00383\ \ \ \ \ \ \ prev\ =\ \&node-\/>\mbox{\hyperlink{structstbrp__node_a3c4a162b9ebf156eeae37a63ac587ac7}{next}};}
+\DoxyCodeLine{00384\ \ \ \ \ \ \ node\ =\ node-\/>\mbox{\hyperlink{structstbrp__node_a3c4a162b9ebf156eeae37a63ac587ac7}{next}};}
+\DoxyCodeLine{00385\ \ \ \ \}}
+\DoxyCodeLine{00386\ }
+\DoxyCodeLine{00387\ \ \ \ best\_x\ =\ (best\ ==\ \mbox{\hyperlink{_classes_2lib_2external_2miniaudio_8h_a070d2ce7b6bb7e5c05602aa8c308d0c4}{NULL}})\ ?\ 0\ :\ (*best)-\/>\mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_ac916c0825494ac3acd4457effd2823d2}{x}};}
+\DoxyCodeLine{00388\ }
+\DoxyCodeLine{00389\ \ \ \ \textcolor{comment}{//\ if\ doing\ best-\/fit\ (BF),\ we\ also\ have\ to\ try\ aligning\ right\ edge\ to\ each\ node\ position}}
+\DoxyCodeLine{00390\ \ \ \ \textcolor{comment}{//}}
+\DoxyCodeLine{00391\ \ \ \ \textcolor{comment}{//\ e.g,\ if\ fitting}}
+\DoxyCodeLine{00392\ \ \ \ \textcolor{comment}{//}}
+\DoxyCodeLine{00393\ \ \ \ \textcolor{comment}{//\ \ \ \ \ \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_}}
+\DoxyCodeLine{00394\ \ \ \ \textcolor{comment}{//\ \ \ \ |\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_|}}
+\DoxyCodeLine{00395\ \ \ \ \textcolor{comment}{//}}
+\DoxyCodeLine{00396\ \ \ \ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \ \ \ into}}
+\DoxyCodeLine{00397\ \ \ \ \textcolor{comment}{//}}
+\DoxyCodeLine{00398\ \ \ \ \textcolor{comment}{//\ \ \ |\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ |}}
+\DoxyCodeLine{00399\ \ \ \ \textcolor{comment}{//\ \ \ |\ \ \ \ \ \ \ \ \ \ \ \ \ \_\_\_\_\_\_\_\_\_\_\_\_|}}
+\DoxyCodeLine{00400\ \ \ \ \textcolor{comment}{//\ \ \ |\_\_\_\_\_\_\_\_\_\_\_\_|}}
+\DoxyCodeLine{00401\ \ \ \ \textcolor{comment}{//}}
+\DoxyCodeLine{00402\ \ \ \ \textcolor{comment}{//\ then\ right-\/aligned\ reduces\ waste,\ but\ bottom-\/left\ BL\ is\ always\ chooses\ left-\/aligned}}
+\DoxyCodeLine{00403\ \ \ \ \textcolor{comment}{//}}
+\DoxyCodeLine{00404\ \ \ \ \textcolor{comment}{//\ This\ makes\ BF\ take\ about\ 2x\ the\ time}}
+\DoxyCodeLine{00405\ }
+\DoxyCodeLine{00406\ \ \ \ \textcolor{keywordflow}{if}\ (c-\/>\mbox{\hyperlink{structstbrp__context_a4b61a7f94e50a54c075e2a8f99f6503a}{heuristic}}\ ==\ \mbox{\hyperlink{_classes_2lib_2external_2stb__rect__pack_8h_a85c7862086c1f92e4fb4108e176d8140a11d62749c4405a231a6fd1dd9d46615c}{STBRP\_HEURISTIC\_Skyline\_BF\_sortHeight}})\ \{}
+\DoxyCodeLine{00407\ \ \ \ \ \ \ tail\ =\ c-\/>\mbox{\hyperlink{structstbrp__context_a920d5f646912f75e3c87c652210ab2ba}{active\_head}};}
+\DoxyCodeLine{00408\ \ \ \ \ \ \ node\ =\ c-\/>\mbox{\hyperlink{structstbrp__context_a920d5f646912f75e3c87c652210ab2ba}{active\_head}};}
+\DoxyCodeLine{00409\ \ \ \ \ \ \ prev\ =\ \&c-\/>\mbox{\hyperlink{structstbrp__context_a920d5f646912f75e3c87c652210ab2ba}{active\_head}};}
+\DoxyCodeLine{00410\ \ \ \ \ \ \ \textcolor{comment}{//\ find\ first\ node\ that's\ admissible}}
+\DoxyCodeLine{00411\ \ \ \ \ \ \ \textcolor{keywordflow}{while}\ (tail-\/>\mbox{\hyperlink{structstbrp__node_a45ab31a88025db27d08040d715b129ea}{x}}\ <\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_a3ce386e55bbeb900c1b23e064b89bd04}{width}})}
+\DoxyCodeLine{00412\ \ \ \ \ \ \ \ \ \ tail\ =\ tail-\/>\mbox{\hyperlink{structstbrp__node_a3c4a162b9ebf156eeae37a63ac587ac7}{next}};}
+\DoxyCodeLine{00413\ \ \ \ \ \ \ \textcolor{keywordflow}{while}\ (tail)\ \{}
+\DoxyCodeLine{00414\ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ xpos\ =\ tail-\/>\mbox{\hyperlink{structstbrp__node_a45ab31a88025db27d08040d715b129ea}{x}}\ -\/\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_a3ce386e55bbeb900c1b23e064b89bd04}{width}};}
+\DoxyCodeLine{00415\ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_a4f27f1eebce8c31db01bb39fab9ef561}{y}},waste;}
+\DoxyCodeLine{00416\ \ \ \ \ \ \ \ \ \ STBRP\_ASSERT(xpos\ >=\ 0);}
+\DoxyCodeLine{00417\ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ find\ the\ left\ position\ that\ matches\ this}}
+\DoxyCodeLine{00418\ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{while}\ (node-\/>\mbox{\hyperlink{structstbrp__node_a3c4a162b9ebf156eeae37a63ac587ac7}{next}}-\/>\mbox{\hyperlink{structstbrp__node_a45ab31a88025db27d08040d715b129ea}{x}}\ <=\ xpos)\ \{}
+\DoxyCodeLine{00419\ \ \ \ \ \ \ \ \ \ \ \ \ prev\ =\ \&node-\/>\mbox{\hyperlink{structstbrp__node_a3c4a162b9ebf156eeae37a63ac587ac7}{next}};}
+\DoxyCodeLine{00420\ \ \ \ \ \ \ \ \ \ \ \ \ node\ =\ node-\/>\mbox{\hyperlink{structstbrp__node_a3c4a162b9ebf156eeae37a63ac587ac7}{next}};}
+\DoxyCodeLine{00421\ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00422\ \ \ \ \ \ \ \ \ \ STBRP\_ASSERT(node-\/>\mbox{\hyperlink{structstbrp__node_a3c4a162b9ebf156eeae37a63ac587ac7}{next}}-\/>\mbox{\hyperlink{structstbrp__node_a45ab31a88025db27d08040d715b129ea}{x}}\ >\ xpos\ \&\&\ node-\/>\mbox{\hyperlink{structstbrp__node_a45ab31a88025db27d08040d715b129ea}{x}}\ <=\ xpos);}
+\DoxyCodeLine{00423\ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_a4f27f1eebce8c31db01bb39fab9ef561}{y}}\ =\ stbrp\_\_skyline\_find\_min\_y(c,\ node,\ xpos,\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_a3ce386e55bbeb900c1b23e064b89bd04}{width}},\ \&waste);}
+\DoxyCodeLine{00424\ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_a4f27f1eebce8c31db01bb39fab9ef561}{y}}\ +\ height\ <=\ c-\/>\mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_aedd0ea77029b98ce91e47c19addcb68f}{height}})\ \{}
+\DoxyCodeLine{00425\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_a4f27f1eebce8c31db01bb39fab9ef561}{y}}\ <=\ best\_y)\ \{}
+\DoxyCodeLine{00426\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_a4f27f1eebce8c31db01bb39fab9ef561}{y}}\ <\ best\_y\ ||\ waste\ <\ best\_waste\ ||\ (waste==best\_waste\ \&\&\ xpos\ <\ best\_x))\ \{}
+\DoxyCodeLine{00427\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ best\_x\ =\ xpos;}
+\DoxyCodeLine{00428\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ STBRP\_ASSERT(\mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_a4f27f1eebce8c31db01bb39fab9ef561}{y}}\ <=\ best\_y);}
+\DoxyCodeLine{00429\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ best\_y\ =\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_a4f27f1eebce8c31db01bb39fab9ef561}{y}};}
+\DoxyCodeLine{00430\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ best\_waste\ =\ waste;}
+\DoxyCodeLine{00431\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ best\ =\ prev;}
+\DoxyCodeLine{00432\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00433\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00434\ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00435\ \ \ \ \ \ \ \ \ \ tail\ =\ tail-\/>\mbox{\hyperlink{structstbrp__node_a3c4a162b9ebf156eeae37a63ac587ac7}{next}};}
+\DoxyCodeLine{00436\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00437\ \ \ \ \}}
+\DoxyCodeLine{00438\ }
+\DoxyCodeLine{00439\ \ \ \ fr.prev\_link\ =\ best;}
+\DoxyCodeLine{00440\ \ \ \ fr.\mbox{\hyperlink{structstbrp__node_a45ab31a88025db27d08040d715b129ea}{x}}\ =\ best\_x;}
+\DoxyCodeLine{00441\ \ \ \ fr.y\ =\ best\_y;}
+\DoxyCodeLine{00442\ \ \ \ \textcolor{keywordflow}{return}\ fr;}
+\DoxyCodeLine{00443\ \}}
+\DoxyCodeLine{00444\ }
+\DoxyCodeLine{00445\ \textcolor{keyword}{static}\ stbrp\_\_findresult\ stbrp\_\_skyline\_pack\_rectangle(\mbox{\hyperlink{structstbrp__context}{stbrp\_context}}\ *context,\ \textcolor{keywordtype}{int}\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_a3ce386e55bbeb900c1b23e064b89bd04}{width}},\ \textcolor{keywordtype}{int}\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_aedd0ea77029b98ce91e47c19addcb68f}{height}})}
+\DoxyCodeLine{00446\ \{}
+\DoxyCodeLine{00447\ \ \ \ \textcolor{comment}{//\ find\ best\ position\ according\ to\ heuristic}}
+\DoxyCodeLine{00448\ \ \ \ stbrp\_\_findresult\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2glad_8h_a1dbb21208b9047cc8031ca9c840d3c2f}{res}}\ =\ stbrp\_\_skyline\_find\_best\_pos(context,\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_a3ce386e55bbeb900c1b23e064b89bd04}{width}},\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_aedd0ea77029b98ce91e47c19addcb68f}{height}});}
+\DoxyCodeLine{00449\ \ \ \ \mbox{\hyperlink{structstbrp__node}{stbrp\_node}}\ *node,\ *cur;}
+\DoxyCodeLine{00450\ }
+\DoxyCodeLine{00451\ \ \ \ \textcolor{comment}{//\ bail\ if:}}
+\DoxyCodeLine{00452\ \ \ \ \textcolor{comment}{//\ \ \ \ 1.\ it\ failed}}
+\DoxyCodeLine{00453\ \ \ \ \textcolor{comment}{//\ \ \ \ 2.\ the\ best\ node\ doesn't\ fit\ (we\ don't\ always\ check\ this)}}
+\DoxyCodeLine{00454\ \ \ \ \textcolor{comment}{//\ \ \ \ 3.\ we're\ out\ of\ memory}}
+\DoxyCodeLine{00455\ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2glad_8h_a1dbb21208b9047cc8031ca9c840d3c2f}{res}}.prev\_link\ ==\ \mbox{\hyperlink{_classes_2lib_2external_2miniaudio_8h_a070d2ce7b6bb7e5c05602aa8c308d0c4}{NULL}}\ ||\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2glad_8h_a1dbb21208b9047cc8031ca9c840d3c2f}{res}}.y\ +\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_aedd0ea77029b98ce91e47c19addcb68f}{height}}\ >\ context-\/>\mbox{\hyperlink{structstbrp__context_af3715a6f3faecfb4fac8f6ccbb71f9c7}{height}}\ ||\ context-\/>\mbox{\hyperlink{structstbrp__context_a8cfe2d49dad3d7af0951e04cc1ca7369}{free\_head}}\ ==\ \mbox{\hyperlink{_classes_2lib_2external_2miniaudio_8h_a070d2ce7b6bb7e5c05602aa8c308d0c4}{NULL}})\ \{}
+\DoxyCodeLine{00456\ \ \ \ \ \ \ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2glad_8h_a1dbb21208b9047cc8031ca9c840d3c2f}{res}}.prev\_link\ =\ \mbox{\hyperlink{_classes_2lib_2external_2miniaudio_8h_a070d2ce7b6bb7e5c05602aa8c308d0c4}{NULL}};}
+\DoxyCodeLine{00457\ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2glad_8h_a1dbb21208b9047cc8031ca9c840d3c2f}{res}};}
+\DoxyCodeLine{00458\ \ \ \ \}}
+\DoxyCodeLine{00459\ }
+\DoxyCodeLine{00460\ \ \ \ \textcolor{comment}{//\ on\ success,\ create\ new\ node}}
+\DoxyCodeLine{00461\ \ \ \ node\ =\ context-\/>\mbox{\hyperlink{structstbrp__context_a8cfe2d49dad3d7af0951e04cc1ca7369}{free\_head}};}
+\DoxyCodeLine{00462\ \ \ \ node-\/>\mbox{\hyperlink{structstbrp__node_a45ab31a88025db27d08040d715b129ea}{x}}\ =\ (\mbox{\hyperlink{_classes_2lib_2external_2stb__rect__pack_8h_a4a396a45893c12de32e2d598abd6b302}{stbrp\_coord}})\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2glad_8h_a1dbb21208b9047cc8031ca9c840d3c2f}{res}}.x;}
+\DoxyCodeLine{00463\ \ \ \ node-\/>\mbox{\hyperlink{structstbrp__node_ad0415cb102a4f37aa45073653307e67e}{y}}\ =\ (\mbox{\hyperlink{_classes_2lib_2external_2stb__rect__pack_8h_a4a396a45893c12de32e2d598abd6b302}{stbrp\_coord}})\ (\mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2glad_8h_a1dbb21208b9047cc8031ca9c840d3c2f}{res}}.y\ +\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_aedd0ea77029b98ce91e47c19addcb68f}{height}});}
+\DoxyCodeLine{00464\ }
+\DoxyCodeLine{00465\ \ \ \ context-\/>\mbox{\hyperlink{structstbrp__context_a8cfe2d49dad3d7af0951e04cc1ca7369}{free\_head}}\ =\ node-\/>\mbox{\hyperlink{structstbrp__node_a3c4a162b9ebf156eeae37a63ac587ac7}{next}};}
+\DoxyCodeLine{00466\ }
+\DoxyCodeLine{00467\ \ \ \ \textcolor{comment}{//\ insert\ the\ new\ node\ into\ the\ right\ starting\ point,\ and}}
+\DoxyCodeLine{00468\ \ \ \ \textcolor{comment}{//\ let\ 'cur'\ point\ to\ the\ remaining\ nodes\ needing\ to\ be}}
+\DoxyCodeLine{00469\ \ \ \ \textcolor{comment}{//\ stiched\ back\ in}}
+\DoxyCodeLine{00470\ }
+\DoxyCodeLine{00471\ \ \ \ cur\ =\ *\mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2glad_8h_a1dbb21208b9047cc8031ca9c840d3c2f}{res}}.prev\_link;}
+\DoxyCodeLine{00472\ \ \ \ \textcolor{keywordflow}{if}\ (cur-\/>\mbox{\hyperlink{structstbrp__node_a45ab31a88025db27d08040d715b129ea}{x}}\ <\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2glad_8h_a1dbb21208b9047cc8031ca9c840d3c2f}{res}}.x)\ \{}
+\DoxyCodeLine{00473\ \ \ \ \ \ \ \textcolor{comment}{//\ preserve\ the\ existing\ one,\ so\ start\ testing\ with\ the\ next\ one}}
+\DoxyCodeLine{00474\ \ \ \ \ \ \ \mbox{\hyperlink{structstbrp__node}{stbrp\_node}}\ *next\ =\ cur-\/>\mbox{\hyperlink{structstbrp__node_a3c4a162b9ebf156eeae37a63ac587ac7}{next}};}
+\DoxyCodeLine{00475\ \ \ \ \ \ \ cur-\/>\mbox{\hyperlink{structstbrp__node_a3c4a162b9ebf156eeae37a63ac587ac7}{next}}\ =\ node;}
+\DoxyCodeLine{00476\ \ \ \ \ \ \ cur\ =\ next;}
+\DoxyCodeLine{00477\ \ \ \ \}\ \textcolor{keywordflow}{else}\ \{}
+\DoxyCodeLine{00478\ \ \ \ \ \ \ *\mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2glad_8h_a1dbb21208b9047cc8031ca9c840d3c2f}{res}}.prev\_link\ =\ node;}
+\DoxyCodeLine{00479\ \ \ \ \}}
+\DoxyCodeLine{00480\ }
+\DoxyCodeLine{00481\ \ \ \ \textcolor{comment}{//\ from\ here,\ traverse\ cur\ and\ free\ the\ nodes,\ until\ we\ get\ to\ one}}
+\DoxyCodeLine{00482\ \ \ \ \textcolor{comment}{//\ that\ shouldn't\ be\ freed}}
+\DoxyCodeLine{00483\ \ \ \ \textcolor{keywordflow}{while}\ (cur-\/>\mbox{\hyperlink{structstbrp__node_a3c4a162b9ebf156eeae37a63ac587ac7}{next}}\ \&\&\ cur-\/>\mbox{\hyperlink{structstbrp__node_a3c4a162b9ebf156eeae37a63ac587ac7}{next}}-\/>\mbox{\hyperlink{structstbrp__node_a45ab31a88025db27d08040d715b129ea}{x}}\ <=\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2glad_8h_a1dbb21208b9047cc8031ca9c840d3c2f}{res}}.x\ +\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_a3ce386e55bbeb900c1b23e064b89bd04}{width}})\ \{}
+\DoxyCodeLine{00484\ \ \ \ \ \ \ \mbox{\hyperlink{structstbrp__node}{stbrp\_node}}\ *next\ =\ cur-\/>\mbox{\hyperlink{structstbrp__node_a3c4a162b9ebf156eeae37a63ac587ac7}{next}};}
+\DoxyCodeLine{00485\ \ \ \ \ \ \ \textcolor{comment}{//\ move\ the\ current\ node\ to\ the\ free\ list}}
+\DoxyCodeLine{00486\ \ \ \ \ \ \ cur-\/>\mbox{\hyperlink{structstbrp__node_a3c4a162b9ebf156eeae37a63ac587ac7}{next}}\ =\ context-\/>\mbox{\hyperlink{structstbrp__context_a8cfe2d49dad3d7af0951e04cc1ca7369}{free\_head}};}
+\DoxyCodeLine{00487\ \ \ \ \ \ \ context-\/>\mbox{\hyperlink{structstbrp__context_a8cfe2d49dad3d7af0951e04cc1ca7369}{free\_head}}\ =\ cur;}
+\DoxyCodeLine{00488\ \ \ \ \ \ \ cur\ =\ next;}
+\DoxyCodeLine{00489\ \ \ \ \}}
+\DoxyCodeLine{00490\ }
+\DoxyCodeLine{00491\ \ \ \ \textcolor{comment}{//\ stitch\ the\ list\ back\ in}}
+\DoxyCodeLine{00492\ \ \ \ node-\/>\mbox{\hyperlink{structstbrp__node_a3c4a162b9ebf156eeae37a63ac587ac7}{next}}\ =\ cur;}
+\DoxyCodeLine{00493\ }
+\DoxyCodeLine{00494\ \ \ \ \textcolor{keywordflow}{if}\ (cur-\/>\mbox{\hyperlink{structstbrp__node_a45ab31a88025db27d08040d715b129ea}{x}}\ <\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2glad_8h_a1dbb21208b9047cc8031ca9c840d3c2f}{res}}.x\ +\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_a3ce386e55bbeb900c1b23e064b89bd04}{width}})}
+\DoxyCodeLine{00495\ \ \ \ \ \ \ cur-\/>\mbox{\hyperlink{structstbrp__node_a45ab31a88025db27d08040d715b129ea}{x}}\ =\ (\mbox{\hyperlink{_classes_2lib_2external_2stb__rect__pack_8h_a4a396a45893c12de32e2d598abd6b302}{stbrp\_coord}})\ (\mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2glad_8h_a1dbb21208b9047cc8031ca9c840d3c2f}{res}}.x\ +\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_a3ce386e55bbeb900c1b23e064b89bd04}{width}});}
+\DoxyCodeLine{00496\ }
+\DoxyCodeLine{00497\ \textcolor{preprocessor}{\#ifdef\ \_DEBUG}}
+\DoxyCodeLine{00498\ \ \ \ cur\ =\ context-\/>\mbox{\hyperlink{structstbrp__context_a920d5f646912f75e3c87c652210ab2ba}{active\_head}};}
+\DoxyCodeLine{00499\ \ \ \ \textcolor{keywordflow}{while}\ (cur-\/>\mbox{\hyperlink{structstbrp__node_a45ab31a88025db27d08040d715b129ea}{x}}\ <\ context-\/>\mbox{\hyperlink{structstbrp__context_a70cfcb2044ce8397cc440d28b30c09b2}{width}})\ \{}
+\DoxyCodeLine{00500\ \ \ \ \ \ \ STBRP\_ASSERT(cur-\/>\mbox{\hyperlink{structstbrp__node_a45ab31a88025db27d08040d715b129ea}{x}}\ <\ cur-\/>\mbox{\hyperlink{structstbrp__node_a3c4a162b9ebf156eeae37a63ac587ac7}{next}}-\/>\mbox{\hyperlink{structstbrp__node_a45ab31a88025db27d08040d715b129ea}{x}});}
+\DoxyCodeLine{00501\ \ \ \ \ \ \ cur\ =\ cur-\/>\mbox{\hyperlink{structstbrp__node_a3c4a162b9ebf156eeae37a63ac587ac7}{next}};}
+\DoxyCodeLine{00502\ \ \ \ \}}
+\DoxyCodeLine{00503\ \ \ \ STBRP\_ASSERT(cur-\/>\mbox{\hyperlink{structstbrp__node_a3c4a162b9ebf156eeae37a63ac587ac7}{next}}\ ==\ \mbox{\hyperlink{_classes_2lib_2external_2miniaudio_8h_a070d2ce7b6bb7e5c05602aa8c308d0c4}{NULL}});}
+\DoxyCodeLine{00504\ }
+\DoxyCodeLine{00505\ \ \ \ \{}
+\DoxyCodeLine{00506\ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_a22486c0c8d9f7d79a07bf22ecffeeb2f}{count}}=0;}
+\DoxyCodeLine{00507\ \ \ \ \ \ \ cur\ =\ context-\/>\mbox{\hyperlink{structstbrp__context_a920d5f646912f75e3c87c652210ab2ba}{active\_head}};}
+\DoxyCodeLine{00508\ \ \ \ \ \ \ \textcolor{keywordflow}{while}\ (cur)\ \{}
+\DoxyCodeLine{00509\ \ \ \ \ \ \ \ \ \ cur\ =\ cur-\/>\mbox{\hyperlink{structstbrp__node_a3c4a162b9ebf156eeae37a63ac587ac7}{next}};}
+\DoxyCodeLine{00510\ \ \ \ \ \ \ \ \ \ ++\mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_a22486c0c8d9f7d79a07bf22ecffeeb2f}{count}};}
+\DoxyCodeLine{00511\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00512\ \ \ \ \ \ \ cur\ =\ context-\/>\mbox{\hyperlink{structstbrp__context_a8cfe2d49dad3d7af0951e04cc1ca7369}{free\_head}};}
+\DoxyCodeLine{00513\ \ \ \ \ \ \ \textcolor{keywordflow}{while}\ (cur)\ \{}
+\DoxyCodeLine{00514\ \ \ \ \ \ \ \ \ \ cur\ =\ cur-\/>\mbox{\hyperlink{structstbrp__node_a3c4a162b9ebf156eeae37a63ac587ac7}{next}};}
+\DoxyCodeLine{00515\ \ \ \ \ \ \ \ \ \ ++\mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_a22486c0c8d9f7d79a07bf22ecffeeb2f}{count}};}
+\DoxyCodeLine{00516\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00517\ \ \ \ \ \ \ STBRP\_ASSERT(\mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_a22486c0c8d9f7d79a07bf22ecffeeb2f}{count}}\ ==\ context-\/>\mbox{\hyperlink{structstbrp__context_afa8105d4ef6d3e0ae5aaf8e1ed4b2c58}{num\_nodes}}+2);}
+\DoxyCodeLine{00518\ \ \ \ \}}
+\DoxyCodeLine{00519\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00520\ }
+\DoxyCodeLine{00521\ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2glad_8h_a1dbb21208b9047cc8031ca9c840d3c2f}{res}};}
+\DoxyCodeLine{00522\ \}}
+\DoxyCodeLine{00523\ }
+\DoxyCodeLine{00524\ \textcolor{keyword}{static}\ \textcolor{keywordtype}{int}\ STBRP\_\_CDECL\ rect\_height\_compare(\textcolor{keyword}{const}\ \textcolor{keywordtype}{void}\ *\mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2glad_8h_ac8729153468b5dcf13f971b21d84d4e5}{a}},\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{void}\ *\mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2glad_8h_a6eba317e3cf44d6d26c04a5a8f197dcb}{b}})}
+\DoxyCodeLine{00525\ \{}
+\DoxyCodeLine{00526\ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{structstbrp__rect}{stbrp\_rect}}\ *p\ =\ (\textcolor{keyword}{const}\ \mbox{\hyperlink{structstbrp__rect}{stbrp\_rect}}\ *)\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2glad_8h_ac8729153468b5dcf13f971b21d84d4e5}{a}};}
+\DoxyCodeLine{00527\ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{structstbrp__rect}{stbrp\_rect}}\ *q\ =\ (\textcolor{keyword}{const}\ \mbox{\hyperlink{structstbrp__rect}{stbrp\_rect}}\ *)\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2glad_8h_a6eba317e3cf44d6d26c04a5a8f197dcb}{b}};}
+\DoxyCodeLine{00528\ \ \ \ \textcolor{keywordflow}{if}\ (p-\/>\mbox{\hyperlink{structstbrp__rect_af68de2dadc7972b7c089d5e0c0558398}{h}}\ >\ q-\/>\mbox{\hyperlink{structstbrp__rect_af68de2dadc7972b7c089d5e0c0558398}{h}})}
+\DoxyCodeLine{00529\ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ -\/1;}
+\DoxyCodeLine{00530\ \ \ \ \textcolor{keywordflow}{if}\ (p-\/>\mbox{\hyperlink{structstbrp__rect_af68de2dadc7972b7c089d5e0c0558398}{h}}\ <\ q-\/>\mbox{\hyperlink{structstbrp__rect_af68de2dadc7972b7c089d5e0c0558398}{h}})}
+\DoxyCodeLine{00531\ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \ 1;}
+\DoxyCodeLine{00532\ \ \ \ \textcolor{keywordflow}{return}\ (p-\/>\mbox{\hyperlink{structstbrp__rect_a248d43f1eb979c1e7b92ba6df431dec5}{w}}\ >\ q-\/>\mbox{\hyperlink{structstbrp__rect_a248d43f1eb979c1e7b92ba6df431dec5}{w}})\ ?\ -\/1\ :\ (p-\/>\mbox{\hyperlink{structstbrp__rect_a248d43f1eb979c1e7b92ba6df431dec5}{w}}\ <\ q-\/>\mbox{\hyperlink{structstbrp__rect_a248d43f1eb979c1e7b92ba6df431dec5}{w}});}
+\DoxyCodeLine{00533\ \}}
+\DoxyCodeLine{00534\ }
+\DoxyCodeLine{00535\ \textcolor{keyword}{static}\ \textcolor{keywordtype}{int}\ STBRP\_\_CDECL\ rect\_original\_order(\textcolor{keyword}{const}\ \textcolor{keywordtype}{void}\ *\mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2glad_8h_ac8729153468b5dcf13f971b21d84d4e5}{a}},\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{void}\ *\mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2glad_8h_a6eba317e3cf44d6d26c04a5a8f197dcb}{b}})}
+\DoxyCodeLine{00536\ \{}
+\DoxyCodeLine{00537\ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{structstbrp__rect}{stbrp\_rect}}\ *p\ =\ (\textcolor{keyword}{const}\ \mbox{\hyperlink{structstbrp__rect}{stbrp\_rect}}\ *)\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2glad_8h_ac8729153468b5dcf13f971b21d84d4e5}{a}};}
+\DoxyCodeLine{00538\ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{structstbrp__rect}{stbrp\_rect}}\ *q\ =\ (\textcolor{keyword}{const}\ \mbox{\hyperlink{structstbrp__rect}{stbrp\_rect}}\ *)\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2glad_8h_a6eba317e3cf44d6d26c04a5a8f197dcb}{b}};}
+\DoxyCodeLine{00539\ \ \ \ \textcolor{keywordflow}{return}\ (p-\/>\mbox{\hyperlink{structstbrp__rect_a74ba347755ce17f2f8a2ea66c612af49}{was\_packed}}\ <\ q-\/>\mbox{\hyperlink{structstbrp__rect_a74ba347755ce17f2f8a2ea66c612af49}{was\_packed}})\ ?\ -\/1\ :\ (p-\/>\mbox{\hyperlink{structstbrp__rect_a74ba347755ce17f2f8a2ea66c612af49}{was\_packed}}\ >\ q-\/>\mbox{\hyperlink{structstbrp__rect_a74ba347755ce17f2f8a2ea66c612af49}{was\_packed}});}
+\DoxyCodeLine{00540\ \}}
+\DoxyCodeLine{00541\ }
+\DoxyCodeLine{00542\ \mbox{\hyperlink{_classes_2lib_2external_2stb__rect__pack_8h_a0b73f2d2521fb81afc056a823e3ca753}{STBRP\_DEF}}\ \textcolor{keywordtype}{int}\ \mbox{\hyperlink{_classes_2lib_2external_2stb__rect__pack_8h_af038ae1b98573f24736c9a3eed0478ba}{stbrp\_pack\_rects}}(\mbox{\hyperlink{structstbrp__context}{stbrp\_context}}\ *context,\ \mbox{\hyperlink{structstbrp__rect}{stbrp\_rect}}\ *\mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_ac34ca70e63c2ed89e7bf6ba3b4b62f1b}{rects}},\ \textcolor{keywordtype}{int}\ num\_rects)}
+\DoxyCodeLine{00543\ \{}
+\DoxyCodeLine{00544\ \ \ \ \textcolor{keywordtype}{int}\ i,\ all\_rects\_packed\ =\ 1;}
+\DoxyCodeLine{00545\ }
+\DoxyCodeLine{00546\ \ \ \ \textcolor{comment}{//\ we\ use\ the\ 'was\_packed'\ field\ internally\ to\ allow\ sorting/unsorting}}
+\DoxyCodeLine{00547\ \ \ \ \textcolor{keywordflow}{for}\ (i=0;\ i\ <\ num\_rects;\ ++i)\ \{}
+\DoxyCodeLine{00548\ \ \ \ \ \ \ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_ac34ca70e63c2ed89e7bf6ba3b4b62f1b}{rects}}[i].\mbox{\hyperlink{structstbrp__rect_a74ba347755ce17f2f8a2ea66c612af49}{was\_packed}}\ =\ i;}
+\DoxyCodeLine{00549\ \ \ \ \}}
+\DoxyCodeLine{00550\ }
+\DoxyCodeLine{00551\ \ \ \ \textcolor{comment}{//\ sort\ according\ to\ heuristic}}
+\DoxyCodeLine{00552\ \ \ \ STBRP\_SORT(\mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_ac34ca70e63c2ed89e7bf6ba3b4b62f1b}{rects}},\ num\_rects,\ \textcolor{keyword}{sizeof}(\mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_ac34ca70e63c2ed89e7bf6ba3b4b62f1b}{rects}}[0]),\ rect\_height\_compare);}
+\DoxyCodeLine{00553\ }
+\DoxyCodeLine{00554\ \ \ \ \textcolor{keywordflow}{for}\ (i=0;\ i\ <\ num\_rects;\ ++i)\ \{}
+\DoxyCodeLine{00555\ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_ac34ca70e63c2ed89e7bf6ba3b4b62f1b}{rects}}[i].\mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_a1ad83f255afd4038129297b57ef91603}{w}}\ ==\ 0\ ||\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_ac34ca70e63c2ed89e7bf6ba3b4b62f1b}{rects}}[i].h\ ==\ 0)\ \{}
+\DoxyCodeLine{00556\ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_ac34ca70e63c2ed89e7bf6ba3b4b62f1b}{rects}}[i].x\ =\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_ac34ca70e63c2ed89e7bf6ba3b4b62f1b}{rects}}[i].y\ =\ 0;\ \ \textcolor{comment}{//\ empty\ rect\ needs\ no\ space}}
+\DoxyCodeLine{00557\ \ \ \ \ \ \ \}\ \textcolor{keywordflow}{else}\ \{}
+\DoxyCodeLine{00558\ \ \ \ \ \ \ \ \ \ stbrp\_\_findresult\ fr\ =\ stbrp\_\_skyline\_pack\_rectangle(context,\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_ac34ca70e63c2ed89e7bf6ba3b4b62f1b}{rects}}[i].\mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_a1ad83f255afd4038129297b57ef91603}{w}},\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_ac34ca70e63c2ed89e7bf6ba3b4b62f1b}{rects}}[i].h);}
+\DoxyCodeLine{00559\ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (fr.prev\_link)\ \{}
+\DoxyCodeLine{00560\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_ac34ca70e63c2ed89e7bf6ba3b4b62f1b}{rects}}[i].x\ =\ (\mbox{\hyperlink{_classes_2lib_2external_2stb__rect__pack_8h_a4a396a45893c12de32e2d598abd6b302}{stbrp\_coord}})\ fr.x;}
+\DoxyCodeLine{00561\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_ac34ca70e63c2ed89e7bf6ba3b4b62f1b}{rects}}[i].y\ =\ (\mbox{\hyperlink{_classes_2lib_2external_2stb__rect__pack_8h_a4a396a45893c12de32e2d598abd6b302}{stbrp\_coord}})\ fr.y;}
+\DoxyCodeLine{00562\ \ \ \ \ \ \ \ \ \ \}\ \textcolor{keywordflow}{else}\ \{}
+\DoxyCodeLine{00563\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_ac34ca70e63c2ed89e7bf6ba3b4b62f1b}{rects}}[i].x\ =\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_ac34ca70e63c2ed89e7bf6ba3b4b62f1b}{rects}}[i].y\ =\ \mbox{\hyperlink{_classes_2lib_2external_2stb__rect__pack_8h_a114ed17dfa71ac93774494ab6d14bfbc}{STBRP\_\_MAXVAL}};}
+\DoxyCodeLine{00564\ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00565\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00566\ \ \ \ \}}
+\DoxyCodeLine{00567\ }
+\DoxyCodeLine{00568\ \ \ \ \textcolor{comment}{//\ unsort}}
+\DoxyCodeLine{00569\ \ \ \ STBRP\_SORT(\mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_ac34ca70e63c2ed89e7bf6ba3b4b62f1b}{rects}},\ num\_rects,\ \textcolor{keyword}{sizeof}(\mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_ac34ca70e63c2ed89e7bf6ba3b4b62f1b}{rects}}[0]),\ rect\_original\_order);}
+\DoxyCodeLine{00570\ }
+\DoxyCodeLine{00571\ \ \ \ \textcolor{comment}{//\ set\ was\_packed\ flags\ and\ all\_rects\_packed\ status}}
+\DoxyCodeLine{00572\ \ \ \ \textcolor{keywordflow}{for}\ (i=0;\ i\ <\ num\_rects;\ ++i)\ \{}
+\DoxyCodeLine{00573\ \ \ \ \ \ \ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_ac34ca70e63c2ed89e7bf6ba3b4b62f1b}{rects}}[i].was\_packed\ =\ !(\mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_ac34ca70e63c2ed89e7bf6ba3b4b62f1b}{rects}}[i].x\ ==\ \mbox{\hyperlink{_classes_2lib_2external_2stb__rect__pack_8h_a114ed17dfa71ac93774494ab6d14bfbc}{STBRP\_\_MAXVAL}}\ \&\&\ \mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_ac34ca70e63c2ed89e7bf6ba3b4b62f1b}{rects}}[i].y\ ==\ \mbox{\hyperlink{_classes_2lib_2external_2stb__rect__pack_8h_a114ed17dfa71ac93774494ab6d14bfbc}{STBRP\_\_MAXVAL}});}
+\DoxyCodeLine{00574\ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (!\mbox{\hyperlink{_classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_ac34ca70e63c2ed89e7bf6ba3b4b62f1b}{rects}}[i].was\_packed)}
+\DoxyCodeLine{00575\ \ \ \ \ \ \ \ \ \ all\_rects\_packed\ =\ 0;}
+\DoxyCodeLine{00576\ \ \ \ \}}
+\DoxyCodeLine{00577\ }
+\DoxyCodeLine{00578\ \ \ \ \textcolor{comment}{//\ return\ the\ all\_rects\_packed\ status}}
+\DoxyCodeLine{00579\ \ \ \ \textcolor{keywordflow}{return}\ all\_rects\_packed;}
+\DoxyCodeLine{00580\ \}}
+\DoxyCodeLine{00581\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00582\ }
+\DoxyCodeLine{00583\ \textcolor{comment}{/*}}
+\DoxyCodeLine{00584\ \textcolor{comment}{-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/}}
+\DoxyCodeLine{00585\ \textcolor{comment}{This\ software\ is\ available\ under\ 2\ licenses\ -\/-\/\ choose\ whichever\ you\ prefer.}}
+\DoxyCodeLine{00586\ \textcolor{comment}{-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/}}
+\DoxyCodeLine{00587\ \textcolor{comment}{ALTERNATIVE\ A\ -\/\ MIT\ License}}
+\DoxyCodeLine{00588\ \textcolor{comment}{Copyright\ (c)\ 2017\ Sean\ Barrett}}
+\DoxyCodeLine{00589\ \textcolor{comment}{Permission\ is\ hereby\ granted,\ free\ of\ charge,\ to\ any\ person\ obtaining\ a\ copy\ of}}
+\DoxyCodeLine{00590\ \textcolor{comment}{this\ software\ and\ associated\ documentation\ files\ (the\ "{}Software"{}),\ to\ deal\ in}}
+\DoxyCodeLine{00591\ \textcolor{comment}{the\ Software\ without\ restriction,\ including\ without\ limitation\ the\ rights\ to}}
+\DoxyCodeLine{00592\ \textcolor{comment}{use,\ copy,\ modify,\ merge,\ publish,\ distribute,\ sublicense,\ and/or\ sell\ copies}}
+\DoxyCodeLine{00593\ \textcolor{comment}{of\ the\ Software,\ and\ to\ permit\ persons\ to\ whom\ the\ Software\ is\ furnished\ to\ do}}
+\DoxyCodeLine{00594\ \textcolor{comment}{so,\ subject\ to\ the\ following\ conditions:}}
+\DoxyCodeLine{00595\ \textcolor{comment}{The\ above\ copyright\ notice\ and\ this\ permission\ notice\ shall\ be\ included\ in\ all}}
+\DoxyCodeLine{00596\ \textcolor{comment}{copies\ or\ substantial\ portions\ of\ the\ Software.}}
+\DoxyCodeLine{00597\ \textcolor{comment}{THE\ SOFTWARE\ IS\ PROVIDED\ "{}AS\ IS"{},\ WITHOUT\ WARRANTY\ OF\ ANY\ KIND,\ EXPRESS\ OR}}
+\DoxyCodeLine{00598\ \textcolor{comment}{IMPLIED,\ INCLUDING\ BUT\ NOT\ LIMITED\ TO\ THE\ WARRANTIES\ OF\ MERCHANTABILITY,}}
+\DoxyCodeLine{00599\ \textcolor{comment}{FITNESS\ FOR\ A\ PARTICULAR\ PURPOSE\ AND\ NONINFRINGEMENT.\ IN\ NO\ EVENT\ SHALL\ THE}}
+\DoxyCodeLine{00600\ \textcolor{comment}{AUTHORS\ OR\ COPYRIGHT\ HOLDERS\ BE\ LIABLE\ FOR\ ANY\ CLAIM,\ DAMAGES\ OR\ OTHER}}
+\DoxyCodeLine{00601\ \textcolor{comment}{LIABILITY,\ WHETHER\ IN\ AN\ ACTION\ OF\ CONTRACT,\ TORT\ OR\ OTHERWISE,\ ARISING\ FROM,}}
+\DoxyCodeLine{00602\ \textcolor{comment}{OUT\ OF\ OR\ IN\ CONNECTION\ WITH\ THE\ SOFTWARE\ OR\ THE\ USE\ OR\ OTHER\ DEALINGS\ IN\ THE}}
+\DoxyCodeLine{00603\ \textcolor{comment}{SOFTWARE.}}
+\DoxyCodeLine{00604\ \textcolor{comment}{-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/}}
+\DoxyCodeLine{00605\ \textcolor{comment}{ALTERNATIVE\ B\ -\/\ Public\ Domain\ (www.unlicense.org)}}
+\DoxyCodeLine{00606\ \textcolor{comment}{This\ is\ free\ and\ unencumbered\ software\ released\ into\ the\ public\ domain.}}
+\DoxyCodeLine{00607\ \textcolor{comment}{Anyone\ is\ free\ to\ copy,\ modify,\ publish,\ use,\ compile,\ sell,\ or\ distribute\ this}}
+\DoxyCodeLine{00608\ \textcolor{comment}{software,\ either\ in\ source\ code\ form\ or\ as\ a\ compiled\ binary,\ for\ any\ purpose,}}
+\DoxyCodeLine{00609\ \textcolor{comment}{commercial\ or\ non-\/commercial,\ and\ by\ any\ means.}}
+\DoxyCodeLine{00610\ \textcolor{comment}{In\ jurisdictions\ that\ recognize\ copyright\ laws,\ the\ author\ or\ authors\ of\ this}}
+\DoxyCodeLine{00611\ \textcolor{comment}{software\ dedicate\ any\ and\ all\ copyright\ interest\ in\ the\ software\ to\ the\ public}}
+\DoxyCodeLine{00612\ \textcolor{comment}{domain.\ We\ make\ this\ dedication\ for\ the\ benefit\ of\ the\ public\ at\ large\ and\ to}}
+\DoxyCodeLine{00613\ \textcolor{comment}{the\ detriment\ of\ our\ heirs\ and\ successors.\ We\ intend\ this\ dedication\ to\ be\ an}}
+\DoxyCodeLine{00614\ \textcolor{comment}{overt\ act\ of\ relinquishment\ in\ perpetuity\ of\ all\ present\ and\ future\ rights\ to}}
+\DoxyCodeLine{00615\ \textcolor{comment}{this\ software\ under\ copyright\ law.}}
+\DoxyCodeLine{00616\ \textcolor{comment}{THE\ SOFTWARE\ IS\ PROVIDED\ "{}AS\ IS"{},\ WITHOUT\ WARRANTY\ OF\ ANY\ KIND,\ EXPRESS\ OR}}
+\DoxyCodeLine{00617\ \textcolor{comment}{IMPLIED,\ INCLUDING\ BUT\ NOT\ LIMITED\ TO\ THE\ WARRANTIES\ OF\ MERCHANTABILITY,}}
+\DoxyCodeLine{00618\ \textcolor{comment}{FITNESS\ FOR\ A\ PARTICULAR\ PURPOSE\ AND\ NONINFRINGEMENT.\ IN\ NO\ EVENT\ SHALL\ THE}}
+\DoxyCodeLine{00619\ \textcolor{comment}{AUTHORS\ BE\ LIABLE\ FOR\ ANY\ CLAIM,\ DAMAGES\ OR\ OTHER\ LIABILITY,\ WHETHER\ IN\ AN}}
+\DoxyCodeLine{00620\ \textcolor{comment}{ACTION\ OF\ CONTRACT,\ TORT\ OR\ OTHERWISE,\ ARISING\ FROM,\ OUT\ OF\ OR\ IN\ CONNECTION}}
+\DoxyCodeLine{00621\ \textcolor{comment}{WITH\ THE\ SOFTWARE\ OR\ THE\ USE\ OR\ OTHER\ DEALINGS\ IN\ THE\ SOFTWARE.}}
+\DoxyCodeLine{00622\ \textcolor{comment}{-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/}}
+\DoxyCodeLine{00623\ \textcolor{comment}{*/}}
+
+\end{DoxyCode}

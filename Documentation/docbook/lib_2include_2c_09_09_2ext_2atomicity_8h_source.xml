@@ -1,0 +1,128 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<section xmlns="http://docbook.org/ns/docbook" version="5.0" xmlns:xlink="http://www.w3.org/1999/xlink" xml:id="_lib_2include_2c_09_09_2ext_2atomicity_8h_source" xml:lang="en-US">
+<title>atomicity.h</title>
+<indexterm><primary>C:/Users/HP/Documents/GitHub/Minero-Game/lib/include/c++/ext/atomicity.h</primary></indexterm>
+Go to the documentation of this file.<programlisting linenumbering="unnumbered">1 <emphasis role="comment">//&#32;Support&#32;for&#32;atomic&#32;operations&#32;-*-&#32;C++&#32;-*-</emphasis>
+2 
+3 <emphasis role="comment">//&#32;Copyright&#32;(C)&#32;2004-2022&#32;Free&#32;Software&#32;Foundation,&#32;Inc.</emphasis>
+4 <emphasis role="comment">//</emphasis>
+5 <emphasis role="comment">//&#32;This&#32;file&#32;is&#32;part&#32;of&#32;the&#32;GNU&#32;ISO&#32;C++&#32;Library.&#32;&#32;This&#32;library&#32;is&#32;free</emphasis>
+6 <emphasis role="comment">//&#32;software;&#32;you&#32;can&#32;redistribute&#32;it&#32;and/or&#32;modify&#32;it&#32;under&#32;the</emphasis>
+7 <emphasis role="comment">//&#32;terms&#32;of&#32;the&#32;GNU&#32;General&#32;Public&#32;License&#32;as&#32;published&#32;by&#32;the</emphasis>
+8 <emphasis role="comment">//&#32;Free&#32;Software&#32;Foundation;&#32;either&#32;version&#32;3,&#32;or&#32;(at&#32;your&#32;option)</emphasis>
+9 <emphasis role="comment">//&#32;any&#32;later&#32;version.</emphasis>
+10 
+11 <emphasis role="comment">//&#32;This&#32;library&#32;is&#32;distributed&#32;in&#32;the&#32;hope&#32;that&#32;it&#32;will&#32;be&#32;useful,</emphasis>
+12 <emphasis role="comment">//&#32;but&#32;WITHOUT&#32;ANY&#32;WARRANTY;&#32;without&#32;even&#32;the&#32;implied&#32;warranty&#32;of</emphasis>
+13 <emphasis role="comment">//&#32;MERCHANTABILITY&#32;or&#32;FITNESS&#32;FOR&#32;A&#32;PARTICULAR&#32;PURPOSE.&#32;&#32;See&#32;the</emphasis>
+14 <emphasis role="comment">//&#32;GNU&#32;General&#32;Public&#32;License&#32;for&#32;more&#32;details.</emphasis>
+15 
+16 <emphasis role="comment">//&#32;Under&#32;Section&#32;7&#32;of&#32;GPL&#32;version&#32;3,&#32;you&#32;are&#32;granted&#32;additional</emphasis>
+17 <emphasis role="comment">//&#32;permissions&#32;described&#32;in&#32;the&#32;GCC&#32;Runtime&#32;Library&#32;Exception,&#32;version</emphasis>
+18 <emphasis role="comment">//&#32;3.1,&#32;as&#32;published&#32;by&#32;the&#32;Free&#32;Software&#32;Foundation.</emphasis>
+19 
+20 <emphasis role="comment">//&#32;You&#32;should&#32;have&#32;received&#32;a&#32;copy&#32;of&#32;the&#32;GNU&#32;General&#32;Public&#32;License&#32;and</emphasis>
+21 <emphasis role="comment">//&#32;a&#32;copy&#32;of&#32;the&#32;GCC&#32;Runtime&#32;Library&#32;Exception&#32;along&#32;with&#32;this&#32;program;</emphasis>
+22 <emphasis role="comment">//&#32;see&#32;the&#32;files&#32;COPYING3&#32;and&#32;COPYING.RUNTIME&#32;respectively.&#32;&#32;If&#32;not,&#32;see</emphasis>
+23 <emphasis role="comment">//&#32;&lt;http://www.gnu.org/licenses/&gt;.</emphasis>
+24 
+29 <emphasis role="preprocessor">#ifndef&#32;_GLIBCXX_ATOMICITY_H</emphasis>
+30 <emphasis role="preprocessor">#define&#32;_GLIBCXX_ATOMICITY_H&#32;&#32;&#32;&#32;1</emphasis>
+31 
+32 <emphasis role="preprocessor">#pragma&#32;GCC&#32;system_header</emphasis>
+33 
+34 <emphasis role="preprocessor">#include&#32;&lt;bits/c++config.h&gt;</emphasis>
+35 <emphasis role="preprocessor">#include&#32;&lt;bits/gthr.h&gt;</emphasis>
+36 <emphasis role="preprocessor">#include&#32;&lt;bits/atomic_word.h&gt;</emphasis>
+37 <emphasis role="preprocessor">#if&#32;__has_include(&lt;sys/single_threaded.h&gt;)</emphasis>
+38 <emphasis role="preprocessor">#&#32;include&#32;&lt;sys/single_threaded.h&gt;</emphasis>
+39 <emphasis role="preprocessor">#endif</emphasis>
+40 
+41 <emphasis role="keyword">namespace&#32;</emphasis><link linkend="_namespace____gnu__cxx">__gnu_cxx</link>&#32;<link linkend="__classes_2lib_2include_2c_09_09_2x86__64-w64-mingw32_2bits_2c_09_09config_8h_1a44377df0d3503f0b3d9ab316dd8ddf8b">_GLIBCXX_VISIBILITY</link>(default)
+42 {
+43 _GLIBCXX_BEGIN_NAMESPACE_VERSION
+44 
+45 &#32;&#32;<link linkend="__classes_2lib_2include_2avx512bf16intrin_8h_1a016eb0ea28cf676c28ca5fdd1709f105">__attribute__</link>((__always_inline__))
+46 &#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>
+47 &#32;&#32;__is_single_threaded()&#32;<link linkend="__classes_2lib_2include_2c_09_09_2x86__64-w64-mingw32_2bits_2c_09_09config_8h_1af2a92889977e9171e0cbfe6445b6a79f">_GLIBCXX_NOTHROW</link>
+48 &#32;&#32;{
+49 <emphasis role="preprocessor">#ifndef&#32;__GTHREADS</emphasis>
+50 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<emphasis role="keyword">true</emphasis>;
+51 <emphasis role="preprocessor">#elif&#32;__has_include(&lt;sys/single_threaded.h&gt;)</emphasis>
+52 &#32;&#32;&#32;&#32;return&#32;::__libc_single_threaded;
+53 <emphasis role="preprocessor">#else</emphasis>
+54 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;!__gthread_active_p();
+55 <emphasis role="preprocessor">#endif</emphasis>
+56 &#32;&#32;}
+57 
+58 &#32;&#32;<emphasis role="comment">//&#32;Functions&#32;for&#32;portable&#32;atomic&#32;access.</emphasis>
+59 &#32;&#32;<emphasis role="comment">//&#32;To&#32;abstract&#32;locking&#32;primitives&#32;across&#32;all&#32;thread&#32;policies,&#32;use:</emphasis>
+60 &#32;&#32;<emphasis role="comment">//&#32;__exchange_and_add_dispatch</emphasis>
+61 &#32;&#32;<emphasis role="comment">//&#32;__atomic_add_dispatch</emphasis>
+62 <emphasis role="preprocessor">#ifdef&#32;_GLIBCXX_ATOMIC_BUILTINS</emphasis>
+63 &#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<link linkend="__classes_2lib_2include_2c_09_09_2x86__64-w64-mingw32_2bits_2atomic__word_8h_1a0c6f0003af1fd2cb9e6926596bf158bc">_Atomic_word</link>
+64 &#32;&#32;<link linkend="__classes_2lib_2include_2avx512bf16intrin_8h_1a016eb0ea28cf676c28ca5fdd1709f105">__attribute__</link>((__always_inline__))
+65 &#32;&#32;__exchange_and_add(<emphasis role="keyword">volatile</emphasis>&#32;<link linkend="__classes_2lib_2include_2c_09_09_2x86__64-w64-mingw32_2bits_2atomic__word_8h_1a0c6f0003af1fd2cb9e6926596bf158bc">_Atomic_word</link>*&#32;__mem,&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2include_2stdatomic_8h_1a15181bfd16829c92971879064b9d8dbb">__val</link>)
+66 &#32;&#32;{&#32;<emphasis role="keywordflow">return</emphasis>&#32;__atomic_fetch_add(__mem,&#32;<link linkend="__classes_2lib_2include_2stdatomic_8h_1a15181bfd16829c92971879064b9d8dbb">__val</link>,&#32;__ATOMIC_ACQ_REL);&#32;}
+67 
+68 &#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>
+69 &#32;&#32;<link linkend="__classes_2lib_2include_2avx512bf16intrin_8h_1a016eb0ea28cf676c28ca5fdd1709f105">__attribute__</link>((__always_inline__))
+70 &#32;&#32;__atomic_add(<emphasis role="keyword">volatile</emphasis>&#32;<link linkend="__classes_2lib_2include_2c_09_09_2x86__64-w64-mingw32_2bits_2atomic__word_8h_1a0c6f0003af1fd2cb9e6926596bf158bc">_Atomic_word</link>*&#32;__mem,&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2include_2stdatomic_8h_1a15181bfd16829c92971879064b9d8dbb">__val</link>)
+71 &#32;&#32;{&#32;__atomic_fetch_add(__mem,&#32;<link linkend="__classes_2lib_2include_2stdatomic_8h_1a15181bfd16829c92971879064b9d8dbb">__val</link>,&#32;__ATOMIC_ACQ_REL);&#32;}
+72 <emphasis role="preprocessor">#else</emphasis>
+73 &#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2x86__64-w64-mingw32_2bits_2atomic__word_8h_1a0c6f0003af1fd2cb9e6926596bf158bc">_Atomic_word</link>
+74 &#32;&#32;__exchange_and_add(<emphasis role="keyword">volatile</emphasis>&#32;<link linkend="__classes_2lib_2include_2c_09_09_2x86__64-w64-mingw32_2bits_2atomic__word_8h_1a0c6f0003af1fd2cb9e6926596bf158bc">_Atomic_word</link>*,&#32;<emphasis role="keywordtype">int</emphasis>)&#32;<link linkend="__classes_2lib_2include_2c_09_09_2x86__64-w64-mingw32_2bits_2c_09_09config_8h_1af2a92889977e9171e0cbfe6445b6a79f">_GLIBCXX_NOTHROW</link>;
+75 
+76 &#32;&#32;<emphasis role="keywordtype">void</emphasis>
+77 &#32;&#32;__atomic_add(<emphasis role="keyword">volatile</emphasis>&#32;<link linkend="__classes_2lib_2include_2c_09_09_2x86__64-w64-mingw32_2bits_2atomic__word_8h_1a0c6f0003af1fd2cb9e6926596bf158bc">_Atomic_word</link>*,&#32;<emphasis role="keywordtype">int</emphasis>)&#32;<link linkend="__classes_2lib_2include_2c_09_09_2x86__64-w64-mingw32_2bits_2c_09_09config_8h_1af2a92889977e9171e0cbfe6445b6a79f">_GLIBCXX_NOTHROW</link>;
+78 <emphasis role="preprocessor">#endif</emphasis>
+79 
+80 &#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<link linkend="__classes_2lib_2include_2c_09_09_2x86__64-w64-mingw32_2bits_2atomic__word_8h_1a0c6f0003af1fd2cb9e6926596bf158bc">_Atomic_word</link>
+81 &#32;&#32;<link linkend="__classes_2lib_2include_2avx512bf16intrin_8h_1a016eb0ea28cf676c28ca5fdd1709f105">__attribute__</link>((__always_inline__))
+82 &#32;&#32;__exchange_and_add_single(<link linkend="__classes_2lib_2include_2c_09_09_2x86__64-w64-mingw32_2bits_2atomic__word_8h_1a0c6f0003af1fd2cb9e6926596bf158bc">_Atomic_word</link>*&#32;__mem,&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2include_2stdatomic_8h_1a15181bfd16829c92971879064b9d8dbb">__val</link>)
+83 &#32;&#32;{
+84 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2x86__64-w64-mingw32_2bits_2atomic__word_8h_1a0c6f0003af1fd2cb9e6926596bf158bc">_Atomic_word</link>&#32;__result&#32;=&#32;*__mem;
+85 &#32;&#32;&#32;&#32;*__mem&#32;+=&#32;<link linkend="__classes_2lib_2include_2stdatomic_8h_1a15181bfd16829c92971879064b9d8dbb">__val</link>;
+86 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__result;
+87 &#32;&#32;}
+88 
+89 &#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>
+90 &#32;&#32;<link linkend="__classes_2lib_2include_2avx512bf16intrin_8h_1a016eb0ea28cf676c28ca5fdd1709f105">__attribute__</link>((__always_inline__))
+91 &#32;&#32;__atomic_add_single(<link linkend="__classes_2lib_2include_2c_09_09_2x86__64-w64-mingw32_2bits_2atomic__word_8h_1a0c6f0003af1fd2cb9e6926596bf158bc">_Atomic_word</link>*&#32;__mem,&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2include_2stdatomic_8h_1a15181bfd16829c92971879064b9d8dbb">__val</link>)
+92 &#32;&#32;{&#32;*__mem&#32;+=&#32;<link linkend="__classes_2lib_2include_2stdatomic_8h_1a15181bfd16829c92971879064b9d8dbb">__val</link>;&#32;}
+93 
+94 &#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<link linkend="__classes_2lib_2include_2c_09_09_2x86__64-w64-mingw32_2bits_2atomic__word_8h_1a0c6f0003af1fd2cb9e6926596bf158bc">_Atomic_word</link>
+95 &#32;&#32;<link linkend="__classes_2lib_2include_2avx512bf16intrin_8h_1a016eb0ea28cf676c28ca5fdd1709f105">__attribute__</link>&#32;((__always_inline__))
+96 &#32;&#32;__exchange_and_add_dispatch(<link linkend="__classes_2lib_2include_2c_09_09_2x86__64-w64-mingw32_2bits_2atomic__word_8h_1a0c6f0003af1fd2cb9e6926596bf158bc">_Atomic_word</link>*&#32;__mem,&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2include_2stdatomic_8h_1a15181bfd16829c92971879064b9d8dbb">__val</link>)
+97 &#32;&#32;{
+98 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__is_single_threaded())
+99 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__exchange_and_add_single(__mem,&#32;<link linkend="__classes_2lib_2include_2stdatomic_8h_1a15181bfd16829c92971879064b9d8dbb">__val</link>);
+100 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>
+101 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__exchange_and_add(__mem,&#32;<link linkend="__classes_2lib_2include_2stdatomic_8h_1a15181bfd16829c92971879064b9d8dbb">__val</link>);
+102 &#32;&#32;}
+103 
+104 &#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>
+105 &#32;&#32;<link linkend="__classes_2lib_2include_2avx512bf16intrin_8h_1a016eb0ea28cf676c28ca5fdd1709f105">__attribute__</link>&#32;((__always_inline__))
+106 &#32;&#32;__atomic_add_dispatch(<link linkend="__classes_2lib_2include_2c_09_09_2x86__64-w64-mingw32_2bits_2atomic__word_8h_1a0c6f0003af1fd2cb9e6926596bf158bc">_Atomic_word</link>*&#32;__mem,&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2include_2stdatomic_8h_1a15181bfd16829c92971879064b9d8dbb">__val</link>)
+107 &#32;&#32;{
+108 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__is_single_threaded())
+109 &#32;&#32;&#32;&#32;&#32;&#32;__atomic_add_single(__mem,&#32;<link linkend="__classes_2lib_2include_2stdatomic_8h_1a15181bfd16829c92971879064b9d8dbb">__val</link>);
+110 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>
+111 &#32;&#32;&#32;&#32;&#32;&#32;__atomic_add(__mem,&#32;<link linkend="__classes_2lib_2include_2stdatomic_8h_1a15181bfd16829c92971879064b9d8dbb">__val</link>);
+112 &#32;&#32;}
+113 
+114 _GLIBCXX_END_NAMESPACE_VERSION
+115 }&#32;<emphasis role="comment">//&#32;namespace</emphasis>
+116 
+117 <emphasis role="comment">//&#32;Even&#32;if&#32;the&#32;CPU&#32;doesn&apos;t&#32;need&#32;a&#32;memory&#32;barrier,&#32;we&#32;need&#32;to&#32;ensure</emphasis>
+118 <emphasis role="comment">//&#32;that&#32;the&#32;compiler&#32;doesn&apos;t&#32;reorder&#32;memory&#32;accesses&#32;across&#32;the</emphasis>
+119 <emphasis role="comment">//&#32;barriers.</emphasis>
+120 <emphasis role="preprocessor">#ifndef&#32;_GLIBCXX_READ_MEM_BARRIER</emphasis>
+121 <emphasis role="preprocessor">#define&#32;_GLIBCXX_READ_MEM_BARRIER&#32;__atomic_thread_fence&#32;(__ATOMIC_ACQUIRE)</emphasis>
+122 <emphasis role="preprocessor">#endif</emphasis>
+123 <emphasis role="preprocessor">#ifndef&#32;_GLIBCXX_WRITE_MEM_BARRIER</emphasis>
+124 <emphasis role="preprocessor">#define&#32;_GLIBCXX_WRITE_MEM_BARRIER&#32;__atomic_thread_fence&#32;(__ATOMIC_RELEASE)</emphasis>
+125 <emphasis role="preprocessor">#endif</emphasis>
+126 
+127 <emphasis role="preprocessor">#endif&#32;</emphasis>
+</programlisting></section>

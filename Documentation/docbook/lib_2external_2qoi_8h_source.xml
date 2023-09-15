@@ -1,0 +1,654 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<section xmlns="http://docbook.org/ns/docbook" version="5.0" xmlns:xlink="http://www.w3.org/1999/xlink" xml:id="_lib_2external_2qoi_8h_source" xml:lang="en-US">
+<title>qoi.h</title>
+<indexterm><primary>C:/Users/HP/Documents/GitHub/Minero-Game/lib/external/qoi.h</primary></indexterm>
+Go to the documentation of this file.<programlisting linenumbering="unnumbered">1 <emphasis role="comment">/*</emphasis>
+2 <emphasis role="comment"></emphasis>
+3 <emphasis role="comment">Copyright&#32;(c)&#32;2021,&#32;Dominic&#32;Szablewski&#32;-&#32;https://phoboslab.org</emphasis>
+4 <emphasis role="comment">SPDX-License-Identifier:&#32;MIT</emphasis>
+5 <emphasis role="comment"></emphasis>
+6 <emphasis role="comment"></emphasis>
+7 <emphasis role="comment">QOI&#32;-&#32;The&#32;&quot;Quite&#32;OK&#32;Image&quot;&#32;format&#32;for&#32;fast,&#32;lossless&#32;image&#32;compression</emphasis>
+8 <emphasis role="comment"></emphasis>
+9 <emphasis role="comment">--&#32;About</emphasis>
+10 <emphasis role="comment"></emphasis>
+11 <emphasis role="comment">QOI&#32;encodes&#32;and&#32;decodes&#32;images&#32;in&#32;a&#32;lossless&#32;format.&#32;Compared&#32;to&#32;stb_image&#32;and</emphasis>
+12 <emphasis role="comment">stb_image_write&#32;QOI&#32;offers&#32;20x-50x&#32;faster&#32;encoding,&#32;3x-4x&#32;faster&#32;decoding&#32;and</emphasis>
+13 <emphasis role="comment">20%&#32;better&#32;compression.</emphasis>
+14 <emphasis role="comment"></emphasis>
+15 <emphasis role="comment"></emphasis>
+16 <emphasis role="comment">--&#32;Synopsis</emphasis>
+17 <emphasis role="comment"></emphasis>
+18 <emphasis role="comment">//&#32;Define&#32;`QOI_IMPLEMENTATION`&#32;in&#32;*one*&#32;C/C++&#32;file&#32;before&#32;including&#32;this</emphasis>
+19 <emphasis role="comment">//&#32;library&#32;to&#32;create&#32;the&#32;implementation.</emphasis>
+20 <emphasis role="comment"></emphasis>
+21 <emphasis role="comment">#define&#32;QOI_IMPLEMENTATION</emphasis>
+22 <emphasis role="comment">#include&#32;&quot;qoi.h&quot;</emphasis>
+23 <emphasis role="comment"></emphasis>
+24 <emphasis role="comment">//&#32;Encode&#32;and&#32;store&#32;an&#32;RGBA&#32;buffer&#32;to&#32;the&#32;file&#32;system.&#32;The&#32;qoi_desc&#32;describes</emphasis>
+25 <emphasis role="comment">//&#32;the&#32;input&#32;pixel&#32;data.</emphasis>
+26 <emphasis role="comment">qoi_write(&quot;image_new.qoi&quot;,&#32;rgba_pixels,&#32;&amp;(qoi_desc){</emphasis>
+27 <emphasis role="comment">&#32;&#32;&#32;&#32;.width&#32;=&#32;1920,</emphasis>
+28 <emphasis role="comment">&#32;&#32;&#32;&#32;.height&#32;=&#32;1080,</emphasis>
+29 <emphasis role="comment">&#32;&#32;&#32;&#32;.channels&#32;=&#32;4,</emphasis>
+30 <emphasis role="comment">&#32;&#32;&#32;&#32;.colorspace&#32;=&#32;QOI_SRGB</emphasis>
+31 <emphasis role="comment">});</emphasis>
+32 <emphasis role="comment"></emphasis>
+33 <emphasis role="comment">//&#32;Load&#32;and&#32;decode&#32;a&#32;QOI&#32;image&#32;from&#32;the&#32;file&#32;system&#32;into&#32;a&#32;32bbp&#32;RGBA&#32;buffer.</emphasis>
+34 <emphasis role="comment">//&#32;The&#32;qoi_desc&#32;struct&#32;will&#32;be&#32;filled&#32;with&#32;the&#32;width,&#32;height,&#32;number&#32;of&#32;channels</emphasis>
+35 <emphasis role="comment">//&#32;and&#32;colorspace&#32;read&#32;from&#32;the&#32;file&#32;header.</emphasis>
+36 <emphasis role="comment">qoi_desc&#32;desc;</emphasis>
+37 <emphasis role="comment">void&#32;*rgba_pixels&#32;=&#32;qoi_read(&quot;image.qoi&quot;,&#32;&amp;desc,&#32;4);</emphasis>
+38 <emphasis role="comment"></emphasis>
+39 <emphasis role="comment"></emphasis>
+40 <emphasis role="comment"></emphasis>
+41 <emphasis role="comment">--&#32;Documentation</emphasis>
+42 <emphasis role="comment"></emphasis>
+43 <emphasis role="comment">This&#32;library&#32;provides&#32;the&#32;following&#32;functions;</emphasis>
+44 <emphasis role="comment">-&#32;qoi_read&#32;&#32;&#32;&#32;--&#32;read&#32;and&#32;decode&#32;a&#32;QOI&#32;file</emphasis>
+45 <emphasis role="comment">-&#32;qoi_decode&#32;&#32;--&#32;decode&#32;the&#32;raw&#32;bytes&#32;of&#32;a&#32;QOI&#32;image&#32;from&#32;memory</emphasis>
+46 <emphasis role="comment">-&#32;qoi_write&#32;&#32;&#32;--&#32;encode&#32;and&#32;write&#32;a&#32;QOI&#32;file</emphasis>
+47 <emphasis role="comment">-&#32;qoi_encode&#32;&#32;--&#32;encode&#32;an&#32;rgba&#32;buffer&#32;into&#32;a&#32;QOI&#32;image&#32;in&#32;memory</emphasis>
+48 <emphasis role="comment"></emphasis>
+49 <emphasis role="comment">See&#32;the&#32;function&#32;declaration&#32;below&#32;for&#32;the&#32;signature&#32;and&#32;more&#32;information.</emphasis>
+50 <emphasis role="comment"></emphasis>
+51 <emphasis role="comment">If&#32;you&#32;don&apos;t&#32;want/need&#32;the&#32;qoi_read&#32;and&#32;qoi_write&#32;functions,&#32;you&#32;can&#32;define</emphasis>
+52 <emphasis role="comment">QOI_NO_STDIO&#32;before&#32;including&#32;this&#32;library.</emphasis>
+53 <emphasis role="comment"></emphasis>
+54 <emphasis role="comment">This&#32;library&#32;uses&#32;malloc()&#32;and&#32;free().&#32;To&#32;supply&#32;your&#32;own&#32;malloc&#32;implementation</emphasis>
+55 <emphasis role="comment">you&#32;can&#32;define&#32;QOI_MALLOC&#32;and&#32;QOI_FREE&#32;before&#32;including&#32;this&#32;library.</emphasis>
+56 <emphasis role="comment"></emphasis>
+57 <emphasis role="comment">This&#32;library&#32;uses&#32;memset()&#32;to&#32;zero-initialize&#32;the&#32;index.&#32;To&#32;supply&#32;your&#32;own</emphasis>
+58 <emphasis role="comment">implementation&#32;you&#32;can&#32;define&#32;QOI_ZEROARR&#32;before&#32;including&#32;this&#32;library.</emphasis>
+59 <emphasis role="comment"></emphasis>
+60 <emphasis role="comment"></emphasis>
+61 <emphasis role="comment">--&#32;Data&#32;Format</emphasis>
+62 <emphasis role="comment"></emphasis>
+63 <emphasis role="comment">A&#32;QOI&#32;file&#32;has&#32;a&#32;14&#32;byte&#32;header,&#32;followed&#32;by&#32;any&#32;number&#32;of&#32;data&#32;&quot;chunks&quot;&#32;and&#32;an</emphasis>
+64 <emphasis role="comment">8-byte&#32;end&#32;marker.</emphasis>
+65 <emphasis role="comment"></emphasis>
+66 <emphasis role="comment">struct&#32;qoi_header_t&#32;{</emphasis>
+67 <emphasis role="comment">&#32;&#32;&#32;&#32;char&#32;&#32;&#32;&#32;&#32;magic[4];&#32;&#32;&#32;//&#32;magic&#32;bytes&#32;&quot;qoif&quot;</emphasis>
+68 <emphasis role="comment">&#32;&#32;&#32;&#32;uint32_t&#32;width;&#32;&#32;&#32;&#32;&#32;&#32;//&#32;image&#32;width&#32;in&#32;pixels&#32;(BE)</emphasis>
+69 <emphasis role="comment">&#32;&#32;&#32;&#32;uint32_t&#32;height;&#32;&#32;&#32;&#32;&#32;//&#32;image&#32;height&#32;in&#32;pixels&#32;(BE)</emphasis>
+70 <emphasis role="comment">&#32;&#32;&#32;&#32;uint8_t&#32;&#32;channels;&#32;&#32;&#32;//&#32;3&#32;=&#32;RGB,&#32;4&#32;=&#32;RGBA</emphasis>
+71 <emphasis role="comment">&#32;&#32;&#32;&#32;uint8_t&#32;&#32;colorspace;&#32;//&#32;0&#32;=&#32;sRGB&#32;with&#32;linear&#32;alpha,&#32;1&#32;=&#32;all&#32;channels&#32;linear</emphasis>
+72 <emphasis role="comment">};</emphasis>
+73 <emphasis role="comment"></emphasis>
+74 <emphasis role="comment">Images&#32;are&#32;encoded&#32;row&#32;by&#32;row,&#32;left&#32;to&#32;right,&#32;top&#32;to&#32;bottom.&#32;The&#32;decoder&#32;and</emphasis>
+75 <emphasis role="comment">encoder&#32;start&#32;with&#32;{r:&#32;0,&#32;g:&#32;0,&#32;b:&#32;0,&#32;a:&#32;255}&#32;as&#32;the&#32;previous&#32;pixel&#32;value.&#32;An</emphasis>
+76 <emphasis role="comment">image&#32;is&#32;complete&#32;when&#32;all&#32;pixels&#32;specified&#32;by&#32;width&#32;*&#32;height&#32;have&#32;been&#32;covered.</emphasis>
+77 <emphasis role="comment"></emphasis>
+78 <emphasis role="comment">Pixels&#32;are&#32;encoded&#32;as</emphasis>
+79 <emphasis role="comment">&#32;-&#32;a&#32;run&#32;of&#32;the&#32;previous&#32;pixel</emphasis>
+80 <emphasis role="comment">&#32;-&#32;an&#32;index&#32;into&#32;an&#32;array&#32;of&#32;previously&#32;seen&#32;pixels</emphasis>
+81 <emphasis role="comment">&#32;-&#32;a&#32;difference&#32;to&#32;the&#32;previous&#32;pixel&#32;value&#32;in&#32;r,g,b</emphasis>
+82 <emphasis role="comment">&#32;-&#32;full&#32;r,g,b&#32;or&#32;r,g,b,a&#32;values</emphasis>
+83 <emphasis role="comment"></emphasis>
+84 <emphasis role="comment">The&#32;color&#32;channels&#32;are&#32;assumed&#32;to&#32;not&#32;be&#32;premultiplied&#32;with&#32;the&#32;alpha&#32;channel</emphasis>
+85 <emphasis role="comment">(&quot;un-premultiplied&#32;alpha&quot;).</emphasis>
+86 <emphasis role="comment"></emphasis>
+87 <emphasis role="comment">A&#32;running&#32;array[64]&#32;(zero-initialized)&#32;of&#32;previously&#32;seen&#32;pixel&#32;values&#32;is</emphasis>
+88 <emphasis role="comment">maintained&#32;by&#32;the&#32;encoder&#32;and&#32;decoder.&#32;Each&#32;pixel&#32;that&#32;is&#32;seen&#32;by&#32;the&#32;encoder</emphasis>
+89 <emphasis role="comment">and&#32;decoder&#32;is&#32;put&#32;into&#32;this&#32;array&#32;at&#32;the&#32;position&#32;formed&#32;by&#32;a&#32;hash&#32;function&#32;of</emphasis>
+90 <emphasis role="comment">the&#32;color&#32;value.&#32;In&#32;the&#32;encoder,&#32;if&#32;the&#32;pixel&#32;value&#32;at&#32;the&#32;index&#32;matches&#32;the</emphasis>
+91 <emphasis role="comment">current&#32;pixel,&#32;this&#32;index&#32;position&#32;is&#32;written&#32;to&#32;the&#32;stream&#32;as&#32;QOI_OP_INDEX.</emphasis>
+92 <emphasis role="comment">The&#32;hash&#32;function&#32;for&#32;the&#32;index&#32;is:</emphasis>
+93 <emphasis role="comment"></emphasis>
+94 <emphasis role="comment">&#32;&#32;&#32;&#32;index_position&#32;=&#32;(r&#32;*&#32;3&#32;+&#32;g&#32;*&#32;5&#32;+&#32;b&#32;*&#32;7&#32;+&#32;a&#32;*&#32;11)&#32;%&#32;64</emphasis>
+95 <emphasis role="comment"></emphasis>
+96 <emphasis role="comment">Each&#32;chunk&#32;starts&#32;with&#32;a&#32;2-&#32;or&#32;8-bit&#32;tag,&#32;followed&#32;by&#32;a&#32;number&#32;of&#32;data&#32;bits.&#32;The</emphasis>
+97 <emphasis role="comment">bit&#32;length&#32;of&#32;chunks&#32;is&#32;divisible&#32;by&#32;8&#32;-&#32;i.e.&#32;all&#32;chunks&#32;are&#32;byte&#32;aligned.&#32;All</emphasis>
+98 <emphasis role="comment">values&#32;encoded&#32;in&#32;these&#32;data&#32;bits&#32;have&#32;the&#32;most&#32;significant&#32;bit&#32;on&#32;the&#32;left.</emphasis>
+99 <emphasis role="comment"></emphasis>
+100 <emphasis role="comment">The&#32;8-bit&#32;tags&#32;have&#32;precedence&#32;over&#32;the&#32;2-bit&#32;tags.&#32;A&#32;decoder&#32;must&#32;check&#32;for&#32;the</emphasis>
+101 <emphasis role="comment">presence&#32;of&#32;an&#32;8-bit&#32;tag&#32;first.</emphasis>
+102 <emphasis role="comment"></emphasis>
+103 <emphasis role="comment">The&#32;byte&#32;stream&apos;s&#32;end&#32;is&#32;marked&#32;with&#32;7&#32;0x00&#32;bytes&#32;followed&#32;a&#32;single&#32;0x01&#32;byte.</emphasis>
+104 <emphasis role="comment"></emphasis>
+105 <emphasis role="comment"></emphasis>
+106 <emphasis role="comment">The&#32;possible&#32;chunks&#32;are:</emphasis>
+107 <emphasis role="comment"></emphasis>
+108 <emphasis role="comment"></emphasis>
+109 <emphasis role="comment">.-&#32;QOI_OP_INDEX&#32;----------.</emphasis>
+110 <emphasis role="comment">|&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;Byte[0]&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;|</emphasis>
+111 <emphasis role="comment">|&#32;&#32;7&#32;&#32;6&#32;&#32;5&#32;&#32;4&#32;&#32;3&#32;&#32;2&#32;&#32;1&#32;&#32;0&#32;|</emphasis>
+112 <emphasis role="comment">|-------+-----------------|</emphasis>
+113 <emphasis role="comment">|&#32;&#32;0&#32;&#32;0&#32;|&#32;&#32;&#32;&#32;&#32;index&#32;&#32;&#32;&#32;&#32;&#32;&#32;|</emphasis>
+114 <emphasis role="comment">`-------------------------`</emphasis>
+115 <emphasis role="comment">2-bit&#32;tag&#32;b00</emphasis>
+116 <emphasis role="comment">6-bit&#32;index&#32;into&#32;the&#32;color&#32;index&#32;array:&#32;0..63</emphasis>
+117 <emphasis role="comment"></emphasis>
+118 <emphasis role="comment">A&#32;valid&#32;encoder&#32;must&#32;not&#32;issue&#32;2&#32;or&#32;more&#32;consecutive&#32;QOI_OP_INDEX&#32;chunks&#32;to&#32;the</emphasis>
+119 <emphasis role="comment">same&#32;index.&#32;QOI_OP_RUN&#32;should&#32;be&#32;used&#32;instead.</emphasis>
+120 <emphasis role="comment"></emphasis>
+121 <emphasis role="comment"></emphasis>
+122 <emphasis role="comment">.-&#32;QOI_OP_DIFF&#32;-----------.</emphasis>
+123 <emphasis role="comment">|&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;Byte[0]&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;|</emphasis>
+124 <emphasis role="comment">|&#32;&#32;7&#32;&#32;6&#32;&#32;5&#32;&#32;4&#32;&#32;3&#32;&#32;2&#32;&#32;1&#32;&#32;0&#32;|</emphasis>
+125 <emphasis role="comment">|-------+-----+-----+-----|</emphasis>
+126 <emphasis role="comment">|&#32;&#32;0&#32;&#32;1&#32;|&#32;&#32;dr&#32;|&#32;&#32;dg&#32;|&#32;&#32;db&#32;|</emphasis>
+127 <emphasis role="comment">`-------------------------`</emphasis>
+128 <emphasis role="comment">2-bit&#32;tag&#32;b01</emphasis>
+129 <emphasis role="comment">2-bit&#32;&#32;&#32;red&#32;channel&#32;difference&#32;from&#32;the&#32;previous&#32;pixel&#32;between&#32;-2..1</emphasis>
+130 <emphasis role="comment">2-bit&#32;green&#32;channel&#32;difference&#32;from&#32;the&#32;previous&#32;pixel&#32;between&#32;-2..1</emphasis>
+131 <emphasis role="comment">2-bit&#32;&#32;blue&#32;channel&#32;difference&#32;from&#32;the&#32;previous&#32;pixel&#32;between&#32;-2..1</emphasis>
+132 <emphasis role="comment"></emphasis>
+133 <emphasis role="comment">The&#32;difference&#32;to&#32;the&#32;current&#32;channel&#32;values&#32;are&#32;using&#32;a&#32;wraparound&#32;operation,</emphasis>
+134 <emphasis role="comment">so&#32;&quot;1&#32;-&#32;2&quot;&#32;will&#32;result&#32;in&#32;255,&#32;while&#32;&quot;255&#32;+&#32;1&quot;&#32;will&#32;result&#32;in&#32;0.</emphasis>
+135 <emphasis role="comment"></emphasis>
+136 <emphasis role="comment">Values&#32;are&#32;stored&#32;as&#32;unsigned&#32;integers&#32;with&#32;a&#32;bias&#32;of&#32;2.&#32;E.g.&#32;-2&#32;is&#32;stored&#32;as</emphasis>
+137 <emphasis role="comment">0&#32;(b00).&#32;1&#32;is&#32;stored&#32;as&#32;3&#32;(b11).</emphasis>
+138 <emphasis role="comment"></emphasis>
+139 <emphasis role="comment">The&#32;alpha&#32;value&#32;remains&#32;unchanged&#32;from&#32;the&#32;previous&#32;pixel.</emphasis>
+140 <emphasis role="comment"></emphasis>
+141 <emphasis role="comment"></emphasis>
+142 <emphasis role="comment">.-&#32;QOI_OP_LUMA&#32;-------------------------------------.</emphasis>
+143 <emphasis role="comment">|&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;Byte[0]&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;|&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;Byte[1]&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;|</emphasis>
+144 <emphasis role="comment">|&#32;&#32;7&#32;&#32;6&#32;&#32;5&#32;&#32;4&#32;&#32;3&#32;&#32;2&#32;&#32;1&#32;&#32;0&#32;|&#32;&#32;7&#32;&#32;6&#32;&#32;5&#32;&#32;4&#32;&#32;3&#32;&#32;2&#32;&#32;1&#32;&#32;0&#32;|</emphasis>
+145 <emphasis role="comment">|-------+-----------------+-------------+-----------|</emphasis>
+146 <emphasis role="comment">|&#32;&#32;1&#32;&#32;0&#32;|&#32;&#32;green&#32;diff&#32;&#32;&#32;&#32;&#32;|&#32;&#32;&#32;dr&#32;-&#32;dg&#32;&#32;&#32;|&#32;&#32;db&#32;-&#32;dg&#32;&#32;|</emphasis>
+147 <emphasis role="comment">`---------------------------------------------------`</emphasis>
+148 <emphasis role="comment">2-bit&#32;tag&#32;b10</emphasis>
+149 <emphasis role="comment">6-bit&#32;green&#32;channel&#32;difference&#32;from&#32;the&#32;previous&#32;pixel&#32;-32..31</emphasis>
+150 <emphasis role="comment">4-bit&#32;&#32;&#32;red&#32;channel&#32;difference&#32;minus&#32;green&#32;channel&#32;difference&#32;-8..7</emphasis>
+151 <emphasis role="comment">4-bit&#32;&#32;blue&#32;channel&#32;difference&#32;minus&#32;green&#32;channel&#32;difference&#32;-8..7</emphasis>
+152 <emphasis role="comment"></emphasis>
+153 <emphasis role="comment">The&#32;green&#32;channel&#32;is&#32;used&#32;to&#32;indicate&#32;the&#32;general&#32;direction&#32;of&#32;change&#32;and&#32;is</emphasis>
+154 <emphasis role="comment">encoded&#32;in&#32;6&#32;bits.&#32;The&#32;red&#32;and&#32;blue&#32;channels&#32;(dr&#32;and&#32;db)&#32;base&#32;their&#32;diffs&#32;off</emphasis>
+155 <emphasis role="comment">of&#32;the&#32;green&#32;channel&#32;difference&#32;and&#32;are&#32;encoded&#32;in&#32;4&#32;bits.&#32;I.e.:</emphasis>
+156 <emphasis role="comment">&#32;&#32;&#32;&#32;dr_dg&#32;=&#32;(cur_px.r&#32;-&#32;prev_px.r)&#32;-&#32;(cur_px.g&#32;-&#32;prev_px.g)</emphasis>
+157 <emphasis role="comment">&#32;&#32;&#32;&#32;db_dg&#32;=&#32;(cur_px.b&#32;-&#32;prev_px.b)&#32;-&#32;(cur_px.g&#32;-&#32;prev_px.g)</emphasis>
+158 <emphasis role="comment"></emphasis>
+159 <emphasis role="comment">The&#32;difference&#32;to&#32;the&#32;current&#32;channel&#32;values&#32;are&#32;using&#32;a&#32;wraparound&#32;operation,</emphasis>
+160 <emphasis role="comment">so&#32;&quot;10&#32;-&#32;13&quot;&#32;will&#32;result&#32;in&#32;253,&#32;while&#32;&quot;250&#32;+&#32;7&quot;&#32;will&#32;result&#32;in&#32;1.</emphasis>
+161 <emphasis role="comment"></emphasis>
+162 <emphasis role="comment">Values&#32;are&#32;stored&#32;as&#32;unsigned&#32;integers&#32;with&#32;a&#32;bias&#32;of&#32;32&#32;for&#32;the&#32;green&#32;channel</emphasis>
+163 <emphasis role="comment">and&#32;a&#32;bias&#32;of&#32;8&#32;for&#32;the&#32;red&#32;and&#32;blue&#32;channel.</emphasis>
+164 <emphasis role="comment"></emphasis>
+165 <emphasis role="comment">The&#32;alpha&#32;value&#32;remains&#32;unchanged&#32;from&#32;the&#32;previous&#32;pixel.</emphasis>
+166 <emphasis role="comment"></emphasis>
+167 <emphasis role="comment"></emphasis>
+168 <emphasis role="comment">.-&#32;QOI_OP_RUN&#32;------------.</emphasis>
+169 <emphasis role="comment">|&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;Byte[0]&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;|</emphasis>
+170 <emphasis role="comment">|&#32;&#32;7&#32;&#32;6&#32;&#32;5&#32;&#32;4&#32;&#32;3&#32;&#32;2&#32;&#32;1&#32;&#32;0&#32;|</emphasis>
+171 <emphasis role="comment">|-------+-----------------|</emphasis>
+172 <emphasis role="comment">|&#32;&#32;1&#32;&#32;1&#32;|&#32;&#32;&#32;&#32;&#32;&#32;&#32;run&#32;&#32;&#32;&#32;&#32;&#32;&#32;|</emphasis>
+173 <emphasis role="comment">`-------------------------`</emphasis>
+174 <emphasis role="comment">2-bit&#32;tag&#32;b11</emphasis>
+175 <emphasis role="comment">6-bit&#32;run-length&#32;repeating&#32;the&#32;previous&#32;pixel:&#32;1..62</emphasis>
+176 <emphasis role="comment"></emphasis>
+177 <emphasis role="comment">The&#32;run-length&#32;is&#32;stored&#32;with&#32;a&#32;bias&#32;of&#32;-1.&#32;Note&#32;that&#32;the&#32;run-lengths&#32;63&#32;and&#32;64</emphasis>
+178 <emphasis role="comment">(b111110&#32;and&#32;b111111)&#32;are&#32;illegal&#32;as&#32;they&#32;are&#32;occupied&#32;by&#32;the&#32;QOI_OP_RGB&#32;and</emphasis>
+179 <emphasis role="comment">QOI_OP_RGBA&#32;tags.</emphasis>
+180 <emphasis role="comment"></emphasis>
+181 <emphasis role="comment"></emphasis>
+182 <emphasis role="comment">.-&#32;QOI_OP_RGB&#32;------------------------------------------.</emphasis>
+183 <emphasis role="comment">|&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;Byte[0]&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;|&#32;Byte[1]&#32;|&#32;Byte[2]&#32;|&#32;Byte[3]&#32;|</emphasis>
+184 <emphasis role="comment">|&#32;&#32;7&#32;&#32;6&#32;&#32;5&#32;&#32;4&#32;&#32;3&#32;&#32;2&#32;&#32;1&#32;&#32;0&#32;|&#32;7&#32;..&#32;0&#32;&#32;|&#32;7&#32;..&#32;0&#32;&#32;|&#32;7&#32;..&#32;0&#32;&#32;|</emphasis>
+185 <emphasis role="comment">|-------------------------+---------+---------+---------|</emphasis>
+186 <emphasis role="comment">|&#32;&#32;1&#32;&#32;1&#32;&#32;1&#32;&#32;1&#32;&#32;1&#32;&#32;1&#32;&#32;1&#32;&#32;0&#32;|&#32;&#32;&#32;red&#32;&#32;&#32;|&#32;&#32;green&#32;&#32;|&#32;&#32;blue&#32;&#32;&#32;|</emphasis>
+187 <emphasis role="comment">`-------------------------------------------------------`</emphasis>
+188 <emphasis role="comment">8-bit&#32;tag&#32;b11111110</emphasis>
+189 <emphasis role="comment">8-bit&#32;&#32;&#32;red&#32;channel&#32;value</emphasis>
+190 <emphasis role="comment">8-bit&#32;green&#32;channel&#32;value</emphasis>
+191 <emphasis role="comment">8-bit&#32;&#32;blue&#32;channel&#32;value</emphasis>
+192 <emphasis role="comment"></emphasis>
+193 <emphasis role="comment">The&#32;alpha&#32;value&#32;remains&#32;unchanged&#32;from&#32;the&#32;previous&#32;pixel.</emphasis>
+194 <emphasis role="comment"></emphasis>
+195 <emphasis role="comment"></emphasis>
+196 <emphasis role="comment">.-&#32;QOI_OP_RGBA&#32;---------------------------------------------------.</emphasis>
+197 <emphasis role="comment">|&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;Byte[0]&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;|&#32;Byte[1]&#32;|&#32;Byte[2]&#32;|&#32;Byte[3]&#32;|&#32;Byte[4]&#32;|</emphasis>
+198 <emphasis role="comment">|&#32;&#32;7&#32;&#32;6&#32;&#32;5&#32;&#32;4&#32;&#32;3&#32;&#32;2&#32;&#32;1&#32;&#32;0&#32;|&#32;7&#32;..&#32;0&#32;&#32;|&#32;7&#32;..&#32;0&#32;&#32;|&#32;7&#32;..&#32;0&#32;&#32;|&#32;7&#32;..&#32;0&#32;&#32;|</emphasis>
+199 <emphasis role="comment">|-------------------------+---------+---------+---------+---------|</emphasis>
+200 <emphasis role="comment">|&#32;&#32;1&#32;&#32;1&#32;&#32;1&#32;&#32;1&#32;&#32;1&#32;&#32;1&#32;&#32;1&#32;&#32;1&#32;|&#32;&#32;&#32;red&#32;&#32;&#32;|&#32;&#32;green&#32;&#32;|&#32;&#32;blue&#32;&#32;&#32;|&#32;&#32;alpha&#32;&#32;|</emphasis>
+201 <emphasis role="comment">`-----------------------------------------------------------------`</emphasis>
+202 <emphasis role="comment">8-bit&#32;tag&#32;b11111111</emphasis>
+203 <emphasis role="comment">8-bit&#32;&#32;&#32;red&#32;channel&#32;value</emphasis>
+204 <emphasis role="comment">8-bit&#32;green&#32;channel&#32;value</emphasis>
+205 <emphasis role="comment">8-bit&#32;&#32;blue&#32;channel&#32;value</emphasis>
+206 <emphasis role="comment">8-bit&#32;alpha&#32;channel&#32;value</emphasis>
+207 <emphasis role="comment"></emphasis>
+208 <emphasis role="comment">*/</emphasis>
+209 
+210 
+211 <emphasis role="comment">/*&#32;-----------------------------------------------------------------------------</emphasis>
+212 <emphasis role="comment">Header&#32;-&#32;Public&#32;functions&#32;*/</emphasis>
+213 
+214 <emphasis role="preprocessor">#ifndef&#32;QOI_H</emphasis>
+215 <emphasis role="preprocessor">#define&#32;QOI_H</emphasis>
+216 
+217 <emphasis role="preprocessor">#ifdef&#32;__cplusplus</emphasis>
+218 <emphasis role="keyword">extern</emphasis>&#32;<emphasis role="stringliteral">&quot;C&quot;</emphasis>&#32;{
+219 <emphasis role="preprocessor">#endif</emphasis>
+220 
+221 <emphasis role="comment">/*&#32;A&#32;pointer&#32;to&#32;a&#32;qoi_desc&#32;struct&#32;has&#32;to&#32;be&#32;supplied&#32;to&#32;all&#32;of&#32;qoi&apos;s&#32;functions.</emphasis>
+222 <emphasis role="comment">It&#32;describes&#32;either&#32;the&#32;input&#32;format&#32;(for&#32;qoi_write&#32;and&#32;qoi_encode),&#32;or&#32;is</emphasis>
+223 <emphasis role="comment">filled&#32;with&#32;the&#32;description&#32;read&#32;from&#32;the&#32;file&#32;header&#32;(for&#32;qoi_read&#32;and</emphasis>
+224 <emphasis role="comment">qoi_decode).</emphasis>
+225 <emphasis role="comment"></emphasis>
+226 <emphasis role="comment">The&#32;colorspace&#32;in&#32;this&#32;qoi_desc&#32;is&#32;an&#32;enum&#32;where</emphasis>
+227 <emphasis role="comment">&#32;&#32;&#32;&#32;0&#32;=&#32;sRGB,&#32;i.e.&#32;gamma&#32;scaled&#32;RGB&#32;channels&#32;and&#32;a&#32;linear&#32;alpha&#32;channel</emphasis>
+228 <emphasis role="comment">&#32;&#32;&#32;&#32;1&#32;=&#32;all&#32;channels&#32;are&#32;linear</emphasis>
+229 <emphasis role="comment">You&#32;may&#32;use&#32;the&#32;constants&#32;QOI_SRGB&#32;or&#32;QOI_LINEAR.&#32;The&#32;colorspace&#32;is&#32;purely</emphasis>
+230 <emphasis role="comment">informative.&#32;It&#32;will&#32;be&#32;saved&#32;to&#32;the&#32;file&#32;header,&#32;but&#32;does&#32;not&#32;affect</emphasis>
+231 <emphasis role="comment">how&#32;chunks&#32;are&#32;en-/decoded.&#32;*/</emphasis>
+232 
+233 <emphasis role="preprocessor">#define&#32;QOI_SRGB&#32;&#32;&#32;0</emphasis>
+234 <emphasis role="preprocessor">#define&#32;QOI_LINEAR&#32;1</emphasis>
+235 
+236 <emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">struct&#32;</emphasis>{
+237 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1a3ce386e55bbeb900c1b23e064b89bd04">width</link>;
+238 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_e_g_l_2eglext_8h_1aedd0ea77029b98ce91e47c19addcb68f">height</link>;
+239 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>&#32;channels;
+240 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>&#32;colorspace;
+241 }&#32;<link linkend="_structqoi__desc">qoi_desc</link>;
+242 
+243 <emphasis role="preprocessor">#ifndef&#32;QOI_NO_STDIO</emphasis>
+244 
+245 <emphasis role="comment">/*&#32;Encode&#32;raw&#32;RGB&#32;or&#32;RGBA&#32;pixels&#32;into&#32;a&#32;QOI&#32;image&#32;and&#32;write&#32;it&#32;to&#32;the&#32;file</emphasis>
+246 <emphasis role="comment">system.&#32;The&#32;qoi_desc&#32;struct&#32;must&#32;be&#32;filled&#32;with&#32;the&#32;image&#32;width,&#32;height,</emphasis>
+247 <emphasis role="comment">number&#32;of&#32;channels&#32;(3&#32;=&#32;RGB,&#32;4&#32;=&#32;RGBA)&#32;and&#32;the&#32;colorspace.</emphasis>
+248 <emphasis role="comment"></emphasis>
+249 <emphasis role="comment">The&#32;function&#32;returns&#32;0&#32;on&#32;failure&#32;(invalid&#32;parameters,&#32;or&#32;fopen&#32;or&#32;malloc</emphasis>
+250 <emphasis role="comment">failed)&#32;or&#32;the&#32;number&#32;of&#32;bytes&#32;written&#32;on&#32;success.&#32;*/</emphasis>
+251 
+252 <emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2external_2qoi_8h_1a249fef81f60dc1e63cd4cb025eb92754">qoi_write</link>(<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>&#32;*<link linkend="__classes_2lib_2m_i_n_i-master_2tests_2testhuge_8cpp_1a42a21beb8018ac623f4d09db1343b9cf">filename</link>,&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>&#32;*<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a89ce72163394e6aef63b551a8806e93f">data</link>,&#32;<emphasis role="keyword">const</emphasis>&#32;<link linkend="_structqoi__desc">qoi_desc</link>&#32;*desc);
+253 
+254 
+255 <emphasis role="comment">/*&#32;Read&#32;and&#32;decode&#32;a&#32;QOI&#32;image&#32;from&#32;the&#32;file&#32;system.&#32;If&#32;channels&#32;is&#32;0,&#32;the</emphasis>
+256 <emphasis role="comment">number&#32;of&#32;channels&#32;from&#32;the&#32;file&#32;header&#32;is&#32;used.&#32;If&#32;channels&#32;is&#32;3&#32;or&#32;4&#32;the</emphasis>
+257 <emphasis role="comment">output&#32;format&#32;will&#32;be&#32;forced&#32;into&#32;this&#32;number&#32;of&#32;channels.</emphasis>
+258 <emphasis role="comment"></emphasis>
+259 <emphasis role="comment">The&#32;function&#32;either&#32;returns&#32;NULL&#32;on&#32;failure&#32;(invalid&#32;data,&#32;or&#32;malloc&#32;or&#32;fopen</emphasis>
+260 <emphasis role="comment">failed)&#32;or&#32;a&#32;pointer&#32;to&#32;the&#32;decoded&#32;pixels.&#32;On&#32;success,&#32;the&#32;qoi_desc&#32;struct</emphasis>
+261 <emphasis role="comment">will&#32;be&#32;filled&#32;with&#32;the&#32;description&#32;from&#32;the&#32;file&#32;header.</emphasis>
+262 <emphasis role="comment"></emphasis>
+263 <emphasis role="comment">The&#32;returned&#32;pixel&#32;data&#32;should&#32;be&#32;free()d&#32;after&#32;use.&#32;*/</emphasis>
+264 
+265 <emphasis role="keywordtype">void</emphasis>&#32;*<link linkend="__classes_2lib_2external_2qoi_8h_1a7a1246ac68f55b93512ba64d1cc59ef7">qoi_read</link>(<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>&#32;*<link linkend="__classes_2lib_2m_i_n_i-master_2tests_2testhuge_8cpp_1a42a21beb8018ac623f4d09db1343b9cf">filename</link>,&#32;<link linkend="_structqoi__desc">qoi_desc</link>&#32;*desc,&#32;<emphasis role="keywordtype">int</emphasis>&#32;channels);
+266 
+267 <emphasis role="preprocessor">#endif&#32;</emphasis><emphasis role="comment">/*&#32;QOI_NO_STDIO&#32;*/</emphasis><emphasis role="preprocessor"></emphasis>
+268 
+269 
+270 <emphasis role="comment">/*&#32;Encode&#32;raw&#32;RGB&#32;or&#32;RGBA&#32;pixels&#32;into&#32;a&#32;QOI&#32;image&#32;in&#32;memory.</emphasis>
+271 <emphasis role="comment"></emphasis>
+272 <emphasis role="comment">The&#32;function&#32;either&#32;returns&#32;NULL&#32;on&#32;failure&#32;(invalid&#32;parameters&#32;or&#32;malloc</emphasis>
+273 <emphasis role="comment">failed)&#32;or&#32;a&#32;pointer&#32;to&#32;the&#32;encoded&#32;data&#32;on&#32;success.&#32;On&#32;success&#32;the&#32;out_len</emphasis>
+274 <emphasis role="comment">is&#32;set&#32;to&#32;the&#32;size&#32;in&#32;bytes&#32;of&#32;the&#32;encoded&#32;data.</emphasis>
+275 <emphasis role="comment"></emphasis>
+276 <emphasis role="comment">The&#32;returned&#32;qoi&#32;data&#32;should&#32;be&#32;free()d&#32;after&#32;use.&#32;*/</emphasis>
+277 
+278 <emphasis role="keywordtype">void</emphasis>&#32;*<link linkend="__classes_2lib_2external_2qoi_8h_1af2e5852f717a39e1d4cf482b9a4a9d06">qoi_encode</link>(<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>&#32;*<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a89ce72163394e6aef63b551a8806e93f">data</link>,&#32;<emphasis role="keyword">const</emphasis>&#32;<link linkend="_structqoi__desc">qoi_desc</link>&#32;*desc,&#32;<emphasis role="keywordtype">int</emphasis>&#32;*out_len);
+279 
+280 
+281 <emphasis role="comment">/*&#32;Decode&#32;a&#32;QOI&#32;image&#32;from&#32;memory.</emphasis>
+282 <emphasis role="comment"></emphasis>
+283 <emphasis role="comment">The&#32;function&#32;either&#32;returns&#32;NULL&#32;on&#32;failure&#32;(invalid&#32;parameters&#32;or&#32;malloc</emphasis>
+284 <emphasis role="comment">failed)&#32;or&#32;a&#32;pointer&#32;to&#32;the&#32;decoded&#32;pixels.&#32;On&#32;success,&#32;the&#32;qoi_desc&#32;struct</emphasis>
+285 <emphasis role="comment">is&#32;filled&#32;with&#32;the&#32;description&#32;from&#32;the&#32;file&#32;header.</emphasis>
+286 <emphasis role="comment"></emphasis>
+287 <emphasis role="comment">The&#32;returned&#32;pixel&#32;data&#32;should&#32;be&#32;free()d&#32;after&#32;use.&#32;*/</emphasis>
+288 
+289 <emphasis role="keywordtype">void</emphasis>&#32;*<link linkend="__classes_2lib_2external_2qoi_8h_1a8740868f0e24f10b57d47aba8195a4f1">qoi_decode</link>(<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>&#32;*<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a89ce72163394e6aef63b551a8806e93f">data</link>,&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a3d1e3edfcf61ca2d831883e1afbad89e">size</link>,&#32;<link linkend="_structqoi__desc">qoi_desc</link>&#32;*desc,&#32;<emphasis role="keywordtype">int</emphasis>&#32;channels);
+290 
+291 
+292 <emphasis role="preprocessor">#ifdef&#32;__cplusplus</emphasis>
+293 }
+294 <emphasis role="preprocessor">#endif</emphasis>
+295 <emphasis role="preprocessor">#endif&#32;</emphasis><emphasis role="comment">/*&#32;QOI_H&#32;*/</emphasis><emphasis role="preprocessor"></emphasis>
+296 
+297 
+298 <emphasis role="comment">/*&#32;-----------------------------------------------------------------------------</emphasis>
+299 <emphasis role="comment">Implementation&#32;*/</emphasis>
+300 
+301 <emphasis role="preprocessor">#ifdef&#32;QOI_IMPLEMENTATION</emphasis>
+302 <emphasis role="preprocessor">#include&#32;&lt;stdlib.h&gt;</emphasis>
+303 <emphasis role="preprocessor">#include&#32;&lt;string.h&gt;</emphasis>
+304 
+305 <emphasis role="preprocessor">#ifndef&#32;QOI_MALLOC</emphasis>
+306 <emphasis role="preprocessor">&#32;&#32;&#32;&#32;#define&#32;QOI_MALLOC(sz)&#32;malloc(sz)</emphasis>
+307 <emphasis role="preprocessor">&#32;&#32;&#32;&#32;#define&#32;QOI_FREE(p)&#32;&#32;&#32;&#32;free(p)</emphasis>
+308 <emphasis role="preprocessor">#endif</emphasis>
+309 <emphasis role="preprocessor">#ifndef&#32;QOI_ZEROARR</emphasis>
+310 <emphasis role="preprocessor">&#32;&#32;&#32;&#32;#define&#32;QOI_ZEROARR(a)&#32;memset((a),0,sizeof(a))</emphasis>
+311 <emphasis role="preprocessor">#endif</emphasis>
+312 
+313 <emphasis role="preprocessor">#define&#32;QOI_OP_INDEX&#32;&#32;0x00&#32;</emphasis><emphasis role="comment">/*&#32;00xxxxxx&#32;*/</emphasis><emphasis role="preprocessor"></emphasis>
+314 <emphasis role="preprocessor">#define&#32;QOI_OP_DIFF&#32;&#32;&#32;0x40&#32;</emphasis><emphasis role="comment">/*&#32;01xxxxxx&#32;*/</emphasis><emphasis role="preprocessor"></emphasis>
+315 <emphasis role="preprocessor">#define&#32;QOI_OP_LUMA&#32;&#32;&#32;0x80&#32;</emphasis><emphasis role="comment">/*&#32;10xxxxxx&#32;*/</emphasis><emphasis role="preprocessor"></emphasis>
+316 <emphasis role="preprocessor">#define&#32;QOI_OP_RUN&#32;&#32;&#32;&#32;0xc0&#32;</emphasis><emphasis role="comment">/*&#32;11xxxxxx&#32;*/</emphasis><emphasis role="preprocessor"></emphasis>
+317 <emphasis role="preprocessor">#define&#32;QOI_OP_RGB&#32;&#32;&#32;&#32;0xfe&#32;</emphasis><emphasis role="comment">/*&#32;11111110&#32;*/</emphasis><emphasis role="preprocessor"></emphasis>
+318 <emphasis role="preprocessor">#define&#32;QOI_OP_RGBA&#32;&#32;&#32;0xff&#32;</emphasis><emphasis role="comment">/*&#32;11111111&#32;*/</emphasis><emphasis role="preprocessor"></emphasis>
+319 
+320 <emphasis role="preprocessor">#define&#32;QOI_MASK_2&#32;&#32;&#32;&#32;0xc0&#32;</emphasis><emphasis role="comment">/*&#32;11000000&#32;*/</emphasis><emphasis role="preprocessor"></emphasis>
+321 
+322 <emphasis role="preprocessor">#define&#32;QOI_COLOR_HASH(C)&#32;(C.rgba.r*3&#32;+&#32;C.rgba.g*5&#32;+&#32;C.rgba.b*7&#32;+&#32;C.rgba.a*11)</emphasis>
+323 <emphasis role="preprocessor">#define&#32;QOI_MAGIC&#32;\</emphasis>
+324 <emphasis role="preprocessor">&#32;&#32;&#32;&#32;(((unsigned&#32;int)&apos;q&apos;)&#32;&lt;&lt;&#32;24&#32;|&#32;((unsigned&#32;int)&apos;o&apos;)&#32;&lt;&lt;&#32;16&#32;|&#32;\</emphasis>
+325 <emphasis role="preprocessor">&#32;&#32;&#32;&#32;&#32;((unsigned&#32;int)&apos;i&apos;)&#32;&lt;&lt;&#32;&#32;8&#32;|&#32;((unsigned&#32;int)&apos;f&apos;))</emphasis>
+326 <emphasis role="preprocessor">#define&#32;QOI_HEADER_SIZE&#32;14</emphasis>
+327 
+328 <emphasis role="comment">/*&#32;2GB&#32;is&#32;the&#32;max&#32;file&#32;size&#32;that&#32;this&#32;implementation&#32;can&#32;safely&#32;handle.&#32;We&#32;guard</emphasis>
+329 <emphasis role="comment">against&#32;anything&#32;larger&#32;than&#32;that,&#32;assuming&#32;the&#32;worst&#32;case&#32;with&#32;5&#32;bytes&#32;per</emphasis>
+330 <emphasis role="comment">pixel,&#32;rounded&#32;down&#32;to&#32;a&#32;nice&#32;clean&#32;value.&#32;400&#32;million&#32;pixels&#32;ought&#32;to&#32;be</emphasis>
+331 <emphasis role="comment">enough&#32;for&#32;anybody.&#32;*/</emphasis>
+332 <emphasis role="preprocessor">#define&#32;QOI_PIXELS_MAX&#32;((unsigned&#32;int)400000000)</emphasis>
+333 
+334 <emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">union&#32;</emphasis>{
+335 &#32;&#32;&#32;&#32;<emphasis role="keyword">struct&#32;</emphasis>{&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1abe08814c2f72843fde4d8df41440d5a0">r</link>,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a9cd653b1648845554169fbc3a3f6d37a">g</link>,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a6eba317e3cf44d6d26c04a5a8f197dcb">b</link>,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1ac8729153468b5dcf13f971b21d84d4e5">a</link>;&#32;}&#32;rgba;
+336 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a14cfbe2fc2234f5504618905b69d1e06">v</link>;
+337 }&#32;qoi_rgba_t;
+338 
+339 <emphasis role="keyword">static</emphasis>&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>&#32;qoi_padding[8]&#32;=&#32;{0,0,0,0,0,0,0,1};
+340 
+341 <emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>&#32;qoi_write_32(<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>&#32;*bytes,&#32;<emphasis role="keywordtype">int</emphasis>&#32;*p,&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a14cfbe2fc2234f5504618905b69d1e06">v</link>)&#32;{
+342 &#32;&#32;&#32;&#32;bytes[(*p)++]&#32;=&#32;(0xff000000&#32;&amp;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a14cfbe2fc2234f5504618905b69d1e06">v</link>)&#32;&gt;&gt;&#32;24;
+343 &#32;&#32;&#32;&#32;bytes[(*p)++]&#32;=&#32;(0x00ff0000&#32;&amp;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a14cfbe2fc2234f5504618905b69d1e06">v</link>)&#32;&gt;&gt;&#32;16;
+344 &#32;&#32;&#32;&#32;bytes[(*p)++]&#32;=&#32;(0x0000ff00&#32;&amp;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a14cfbe2fc2234f5504618905b69d1e06">v</link>)&#32;&gt;&gt;&#32;8;
+345 &#32;&#32;&#32;&#32;bytes[(*p)++]&#32;=&#32;(0x000000ff&#32;&amp;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a14cfbe2fc2234f5504618905b69d1e06">v</link>);
+346 }
+347 
+348 <emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;qoi_read_32(<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>&#32;*bytes,&#32;<emphasis role="keywordtype">int</emphasis>&#32;*p)&#32;{
+349 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1ac8729153468b5dcf13f971b21d84d4e5">a</link>&#32;=&#32;bytes[(*p)++];
+350 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a6eba317e3cf44d6d26c04a5a8f197dcb">b</link>&#32;=&#32;bytes[(*p)++];
+351 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;c&#32;=&#32;bytes[(*p)++];
+352 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;d&#32;=&#32;bytes[(*p)++];
+353 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1ac8729153468b5dcf13f971b21d84d4e5">a</link>&#32;&lt;&lt;&#32;24&#32;|&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a6eba317e3cf44d6d26c04a5a8f197dcb">b</link>&#32;&lt;&lt;&#32;16&#32;|&#32;c&#32;&lt;&lt;&#32;8&#32;|&#32;d;
+354 }
+355 
+356 <emphasis role="keywordtype">void</emphasis>&#32;*<link linkend="__classes_2lib_2external_2qoi_8h_1af2e5852f717a39e1d4cf482b9a4a9d06">qoi_encode</link>(<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>&#32;*<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a89ce72163394e6aef63b551a8806e93f">data</link>,&#32;<emphasis role="keyword">const</emphasis>&#32;<link linkend="_structqoi__desc">qoi_desc</link>&#32;*desc,&#32;<emphasis role="keywordtype">int</emphasis>&#32;*out_len)&#32;{
+357 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;i,&#32;max_size,&#32;p,&#32;<link linkend="_namespaceutils_1a187ff8156e2bfba6bc234ed6bfd64b3f">run</link>;
+358 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;px_len,&#32;px_end,&#32;px_pos,&#32;channels;
+359 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>&#32;*bytes;
+360 &#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>&#32;*<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a620525fb1b4102cd9522c24b0e7d3e40">pixels</link>;
+361 &#32;&#32;&#32;&#32;qoi_rgba_t&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a57f14e05b1900f16a2da82ade47d0c6d">index</link>[64];
+362 &#32;&#32;&#32;&#32;qoi_rgba_t&#32;px,&#32;px_prev;
+363 
+364 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(
+365 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a89ce72163394e6aef63b551a8806e93f">data</link>&#32;==&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>&#32;||&#32;out_len&#32;==&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>&#32;||&#32;desc&#32;==&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>&#32;||
+366 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;desc-&gt;<link linkend="_structqoi__desc_1a83a3364343e57f7f3a6fdc1066f5f3b5">width</link>&#32;==&#32;0&#32;||&#32;desc-&gt;<link linkend="_structqoi__desc_1aba0a3f316525b924096b132fbe85ae57">height</link>&#32;==&#32;0&#32;||
+367 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;desc-&gt;<link linkend="_structqoi__desc_1af48b1a6bf4b34343847f14a570b7dde7">channels</link>&#32;&lt;&#32;3&#32;||&#32;desc-&gt;<link linkend="_structqoi__desc_1af48b1a6bf4b34343847f14a570b7dde7">channels</link>&#32;&gt;&#32;4&#32;||
+368 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;desc-&gt;<link linkend="_structqoi__desc_1ac62f968203967d283e0ecd847d4bb74d">colorspace</link>&#32;&gt;&#32;1&#32;||
+369 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;desc-&gt;<link linkend="_structqoi__desc_1aba0a3f316525b924096b132fbe85ae57">height</link>&#32;&gt;=&#32;QOI_PIXELS_MAX&#32;/&#32;desc-&gt;<link linkend="_structqoi__desc_1a83a3364343e57f7f3a6fdc1066f5f3b5">width</link>
+370 &#32;&#32;&#32;&#32;)&#32;{
+371 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>;
+372 &#32;&#32;&#32;&#32;}
+373 
+374 &#32;&#32;&#32;&#32;max_size&#32;=
+375 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;desc-&gt;<link linkend="_structqoi__desc_1a83a3364343e57f7f3a6fdc1066f5f3b5">width</link>&#32;*&#32;desc-&gt;<link linkend="_structqoi__desc_1aba0a3f316525b924096b132fbe85ae57">height</link>&#32;*&#32;(desc-&gt;<link linkend="_structqoi__desc_1af48b1a6bf4b34343847f14a570b7dde7">channels</link>&#32;+&#32;1)&#32;+
+376 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;QOI_HEADER_SIZE&#32;+&#32;<emphasis role="keyword">sizeof</emphasis>(qoi_padding);
+377 
+378 &#32;&#32;&#32;&#32;p&#32;=&#32;0;
+379 &#32;&#32;&#32;&#32;bytes&#32;=&#32;(<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>&#32;*)&#32;<link linkend="__classes_2lib_2rtextures_8c_1a40ac67345362c1843387026b5a69004f">QOI_MALLOC</link>(max_size);
+380 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(!bytes)&#32;{
+381 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>;
+382 &#32;&#32;&#32;&#32;}
+383 
+384 &#32;&#32;&#32;&#32;qoi_write_32(bytes,&#32;&amp;p,&#32;QOI_MAGIC);
+385 &#32;&#32;&#32;&#32;qoi_write_32(bytes,&#32;&amp;p,&#32;desc-&gt;<link linkend="_structqoi__desc_1a83a3364343e57f7f3a6fdc1066f5f3b5">width</link>);
+386 &#32;&#32;&#32;&#32;qoi_write_32(bytes,&#32;&amp;p,&#32;desc-&gt;<link linkend="_structqoi__desc_1aba0a3f316525b924096b132fbe85ae57">height</link>);
+387 &#32;&#32;&#32;&#32;bytes[p++]&#32;=&#32;desc-&gt;<link linkend="_structqoi__desc_1af48b1a6bf4b34343847f14a570b7dde7">channels</link>;
+388 &#32;&#32;&#32;&#32;bytes[p++]&#32;=&#32;desc-&gt;<link linkend="_structqoi__desc_1ac62f968203967d283e0ecd847d4bb74d">colorspace</link>;
+389 
+390 
+391 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a620525fb1b4102cd9522c24b0e7d3e40">pixels</link>&#32;=&#32;(<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>&#32;*)<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a89ce72163394e6aef63b551a8806e93f">data</link>;
+392 
+393 &#32;&#32;&#32;&#32;QOI_ZEROARR(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a57f14e05b1900f16a2da82ade47d0c6d">index</link>);
+394 
+395 &#32;&#32;&#32;&#32;<link linkend="_namespaceutils_1a187ff8156e2bfba6bc234ed6bfd64b3f">run</link>&#32;=&#32;0;
+396 &#32;&#32;&#32;&#32;px_prev.rgba.r&#32;=&#32;0;
+397 &#32;&#32;&#32;&#32;px_prev.rgba.g&#32;=&#32;0;
+398 &#32;&#32;&#32;&#32;px_prev.rgba.b&#32;=&#32;0;
+399 &#32;&#32;&#32;&#32;px_prev.rgba.a&#32;=&#32;255;
+400 &#32;&#32;&#32;&#32;px&#32;=&#32;px_prev;
+401 
+402 &#32;&#32;&#32;&#32;px_len&#32;=&#32;desc-&gt;<link linkend="_structqoi__desc_1a83a3364343e57f7f3a6fdc1066f5f3b5">width</link>&#32;*&#32;desc-&gt;<link linkend="_structqoi__desc_1aba0a3f316525b924096b132fbe85ae57">height</link>&#32;*&#32;desc-&gt;<link linkend="_structqoi__desc_1af48b1a6bf4b34343847f14a570b7dde7">channels</link>;
+403 &#32;&#32;&#32;&#32;px_end&#32;=&#32;px_len&#32;-&#32;desc-&gt;<link linkend="_structqoi__desc_1af48b1a6bf4b34343847f14a570b7dde7">channels</link>;
+404 &#32;&#32;&#32;&#32;channels&#32;=&#32;desc-&gt;<link linkend="_structqoi__desc_1af48b1a6bf4b34343847f14a570b7dde7">channels</link>;
+405 
+406 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(px_pos&#32;=&#32;0;&#32;px_pos&#32;&lt;&#32;px_len;&#32;px_pos&#32;+=&#32;channels)&#32;{
+407 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;px.rgba.r&#32;=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a620525fb1b4102cd9522c24b0e7d3e40">pixels</link>[px_pos&#32;+&#32;0];
+408 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;px.rgba.g&#32;=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a620525fb1b4102cd9522c24b0e7d3e40">pixels</link>[px_pos&#32;+&#32;1];
+409 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;px.rgba.b&#32;=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a620525fb1b4102cd9522c24b0e7d3e40">pixels</link>[px_pos&#32;+&#32;2];
+410 
+411 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(channels&#32;==&#32;4)&#32;{
+412 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;px.rgba.a&#32;=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a620525fb1b4102cd9522c24b0e7d3e40">pixels</link>[px_pos&#32;+&#32;3];
+413 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+414 
+415 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(px.v&#32;==&#32;px_prev.v)&#32;{
+416 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_namespaceutils_1a187ff8156e2bfba6bc234ed6bfd64b3f">run</link>++;
+417 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(run&#32;==&#32;62&#32;||&#32;px_pos&#32;==&#32;px_end)&#32;{
+418 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;bytes[p++]&#32;=&#32;QOI_OP_RUN&#32;|&#32;(<link linkend="_namespaceutils_1a187ff8156e2bfba6bc234ed6bfd64b3f">run</link>&#32;-&#32;1);
+419 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_namespaceutils_1a187ff8156e2bfba6bc234ed6bfd64b3f">run</link>&#32;=&#32;0;
+420 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+421 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+422 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>&#32;{
+423 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;index_pos;
+424 
+425 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(run&#32;&gt;&#32;0)&#32;{
+426 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;bytes[p++]&#32;=&#32;QOI_OP_RUN&#32;|&#32;(<link linkend="_namespaceutils_1a187ff8156e2bfba6bc234ed6bfd64b3f">run</link>&#32;-&#32;1);
+427 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_namespaceutils_1a187ff8156e2bfba6bc234ed6bfd64b3f">run</link>&#32;=&#32;0;
+428 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+429 
+430 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;index_pos&#32;=&#32;QOI_COLOR_HASH(px)&#32;%&#32;64;
+431 
+432 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a57f14e05b1900f16a2da82ade47d0c6d">index</link>[index_pos].<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a14cfbe2fc2234f5504618905b69d1e06">v</link>&#32;==&#32;px.v)&#32;{
+433 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;bytes[p++]&#32;=&#32;QOI_OP_INDEX&#32;|&#32;index_pos;
+434 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+435 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>&#32;{
+436 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a57f14e05b1900f16a2da82ade47d0c6d">index</link>[index_pos]&#32;=&#32;px;
+437 
+438 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(px.rgba.a&#32;==&#32;px_prev.rgba.a)&#32;{
+439 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">signed</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>&#32;vr&#32;=&#32;px.rgba.r&#32;-&#32;px_prev.rgba.r;
+440 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">signed</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>&#32;vg&#32;=&#32;px.rgba.g&#32;-&#32;px_prev.rgba.g;
+441 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">signed</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>&#32;vb&#32;=&#32;px.rgba.b&#32;-&#32;px_prev.rgba.b;
+442 
+443 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">signed</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>&#32;vg_r&#32;=&#32;vr&#32;-&#32;vg;
+444 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">signed</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>&#32;vg_b&#32;=&#32;vb&#32;-&#32;vg;
+445 
+446 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(
+447 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;vr&#32;&gt;&#32;-3&#32;&amp;&amp;&#32;vr&#32;&lt;&#32;2&#32;&amp;&amp;
+448 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;vg&#32;&gt;&#32;-3&#32;&amp;&amp;&#32;vg&#32;&lt;&#32;2&#32;&amp;&amp;
+449 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;vb&#32;&gt;&#32;-3&#32;&amp;&amp;&#32;vb&#32;&lt;&#32;2
+450 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;)&#32;{
+451 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;bytes[p++]&#32;=&#32;QOI_OP_DIFF&#32;|&#32;(vr&#32;+&#32;2)&#32;&lt;&lt;&#32;4&#32;|&#32;(vg&#32;+&#32;2)&#32;&lt;&lt;&#32;2&#32;|&#32;(vb&#32;+&#32;2);
+452 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+453 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>&#32;<emphasis role="keywordflow">if</emphasis>&#32;(
+454 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;vg_r&#32;&gt;&#32;&#32;-9&#32;&amp;&amp;&#32;vg_r&#32;&lt;&#32;&#32;8&#32;&amp;&amp;
+455 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;vg&#32;&#32;&#32;&gt;&#32;-33&#32;&amp;&amp;&#32;vg&#32;&#32;&#32;&lt;&#32;32&#32;&amp;&amp;
+456 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;vg_b&#32;&gt;&#32;&#32;-9&#32;&amp;&amp;&#32;vg_b&#32;&lt;&#32;&#32;8
+457 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;)&#32;{
+458 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;bytes[p++]&#32;=&#32;QOI_OP_LUMA&#32;&#32;&#32;&#32;&#32;|&#32;(vg&#32;&#32;&#32;+&#32;32);
+459 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;bytes[p++]&#32;=&#32;(vg_r&#32;+&#32;8)&#32;&lt;&lt;&#32;4&#32;|&#32;(vg_b&#32;+&#32;&#32;8);
+460 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+461 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>&#32;{
+462 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;bytes[p++]&#32;=&#32;QOI_OP_RGB;
+463 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;bytes[p++]&#32;=&#32;px.rgba.r;
+464 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;bytes[p++]&#32;=&#32;px.rgba.g;
+465 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;bytes[p++]&#32;=&#32;px.rgba.b;
+466 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+467 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+468 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>&#32;{
+469 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;bytes[p++]&#32;=&#32;QOI_OP_RGBA;
+470 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;bytes[p++]&#32;=&#32;px.rgba.r;
+471 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;bytes[p++]&#32;=&#32;px.rgba.g;
+472 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;bytes[p++]&#32;=&#32;px.rgba.b;
+473 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;bytes[p++]&#32;=&#32;px.rgba.a;
+474 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+475 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+476 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+477 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;px_prev&#32;=&#32;px;
+478 &#32;&#32;&#32;&#32;}
+479 
+480 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(i&#32;=&#32;0;&#32;i&#32;&lt;&#32;(int)<emphasis role="keyword">sizeof</emphasis>(qoi_padding);&#32;i++)&#32;{
+481 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;bytes[p++]&#32;=&#32;qoi_padding[i];
+482 &#32;&#32;&#32;&#32;}
+483 
+484 &#32;&#32;&#32;&#32;*out_len&#32;=&#32;p;
+485 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;bytes;
+486 }
+487 
+488 <emphasis role="keywordtype">void</emphasis>&#32;*<link linkend="__classes_2lib_2external_2qoi_8h_1a8740868f0e24f10b57d47aba8195a4f1">qoi_decode</link>(<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>&#32;*<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a89ce72163394e6aef63b551a8806e93f">data</link>,&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a3d1e3edfcf61ca2d831883e1afbad89e">size</link>,&#32;<link linkend="_structqoi__desc">qoi_desc</link>&#32;*desc,&#32;<emphasis role="keywordtype">int</emphasis>&#32;channels)&#32;{
+489 &#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>&#32;*bytes;
+490 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">int</emphasis>&#32;header_magic;
+491 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>&#32;*<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a620525fb1b4102cd9522c24b0e7d3e40">pixels</link>;
+492 &#32;&#32;&#32;&#32;qoi_rgba_t&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a57f14e05b1900f16a2da82ade47d0c6d">index</link>[64];
+493 &#32;&#32;&#32;&#32;qoi_rgba_t&#32;px;
+494 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;px_len,&#32;chunks_len,&#32;px_pos;
+495 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;p&#32;=&#32;0,&#32;<link linkend="_namespaceutils_1a187ff8156e2bfba6bc234ed6bfd64b3f">run</link>&#32;=&#32;0;
+496 
+497 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(
+498 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a89ce72163394e6aef63b551a8806e93f">data</link>&#32;==&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>&#32;||&#32;desc&#32;==&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>&#32;||
+499 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;(channels&#32;!=&#32;0&#32;&amp;&amp;&#32;channels&#32;!=&#32;3&#32;&amp;&amp;&#32;channels&#32;!=&#32;4)&#32;||
+500 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a3d1e3edfcf61ca2d831883e1afbad89e">size</link>&#32;&lt;&#32;QOI_HEADER_SIZE&#32;+&#32;(<emphasis role="keywordtype">int</emphasis>)<emphasis role="keyword">sizeof</emphasis>(qoi_padding)
+501 &#32;&#32;&#32;&#32;)&#32;{
+502 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>;
+503 &#32;&#32;&#32;&#32;}
+504 
+505 &#32;&#32;&#32;&#32;bytes&#32;=&#32;(<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>&#32;*)<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a89ce72163394e6aef63b551a8806e93f">data</link>;
+506 
+507 &#32;&#32;&#32;&#32;header_magic&#32;=&#32;qoi_read_32(bytes,&#32;&amp;p);
+508 &#32;&#32;&#32;&#32;desc-&gt;<link linkend="_structqoi__desc_1a83a3364343e57f7f3a6fdc1066f5f3b5">width</link>&#32;=&#32;qoi_read_32(bytes,&#32;&amp;p);
+509 &#32;&#32;&#32;&#32;desc-&gt;<link linkend="_structqoi__desc_1aba0a3f316525b924096b132fbe85ae57">height</link>&#32;=&#32;qoi_read_32(bytes,&#32;&amp;p);
+510 &#32;&#32;&#32;&#32;desc-&gt;<link linkend="_structqoi__desc_1af48b1a6bf4b34343847f14a570b7dde7">channels</link>&#32;=&#32;bytes[p++];
+511 &#32;&#32;&#32;&#32;desc-&gt;<link linkend="_structqoi__desc_1ac62f968203967d283e0ecd847d4bb74d">colorspace</link>&#32;=&#32;bytes[p++];
+512 
+513 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(
+514 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;desc-&gt;<link linkend="_structqoi__desc_1a83a3364343e57f7f3a6fdc1066f5f3b5">width</link>&#32;==&#32;0&#32;||&#32;desc-&gt;<link linkend="_structqoi__desc_1aba0a3f316525b924096b132fbe85ae57">height</link>&#32;==&#32;0&#32;||
+515 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;desc-&gt;<link linkend="_structqoi__desc_1af48b1a6bf4b34343847f14a570b7dde7">channels</link>&#32;&lt;&#32;3&#32;||&#32;desc-&gt;<link linkend="_structqoi__desc_1af48b1a6bf4b34343847f14a570b7dde7">channels</link>&#32;&gt;&#32;4&#32;||
+516 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;desc-&gt;<link linkend="_structqoi__desc_1ac62f968203967d283e0ecd847d4bb74d">colorspace</link>&#32;&gt;&#32;1&#32;||
+517 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;header_magic&#32;!=&#32;QOI_MAGIC&#32;||
+518 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;desc-&gt;<link linkend="_structqoi__desc_1aba0a3f316525b924096b132fbe85ae57">height</link>&#32;&gt;=&#32;QOI_PIXELS_MAX&#32;/&#32;desc-&gt;<link linkend="_structqoi__desc_1a83a3364343e57f7f3a6fdc1066f5f3b5">width</link>
+519 &#32;&#32;&#32;&#32;)&#32;{
+520 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>;
+521 &#32;&#32;&#32;&#32;}
+522 
+523 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(channels&#32;==&#32;0)&#32;{
+524 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;channels&#32;=&#32;desc-&gt;<link linkend="_structqoi__desc_1af48b1a6bf4b34343847f14a570b7dde7">channels</link>;
+525 &#32;&#32;&#32;&#32;}
+526 
+527 &#32;&#32;&#32;&#32;px_len&#32;=&#32;desc-&gt;<link linkend="_structqoi__desc_1a83a3364343e57f7f3a6fdc1066f5f3b5">width</link>&#32;*&#32;desc-&gt;<link linkend="_structqoi__desc_1aba0a3f316525b924096b132fbe85ae57">height</link>&#32;*&#32;channels;
+528 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a620525fb1b4102cd9522c24b0e7d3e40">pixels</link>&#32;=&#32;(<emphasis role="keywordtype">unsigned</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>&#32;*)&#32;<link linkend="__classes_2lib_2rtextures_8c_1a40ac67345362c1843387026b5a69004f">QOI_MALLOC</link>(px_len);
+529 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(!<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a620525fb1b4102cd9522c24b0e7d3e40">pixels</link>)&#32;{
+530 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>;
+531 &#32;&#32;&#32;&#32;}
+532 
+533 &#32;&#32;&#32;&#32;QOI_ZEROARR(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a57f14e05b1900f16a2da82ade47d0c6d">index</link>);
+534 &#32;&#32;&#32;&#32;px.rgba.r&#32;=&#32;0;
+535 &#32;&#32;&#32;&#32;px.rgba.g&#32;=&#32;0;
+536 &#32;&#32;&#32;&#32;px.rgba.b&#32;=&#32;0;
+537 &#32;&#32;&#32;&#32;px.rgba.a&#32;=&#32;255;
+538 
+539 &#32;&#32;&#32;&#32;chunks_len&#32;=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a3d1e3edfcf61ca2d831883e1afbad89e">size</link>&#32;-&#32;(int)<emphasis role="keyword">sizeof</emphasis>(qoi_padding);
+540 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(px_pos&#32;=&#32;0;&#32;px_pos&#32;&lt;&#32;px_len;&#32;px_pos&#32;+=&#32;channels)&#32;{
+541 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(run&#32;&gt;&#32;0)&#32;{
+542 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_namespaceutils_1a187ff8156e2bfba6bc234ed6bfd64b3f">run</link>--;
+543 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+544 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>&#32;<emphasis role="keywordflow">if</emphasis>&#32;(p&#32;&lt;&#32;chunks_len)&#32;{
+545 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;b1&#32;=&#32;bytes[p++];
+546 
+547 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(b1&#32;==&#32;QOI_OP_RGB)&#32;{
+548 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;px.rgba.r&#32;=&#32;bytes[p++];
+549 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;px.rgba.g&#32;=&#32;bytes[p++];
+550 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;px.rgba.b&#32;=&#32;bytes[p++];
+551 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+552 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>&#32;<emphasis role="keywordflow">if</emphasis>&#32;(b1&#32;==&#32;QOI_OP_RGBA)&#32;{
+553 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;px.rgba.r&#32;=&#32;bytes[p++];
+554 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;px.rgba.g&#32;=&#32;bytes[p++];
+555 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;px.rgba.b&#32;=&#32;bytes[p++];
+556 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;px.rgba.a&#32;=&#32;bytes[p++];
+557 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+558 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>&#32;<emphasis role="keywordflow">if</emphasis>&#32;((b1&#32;&amp;&#32;QOI_MASK_2)&#32;==&#32;QOI_OP_INDEX)&#32;{
+559 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;px&#32;=&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a57f14e05b1900f16a2da82ade47d0c6d">index</link>[b1];
+560 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+561 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>&#32;<emphasis role="keywordflow">if</emphasis>&#32;((b1&#32;&amp;&#32;QOI_MASK_2)&#32;==&#32;QOI_OP_DIFF)&#32;{
+562 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;px.rgba.r&#32;+=&#32;((b1&#32;&gt;&gt;&#32;4)&#32;&amp;&#32;0x03)&#32;-&#32;2;
+563 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;px.rgba.g&#32;+=&#32;((b1&#32;&gt;&gt;&#32;2)&#32;&amp;&#32;0x03)&#32;-&#32;2;
+564 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;px.rgba.b&#32;+=&#32;(&#32;b1&#32;&#32;&#32;&#32;&#32;&#32;&#32;&amp;&#32;0x03)&#32;-&#32;2;
+565 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+566 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>&#32;<emphasis role="keywordflow">if</emphasis>&#32;((b1&#32;&amp;&#32;QOI_MASK_2)&#32;==&#32;QOI_OP_LUMA)&#32;{
+567 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;b2&#32;=&#32;bytes[p++];
+568 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;vg&#32;=&#32;(b1&#32;&amp;&#32;0x3f)&#32;-&#32;32;
+569 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;px.rgba.r&#32;+=&#32;vg&#32;-&#32;8&#32;+&#32;((b2&#32;&gt;&gt;&#32;4)&#32;&amp;&#32;0x0f);
+570 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;px.rgba.g&#32;+=&#32;vg;
+571 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;px.rgba.b&#32;+=&#32;vg&#32;-&#32;8&#32;+&#32;&#32;(b2&#32;&#32;&#32;&#32;&#32;&#32;&#32;&amp;&#32;0x0f);
+572 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+573 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>&#32;<emphasis role="keywordflow">if</emphasis>&#32;((b1&#32;&amp;&#32;QOI_MASK_2)&#32;==&#32;QOI_OP_RUN)&#32;{
+574 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_namespaceutils_1a187ff8156e2bfba6bc234ed6bfd64b3f">run</link>&#32;=&#32;(b1&#32;&amp;&#32;0x3f);
+575 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+576 
+577 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a57f14e05b1900f16a2da82ade47d0c6d">index</link>[QOI_COLOR_HASH(px)&#32;%&#32;64]&#32;=&#32;px;
+578 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+579 
+580 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a620525fb1b4102cd9522c24b0e7d3e40">pixels</link>[px_pos&#32;+&#32;0]&#32;=&#32;px.rgba.r;
+581 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a620525fb1b4102cd9522c24b0e7d3e40">pixels</link>[px_pos&#32;+&#32;1]&#32;=&#32;px.rgba.g;
+582 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a620525fb1b4102cd9522c24b0e7d3e40">pixels</link>[px_pos&#32;+&#32;2]&#32;=&#32;px.rgba.b;
+583 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;
+584 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(channels&#32;==&#32;4)&#32;{
+585 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a620525fb1b4102cd9522c24b0e7d3e40">pixels</link>[px_pos&#32;+&#32;3]&#32;=&#32;px.rgba.a;
+586 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+587 &#32;&#32;&#32;&#32;}
+588 
+589 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a620525fb1b4102cd9522c24b0e7d3e40">pixels</link>;
+590 }
+591 
+592 <emphasis role="preprocessor">#ifndef&#32;QOI_NO_STDIO</emphasis>
+593 <emphasis role="preprocessor">#include&#32;&lt;stdio.h&gt;</emphasis>
+594 
+595 <emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2external_2qoi_8h_1a249fef81f60dc1e63cd4cb025eb92754">qoi_write</link>(<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>&#32;*<link linkend="__classes_2lib_2m_i_n_i-master_2tests_2testhuge_8cpp_1a42a21beb8018ac623f4d09db1343b9cf">filename</link>,&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>&#32;*<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a89ce72163394e6aef63b551a8806e93f">data</link>,&#32;<emphasis role="keyword">const</emphasis>&#32;<link linkend="_structqoi__desc">qoi_desc</link>&#32;*desc)&#32;{
+596 &#32;&#32;&#32;&#32;FILE&#32;*<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a0fdda94b8b7e64884690244028f455ba">f</link>&#32;=&#32;fopen(<link linkend="__classes_2lib_2m_i_n_i-master_2tests_2testhuge_8cpp_1a42a21beb8018ac623f4d09db1343b9cf">filename</link>,&#32;<emphasis role="stringliteral">&quot;wb&quot;</emphasis>);
+597 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a3d1e3edfcf61ca2d831883e1afbad89e">size</link>;
+598 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>&#32;*encoded;
+599 
+600 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(!<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a0fdda94b8b7e64884690244028f455ba">f</link>)&#32;{
+601 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;0;
+602 &#32;&#32;&#32;&#32;}
+603 
+604 &#32;&#32;&#32;&#32;encoded&#32;=&#32;<link linkend="__classes_2lib_2external_2qoi_8h_1af2e5852f717a39e1d4cf482b9a4a9d06">qoi_encode</link>(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a89ce72163394e6aef63b551a8806e93f">data</link>,&#32;desc,&#32;&amp;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a3d1e3edfcf61ca2d831883e1afbad89e">size</link>);
+605 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(!encoded)&#32;{
+606 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;fclose(<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a0fdda94b8b7e64884690244028f455ba">f</link>);
+607 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;0;
+608 &#32;&#32;&#32;&#32;}
+609 
+610 &#32;&#32;&#32;&#32;fwrite(encoded,&#32;1,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a3d1e3edfcf61ca2d831883e1afbad89e">size</link>,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a0fdda94b8b7e64884690244028f455ba">f</link>);
+611 &#32;&#32;&#32;&#32;fclose(<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a0fdda94b8b7e64884690244028f455ba">f</link>);
+612 
+613 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2rtextures_8c_1a273924653ee890931eb839262fc28977">QOI_FREE</link>(encoded);
+614 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a3d1e3edfcf61ca2d831883e1afbad89e">size</link>;
+615 }
+616 
+617 <emphasis role="keywordtype">void</emphasis>&#32;*<link linkend="__classes_2lib_2external_2qoi_8h_1a7a1246ac68f55b93512ba64d1cc59ef7">qoi_read</link>(<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>&#32;*<link linkend="__classes_2lib_2m_i_n_i-master_2tests_2testhuge_8cpp_1a42a21beb8018ac623f4d09db1343b9cf">filename</link>,&#32;<link linkend="_structqoi__desc">qoi_desc</link>&#32;*desc,&#32;<emphasis role="keywordtype">int</emphasis>&#32;channels)&#32;{
+618 &#32;&#32;&#32;&#32;FILE&#32;*<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a0fdda94b8b7e64884690244028f455ba">f</link>&#32;=&#32;fopen(<link linkend="__classes_2lib_2m_i_n_i-master_2tests_2testhuge_8cpp_1a42a21beb8018ac623f4d09db1343b9cf">filename</link>,&#32;<emphasis role="stringliteral">&quot;rb&quot;</emphasis>);
+619 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">int</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a3d1e3edfcf61ca2d831883e1afbad89e">size</link>,&#32;bytes_read;
+620 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>&#32;*<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a620525fb1b4102cd9522c24b0e7d3e40">pixels</link>,&#32;*<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a89ce72163394e6aef63b551a8806e93f">data</link>;
+621 
+622 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(!<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a0fdda94b8b7e64884690244028f455ba">f</link>)&#32;{
+623 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>;
+624 &#32;&#32;&#32;&#32;}
+625 
+626 &#32;&#32;&#32;&#32;fseek(<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a0fdda94b8b7e64884690244028f455ba">f</link>,&#32;0,&#32;SEEK_END);
+627 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a3d1e3edfcf61ca2d831883e1afbad89e">size</link>&#32;=&#32;ftell(<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a0fdda94b8b7e64884690244028f455ba">f</link>);
+628 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a3d1e3edfcf61ca2d831883e1afbad89e">size</link>&#32;&lt;=&#32;0)&#32;{
+629 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;fclose(<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a0fdda94b8b7e64884690244028f455ba">f</link>);
+630 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>;
+631 &#32;&#32;&#32;&#32;}
+632 &#32;&#32;&#32;&#32;fseek(<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a0fdda94b8b7e64884690244028f455ba">f</link>,&#32;0,&#32;SEEK_SET);
+633 
+634 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a89ce72163394e6aef63b551a8806e93f">data</link>&#32;=&#32;<link linkend="__classes_2lib_2rtextures_8c_1a40ac67345362c1843387026b5a69004f">QOI_MALLOC</link>(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a3d1e3edfcf61ca2d831883e1afbad89e">size</link>);
+635 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(!<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a89ce72163394e6aef63b551a8806e93f">data</link>)&#32;{
+636 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;fclose(<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a0fdda94b8b7e64884690244028f455ba">f</link>);
+637 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="__classes_2lib_2external_2miniaudio_8h_1a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</link>;
+638 &#32;&#32;&#32;&#32;}
+639 
+640 &#32;&#32;&#32;&#32;bytes_read&#32;=&#32;fread(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a89ce72163394e6aef63b551a8806e93f">data</link>,&#32;1,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a3d1e3edfcf61ca2d831883e1afbad89e">size</link>,&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a0fdda94b8b7e64884690244028f455ba">f</link>);
+641 &#32;&#32;&#32;&#32;fclose(<link linkend="__classes_2lib_2raylib_2src_2external_2glad_8h_1a0fdda94b8b7e64884690244028f455ba">f</link>);
+642 
+643 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a620525fb1b4102cd9522c24b0e7d3e40">pixels</link>&#32;=&#32;<link linkend="__classes_2lib_2external_2qoi_8h_1a8740868f0e24f10b57d47aba8195a4f1">qoi_decode</link>(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a89ce72163394e6aef63b551a8806e93f">data</link>,&#32;bytes_read,&#32;desc,&#32;channels);
+644 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2rtextures_8c_1a273924653ee890931eb839262fc28977">QOI_FREE</link>(<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a89ce72163394e6aef63b551a8806e93f">data</link>);
+645 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="__classes_2lib_2raylib_2src_2external_2_a_n_g_l_e_2_g_l_e_s2_2gl2ext_8h_1a620525fb1b4102cd9522c24b0e7d3e40">pixels</link>;
+646 }
+647 
+648 <emphasis role="preprocessor">#endif&#32;</emphasis><emphasis role="comment">/*&#32;QOI_NO_STDIO&#32;*/</emphasis><emphasis role="preprocessor"></emphasis>
+649 <emphasis role="preprocessor">#endif&#32;</emphasis><emphasis role="comment">/*&#32;QOI_IMPLEMENTATION&#32;*/</emphasis><emphasis role="preprocessor"></emphasis>
+</programlisting></section>

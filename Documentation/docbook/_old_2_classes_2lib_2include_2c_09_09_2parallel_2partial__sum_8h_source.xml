@@ -1,0 +1,206 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<section xmlns="http://docbook.org/ns/docbook" version="5.0" xmlns:xlink="http://www.w3.org/1999/xlink" xml:id="__old_2_classes_2lib_2include_2c_09_09_2parallel_2partial__sum_8h_source" xml:lang="en-US">
+<title>partial_sum.h</title>
+<indexterm><primary>C:/Users/HP/Documents/GitHub/Minero-Game/Old/Classes/lib/include/c++/parallel/partial_sum.h</primary></indexterm>
+Go to the documentation of this file.<programlisting linenumbering="unnumbered">1 <emphasis role="comment">//&#32;-*-&#32;C++&#32;-*-</emphasis>
+2 
+3 <emphasis role="comment">//&#32;Copyright&#32;(C)&#32;2007-2022&#32;Free&#32;Software&#32;Foundation,&#32;Inc.</emphasis>
+4 <emphasis role="comment">//</emphasis>
+5 <emphasis role="comment">//&#32;This&#32;file&#32;is&#32;part&#32;of&#32;the&#32;GNU&#32;ISO&#32;C++&#32;Library.&#32;&#32;This&#32;library&#32;is&#32;free</emphasis>
+6 <emphasis role="comment">//&#32;software;&#32;you&#32;can&#32;redistribute&#32;it&#32;and/or&#32;modify&#32;it&#32;under&#32;the&#32;terms</emphasis>
+7 <emphasis role="comment">//&#32;of&#32;the&#32;GNU&#32;General&#32;Public&#32;License&#32;as&#32;published&#32;by&#32;the&#32;Free&#32;Software</emphasis>
+8 <emphasis role="comment">//&#32;Foundation;&#32;either&#32;version&#32;3,&#32;or&#32;(at&#32;your&#32;option)&#32;any&#32;later</emphasis>
+9 <emphasis role="comment">//&#32;version.</emphasis>
+10 
+11 <emphasis role="comment">//&#32;This&#32;library&#32;is&#32;distributed&#32;in&#32;the&#32;hope&#32;that&#32;it&#32;will&#32;be&#32;useful,&#32;but</emphasis>
+12 <emphasis role="comment">//&#32;WITHOUT&#32;ANY&#32;WARRANTY;&#32;without&#32;even&#32;the&#32;implied&#32;warranty&#32;of</emphasis>
+13 <emphasis role="comment">//&#32;MERCHANTABILITY&#32;or&#32;FITNESS&#32;FOR&#32;A&#32;PARTICULAR&#32;PURPOSE.&#32;&#32;See&#32;the&#32;GNU</emphasis>
+14 <emphasis role="comment">//&#32;General&#32;Public&#32;License&#32;for&#32;more&#32;details.</emphasis>
+15 
+16 <emphasis role="comment">//&#32;Under&#32;Section&#32;7&#32;of&#32;GPL&#32;version&#32;3,&#32;you&#32;are&#32;granted&#32;additional</emphasis>
+17 <emphasis role="comment">//&#32;permissions&#32;described&#32;in&#32;the&#32;GCC&#32;Runtime&#32;Library&#32;Exception,&#32;version</emphasis>
+18 <emphasis role="comment">//&#32;3.1,&#32;as&#32;published&#32;by&#32;the&#32;Free&#32;Software&#32;Foundation.</emphasis>
+19 
+20 <emphasis role="comment">//&#32;You&#32;should&#32;have&#32;received&#32;a&#32;copy&#32;of&#32;the&#32;GNU&#32;General&#32;Public&#32;License&#32;and</emphasis>
+21 <emphasis role="comment">//&#32;a&#32;copy&#32;of&#32;the&#32;GCC&#32;Runtime&#32;Library&#32;Exception&#32;along&#32;with&#32;this&#32;program;</emphasis>
+22 <emphasis role="comment">//&#32;see&#32;the&#32;files&#32;COPYING3&#32;and&#32;COPYING.RUNTIME&#32;respectively.&#32;&#32;If&#32;not,&#32;see</emphasis>
+23 <emphasis role="comment">//&#32;&lt;http://www.gnu.org/licenses/&gt;.</emphasis>
+24 
+31 <emphasis role="comment">//&#32;Written&#32;by&#32;Johannes&#32;Singler.</emphasis>
+32 
+33 <emphasis role="preprocessor">#ifndef&#32;_GLIBCXX_PARALLEL_PARTIAL_SUM_H</emphasis>
+34 <emphasis role="preprocessor">#define&#32;_GLIBCXX_PARALLEL_PARTIAL_SUM_H&#32;1</emphasis>
+35 
+36 <emphasis role="preprocessor">#include&#32;&lt;omp.h&gt;</emphasis>
+37 <emphasis role="preprocessor">#include&#32;&lt;new&gt;</emphasis>
+38 <emphasis role="preprocessor">#include&#32;&lt;bits/stl_algobase.h&gt;</emphasis>
+39 <emphasis role="preprocessor">#include&#32;&lt;parallel/parallel.h&gt;</emphasis>
+40 <emphasis role="preprocessor">#include&#32;&lt;parallel/numericfwd.h&gt;</emphasis>
+41 
+42 <emphasis role="keyword">namespace&#32;</emphasis><link linkend="_namespace____gnu__parallel">__gnu_parallel</link>
+43 {
+44 &#32;&#32;<emphasis role="comment">//&#32;Problem:&#32;there&#32;is&#32;no&#32;0-element&#32;given.</emphasis>
+45 
+54 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_IIter,
+55 &#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;_OutputIterator,
+56 &#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;_BinaryOperation&gt;
+57 &#32;&#32;&#32;&#32;_OutputIterator
+58 &#32;&#32;&#32;&#32;<link linkend="_namespace____gnu__parallel_1adeded88310546a7c54d73464bee998e2">__parallel_partial_sum_basecase</link>(_IIter&#32;__begin,&#32;_IIter&#32;__end,
+59 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_OutputIterator&#32;__result,
+60 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_BinaryOperation&#32;__bin_op,
+61 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;std::iterator_traits&#32;&lt;_IIter&gt;::value_type&#32;__value)
+62 &#32;&#32;&#32;&#32;{
+63 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__begin&#32;==&#32;__end)
+64 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__result;
+65 
+66 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">while</emphasis>&#32;(__begin&#32;!=&#32;__end)
+67 &#32;&#32;&#32;&#32;{
+68 &#32;&#32;&#32;&#32;&#32;&#32;__value&#32;=&#32;__bin_op(__value,&#32;*__begin);
+69 &#32;&#32;&#32;&#32;&#32;&#32;*__result&#32;=&#32;__value;
+70 &#32;&#32;&#32;&#32;&#32;&#32;++__result;
+71 &#32;&#32;&#32;&#32;&#32;&#32;++__begin;
+72 &#32;&#32;&#32;&#32;}
+73 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__result;
+74 &#32;&#32;&#32;&#32;}
+75 
+85 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_IIter,
+86 &#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;_OutputIterator,
+87 &#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;_BinaryOperation&gt;
+88 &#32;&#32;&#32;&#32;_OutputIterator
+89 &#32;&#32;&#32;&#32;<link linkend="_namespace____gnu__parallel_1a63017e821c2b4ff9f90c3641bc45f001">__parallel_partial_sum_linear</link>(_IIter&#32;__begin,&#32;_IIter&#32;__end,
+90 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_OutputIterator&#32;__result,
+91 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_BinaryOperation&#32;__bin_op,
+92 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;std::iterator_traits&lt;_IIter&gt;::difference_type&#32;__n)
+93 &#32;&#32;&#32;&#32;{
+94 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;std::iterator_traits&lt;_IIter&gt;&#32;_TraitsType;
+95 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">typename</emphasis>&#32;_TraitsType::value_type&#32;_ValueType;
+96 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">typename</emphasis>&#32;_TraitsType::difference_type&#32;_DifferenceType;
+97 
+98 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__begin&#32;==&#32;__end)
+99 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__result;
+100 
+101 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_namespace____gnu__parallel_1a05e502e51bfc3233671730f74a44dc6a">_ThreadIndex</link>&#32;__num_threads&#32;=
+102 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;std::min&lt;_DifferenceType&gt;(<link linkend="_namespace____gnu__parallel_1aa72851b809c2b314bc09580c3512f281">__get_max_threads</link>(),&#32;__n&#32;-&#32;1);
+103 
+104 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__num_threads&#32;&lt;&#32;2)
+105 &#32;&#32;&#32;&#32;{
+106 &#32;&#32;&#32;&#32;&#32;&#32;*__result&#32;=&#32;*__begin;
+107 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="_namespace____gnu__parallel_1adeded88310546a7c54d73464bee998e2">__parallel_partial_sum_basecase</link>(__begin&#32;+&#32;1,&#32;__end,
+108 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__result&#32;+&#32;1,&#32;__bin_op,
+109 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;*__begin);
+110 &#32;&#32;&#32;&#32;}
+111 
+112 &#32;&#32;&#32;&#32;&#32;&#32;_DifferenceType*&#32;__borders;
+113 &#32;&#32;&#32;&#32;&#32;&#32;_ValueType*&#32;__sums;
+114 
+115 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;_Settings&amp;&#32;__s&#32;=&#32;<link linkend="_struct____gnu__parallel_1_1___settings_1adf11d9453707f1145a9e221ab7630bd3">_Settings::get</link>();
+116 
+117 <emphasis role="preprocessor">#&#32;&#32;&#32;&#32;&#32;pragma&#32;omp&#32;parallel&#32;num_threads(__num_threads)</emphasis>
+118 &#32;&#32;&#32;&#32;&#32;&#32;{
+119 <emphasis role="preprocessor">#&#32;&#32;&#32;&#32;&#32;&#32;&#32;pragma&#32;omp&#32;single</emphasis>
+120 &#32;&#32;&#32;&#32;{
+121 &#32;&#32;&#32;&#32;&#32;&#32;__num_threads&#32;=&#32;<link linkend="__classes_2lib_2include_2omp_8h_1ac42ead04531fd33507e3d3a6f648b200">omp_get_num_threads</link>();
+122 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;
+123 &#32;&#32;&#32;&#32;&#32;&#32;__borders&#32;=&#32;<emphasis role="keyword">new</emphasis>&#32;_DifferenceType[__num_threads&#32;+&#32;2];
+124 
+125 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__s.partial_sum_dilation&#32;==&#32;1.0f)
+126 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_namespace____gnu__parallel_1ac799255921e70b0378d145924d673f9c">__equally_split</link>(__n,&#32;__num_threads&#32;+&#32;1,&#32;__borders);
+127 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>
+128 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+129 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_DifferenceType&#32;__first_part_length&#32;=
+130 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;std::max&lt;_DifferenceType&gt;(1,
+131 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__n&#32;/&#32;(1.0f&#32;+&#32;__s.partial_sum_dilation&#32;*&#32;__num_threads));
+132 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_DifferenceType&#32;__chunk_length&#32;=
+133 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;(__n&#32;-&#32;__first_part_length)&#32;/&#32;__num_threads;
+134 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_DifferenceType&#32;__borderstart&#32;=
+135 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__n&#32;-&#32;__num_threads&#32;*&#32;__chunk_length;
+136 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__borders[0]&#32;=&#32;0;
+137 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(<link linkend="_namespace____gnu__parallel_1a05e502e51bfc3233671730f74a44dc6a">_ThreadIndex</link>&#32;__i&#32;=&#32;1;&#32;__i&#32;&lt;&#32;(__num_threads&#32;+&#32;1);&#32;++__i)
+138 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+139 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__borders[__i]&#32;=&#32;__borderstart;
+140 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__borderstart&#32;+=&#32;__chunk_length;
+141 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+142 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__borders[__num_threads&#32;+&#32;1]&#32;=&#32;__n;
+143 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+144 
+145 &#32;&#32;&#32;&#32;&#32;&#32;__sums&#32;=&#32;<emphasis role="keyword">static_cast&lt;</emphasis>_ValueType*<emphasis role="keyword">&gt;</emphasis>(::operator&#32;<emphasis role="keyword">new</emphasis>(<emphasis role="keyword">sizeof</emphasis>(_ValueType)
+146 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;*&#32;__num_threads));
+147 &#32;&#32;&#32;&#32;&#32;&#32;_OutputIterator&#32;__target_end;
+148 &#32;&#32;&#32;&#32;}&#32;<emphasis role="comment">//single</emphasis>
+149 
+150 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_namespace____gnu__parallel_1a05e502e51bfc3233671730f74a44dc6a">_ThreadIndex</link>&#32;__iam&#32;=&#32;<link linkend="__classes_2lib_2include_2omp_8h_1aa03cf372d8266eef024262a68d304e1b">omp_get_thread_num</link>();
+151 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(__iam&#32;==&#32;0)
+152 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+153 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;*__result&#32;=&#32;*__begin;
+154 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_namespace____gnu__parallel_1adeded88310546a7c54d73464bee998e2">__parallel_partial_sum_basecase</link>(__begin&#32;+&#32;1,
+155 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__begin&#32;+&#32;__borders[1],
+156 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__result&#32;+&#32;1,
+157 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__bin_op,&#32;*__begin);
+158 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;::new(&amp;(__sums[__iam]))&#32;_ValueType(*(__result&#32;+&#32;__borders[1]&#32;-&#32;1));
+159 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+160 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">else</emphasis>
+161 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+162 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;::new(&amp;(__sums[__iam]))
+163 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_ValueType(__gnu_parallel::accumulate(
+164 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__begin&#32;+&#32;__borders[__iam]&#32;+&#32;1,
+165 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__begin&#32;+&#32;__borders[__iam&#32;+&#32;1],
+166 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;*(__begin&#32;+&#32;__borders[__iam]),
+167 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__bin_op,
+168 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_struct____gnu__parallel_1_1sequential__tag">__gnu_parallel::sequential_tag</link>()));
+169 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+170 
+171 <emphasis role="preprocessor">#&#32;&#32;&#32;&#32;&#32;&#32;&#32;pragma&#32;omp&#32;barrier</emphasis>
+172 
+173 <emphasis role="preprocessor">#&#32;&#32;&#32;&#32;&#32;&#32;&#32;pragma&#32;omp&#32;single</emphasis>
+174 &#32;&#32;&#32;&#32;<link linkend="_namespace____gnu__parallel_1adeded88310546a7c54d73464bee998e2">__parallel_partial_sum_basecase</link>(__sums&#32;+&#32;1,&#32;__sums&#32;+&#32;__num_threads,
+175 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__sums&#32;+&#32;1,&#32;__bin_op,&#32;__sums[0]);
+176 
+177 <emphasis role="preprocessor">#&#32;&#32;&#32;&#32;&#32;&#32;&#32;pragma&#32;omp&#32;barrier</emphasis>
+178 
+179 &#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Still&#32;same&#32;team.</emphasis>
+180 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_namespace____gnu__parallel_1adeded88310546a7c54d73464bee998e2">__parallel_partial_sum_basecase</link>(__begin&#32;+&#32;__borders[__iam&#32;+&#32;1],
+181 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__begin&#32;+&#32;__borders[__iam&#32;+&#32;2],
+182 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__result&#32;+&#32;__borders[__iam&#32;+&#32;1],
+183 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__bin_op,&#32;__sums[__iam]);
+184 &#32;&#32;&#32;&#32;&#32;&#32;}&#32;<emphasis role="comment">//parallel</emphasis>
+185 
+186 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">for</emphasis>&#32;(<link linkend="_namespace____gnu__parallel_1a05e502e51bfc3233671730f74a44dc6a">_ThreadIndex</link>&#32;__i&#32;=&#32;0;&#32;__i&#32;&lt;&#32;__num_threads;&#32;++__i)
+187 &#32;&#32;&#32;&#32;__sums[__i].~_ValueType();
+188 &#32;&#32;&#32;&#32;&#32;&#32;::operator&#32;<emphasis role="keyword">delete</emphasis>(__sums);
+189 
+190 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">delete</emphasis>[]&#32;__borders;
+191 
+192 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__result&#32;+&#32;__n;
+193 &#32;&#32;&#32;&#32;}
+194 
+201 &#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;_IIter,
+202 &#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;_OutputIterator,
+203 &#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;_BinaryOperation&gt;
+204 &#32;&#32;&#32;&#32;_OutputIterator
+205 &#32;&#32;&#32;&#32;<link linkend="_namespace____gnu__parallel_1a0cf4a05b6f849cae06f9fb6098eb0628">__parallel_partial_sum</link>(_IIter&#32;__begin,&#32;_IIter&#32;__end,
+206 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;_OutputIterator&#32;__result,&#32;_BinaryOperation&#32;__bin_op)
+207 &#32;&#32;&#32;&#32;{
+208 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2parallel_2compiletime__settings_8h_1a77fb93c9cecec331ccee755972695128">_GLIBCXX_CALL</link>(__begin&#32;-&#32;__end)
+209 
+210 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;std::iterator_traits&lt;_IIter&gt;&#32;_TraitsType;
+211 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">typename</emphasis>&#32;_TraitsType::value_type&#32;_ValueType;
+212 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">typename</emphasis>&#32;_TraitsType::difference_type&#32;_DifferenceType;
+213 
+214 &#32;&#32;&#32;&#32;&#32;&#32;_DifferenceType&#32;__n&#32;=&#32;__end&#32;-&#32;__begin;
+215 
+216 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">switch</emphasis>&#32;(<link linkend="_struct____gnu__parallel_1_1___settings_1adf11d9453707f1145a9e221ab7630bd3">_Settings::get</link>().partial_sum_algorithm)
+217 &#32;&#32;&#32;&#32;{
+218 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">case</emphasis>&#32;<link linkend="_namespace____gnu__parallel_1a6a4a811c81e2fb4a7722ee69762c7380a734c2f0b561ad9d6bc4a85a86c0c7d1d">LINEAR</link>:
+219 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Need&#32;an&#32;initial&#32;offset.</emphasis>
+220 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="_namespace____gnu__parallel_1a63017e821c2b4ff9f90c3641bc45f001">__parallel_partial_sum_linear</link>(__begin,&#32;__end,&#32;__result,
+221 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__bin_op,&#32;__n);
+222 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">default</emphasis>:
+223 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="comment">//&#32;Partial_sum&#32;algorithm&#32;not&#32;implemented.</emphasis>
+224 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2parallel_2base_8h_1acff27ea0a7532ee31661cbd47a95d3de">_GLIBCXX_PARALLEL_ASSERT</link>(0);
+225 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;__result&#32;+&#32;__n;
+226 &#32;&#32;&#32;&#32;}
+227 &#32;&#32;&#32;&#32;}
+228 }
+229 
+230 <emphasis role="preprocessor">#endif&#32;</emphasis><emphasis role="comment">/*&#32;_GLIBCXX_PARALLEL_PARTIAL_SUM_H&#32;*/</emphasis><emphasis role="preprocessor"></emphasis>
+</programlisting></section>

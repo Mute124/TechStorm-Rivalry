@@ -1,0 +1,577 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<section xmlns="http://docbook.org/ns/docbook" version="5.0" xmlns:xlink="http://www.w3.org/1999/xlink" xml:id="_lib_2include_2c_09_09_2ext_2pb__ds_2detail_2pat__trie___2pat__trie___8hpp_source" xml:lang="en-US">
+<title>pat_trie_.hpp</title>
+<indexterm><primary>C:/Users/HP/Documents/GitHub/Minero-Game/lib/include/c++/ext/pb_ds/detail/pat_trie_/pat_trie_.hpp</primary></indexterm>
+Go to the documentation of this file.<programlisting linenumbering="unnumbered">1 <emphasis role="comment">//&#32;-*-&#32;C++&#32;-*-</emphasis>
+2 
+3 <emphasis role="comment">//&#32;Copyright&#32;(C)&#32;2005-2022&#32;Free&#32;Software&#32;Foundation,&#32;Inc.</emphasis>
+4 <emphasis role="comment">//</emphasis>
+5 <emphasis role="comment">//&#32;This&#32;file&#32;is&#32;part&#32;of&#32;the&#32;GNU&#32;ISO&#32;C++&#32;Library.&#32;&#32;This&#32;library&#32;is&#32;free</emphasis>
+6 <emphasis role="comment">//&#32;software;&#32;you&#32;can&#32;redistribute&#32;it&#32;and/or&#32;modify&#32;it&#32;under&#32;the&#32;terms</emphasis>
+7 <emphasis role="comment">//&#32;of&#32;the&#32;GNU&#32;General&#32;Public&#32;License&#32;as&#32;published&#32;by&#32;the&#32;Free&#32;Software</emphasis>
+8 <emphasis role="comment">//&#32;Foundation;&#32;either&#32;version&#32;3,&#32;or&#32;(at&#32;your&#32;option)&#32;any&#32;later</emphasis>
+9 <emphasis role="comment">//&#32;version.</emphasis>
+10 
+11 <emphasis role="comment">//&#32;This&#32;library&#32;is&#32;distributed&#32;in&#32;the&#32;hope&#32;that&#32;it&#32;will&#32;be&#32;useful,&#32;but</emphasis>
+12 <emphasis role="comment">//&#32;WITHOUT&#32;ANY&#32;WARRANTY;&#32;without&#32;even&#32;the&#32;implied&#32;warranty&#32;of</emphasis>
+13 <emphasis role="comment">//&#32;MERCHANTABILITY&#32;or&#32;FITNESS&#32;FOR&#32;A&#32;PARTICULAR&#32;PURPOSE.&#32;&#32;See&#32;the&#32;GNU</emphasis>
+14 <emphasis role="comment">//&#32;General&#32;Public&#32;License&#32;for&#32;more&#32;details.</emphasis>
+15 
+16 <emphasis role="comment">//&#32;Under&#32;Section&#32;7&#32;of&#32;GPL&#32;version&#32;3,&#32;you&#32;are&#32;granted&#32;additional</emphasis>
+17 <emphasis role="comment">//&#32;permissions&#32;described&#32;in&#32;the&#32;GCC&#32;Runtime&#32;Library&#32;Exception,&#32;version</emphasis>
+18 <emphasis role="comment">//&#32;3.1,&#32;as&#32;published&#32;by&#32;the&#32;Free&#32;Software&#32;Foundation.</emphasis>
+19 
+20 <emphasis role="comment">//&#32;You&#32;should&#32;have&#32;received&#32;a&#32;copy&#32;of&#32;the&#32;GNU&#32;General&#32;Public&#32;License&#32;and</emphasis>
+21 <emphasis role="comment">//&#32;a&#32;copy&#32;of&#32;the&#32;GCC&#32;Runtime&#32;Library&#32;Exception&#32;along&#32;with&#32;this&#32;program;</emphasis>
+22 <emphasis role="comment">//&#32;see&#32;the&#32;files&#32;COPYING3&#32;and&#32;COPYING.RUNTIME&#32;respectively.&#32;&#32;If&#32;not,&#32;see</emphasis>
+23 <emphasis role="comment">//&#32;&lt;http://www.gnu.org/licenses/&gt;.</emphasis>
+24 
+25 <emphasis role="comment">//&#32;Copyright&#32;(C)&#32;2004&#32;Ami&#32;Tavory&#32;and&#32;Vladimir&#32;Dreizin,&#32;IBM-HRL.</emphasis>
+26 
+27 <emphasis role="comment">//&#32;Permission&#32;to&#32;use,&#32;copy,&#32;modify,&#32;sell,&#32;and&#32;distribute&#32;this&#32;software</emphasis>
+28 <emphasis role="comment">//&#32;is&#32;hereby&#32;granted&#32;without&#32;fee,&#32;provided&#32;that&#32;the&#32;above&#32;copyright</emphasis>
+29 <emphasis role="comment">//&#32;notice&#32;appears&#32;in&#32;all&#32;copies,&#32;and&#32;that&#32;both&#32;that&#32;copyright&#32;notice</emphasis>
+30 <emphasis role="comment">//&#32;and&#32;this&#32;permission&#32;notice&#32;appear&#32;in&#32;supporting&#32;documentation.&#32;None</emphasis>
+31 <emphasis role="comment">//&#32;of&#32;the&#32;above&#32;authors,&#32;nor&#32;IBM&#32;Haifa&#32;Research&#32;Laboratories,&#32;make&#32;any</emphasis>
+32 <emphasis role="comment">//&#32;representation&#32;about&#32;the&#32;suitability&#32;of&#32;this&#32;software&#32;for&#32;any</emphasis>
+33 <emphasis role="comment">//&#32;purpose.&#32;It&#32;is&#32;provided&#32;&quot;as&#32;is&quot;&#32;without&#32;express&#32;or&#32;implied</emphasis>
+34 <emphasis role="comment">//&#32;warranty.</emphasis>
+35 
+41 <emphasis role="preprocessor">#include&#32;&lt;iterator&gt;</emphasis>
+42 <emphasis role="preprocessor">#include&#32;&lt;utility&gt;</emphasis>
+43 <emphasis role="preprocessor">#include&#32;&lt;algorithm&gt;</emphasis>
+44 <emphasis role="preprocessor">#include&#32;&lt;functional&gt;</emphasis>
+45 <emphasis role="preprocessor">#include&#32;&lt;assert.h&gt;</emphasis>
+46 <emphasis role="preprocessor">#include&#32;&lt;list&gt;</emphasis>
+47 <emphasis role="preprocessor">#include&#32;&lt;ext/pb_ds/exception.hpp&gt;</emphasis>
+48 <emphasis role="preprocessor">#include&#32;&lt;ext/pb_ds/tag_and_trait.hpp&gt;</emphasis>
+49 <emphasis role="preprocessor">#include&#32;&lt;ext/pb_ds/tree_policy.hpp&gt;</emphasis>
+50 <emphasis role="preprocessor">#include&#32;&lt;ext/pb_ds/detail/cond_dealtor.hpp&gt;</emphasis>
+51 <emphasis role="preprocessor">#include&#32;&lt;ext/pb_ds/detail/type_utils.hpp&gt;</emphasis>
+52 <emphasis role="preprocessor">#include&#32;&lt;ext/pb_ds/detail/types_traits.hpp&gt;</emphasis>
+53 <emphasis role="preprocessor">#include&#32;&lt;ext/pb_ds/detail/eq_fn/eq_by_less.hpp&gt;</emphasis>
+54 <emphasis role="preprocessor">#include&#32;&lt;ext/pb_ds/detail/pat_trie_/synth_access_traits.hpp&gt;</emphasis>
+55 <emphasis role="preprocessor">#include&#32;&lt;ext/pb_ds/detail/pat_trie_/pat_trie_base.hpp&gt;</emphasis>
+56 <emphasis role="preprocessor">#ifdef&#32;_GLIBCXX_DEBUG</emphasis>
+57 <emphasis role="preprocessor">#include&#32;&lt;ext/pb_ds/detail/debug_map_base.hpp&gt;</emphasis>
+58 <emphasis role="preprocessor">#endif</emphasis>
+59 <emphasis role="preprocessor">#include&#32;&lt;debug/debug.h&gt;</emphasis>
+60 
+61 <emphasis role="keyword">namespace&#32;</emphasis><link linkend="_namespace____gnu__pbds">__gnu_pbds</link>
+62 {
+63 &#32;&#32;<emphasis role="keyword">namespace&#32;</emphasis>detail
+64 &#32;&#32;{
+65 <emphasis role="preprocessor">#ifdef&#32;PB_DS_DATA_TRUE_INDICATOR</emphasis>
+66 <emphasis role="preprocessor">#define&#32;PB_DS_PAT_TRIE_NAME&#32;pat_trie_map</emphasis>
+67 <emphasis role="preprocessor">#endif</emphasis>
+68 
+69 <emphasis role="preprocessor">#ifdef&#32;PB_DS_DATA_FALSE_INDICATOR</emphasis>
+70 <emphasis role="preprocessor">#define&#32;PB_DS_PAT_TRIE_NAME&#32;pat_trie_set</emphasis>
+71 <emphasis role="preprocessor">#endif</emphasis>
+72 
+73 <emphasis role="preprocessor">#define&#32;PB_DS_CLASS_T_DEC&#32;\</emphasis>
+74 <emphasis role="preprocessor">&#32;&#32;&#32;&#32;template&lt;typename&#32;Key,&#32;typename&#32;Mapped,&#32;typename&#32;Node_And_It_Traits,&#32;\</emphasis>
+75 <emphasis role="preprocessor">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;typename&#32;_Alloc&gt;</emphasis>
+76 
+77 <emphasis role="preprocessor">#define&#32;PB_DS_CLASS_C_DEC&#32;\</emphasis>
+78 <emphasis role="preprocessor">&#32;&#32;&#32;&#32;PB_DS_PAT_TRIE_NAME&lt;Key,&#32;Mapped,&#32;Node_And_It_Traits,&#32;_Alloc&gt;</emphasis>
+79 
+80 <emphasis role="preprocessor">#define&#32;PB_DS_PAT_TRIE_TRAITS_BASE&#32;\</emphasis>
+81 <emphasis role="preprocessor">&#32;&#32;&#32;&#32;types_traits&lt;Key,&#32;Mapped,&#32;_Alloc,&#32;false&gt;</emphasis>
+82 
+83 <emphasis role="preprocessor">#ifdef&#32;_GLIBCXX_DEBUG</emphasis>
+84 <emphasis role="preprocessor">#define&#32;PB_DS_DEBUG_MAP_BASE_C_DEC&#32;\</emphasis>
+85 <emphasis role="preprocessor">&#32;&#32;&#32;&#32;debug_map_base&lt;Key,&#32;eq_by_less&lt;Key,&#32;std::less&lt;Key&gt;&#32;&gt;,&#32;\</emphasis>
+86 <emphasis role="preprocessor">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;typename&#32;rebind_traits&lt;_Alloc,&#32;Key&gt;::const_reference&gt;</emphasis>
+87 <emphasis role="preprocessor">#endif</emphasis>
+88 
+89 
+99 &#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;Key,&#32;<emphasis role="keyword">typename</emphasis>&#32;Mapped,&#32;<emphasis role="keyword">typename</emphasis>&#32;Node_And_It_Traits,
+100 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;_Alloc&gt;
+101 &#32;&#32;&#32;&#32;<emphasis role="keyword">class&#32;</emphasis>PB_DS_PAT_TRIE_NAME&#32;:
+102 <emphasis role="preprocessor">#ifdef&#32;_GLIBCXX_DEBUG</emphasis>
+103 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">public</emphasis>&#32;PB_DS_DEBUG_MAP_BASE_C_DEC,
+104 <emphasis role="preprocessor">#endif</emphasis>
+105 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">public</emphasis>&#32;Node_And_It_Traits::synth_access_traits,
+106 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">public</emphasis>&#32;Node_And_It_Traits::node_update,
+107 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">public</emphasis>&#32;<link linkend="__classes_2lib_2include_2c_09_09_2ext_2pb__ds_2detail_2pat__trie___2pat__trie___8hpp_1a943a5550f8c2da5c633a5ac5bc90a538">PB_DS_PAT_TRIE_TRAITS_BASE</link>,
+108 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">public</emphasis>&#32;pat_trie_base
+109 &#32;&#32;&#32;&#32;{
+110 &#32;&#32;&#32;&#32;<emphasis role="keyword">private</emphasis>:
+111 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;pat_trie_base&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;base_type;
+112 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<link linkend="__classes_2lib_2include_2c_09_09_2ext_2pb__ds_2detail_2pat__trie___2pat__trie___8hpp_1a943a5550f8c2da5c633a5ac5bc90a538">PB_DS_PAT_TRIE_TRAITS_BASE</link>&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;traits_base;
+113 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;Node_And_It_Traits&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;traits_type;
+114 
+115 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">typename</emphasis>&#32;traits_type::synth_access_traits&#32;synth_access_traits;
+116 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">typename</emphasis>&#32;<link linkend="_struct____gnu__pbds_1_1detail_1_1synth__access__traits_1a06e3d46d2b3a4dd09cd110090a415158">synth_access_traits::const_iterator</link>&#32;a_const_iterator;
+117 
+118 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">typename</emphasis>&#32;traits_type::node&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;node;
+119 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;rebind_traits&lt;_Alloc,&#32;node&gt;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__rebind_n;
+120 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">typename</emphasis>&#32;__rebind_n::const_pointer&#32;&#32;&#32;&#32;node_const_pointer;
+121 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">typename</emphasis>&#32;__rebind_n::pointer&#32;&#32;&#32;&#32;&#32;&#32;node_pointer;
+122 
+123 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">typename</emphasis>&#32;traits_type::head&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;head;
+124 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;rebind_traits&lt;_Alloc,&#32;head&gt;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__rebind_h;
+125 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">typename</emphasis>&#32;<link linkend="_struct____gnu__pbds_1_1detail_1_1rebind__traits_1a5c2f6b883ad38d742a04662bd1442365">__rebind_h::allocator_type</link>&#32;&#32;&#32;head_allocator;
+126 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">typename</emphasis>&#32;__rebind_h::pointer&#32;&#32;&#32;&#32;&#32;&#32;head_pointer;
+127 
+128 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">typename</emphasis>&#32;traits_type::leaf&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;leaf;
+129 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;rebind_traits&lt;_Alloc,&#32;leaf&gt;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__rebind_l;
+130 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">typename</emphasis>&#32;<link linkend="_struct____gnu__pbds_1_1detail_1_1rebind__traits_1a5c2f6b883ad38d742a04662bd1442365">__rebind_l::allocator_type</link>&#32;&#32;&#32;leaf_allocator;
+131 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">typename</emphasis>&#32;__rebind_l::pointer&#32;&#32;&#32;&#32;&#32;&#32;leaf_pointer;
+132 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">typename</emphasis>&#32;__rebind_l::const_pointer&#32;&#32;&#32;&#32;leaf_const_pointer;
+133 
+134 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">typename</emphasis>&#32;traits_type::inode&#32;&#32;&#32;&#32;&#32;&#32;&#32;inode;
+135 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">typename</emphasis>&#32;inode::iterator&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;inode_iterator;
+136 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;rebind_traits&lt;_Alloc,&#32;inode&gt;&#32;&#32;&#32;&#32;&#32;&#32;__rebind_in;
+137 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">typename</emphasis>&#32;<link linkend="_struct____gnu__pbds_1_1detail_1_1rebind__traits_1a5c2f6b883ad38d742a04662bd1442365">__rebind_in::allocator_type</link>&#32;&#32;inode_allocator;
+138 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">typename</emphasis>&#32;__rebind_in::pointer&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;inode_pointer;
+139 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">typename</emphasis>&#32;__rebind_in::const_pointer&#32;&#32;&#32;inode_const_pointer;
+140 
+141 
+143 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">class&#32;</emphasis>cond_dealtor
+144 &#32;&#32;&#32;&#32;&#32;&#32;{
+145 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">protected</emphasis>:
+146 &#32;&#32;&#32;&#32;leaf_pointer&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;m_p_nd;
+147 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">bool</emphasis>&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;m_no_action_dtor;
+148 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">bool</emphasis>&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;m_call_destructor;
+149 
+150 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">public</emphasis>:
+151 &#32;&#32;&#32;&#32;cond_dealtor(leaf_pointer&#32;p_nd)
+152 &#32;&#32;&#32;&#32;:&#32;m_p_nd(p_nd),&#32;m_no_action_dtor(<emphasis role="keyword">false</emphasis>),&#32;m_call_destructor(<emphasis role="keyword">false</emphasis>)
+153 &#32;&#32;&#32;&#32;{&#32;}
+154 
+155 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+156 &#32;&#32;&#32;&#32;set_no_action_dtor()
+157 &#32;&#32;&#32;&#32;{&#32;m_no_action_dtor&#32;=&#32;<emphasis role="keyword">true</emphasis>;&#32;}
+158 
+159 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+160 &#32;&#32;&#32;&#32;set_call_destructor()
+161 &#32;&#32;&#32;&#32;{&#32;m_call_destructor&#32;=&#32;<emphasis role="keyword">true</emphasis>;&#32;}
+162 
+163 &#32;&#32;&#32;&#32;~cond_dealtor()
+164 &#32;&#32;&#32;&#32;{
+165 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(m_no_action_dtor)
+166 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>;
+167 
+168 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">if</emphasis>&#32;(m_call_destructor)
+169 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;m_p_nd-&gt;~leaf();
+170 
+171 &#32;&#32;&#32;&#32;&#32;&#32;s_leaf_allocator.deallocate(m_p_nd,&#32;1);
+172 &#32;&#32;&#32;&#32;}
+173 &#32;&#32;&#32;&#32;&#32;&#32;};
+174 
+175 
+177 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">class&#32;</emphasis>branch_bag
+178 &#32;&#32;&#32;&#32;&#32;&#32;{
+179 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">private</emphasis>:
+180 &#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;inode_pointer&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;__inp;
+181 &#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">typename</emphasis>&#32;<link linkend="_struct____gnu__pbds_1_1detail_1_1rebind__traits_1a5c2f6b883ad38d742a04662bd1442365">rebind_traits&lt;_Alloc, __inp&gt;::allocator_type</link>
+182 &#32;&#32;&#32;&#32;&#32;&#32;__rebind_inp;
+183 
+184 <emphasis role="preprocessor">#ifdef&#32;_GLIBCXX_DEBUG</emphasis>
+185 &#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;std::_GLIBCXX_STD_C::list&lt;__inp,&#32;__rebind_inp&gt;&#32;&#32;bag_type;
+186 <emphasis role="preprocessor">#else</emphasis>
+187 &#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;std::list&lt;__inp,&#32;__rebind_inp&gt;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;bag_type;
+188 <emphasis role="preprocessor">#endif</emphasis>
+189 
+190 &#32;&#32;&#32;&#32;bag_type&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;m_bag;
+191 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">public</emphasis>:
+192 &#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+193 &#32;&#32;&#32;&#32;add_branch()
+194 &#32;&#32;&#32;&#32;{
+195 &#32;&#32;&#32;&#32;&#32;&#32;inode_pointer&#32;p_nd&#32;=&#32;s_inode_allocator.allocate(1);
+196 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2bits_2exception__defines_8h_1a130bf0cd31a0783cd03563f46b46915b">__try</link>
+197 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+198 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;m_bag.push_back(p_nd);
+199 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+200 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2bits_2exception__defines_8h_1a9e51d2f324c18a996a3e4f9a6ba0f6c2">__catch</link>(...)
+201 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+202 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;s_inode_allocator.deallocate(p_nd,&#32;1);
+203 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2bits_2exception__defines_8h_1a92ef03a5310b10a4243a6ec8f43494b5">__throw_exception_again</link>;
+204 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+205 &#32;&#32;&#32;&#32;}
+206 
+207 &#32;&#32;&#32;&#32;inode_pointer
+208 &#32;&#32;&#32;&#32;get_branch()
+209 &#32;&#32;&#32;&#32;{
+210 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_lib_2include_2c_09_09_2debug_2assertions_8h_1aa2bfb4e74c7be93673913edf15f85504">_GLIBCXX_DEBUG_ASSERT</link>(!m_bag.empty());
+211 &#32;&#32;&#32;&#32;&#32;&#32;inode_pointer&#32;p_nd&#32;=&#32;*m_bag.begin();
+212 &#32;&#32;&#32;&#32;&#32;&#32;m_bag.pop_front();
+213 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;p_nd;
+214 &#32;&#32;&#32;&#32;}
+215 
+216 &#32;&#32;&#32;&#32;~branch_bag()
+217 &#32;&#32;&#32;&#32;{
+218 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordflow">while</emphasis>&#32;(!m_bag.empty())
+219 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;{
+220 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;inode_pointer&#32;p_nd&#32;=&#32;*m_bag.begin();
+221 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;s_inode_allocator.deallocate(p_nd,&#32;1);
+222 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;m_bag.pop_front();
+223 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;}
+224 &#32;&#32;&#32;&#32;}
+225 
+226 &#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2x86__64-w64-mingw32_2bits_2c_09_09config_8h_1a56bc959ca1311889bcd1c5abb178ab59">_GLIBCXX_NODISCARD</link>&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>
+227 &#32;&#32;&#32;&#32;empty()<emphasis role="keyword">&#32;const</emphasis>
+228 <emphasis role="keyword">&#32;&#32;&#32;&#32;</emphasis>{&#32;<emphasis role="keywordflow">return</emphasis>&#32;m_bag.empty();&#32;}
+229 &#32;&#32;&#32;&#32;&#32;&#32;};
+230 
+231 <emphasis role="preprocessor">#ifdef&#32;_GLIBCXX_DEBUG</emphasis>
+232 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;PB_DS_DEBUG_MAP_BASE_C_DEC&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;debug_base;
+233 <emphasis role="preprocessor">#endif</emphasis>
+234 
+235 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">typename</emphasis>&#32;traits_type::null_node_update_pointer&#32;null_node_update_pointer;
+236 
+237 &#32;&#32;&#32;&#32;<emphasis role="keyword">public</emphasis>:
+238 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<link linkend="_struct____gnu__pbds_1_1pat__trie__tag">pat_trie_tag</link>&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1detail_1_1_p_b___d_s___p_a_t___t_r_i_e___n_a_m_e_1a6a95088816a731024853b421f391c6c3">container_category</link>;
+239 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;_Alloc&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1detail_1_1_p_b___d_s___p_a_t___t_r_i_e___n_a_m_e_1ad6726310032233644caf22ede4e6f72e">allocator_type</link>;
+240 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">typename</emphasis>&#32;_Alloc::size_type&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1detail_1_1_p_b___d_s___p_a_t___t_r_i_e___n_a_m_e_1abe46f72944f7d6e709246c998f43afcb">size_type</link>;
+241 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">typename</emphasis>&#32;_Alloc::difference_type&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1detail_1_1_p_b___d_s___p_a_t___t_r_i_e___n_a_m_e_1a006111ac274ad19e139600bb9bcb5c53">difference_type</link>;
+242 
+243 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">typename</emphasis>&#32;traits_base::key_type&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1detail_1_1_p_b___d_s___p_a_t___t_r_i_e___n_a_m_e_1a95534c5b5b9e4b0396c64ff6ae4ac499">key_type</link>;
+244 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">typename</emphasis>&#32;traits_base::key_pointer&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1detail_1_1_p_b___d_s___p_a_t___t_r_i_e___n_a_m_e_1a7eca3f5c211ad0e481ab7a03ae214589">key_pointer</link>;
+245 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">typename</emphasis>&#32;traits_base::key_const_pointer&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1detail_1_1_p_b___d_s___p_a_t___t_r_i_e___n_a_m_e_1af3fa12bb50df1dcd25b80be6415bab10">key_const_pointer</link>;
+246 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">typename</emphasis>&#32;traits_base::key_reference&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1detail_1_1_p_b___d_s___p_a_t___t_r_i_e___n_a_m_e_1af58eeff565572de161600ede3e425c6c">key_reference</link>;
+247 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">typename</emphasis>&#32;traits_base::key_const_reference&#32;<link linkend="_class____gnu__pbds_1_1detail_1_1_p_b___d_s___p_a_t___t_r_i_e___n_a_m_e_1a3b031778d59f2c52c7ce8406f5b0586e">key_const_reference</link>;
+248 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">typename</emphasis>&#32;traits_base::mapped_type&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1detail_1_1_p_b___d_s___p_a_t___t_r_i_e___n_a_m_e_1a6b09906f856a06395d73fdb0f34ba1ef">mapped_type</link>;
+249 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">typename</emphasis>&#32;traits_base::mapped_pointer&#32;&#32;<link linkend="_class____gnu__pbds_1_1detail_1_1_p_b___d_s___p_a_t___t_r_i_e___n_a_m_e_1acd2b60ec7b30b0a3f73774d8d4e8e646">mapped_pointer</link>;
+250 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">typename</emphasis>&#32;traits_base::mapped_const_pointer&#32;<link linkend="_class____gnu__pbds_1_1detail_1_1_p_b___d_s___p_a_t___t_r_i_e___n_a_m_e_1a2324a62bae02bbcd24f7d55cca47a2b9">mapped_const_pointer</link>;
+251 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">typename</emphasis>&#32;traits_base::mapped_reference&#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1detail_1_1_p_b___d_s___p_a_t___t_r_i_e___n_a_m_e_1a1664c678820b9308e082404af67de00d">mapped_reference</link>;
+252 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">typename</emphasis>&#32;traits_base::mapped_const_reference&#32;<link linkend="_class____gnu__pbds_1_1detail_1_1_p_b___d_s___p_a_t___t_r_i_e___n_a_m_e_1a031b7c3fa2a24e4c3f0713f6b1fc219d">mapped_const_reference</link>;
+253 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">typename</emphasis>&#32;traits_base::value_type&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1detail_1_1_p_b___d_s___p_a_t___t_r_i_e___n_a_m_e_1aec7127f766af0aabce539d7a669adba6">value_type</link>;
+254 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">typename</emphasis>&#32;traits_base::pointer&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1detail_1_1_p_b___d_s___p_a_t___t_r_i_e___n_a_m_e_1a8d9c3e46c2bf369be3138103be9c710d">pointer</link>;
+255 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">typename</emphasis>&#32;traits_base::const_pointer&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1detail_1_1_p_b___d_s___p_a_t___t_r_i_e___n_a_m_e_1af29fb427620948ae7fbac62725779d70">const_pointer</link>;
+256 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">typename</emphasis>&#32;traits_base::reference&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1detail_1_1_p_b___d_s___p_a_t___t_r_i_e___n_a_m_e_1a7380876f4224608664f6f67767626407">reference</link>;
+257 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">typename</emphasis>&#32;traits_base::const_reference&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1detail_1_1_p_b___d_s___p_a_t___t_r_i_e___n_a_m_e_1a7c390830f4e6024a5ef49c92a0ec941d">const_reference</link>;
+258 
+259 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">typename</emphasis>&#32;traits_type::access_traits&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1detail_1_1_p_b___d_s___p_a_t___t_r_i_e___n_a_m_e_1aaae93c060c95bbce0439b34f4e2dd4a3">access_traits</link>;
+260 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">typename</emphasis>&#32;traits_type::const_iterator&#32;&#32;<link linkend="_class____gnu__pbds_1_1detail_1_1_p_b___d_s___p_a_t___t_r_i_e___n_a_m_e_1a2e36a8c0df6e28b3d88e15f4f1fdb024">point_const_iterator</link>;
+261 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">typename</emphasis>&#32;traits_type::iterator&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1detail_1_1_p_b___d_s___p_a_t___t_r_i_e___n_a_m_e_1ad961a0e3b9f7e3b63d9c6aa9b0f21ef5">point_iterator</link>;
+262 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<link linkend="_class____gnu__pbds_1_1detail_1_1_p_b___d_s___p_a_t___t_r_i_e___n_a_m_e_1a2e36a8c0df6e28b3d88e15f4f1fdb024">point_const_iterator</link>&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1detail_1_1_p_b___d_s___p_a_t___t_r_i_e___n_a_m_e_1aca8a29a565b7694995d8b5230315d53f">const_iterator</link>;
+263 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<link linkend="_class____gnu__pbds_1_1detail_1_1_p_b___d_s___p_a_t___t_r_i_e___n_a_m_e_1ad961a0e3b9f7e3b63d9c6aa9b0f21ef5">point_iterator</link>&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1detail_1_1_p_b___d_s___p_a_t___t_r_i_e___n_a_m_e_1a5a79736341a82007269d12cf5ce82a84">iterator</link>;
+264 
+265 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">typename</emphasis>&#32;traits_type::reverse_iterator&#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1detail_1_1_p_b___d_s___p_a_t___t_r_i_e___n_a_m_e_1a147c7d2ef1f318c7048e031a05ed8d8d">reverse_iterator</link>;
+266 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">typename</emphasis>&#32;traits_type::const_reverse_iterator&#32;<link linkend="_class____gnu__pbds_1_1detail_1_1_p_b___d_s___p_a_t___t_r_i_e___n_a_m_e_1ac7837c5884c7ca55bf2196272e4ac7bd">const_reverse_iterator</link>;
+267 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">typename</emphasis>&#32;traits_type::node_const_iterator&#32;<link linkend="_class____gnu__pbds_1_1detail_1_1_p_b___d_s___p_a_t___t_r_i_e___n_a_m_e_1af8b9a30df781c8eb3ecbb47cd6db909f">node_const_iterator</link>;
+268 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">typename</emphasis>&#32;traits_type::node_iterator&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1detail_1_1_p_b___d_s___p_a_t___t_r_i_e___n_a_m_e_1a77cff7c5040f5ed095e78d5d572a91ca">node_iterator</link>;
+269 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typedef</emphasis>&#32;<emphasis role="keyword">typename</emphasis>&#32;traits_type::node_update&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1detail_1_1_p_b___d_s___p_a_t___t_r_i_e___n_a_m_e_1a55eed3abeba9e00e8050f6aba9a6266c">node_update</link>;
+270 
+271 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1detail_1_1_p_b___d_s___p_a_t___t_r_i_e___n_a_m_e_1ac4fd3aa90cd19716c1b438c8e585fd12">PB_DS_PAT_TRIE_NAME</link>();
+272 
+273 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1detail_1_1_p_b___d_s___p_a_t___t_r_i_e___n_a_m_e_1a1e2f73d50a2c63525762c08948e2d2c0">PB_DS_PAT_TRIE_NAME</link>(<emphasis role="keyword">const</emphasis>&#32;<link linkend="_class____gnu__pbds_1_1detail_1_1_p_b___d_s___p_a_t___t_r_i_e___n_a_m_e_1aaae93c060c95bbce0439b34f4e2dd4a3">access_traits</link>&amp;);
+274 
+275 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1detail_1_1_p_b___d_s___p_a_t___t_r_i_e___n_a_m_e_1ad94ab998509ea60b3eeae496f54ddddd">PB_DS_PAT_TRIE_NAME</link>(<emphasis role="keyword">const</emphasis>&#32;<link linkend="__classes_2lib_2include_2c_09_09_2ext_2pb__ds_2detail_2bin__search__tree___2bin__search__tree___8hpp_1a304b8b73a11afe64bfca54576b91263b">PB_DS_CLASS_C_DEC</link>&amp;);
+276 
+277 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+278 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1detail_1_1_p_b___d_s___p_a_t___t_r_i_e___n_a_m_e_1a105e2d0552cf116dd0f7e170c69c2d16">swap</link>(<link linkend="__classes_2lib_2include_2c_09_09_2ext_2pb__ds_2detail_2bin__search__tree___2bin__search__tree___8hpp_1a304b8b73a11afe64bfca54576b91263b">PB_DS_CLASS_C_DEC</link>&amp;);
+279 
+280 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1detail_1_1_p_b___d_s___p_a_t___t_r_i_e___n_a_m_e_1adfc217a84b1da9326f497b0563bf6e01">~PB_DS_PAT_TRIE_NAME</link>();
+281 
+282 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2x86__64-w64-mingw32_2bits_2c_09_09config_8h_1a56bc959ca1311889bcd1c5abb178ab59">_GLIBCXX_NODISCARD</link>&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>
+283 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1detail_1_1_p_b___d_s___p_a_t___t_r_i_e___n_a_m_e_1a650ab02fceedf2b220baba7edda20df1">empty</link>()&#32;<emphasis role="keyword">const</emphasis>;
+284 
+285 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<link linkend="_class____gnu__pbds_1_1detail_1_1_p_b___d_s___p_a_t___t_r_i_e___n_a_m_e_1abe46f72944f7d6e709246c998f43afcb">size_type</link>
+286 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1detail_1_1_p_b___d_s___p_a_t___t_r_i_e___n_a_m_e_1a49dcaed876f68275a5d8684a4ed0ac0f">size</link>()&#32;<emphasis role="keyword">const</emphasis>;
+287 
+288 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<link linkend="_class____gnu__pbds_1_1detail_1_1_p_b___d_s___p_a_t___t_r_i_e___n_a_m_e_1abe46f72944f7d6e709246c998f43afcb">size_type</link>
+289 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1detail_1_1_p_b___d_s___p_a_t___t_r_i_e___n_a_m_e_1acdaa35c9aff6fe0495184ab74abd99f2">max_size</link>()&#32;<emphasis role="keyword">const</emphasis>;
+290 
+291 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1detail_1_1_p_b___d_s___p_a_t___t_r_i_e___n_a_m_e_1aaae93c060c95bbce0439b34f4e2dd4a3">access_traits</link>&amp;
+292 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1detail_1_1_p_b___d_s___p_a_t___t_r_i_e___n_a_m_e_1afad598debd5fc19f9163cd3fb62a012c">get_access_traits</link>();
+293 
+294 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;<link linkend="_class____gnu__pbds_1_1detail_1_1_p_b___d_s___p_a_t___t_r_i_e___n_a_m_e_1aaae93c060c95bbce0439b34f4e2dd4a3">access_traits</link>&amp;
+295 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1detail_1_1_p_b___d_s___p_a_t___t_r_i_e___n_a_m_e_1ade52dc835202a001b806e4eea7621757">get_access_traits</link>()&#32;<emphasis role="keyword">const</emphasis>;
+296 
+297 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1detail_1_1_p_b___d_s___p_a_t___t_r_i_e___n_a_m_e_1a55eed3abeba9e00e8050f6aba9a6266c">node_update</link>&amp;
+298 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1detail_1_1_p_b___d_s___p_a_t___t_r_i_e___n_a_m_e_1ad825a7fbbfab3dacffa8b6a7a8e469a4">get_node_update</link>();
+299 
+300 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">const</emphasis>&#32;<link linkend="_class____gnu__pbds_1_1detail_1_1_p_b___d_s___p_a_t___t_r_i_e___n_a_m_e_1a55eed3abeba9e00e8050f6aba9a6266c">node_update</link>&amp;
+301 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1detail_1_1_p_b___d_s___p_a_t___t_r_i_e___n_a_m_e_1a76cd2ac3407f4d5e849a32e2055bb91f">get_node_update</link>()&#32;<emphasis role="keyword">const</emphasis>;
+302 
+303 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;std::pair&lt;point_iterator,&#32;bool&gt;
+304 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1detail_1_1_p_b___d_s___p_a_t___t_r_i_e___n_a_m_e_1a65d410b992c679c11c4444f9fc12d15a">insert</link>(<link linkend="_class____gnu__pbds_1_1detail_1_1_p_b___d_s___p_a_t___t_r_i_e___n_a_m_e_1a7c390830f4e6024a5ef49c92a0ec941d">const_reference</link>);
+305 
+306 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<link linkend="_class____gnu__pbds_1_1detail_1_1_p_b___d_s___p_a_t___t_r_i_e___n_a_m_e_1a1664c678820b9308e082404af67de00d">mapped_reference</link>
+307 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1detail_1_1_p_b___d_s___p_a_t___t_r_i_e___n_a_m_e_1a6148e1e89269fa41f70db8af0d27e7fc">operator[]</link>(<link linkend="_class____gnu__pbds_1_1detail_1_1_p_b___d_s___p_a_t___t_r_i_e___n_a_m_e_1a3b031778d59f2c52c7ce8406f5b0586e">key_const_reference</link>&#32;r_key)
+308 &#32;&#32;&#32;&#32;&#32;&#32;{
+309 <emphasis role="preprocessor">#ifdef&#32;PB_DS_DATA_TRUE_INDICATOR</emphasis>
+310 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;<link linkend="_class____gnu__pbds_1_1detail_1_1_p_b___d_s___p_a_t___t_r_i_e___n_a_m_e_1a65d410b992c679c11c4444f9fc12d15a">insert</link>(std::make_pair(r_key,&#32;<link linkend="_class____gnu__pbds_1_1detail_1_1_p_b___d_s___p_a_t___t_r_i_e___n_a_m_e_1a6b09906f856a06395d73fdb0f34ba1ef">mapped_type</link>())).first-&gt;second;
+311 <emphasis role="preprocessor">#else</emphasis>
+312 &#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1detail_1_1_p_b___d_s___p_a_t___t_r_i_e___n_a_m_e_1a65d410b992c679c11c4444f9fc12d15a">insert</link>(r_key);
+313 &#32;&#32;&#32;&#32;<emphasis role="keywordflow">return</emphasis>&#32;traits_base::s_null_type;
+314 <emphasis role="preprocessor">#endif</emphasis>
+315 &#32;&#32;&#32;&#32;&#32;&#32;}
+316 
+317 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<link linkend="_class____gnu__pbds_1_1detail_1_1_p_b___d_s___p_a_t___t_r_i_e___n_a_m_e_1ad961a0e3b9f7e3b63d9c6aa9b0f21ef5">point_iterator</link>
+318 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1detail_1_1_p_b___d_s___p_a_t___t_r_i_e___n_a_m_e_1a1c96a377fb4db5490a28538a6423a4c9">find</link>(<link linkend="_class____gnu__pbds_1_1detail_1_1_p_b___d_s___p_a_t___t_r_i_e___n_a_m_e_1a3b031778d59f2c52c7ce8406f5b0586e">key_const_reference</link>);
+319 
+320 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<link linkend="_class____gnu__pbds_1_1detail_1_1_p_b___d_s___p_a_t___t_r_i_e___n_a_m_e_1a2e36a8c0df6e28b3d88e15f4f1fdb024">point_const_iterator</link>
+321 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1detail_1_1_p_b___d_s___p_a_t___t_r_i_e___n_a_m_e_1af3cd28b352db4d7624c0f3d06e6d7386">find</link>(<link linkend="_class____gnu__pbds_1_1detail_1_1_p_b___d_s___p_a_t___t_r_i_e___n_a_m_e_1a3b031778d59f2c52c7ce8406f5b0586e">key_const_reference</link>)&#32;<emphasis role="keyword">const</emphasis>;
+322 
+323 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<link linkend="_class____gnu__pbds_1_1detail_1_1_p_b___d_s___p_a_t___t_r_i_e___n_a_m_e_1ad961a0e3b9f7e3b63d9c6aa9b0f21ef5">point_iterator</link>
+324 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1detail_1_1_p_b___d_s___p_a_t___t_r_i_e___n_a_m_e_1a9360ca18b6f1263737d9ee6b68ef984b">lower_bound</link>(<link linkend="_class____gnu__pbds_1_1detail_1_1_p_b___d_s___p_a_t___t_r_i_e___n_a_m_e_1a3b031778d59f2c52c7ce8406f5b0586e">key_const_reference</link>);
+325 
+326 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<link linkend="_class____gnu__pbds_1_1detail_1_1_p_b___d_s___p_a_t___t_r_i_e___n_a_m_e_1a2e36a8c0df6e28b3d88e15f4f1fdb024">point_const_iterator</link>
+327 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1detail_1_1_p_b___d_s___p_a_t___t_r_i_e___n_a_m_e_1a45db64cbd263d788f60136f949bcd2ef">lower_bound</link>(<link linkend="_class____gnu__pbds_1_1detail_1_1_p_b___d_s___p_a_t___t_r_i_e___n_a_m_e_1a3b031778d59f2c52c7ce8406f5b0586e">key_const_reference</link>)&#32;<emphasis role="keyword">const</emphasis>;
+328 
+329 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<link linkend="_class____gnu__pbds_1_1detail_1_1_p_b___d_s___p_a_t___t_r_i_e___n_a_m_e_1ad961a0e3b9f7e3b63d9c6aa9b0f21ef5">point_iterator</link>
+330 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1detail_1_1_p_b___d_s___p_a_t___t_r_i_e___n_a_m_e_1ab5767652637e2982f229cafa654ec35b">upper_bound</link>(<link linkend="_class____gnu__pbds_1_1detail_1_1_p_b___d_s___p_a_t___t_r_i_e___n_a_m_e_1a3b031778d59f2c52c7ce8406f5b0586e">key_const_reference</link>);
+331 
+332 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<link linkend="_class____gnu__pbds_1_1detail_1_1_p_b___d_s___p_a_t___t_r_i_e___n_a_m_e_1a2e36a8c0df6e28b3d88e15f4f1fdb024">point_const_iterator</link>
+333 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1detail_1_1_p_b___d_s___p_a_t___t_r_i_e___n_a_m_e_1a3e76cd66fd856913ce484cecfc01c935">upper_bound</link>(<link linkend="_class____gnu__pbds_1_1detail_1_1_p_b___d_s___p_a_t___t_r_i_e___n_a_m_e_1a3b031778d59f2c52c7ce8406f5b0586e">key_const_reference</link>)&#32;<emphasis role="keyword">const</emphasis>;
+334 
+335 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+336 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1detail_1_1_p_b___d_s___p_a_t___t_r_i_e___n_a_m_e_1a432d75b541613d712201afd16044f7f2">clear</link>();
+337 
+338 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keywordtype">bool</emphasis>
+339 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1detail_1_1_p_b___d_s___p_a_t___t_r_i_e___n_a_m_e_1a5e6cb91703c273416e0a1c09668dec16">erase</link>(<link linkend="_class____gnu__pbds_1_1detail_1_1_p_b___d_s___p_a_t___t_r_i_e___n_a_m_e_1a3b031778d59f2c52c7ce8406f5b0586e">key_const_reference</link>);
+340 
+341 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<link linkend="_class____gnu__pbds_1_1detail_1_1_p_b___d_s___p_a_t___t_r_i_e___n_a_m_e_1aca8a29a565b7694995d8b5230315d53f">const_iterator</link>
+342 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1detail_1_1_p_b___d_s___p_a_t___t_r_i_e___n_a_m_e_1a8012c51e0a0dcfbbc2cd4d12bc873af0">erase</link>(<link linkend="_class____gnu__pbds_1_1detail_1_1_p_b___d_s___p_a_t___t_r_i_e___n_a_m_e_1aca8a29a565b7694995d8b5230315d53f">const_iterator</link>);
+343 
+344 <emphasis role="preprocessor">#ifdef&#32;PB_DS_DATA_TRUE_INDICATOR</emphasis>
+345 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<link linkend="_class____gnu__pbds_1_1detail_1_1_p_b___d_s___p_a_t___t_r_i_e___n_a_m_e_1a5a79736341a82007269d12cf5ce82a84">iterator</link>
+346 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1detail_1_1_p_b___d_s___p_a_t___t_r_i_e___n_a_m_e_1a5e6cb91703c273416e0a1c09668dec16">erase</link>(<link linkend="_class____gnu__pbds_1_1detail_1_1_p_b___d_s___p_a_t___t_r_i_e___n_a_m_e_1a5a79736341a82007269d12cf5ce82a84">iterator</link>);
+347 <emphasis role="preprocessor">#endif</emphasis>
+348 
+349 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<link linkend="_class____gnu__pbds_1_1detail_1_1_p_b___d_s___p_a_t___t_r_i_e___n_a_m_e_1ac7837c5884c7ca55bf2196272e4ac7bd">const_reverse_iterator</link>
+350 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1detail_1_1_p_b___d_s___p_a_t___t_r_i_e___n_a_m_e_1a87ed6b278cfda7440590a763d5f69770">erase</link>(<link linkend="_class____gnu__pbds_1_1detail_1_1_p_b___d_s___p_a_t___t_r_i_e___n_a_m_e_1ac7837c5884c7ca55bf2196272e4ac7bd">const_reverse_iterator</link>);
+351 
+352 <emphasis role="preprocessor">#ifdef&#32;PB_DS_DATA_TRUE_INDICATOR</emphasis>
+353 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<link linkend="_class____gnu__pbds_1_1detail_1_1_p_b___d_s___p_a_t___t_r_i_e___n_a_m_e_1a147c7d2ef1f318c7048e031a05ed8d8d">reverse_iterator</link>
+354 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1detail_1_1_p_b___d_s___p_a_t___t_r_i_e___n_a_m_e_1a5e6cb91703c273416e0a1c09668dec16">erase</link>(<link linkend="_class____gnu__pbds_1_1detail_1_1_p_b___d_s___p_a_t___t_r_i_e___n_a_m_e_1a147c7d2ef1f318c7048e031a05ed8d8d">reverse_iterator</link>);
+355 <emphasis role="preprocessor">#endif</emphasis>
+356 
+357 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;Pred&gt;
+358 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<link linkend="_class____gnu__pbds_1_1detail_1_1_p_b___d_s___p_a_t___t_r_i_e___n_a_m_e_1abe46f72944f7d6e709246c998f43afcb">size_type</link>
+359 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1detail_1_1_p_b___d_s___p_a_t___t_r_i_e___n_a_m_e_1a04af6a8b0ee36752fec437926341c2ac">erase_if</link>(Pred);
+360 
+361 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+362 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1detail_1_1_p_b___d_s___p_a_t___t_r_i_e___n_a_m_e_1af43a28c6d8c09bdda8d4bdd2d98b1639">join</link>(<link linkend="__classes_2lib_2include_2c_09_09_2ext_2pb__ds_2detail_2bin__search__tree___2bin__search__tree___8hpp_1a304b8b73a11afe64bfca54576b91263b">PB_DS_CLASS_C_DEC</link>&amp;);
+363 
+364 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+365 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1detail_1_1_p_b___d_s___p_a_t___t_r_i_e___n_a_m_e_1a4d7e60e5c9c33024a9135d4b2fd96cab">split</link>(<link linkend="_class____gnu__pbds_1_1detail_1_1_p_b___d_s___p_a_t___t_r_i_e___n_a_m_e_1a3b031778d59f2c52c7ce8406f5b0586e">key_const_reference</link>,&#32;<link linkend="__classes_2lib_2include_2c_09_09_2ext_2pb__ds_2detail_2bin__search__tree___2bin__search__tree___8hpp_1a304b8b73a11afe64bfca54576b91263b">PB_DS_CLASS_C_DEC</link>&amp;);
+366 
+367 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<link linkend="_class____gnu__pbds_1_1detail_1_1_p_b___d_s___p_a_t___t_r_i_e___n_a_m_e_1a5a79736341a82007269d12cf5ce82a84">iterator</link>
+368 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1detail_1_1_p_b___d_s___p_a_t___t_r_i_e___n_a_m_e_1ac2487b0faeac6d193124a166320abb32">begin</link>();
+369 
+370 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<link linkend="_class____gnu__pbds_1_1detail_1_1_p_b___d_s___p_a_t___t_r_i_e___n_a_m_e_1aca8a29a565b7694995d8b5230315d53f">const_iterator</link>
+371 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1detail_1_1_p_b___d_s___p_a_t___t_r_i_e___n_a_m_e_1a693785f431d7c172444278e8118c6c5d">begin</link>()&#32;<emphasis role="keyword">const</emphasis>;
+372 
+373 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<link linkend="_class____gnu__pbds_1_1detail_1_1_p_b___d_s___p_a_t___t_r_i_e___n_a_m_e_1a5a79736341a82007269d12cf5ce82a84">iterator</link>
+374 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1detail_1_1_p_b___d_s___p_a_t___t_r_i_e___n_a_m_e_1af70059390c1b9e4fd7d799b9666d275b">end</link>();
+375 
+376 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<link linkend="_class____gnu__pbds_1_1detail_1_1_p_b___d_s___p_a_t___t_r_i_e___n_a_m_e_1aca8a29a565b7694995d8b5230315d53f">const_iterator</link>
+377 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1detail_1_1_p_b___d_s___p_a_t___t_r_i_e___n_a_m_e_1af20acda44757a1754b4f761c8cec89cb">end</link>()&#32;<emphasis role="keyword">const</emphasis>;
+378 
+379 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<link linkend="_class____gnu__pbds_1_1detail_1_1_p_b___d_s___p_a_t___t_r_i_e___n_a_m_e_1a147c7d2ef1f318c7048e031a05ed8d8d">reverse_iterator</link>
+380 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1detail_1_1_p_b___d_s___p_a_t___t_r_i_e___n_a_m_e_1a5cbce24b9af5d88d9ef55a5f2b325fc2">rbegin</link>();
+381 
+382 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<link linkend="_class____gnu__pbds_1_1detail_1_1_p_b___d_s___p_a_t___t_r_i_e___n_a_m_e_1ac7837c5884c7ca55bf2196272e4ac7bd">const_reverse_iterator</link>
+383 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1detail_1_1_p_b___d_s___p_a_t___t_r_i_e___n_a_m_e_1ac2fc883c6f4f956de198a82df654b639">rbegin</link>()&#32;<emphasis role="keyword">const</emphasis>;
+384 
+385 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<link linkend="_class____gnu__pbds_1_1detail_1_1_p_b___d_s___p_a_t___t_r_i_e___n_a_m_e_1a147c7d2ef1f318c7048e031a05ed8d8d">reverse_iterator</link>
+386 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1detail_1_1_p_b___d_s___p_a_t___t_r_i_e___n_a_m_e_1aafb7129aab9e1a4256f6a2d128db07e9">rend</link>();
+387 
+388 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<link linkend="_class____gnu__pbds_1_1detail_1_1_p_b___d_s___p_a_t___t_r_i_e___n_a_m_e_1ac7837c5884c7ca55bf2196272e4ac7bd">const_reverse_iterator</link>
+389 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1detail_1_1_p_b___d_s___p_a_t___t_r_i_e___n_a_m_e_1a11cf7c3a692238ff19b71b1bc1d01f6a">rend</link>()&#32;<emphasis role="keyword">const</emphasis>;
+390 
+393 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<link linkend="_class____gnu__pbds_1_1detail_1_1_p_b___d_s___p_a_t___t_r_i_e___n_a_m_e_1af8b9a30df781c8eb3ecbb47cd6db909f">node_const_iterator</link>
+394 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1detail_1_1_p_b___d_s___p_a_t___t_r_i_e___n_a_m_e_1a7c61a910286f6115a9e5aeb970c6a67b">node_begin</link>()&#32;<emphasis role="keyword">const</emphasis>;
+395 
+398 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<link linkend="_class____gnu__pbds_1_1detail_1_1_p_b___d_s___p_a_t___t_r_i_e___n_a_m_e_1a77cff7c5040f5ed095e78d5d572a91ca">node_iterator</link>
+399 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1detail_1_1_p_b___d_s___p_a_t___t_r_i_e___n_a_m_e_1ab52d232e33220ce87445caa25b216902">node_begin</link>();
+400 
+403 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<link linkend="_class____gnu__pbds_1_1detail_1_1_p_b___d_s___p_a_t___t_r_i_e___n_a_m_e_1af8b9a30df781c8eb3ecbb47cd6db909f">node_const_iterator</link>
+404 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1detail_1_1_p_b___d_s___p_a_t___t_r_i_e___n_a_m_e_1a2c364cdb1f5cfd021a71c1df9c5cd9ca">node_end</link>()&#32;<emphasis role="keyword">const</emphasis>;
+405 
+408 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<link linkend="_class____gnu__pbds_1_1detail_1_1_p_b___d_s___p_a_t___t_r_i_e___n_a_m_e_1a77cff7c5040f5ed095e78d5d572a91ca">node_iterator</link>
+409 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1detail_1_1_p_b___d_s___p_a_t___t_r_i_e___n_a_m_e_1a17a4ef5dd64c98805d5a91544c4ea062">node_end</link>();
+410 
+411 <emphasis role="preprocessor">#ifdef&#32;PB_DS_PAT_TRIE_TRACE_</emphasis>
+412 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+413 &#32;&#32;&#32;&#32;&#32;&#32;trace()&#32;<emphasis role="keyword">const</emphasis>;
+414 <emphasis role="preprocessor">#endif</emphasis>
+415 
+416 &#32;&#32;&#32;&#32;<emphasis role="keyword">protected</emphasis>:
+417 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;It&gt;
+418 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+419 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1detail_1_1_p_b___d_s___p_a_t___t_r_i_e___n_a_m_e_1a6affd09972e135efc2e3aec17126b941">copy_from_range</link>(It,&#32;It);
+420 
+421 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+422 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1detail_1_1_p_b___d_s___p_a_t___t_r_i_e___n_a_m_e_1a037864e94c1ee1f8598d039453fdeab7">value_swap</link>(<link linkend="__classes_2lib_2include_2c_09_09_2ext_2pb__ds_2detail_2bin__search__tree___2bin__search__tree___8hpp_1a304b8b73a11afe64bfca54576b91263b">PB_DS_CLASS_C_DEC</link>&amp;);
+423 
+424 &#32;&#32;&#32;&#32;&#32;&#32;node_pointer
+425 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1detail_1_1_p_b___d_s___p_a_t___t_r_i_e___n_a_m_e_1a3c5a6745b72f89e8352cd35d5ec2b03e">recursive_copy_node</link>(node_const_pointer);
+426 
+427 &#32;&#32;&#32;&#32;<emphasis role="keyword">private</emphasis>:
+428 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+429 &#32;&#32;&#32;&#32;&#32;&#32;initialize();
+430 
+431 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>
+432 &#32;&#32;&#32;&#32;&#32;&#32;apply_update(node_pointer,&#32;null_node_update_pointer);
+433 
+434 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;Node_Update_&gt;
+435 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>
+436 &#32;&#32;&#32;&#32;&#32;&#32;apply_update(node_pointer,&#32;Node_Update_*);
+437 
+438 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">bool</emphasis>
+439 &#32;&#32;&#32;&#32;&#32;&#32;join_prep(<link linkend="__classes_2lib_2include_2c_09_09_2ext_2pb__ds_2detail_2bin__search__tree___2bin__search__tree___8hpp_1a304b8b73a11afe64bfca54576b91263b">PB_DS_CLASS_C_DEC</link>&amp;,&#32;branch_bag&amp;);
+440 
+441 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+442 &#32;&#32;&#32;&#32;&#32;&#32;rec_join_prep(node_const_pointer,&#32;node_const_pointer,&#32;branch_bag&amp;);
+443 
+444 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+445 &#32;&#32;&#32;&#32;&#32;&#32;rec_join_prep(leaf_const_pointer,&#32;leaf_const_pointer,&#32;branch_bag&amp;);
+446 
+447 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+448 &#32;&#32;&#32;&#32;&#32;&#32;rec_join_prep(leaf_const_pointer,&#32;inode_const_pointer,&#32;branch_bag&amp;);
+449 
+450 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+451 &#32;&#32;&#32;&#32;&#32;&#32;rec_join_prep(inode_const_pointer,&#32;leaf_const_pointer,&#32;branch_bag&amp;);
+452 
+453 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+454 &#32;&#32;&#32;&#32;&#32;&#32;rec_join_prep(inode_const_pointer,&#32;inode_const_pointer,&#32;branch_bag&amp;);
+455 
+456 &#32;&#32;&#32;&#32;&#32;&#32;node_pointer
+457 &#32;&#32;&#32;&#32;&#32;&#32;rec_join(node_pointer,&#32;node_pointer,&#32;<link linkend="_class____gnu__pbds_1_1detail_1_1_p_b___d_s___p_a_t___t_r_i_e___n_a_m_e_1abe46f72944f7d6e709246c998f43afcb">size_type</link>,&#32;branch_bag&amp;);
+458 
+459 &#32;&#32;&#32;&#32;&#32;&#32;node_pointer
+460 &#32;&#32;&#32;&#32;&#32;&#32;rec_join(leaf_pointer,&#32;leaf_pointer,&#32;branch_bag&amp;);
+461 
+462 &#32;&#32;&#32;&#32;&#32;&#32;node_pointer
+463 &#32;&#32;&#32;&#32;&#32;&#32;rec_join(leaf_pointer,&#32;inode_pointer,&#32;<link linkend="_class____gnu__pbds_1_1detail_1_1_p_b___d_s___p_a_t___t_r_i_e___n_a_m_e_1abe46f72944f7d6e709246c998f43afcb">size_type</link>,&#32;branch_bag&amp;);
+464 
+465 &#32;&#32;&#32;&#32;&#32;&#32;node_pointer
+466 &#32;&#32;&#32;&#32;&#32;&#32;rec_join(inode_pointer,&#32;leaf_pointer,&#32;<link linkend="_class____gnu__pbds_1_1detail_1_1_p_b___d_s___p_a_t___t_r_i_e___n_a_m_e_1abe46f72944f7d6e709246c998f43afcb">size_type</link>,&#32;branch_bag&amp;);
+467 
+468 &#32;&#32;&#32;&#32;&#32;&#32;node_pointer
+469 &#32;&#32;&#32;&#32;&#32;&#32;rec_join(inode_pointer,&#32;inode_pointer,&#32;branch_bag&amp;);
+470 
+471 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1detail_1_1_p_b___d_s___p_a_t___t_r_i_e___n_a_m_e_1abe46f72944f7d6e709246c998f43afcb">size_type</link>
+472 &#32;&#32;&#32;&#32;&#32;&#32;keys_diff_ind(<emphasis role="keyword">typename</emphasis>&#32;access_traits::const_iterator,
+473 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;access_traits::const_iterator,
+474 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;access_traits::const_iterator,
+475 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">typename</emphasis>&#32;access_traits::const_iterator);
+476 
+477 &#32;&#32;&#32;&#32;&#32;&#32;inode_pointer
+478 &#32;&#32;&#32;&#32;&#32;&#32;insert_branch(node_pointer,&#32;node_pointer,&#32;branch_bag&amp;);
+479 
+480 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+481 &#32;&#32;&#32;&#32;&#32;&#32;update_min_max_for_inserted_leaf(leaf_pointer);
+482 
+483 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+484 &#32;&#32;&#32;&#32;&#32;&#32;erase_leaf(leaf_pointer);
+485 
+486 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>
+487 &#32;&#32;&#32;&#32;&#32;&#32;actual_erase_leaf(leaf_pointer);
+488 
+489 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+490 &#32;&#32;&#32;&#32;&#32;&#32;clear_imp(node_pointer);
+491 
+492 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+493 &#32;&#32;&#32;&#32;&#32;&#32;erase_fixup(inode_pointer);
+494 
+495 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+496 &#32;&#32;&#32;&#32;&#32;&#32;update_min_max_for_erased_leaf(leaf_pointer);
+497 
+498 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keyword">inline</emphasis>&#32;a_const_iterator
+499 &#32;&#32;&#32;&#32;&#32;&#32;pref_begin(node_const_pointer);
+500 
+501 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keyword">inline</emphasis>&#32;a_const_iterator
+502 &#32;&#32;&#32;&#32;&#32;&#32;pref_end(node_const_pointer);
+503 
+504 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;node_pointer
+505 &#32;&#32;&#32;&#32;&#32;&#32;find_imp(<link linkend="_class____gnu__pbds_1_1detail_1_1_p_b___d_s___p_a_t___t_r_i_e___n_a_m_e_1a3b031778d59f2c52c7ce8406f5b0586e">key_const_reference</link>);
+506 
+507 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;node_pointer
+508 &#32;&#32;&#32;&#32;&#32;&#32;lower_bound_imp(<link linkend="_class____gnu__pbds_1_1detail_1_1_p_b___d_s___p_a_t___t_r_i_e___n_a_m_e_1a3b031778d59f2c52c7ce8406f5b0586e">key_const_reference</link>);
+509 
+510 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;node_pointer
+511 &#32;&#32;&#32;&#32;&#32;&#32;upper_bound_imp(<link linkend="_class____gnu__pbds_1_1detail_1_1_p_b___d_s___p_a_t___t_r_i_e___n_a_m_e_1a3b031778d59f2c52c7ce8406f5b0586e">key_const_reference</link>);
+512 
+513 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keyword">static</emphasis>&#32;leaf_const_pointer
+514 &#32;&#32;&#32;&#32;&#32;&#32;leftmost_descendant(node_const_pointer);
+515 
+516 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keyword">static</emphasis>&#32;leaf_pointer
+517 &#32;&#32;&#32;&#32;&#32;&#32;leftmost_descendant(node_pointer);
+518 
+519 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keyword">static</emphasis>&#32;leaf_const_pointer
+520 &#32;&#32;&#32;&#32;&#32;&#32;rightmost_descendant(node_const_pointer);
+521 
+522 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">inline</emphasis>&#32;<emphasis role="keyword">static</emphasis>&#32;leaf_pointer
+523 &#32;&#32;&#32;&#32;&#32;&#32;rightmost_descendant(node_pointer);
+524 
+525 <emphasis role="preprocessor">#ifdef&#32;_GLIBCXX_DEBUG</emphasis>
+526 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+527 &#32;&#32;&#32;&#32;&#32;&#32;assert_valid(<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>*,&#32;<emphasis role="keywordtype">int</emphasis>)&#32;<emphasis role="keyword">const</emphasis>;
+528 
+529 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+530 &#32;&#32;&#32;&#32;&#32;&#32;assert_iterators(<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>*,&#32;<emphasis role="keywordtype">int</emphasis>)&#32;<emphasis role="keyword">const</emphasis>;
+531 
+532 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+533 &#32;&#32;&#32;&#32;&#32;&#32;assert_reverse_iterators(<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>*,&#32;<emphasis role="keywordtype">int</emphasis>)&#32;<emphasis role="keyword">const</emphasis>;
+534 
+535 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">static</emphasis>&#32;<link linkend="_class____gnu__pbds_1_1detail_1_1_p_b___d_s___p_a_t___t_r_i_e___n_a_m_e_1abe46f72944f7d6e709246c998f43afcb">size_type</link>
+536 &#32;&#32;&#32;&#32;&#32;&#32;recursive_count_leafs(node_const_pointer,&#32;<emphasis role="keyword">const</emphasis>&#32;<emphasis role="keywordtype">char</emphasis>*,&#32;<emphasis role="keywordtype">int</emphasis>);
+537 <emphasis role="preprocessor">#endif</emphasis>
+538 
+539 <emphasis role="preprocessor">#ifdef&#32;PB_DS_PAT_TRIE_TRACE_</emphasis>
+540 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>
+541 &#32;&#32;&#32;&#32;&#32;&#32;trace_node(node_const_pointer,&#32;<link linkend="_class____gnu__pbds_1_1detail_1_1_p_b___d_s___p_a_t___t_r_i_e___n_a_m_e_1abe46f72944f7d6e709246c998f43afcb">size_type</link>);
+542 
+543 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">template</emphasis>&lt;<emphasis role="keyword">typename</emphasis>&#32;Metadata_&gt;
+544 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>
+545 &#32;&#32;&#32;&#32;&#32;&#32;trace_node_metadata(node_const_pointer,&#32;<link linkend="_struct____gnu__pbds_1_1detail_1_1type__to__type">type_to_type&lt;Metadata_&gt;</link>);
+546 
+547 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">static</emphasis>&#32;<emphasis role="keywordtype">void</emphasis>
+548 &#32;&#32;&#32;&#32;&#32;&#32;trace_node_metadata(node_const_pointer,&#32;<link linkend="_struct____gnu__pbds_1_1detail_1_1type__to__type">type_to_type&lt;null_type&gt;</link>);
+549 <emphasis role="preprocessor">#endif</emphasis>
+550 
+551 &#32;&#32;&#32;&#32;&#32;&#32;leaf_pointer
+552 &#32;&#32;&#32;&#32;&#32;&#32;split_prep(<link linkend="_class____gnu__pbds_1_1detail_1_1_p_b___d_s___p_a_t___t_r_i_e___n_a_m_e_1a3b031778d59f2c52c7ce8406f5b0586e">key_const_reference</link>,&#32;<link linkend="__classes_2lib_2include_2c_09_09_2ext_2pb__ds_2detail_2bin__search__tree___2bin__search__tree___8hpp_1a304b8b73a11afe64bfca54576b91263b">PB_DS_CLASS_C_DEC</link>&amp;,&#32;branch_bag&amp;);
+553 
+554 &#32;&#32;&#32;&#32;&#32;&#32;node_pointer
+555 &#32;&#32;&#32;&#32;&#32;&#32;rec_split(node_pointer,&#32;a_const_iterator,&#32;a_const_iterator,
+556 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="__classes_2lib_2include_2c_09_09_2ext_2pb__ds_2detail_2bin__search__tree___2bin__search__tree___8hpp_1a304b8b73a11afe64bfca54576b91263b">PB_DS_CLASS_C_DEC</link>&amp;,&#32;branch_bag&amp;);
+557 
+558 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keywordtype">void</emphasis>
+559 &#32;&#32;&#32;&#32;&#32;&#32;split_insert_branch(<link linkend="_class____gnu__pbds_1_1detail_1_1_p_b___d_s___p_a_t___t_r_i_e___n_a_m_e_1abe46f72944f7d6e709246c998f43afcb">size_type</link>,&#32;a_const_iterator,&#32;inode_iterator,
+560 &#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1detail_1_1_p_b___d_s___p_a_t___t_r_i_e___n_a_m_e_1abe46f72944f7d6e709246c998f43afcb">size_type</link>,&#32;branch_bag&amp;);
+561 
+562 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">static</emphasis>&#32;head_allocator&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;s_head_allocator;
+563 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">static</emphasis>&#32;inode_allocator&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;s_inode_allocator;
+564 &#32;&#32;&#32;&#32;&#32;&#32;<emphasis role="keyword">static</emphasis>&#32;leaf_allocator&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;s_leaf_allocator;
+565 
+566 &#32;&#32;&#32;&#32;&#32;&#32;head_pointer&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;m_p_head;
+567 &#32;&#32;&#32;&#32;&#32;&#32;<link linkend="_class____gnu__pbds_1_1detail_1_1_p_b___d_s___p_a_t___t_r_i_e___n_a_m_e_1abe46f72944f7d6e709246c998f43afcb">size_type</link>&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;m_size;
+568 &#32;&#32;&#32;&#32;};
+569 
+570 <emphasis role="preprocessor">#define&#32;PB_DS_ASSERT_NODE_VALID(X)&#32;\</emphasis>
+571 <emphasis role="preprocessor">&#32;&#32;_GLIBCXX_DEBUG_ONLY(X-&gt;assert_valid(this,&#32;__FILE__,&#32;__LINE__);)</emphasis>
+572 
+573 <emphasis role="preprocessor">#define&#32;PB_DS_RECURSIVE_COUNT_LEAFS(X)&#32;\</emphasis>
+574 <emphasis role="preprocessor">&#32;&#32;recursive_count_leafs(X,&#32;__FILE__,&#32;__LINE__)</emphasis>
+575 
+576 <emphasis role="preprocessor">#include&#32;&lt;ext/pb_ds/detail/pat_trie_/constructors_destructor_fn_imps.hpp&gt;</emphasis>
+577 <emphasis role="preprocessor">#include&#32;&lt;ext/pb_ds/detail/pat_trie_/iterators_fn_imps.hpp&gt;</emphasis>
+578 <emphasis role="preprocessor">#include&#32;&lt;ext/pb_ds/detail/pat_trie_/insert_join_fn_imps.hpp&gt;</emphasis>
+579 <emphasis role="preprocessor">#include&#32;&lt;ext/pb_ds/detail/pat_trie_/erase_fn_imps.hpp&gt;</emphasis>
+580 <emphasis role="preprocessor">#include&#32;&lt;ext/pb_ds/detail/pat_trie_/find_fn_imps.hpp&gt;</emphasis>
+581 <emphasis role="preprocessor">#include&#32;&lt;ext/pb_ds/detail/pat_trie_/info_fn_imps.hpp&gt;</emphasis>
+582 <emphasis role="preprocessor">#include&#32;&lt;ext/pb_ds/detail/pat_trie_/policy_access_fn_imps.hpp&gt;</emphasis>
+583 <emphasis role="preprocessor">#include&#32;&lt;ext/pb_ds/detail/pat_trie_/split_fn_imps.hpp&gt;</emphasis>
+584 <emphasis role="preprocessor">#include&#32;&lt;ext/pb_ds/detail/pat_trie_/debug_fn_imps.hpp&gt;</emphasis>
+585 <emphasis role="preprocessor">#include&#32;&lt;ext/pb_ds/detail/pat_trie_/trace_fn_imps.hpp&gt;</emphasis>
+586 <emphasis role="preprocessor">#include&#32;&lt;ext/pb_ds/detail/pat_trie_/update_fn_imps.hpp&gt;</emphasis>
+587 
+588 <emphasis role="preprocessor">#undef&#32;PB_DS_RECURSIVE_COUNT_LEAFS</emphasis>
+589 <emphasis role="preprocessor">#undef&#32;PB_DS_ASSERT_NODE_VALID</emphasis>
+590 <emphasis role="preprocessor">#undef&#32;PB_DS_CLASS_C_DEC</emphasis>
+591 <emphasis role="preprocessor">#undef&#32;PB_DS_CLASS_T_DEC</emphasis>
+592 <emphasis role="preprocessor">#undef&#32;PB_DS_PAT_TRIE_NAME</emphasis>
+593 <emphasis role="preprocessor">#undef&#32;PB_DS_PAT_TRIE_TRAITS_BASE</emphasis>
+594 <emphasis role="preprocessor">#undef&#32;PB_DS_DEBUG_MAP_BASE_C_DEC</emphasis>
+595 &#32;&#32;}&#32;<emphasis role="comment">//&#32;namespace&#32;detail</emphasis>
+596 }&#32;<emphasis role="comment">//&#32;namespace&#32;__gnu_pbds</emphasis>
+</programlisting></section>
