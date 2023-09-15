@@ -1,5 +1,0 @@
-var dir_c5f6ac754440a97f0bb14bcb7a9bb201 =
-[
-    [ "android_native_app_glue.c", "_old_2_classes_2lib_2raylib_2src_2external_2android_2native__app__glue_2android__native__app__glue_8c.html", "_old_2_classes_2lib_2raylib_2src_2external_2android_2native__app__glue_2android__native__app__glue_8c" ],
-    [ "android_native_app_glue.h", "_old_2_classes_2lib_2raylib_2src_2external_2android_2native__app__glue_2android__native__app__glue_8h.html", "_old_2_classes_2lib_2raylib_2src_2external_2android_2native__app__glue_2android__native__app__glue_8h" ]
-];

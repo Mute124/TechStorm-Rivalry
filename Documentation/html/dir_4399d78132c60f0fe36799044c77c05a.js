@@ -1,4 +1,0 @@
-var dir_4399d78132c60f0fe36799044c77c05a =
-[
-    [ "GLFW", "dir_4206e49bc57396d47023f0f0e93c0e50.html", "dir_4206e49bc57396d47023f0f0e93c0e50" ]
-];

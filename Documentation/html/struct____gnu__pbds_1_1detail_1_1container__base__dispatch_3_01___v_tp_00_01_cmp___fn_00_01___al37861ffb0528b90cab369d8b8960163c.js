@@ -1,6 +1,0 @@
-var struct____gnu__pbds_1_1detail_1_1container__base__dispatch_3_01___v_tp_00_01_cmp___fn_00_01___al37861ffb0528b90cab369d8b8960163c =
-[
-    [ "type", "struct____gnu__pbds_1_1detail_1_1container__base__dispatch_3_01___v_tp_00_01_cmp___fn_00_01___al37861ffb0528b90cab369d8b8960163c.html#adbbd8131d9a4cdc53e280a34f161dd3c", null ],
-    [ "type", "struct____gnu__pbds_1_1detail_1_1container__base__dispatch_3_01___v_tp_00_01_cmp___fn_00_01___al37861ffb0528b90cab369d8b8960163c.html#adbbd8131d9a4cdc53e280a34f161dd3c", null ],
-    [ "type", "struct____gnu__pbds_1_1detail_1_1container__base__dispatch_3_01___v_tp_00_01_cmp___fn_00_01___al37861ffb0528b90cab369d8b8960163c.html#adbbd8131d9a4cdc53e280a34f161dd3c", null ]
-];

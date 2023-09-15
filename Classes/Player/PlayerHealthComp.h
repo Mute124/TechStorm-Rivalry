@@ -4,18 +4,16 @@
 
 struct PlayerHealthCompData
 {
+    HealthBar healthBar = HealthBar();
     int hp;
     const int max_hp = 100;
 };
 
 class PlayerHealthComp
 {
-protected:
-
-    PlayerHealthCompData data;
-    HealthBar healthBar;
 
 public:
+    PlayerHealthCompData data;
     PlayerHealthComp()
     {
     }

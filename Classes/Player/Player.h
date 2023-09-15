@@ -117,9 +117,13 @@ public:
             // empty because it shouldnt draw anything
         }
 
-        // TODO : Create Health Bar using the PlayerHealthComp
+        
     }
-
+    
+    void DrawHealthBar() {
+        // TODO : Create Health Bar using the PlayerHealthComp
+        healthComp.data.healthBar.Draw((Vector2){30.0f, 30.0f}, healthComp.data.hp, healthComp.data.max_hp);
+    }
     static Ray *GetLook(int id)
     {
     }

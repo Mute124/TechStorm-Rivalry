@@ -1,6 +1,0 @@
-var dir_6f298bd0ba21f6e3f305b24c43969d0f =
-[
-    [ "branch_policy.hpp", "_old_2_classes_2lib_2include_2c_09_09_2ext_2pb__ds_2detail_2branch__policy_2branch__policy_8hpp.html", "_old_2_classes_2lib_2include_2c_09_09_2ext_2pb__ds_2detail_2branch__policy_2branch__policy_8hpp" ],
-    [ "null_node_metadata.hpp", "_old_2_classes_2lib_2include_2c_09_09_2ext_2pb__ds_2detail_2branch__policy_2null__node__metadata_8hpp.html", "_old_2_classes_2lib_2include_2c_09_09_2ext_2pb__ds_2detail_2branch__policy_2null__node__metadata_8hpp" ],
-    [ "traits.hpp", "_old_2_classes_2lib_2include_2c_09_09_2ext_2pb__ds_2detail_2branch__policy_2traits_8hpp.html", "_old_2_classes_2lib_2include_2c_09_09_2ext_2pb__ds_2detail_2branch__policy_2traits_8hpp" ]
-];

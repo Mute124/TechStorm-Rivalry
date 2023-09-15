@@ -295,8 +295,8 @@ int main(void)
   Color groundColor = GRAY;
   // ambient light level
   int amb = GetShaderLocation(postProcessShader, "ambient");
-  static float shaderamb[4] = {5.0f, 5.0f, 5.0f, 5.0f};
-  SetShaderValue(postProcessShader, amb, shaderamb, UNIFORM_VEC4);
+  static Color shaderamb = BLUE;
+  SetShaderValue(postProcessShader, amb, &shaderamb, UNIFORM_VEC4);
 
   Flashlight *flashlight = new Flashlight(player->getSelfCamera(), postProcessShader);
 
@@ -398,6 +398,7 @@ int main(void)
   }
   delete mmen_start;
 
+  // Game Loop
   while (!WindowShouldClose())
   {
 
@@ -563,6 +564,9 @@ int main(void)
       player->SetPosition((Vector3){player->getPosition().x, player->getPosition().y - 0.1f, player->getPosition().z});
     }
 
+
+    // TODO : day night affect
+
     //----------------------------------------------------------------------------------
 
     PollInputEvents(); // helps for some reason?
@@ -585,6 +589,7 @@ int main(void)
     SetShaderValue(postProcessShader, postProcessShader.locs[SHADER_LOC_VECTOR_VIEW], cameraPos, SHADER_UNIFORM_VEC3);
 
     BeginDrawing();
+    player->DrawHealthBar();
     ClearBackground(RAYWHITE);
 
     BeginMode3D(player->getSelfCamera());
