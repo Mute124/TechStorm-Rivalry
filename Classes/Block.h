@@ -31,40 +31,43 @@ public:
     // Automatically sends it to the renderer.
     void Draw() override
     {
-        DrawBoundingBox(this->Box, ORANGE);
+        
+        //DrawBoundingBox(this->Box, ORANGE);
         if (this->type != BlockAir)
         {
             
             DrawModel(model, m_position, BLOCK_SIZE, color);
-            
+        
         }
     }
 
     // main block constructor.
     Block(const BType type, Vector3 position, const Color color, Shader shader, Model model) : type(type), color(color), m_position(position), shader(shader), model(model), id(RegisterObj(this)), velocity(Vector3Zero()), Box(GetModelBoundingBox(this->model))
     {
-        Logman::CustomLog(LOG_TRACE, "Block Constructor", NULL);
+        
         this->shader = shader;
-
 
         this->model = model;
         this->model.materials[0].shader = shader;
-        this->model.materials[0].shader.locs[SHADER_LOC_VECTOR_VIEW] = GetShaderLocation(this->shader, "viewPos");
+        this->model.materials[0].shader.locs[SHADER_LOC_VECTOR_VIEW] = GetShaderLocation(this->shader, "viewPos");       
+        
+        Texture2D Bricks = LoadTexture("C:/Git/Minero/raylib/projects/VSCode/resources/textures/Brick.png");
+        //Image img = LoadImage("resources/textures/Brick.png");
 
+        
+        SetTextureFilter(Bricks, TEXTURE_FILTER_BILINEAR);
+        
+        SetMaterialTexture(this->model.materials, MATERIAL_MAP_DIFFUSE, Bricks);
 
-        const static Texture2D Bricks = LoadTexture("C:/Git/Minero/raylib/projects/VSCode/resources/textures/Brick.png");
-
-            SetMaterialTexture(this->model.materials, MATERIAL_MAP_DIFFUSE, Bricks);
-        this->model.materials[0].maps[MATERIAL_MAP_DIFFUSE].value = 1.0f;
-
-
-        //UnloadTexture(Bricks);
-
-
+        //SetShaderValue(shader, GetShaderLocation(shader, "colDiffuse"), &color, SHADER_UNIFORM_VEC4);
+    
+        // UnloadTexture(Bricks);
     }
     // main block constructor.
+    
 
-    int GetId() const override {
+    int GetId() const override
+    {
         return this->id;
     }
     int GetType() const override
@@ -78,32 +81,37 @@ public:
         return this->model;
     }
 
+
+    void SetBlockShaderValue(int locIndex, const void *value, int UniformType) {
+        SetShaderValue(shader, locIndex, &value, UniformType);
+    }
+
     void onUpdate() override
     {
         
         if (CheckCollision(this, this->id))
-        {   
+        {
             this->colpos = this->m_position;
             this->onCollision();
             this->isColliding = true;
             this->velocity = Vector3Zero();
             BeginDrawing();
-            
+
             EndDrawing();
         }
         else
         {
-           
-           this->velocity = Vector3Subtract(this->velocity, (Vector3){ 0.0f, 0.001f * (float)Global::Time::GetGameTime(), 0.0f });
-            
-        }
 
+            this->velocity = Vector3Subtract(this->velocity, (Vector3){0.0f, 0.001f * (float)Global::Time::GetGameTime(), 0.0f});
+        }
 
         this->m_position = Vector3Add(this->m_position, this->velocity);
     };
 
 
-    Vector3 GetPosition() override {
+
+    Vector3 GetPosition() override
+    {
         return this->m_position;
     }
     static void UpdateBlockRegistry(std::vector<GameObject *> objects)
@@ -113,17 +121,16 @@ public:
 
     BoundingBox GetBoundingBox() override
     {
-        
+
         return this->Box;
     };
 
+    void onCollision() override{
 
-    void onCollision() override
-    {
-        
     };
 
-    void onDestroy() const override{
+    void onDestroy() const override
+    {
         delete this;
     };
 
@@ -143,7 +150,7 @@ public:
     // GLM functions are NOT useless. they are used to detect block breaking
     glm::vec3 GetMinBounds() const
     {
-        
+
         return glm::vec3(m_position.x, m_position.y, m_position.z);
     }
 
@@ -171,6 +178,7 @@ public:
     }
 
 private:
+    
     Vector3 colpos;
     bool initial = true;
     bool isColliding = false;
@@ -214,10 +222,5 @@ private:
 
     const int id;
 
-
     Vector2 ScreenPosition = {0.0f, 0.0f};
-
-    
-
-
 };

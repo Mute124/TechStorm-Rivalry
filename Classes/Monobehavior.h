@@ -42,10 +42,6 @@
 #define LOC_VECTOR_VIEW LOC_VECTOR_VIEW // TODO : Check if this is nessisary.
 #define LOG_WARN LOG_WARNING // just to make typing easier.
 
-// C/C++ Improvements
-#define is ==
-#define equals ==
-
 #define DESPAWN_DISTANCE 1000.0f
 
 #define MAX_SHADERS 10

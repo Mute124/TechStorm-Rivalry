@@ -9,11 +9,11 @@
 #define RLIGHTS_IMPLEMENTATION
 #include "rlights.h"
 
-#define GLSL_VERSION            210
-#define MAP_RESOLUTION			512 // width and height of heightmap
-#define CLIP_SHADERS_COUNT		1 // number of shaders that use a clipPlane
-#define TREE_TEXTURE_COUNT		19 // number of textures for a tree
-#define TREE_COUNT				8190 // number of tree billboards
+#define GLSL_VERSION 210
+#define MAP_RESOLUTION 512	  // width and height of heightmap
+#define CLIP_SHADERS_COUNT 1  // number of shaders that use a clipPlane
+#define TREE_TEXTURE_COUNT 19 // number of textures for a tree
+#define TREE_COUNT 8190		  // number of tree billboards
 
 // defines a tree billboard
 typedef struct
@@ -28,7 +28,7 @@ Shader treeShader; // shader used for tree billboards
 // renders all 3d scene (include variants for above and below the surface)
 void Render3DScene(Camera camera, Light lights[], std::vector<Model> models, std::vector<TreeBillboard> trees, int clipPlane);
 // generates (or regenerates) all tree billboards
-void GenerateTrees(ErosionMaker* erosionMaker, std::vector<float>* mapData, Texture2D* treeTextures, std::vector<TreeBillboard>* trees, bool generateNew);
+void GenerateTrees(ErosionMaker *erosionMaker, std::vector<float> *mapData, Texture2D *treeTextures, std::vector<TreeBillboard> *trees, bool generateNew);
 
 // data used to store shaders that make use of clipPlanes
 Shader clipShaders[CLIP_SHADERS_COUNT];
@@ -45,8 +45,9 @@ int AddClipShader(Shader shader)
 }
 
 // random float between two values
-float static randomRange(float min, float max) {
-	return min + static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / (max - min)));
+float static randomRange(float min, float max)
+{
+	return min + static_cast<float>(rand()) / (static_cast<float>(RAND_MAX / (max - min)));
 }
 
 int main(void)
@@ -61,13 +62,13 @@ int main(void)
 	bool windowSizeChanged = false; // set to true when switching to fullscreen
 
 	const Vector2 displayResolutions[] =
-	{
-		{320, 180}, // 0
-		{640, 360}, // 1
-		{1280, 720}, // 2
-		{1600, 900}, // 3
-		{1920, 1080} // 4
-	};
+		{
+			{320, 180},	 // 0
+			{640, 360},	 // 1
+			{1280, 720}, // 2
+			{1600, 900}, // 3
+			{1920, 1080} // 4
+		};
 	int currentDisplayResolutionIndex = 2;
 
 	bool useApplicationBuffer = false; // wether to use app buffer or not
@@ -75,18 +76,18 @@ int main(void)
 
 	float daytime = 0.2f; // range (0, 1) but is sent to shader as a range(-1, 1) normalized upon a unit sphere
 	float dayspeed = 0.015f;
-	bool dayrunning = true; // if day is animating
-	float ambc[4] = { 0.22f, 0.17f, 0.41f, 0.2f }; // current ambient color & intensity
+	bool dayrunning = true;						 // if day is animating
+	float ambc[4] = {0.22f, 0.17f, 0.41f, 0.2f}; // current ambient color & intensity
 
 	Image ambientColorsImage = LoadImage("resources/ambientGradient.png");
-	Vector4* ambientColors = GetImageDataNormalized(ambientColorsImage); // array of colors for ambient color through the day
-	int ambientColorsNumber = ambientColorsImage.width; // length of array
+	Vector4 *ambientColors = GetImageDataNormalized(ambientColorsImage); // array of colors for ambient color through the day
+	int ambientColorsNumber = ambientColorsImage.width;					 // length of array
 	UnloadImage(ambientColorsImage);
 
 	std::vector<TreeBillboard> noTrees; // keep empty
-	std::vector<TreeBillboard> trees; // fill with tree data
+	std::vector<TreeBillboard> trees;	// fill with tree data
 
-	int totalDroplets = 0; // total amount of droplets simulated
+	int totalDroplets = 0;				// total amount of droplets simulated
 	int dropletsSinceLastTreeRegen = 0; // used to regenerate trees after certain droplets have fallen
 
 	SetConfigFlags(FLAG_WINDOW_RESIZABLE | FLAG_MSAA_4X_HINT);
@@ -94,7 +95,7 @@ int main(void)
 
 	Shader postProcessShader = LoadShader(0, "resources/shaders/postprocess.frag");
 	// Create a RenderTexture2D to be used for render to texture
-	RenderTexture2D applicationBuffer = LoadRenderTexture(GetScreenWidth(), GetScreenHeight()); // main FBO used for postprocessing
+	RenderTexture2D applicationBuffer = LoadRenderTexture(GetScreenWidth(), GetScreenHeight());					   // main FBO used for postprocessing
 	RenderTexture2D reflectionBuffer = LoadRenderTexture(GetScreenWidth() / fboSize, GetScreenHeight() / fboSize); // FBO used for water reflection
 	RenderTexture2D refractionBuffer = LoadRenderTexture(GetScreenWidth() / fboSize, GetScreenHeight() / fboSize); // FBO used for water refraction
 	SetTextureFilter(reflectionBuffer.texture, FILTER_BILINEAR);
@@ -103,24 +104,24 @@ int main(void)
 	SetTextureWrap(refractionBuffer.texture, WRAP_CLAMP);*/
 
 	// Define our custom camera to look into our 3d world
-	Camera camera = { {12.0f, 32.0f, 22.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 1.0f, 0.0f}, 45.0f, 0 };
+	Camera camera = {{12.0f, 32.0f, 22.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 1.0f, 0.0f}, 45.0f, 0};
 	SetCameraMode(camera, CAMERA_THIRD_PERSON);
 
 	// Initialize the erosion maker
-	ErosionMaker* erosionMaker = &ErosionMaker::GetInstance();
+	ErosionMaker *erosionMaker = &ErosionMaker::GetInstance();
 
 	Image initialHeightmapImage = GenImagePerlinNoise(MAP_RESOLUTION, MAP_RESOLUTION, 50, 50, 4.0f); // generate fractal perlin noise
-	std::vector<float>* mapData = new std::vector<float>(MAP_RESOLUTION * MAP_RESOLUTION);
+	std::vector<float> *mapData = new std::vector<float>(MAP_RESOLUTION * MAP_RESOLUTION);
 	// Extract pixels and put them in mapData
-	Color* pixels = GetImageData(initialHeightmapImage);
+	Color *pixels = GetImageData(initialHeightmapImage);
 	for (size_t i = 0; i < MAP_RESOLUTION * MAP_RESOLUTION; i++)
 	{
 		mapData->at(i) = pixels[i].r / 255.0f;
 	}
 	// Erode
 	erosionMaker->Gradient(mapData, MAP_RESOLUTION, 0.5f, GradientType::SQUARE); // apply a centered gradient to smooth out border pixel (create island at center)
-	erosionMaker->Remap(mapData, MAP_RESOLUTION); // flatten beaches
-	erosionMaker->Erode(mapData, MAP_RESOLUTION, 0, true); // Erode (0 droplets for initialization)
+	erosionMaker->Remap(mapData, MAP_RESOLUTION);								 // flatten beaches
+	erosionMaker->Erode(mapData, MAP_RESOLUTION, 0, true);						 // Erode (0 droplets for initialization)
 	// Update pixels from mapData to texture
 	for (size_t i = 0; i < MAP_RESOLUTION * MAP_RESOLUTION; i++)
 	{
@@ -132,22 +133,22 @@ int main(void)
 	}
 	Image heightmapImage = LoadImageEx(pixels, MAP_RESOLUTION, MAP_RESOLUTION);
 	Texture2D heightmapTexture = LoadTextureFromImage(heightmapImage); // Convert image to texture (VRAM)
-	UnloadImage(heightmapImage); // Unload heightmap image from RAM, already uploaded to VRAM
+	UnloadImage(heightmapImage);									   // Unload heightmap image from RAM, already uploaded to VRAM
 	SetTextureFilter(heightmapTexture, FILTER_BILINEAR);
 	SetTextureWrap(heightmapTexture, WRAP_CLAMP);
 	GenTextureMipmaps(&heightmapTexture);
 
-
 	// TERRAIN
-	Mesh terrainMesh = GenMeshPlane(32, 32, 256, 256);// Generate terrain mesh (RAM and VRAM)
+	Mesh terrainMesh = GenMeshPlane(32, 32, 256, 256);						  // Generate terrain mesh (RAM and VRAM)
 	Texture2D terrainGradient = LoadTexture("resources/terrainGradient.png"); // color ramp of terrain (rock and grass)
-	//SetTextureFilter(terrainGradient, FILTER_BILINEAR);
+	// SetTextureFilter(terrainGradient, FILTER_BILINEAR);
 	SetTextureWrap(terrainGradient, WRAP_CLAMP);
 	GenTextureMipmaps(&terrainGradient);
 	Model terrainModel = LoadModelFromMesh(terrainMesh); // Load model from generated mesh
 	terrainModel.transform = MatrixTranslate(0, -1.2f, 0);
 	terrainModel.materials[0].maps[0].texture = terrainGradient;
 	terrainModel.materials[0].maps[2].texture = heightmapTexture;
+
 	terrainModel.materials[0].shader = LoadShader("resources/shaders/terrain.vert", "resources/shaders/terrain.frag");
 	// Get some shader loactions
 	terrainModel.materials[0].shader.locs[LOC_MATRIX_MODEL] = GetShaderLocation(terrainModel.materials[0].shader, "matModel");
@@ -176,7 +177,7 @@ int main(void)
 	oceanModel.transform = MatrixTranslate(0, 0, 0);
 	oceanModel.materials[0].maps[0].texture = reflectionBuffer.texture; // uniform texture0
 	oceanModel.materials[0].maps[1].texture = refractionBuffer.texture; // uniform texture1
-	oceanModel.materials[0].maps[2].texture = DUDVTex; // uniform texture2
+	oceanModel.materials[0].maps[2].texture = DUDVTex;					// uniform texture2
 	oceanModel.materials[0].shader = LoadShader("resources/shaders/water.vert", "resources/shaders/water.frag");
 	float waterMoveFactor = 0.0f;
 	int waterMoveFactorLoc = GetShaderLocation(oceanModel.materials[0].shader, "moveFactor");
@@ -218,11 +219,11 @@ int main(void)
 	float skyboxMoveFactor = 0.0f;
 	int skyboxMoveFactorLoc = GetShaderLocation(skybox.materials[0].shader, "moveFactor");
 	Shader shdrCubemap = LoadShader("resources/shaders/cubemap.vert", "resources/shaders/cubemap.frag");
-	int param[1] = { MAP_CUBEMAP };
+	int param[1] = {MAP_CUBEMAP};
 	SetShaderValue(skybox.materials[0].shader, GetShaderLocation(skybox.materials[0].shader, "environmentMapNight"), param, UNIFORM_INT);
-	int param2[1] = { MAP_IRRADIANCE };
+	int param2[1] = {MAP_IRRADIANCE};
 	SetShaderValue(skybox.materials[0].shader, GetShaderLocation(skybox.materials[0].shader, "environmentMapDay"), param2, UNIFORM_INT);
-	int param3[1] = { 0 };
+	int param3[1] = {0};
 	SetShaderValue(shdrCubemap, GetShaderLocation(shdrCubemap, "equirectangularMap"), param3, UNIFORM_INT);
 	Texture2D texHDR = LoadTexture("resources/milkyWay.hdr"); // Load HDR panorama (sphere) texture
 	Texture2D texHDR2 = LoadTexture("resources/daytime.hdr"); // Load HDR panorama (sphere) texture
@@ -237,9 +238,9 @@ int main(void)
 	SetTextureFilter(skybox.materials[0].maps[MAP_IRRADIANCE].texture, FILTER_BILINEAR);
 	GenTextureMipmaps(&skybox.materials[0].maps[MAP_CUBEMAP].texture);
 	GenTextureMipmaps(&skybox.materials[0].maps[MAP_IRRADIANCE].texture);
-	UnloadTexture(texHDR);      // Texture not required anymore, cubemap already generated
-	UnloadTexture(texHDR2);      // Texture not required anymore, cubemap already generated
-	UnloadShader(shdrCubemap);  // Unload cubemap generation shader, not required anymore
+	UnloadTexture(texHDR);	   // Texture not required anymore, cubemap already generated
+	UnloadTexture(texHDR2);	   // Texture not required anymore, cubemap already generated
+	UnloadShader(shdrCubemap); // Unload cubemap generation shader, not required anymore
 
 	// TREES
 	Texture2D treeTextures[TREE_TEXTURE_COUNT];
@@ -247,7 +248,7 @@ int main(void)
 	{
 		treeTextures[i] = LoadTexture(TextFormat("resources/trees/b/%i.png", i)); // variant b of trees looks much better
 		SetTextureFilter(treeTextures[i], FILTER_BILINEAR);
-		//GenTextureMipmaps(&treeTextures[i]); // looks better without
+		// GenTextureMipmaps(&treeTextures[i]); // looks better without
 	}
 	GenerateTrees(erosionMaker, mapData, treeTextures, &trees, true);
 	Material treeMaterial = LoadMaterialDefault();
@@ -261,15 +262,15 @@ int main(void)
 	int treeMoveFactorLoc = GetShaderLocation(treeShader, "moveFactor");
 
 	// LIGHT(S)
-	Light lights[MAX_LIGHTS] = { 0 };
-	lights[0] = CreateLight(LIGHT_DIRECTIONAL, { 20, 10, 0 }, Vector3Zero(), WHITE, { terrainModel.materials[0].shader, oceanModel.materials[0].shader, treeShader, skybox.materials[0].shader });
+	Light lights[MAX_LIGHTS] = {0};
+	lights[0] = CreateLight(LIGHT_DIRECTIONAL, {20, 10, 0}, Vector3Zero(), WHITE, {terrainModel.materials[0].shader, oceanModel.materials[0].shader, treeShader, skybox.materials[0].shader});
 
 	float angle = 6.282f;
 	float radius = 100.0f;
 
-	//rlDisableBackfaceCulling();
+	// rlDisableBackfaceCulling();
 
-	SetTargetFPS(0); // Set our game to run at 60 frames-per-second
+	SetTargetFPS(0);			// Set our game to run at 60 frames-per-second
 	SetTraceLogLevel(LOG_NONE); // disable logging from now on
 	//--------------------------------------------------------------------------------------
 
@@ -283,7 +284,7 @@ int main(void)
 			UnloadRenderTexture(applicationBuffer);
 			UnloadRenderTexture(reflectionBuffer);
 			UnloadRenderTexture(refractionBuffer);
-			applicationBuffer = LoadRenderTexture(GetScreenWidth(), GetScreenHeight()); // main FBO used for postprocessing
+			applicationBuffer = LoadRenderTexture(GetScreenWidth(), GetScreenHeight());					   // main FBO used for postprocessing
 			reflectionBuffer = LoadRenderTexture(GetScreenWidth() / fboSize, GetScreenHeight() / fboSize); // FBO used for water reflection
 			refractionBuffer = LoadRenderTexture(GetScreenWidth() / fboSize, GetScreenHeight() / fboSize); // FBO used for water refraction
 			SetTextureFilter(reflectionBuffer.texture, FILTER_BILINEAR);
@@ -299,7 +300,6 @@ int main(void)
 		}
 		// Update
 		//----------------------------------------------------------------------------------
-
 
 		// animate water
 		waterMoveFactor += 0.03f * GetFrameTime();
@@ -351,7 +351,7 @@ int main(void)
 			}
 		}
 		float sunAngle = Lerp(-90, 270, daytime) * DEG2RAD; // -90 midnight, 90 midday
-		float nDaytime = sinf(sunAngle); // normalize it to make it look like a dot product on an unit sphere (shaders expect it this way) (-1, 1)
+		float nDaytime = sinf(sunAngle);					// normalize it to make it look like a dot product on an unit sphere (shaders expect it this way) (-1, 1)
 		int iDaytime = ((nDaytime + 1.0f) / 2.0f) * (float)(ambientColorsNumber - 1);
 		ambc[0] = ambientColors[iDaytime].x; // ambient color based on daytime
 		ambc[1] = ambientColors[iDaytime].y;
@@ -372,7 +372,7 @@ int main(void)
 		UpdateLightValues(lights[0]);
 
 		// Update the light shader with the camera view position
-		float cameraPos[3] = { camera.position.x, camera.position.y, camera.position.z };
+		float cameraPos[3] = {camera.position.x, camera.position.y, camera.position.z};
 		SetShaderValue(terrainModel.materials[0].shader, terrainModel.materials[0].shader.locs[LOC_VECTOR_VIEW], cameraPos, UNIFORM_VEC3);
 		SetShaderValue(oceanModel.materials[0].shader, oceanModel.materials[0].shader.locs[LOC_VECTOR_VIEW], cameraPos, UNIFORM_VEC3);
 		//----------------------------------------------------------------------------------
@@ -385,28 +385,30 @@ int main(void)
 		BeginTextureMode(reflectionBuffer);
 		ClearBackground(RED);
 		camera.position.y *= -1;
-		Render3DScene(camera, lights, { skybox, terrainModel }, noTrees, 1);
+		Render3DScene(camera, lights, {skybox, terrainModel}, noTrees, 1);
 		camera.position.y *= -1;
 		EndTextureMode();
 
 		// render stuff to refraction FBO
 		BeginTextureMode(refractionBuffer);
 		ClearBackground(GREEN);
-		Render3DScene(camera, lights, { skybox, terrainModel, oceanFloorModel }, noTrees, 0);
+		Render3DScene(camera, lights, {skybox, terrainModel, oceanFloorModel}, noTrees, 0);
 		EndTextureMode();
 
 		// render stuff to normal application buffer
-		if (useApplicationBuffer) BeginTextureMode(applicationBuffer);
+		if (useApplicationBuffer)
+			BeginTextureMode(applicationBuffer);
 		ClearBackground(YELLOW);
-		Render3DScene(camera, lights, { skybox, cloudModel, terrainModel, oceanFloorModel, oceanModel }, trees, 2);
-		if (useApplicationBuffer) EndTextureMode();
+		Render3DScene(camera, lights, {skybox, cloudModel, terrainModel, oceanFloorModel, oceanModel}, trees, 2);
+		if (useApplicationBuffer)
+			EndTextureMode();
 
 		// render to frame buffer after applying post-processing (if enabled)
 		if (useApplicationBuffer)
 		{
 			BeginShaderMode(postProcessShader);
 			// NOTE: Render texture must be y-flipped due to default OpenGL coordinates (left-bottom)
-			DrawTextureRec(applicationBuffer.texture, { 0.0f, 0.0f, (float)applicationBuffer.texture.width, (float)-applicationBuffer.texture.height }, { 0.0f, 0.0f }, WHITE);
+			DrawTextureRec(applicationBuffer.texture, {0.0f, 0.0f, (float)applicationBuffer.texture.width, (float)-applicationBuffer.texture.height}, {0.0f, 0.0f}, WHITE);
 			EndShaderMode();
 		}
 
@@ -468,7 +470,7 @@ int main(void)
 			std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
 
 			SetTraceLogLevel(LOG_INFO);
-			TraceLog(LOG_INFO, TextFormat("Eroded 100000 droplets. Time elapsed: %f s", std::chrono::duration_cast<std::chrono::nanoseconds> (end - begin).count() / 1000000000.0));
+			TraceLog(LOG_INFO, TextFormat("Eroded 100000 droplets. Time elapsed: %f s", std::chrono::duration_cast<std::chrono::nanoseconds>(end - begin).count() / 1000000000.0));
 			SetTraceLogLevel(LOG_NONE);
 
 			totalDroplets += 100000;
@@ -505,7 +507,7 @@ int main(void)
 			{
 				erosionMaker->Gradient(mapData, MAP_RESOLUTION, 0.5f, GradientType::SQUARE);
 			}
-			else if (IsKeyPressed(KEY_T)) 
+			else if (IsKeyPressed(KEY_T))
 			{
 				erosionMaker->Gradient(mapData, MAP_RESOLUTION, 0.5f, GradientType::CIRCLE);
 			}
@@ -543,16 +545,16 @@ int main(void)
 		if (IsKeyDown(KEY_S))
 		{
 			// display FBOS for debug
-			DrawTextureRec(reflectionBuffer.texture, { 0.0f, 0.0f, (float)reflectionBuffer.texture.width, (float)-reflectionBuffer.texture.height }, { 0.0f, 0.0f }, WHITE);
-			DrawTextureRec(refractionBuffer.texture, { 0.0f, 0.0f, (float)refractionBuffer.texture.width, (float)-refractionBuffer.texture.height }, { 0.0f, (float)reflectionBuffer.texture.height }, WHITE);
+			DrawTextureRec(reflectionBuffer.texture, {0.0f, 0.0f, (float)reflectionBuffer.texture.width, (float)-reflectionBuffer.texture.height}, {0.0f, 0.0f}, WHITE);
+			DrawTextureRec(refractionBuffer.texture, {0.0f, 0.0f, (float)refractionBuffer.texture.width, (float)-refractionBuffer.texture.height}, {0.0f, (float)reflectionBuffer.texture.height}, WHITE);
 		}
 		if (IsKeyDown(KEY_A))
 		{
 			// display other info for debug
-			DrawTextureEx(heightmapTexture, { GetScreenWidth() - heightmapTexture.width - 20.0f, 20 }, 0, 1, WHITE);
+			DrawTextureEx(heightmapTexture, {GetScreenWidth() - heightmapTexture.width - 20.0f, 20}, 0, 1, WHITE);
 			DrawRectangleLines(GetScreenWidth() - heightmapTexture.width - 20, 20, heightmapTexture.width, heightmapTexture.height, GREEN);
 
-			//DrawFPS(10, 70);
+			// DrawFPS(10, 70);
 		}
 
 		if (IsKeyPressed(KEY_LEFT_CONTROL))
@@ -609,7 +611,7 @@ int main(void)
 			// take a screenshot
 			for (int i = 0; i < INT_MAX; i++)
 			{
-				const char* fileName = TextFormat("screen%i.png", i);
+				const char *fileName = TextFormat("screen%i.png", i);
 				if (FileExists(fileName) == 0)
 				{
 					TakeScreenshot(fileName);
@@ -645,7 +647,7 @@ void Render3DScene(Camera camera, Light lights[], std::vector<Model> models, std
 
 	for (size_t i = 0; i < models.size(); i++) // draw all 3d models in the scene
 	{
-		DrawModel(models[i], { 0, 0, 0 }, 1.0f, WHITE);
+		DrawModel(models[i], {0, 0, 0}, 1.0f, WHITE);
 	}
 
 	BeginShaderMode(treeShader);
@@ -663,10 +665,10 @@ void Render3DScene(Camera camera, Light lights[], std::vector<Model> models, std
 	EndMode3D();
 }
 
-void GenerateTrees(ErosionMaker* erosionMaker, std::vector<float>* mapData, Texture2D* treeTextures, std::vector<TreeBillboard>* trees, bool generateNew)
+void GenerateTrees(ErosionMaker *erosionMaker, std::vector<float> *mapData, Texture2D *treeTextures, std::vector<TreeBillboard> *trees, bool generateNew)
 {
-	Vector3 billPosition = { 0.0f, 0.0f, 0.0f };
-	Vector3 billNormal = { 0.0f, 0.0f, 0.0f };
+	Vector3 billPosition = {0.0f, 0.0f, 0.0f};
+	Vector3 billNormal = {0.0f, 0.0f, 0.0f};
 	float grassSlopeThreshold = 0.2; // different than in the terrain shader
 	float grassBlendAmount = 0.55;
 	float grassWeight;
@@ -702,7 +704,7 @@ void GenerateTrees(ErosionMaker* erosionMaker, std::vector<float>* mapData, Text
 		else
 		{
 			int textureChoice = (int)randomRange(0, TREE_TEXTURE_COUNT);
-			trees->push_back({ treeTextures[textureChoice], billPosition, randomRange(0.6f, 1.4f) * 0.3f, billColor });
+			trees->push_back({treeTextures[textureChoice], billPosition, randomRange(0.6f, 1.4f) * 0.3f, billColor});
 		}
 	}
 }
