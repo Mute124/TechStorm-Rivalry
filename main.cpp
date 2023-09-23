@@ -1,36 +1,24 @@
 // Run Args
 bool SkipMainMenu = true;
 
-// Raylib Stuff.
+
 
 #include "lib/Buttons/src/ButtonR.h" // Needed for buttons.
+//Raylib Framework
 #include "lib/raylib.h"
 #include "lib/raymath.h"
 #include "lib/rcamera.h"
 #include "lib/rlgl.h"
 
 // Object classes
-#include "Classes/Monobehavior.h"
-#include "Classes/Block.h"
+#include "Engine/DataSets/Globals.h"
+#include "Engine/Classes/ShapeBase/Block/Block.h"
+#include "Engine/Classes/GameObject/Gameobject.h"
+#include "Engine/Classes/GUIs/Core/MenuCamera.h"
+#include "Engine/Classes/Player/Player.h"
+#include "Engine/Classes/Logging/Logman.h"
 
-#include "Classes/GUtils.h"
-#include "Classes/Gameobj.h"
-#include "Classes/Globals.h"
-#include "Classes/MenuCamera.h"
-#include "Classes/Player/Player.h"
-#include "Classes/TestPlane.h"
-#include "Classes/Logman.h"
-#include "Classes/Vehicles/Plane.h"
-#include "Classes/World/WorldFloor.h"
-
-#include "Classes/HeightMap.h"
-#include "Classes/Flashlight.h"
-#include "Classes/Gun.h"
-#include "Classes/Metal_Block.h"
-
-#include "Classes/Graphics/FBO.h"
-
-#include "Classes/ConfigMan/ConfigMan.h"
+#include "Engine/Classes/ConfigMan/ConfigMan.h" // config manager
 
 // Externs required for functionality
 // In the lib file
@@ -124,6 +112,7 @@ int main(void)
                          // still generating, it wont pause the game.
 
   SetExitKey(KEY_BACKSPACE); // In event of your fuck up press this.
+  SetTargetFPS(targetFPS);
   // Load skybox model
   bool HasDone; // I dont remember what this does...
                 // Define transforms to be uploaded to GPU for instances
@@ -183,6 +172,7 @@ int main(void)
                            postProcessShader, LoadModel("resources/models/Block.obj"));
   GameObject::PushObject(block);
 
+  block = nullptr;
   int PostViewLoc = GetShaderLocation(postProcessShader, "viewPos"); // View pos shader location
 
   /*
@@ -299,8 +289,6 @@ int main(void)
 
 
 
-  Texture2D texture2 =
-      LoadTextureFromImage(PerlinTest); // Convert image to texture (VRAM)
 
   Mesh mesh = GenMeshHeightmap(
       PerlinTest, Vector3{16, 8, 16});        // Generate heightmap mesh (RAM and VRAM)
@@ -361,9 +349,9 @@ int main(void)
   //Image Perlin = GenImagePerlinNoise(100, 100, 0, 0, 1.0f);
   //ExportImage(Perlin, "perlin.png");
 //GenMeshHeightmap(Perlin, (Vector3){100.0f, 10.0f, 100.0f})
-  Model terrain = DefaultBlockModel;
+  Model terrain = LoadModelFromMesh(GenMeshCube(BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE));
 
-  //terrain.materials[0].shader = postProcessShader;
+  terrain.materials[0].shader = postProcessShader;
 
   //UnloadImage(Perlin);
   //UnloadImage(PerlinTest);
@@ -374,16 +362,6 @@ int main(void)
     system("mkdir temp");
   }
   Texture tex;
-
-  string Command;
-
-  // GameObject::PushObject(new Plane(postProcessShader, Vector3One(), player));
-
-  // GameObject::PushObject(new WorldFloor(postProcessShader, (Vector3){0.0f, -4.0f, 0.0f}));
-
-  // RenderTexture2D fbo = FBO::LoadRenderTextureDepthTex(screenWidth, screenHeight);
-
-  //SetShaderValue(postProcessShader, GetShaderLocation(postProcessShader, "colDiffuse"), &ambientColor, UNIFORM_VEC4);
 
   // All setup goes above!
   Logman::CustomLog(LOG_INFO, "Starting test", NULL);
@@ -397,7 +375,7 @@ int main(void)
 
 
   delete GameConfig;
-  SetTargetFPS(targetFPS);
+  
   if (SkipMainMenu != true)
   {
     // Declare main loading done
@@ -432,6 +410,7 @@ int main(void)
   // Game Loop
   while (!WindowShouldClose())
   {
+    Global::Time::Update();
 
     // Pause Menu
     if (IsKeyPressed(KEY_ESCAPE))
@@ -548,10 +527,10 @@ int main(void)
     if (IsMouseButtonPressed(MOUSE_BUTTON_RIGHT))
     {
       Vector3 placepos = player->getTarget();
-      Block *bl = new Block(BlockStone, (Vector3){roundf(placepos.x), roundf(placepos.y), roundf(placepos.z)}, WHITE, postProcessShader, DefaultBlockModel);
+     
 
-      GameObject::PushObject(std::move(bl));
-      bl = nullptr;
+      GameObject::PushObject(new Block(BlockStone, (Vector3){roundf(placepos.x), roundf(placepos.y), roundf(placepos.z)}, WHITE, postProcessShader, DefaultBlockModel));
+      
     }
 
     if (!IsKeyDown(KEY_LEFT_ALT))
