@@ -361,20 +361,10 @@ int main(void)
   {
     system("mkdir temp");
   }
-  Texture tex;
-
-  // All setup goes above!
-  Logman::CustomLog(LOG_INFO, "Starting test", NULL);
   
-  ConfigMan *GameConfig = new ConfigMan("Config/game.toml");
+  Texture tex; // TODO : Find out what this is.
+
   
-
-  bool log = GameConfig->GetEntry<bool>("Debug", "logverbatim");
-
-  Logman::CustomLog(LOG_INFO, TextFormat("Result of test is : %i", log), NULL);
-
-
-  delete GameConfig;
   
   if (SkipMainMenu != true)
   {

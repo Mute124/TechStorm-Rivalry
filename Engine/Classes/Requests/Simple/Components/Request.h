@@ -1,30 +1,40 @@
+
 #pragma once
 #include <map>
 
 #include "RequestTypes.h"
 
+#include "../../../Logging/Logman.h"
 
 // First a request is made by what ever, then it gets compiled into a map, packaged, and shipped to the correct system man
 template <typename T>
 class Request
 {
 public:
-    
-
-
-    // String is the type of said request, T is the data of the request.
-    std::map<RequestTypes, T> RequestData;
-
+    T RequestData;
+    RequestType type;
     bool isPackaged;
-    
-    Request(RequestTypes type, T data) {
+    int id;
 
-        this->RequestData[type] = data;
-
-        ShipRequest(this->RequestData);
+    Request(RequestType type, T data)
+    {
+        id = AssignId();
+        this->RequestData = data;
+        this->type = type;
     };
 
-    
+    static void Flush() {
+        RequestCount = 0;
+    }
 
-    
+private:
+    static inline int AssignId()
+    {
+        if (RequestCount == 0) {
+            return 0;
+        } else {
+            return RequestCount++;
+        }
+    }
+    static int RequestCount;
 };

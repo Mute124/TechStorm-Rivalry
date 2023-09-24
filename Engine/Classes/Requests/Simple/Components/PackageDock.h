@@ -24,11 +24,11 @@ public:
     
 
     // Ship data to the correct system manager
-    static int ShipRequest(std::map<RequestTypes, T> PackagedRequest)
+    static int ShipRequest(std::map<RequestType, T> PackagedRequest)
     {
-        if (PackagedRequest[REQUEST_AUDIO] == 0)
+        if (PackagedRequest<REQUEST_AUDIO>)
         {
-
+            
             return 0;
         }
         else if (PackagedRequest[REQUEST_GRAPHICS] == 0)
@@ -47,11 +47,26 @@ public:
         {
             return 0;
         }
-        else if (PackagedRequest[REQUEST_ACTIONS] == 0)
+        else if (PackagedRequest[REQUEST_MISC] == 0)
         {
             return 0;
         }
 
         return 0;
+    }
+};
+
+
+template <typename T>
+class PackageReceiverDock
+{
+private:
+    
+
+public:
+    PackageReceiverDock() {};
+
+    ReceiveRequest(std::map<RequestType, T> PackagedRequest) {
+        
     }
 };

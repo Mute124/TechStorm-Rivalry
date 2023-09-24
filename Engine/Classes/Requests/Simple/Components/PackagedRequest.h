@@ -2,9 +2,11 @@
 
 #include "Request.h"
 
-template<typename T>
+#include <string>
+
 class PackagedRequest {
     public:
-        
-        const Request<T> request;
+        std::string data;
+
+        RequestType type;
 };

@@ -14,30 +14,50 @@
 */
 #pragma once
 
-#include "../lib/raylib.h"
+#include "../../../lib/raylib.h"
 
 #include "Simple/Components/Request.h"
 #include "Simple/Components/PackageDock.h"
 #include "Simple/Components/RequestTypes.h"
 #include "Simple/Components/RequestPackageFactory.h"
 
+#include "../ConfigMan/ConfigMan.h"
 
-// THIS CLASS IS THREADED! This is the request system. If threading is not wanted, it can be turned off
+#include <thread>
+#include <mutex>
+
+// Not used At the moment
+// THIS CLASS IS THREADED! This is the request system. If threading is not wanted, it can be turned off in config
 class RequestMan {
     public:
-        RequestMan(const bool isThreaded) {
-            if (isThreaded) {
-                RequestManLoop();
+        RequestMan() {
+            // Check if the config says to use threading.
+            if (ConfigMan::configregistry->GetEntryinFile<bool>("Config/Engine.toml", "General", "UseMultiThreading")) {
+                RequestManThread = std::thread(RequestManLoop);
+            } else {
+                // TODO : implement non-threading request system
             }
         }
+
+
 
         static void RequestManLoop() {
             while (!WindowShouldClose()) {
-                
+                if (Stop) {
+                    break;
+                }
             }
+            
         }
 
+        // call from another thread. to stop the Requestman Thread
+        static void Exit() {
+            Stop = true;
+            RequestManThread.join();
+        }
+        
         
     private:
-
+        static inline bool Stop = false;
+        static inline std::thread RequestManThread;
 };

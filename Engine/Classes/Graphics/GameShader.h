@@ -1,10 +1,15 @@
 #pragma once
-#include "../lib/raylib.h"
+#include "../../../lib/raylib.h"
 
 
-class GameShader : public Shader{
+
+
+
+class GameShader {
     public:
-        GameShader();
+        GameShader() {
+            
+        };
         
         bool isShaderReady() {
             return isReady;
@@ -16,11 +21,6 @@ class GameShader : public Shader{
 
         virtual void DisableShader() {};
 
-        // Assign shader
-        Shader AssignShader() {
-            Shader shader = { 0 };
-            
-        };
 
         virtual void Start() {};
 

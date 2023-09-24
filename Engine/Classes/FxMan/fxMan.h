@@ -36,7 +36,7 @@ class FxMan
     private:
 
 
-        static void UnboxShipment(std::map<RequestTypes, T> **PackagedRequest) {
+        static void UnboxShipment(std::map<RequestType, T> **PackagedRequest) {
 
         }
     protected:
