@@ -101,10 +101,7 @@ int main(void)
   Game *game = new Game();
   game->StartGame();
 
-  // Setting the window icon in task bar
-  Image icon = LoadImage("resources/images/icon.png");
-  ImageFormat(&icon, PIXELFORMAT_UNCOMPRESSED_R8G8B8A8);
-  SetWindowIcon(icon);
+
 
   ButtonR *mmen_start = new ButtonR("start", middlex, middley); // Main start button
 
@@ -118,10 +115,7 @@ int main(void)
 
   SetExitKey(KEY_BACKSPACE); // In event of your fuck up press this.
   SetTargetFPS(targetFPS);
-  // Load skybox model
-  bool HasDone; // I dont remember what this does...
-                // Define transforms to be uploaded to GPU for instances
-
+  
   // Load postprocessing shader
   // NOTE: Defining 0 (NULL) for vertex shader forces usage of internal default
   // vertex shader
@@ -330,8 +324,6 @@ int main(void)
                  GetShaderLocation(postProcessShader, "ambientColor"), &amb,
                  SHADER_UNIFORM_VEC4);
 
-  // Main game loop
-  HasDone = false;
   bool CreateSunRay = true;
 
   Vector3 Orgin =

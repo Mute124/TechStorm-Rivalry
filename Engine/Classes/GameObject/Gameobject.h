@@ -17,8 +17,13 @@ typedef enum type
 
 } objtype;
 
+#include "../Lists/Registry.h"
+
+// TODO : Make this...
+class GameObjectRegistry;
+
 // used for organization reasons and makes C++ less torture.
-// TODO : Refactor workspace to account for changes
+// TODO : Refactor for sake of sanity...
 class GameObject
 {
 
@@ -255,7 +260,7 @@ private:
 
   objtype type; // TODO : is this needed?
 
-  
+  friend class GameObjectRegistry;
 
 
 };

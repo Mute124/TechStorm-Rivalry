@@ -28,7 +28,6 @@
 
 #define MAX_INSTANCES 10000 // Max amount of objects.
 
-#define MAX_MEMORY_SIZE 1000000
 #define MAX_WINDOW_TITLE_LENGTH 50
 
 // alternative cases. makes it so that you dont have to write as much boiler plate

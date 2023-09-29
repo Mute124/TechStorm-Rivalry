@@ -3,7 +3,7 @@
 #include "ConfigRegistry.h"
 #include "ConfigTypeConverter.h"
 
-// NOTE : Very much so broken... FUUUUUUUUUUUUUUUUUUUUU
+// NOTE : NO LONGER BROKEN!!! Still have to refactor though to use Registry Class. FUUUUUUUUUUUUUUUUUUUUUU
 class ConfigMan : public ConfigRegistrySecretary, public ConfigTypeConverter
 {
     public:

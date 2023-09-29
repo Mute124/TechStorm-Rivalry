@@ -50,17 +50,11 @@ public:
         this->model.materials[0].shader = shader;
         this->model.materials[0].shader.locs[SHADER_LOC_VECTOR_VIEW] = GetShaderLocation(this->shader, "viewPos");       
         
-        Texture2D Bricks = LoadTexture("C:/Git/Minero/raylib/projects/VSCode/resources/textures/Brick.png");
-        //Image img = LoadImage("resources/textures/Brick.png");
+        Texture2D Bricks = LoadTexture("resources/textures/Brick.png");
 
-        
-        SetTextureFilter(Bricks, TEXTURE_FILTER_BILINEAR);
-        
         SetMaterialTexture(this->model.materials, MATERIAL_MAP_DIFFUSE, Bricks);
 
-        //SetShaderValue(shader, GetShaderLocation(shader, "colDiffuse"), &color, SHADER_UNIFORM_VEC4);
-    
-        // UnloadTexture(Bricks);
+
     }
     // main block constructor.
     

@@ -69,19 +69,25 @@ public:
         }
         windowfactory->StampFlag(FLAG_MSAA_4X_HINT);
         windowfactory->ManufactureWindow(windowWidth, windowHeight, "Minero");
+
+        // Setting the window icon in task bar
+        Image icon = LoadImage("resources/images/icon.png");
+        ImageFormat(&icon, PIXELFORMAT_UNCOMPRESSED_R8G8B8A8);
+        SetWindowIcon(icon);
     }
 
-    void EndGame() {
+    void EndGame()
+    {
         delete this->configman;
-        
     }
 
-    volatile int windowWidth;
-    volatile int windowHeight;
+    int windowWidth;
+    int windowHeight;
 
-    volatile bool isFullscreen = false;
+    bool isFullscreen = false;
 
     ConfigMan *configman = new ConfigMan();
+
 private:
     toml::v3::parse_result optionsConfig;
     GameWindowFactory *windowfactory = new GameWindowFactory();
