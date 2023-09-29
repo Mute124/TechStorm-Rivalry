@@ -5,7 +5,6 @@
 #include "../Logging/Logman.h"
 #include "../../../lib/raylib.h"
 
-
 // Components
 #include "ConfigFile.h"
 #include "ConfigRegistrySearcher.h"
@@ -13,38 +12,44 @@
 class ConfigRegistry
 {
 public:
+    ConfigRegistry() {
+
+    }
+
+    ~ConfigRegistry() {
+        delete ConfigSecretary;
+    }
 
 
-    template <typename T>
-    T GetEntryinFile(const char *file, const char *section, const char *entry)
+    bool IsFileRegistered(const char *FileName)
     {
-        GetFile(file)->GetEntry<T>(section, entry);
+        return ConfigSecretary->DoesFileExist(registry, FileName);
     }
 
-    bool IsFileRegistered(const char *file) {
-        return Searcher->DoesFileExist(registry, file);
+    // Get a config FileName
+    ConfigFile GetFile(const char *FileName)
+    {
+        return ConfigSecretary->FindFile(registry, FileName);
     }
 
-    // Get a config file
-    ConfigFile *GetFile(const char *file) {
-        ConfigFile result = std::move(Searcher->FindFile(registry, file));
-        return &result;
-    }
-
-    // register a config file into the registry
-    void RegisterFile(const char *file) {
-        registry.push_back(ConfigFile(file));
+    // register a config FileName into the registry
+    void RegisterFile(const char *FileName)
+    {
+        registry.push_back(ConfigFile(FileName));
     }
 
     // Flush the registry, WILL NOT SAVE!
-    int Flush() {
-       ConfigFile::Flush();
-       bool issuccessful = registry.empty();
-       return issuccessful;
+    int Flush()
+    {
+        ConfigFile::Flush();
+        bool issuccessful = registry.empty();
+        return issuccessful;
     }
 
+    
+
+    ConfigRegistrySecretary *ConfigSecretary = new ConfigRegistrySecretary(); // Searching component
 private:
 
-    ConfigRegistrySearcher *Searcher = new ConfigRegistrySearcher(); // Searching component
     std::vector<ConfigFile> registry;
 };

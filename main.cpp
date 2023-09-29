@@ -10,15 +10,17 @@ bool SkipMainMenu = true;
 #include "lib/rcamera.h"
 #include "lib/rlgl.h"
 
-// Object classes
+// Game Engine
+#include "Engine/Classes/Project/Game/Game.h"
 #include "Engine/DataSets/Globals.h"
 #include "Engine/Classes/ShapeBase/Block/Block.h"
 #include "Engine/Classes/GameObject/Gameobject.h"
 #include "Engine/Classes/GUIs/Core/MenuCamera.h"
 #include "Engine/Classes/Player/Player.h"
 #include "Engine/Classes/Logging/Logman.h"
-
 #include "Engine/Classes/ConfigMan/ConfigMan.h" // config manager
+
+// Minero Classes
 
 // Externs required for functionality
 // In the lib file
@@ -80,8 +82,6 @@ int targetFPS = GetMonitorRefreshRate(GetCurrentMonitor()); // This is what is u
 
 int main(void)
 {
-
-
   int screenWidth = GetScreenWidth();
   int screenHeight = GetScreenHeight();
 
@@ -92,9 +92,14 @@ int main(void)
   const int middlex = (screenWidth / 2);
   const int middley = (screenHeight / 2);
 
-  SetConfigFlags(FLAG_MSAA_4X_HINT || FLAG_WINDOW_RESIZABLE); // states the window can be resized and
+  //SetConfigFlags(FLAG_MSAA_4X_HINT || FLAG_WINDOW_RESIZABLE); // states the window can be resized and
                                      // allows anti-aliasing if available
-  InitWindow(GetScreenWidth() / 2, GetScreenHeight() / 2, "Minero");
+  //InitWindow(800, 600, "Minero");
+
+
+  
+  Game *game = new Game();
+  game->StartGame();
 
   // Setting the window icon in task bar
   Image icon = LoadImage("resources/images/icon.png");
@@ -700,6 +705,9 @@ ExitGame:
     remove("HMap.png");
   }
 
+
+  game->EndGame();
+  delete game;
   delete player;
   delete mmen_start; // Deletes the main menu
   delete menucamera;

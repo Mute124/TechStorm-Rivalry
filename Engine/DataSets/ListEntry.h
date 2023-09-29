@@ -3,7 +3,7 @@
 template<typename T>
 struct ListEntry
 {
-    T typedata;
+    T entry;
     const char *tag;
     int id;
 };

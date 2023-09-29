@@ -4,26 +4,26 @@
 #include <vector>
 
 // Component class of ConfigRegistry
-class ConfigRegistrySearcher {
+class ConfigRegistrySecretary {
     public:
-        ConfigRegistrySearcher() {}
+        ConfigRegistrySecretary() {}
 
-        ConfigFile FindFile(std::vector<ConfigFile> &Dataset, const char *TargetFile) {
+        static inline ConfigFile FindFile(std::vector<ConfigFile> &Dataset, const char *TargetFile) {
+            ConfigFile file;
             if (DoesFileExist(Dataset, TargetFile)) {
                 for (int i = 0; i < Dataset.size(); i++) {
-                    if (Dataset[i].file.typedata.File == TargetFile) {
-                        return Dataset[i];
+                    if (Dataset[i].file.entry.FilePath == TargetFile) {
+                        file = Dataset[i];
                     }
                 }
-            } else {
-                return ConfigFile();
-            }
+            } 
+            return file;
         }
 
-        bool DoesFileExist(std::vector<ConfigFile> &Dataset, const char *TargetFile) {
+        static inline bool DoesFileExist(std::vector<ConfigFile> &Dataset, const char *TargetFile) {
             bool found;
             for (int i = 0; i < Dataset.size(); i++) {
-                if (Dataset[i].file.typedata.File == TargetFile) {
+                if (Dataset[i].file.entry.FilePath == TargetFile) {
                     found = true;
                 }
             }
