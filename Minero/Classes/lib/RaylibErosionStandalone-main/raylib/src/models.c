@@ -875,8 +875,8 @@ Material LoadMaterialDefault(void)
 
     material.shader = GetShaderDefault();
     material.maps[MAP_DIFFUSE].texture = GetTextureDefault();   // White texture (1x1 pixel)
-    //material.maps[MAP_NORMAL].texture;         // NOTE: By default, not set
-    //material.maps[MAP_SPECULAR].texture;       // NOTE: By default, not set
+    material.maps[MAP_NORMAL].texture;         // NOTE: By default, not set
+    material.maps[MAP_SPECULAR].texture;       // NOTE: By default, not set
 
     material.maps[MAP_DIFFUSE].color = WHITE;    // Diffuse color
     material.maps[MAP_SPECULAR].color = WHITE;   // Specular color

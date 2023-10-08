@@ -1,5 +1,5 @@
 /*
-   TODO : this class needs to be migrated to be a base class that polymorphism takes place in.
+   TODO : this class needs to be migrated to be a base class that polymorphism takes place in. Also make the code not crap
 */
 #pragma once
 
@@ -11,7 +11,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-// specifies all the codes for the different block types. just makes things easier :)
+// specifies all the codes for the different block types.
 typedef enum BlockType
 {
     BlockAir = 0,
@@ -30,34 +30,37 @@ public:
     // Automatically sends it to the renderer.
     void Draw() override
     {
-        
-        //DrawBoundingBox(this->Box, ORANGE);
+
+        // DrawBoundingBox(this->Box, ORANGE);
         if (this->type != BlockAir)
         {
-            
+
             DrawModel(model, m_position, BLOCK_SIZE, color);
-        
         }
     }
 
     // main block constructor.
     Block(const BType type, Vector3 position, const Color color, Shader shader, Model model) : type(type), color(color), m_position(position), shader(shader), model(model), id(RegisterObj(this)), velocity(Vector3Zero()), Box(GetModelBoundingBox(this->model))
     {
-        
+
+        Logman::CustomLog(LOG_TRACE, "Block Constructor", NULL);
         this->shader = shader;
 
         this->model = model;
         this->model.materials[0].shader = shader;
-        this->model.materials[0].shader.locs[SHADER_LOC_VECTOR_VIEW] = GetShaderLocation(this->shader, "viewPos");       
+        this->model.materials[0].shader.locs[SHADER_LOC_VECTOR_VIEW] = GetShaderLocation(this->shader, "viewPos");
+
+        const static Texture2D Bricks = LoadTexture("resources/textures/Brick.png");
         
-        Texture2D Bricks = LoadTexture("resources/textures/Brick.png");
-
-        SetMaterialTexture(this->model.materials, MATERIAL_MAP_DIFFUSE, Bricks);
-
-
+        
+        this->model.materials[0] = LoadMaterialDefault();
+        
+        this->model.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = Bricks;
+        
+        
+        // UnloadTexture(Bricks);
     }
     // main block constructor.
-    
 
     int GetId() const override
     {
@@ -74,34 +77,29 @@ public:
         return this->model;
     }
 
-
-    void SetBlockShaderValue(int locIndex, const void *value, int UniformType) {
+    void SetBlockShaderValue(int locIndex, const void *value, int UniformType)
+    {
         SetShaderValue(shader, locIndex, &value, UniformType);
     }
 
     void onUpdate() override
     {
-        
+
         if (CheckCollision(this, this->id))
         {
             this->colpos = this->m_position;
             this->onCollision();
             this->isColliding = true;
             this->velocity = Vector3Zero();
-            BeginDrawing();
-
-            EndDrawing();
         }
         else
         {
 
-            this->velocity = Vector3Subtract(this->velocity, (Vector3){0.0f, 0.001f * (float)Global::Time::GetGameTime(), 0.0f});
+            // this->velocity = Vector3Subtract(this->velocity, (Vector3){0.0f, 0.001f * (float)Global::Time::GetGameTime(), 0.0f});
         }
 
         this->m_position = Vector3Add(this->m_position, this->velocity);
     };
-
-
 
     Vector3 GetPosition() override
     {
@@ -171,7 +169,6 @@ public:
     }
 
 private:
-    
     Vector3 colpos;
     bool initial = true;
     bool isColliding = false;

@@ -67,6 +67,7 @@ public:
         else
         {
         }
+        
         windowfactory->StampFlag(FLAG_MSAA_4X_HINT);
         windowfactory->ManufactureWindow(windowWidth, windowHeight, "Minero");
 

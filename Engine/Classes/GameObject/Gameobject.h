@@ -9,7 +9,7 @@
 #include <mutex>
 typedef enum type
 {
-  BLOCK = 0, // Game object is a block
+  BLOCK = 0,  // Game object is a block
   PLAYER = 1, // Player object.
   SKYBOX,
   VEHICLE,
@@ -19,7 +19,7 @@ typedef enum type
 
 #include "../Lists/Registry.h"
 
-// TODO : Make this...
+// TODO : Make
 class GameObjectRegistry;
 
 // used for organization reasons and makes C++ less torture.
@@ -28,59 +28,60 @@ class GameObject
 {
 
 public:
+  RenderTexture2D LoadRenderTextureDepthTex(int width, int height)
+  {
+    RenderTexture2D target = {0};
 
-RenderTexture2D LoadRenderTextureDepthTex(int width, int height)
-{
-    RenderTexture2D target = { 0 };
-
-    target.id = rlLoadFramebuffer(width, height);   // Load an empty framebuffer
+    target.id = rlLoadFramebuffer(width, height); // Load an empty framebuffer
 
     if (target.id > 0)
     {
-        rlEnableFramebuffer(target.id);
+      rlEnableFramebuffer(target.id);
 
-        // Create color texture (default to RGBA)
-        target.texture.id = rlLoadTexture(0, width, height, PIXELFORMAT_UNCOMPRESSED_R8G8B8A8, 1);
-        target.texture.width = width;
-        target.texture.height = height;
-        target.texture.format = PIXELFORMAT_UNCOMPRESSED_R8G8B8A8;
-        target.texture.mipmaps = 1;
+      // Create color texture (default to RGBA)
+      target.texture.id = rlLoadTexture(0, width, height, PIXELFORMAT_UNCOMPRESSED_R8G8B8A8, 1);
+      target.texture.width = width;
+      target.texture.height = height;
+      target.texture.format = PIXELFORMAT_UNCOMPRESSED_R8G8B8A8;
+      target.texture.mipmaps = 1;
 
-        // Create depth texture buffer (instead of raylib default renderbuffer)
-        target.depth.id = rlLoadTextureDepth(width, height, false);
-        target.depth.width = width;
-        target.depth.height = height;
-        target.depth.format = 19;       //DEPTH_COMPONENT_24BIT?
-        target.depth.mipmaps = 1;
+      // Create depth texture buffer (instead of raylib default renderbuffer)
+      target.depth.id = rlLoadTextureDepth(width, height, false);
+      target.depth.width = width;
+      target.depth.height = height;
+      target.depth.format = 19; // DEPTH_COMPONENT_24BIT?
+      target.depth.mipmaps = 1;
 
-        // Attach color texture and depth texture to FBO
-        rlFramebufferAttach(target.id, target.texture.id, RL_ATTACHMENT_COLOR_CHANNEL0, RL_ATTACHMENT_TEXTURE2D, 0);
-        rlFramebufferAttach(target.id, target.depth.id, RL_ATTACHMENT_DEPTH, RL_ATTACHMENT_TEXTURE2D, 0);
+      // Attach color texture and depth texture to FBO
+      rlFramebufferAttach(target.id, target.texture.id, RL_ATTACHMENT_COLOR_CHANNEL0, RL_ATTACHMENT_TEXTURE2D, 0);
+      rlFramebufferAttach(target.id, target.depth.id, RL_ATTACHMENT_DEPTH, RL_ATTACHMENT_TEXTURE2D, 0);
 
-        // Check if fbo is complete with attachments (valid)
-        if (rlFramebufferComplete(target.id)) TRACELOG(LOG_INFO, "FBO: [ID %i] Framebuffer object created successfully", target.id);
+      // Check if fbo is complete with attachments (valid)
+      if (rlFramebufferComplete(target.id))
+        TRACELOG(LOG_INFO, "FBO: [ID %i] Framebuffer object created successfully", target.id);
 
-        rlDisableFramebuffer();
+      rlDisableFramebuffer();
     }
-    else TRACELOG(LOG_WARNING, "FBO: Framebuffer object can not be created");
+    else
+      TRACELOG(LOG_WARNING, "FBO: Framebuffer object can not be created");
 
     return target;
-}
+  }
 
-// Unload render texture from GPU memory (VRAM)
-void UnloadRenderTextureDepthTex(RenderTexture2D target)
-{
+  // Unload render texture from GPU memory (VRAM)
+  void UnloadRenderTextureDepthTex(RenderTexture2D target)
+  {
     if (target.id > 0)
     {
-        // Color texture attached to FBO is deleted
-        rlUnloadTexture(target.texture.id);
-        rlUnloadTexture(target.depth.id);
+      // Color texture attached to FBO is deleted
+      rlUnloadTexture(target.texture.id);
+      rlUnloadTexture(target.depth.id);
 
-        // NOTE: Depth texture is automatically
-        // queried and deleted before deleting framebuffer
-        rlUnloadFramebuffer(target.id);
+      // NOTE: Depth texture is automatically
+      // queried and deleted before deleting framebuffer
+      rlUnloadFramebuffer(target.id);
     }
-}
+  }
   typedef struct
 
   {
@@ -89,7 +90,7 @@ void UnloadRenderTextureDepthTex(RenderTexture2D target)
     float *h = new float();
   } ObjDim; // TODO : is this needed?
 
-  virtual void Draw() {};
+  virtual void Draw(){};
 
   virtual ~GameObject()
   {
@@ -100,23 +101,26 @@ void UnloadRenderTextureDepthTex(RenderTexture2D target)
     }
   }
 
-  static inline GameObject *SearchById(int id) {
+  static inline GameObject *SearchById(int id)
+  {
     return GameObjects[id];
   }
 
-  static inline auto *SearchByType(int type) {
+  static inline auto *SearchByType(int type)
+  {
 
-    for (auto &GameObject : GameObjects) {
+    for (auto &GameObject : GameObjects)
+    {
       if (GameObject->GetType() == type)
       {
-        
+
         return GameObject;
         break;
       }
     }
   }
 
-  virtual int GetType() const = 0 ;
+  virtual int GetType() const = 0;
 
   /**
    * Registers an object.
@@ -125,7 +129,6 @@ void UnloadRenderTextureDepthTex(RenderTexture2D target)
    *
    * @throws ErrorType A description of the error.
    */
-
   static inline int RegisterObj(GameObject *object)
   {
     if (ids.size() == 0)
@@ -148,34 +151,39 @@ void UnloadRenderTextureDepthTex(RenderTexture2D target)
     GameObjects[id]->onDestroy();
   }
 
-  virtual void Test() {};
+  virtual void Test(){};
 
-  virtual void onUpdate() {}; // Called every frame
+  virtual void onUpdate(){}; // Called every frame
 
-  virtual void onCollision() {};
+  virtual void onCollision(){};
 
   virtual void onDestroy() const = 0; // NOTE : This deletes the object and shall be overridden for custom behaviors
 
   virtual int GetId() const = 0;
 
-  virtual BoundingBox GetBoundingBox() {};
+  virtual BoundingBox GetBoundingBox(){};
 
-  virtual bool CheckCollision(GameObject *Orgin, int id) {
+  virtual bool CheckCollision(GameObject *Orgin, int id)
+  {
     for (auto &GameObject : GameObjects)
     {
-        if (CheckCollisionBoxes(Orgin->GetBoundingBox(), GameObject->GetBoundingBox()))
+      if (CheckCollisionBoxes(Orgin->GetBoundingBox(), GameObject->GetBoundingBox()))
+      {
+        if (id == GameObject->GetId())
         {
-          if (id == GameObject->GetId()) {
-            continue;
-          } else {
-            return true;
-            break;
-          }
+          continue;
         }
+        else
+        {
+          return true;
+          break;
+        }
+      }
     }
   };
 
-  static inline void UpdateRegistry(std::vector<GameObject *> objects) {
+  static inline void UpdateRegistry(std::vector<GameObject *> objects)
+  {
     GameObjects = objects;
   }
 
@@ -188,66 +196,65 @@ void UnloadRenderTextureDepthTex(RenderTexture2D target)
    *
    * @throws None
    */
-  static void Update()
+  static inline void Update()
   {
-    
+    Render();
     for (auto &GameObject : GameObjects)
     {
-      Render();
-      // do all lambda stuff
+
+
       GameObject->onUpdate();
     }
   }
-  virtual Vector3 GetPosition() {};
+  virtual Vector3 GetPosition(){};
 
   static inline std::vector<int> ids; // is this needed?
 
-  static inline void Sync(std::vector<GameObject *> objs) {
-    
+
+
+  static inline void Sync(std::vector<GameObject *> objs)
+  {
+
     GameObjects = objs;
+  }
 
-    
-    
-  } 
-
-  static inline std::vector<GameObject *> RequestObjectList() {
+  static inline std::vector<GameObject *> RequestObjectList()
+  {
     return GameObjects;
   }
 
-  static inline GameObject *RequestObject(int id) {
+  static inline GameObject *RequestObject(int id)
+  {
     return SearchById(id);
   }
 
-
-  static inline auto PushObject(GameObject *&&_obj) {
+  static inline auto PushObject(GameObject *&&_obj)
+  {
     Logman::CustomLog(LOG_INFO, "GameObject : Pushing new object into buffer...", 0);
     GameObjects.push_back(_obj);
     _obj = nullptr;
   }
 
-  static inline void FlushBuffer() {
-    for (auto &obj : GameObjects) {
+  static inline void FlushBuffer()
+  {
+    for (auto &obj : GameObjects)
+    {
       obj->onDestroy();
-
     }
   }
   static void Render()
   {
-    
-    for (auto &GameObject : GameObjects)
+
+    for (auto &obj : GameObjects)
     {
-      GameObject->Draw();
+      obj->Draw();
     }
-    
   }
 
   static inline std::vector<GameObject *> GameObjects; // game objects
 private:
-
-
-
-  static inline auto Search() {
-
+  static inline auto Search()
+  {
   }
 
   Global::Tag IgnoredTags[10] = {
@@ -255,12 +262,9 @@ private:
       "light",
       "lighting",
       "cubemap",
-      "sky"
-      };
+      "sky"};
 
   objtype type; // TODO : is this needed?
 
   friend class GameObjectRegistry;
-
-
 };
