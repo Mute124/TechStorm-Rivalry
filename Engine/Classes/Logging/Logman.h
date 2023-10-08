@@ -19,7 +19,7 @@ class Logman {
     }
     
     // Custom logging function
-    static void CustomLog(int msgType, const char *text, va_list args)
+    static void CustomLog(int msgType, const char *text, va_list args = 0)
     {
 
       char timeStr[64] = {0};

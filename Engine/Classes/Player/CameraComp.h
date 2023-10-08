@@ -12,7 +12,6 @@ public:
 
     }
 
-
     Vector3 getPosition()
     {
         return this->camera.position;
@@ -66,10 +65,6 @@ public:
         return data.constructToCamera();
     }
 
-    static inline CameraComp *requestCameraComp(int id) {
-        return cameras[id];
-    }
-
     Camera getSelfCamera() {
         return this->camera;
     }
@@ -81,8 +76,6 @@ public:
 
 
 private:
-    mutable int id;
-    static std::vector<CameraComp *> cameras;
 
     Camera camera;
 };

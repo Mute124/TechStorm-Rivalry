@@ -91,11 +91,6 @@ int main(void)
   const int middlex = (screenWidth / 2);
   const int middley = (screenHeight / 2);
 
-  //SetConfigFlags(FLAG_MSAA_4X_HINT || FLAG_WINDOW_RESIZABLE); // states the window can be resized and
-                                     // allows anti-aliasing if available
-  //InitWindow(800, 600, "Minero");
-
-
   
   Game *game = new Game();
   game->StartGame();
@@ -170,7 +165,7 @@ int main(void)
                            postProcessShader, LoadModel("resources/models/Block.obj"));
   GameObject::PushObject(block);
 
-  block = nullptr;
+
   int PostViewLoc = GetShaderLocation(postProcessShader, "viewPos"); // View pos shader location
 
   /*
@@ -288,7 +283,8 @@ int main(void)
   static float shaderamb[4] = {0.02f, 0.02f, 0.02f, 0.02f};;
   SetShaderValue(postProcessShader, amb, &shaderamb, UNIFORM_VEC4);
 
-  //Flashlight *flashlight = new Flashlight(player->getSelfCamera(), postProcessShader);
+  // commented since this needs to be cleaned up.
+  //Flashlight *flashlight = new Flashlight(player->getSelfCamera(), postProcessShader); 
 
   Vector3 lightDirection[3] = {
       Sun[0].target, Sun[1].target, }; // Example light direction pointing upwards
@@ -313,8 +309,8 @@ int main(void)
   bool CreateSunRay = true;
 
   Vector3 Orgin =
-      Vector3{player->getPosition().x, player->getPosition().y - 10.0f,
-              player->getPosition().z};
+      Vector3{player->cameraComponent->getPosition().x, player->cameraComponent->getPosition().y - 10.0f,
+              player->cameraComponent->getPosition().z};
   Logman::CustomLog(LOG_DEBUG, "Trace ", NULL);
   Vector3 testblock = Vector3One();
 
@@ -334,7 +330,7 @@ int main(void)
 //GenMeshHeightmap(Perlin, (Vector3){100.0f, 10.0f, 100.0f})
   Model terrain = LoadModelFromMesh(GenMeshCube(BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE));
 
-  terrain.materials[0].shader = LoadShader("resources/terrain.vs", "resources/terrain.fs");
+  terrain.materials[0].shader = LoadShader("resources/terrain.vert", "resources/terrain.frag");
 
   //UnloadImage(Perlin);
   //UnloadImage(PerlinTest);
@@ -385,6 +381,7 @@ int main(void)
   {
     Global::Time::Update();
 
+    // TODO : Move input crap into another thread.
     // Pause Menu
     if (IsKeyPressed(KEY_ESCAPE))
     {
@@ -465,16 +462,16 @@ int main(void)
     }
 
     // update ray
-    ray.position = player->getPosition();
-    ray.direction = player->getTarget();
+    ray.position = player->cameraComponent->getPosition();
+    ray.direction = player->cameraComponent->getTarget();
 
     // Show Debug shit
     if (IsKeyDown(KEY_END))
     {
       BeginDrawing();
-      BeginMode3D(player->getSelfCamera());
+      BeginMode3D(player->cameraComponent->getSelfCamera());
       // Sun Rays
-      DrawLine3D(Sun[0].position, player->getPosition(), RED);
+      DrawLine3D(Sun[0].position, player->cameraComponent->getPosition(), RED);
       EndMode3D();
       EndDrawing();
     }
@@ -483,7 +480,7 @@ int main(void)
     // Update variables that are declared in the settings.ini file
 
     UpdateCamera(
-        player->getSelfCameraPointer(),
+        player->cameraComponent->getSelfCameraPointer(),
         player
             ->cameraMode); // Updates the camera with the current mode and data.
 
@@ -499,7 +496,7 @@ int main(void)
     // If statement for block placing.
     if (IsMouseButtonPressed(MOUSE_BUTTON_RIGHT))
     {
-      Vector3 placepos = player->getTarget();
+      Vector3 placepos = player->cameraComponent->getTarget();
      
       GameObject::PushObject(new Block(BlockStone, (Vector3){roundf(placepos.x), roundf(placepos.y), roundf(placepos.z)}, WHITE, postProcessShader, DefaultBlockModel));
       
@@ -511,7 +508,7 @@ int main(void)
       {
         DisableCursor();
       }
-      UpdateCamera(player->getSelfCameraPointer(), player->cameraMode); // Update camera
+      UpdateCamera(player->cameraComponent->getSelfCameraPointer(), player->cameraMode); // Update camera
     }
     else
     {
@@ -536,15 +533,16 @@ int main(void)
     if (IsKeyDown(KEY_SPACE))
     {
       
-      player->SetPosition((Vector3){player->getPosition().x, player->getPosition().y + 1.0f, player->getPosition().z});
+      player->cameraComponent->setPosition((Vector3){player->cameraComponent->getPosition().x, player->cameraComponent->getPosition().y + 1.0f, player->cameraComponent->getPosition().z});
 
-      CameraMoveUp(player->getSelfCameraPointer(), 0.1f);
+      CameraMoveUp(player->cameraComponent->getSelfCameraPointer(), 0.1f);
     }
 
     if (IsKeyDown(KEY_C))
     {
-      player->SetPosition((Vector3){player->getPosition().x, player->getPosition().y - 0.1f, player->getPosition().z});
-     CameraMoveUp(player->getSelfCameraPointer(), -0.1f);
+      
+      player->cameraComponent->setPosition((Vector3){player->cameraComponent->getPosition().x, player->cameraComponent->getPosition().y - 0.1f, player->cameraComponent->getPosition().z});
+     CameraMoveUp(player->cameraComponent->getSelfCameraPointer(), -0.1f);
     }
 
     // TODO : day night affect
@@ -559,9 +557,9 @@ int main(void)
     // Update the shader with the camera view vector (points towards { 0.0f,
     // 0.0f, 0.0f })
 
-    float cameraPos[3] = {player->getPosition().x,
-                          player->getPosition().y,
-                          player->getPosition().z};
+    float cameraPos[3] = {player->cameraComponent->getPosition().x,
+                          player->cameraComponent->getPosition().y,
+                          player->cameraComponent->getPosition().z};
 
     Vector3 SunPos = {Sun[0].position.x, Sun[0].position.y, Sun[0].position.z};
 
@@ -576,7 +574,7 @@ int main(void)
     // player->DrawHealthBar();
     ClearBackground(RAYWHITE);
 
-    BeginMode3D(player->getSelfCamera());
+    BeginMode3D(player->cameraComponent->getSelfCamera());
     
     rlDisableBackfaceCulling();
     rlDisableDepthMask();
@@ -605,7 +603,7 @@ GameObject::Render();
 
     // Get the mouse ray based on the current camera position and mouse position
     Vector2 mouse_pos = GetMousePosition();
-    ray = GetMouseRay(mouse_pos, player->getSelfCamera());
+    ray = GetMouseRay(mouse_pos, player->cameraComponent->getSelfCamera());
     EndShaderMode();
     EndMode3D();
 
@@ -629,23 +627,23 @@ GameObject::Render();
                                                                : "CUSTOM"),
              610, 30, 10, BLACK);
     DrawText(TextFormat("- Projection: %s",
-                        (player->getProjection() == CAMERA_PERSPECTIVE)
+                        (player->cameraComponent->getProjection() == CAMERA_PERSPECTIVE)
                             ? "PERSPECTIVE"
-                        : (player->getProjection() == CAMERA_ORTHOGRAPHIC)
+                        : (player->cameraComponent->getProjection() == CAMERA_ORTHOGRAPHIC)
                             ? "ORTHOGRAPHIC"
                             : "CUSTOM"),
              610, 45, 10, BLACK);
     DrawText(TextFormat("- Position: (%06.3f, %06.3f, %06.3f)",
-                        player->getPosition().x,
-                        player->getPosition().y,
-                        player->getPosition().z),
+                        player->cameraComponent->getPosition().x,
+                        player->cameraComponent->getPosition().y,
+                        player->cameraComponent->getPosition().z),
              610, 60, 10, BLACK);
     DrawText(TextFormat("- Target: (%06.3f, %06.3f, %06.3f)",
-                        player->getPosition().x, player->getPosition().y,
-                        player->getPosition().z),
+                        player->cameraComponent->getPosition().x, player->cameraComponent->getPosition().y,
+                        player->cameraComponent->getPosition().z),
              610, 75, 10, BLACK);
-    DrawText(TextFormat("- Up: (%06.3f, %06.3f, %06.3f)", player->getup().x,
-                        player->getup().y, player->getup().z),
+    DrawText(TextFormat("- Up: (%06.3f, %06.3f, %06.3f)", player->cameraComponent->getup().x,
+                        player->cameraComponent->getup().y, player->cameraComponent->getup().z),
              610, 90, 10, BLACK);
 
     //(fbo, (Rectangle){0, 0, screenWidth, -screenHeight}, (Vector2){middlex, middley}, WHITE);
@@ -691,6 +689,7 @@ ExitGame:
   delete block;
 
   GameObject::FlushBuffer();
+
   // delete heightmap;
 
   //delete flashlight;

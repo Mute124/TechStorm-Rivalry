@@ -19,7 +19,7 @@ typedef enum type
 
 #include "../Lists/Registry.h"
 
-// TODO : Make
+// TODO : code this
 class GameObjectRegistry;
 
 // used for organization reasons and makes C++ less torture.
@@ -202,15 +202,12 @@ public:
     for (auto &GameObject : GameObjects)
     {
 
-
       GameObject->onUpdate();
     }
   }
   virtual Vector3 GetPosition(){};
 
   static inline std::vector<int> ids; // is this needed?
-
-
 
   static inline void Sync(std::vector<GameObject *> objs)
   {
@@ -228,21 +225,25 @@ public:
     return SearchById(id);
   }
 
-  static inline auto PushObject(GameObject *&&_obj)
-  {
-    Logman::CustomLog(LOG_INFO, "GameObject : Pushing new object into buffer...", 0);
+static inline void PushObject(GameObject *_obj)
+{
+    Logman::CustomLog(LOG_INFO, "Pushing object", NULL);
     GameObjects.push_back(_obj);
-    _obj = nullptr;
-  }
+}
 
   static inline void FlushBuffer()
   {
+
+    // we have to use this implementation due to each object can have their own behavior.
     for (auto &obj : GameObjects)
     {
       obj->onDestroy();
     }
   }
-  static void Render()
+
+
+
+  static inline void Render()
   {
 
     for (auto &obj : GameObjects)
@@ -250,12 +251,9 @@ public:
       obj->Draw();
     }
   }
-
+  
   static inline std::vector<GameObject *> GameObjects; // game objects
 private:
-  static inline auto Search()
-  {
-  }
 
   Global::Tag IgnoredTags[10] = {
       "skybox",
@@ -265,6 +263,4 @@ private:
       "sky"};
 
   objtype type; // TODO : is this needed?
-
-  friend class GameObjectRegistry;
 };

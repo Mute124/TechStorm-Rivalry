@@ -105,10 +105,6 @@ public:
     {
         return this->m_position;
     }
-    static void UpdateBlockRegistry(std::vector<GameObject *> objects)
-    {
-        objectreg = objects;
-    }
 
     BoundingBox GetBoundingBox() override
     {
@@ -172,7 +168,7 @@ private:
     Vector3 colpos;
     bool initial = true;
     bool isColliding = false;
-    static inline std::vector<GameObject *> objectreg;
+    
     BlockType type; // specifies what type of block it is. see above enum for types.
 
     Color color; // color of the block, Right now not being used
