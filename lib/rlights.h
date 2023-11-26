@@ -60,6 +60,8 @@ typedef struct {
     int attenuationLoc;
 } Light;
 
+
+
 // Light type
 typedef enum {
     LIGHT_DIRECTIONAL = 0,
@@ -73,8 +75,8 @@ extern "C" {            // Prevents name mangling of functions
 //----------------------------------------------------------------------------------
 // Module Functions Declaration
 //----------------------------------------------------------------------------------
-Light CreateLight(int type, Vector3 position, Vector3 target, Color color, Shader shader);   // Create a light and get shader locations
-void UpdateLightValues(Shader shader, Light light);         // Send light properties to shader
+extern Light CreateLight(int type, Vector3 position, Vector3 target, Color color, Shader shader);   // Create a light and get shader locations
+extern void UpdateLightValues(Shader shader, Light light);         // Send light properties to shader
 
 #ifdef __cplusplus
 }

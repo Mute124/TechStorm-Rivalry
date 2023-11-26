@@ -18,6 +18,10 @@ class Logman {
       
     }
     
+    static void Log(const char *message) {
+      CustomLog(LOG_INFO, message, NULL);
+    }
+
     // Custom logging function
     static void CustomLog(int msgType, const char *text, va_list args = 0)
     {

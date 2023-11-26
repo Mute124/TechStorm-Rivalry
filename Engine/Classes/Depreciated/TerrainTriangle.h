@@ -22,21 +22,21 @@ private:
   long int m_id;
   const Shader shader;
   Model m_model;
-  Mesh m_mesh;
+  Mesh mesh;
   Color m_color;
   TriVert m_vert;
   
   Texture2D m_tex;
   
-  Vector3 m_position;
+  Vector3 position;
 
 public:
   
   TerrainTriangle(Shader shader, TriVert Verticies) : shader(shader), m_vert(Verticies) {
     
     this->m_tex = LoadTextureFromImage(GenImageColor(10, 10, GREEN));
-    this->m_mesh = GenMeshCustom(Verticies);
-    this->m_model = LoadModelFromMesh(this->m_mesh);
+    this->mesh = GenMeshCustom(Verticies);
+    this->m_model = LoadModelFromMesh(this->mesh);
     this->m_model.materials[0].shader = shader;
     this->m_model.materials[0].shader.locs[SHADER_LOC_VECTOR_VIEW] = GetShaderLocation(this->shader, "viewPos");
     
@@ -46,14 +46,14 @@ public:
     this->m_id = RegisterObj();
     this->m_vert = Verticies;
 
-    this->m_position = (Vector3){this->m_vert.v1.x / 2,this->m_vert.v2.y / 2, this->m_vert.v3.z / 2 };
+    this->position = (Vector3){this->m_vert.v1.x / 2,this->m_vert.v2.y / 2, this->m_vert.v3.z / 2 };
   }
   int GetType() const override { return 0; }
   void SetModel() const override {}
 
   void Draw() const override {
 
-    DrawModel(this->m_model, this->m_position, 1.0f, RED);
+    DrawModel(this->m_model, this->position, 1.0f, RED);
     
   }
 };

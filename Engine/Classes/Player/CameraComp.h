@@ -73,7 +73,7 @@ public:
         return &this->camera;
     }
 
-
+    
 
 private:
 

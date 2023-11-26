@@ -1,10 +1,18 @@
+/*
+  Minero Code. Common game startup (Ie. Engine shaders, player, etc) go into Game.h
+
+  TODO :
+    Work on graphics using the Erosion Standalone reference code.
+    Move config arguments into TOML files.
+
+
+*/
+
 // Run Args
 bool SkipMainMenu = true;
 
-
-
 #include "lib/Buttons/src/ButtonR.h" // Needed for buttons.
-//Raylib Framework
+// Raylib Framework
 #include "lib/raylib.h"
 #include "lib/raymath.h"
 #include "lib/rcamera.h"
@@ -69,7 +77,6 @@ bool CheckCollisionRayBox(Ray ray, BoundingBox box, float *outDistance);
 
 // random float between two values
 
-
 Ray ray; // Player View Ray. used for block breaking
 
 // Custom timing variables
@@ -91,25 +98,14 @@ int main(void)
   const int middlex = (screenWidth / 2);
   const int middley = (screenHeight / 2);
 
-  
   Game *game = new Game();
   game->StartGame();
-
-
+  // Game::Initialize();
 
   ButtonR *mmen_start = new ButtonR("start", middlex, middley); // Main start button
 
   MenuCamera *menucamera = new MenuCamera(); // camera for the main menu is needed due to dimension differences
 
-  InitAudioDevice(); // starts the audio driver(s).
-
-  DisableEventWaiting(); // Enables the ability for the game to run even if a
-                         // thing is lagging. Like for example if terrain is
-                         // still generating, it wont pause the game.
-
-  SetExitKey(KEY_BACKSPACE); // In event of your fuck up press this.
-
-  
   // Load postprocessing shader
   // NOTE: Defining 0 (NULL) for vertex shader forces usage of internal default
   // vertex shader
@@ -120,20 +116,18 @@ int main(void)
 
   Model DefaultBlockModel = LoadModelFromMesh(
       GenMeshCube(BLOCK_SIZE, BLOCK_SIZE,
-                  BLOCK_SIZE)); // this is the default model used in blocks.
+                  BLOCK_SIZE)); // this is the default model used in blocksd.
 
-  Shader postProcessShader = LoadShader(
-      TextFormat("resources/shaders/glsl330/lighting.vs", GLSL_VERSION),
-      TextFormat("resources/shaders/glsl330/lighting.fs", GLSL_VERSION));
+  Shader postProcessShader = LoadShader(TextFormat("resources/shaders/glsl330/lighting.vs", GLSL_VERSION), TextFormat("resources/shaders/glsl330/lighting.fs", GLSL_VERSION));
 
-  //Shader fog = LoadShader("resources/shaders/glsl330/lighting.vs", "resources/shaders/glsl330/fog.fs");
+  // Shader fog = LoadShader("resources/shaders/glsl330/lighting.vs", "resources/shaders/glsl330/fog.fs");
 
- // fog.locs[SHADER_LOC_MATRIX_MODEL] = GetShaderLocation(fog, "matModel");
-  //fog.locs[SHADER_LOC_VECTOR_VIEW] = GetShaderLocation(fog, "viewPos");
+  // fog.locs[SHADER_LOC_MATRIX_MODEL] = GetShaderLocation(fog, "matModel");
+  // fog.locs[SHADER_LOC_VECTOR_VIEW] = GetShaderLocation(fog, "viewPos");
 
-  //float fogDensity = 1.0f;
-  //int fogDensityLoc = GetShaderLocation(fog, "fogDensity");
-  //SetShaderValue(fog, fogDensityLoc, &fogDensity, SHADER_UNIFORM_FLOAT);
+  // float fogDensity = 1.0f;
+  // int fogDensityLoc = GetShaderLocation(fog, "fogDensity");
+  // SetShaderValue(fog, fogDensityLoc, &fogDensity, SHADER_UNIFORM_FLOAT);
 
   postProcessShader.locs[SHADER_LOC_VECTOR_VIEW] = GetShaderLocation(postProcessShader, "viewPos");
 
@@ -142,44 +136,28 @@ int main(void)
   // Set shader value: ambient light level
 
   int ambientLoc = GetShaderLocation(postProcessShader, "ambient");
-  static const Color ambientColor = RED;
+  static const Color ambientColor = WHITE;
   SetShaderValue(postProcessShader, ambientLoc, &ambientColor, SHADER_UNIFORM_VEC4);
 
   SetShaderValue(postProcessShader, postProcessShader.locs[SHADER_LOC_COLOR_AMBIENT], &ambientColor, SHADER_UNIFORM_VEC4);
   // Player Object Creation
   const int Playersize = 3.f;
-  Model PlayerModel = LoadModelFromMesh(GenMeshCube(
-      3.0f, 3.0f,
-      3.0f)); // Generates the playermodel. For right now it is a cube.
-  Player *player = new Player(
-      Vector3{0.0f, 2.0f, 4.0f}, 100, PlayerModel,
-      CAMERA_FIRST_PERSON); // Player object creation, Read the Player()
-                            // function for other details. It is in Player.h
-  // Adds the player obj to the list of Game objects so it gets freed
-  // automatically. Neat aint it :)
+  Model PlayerModel = LoadModelFromMesh(GenMeshCube(3.0f, 3.0f, 3.0f)); // Generates the playermodel. For right now it is a cube.
+  Player *player = new Player(Vector3{0.0f, 2.0f, 4.0f}, 100, PlayerModel, CAMERA_FIRST_PERSON);
+
   GameObject::PushObject(player);
 
   // Block Initialization
 
+DefaultBlockModel.materials[0].maps[MATERIAL_MAP_CUBEMAP].texture = Global::MeshTools::GenTextureCubemap(
+        postProcessShader, game->renderer->fbo.texture, 1024, PIXELFORMAT_UNCOMPRESSED_R8G8B8A8);
+
+
   Block *block = new Block(BlockDirt, Vector3Zero(), WHITE,
-                           postProcessShader, LoadModel("resources/models/Block.obj"));
+                           postProcessShader, DefaultBlockModel);
   GameObject::PushObject(block);
 
-
   int PostViewLoc = GetShaderLocation(postProcessShader, "viewPos"); // View pos shader location
-
-  /*
-                                                  Lights
-  _________________________________________________________________________________________________________
-
-
-      Lights show up on the floor but the sky is just a disgusting piss yellow.
-  There should be the skybox.
-
-      Ocean for some fucking reason gets smaller when you get further away from
-  land. why? because it is special
-
-  */
 
   // Load skybox model
   // skybox creation.
@@ -190,14 +168,14 @@ int main(void)
 
   // Load skybox shader and set required locations
   // NOTE: Some locations are automatically set at shader loading
-  skybox.materials[0].shader =
-      LoadShader("resources/skybox.vs", "resources/skybox.fs");
+
+  skybox.materials[0].shader = LoadShader("resources/skybox.vs", "resources/skybox.fs");
 
   // since the compiler complains about the references of such, these three vars
   // are for the skybox shaders. They will be deleted after.
-  static int a = 7;
+  static int a = MATERIAL_MAP_CUBEMAP;
   static int b = {useHDR ? 1 : 0};
-  static int c = 0;
+  static int c = {useHDR ? 1 : 0};
 
   SetShaderValue(
       skybox.materials[0].shader,
@@ -207,21 +185,19 @@ int main(void)
                  GetShaderLocation(skybox.materials[0].shader, "doGamma"), &b,
                  SHADER_UNIFORM_INT);
   SetShaderValue(skybox.materials[0].shader,
-                 GetShaderLocation(skybox.materials[0].shader, "vflipped"), &b,
+                 GetShaderLocation(skybox.materials[0].shader, "vflipped"), &c,
                  SHADER_UNIFORM_INT);
 
   // Load cubemap shader and setup required shader locations
   Shader shdrCubemap =
       LoadShader("resources/cubemap.vs", "resources/cubemap.fs");
 
-  SetShaderValue(shdrCubemap,
-                 GetShaderLocation(shdrCubemap, "equirectangularMap"), &c,
-                 SHADER_UNIFORM_INT);
+  const static int equimap = 0;
+  SetShaderValue(shdrCubemap, GetShaderLocation(shdrCubemap, "equirectangularMap"), &equimap, SHADER_UNIFORM_INT);
 
   char skyboxFileName[256] = {0};
 
   Texture2D panorama; // Skybox texture.
-
   if (useHDR)
   {
     TextCopy(skyboxFileName, "resources/daytime.hdr");
@@ -229,6 +205,9 @@ int main(void)
     // Load HDR panorama (sphere) texture
     panorama = LoadTexture(skyboxFileName);
 
+
+    game->renderer->env->Panorama = panorama;
+    
     // Generate cubemap (texture with 6 quads-cube-mapping) from panorama HDR
     // texture NOTE 1: New texture is generated rendering to texture, shader
     // calculates the sphere->cube coordinates mapping NOTE 2: It seems on some
@@ -239,8 +218,10 @@ int main(void)
     skybox.materials[0].maps[MATERIAL_MAP_CUBEMAP].texture = Global::MeshTools::GenTextureCubemap(
         shdrCubemap, panorama, 1024, PIXELFORMAT_UNCOMPRESSED_R8G8B8A8);
 
-    UnloadTexture(panorama); // Texture not required anymore, cubemap
-    // already generated
+    // /);
+
+    // UnloadTexture(panorama); // Texture not required anymore, cubemap
+    //  already generated
   }
   else
   {
@@ -260,8 +241,9 @@ int main(void)
   Sun[0] = CreateLight(LIGHT_DIRECTIONAL, Vector3{50.0f, 50.0f, 50.0f},
                        Vector3Zero(), WHITE, postProcessShader);
   Sun[1] = CreateLight(LIGHT_POINT, Vector3{50.0f, 50.0f, 50.0f}, Vector3Zero(),
-                       WHITE, postProcessShader); // Ambient color.
+                       BLACK, postProcessShader); // Ambient color.
 
+    
 
   // Assignment of shaders
 
@@ -271,7 +253,7 @@ int main(void)
   ExportImage(PerlinTest, "PerlinTest.png");
 
   Mesh mesh = GenMeshHeightmap(
-      PerlinTest, Vector3{16, 8, 16});        // Generate heightmap mesh (RAM and VRAM)
+      PerlinTest, Vector3{16, 8, 16});   // Generate heightmap mesh (RAM and VRAM)
   Model model = LoadModelFromMesh(mesh); // Load model from generated mesh
 
   UnloadImage(PerlinTest); // Unload heightmap PerlinTest from RAM, already uploaded to VRAM
@@ -280,31 +262,29 @@ int main(void)
   Color groundColor = GRAY;
   // ambient light level
   int amb = GetShaderLocation(postProcessShader, "ambient");
-  static float shaderamb[4] = {0.02f, 0.02f, 0.02f, 0.02f};;
+  static float shaderamb[4] = {0.02f, 0.02f, 0.02f, 0.02f};
+
   SetShaderValue(postProcessShader, amb, &shaderamb, UNIFORM_VEC4);
 
   // commented since this needs to be cleaned up.
-  //Flashlight *flashlight = new Flashlight(player->getSelfCamera(), postProcessShader); 
+  // Flashlight *flashlight = new Flashlight(player->cameraComponent->getSelfCamera(), postProcessShader);
 
   Vector3 lightDirection[3] = {
-      Sun[0].target, Sun[1].target, }; // Example light direction pointing upwards
+      Sun[0].target,
+      Sun[1].target,
+      // flashlight->GetLight().target
+
+  }; // Example light direction pointing upwards
   SetShaderValue(postProcessShader, Sun[0].targetLoc, &lightDirection[0],
                  SHADER_UNIFORM_VEC3);
   SetShaderValue(postProcessShader, Sun[1].targetLoc, &lightDirection[1],
                  SHADER_UNIFORM_VEC3);
-// SetShaderValue(postProcessShader, flashlight->GetLight().targetLoc, &lightDirection[1],
-//                 SHADER_UNIFORM_VEC3);
+  // SetShaderValue(postProcessShader, flashlight->GetLight().targetLoc, &lightDirection[2], SHADER_UNIFORM_VEC3);
 
-  SetShaderValue(postProcessShader,
-                 GetShaderLocation(postProcessShader, "skyColor"), &skyColor,
-                 SHADER_UNIFORM_VEC4);
-  SetShaderValue(postProcessShader,
-                 GetShaderLocation(postProcessShader, "groundColor"),
-                 &groundColor, SHADER_UNIFORM_VEC4);
+  SetShaderValue(postProcessShader, GetShaderLocation(postProcessShader, "skyColor"), &skyColor, SHADER_UNIFORM_VEC4);
+  SetShaderValue(postProcessShader, GetShaderLocation(postProcessShader, "groundColor"), &groundColor, SHADER_UNIFORM_VEC4);
 
-  SetShaderValue(postProcessShader,
-                 GetShaderLocation(postProcessShader, "ambientColor"), &amb,
-                 SHADER_UNIFORM_VEC4);
+  SetShaderValue(postProcessShader, GetShaderLocation(postProcessShader, "ambientColor"), &amb, SHADER_UNIFORM_VEC4);
 
   bool CreateSunRay = true;
 
@@ -325,26 +305,38 @@ int main(void)
   Logman::CustomLog(LOG_DEBUG, TextFormat("World generated in %d", Starttime - current),
                     NULL);
 
-  //Image Perlin = GenImagePerlinNoise(100, 100, 0, 0, 1.0f);
-  //ExportImage(Perlin, "perlin.png");
-//GenMeshHeightmap(Perlin, (Vector3){100.0f, 10.0f, 100.0f})
+  // Image Perlin = GenImagePerlinNoise(100, 100, 0, 0, 1.0f);
+  // ExportImage(Perlin, "perlin.png");
+  // GenMeshHeightmap(Perlin, (Vector3){100.0f, 10.0f, 100.0f})
   Model terrain = LoadModelFromMesh(GenMeshCube(BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE));
 
   terrain.materials[0].shader = LoadShader("resources/terrain.vert", "resources/terrain.frag");
 
-  //UnloadImage(Perlin);
-  //UnloadImage(PerlinTest);
+  // UnloadImage(Perlin);
+  // UnloadImage(PerlinTest);
 
   // test if temp folder exists
   if (!DirectoryExists("temp"))
   {
     system("mkdir temp");
   }
-  
+
   Texture tex; // TODO : Find out what this is.
 
+  // const static int res[2] = {game->windowHeight, game->windowWidth};
+  // SetShaderValue(postProcessShader, GetShaderLocation(postProcessShader, "resolution"), &res, SHADER_UNIFORM_VEC2);
+ 
+ game->renderer->env->shdrCubemap = shdrCubemap;
+ 
   
-  
+
+// Checks if the music should be played, and plays it if it should be.
+ if (game->enableMusic)
+ {
+   PlayMusicStream(LoadMusicStream("resources/Audio/OST/Minero.mp3"));
+ }
+
+  // Main menu, Not complete!
   if (SkipMainMenu != true)
   {
     // Declare main loading done
@@ -412,6 +404,17 @@ int main(void)
         {
 
           // todo : implement Saving game data, probably use the Objects vector.
+          const char *filename = "save.sav";
+
+          std::vector<void *> data;
+
+          for (int i = 0; i < GameObject::GameObjects.size(); i++)
+          {
+            data.push_back(GameObject::GameObjects[i]);
+          }
+          SaveFileData(filename, &data, sizeof(data));
+
+          Logman::CustomLog(LOG_DEBUG, LoadFileText(filename), NULL);
         }
 
         if (exitButton->IsClicked())
@@ -426,6 +429,8 @@ int main(void)
           {
             // TODO : Add options
 
+
+            
             if (IsKeyDown(KEY_ESCAPE))
             {
               closeOptions = true;
@@ -481,8 +486,7 @@ int main(void)
 
     UpdateCamera(
         player->cameraComponent->getSelfCameraPointer(),
-        player
-            ->cameraMode); // Updates the camera with the current mode and data.
+        player->cameraMode); // Updates the camera with the current mode and data.
 
     // Keybinds yah
 
@@ -490,16 +494,15 @@ int main(void)
 
     if (IsKeyPressed(KEY_F))
     {
-      //flashlight->Switch();
+      // flashlight->Switch();
     }
 
     // If statement for block placing.
     if (IsMouseButtonPressed(MOUSE_BUTTON_RIGHT))
     {
       Vector3 placepos = player->cameraComponent->getTarget();
-     
-      GameObject::PushObject(new Block(BlockStone, (Vector3){roundf(placepos.x), roundf(placepos.y), roundf(placepos.z)}, WHITE, postProcessShader, DefaultBlockModel));
-      
+
+      GameObject::PushObject(new Block(BlockStone, Vector3{roundf(placepos.x), roundf(placepos.y), roundf(placepos.z)}, WHITE, postProcessShader, DefaultBlockModel));
     }
 
     if (!IsKeyDown(KEY_LEFT_ALT))
@@ -532,19 +535,25 @@ int main(void)
 
     if (IsKeyDown(KEY_SPACE))
     {
-      
-      player->cameraComponent->setPosition((Vector3){player->cameraComponent->getPosition().x, player->cameraComponent->getPosition().y + 1.0f, player->cameraComponent->getPosition().z});
+
+      // player->cameraComponent->setPosition(Vector3{player->cameraComponent->getPosition().x, player->cameraComponent->getPosition().y + 1.0f, player->cameraComponent->getPosition().z});
 
       CameraMoveUp(player->cameraComponent->getSelfCameraPointer(), 0.1f);
     }
 
     if (IsKeyDown(KEY_C))
     {
-      
-      player->cameraComponent->setPosition((Vector3){player->cameraComponent->getPosition().x, player->cameraComponent->getPosition().y - 0.1f, player->cameraComponent->getPosition().z});
-     CameraMoveUp(player->cameraComponent->getSelfCameraPointer(), -0.1f);
+
+      // player->cameraComponent->setPosition(Vector3{player->cameraComponent->getPosition().x, player->cameraComponent->getPosition().y - 0.1f, player->cameraComponent->getPosition().z});
+      CameraMoveUp(player->cameraComponent->getSelfCameraPointer(), -0.1f);
     }
 
+    if (IsKeyDown(KEY_LEFT_SHIFT)) {
+      player->isRunning = true;
+      
+    } else {
+      player->isRunning = false;
+    }
     // TODO : day night affect
 
     // float h = Vector3Distance(player->getPosition(), Sun[0].position);
@@ -566,88 +575,83 @@ int main(void)
     UpdateLightValues(postProcessShader, Sun[0]);
     UpdateLightValues(postProcessShader, Sun[1]);
 
-    //flashlight->Update(postProcessShader, player->getPosition(), player->getPosition());
+    // flashlight->Update(postProcessShader, player->cameraComponent->getPosition(), player->cameraComponent->getPosition());
 
     SetShaderValue(postProcessShader, postProcessShader.locs[SHADER_LOC_VECTOR_VIEW], cameraPos, SHADER_UNIFORM_VEC3);
 
-    BeginDrawing();
-    // player->DrawHealthBar();
-    ClearBackground(RAYWHITE);
+    game->renderer->StartTexturing();
 
     BeginMode3D(player->cameraComponent->getSelfCamera());
-    
+
     rlDisableBackfaceCulling();
     rlDisableDepthMask();
-    DrawModel(skybox, (Vector3){0.0f, 0.0f, 0.0f}, 1.0f, WHITE);
+    DrawModel(skybox, Vector3{0.0f, 0.0f, 0.0f}, 1.0f, WHITE);
     rlEnableBackfaceCulling();
     rlEnableDepthMask();
 
-    DrawModel(terrain, Vector3SubtractValue(Vector3Zero(), 2.0f), 1.0f, GREEN); // not needed atm, if it isnt for a while, it will get deleted
+    // rlPopMatrix()
+
+    // DrawModel(terrain, Vector3SubtractValue(Vector3Zero(), 2.0f), 1.0f, GREEN); // not needed atm, if it isnt for a while, it will get deleted
 
     //  We are inside the cube, we need to disable backface culling!
 
-
-    BeginShaderMode(postProcessShader);
-GameObject::Render();
-    
-
-    // Draw spheres to show where the lights are
-    for (int i = 0; i < MAX_LIGHTS; i++)
-    {
-      if (Sun[i].enabled)
-        DrawSphereEx(Sun[i].position, 0.2f, 8, 8, Sun[i].color);
-      else
-        DrawSphereWires(Sun[i].position, 0.2f, 8, 8,
-                        ColorAlpha(Sun[i].color, 0.3f));
-    }
-
-    // Get the mouse ray based on the current camera position and mouse position
-    Vector2 mouse_pos = GetMousePosition();
-    ray = GetMouseRay(mouse_pos, player->cameraComponent->getSelfCamera());
+    BeginShaderMode(shdrCubemap);
+    GameObject::Render();
     EndShaderMode();
-    EndMode3D();
+    BeginShaderMode(postProcessShader);
+    GameObject::Render();
+    EndShaderMode();
 
-    // Draw info boxes
-    DrawRectangle(5, 5, 330, 100, Fade(SKYBLUE, 0.5f));
-    DrawRectangleLines(5, 5, 330, 100, BLUE);
+    // EndShaderMode();
+    game->renderer->End3D();
 
-    DrawText(TextFormat("FPS : %i", GetFPS()), 15, 110, 10, GREEN);
-    DrawText(TextFormat("Time :  %i", GetTime()), 15, 140, 10, GREEN);
+    game->renderer->StopTexturing();
+    rlPopMatrix();
 
-    DrawRectangle(600, 5, 195, 100, Fade(SKYBLUE, 0.5f));
-    DrawRectangleLines(600, 5, 195, 100, BLUE);
 
-    DrawText("Camera status:", 610, 15, 10, BLACK);
-    DrawText(TextFormat(
-                 "- Mode: %s",
-                 (player->cameraMode == CAMERA_FREE)           ? "FREE"
-                 : (player->cameraMode == CAMERA_FIRST_PERSON) ? "FIRST_PERSON"
-                 : (player->cameraMode == CAMERA_THIRD_PERSON) ? "THIRD_PERSON"
-                 : (player->cameraMode == CAMERA_ORBITAL)      ? "ORBITAL"
-                                                               : "CUSTOM"),
-             610, 30, 10, BLACK);
-    DrawText(TextFormat("- Projection: %s",
-                        (player->cameraComponent->getProjection() == CAMERA_PERSPECTIVE)
-                            ? "PERSPECTIVE"
-                        : (player->cameraComponent->getProjection() == CAMERA_ORTHOGRAPHIC)
-                            ? "ORTHOGRAPHIC"
-                            : "CUSTOM"),
-             610, 45, 10, BLACK);
-    DrawText(TextFormat("- Position: (%06.3f, %06.3f, %06.3f)",
-                        player->cameraComponent->getPosition().x,
-                        player->cameraComponent->getPosition().y,
-                        player->cameraComponent->getPosition().z),
-             610, 60, 10, BLACK);
-    DrawText(TextFormat("- Target: (%06.3f, %06.3f, %06.3f)",
-                        player->cameraComponent->getPosition().x, player->cameraComponent->getPosition().y,
-                        player->cameraComponent->getPosition().z),
-             610, 75, 10, BLACK);
-    DrawText(TextFormat("- Up: (%06.3f, %06.3f, %06.3f)", player->cameraComponent->getup().x,
-                        player->cameraComponent->getup().y, player->cameraComponent->getup().z),
-             610, 90, 10, BLACK);
+    // depth mask
+    game->renderer->StartDepthMode();
 
+    BeginMode3D(player->cameraComponent->getSelfCamera());
+
+    rlDisableBackfaceCulling();
+    rlDisableDepthMask();
+    DrawModel(skybox, Vector3{0.0f, 0.0f, 0.0f}, 1.0f, WHITE);
+    rlEnableBackfaceCulling();
+    rlEnableDepthMask();
+
+    // rlPopMatrix()
+
+    // DrawModel(terrain, Vector3SubtractValue(Vector3Zero(), 2.0f), 1.0f, GREEN); // not needed atm, if it isnt for a while, it will get deleted
+
+    //  We are inside the cube, we need to disable backface culling!
+
+    BeginShaderMode(shdrCubemap);
+    GameObject::Render();
+    EndShaderMode();
+    BeginShaderMode(postProcessShader);
+    GameObject::Render();
+    EndShaderMode();
+
+    // EndShaderMode();
+    game->renderer->End3D();
+
+    game->renderer->StopTexturing();
+    rlPopMatrix();
+
+    SetTextureFilter(game->renderer->fbo.texture, TEXTURE_FILTER_BILINEAR);
+    
+    game->renderer->StartDraw();
+
+    // BeginShaderMode(shdrCubemap);
+    // NOTE: Render texture must be y-flipped due to default OpenGL coordinates (left-bottom)
+    DrawTextureRec(game->renderer->fbo.texture, Rectangle{ 0, 0, (float)(game->renderer->fbo.texture.width), (float)(-game->renderer->fbo.texture.height) }, (Vector2){ 0, 0 }, WHITE);
+    // EndShaderMode();
+
+    game->renderer->EndDraw();
+    // rlPushMatrix();
     //(fbo, (Rectangle){0, 0, screenWidth, -screenHeight}, (Vector2){middlex, middley}, WHITE);
-    EndDrawing();
+    //  EndDrawing();
 
     // check if we are using hdr
 
@@ -674,25 +678,24 @@ ExitGame:
 
   UnloadImage(PerlinTest);
   UnloadImage(PerlinTest);
+
   using namespace std;
   {
     remove("PerlinTest.png");
     remove("HMap.png");
   }
 
-
   game->EndGame();
   delete game;
-  delete player;
   delete mmen_start; // Deletes the main menu
   delete menucamera;
   delete block;
-
+  delete player;
   GameObject::FlushBuffer();
 
   // delete heightmap;
 
-  //delete flashlight;
+  // delete flashlight;
 
   return 0;
 }

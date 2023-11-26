@@ -7,6 +7,8 @@ in vec3 vertexNormal;
 in vec4 vertexColor;
 
 // Input uniform values
+uniform mat4 matProjection;
+uniform mat4 matView;
 uniform mat4 mvp;
 uniform mat4 matModel;
 uniform mat4 matNormal;

@@ -33,9 +33,24 @@ class Player : public GameObject
 {
 
 public:
+
+    class BuildingComp {
+        public:
+
+            static void SetGlobalVariables(Color buildcolor) {
+                buildColor = buildcolor;
+            }
+
+            void cast(Vector3 castPosition, bool isGroundLocked);
+
+        private:
+
+            static inline Color buildColor;
+    };
+
     // main constructor
     Player(Vector3 StartingPos, int MaxHP, const Model model, int CameraMode)
-        : m_position(StartingPos),
+        : position(StartingPos),
           m_max(MaxHP),
           model(model),
           cameraMode(CameraMode),
@@ -51,8 +66,6 @@ public:
 
     };
 
-
-
     void onDestroy() const override
     {
         delete this;
@@ -60,6 +73,12 @@ public:
 
     void onUpdate() override
     {
+
+        if (cameraMode != CAMERA_FIRST_PERSON) {
+            if (this->doDraw) {
+                DrawModel(model, this->cameraComponent->getPosition(), 0.2f, GREEN);
+            }
+        }
     };
 
     void onCollision() override{};
@@ -96,6 +115,7 @@ public:
     // do not fucking touch this
     virtual ~Player()
     {
+        delete cameraComponent;
         delete this;
     }
 
@@ -111,7 +131,17 @@ public:
 
 
     CameraComp *cameraComponent;
+
+    bool isRunning;
 private:
+
+
+    void CalculateMovement() {
+        position = Vector3Add(position, velocity);
+
+        
+        
+    }
 
     const int id;
     static void CheckForBlockPlacement(MouseButton Trigger, Ray ray)
@@ -150,10 +180,10 @@ private:
     RayCollision collision = {0};
 
     // KeyboardKey *CurrentKeyDown;
-    Vector3 m_position;
-    Mesh m_mesh;
+    Vector3 position;
+    Mesh mesh;
 
-    // Global::Transform transform;
+    // Global::ObjectTransform transform;
     Vector3 velocity;
     BoundingBox Box = GetModelBoundingBox(this->model);
 

@@ -5,7 +5,7 @@
 class Flashlight {
     private:
         Light m_light_source;
-        Vector3 m_position;
+        Vector3 position;
     public:
         Light GetLight() {
             return this->m_light_source;

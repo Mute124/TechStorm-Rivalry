@@ -144,79 +144,8 @@ namespace Global
         static inline float timeCounter;
         static inline int targetFPS;
     };
-    class Transform
-        {
-        public:
-            /**
-             * Sets the rotation of an object in 3D space.
-             *
-             * @param x the new rotation value around the x-axis
-             * @param y the new rotation value around the y-axis
-             * @param z the new rotation value around the z-axis
-             */
-            void setRotation(float x, float y, float z)
-            {
-                rotation.x = x;
-                rotation.y = y;
-                rotation.z = z;
-            }
-
-            void setRotation(Vector3 rotation) {
-                this->rotation = rotation;
-            }
-
-            /**
-             * Change the rotation of an object by the specified amounts in the x, y, and z axes.
-             *
-             * @param x the amount to rotate around the x-axis
-             * @param y the amount to rotate around the y-axis
-             * @param z the amount to rotate around the z-axis
-             *
-             * @throws None
-             */
-            void changeRotation(float x, float y, float z)
-            {
-                rotation.x += x;
-                rotation.y += y;
-                rotation.z += z;
-            }
-
-            /**
-             * Sets the position of an object in 3D space.
-             *
-             * @param x the x-coordinate of the position
-             * @param y the y-coordinate of the position
-             * @param z the z-coordinate of the position
-             *
-             * @throws ErrorType description of error
-             */
-            void setPosition(float x, float y, float z)
-            {
-                position.x = x;
-                position.y = y;
-                position.z = z;
-            }
-
-            /**
-             * Change the position of an object in 3D space.
-             *
-             * @param x the amount to move in the x-axis
-             * @param y the amount to move in the y-axis
-             * @param z the amount to move in the z-axis
-             *
-             * @throws ErrorType if there is an error while changing the position
-             */
-            void changePosition(float x, float y, float z)
-            {
-                position.x += x;
-                position.y += y;
-                position.z += z;
-            }
-
-            Vector3 position;
-            Vector3 rotation;
-            Vector3 scale;
-        };
+    
+    
     class Tag {
         public:
             std::string Tag;  

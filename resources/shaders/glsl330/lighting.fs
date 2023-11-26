@@ -3,14 +3,21 @@
 // Input vertex attributes (from vertex shader)
 in vec3 fragPosition;
 in vec2 fragTexCoord;
-//in vec4 fragColor;
+in vec4 fragColor;
 in vec3 fragNormal;
 
 
 // Input uniform values
+// Input uniform values
+uniform mat4 matProjection;
+uniform mat4 matView;
+uniform mat4 mvp;
+uniform mat4 matModel;
+uniform mat4 matNormal;
 uniform sampler2D texture0;
 uniform vec4 colDiffuse;
 
+uniform float roughness;
 
 // Output fragment color
 out vec4 finalColor;
@@ -42,6 +49,8 @@ uniform vec3 viewPos;
 
 void main()
 {
+    vec4 Ambiance = vec4(255, 255, 255, 255);
+    float ambientStrength = 0.1;
     // Texel color fetching from texture sampler
     vec4 texelColor = texture(texture0, fragTexCoord);
     vec3 lightDot = vec3(0.0);
@@ -67,20 +76,20 @@ void main()
                 light = normalize(lights[i].position - fragPosition);
             }
 
-            float NdotL = max(dot(normal, light), 0.0);
+            float NdotL = max(dot(normal, light), 0.5);
             lightDot += lights[i].color.rgb*NdotL;
 
             float specCo = 1.0;
             if (NdotL > 0.0) specCo = pow(max(0.0, dot(viewD, reflect(-(light), normal))), 16.0); // 16 refers to shine
-            specular += specCo;
+            specular += specCo ;
+            Ambiance = (ambientStrength*lights[i].color);
         }
     }
 
     finalColor = (texelColor*((colDiffuse + vec4(specular, 1.0))*vec4(lightDot, 1.0)));
-    finalColor += texelColor*(ambient/10.0);
+    finalColor += (texelColor*(ambient/10.0)) * Ambiance * vec4(matProjection);
 
-
-
+    
     // Gamma correction
     finalColor = pow(finalColor, vec4(1.0/2.2));
 }

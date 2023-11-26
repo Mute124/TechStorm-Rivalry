@@ -6,6 +6,8 @@ in vec3 vertexPosition;
 // Input uniform values
 uniform mat4 matProjection;
 uniform mat4 matView;
+uniform mat4 mvp;
+
 
 // Output vertex attributes (to fragment shader)
 out vec3 fragPosition;

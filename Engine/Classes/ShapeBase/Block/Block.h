@@ -7,6 +7,7 @@
 #include "../../../../lib/glm/glm/glm.hpp"
 #include "../../GameObject/Gameobject.h"
 #include "../../../DataSets/Globals.h"
+#include "../../Project/Game/Game.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -34,30 +35,50 @@ public:
         // DrawBoundingBox(this->Box, ORANGE);
         if (this->type != BlockAir)
         {
+            
+            //BeginShaderMode(shader);
+            DrawModel(model, position, BLOCK_SIZE, color);
+            //EndShaderMode();
+            //BeginBlendMode(BLEND_ALPHA_PREMULTIPLY);
 
-            DrawModel(model, m_position, BLOCK_SIZE, color);
+            //DrawModel(model, position, BLOCK_SIZE, color);
+            //EndBlendMode();
         }
     }
 
     // main block constructor.
-    Block(const BType type, Vector3 position, const Color color, Shader shader, Model model) : type(type), color(color), m_position(position), shader(shader), model(model), id(RegisterObj(this)), velocity(Vector3Zero()), Box(GetModelBoundingBox(this->model))
+    Block(const BType type, Vector3 position, const Color color, Shader shader, Model model) : type(type), color(color), position(position), shader(shader), model(model), id(RegisterObj(this)), velocity(Vector3Zero()), Box(GetModelBoundingBox(this->model))
     {
 
         Logman::CustomLog(LOG_TRACE, "Block Constructor", NULL);
         this->shader = shader;
-
         this->model = model;
+
+        const static Texture2D Bricks = LoadTexture("resources/textures/Brick.png");
+        SetTextureFilter(Bricks, TEXTURE_FILTER_BILINEAR);
+        SetTextureWrap(Bricks, TEXTURE_WRAP_CLAMP);
+
+        const static Texture2D BrickNormal = LoadTexture("resources/textures/Block/Brick/Brick_NORM.png");
+
+        const static Texture2D BrickSpecular = LoadTexture("resources/textures/Block/Brick/Brick_SPEC.png");
+
         this->model.materials[0].shader = shader;
         this->model.materials[0].shader.locs[SHADER_LOC_VECTOR_VIEW] = GetShaderLocation(this->shader, "viewPos");
 
-        const static Texture2D Bricks = LoadTexture("resources/textures/Brick.png");
-        
-        
-        this->model.materials[0] = LoadMaterialDefault();
-        
         this->model.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = Bricks;
+        this->model.materials[0].maps[MATERIAL_MAP_ALBEDO].texture = Bricks;
+        this->model.materials[0].maps[MATERIAL_MAP_ROUGHNESS].texture = BrickNormal;
+        this->model.materials[0].maps[MATERIAL_MAP_SPECULAR].texture = BrickSpecular;
+       // this->model.materials[0].maps[MATERIAL_MAP_CUBEMAP].texture = Global::MeshTools::GenTextureCubemap(Game::Renderer::env->shdrCubemap, Game::Renderer::env->Panorama, 1024, PIXELFORMAT_UNCOMPRESSED_R8G8B8A8);
         
-        
+        const float roughness = 1.0f;
+        SetShaderValue(this->model.materials[0].shader, GetShaderLocation(this->model.materials[0].shader, "texture0"), &Bricks, SHADER_UNIFORM_SAMPLER2D);
+        SetShaderValue(this->model.materials[0].shader, GetShaderLocation(this->model.materials[0].shader, "roughness"), &roughness, SHADER_UNIFORM_FLOAT);
+
+
+        // SetShaderValueMatrix(this->model.materials[0].shader, GetShaderLocation(this->model.materials[0].shader, "matModel"), this->model.transform);
+        SetShaderValueMatrix(this->model.materials[0].shader, GetShaderLocation(this->model.materials[0].shader, "mvp"), this->model.transform);
+
         // UnloadTexture(Bricks);
     }
     // main block constructor.
@@ -87,7 +108,7 @@ public:
 
         if (CheckCollision(this, this->id))
         {
-            this->colpos = this->m_position;
+            this->colpos = this->position;
             this->onCollision();
             this->isColliding = true;
             this->velocity = Vector3Zero();
@@ -98,12 +119,12 @@ public:
             // this->velocity = Vector3Subtract(this->velocity, (Vector3){0.0f, 0.001f * (float)Global::Time::GetGameTime(), 0.0f});
         }
 
-        this->m_position = Vector3Add(this->m_position, this->velocity);
+        this->position = Vector3Add(this->position, this->velocity);
     };
 
     Vector3 GetPosition() override
     {
-        return this->m_position;
+        return this->position;
     }
 
     BoundingBox GetBoundingBox() override
@@ -138,17 +159,17 @@ public:
     glm::vec3 GetMinBounds() const
     {
 
-        return glm::vec3(m_position.x, m_position.y, m_position.z);
+        return glm::vec3(position.x, position.y, position.z);
     }
 
     glm::vec3 GetMaxBounds() const
     {
-        return glm::vec3(m_position.x + BLOCK_SIZE, m_position.y + BLOCK_SIZE, m_position.z + BLOCK_SIZE);
+        return glm::vec3(position.x + BLOCK_SIZE, position.y + BLOCK_SIZE, position.z + BLOCK_SIZE);
     }
 
     glm::vec3 GetCenter() const
     {
-        return glm::vec3(m_position.x + BLOCK_SIZE / 2, m_position.y + BLOCK_SIZE / 2, m_position.z + BLOCK_SIZE / 2);
+        return glm::vec3(position.x + BLOCK_SIZE / 2, position.y + BLOCK_SIZE / 2, position.z + BLOCK_SIZE / 2);
     }
 
     struct AABB
@@ -164,11 +185,10 @@ public:
         return {minBounds, maxBounds};
     }
 
-private:
     Vector3 colpos;
     bool initial = true;
     bool isColliding = false;
-    
+
     BlockType type; // specifies what type of block it is. see above enum for types.
 
     Color color; // color of the block, Right now not being used
@@ -179,7 +199,7 @@ private:
 
     bool m_deleteRequested; // currently unused, since it only takes 1 bit, this isnt gonna be deleted just yet.
 
-    const Mesh m_mesh = GenMeshCube(BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE);
+    const Mesh mesh = GenMeshCube(BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE);
 
     // currently unused, this was supposed to be a break block method.
     bool ShouldDelete()
@@ -194,19 +214,17 @@ private:
         }
     }
 
-    Vector3 m_position; // position of the block
+    Vector3 position; // position of the block
 
     Model model;
     Shader shader;
     Shader m_shader_cubemap;
 
-    Transform transform;
+    //ObjectTransform transform;
 
     BoundingBox Box;
 
     Vector3 velocity;
 
     const int id;
-
-    Vector2 ScreenPosition = {0.0f, 0.0f};
 };

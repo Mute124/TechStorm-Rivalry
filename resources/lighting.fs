@@ -3,19 +3,24 @@
 // Input vertex attributes (from vertex shader)
 in vec3 fragPosition;
 in vec2 fragTexCoord;
-//in vec4 fragColor;
+in vec4 fragColor;
 in vec3 fragNormal;
 
+in vec3 Normal;
+in vec3 Position;
 
 // Input uniform values
 uniform sampler2D texture0;
 uniform vec4 colDiffuse;
 
+uniform samplerCube skybox;
 
 // Output fragment color
 out vec4 finalColor;
 
 // NOTE: Add here your custom variables
+
+
 
 #define     MAX_LIGHTS              4
 #define     LIGHT_DIRECTIONAL       0
@@ -39,6 +44,12 @@ struct Light {
 uniform Light lights[MAX_LIGHTS];
 uniform vec4 ambient;
 uniform vec3 viewPos;
+
+void Reflect() {
+    vec3 I = normalize(Position - viewPos);
+    vec3 R = reflect(i, normalize(Normal));
+    fragColor = vec4(texture(skybox, R).rgb, 1.0);
+}
 
 void main()
 {
@@ -75,6 +86,8 @@ void main()
             specular += specCo;
         }
     }
+
+    Reflect();
 
     finalColor = (texelColor*((colDiffuse + vec4(specular, 1.0))*vec4(lightDot, 1.0)));
     finalColor += texelColor*(ambient*/10.0)*colDiffuse;

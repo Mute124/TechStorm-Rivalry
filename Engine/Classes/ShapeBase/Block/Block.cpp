@@ -13,7 +13,7 @@ void Block::Draw() const
 {
     if (this->type != BlockAir)
     {
-        DrawModel(model, m_position, BLOCK_SIZE, color);
+        DrawModel(model, position, BLOCK_SIZE, color);
     }
 }
 
@@ -95,20 +95,20 @@ BoundingBox Block::GetBounds() const
 glm::vec3 Block::GetMinBounds() const
 {
 
-    return glm::vec3(m_position.x, m_position.y, m_position.z);
+    return glm::vec3(position.x, position.y, position.z);
 }
 
 glm::vec3 Block::GetMaxBounds() const
 {
-    return glm::vec3(m_position.x + BLOCK_SIZE, m_position.y + BLOCK_SIZE, m_position.z + BLOCK_SIZE);
+    return glm::vec3(position.x + BLOCK_SIZE, position.y + BLOCK_SIZE, position.z + BLOCK_SIZE);
 }
 
 glm::vec3 Block::GetCenter() const
 {
-    return glm::vec3(m_position.x + BLOCK_SIZE / 2.0f, m_position.y + BLOCK_SIZE / 2.0f, m_position.z + BLOCK_SIZE / 2.0f);
+    return glm::vec3(position.x + BLOCK_SIZE / 2.0f, position.y + BLOCK_SIZE / 2.0f, position.z + BLOCK_SIZE / 2.0f);
 }
 
-Block::Block(const BType type, Vector3 position, const Color color, Shader shader, Model model) : type(type), color(color), m_position(position), shader(shader), model(model)
+Block::Block(const BType type, Vector3 position, const Color color, Shader shader, Model model) : type(type), color(color), position(position), shader(shader), model(model)
 {
     this->shader = shader;
     this->model.materials[0].shader.locs[SHADER_LOC_VECTOR_VIEW] = GetShaderLocation(this->shader, "viewPos");

@@ -1,7 +1,5 @@
 #pragma once
-#include "../lib/raylib.h"
-
-#include "../Requests/Request.h"
+#include "../../../lib/raylib.h"
 
 #include <vector>
 #include <map>
@@ -18,27 +16,36 @@ class FxMan
         {
             if (isThreaded) {
                 FxManLoop();
+            } else {
+                
             }
         }
 
         static void FxManLoop() {
             while (!WindowShouldClose()) {
-                
+                if (IsAudioDeviceReady()) {
+                    PlayAudioStream(ambiance);
+                }
             }
         }
         
-        template<typename T>
-        static int ReceiveShipment() {
-            
+        void AddAmbiance(Music music) {
+            ambiance.buffer[nextAudioSlot] = music;
+
+            nextAudioSlot += 1;
         }
+
         
 
+
+
+
     private:
+        AudioStream ambiance;
+
+        int nextAudioSlot = 0;
 
 
-        static void UnboxShipment(std::map<RequestType, T> **PackagedRequest) {
-
-        }
     protected:
         const bool isThreaded;
 };

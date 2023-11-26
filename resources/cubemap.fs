@@ -6,6 +6,7 @@ in vec3 fragPosition;
 // Input uniform values
 uniform sampler2D equirectangularMap;
 
+
 // Output fragment color
 out vec4 finalColor;
 
