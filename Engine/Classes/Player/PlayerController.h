@@ -20,7 +20,7 @@ private:
 
     float speed;
 
-    float mouseSensitivity;
+    float mouseSensitivity = 0.05f;
 
     KeyboardKey forward, backward, left, right, jump, crouch;
 public:
