@@ -10,7 +10,7 @@ class Object : public GameObject {
 
 
 
-        Object(Model model, ObjectTransform transform, float roughness) {      
+        Object(Model model, ObjectTransform transform) {      
 
             this->model = model;
             this->transform = new ObjectTransform(transform);
@@ -30,9 +30,6 @@ class Object : public GameObject {
         Model model;
         
         RigidBody *rigidbody;
-        
-
-        TextureCubemap cubemap;
         Texture2D texture;
     private:
         ~Object() {

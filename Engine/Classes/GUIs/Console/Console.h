@@ -1,53 +1,76 @@
 #pragma once
-#include "lib/raylib.h"
-#include "Gui.h"
+#include "../../../../lib/raylib.h"
+#include "../../Logging/Logman.h"
 
 #include <stdio.h>
 
-class ConsoleGUI : public GUI
+
+class ConsoleGUI 
 {
 public:
-    void Draw() const override
-    {
-        if (m_triggerkey != NULL)
-        {
-            if (IsKeyDown(m_triggerkey) && !m_isopen)
-            {
-                DrawRectangle(GetMonitorHeight(GetCurrentMonitor()) - 10, GetMonitorHeight(GetCurrentMonitor()) - 10, this->m_width, this->m_height, GRAY);
+
+    ConsoleGUI(bool AlwaysOpen = false) {
+
+
+        if (enabled) {
+            active = AlwaysOpen;
+        }        
+    }
+
+    void ConsoleUpdate() {
+        if(enabled){
+            if (!active) {
+                shouldClose = true;
+            } 
+
+            if (sizeof(commandBuffer) < bufferSize) {
+                if (IsKeyPressed(KEY_BACKSPACE)) {
+                    if (commandBufferCursor > 0) {
+                        commandBufferCursor--;
+                        commandBuffer[commandBufferCursor] = '\0';
+                    }
+                }
+
+                UpdateBuffer();
+
+                if (DEBUGMODE) {
+                    Logman::Log(commandBuffer);
+                }
             }
-            else if (m_isopen)
-            {
-                DrawRectangle(GetMonitorHeight(GetCurrentMonitor()) - 10, GetMonitorHeight(GetCurrentMonitor()) - 10, this->m_width, this->m_height, GRAY);
-            }
+
         }
-        else if (m_triggerkey == NULL)
-        {
-            throw "TriggerKey not set. It cannot equal null";
-        }
-        else
-        {
-            throw "Error in console class. ";
+
+    }
+
+    void SwitchMode() {
+        active = !active;
+    }
+
+private:
+
+    // gets input;
+    void UpdateBuffer() {
+        int pressedkey = GetCharPressed();
+
+        if(pressedkey == KEY_NULL) {
+            
+        } else {
+            commandBuffer[commandBufferCursor] = pressedkey;
+            commandBufferCursor++;
+
+
         }
     }
 
-    void OnUpdate() const override {}
-    ConsoleGUI(const int width, const int height, KeyboardKey Trigger) : m_width(width), m_height(height), m_triggerkey(Trigger), m_isopen(NULL) {}
+    char *commandBuffer;
+    int bufferSize = 256;
+    int commandBufferCursor; // position in the buffer
 
-    void SetTriggerKey(KeyboardKey key) const override {}
+    bool active = false; // is it active?
+    bool enabled = true; // Is the console allowed to be opened
+    bool shouldClose = false; // Should this close
 
-    void ParseInput(char *input) {}
+    const bool DEBUGMODE = true;
+    
 
-private:
-    const int m_width;
-    const int m_height;
-
-
-    Camera3D CameratoUse;
-
-    // Console guts
-    bool m_isopen;
-
-
-
-protected:
 };

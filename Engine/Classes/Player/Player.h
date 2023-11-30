@@ -13,6 +13,7 @@
 #include "../ShapeBase/Block/Block.h"
 #include "CameraComp.h"
 #include "PlayerHealthComp.h"
+#include "PlayerController.h"
 
 #include <thread>
 #include <stdio.h>
@@ -55,15 +56,15 @@ public:
           model(model),
           cameraMode(CameraMode),
 
-          id(RegisterObj(this)),
-          cameraComponent(new CameraComp((CameraData){
-              StartingPos,
-              {0.0f, 2.0f, 0.0f},
-              {0.0f, 1.0f, 0.0f},
-              45.0f,
-              CAMERA_PERSPECTIVE}))
+          id(RegisterObj(this))
+       
     {
-
+       cameraComponent = new CameraComp((CameraData){
+              {0.0f, 0.0f, 4.0f},
+              {0.0f, 2.0f, 0.0f},
+              {0.0f, 2.0f, 0.0f},
+              45.0f,
+              CAMERA_PERSPECTIVE});
     };
 
     void onDestroy() const override
@@ -79,6 +80,23 @@ public:
                 DrawModel(model, this->cameraComponent->getPosition(), 0.2f, GREEN);
             }
         }
+
+        if (controller->canMove) {
+            controller->Update(cameraComponent->getSelfCameraPointer());
+        }
+
+        if (IsKeyDown(KEY_F)) {
+            startDriving = true;
+        }
+    
+        if (IsKeyDown(KEY_V)) {
+            startDriving = false;
+        }
+        
+        if (startDriving) {
+            Drive();
+        }
+        
     };
 
     void onCollision() override{};
@@ -108,14 +126,25 @@ public:
             // empty because it shouldnt draw anything
         }
 
+
+
         
     }
+
+    void Drive() {
+        
+        
+        CameraMoveForward(cameraComponent->getSelfCameraPointer(), 0.01f, false);
+        
+    }
+
 
 
     // do not fucking touch this
     virtual ~Player()
     {
         delete cameraComponent;
+        delete controller;
         delete this;
     }
 
@@ -130,7 +159,13 @@ public:
     bool doDraw = true;
 
 
-    CameraComp *cameraComponent;
+    static void Setup() {
+
+    }
+    static inline CameraComp *cameraComponent;
+
+    PlayerController *controller = new PlayerController(KEY_W, KEY_S, KEY_A, KEY_D, KEY_SPACE, KEY_C, cameraMode);
+    
 
     bool isRunning;
 private:
@@ -143,6 +178,8 @@ private:
         
     }
 
+
+    bool startDriving = false;
     const int id;
     static void CheckForBlockPlacement(MouseButton Trigger, Ray ray)
     {

@@ -12,7 +12,7 @@
 
 #define MAX_COLLIDERS 1000
 
-class RigidBodyRegistryEntry;
+class RigidBody;
 class RigidBodies;
 class Collider;
 
@@ -22,6 +22,7 @@ class RigidBody
 public:
     RigidBody(BoundingBox *box, double mass) : mass(mass), boundingBox(box)
     {
+        RigidBodies::RegisterObject(this);
     }
 
     ~RigidBody()
@@ -31,9 +32,13 @@ public:
 
     void Update()
     {
-        Vector3Add(this->transform.translation, velocity.Get());
 
-        velocity.Change(-airResistance.factor, -airResistance.factor, -airResistance.factor);
+        if (!Collider::CheckForCollision(this)) {
+            Vector3Add(position, velocity.Get());
+
+            velocity.Change(-airResistance.factor, -airResistance.factor, -airResistance.factor);
+        }
+
     }
 
     BoundingBox *boundingBox;
@@ -42,34 +47,23 @@ public:
 
     Velocity velocity;
 
-    ObjectTransform transform;
-
     Friction airResistance;
+
+    Vector3 position;
+    
 };
 
-class RigidBodyRegistryEntry
-{
-public:
-    RigidBodyRegistryEntry(RigidBody *rigidBody) 
-    {
-        rigidBodyEntry.data = &rigidBody;
-        rigidBodyEntry.RegisterObject(counter);
-    }
 
-    ~RigidBodyRegistryEntry() {
-        delete this;
-    }
-
-    RegistryObject<RigidBody*> rigidBodyEntry = RegistryObject<RigidBody*>();
-
-    static inline RegisteryObjectCounter counter;
-};
 
 class RigidBodies
 {
 public:
-    static inline Registry<RigidBodyRegistryEntry> rigidbodies;
 
+    static inline void RegisterObject(RigidBody *rigidBody) {
+        registry.push_back(rigidBody);
+    }
+    
+    static inline std::vector<RigidBody *> registry;
 private:
 };
 
@@ -79,9 +73,9 @@ public:
     bool CheckForCollision(RigidBody orgin)
     {
         bool *hasFound = new bool(false);
-        for (int i = 0; i < RigidBodies::rigidbodies.registry[0]->GetNumberOfObjects(); i++)
+        for (int i = 0; i < RigidBodies::registry.size(); i++)
         {
-            if (CheckCollisionBoxes(*orgin.boundingBox, RigidBodies::rigidbodies.registry[i]->data->rigidBodyEntry.data.boundingBox)
+            if (CheckCollisionBoxes(*orgin.boundingBox, RigidBodies::registry[i]->boundingBox))
             {
                 hasFound = new bool(true);
                 break;

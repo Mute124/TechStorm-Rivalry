@@ -9,6 +9,7 @@
 #include "../../../DataSets/Globals.h"
 #include "../../Project/Game/Game.h"
 
+
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -79,6 +80,9 @@ public:
         // SetShaderValueMatrix(this->model.materials[0].shader, GetShaderLocation(this->model.materials[0].shader, "matModel"), this->model.transform);
         SetShaderValueMatrix(this->model.materials[0].shader, GetShaderLocation(this->model.materials[0].shader, "mvp"), this->model.transform);
 
+
+
+        
         // UnloadTexture(Bricks);
     }
     // main block constructor.
@@ -116,7 +120,7 @@ public:
         else
         {
 
-            // this->velocity = Vector3Subtract(this->velocity, (Vector3){0.0f, 0.001f * (float)Global::Time::GetGameTime(), 0.0f});
+            this->velocity = Vector3Subtract(this->velocity, (Vector3){0.0f, 0.001f * (float)Global::Time::GetGameTime(), 0.0f});
         }
 
         this->position = Vector3Add(this->position, this->velocity);
@@ -227,4 +231,5 @@ public:
     Vector3 velocity;
 
     const int id;
+
 };

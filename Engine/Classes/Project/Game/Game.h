@@ -15,6 +15,8 @@
 
 #include "../../Env/Environment.h"
 
+
+
 class Game
 {
 
@@ -22,6 +24,7 @@ class Game
     GameWindowFactory *windowfactory = new GameWindowFactory();
 
 public:
+
     class Renderer
     {
     public:

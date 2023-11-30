@@ -27,9 +27,10 @@ bool SkipMainMenu = true;
 #include "Engine/Classes/Player/Player.h"
 #include "Engine/Classes/Logging/Logman.h"
 #include "Engine/Classes/ConfigMan/ConfigMan.h" // config manager
+#include "Engine/Classes/GUIs/Console/Console.h"
 
 // Minero Classes
-
+#include "Minero/Classes/Vehicles/Plane.h"
 // Externs required for functionality
 // In the lib file
 #include "lib/external/glfw/deps/glad/gl.h"
@@ -330,6 +331,10 @@ DefaultBlockModel.materials[0].maps[MATERIAL_MAP_CUBEMAP].texture = Global::Mesh
  
   
 
+  ConsoleGUI *console = new ConsoleGUI(true);
+
+
+
 // Checks if the music should be played, and plays it if it should be.
  if (game->enableMusic)
  {
@@ -367,7 +372,8 @@ DefaultBlockModel.materials[0].maps[MATERIAL_MAP_CUBEMAP].texture = Global::Mesh
     }
   }
   delete mmen_start;
-
+  //player->Setup();
+//GameObject::PushObject(new Plane(postProcessShader, Vector3{0.0f, 0.0f, 0.0f}));
   // Game Loop
   while (!WindowShouldClose())
   {
@@ -466,6 +472,10 @@ DefaultBlockModel.materials[0].maps[MATERIAL_MAP_CUBEMAP].texture = Global::Mesh
       }
     }
 
+
+    if (IsKeyPressed(KEY_U)) {
+
+    }
     // update ray
     ray.position = player->cameraComponent->getPosition();
     ray.direction = player->cameraComponent->getTarget();
@@ -480,15 +490,6 @@ DefaultBlockModel.materials[0].maps[MATERIAL_MAP_CUBEMAP].texture = Global::Mesh
       EndMode3D();
       EndDrawing();
     }
-
-    // to do :
-    // Update variables that are declared in the settings.ini file
-
-    UpdateCamera(
-        player->cameraComponent->getSelfCameraPointer(),
-        player->cameraMode); // Updates the camera with the current mode and data.
-
-    // Keybinds yah
 
     // Check for left click
 
@@ -649,6 +650,8 @@ DefaultBlockModel.materials[0].maps[MATERIAL_MAP_CUBEMAP].texture = Global::Mesh
     // EndShaderMode();
 
     game->renderer->EndDraw();
+
+    //console->ConsoleUpdate();
     // rlPushMatrix();
     //(fbo, (Rectangle){0, 0, screenWidth, -screenHeight}, (Vector2){middlex, middley}, WHITE);
     //  EndDrawing();
@@ -692,7 +695,7 @@ ExitGame:
   delete block;
   delete player;
   GameObject::FlushBuffer();
-
+  delete console;
   // delete heightmap;
 
   // delete flashlight;

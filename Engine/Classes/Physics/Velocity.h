@@ -28,7 +28,7 @@ class Velocity {
 
     protected:
 
-        const static double MAX_ACCELERATION = 9.81; // Meters a second
+        constexpr static double MAX_ACCELERATION = 9.81; // Meters a second
         
 
 
