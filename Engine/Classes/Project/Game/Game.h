@@ -32,7 +32,6 @@ public:
         {
             isDrawing = true;
             BeginDrawing();
-            //ClearBackground(RAYWHITE);
         }
 
         void EndDraw()
@@ -141,7 +140,7 @@ public:
         enableMusic = optionsConfig["Sound"]["enableMusic"].as_boolean();
         Logman::CustomLog(LOG_INFO, TextFormat("EnableMusic = %i", enableMusic), NULL);
         
-        if (!isFullscreen)
+        if (isFullscreen == true)
         {
             windowWidth = ConfigTypeConverter::StrToInt(&optionsConfig["Window"]["windowWidth"].as_string()->operator std::string &());
             Logman::CustomLog(LOG_INFO, TextFormat("Setting window width to %i", windowWidth), NULL);
@@ -150,12 +149,13 @@ public:
             Logman::CustomLog(LOG_INFO, TextFormat("Setting window height to %i", windowHeight), NULL);
 
             // since it isnt full screen, the window is resizeable
-            windowfactory->StampFlag(FLAG_WINDOW_RESIZABLE);
+            //windowfactory->StampFlag(FLAG_WINDOW_RESIZABLE);
         }
         else
         {
-            windowWidth = GetScreenWidth();
-            windowHeight = GetScreenHeight();
+            windowWidth = GetMonitorWidth(0);
+            windowHeight = GetMonitorHeight(0);
+            //windowfactory->StampFlag(FLAG_WINDOW_MAXIMIZED);
         }
 
         if (windowHeight == 0 || windowWidth == 0)
@@ -169,11 +169,13 @@ public:
             Logman::CustomLog(LOG_INFO, TextFormat("Setting window height to %i", windowHeight), NULL);
 
             // since it isnt full screen, the window is resizeable
-            windowfactory->StampFlag(FLAG_WINDOW_RESIZABLE);
+            //windowfactory->StampFlag(FLAG_WINDOW_RESIZABLE);
         }
 
         // Stamp window config flags & Manufacture
-        windowfactory->StampFlag(FLAG_MSAA_4X_HINT);
+        //windowfactory->StampFlag(FLAG_MSAA_4X_HINT);
+
+
         windowfactory->ManufactureWindow(windowWidth, windowHeight, "Minero");
         InitAudioDevice(); // starts the audio driver(s).
 

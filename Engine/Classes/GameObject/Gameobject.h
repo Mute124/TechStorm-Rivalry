@@ -17,6 +17,15 @@ typedef enum type
 
 } objtype;
 
+  typedef struct
+
+  {
+    float *l = new float();
+    float *w = new float();
+    float *h = new float();
+  } ObjDim; // TODO : is this needed?
+
+
 #include "../Lists/Registry.h"
 
 // TODO : code this
@@ -28,6 +37,8 @@ class GameObject
 {
 
 public:
+
+
   RenderTexture2D LoadRenderTextureDepthTex(int width, int height)
   {
     RenderTexture2D target = {0};
@@ -82,13 +93,6 @@ public:
       rlUnloadFramebuffer(target.id);
     }
   }
-  typedef struct
-
-  {
-    float *l = new float();
-    float *w = new float();
-    float *h = new float();
-  } ObjDim; // TODO : is this needed?
 
   virtual void Draw(){};
 

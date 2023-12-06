@@ -135,14 +135,13 @@ int main(void)
   postProcessShader.locs[SHADER_LOC_COLOR_AMBIENT] = GetShaderLocation(postProcessShader, "ambient");
 
   // Set shader value: ambient light level
-
   int ambientLoc = GetShaderLocation(postProcessShader, "ambient");
   static const Color ambientColor = WHITE;
   SetShaderValue(postProcessShader, ambientLoc, &ambientColor, SHADER_UNIFORM_VEC4);
 
   SetShaderValue(postProcessShader, postProcessShader.locs[SHADER_LOC_COLOR_AMBIENT], &ambientColor, SHADER_UNIFORM_VEC4);
   // Player Object Creation
-  const int Playersize = 3.f;
+  const int Playersize = 3.0f;
   Model PlayerModel = LoadModelFromMesh(GenMeshCube(3.0f, 3.0f, 3.0f)); // Generates the playermodel. For right now it is a cube.
   Player *player = new Player(Vector3{0.0f, 2.0f, 4.0f}, 100, PlayerModel, CAMERA_FIRST_PERSON);
 
@@ -156,6 +155,7 @@ DefaultBlockModel.materials[0].maps[MATERIAL_MAP_CUBEMAP].texture = Global::Mesh
 
   Block *block = new Block(BlockDirt, Vector3Zero(), WHITE,
                            postProcessShader, DefaultBlockModel);
+
   GameObject::PushObject(block);
 
   int PostViewLoc = GetShaderLocation(postProcessShader, "viewPos"); // View pos shader location
@@ -330,7 +330,6 @@ DefaultBlockModel.materials[0].maps[MATERIAL_MAP_CUBEMAP].texture = Global::Mesh
  game->renderer->env->shdrCubemap = shdrCubemap;
  
   
-
   ConsoleGUI *console = new ConsoleGUI(true);
 
 
@@ -582,6 +581,8 @@ DefaultBlockModel.materials[0].maps[MATERIAL_MAP_CUBEMAP].texture = Global::Mesh
 
     game->renderer->StartTexturing();
 
+
+    
     BeginMode3D(player->cameraComponent->getSelfCamera());
 
     rlDisableBackfaceCulling();
@@ -603,6 +604,7 @@ DefaultBlockModel.materials[0].maps[MATERIAL_MAP_CUBEMAP].texture = Global::Mesh
     GameObject::Render();
     EndShaderMode();
 
+    
     // EndShaderMode();
     game->renderer->End3D();
 
@@ -621,11 +623,6 @@ DefaultBlockModel.materials[0].maps[MATERIAL_MAP_CUBEMAP].texture = Global::Mesh
     rlEnableBackfaceCulling();
     rlEnableDepthMask();
 
-    // rlPopMatrix()
-
-    // DrawModel(terrain, Vector3SubtractValue(Vector3Zero(), 2.0f), 1.0f, GREEN); // not needed atm, if it isnt for a while, it will get deleted
-
-    //  We are inside the cube, we need to disable backface culling!
 
     BeginShaderMode(shdrCubemap);
     GameObject::Render();
@@ -643,24 +640,20 @@ DefaultBlockModel.materials[0].maps[MATERIAL_MAP_CUBEMAP].texture = Global::Mesh
     SetTextureFilter(game->renderer->fbo.texture, TEXTURE_FILTER_BILINEAR);
     
     game->renderer->StartDraw();
-
+      
     // BeginShaderMode(shdrCubemap);
     // NOTE: Render texture must be y-flipped due to default OpenGL coordinates (left-bottom)
     DrawTextureRec(game->renderer->fbo.texture, Rectangle{ 0, 0, (float)(game->renderer->fbo.texture.width), (float)(-game->renderer->fbo.texture.height) }, (Vector2){ 0, 0 }, WHITE);
-    // EndShaderMode();
+                ClearBackground(RAYWHITE);
+
+    //BeginMode2D(menucamera->camera);
+
+    // Crosshair
+    DrawCircle(game->windowWidth/2, game->windowHeight/2, 3, GRAY);
+    //EndMode2D();
 
     game->renderer->EndDraw();
 
-    //console->ConsoleUpdate();
-    // rlPushMatrix();
-    //(fbo, (Rectangle){0, 0, screenWidth, -screenHeight}, (Vector2){middlex, middley}, WHITE);
-    //  EndDrawing();
-
-    // check if we are using hdr
-
-    /*
-
-    */
   }
 
 ExitGame:

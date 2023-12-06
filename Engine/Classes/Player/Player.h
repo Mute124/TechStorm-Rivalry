@@ -35,18 +35,56 @@ class Player : public GameObject
 
 public:
 
-    class BuildingComp {
+    class Crosshair {
         public:
-
-            static void SetGlobalVariables(Color buildcolor) {
-                buildColor = buildcolor;
+            Crosshair(int width, int height, Color color) : width(width), height(height), color(color) {
+                position = {(float)width / 2, (float)height / 2};
             }
 
-            void cast(Vector3 castPosition, bool isGroundLocked);
+            void Draw() {
+                
 
-        private:
+            }
 
-            static inline Color buildColor;
+        int width, height;
+        Color color;
+
+        Vector2 position;
+    };
+
+    class Hand : public GameObject {
+
+        public:
+            Vector3 offset;
+            Vector3 position;
+
+            Model model;
+
+            Hand(Model model) : offset({0.0f, 0.0f, 0.0f}), model(model) {
+
+            }
+
+            void onUpdate() override {
+                
+            }
+
+            void onDestroy() const override {
+                
+            }
+
+            int GetId() const override{
+                return 0;
+            }
+
+            int GetType() const override{
+                
+            }
+
+            void Draw() override {
+                DrawModel(model, this->position, 0.05f, GREEN);
+            }
+
+            
     };
 
     // main constructor
@@ -65,6 +103,12 @@ public:
               {0.0f, 2.0f, 0.0f},
               45.0f,
               CAMERA_PERSPECTIVE});
+
+        hand = new Hand(model);
+        crosshair = new Crosshair(GetScreenWidth(), GetScreenHeight(), BLACK);
+
+        
+
     };
 
     void onDestroy() const override
@@ -97,9 +141,14 @@ public:
             Drive();
         }
         
+        
+        
+        hand->position = Vector3Add(this->cameraComponent->getPosition(), GetCameraForward(this->cameraComponent->getSelfCameraPointer()));//= Vector3Normalize(Vector3Add(Vector3Divide(this->cameraComponent->getTarget(), {2.0f, 2.0f, 2.0f}), GetCameraForward(this->cameraComponent->getSelfCameraPointer())));
+        //hand->model.transform = MatrixLookAt(this->cameraComponent->getPosition(), this->cameraComponent->getTarget(), {0.0f, 1.0f, 0.0f});
+        //hand->model = model;
     };
 
-    void onCollision() override{};
+    void onCollision() override {};
 
     int GetId() const override
     {
@@ -126,7 +175,7 @@ public:
             // empty because it shouldnt draw anything
         }
 
-
+        hand->Draw();
 
         
     }
@@ -145,6 +194,7 @@ public:
     {
         delete cameraComponent;
         delete controller;
+        delete hand;
         delete this;
     }
 
@@ -168,16 +218,11 @@ public:
     
 
     bool isRunning;
+
+    static inline Hand *hand;
+    
+    Crosshair *crosshair;
 private:
-
-
-    void CalculateMovement() {
-        position = Vector3Add(position, velocity);
-
-        
-        
-    }
-
 
     bool startDriving = false;
     const int id;
@@ -215,7 +260,7 @@ private:
 
     // CameraComp cameraComponent;
     RayCollision collision = {0};
-
+    
     // KeyboardKey *CurrentKeyDown;
     Vector3 position;
     Mesh mesh;
