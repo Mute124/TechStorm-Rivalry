@@ -17,14 +17,13 @@ typedef enum type
 
 } objtype;
 
-  typedef struct
+typedef struct
 
-  {
-    float *l = new float();
-    float *w = new float();
-    float *h = new float();
-  } ObjDim; // TODO : is this needed?
-
+{
+  float *l = new float();
+  float *w = new float();
+  float *h = new float();
+} ObjDim; // TODO : is this needed?
 
 #include "../Lists/Registry.h"
 
@@ -37,8 +36,6 @@ class GameObject
 {
 
 public:
-
-
   RenderTexture2D LoadRenderTextureDepthTex(int width, int height)
   {
     RenderTexture2D target = {0};
@@ -105,25 +102,6 @@ public:
     }
   }
 
-  static inline GameObject *SearchById(int id)
-  {
-    return GameObjects[id];
-  }
-
-  static inline auto *SearchByType(int type)
-  {
-
-    for (auto &GameObject : GameObjects)
-    {
-      if (GameObject->GetType() == type)
-      {
-
-        return GameObject;
-        break;
-      }
-    }
-  }
-
   virtual int GetType() const = 0;
 
   /**
@@ -165,7 +143,10 @@ public:
 
   virtual int GetId() const = 0;
 
-  virtual BoundingBox GetBoundingBox(){};
+  virtual BoundingBox GetBoundingBox()
+  {
+    return Global::BoxNull;
+  };
 
   virtual bool CheckCollision(GameObject *Orgin, int id)
   {
@@ -209,43 +190,18 @@ public:
       GameObject->onUpdate();
     }
   }
-  virtual Vector3 GetPosition(){};
+  virtual Vector3 GetPosition()
+  {
+    return Vector3Zero();
+  };
 
   static inline std::vector<int> ids; // is this needed?
 
-  static inline void Sync(std::vector<GameObject *> objs)
+  static inline void PushObject(GameObject *_obj)
   {
-
-    GameObjects = objs;
-  }
-
-  static inline std::vector<GameObject *> RequestObjectList()
-  {
-    return GameObjects;
-  }
-
-  static inline GameObject *RequestObject(int id)
-  {
-    return SearchById(id);
-  }
-
-static inline void PushObject(GameObject *_obj)
-{
     Logman::CustomLog(LOG_INFO, "Pushing object", NULL);
     GameObjects.push_back(_obj);
-}
-
-  static inline void FlushBuffer()
-  {
-
-    // we have to use this implementation due to each object can have their own behavior.
-    for (auto &obj : GameObjects)
-    {
-      obj->onDestroy();
-    }
   }
-
-
 
   static inline void Render()
   {
@@ -256,17 +212,17 @@ static inline void PushObject(GameObject *_obj)
       obj->onUpdate();
     }
   }
-  
+  static void FlushBuffer()
+  {
+
+    // we have to use this implementation due to each object can have their own behavior.
+    for (int i = 0; i < GameObjects.size(); i++)
+    {
+      GameObjects[i]->onDestroy();
+    }
+  }
   static inline std::vector<GameObject *> GameObjects; // game objects
 private:
-
-  Global::Tag IgnoredTags[10] = {
-      "skybox",
-      "light",
-      "lighting",
-      "cubemap",
-      "sky"};
-
   objtype type; // TODO : is this needed?
 };
 
@@ -274,25 +230,79 @@ private:
 // NOTE: Creates a copy of pixels data array
 Image LoadImageEx(Color *pixels, int width, int height)
 {
-    Image image = { 0 };
-    image.data = NULL;
-    image.width = width;
-    image.height = height;
-    image.mipmaps = 1;
-    image.format = PIXELFORMAT_UNCOMPRESSED_R8G8B8A8;
+  Image image = {0};
+  image.data = NULL;
+  image.width = width;
+  image.height = height;
+  image.mipmaps = 1;
+  image.format = PIXELFORMAT_UNCOMPRESSED_R8G8B8A8;
 
-    int k = 0;
+  int k = 0;
 
-    image.data = (unsigned char *)RL_MALLOC(image.width*image.height*4*sizeof(unsigned char));
+  image.data = (unsigned char *)RL_MALLOC(image.width * image.height * 4 * sizeof(unsigned char));
 
-    for (int i = 0; i < image.width*image.height*4; i += 4)
-    {
-        ((unsigned char *)image.data)[i] = pixels[k].r;
-        ((unsigned char *)image.data)[i + 1] = pixels[k].g;
-        ((unsigned char *)image.data)[i + 2] = pixels[k].b;
-        ((unsigned char *)image.data)[i + 3] = pixels[k].a;
-        k++;
-    }
+  for (int i = 0; i < image.width * image.height * 4; i += 4)
+  {
+    ((unsigned char *)image.data)[i] = pixels[k].r;
+    ((unsigned char *)image.data)[i + 1] = pixels[k].g;
+    ((unsigned char *)image.data)[i + 2] = pixels[k].b;
+    ((unsigned char *)image.data)[i + 3] = pixels[k].a;
+    k++;
+  }
 
-    return image;
+  return image;
 }
+
+/*
+class GameObjectManager
+{
+public:
+  static void Update()
+  {
+
+    for (int i = 0; i < Objects.size(); i++)
+    {
+      Objects[i]->onUpdate();
+    }
+  }
+
+
+  static std::vector<NewGameObject *> Objects;
+};
+class NewGameObject
+{
+public:
+  NewGameObject()
+  {
+  }
+
+  Transform GetTransform()
+  {
+    return transform;
+  }
+
+  void SetTransform(Transform _transform)
+  {
+  }
+
+  virtual void onUpdate()
+  {
+  }
+
+  virtual void onDestroy()
+  {
+  }
+
+  virtual void Draw()
+  {
+  }
+
+private:
+  Transform transform = {0};
+
+  Mesh mesh;
+  Model model;
+
+  int id;
+};
+*/

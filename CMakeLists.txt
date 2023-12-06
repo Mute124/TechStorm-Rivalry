@@ -1,11 +1,14 @@
-cmake_minimum_required(VERSION 3.11) # FetchContent is available in 3.11+
-project(example)
+cmake_minimum_required(VERSION 3.25) # FetchContent is available in 3.11+
+project(Minero)
 
 # Generate compile_commands.json
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_C_STANDARD 99)
+
 
 # Dependencies
-set(RAYLIB_VERSION 4.2.0)
+set(RAYLIB_VERSION 4.5.0)
 find_package(raylib ${RAYLIB_VERSION} QUIET) # QUIET or REQUIRED
 if (NOT raylib_FOUND) # If there's none, fetch and build raylib
   include(FetchContent)
@@ -21,12 +24,24 @@ if (NOT raylib_FOUND) # If there's none, fetch and build raylib
     add_subdirectory(${raylib_SOURCE_DIR} ${raylib_BINARY_DIR})
   endif()
 endif()
+# Registers build options that are exposed to cmake
+include(CMakeOptions.txt)
 
+include(FetchContent)
+FetchContent_Declare(
+    tomlplusplus
+    GIT_REPOSITORY https://github.com/marzer/tomlplusplus.git
+    GIT_TAG        v3.4.0
+)
+FetchContent_MakeAvailable(tomlplusplus)
 # Our Project
 
 add_executable(${PROJECT_NAME} main.cpp)
 #set(raylib_VERBOSE 1)
 target_link_libraries(${PROJECT_NAME} raylib)
+
+
+include_directories(BEFORE SYSTEM ${CMAKE_CURRENT_SOURCE_DIR}/resources)
 
 # Web Configurations
 if (${PLATFORM} STREQUAL "Web")
@@ -40,3 +55,4 @@ if (APPLE)
     target_link_libraries(${PROJECT_NAME} "-framework Cocoa")
     target_link_libraries(${PROJECT_NAME} "-framework OpenGL")
 endif()
+

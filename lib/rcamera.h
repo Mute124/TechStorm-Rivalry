@@ -228,6 +228,7 @@ Vector3 GetCameraUp(Camera *camera)
 Vector3 GetCameraDown(Camera *camera)
 {
     return Vector3Normalize(camera->down);
+    
 }
 // Returns the cameras right vector (normalized)
 Vector3 GetCameraRight(Camera *camera)

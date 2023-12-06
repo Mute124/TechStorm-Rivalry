@@ -2,6 +2,7 @@
 
 #pragma once
 #include "../../lib/raylib.h" // raylib framework
+#include "../../lib/raymath.h"
 #include "../../lib/rlgl.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -76,21 +77,21 @@ namespace Global
 
     using namespace Global;
 
+    /*
     class Time
     {
     public:
-        static double GetGameTimeFormatted()
+        static inline double GetGameTimeFormatted()
         {
-            
-            return timeCounter;
+            return Global::Time::timeCounter;
         }
 
-        static double GetGameTime()
+        static inline double GetGameTime()
         {
             return GetTime();
         }
 
-        static void StartClock()
+        static inline void StartClock()
         {
             previousTime = GetTime();
             currentTime = 0.0;
@@ -107,7 +108,7 @@ namespace Global
         }
 
         // updates the clock
-        static void Update()
+        static inline void Update()
         {
             currentTime = GetTime();
             updateDrawTime = currentTime - previousTime;
@@ -130,7 +131,7 @@ namespace Global
             previousTime = currentTime;
         }
 
-        static float DeltaTime()
+        static inline float DeltaTime()
         {
             return deltaTime;
         }
@@ -143,7 +144,7 @@ namespace Global
         static inline float deltaTime;
         static inline float timeCounter;
         static inline int targetFPS;
-    };
+    };*/
     
     
     class Tag {
@@ -198,7 +199,7 @@ namespace Global
          */
         static MeshTools::CubeVerticies CVertZero()
         {
-            return (CubeVerticies){0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
+            return CubeVerticies{0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
         }
 
         static TextureCubemap GenTextureCubemap(Shader shader, Texture2D panorama, int size, int format)
@@ -236,7 +237,7 @@ namespace Global
                 90.0 * DEG2RAD, 1.0, RL_CULL_DISTANCE_NEAR, RL_CULL_DISTANCE_FAR);
             rlSetUniformMatrix(shader.locs[SHADER_LOC_MATRIX_PROJECTION],
                                matFboProjection);
-
+            
             // Define view matrix for every side of the cubemap
             Matrix fboViews[6] = {
                 MatrixLookAt(Vector3{0.0f, 0.0f, 0.0f}, Vector3{1.0f, 0.0f, 0.0f},
@@ -660,7 +661,7 @@ namespace Global
         static float Mean(const std::vector<float> &data)
         {
             float result = 0.0;
-            for (int i = 1; i < data.size(); i++)
+            for (unsigned int i = 1; i < data.size(); i++)
             {
                 result += data[i - 1] + data[i];
             }
@@ -683,7 +684,7 @@ namespace Global
 
         static Vector3 Vector3Random(int min, int max)
         {
-            return (Vector3){static_cast<float>(GetRandomValue(min, max)),
+            return Vector3{static_cast<float>(GetRandomValue(min, max)),
                              static_cast<float>(GetRandomValue(min, max)),
                              static_cast<float>(GetRandomValue(min, max))};
         }
@@ -692,7 +693,7 @@ namespace Global
         // rounds vector3
         static Vector3 RoundVec3(Vector3 Target)
         {
-            return (Vector3){
+            return Vector3{
                 (float)round(Target.x), (float)round(Target.y), (float)round(Target.z)};
         }
 
@@ -700,7 +701,7 @@ namespace Global
         // returns vector on for both positive and negative
         static Vector3 Vector3MaxPos()
         {
-            return (Vector3){WORLD_SIZE, WORLD_SIZE, WORLD_SIZE};
+            return Vector3{WORLD_SIZE, WORLD_SIZE, WORLD_SIZE};
         }
 
         // return the average of a floating point data set
@@ -763,7 +764,7 @@ namespace Global
         // same as DualVector3RandomEx() but only returns one value
         static Vector3 Vector3RandomEx(Vector3 min, Vector3 max)
         {
-            return (Vector3){(float)GetRandomValue(min.x, max.x), (float)GetRandomValue(min.y, max.y), (float)GetRandomValue(min.z, max.z)};
+            return Vector3{(float)GetRandomValue(min.x, max.x), (float)GetRandomValue(min.y, max.y), (float)GetRandomValue(min.z, max.z)};
         }
     };
 

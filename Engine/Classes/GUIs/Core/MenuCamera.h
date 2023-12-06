@@ -2,6 +2,7 @@
 #include "../../../../lib/raylib.h"
 #include "../../GameObject/Gameobject.h"
 
+#pragma 
 class MenuCamera 
 {
     public:
@@ -9,6 +10,8 @@ class MenuCamera
         Camera2D camera;
 
         MenuCamera() {
-            camera.target = (Vector2){GetMonitorWidth(GetCurrentMonitor()) / 2.0f, GetMonitorHeight(GetCurrentMonitor()) / 2.0f};
+
+            
+        camera.target = Vector2{(float)GetMonitorWidth(GetCurrentMonitor()) / 2.0f, (float)GetMonitorHeight(GetCurrentMonitor()) / 2.0f};
         }
 };

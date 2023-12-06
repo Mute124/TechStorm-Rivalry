@@ -6,7 +6,7 @@ class HealthBar
 public:
     float CalculatePercentage(int hp, int max_hp)
     {
-        int percentage = (float)hp / (float)max_hp;
+        float percentage = (float)hp / (float)max_hp;
         return percentage;
     }
 

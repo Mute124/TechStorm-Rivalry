@@ -30,6 +30,7 @@ typedef enum
     Action_Fly,
     Action_Place
 } Player_Action;
+
 class Player : public GameObject
 {
 
@@ -55,6 +56,8 @@ public:
     class Hand : public GameObject {
 
         public:
+
+
             Vector3 offset;
             Vector3 position;
 
@@ -77,7 +80,7 @@ public:
             }
 
             int GetType() const override{
-                
+                return 0;
             }
 
             void Draw() override {
@@ -97,7 +100,7 @@ public:
           id(RegisterObj(this))
        
     {
-       cameraComponent = new CameraComp((CameraData){
+       cameraComponent = new CameraComp(CameraData{
               {0.0f, 0.0f, 4.0f},
               {0.0f, 2.0f, 0.0f},
               {0.0f, 2.0f, 0.0f},
@@ -220,7 +223,7 @@ public:
     bool isRunning;
 
     static inline Hand *hand;
-    
+
     Crosshair *crosshair;
 private:
 
@@ -228,8 +231,8 @@ private:
     const int id;
     static void CheckForBlockPlacement(MouseButton Trigger, Ray ray)
     {
-
-        if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
+/*  
+if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
         {
 
             std::vector<GameObject *> objects = RequestObjectList();
@@ -255,7 +258,8 @@ private:
                     }
                 }
             }
-        }
+        }*/
+        
     }
 
     // CameraComp cameraComponent;

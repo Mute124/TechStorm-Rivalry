@@ -30,6 +30,7 @@ public:
 
     PlayerController(KeyboardKey Forward, KeyboardKey Backward, KeyboardKey Left, KeyboardKey Right, KeyboardKey Jump, KeyboardKey Crouch, int mode) : forward(Forward), backward(Backward), left(Left), right(Right), jump(Jump), crouch(Crouch), mode(mode)
     {
+        
     }
 
     Velocity vel;
@@ -45,14 +46,14 @@ public:
         // This new camera function allows custom movement/rotation values to be directly provided
         // as input parameters, with this approach, rcamera module is internally independent of raylib inputs
         UpdateCameraPro(camera,
-            (Vector3){
+            Vector3{
                 (IsKeyDown(forward) || IsKeyDown(KEY_UP))*speed -      // Move forward-backward
                 (IsKeyDown(backward) || IsKeyDown(KEY_DOWN))*speed,    
                 (IsKeyDown(right) || IsKeyDown(KEY_RIGHT))*speed -   // Move right-left
                 (IsKeyDown(left) || IsKeyDown(KEY_LEFT))*speed,
                 0.0f                                                // Move up-down
             },
-            (Vector3){
+            Vector3{
                 GetMouseDelta().x*mouseSensitivity,                            // Rotation: yaw
                 GetMouseDelta().y*mouseSensitivity,                            // Rotation: pitch
                 0.0f                                                // Rotation: roll

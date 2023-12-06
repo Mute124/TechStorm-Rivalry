@@ -127,11 +127,12 @@ public:
 
     void StartGame()
     {
-        Logman::CustomLog(LOG_INFO, "Starting Game", NULL);
 
+ 
         // Read config to decide what to set for the game
         Logman::CustomLog(LOG_INFO, "Initiating Config Manager", NULL);
-        optionsConfig = toml::parse_file("Config/options.toml");
+        
+        optionsConfig = toml::parse_file("../../Minero-Game/Config/options.toml");
         Logman::CustomLog(LOG_INFO, "OptionsConfig file registered", NULL);
 
         isFullscreen = optionsConfig["Window"]["isFullScreen"].as_boolean();
@@ -153,8 +154,9 @@ public:
         }
         else
         {
-            windowWidth = GetMonitorWidth(0);
+                    windowWidth = GetMonitorWidth(0);
             windowHeight = GetMonitorHeight(0);
+
             //windowfactory->StampFlag(FLAG_WINDOW_MAXIMIZED);
         }
 
@@ -175,6 +177,9 @@ public:
         // Stamp window config flags & Manufacture
         //windowfactory->StampFlag(FLAG_MSAA_4X_HINT);
 
+        Logman::CustomLog(LOG_INFO, "Starting Game", NULL);
+
+
 
         windowfactory->ManufactureWindow(windowWidth, windowHeight, "Minero");
         InitAudioDevice(); // starts the audio driver(s).
@@ -184,7 +189,7 @@ public:
         SetExitKey(KEY_BACKSPACE); // In event of your fuck up press this.
 
         // Setting the window icon in task bar
-        Image icon = LoadImage("resources/images/icon.png");
+        Image icon = LoadImage("../../Minero-Game/resources/images/icon.png");
         ImageFormat(&icon, PIXELFORMAT_UNCOMPRESSED_R8G8B8A8);
         SetWindowIcon(icon);
 

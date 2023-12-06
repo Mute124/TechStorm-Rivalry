@@ -103,7 +103,7 @@ int main(void)
   game->StartGame();
   // Game::Initialize();
 
-  ButtonR *mmen_start = new ButtonR("start", middlex, middley); // Main start button
+  ButtonR *mmen_start = new ButtonR("start", (float)middlex, (float)middley); // Main start button
 
   MenuCamera *menucamera = new MenuCamera(); // camera for the main menu is needed due to dimension differences
 
@@ -119,7 +119,7 @@ int main(void)
       GenMeshCube(BLOCK_SIZE, BLOCK_SIZE,
                   BLOCK_SIZE)); // this is the default model used in blocksd.
 
-  Shader postProcessShader = LoadShader(TextFormat("resources/shaders/glsl330/lighting.vs", GLSL_VERSION), TextFormat("resources/shaders/glsl330/lighting.fs", GLSL_VERSION));
+  Shader postProcessShader = LoadShader(TextFormat("../../Minero-Game/resources/shaders/glsl330/lighting.vs", GLSL_VERSION), TextFormat("../../Minero-Game/resources/shaders/glsl330/lighting.fs", GLSL_VERSION));
 
   // Shader fog = LoadShader("resources/shaders/glsl330/lighting.vs", "resources/shaders/glsl330/fog.fs");
 
@@ -141,7 +141,7 @@ int main(void)
 
   SetShaderValue(postProcessShader, postProcessShader.locs[SHADER_LOC_COLOR_AMBIENT], &ambientColor, SHADER_UNIFORM_VEC4);
   // Player Object Creation
-  const int Playersize = 3.0f;
+  const int Playersize = 3;
   Model PlayerModel = LoadModelFromMesh(GenMeshCube(3.0f, 3.0f, 3.0f)); // Generates the playermodel. For right now it is a cube.
   Player *player = new Player(Vector3{0.0f, 2.0f, 4.0f}, 100, PlayerModel, CAMERA_FIRST_PERSON);
 
@@ -170,7 +170,7 @@ DefaultBlockModel.materials[0].maps[MATERIAL_MAP_CUBEMAP].texture = Global::Mesh
   // Load skybox shader and set required locations
   // NOTE: Some locations are automatically set at shader loading
 
-  skybox.materials[0].shader = LoadShader("resources/skybox.vs", "resources/skybox.fs");
+  skybox.materials[0].shader = LoadShader("../../Minero-Game/resources/skybox.vs", "../../Minero-Game/resources/skybox.fs");
 
   // since the compiler complains about the references of such, these three vars
   // are for the skybox shaders. They will be deleted after.
@@ -191,7 +191,7 @@ DefaultBlockModel.materials[0].maps[MATERIAL_MAP_CUBEMAP].texture = Global::Mesh
 
   // Load cubemap shader and setup required shader locations
   Shader shdrCubemap =
-      LoadShader("resources/cubemap.vs", "resources/cubemap.fs");
+      LoadShader("../../Minero-Game/resources/cubemap.vs", "../../Minero-Game/resources/cubemap.fs");
 
   const static int equimap = 0;
   SetShaderValue(shdrCubemap, GetShaderLocation(shdrCubemap, "equirectangularMap"), &equimap, SHADER_UNIFORM_INT);
@@ -201,7 +201,7 @@ DefaultBlockModel.materials[0].maps[MATERIAL_MAP_CUBEMAP].texture = Global::Mesh
   Texture2D panorama; // Skybox texture.
   if (useHDR)
   {
-    TextCopy(skyboxFileName, "resources/daytime.hdr");
+    TextCopy(skyboxFileName, "../../Minero-Game/resources/daytime.hdr");
 
     // Load HDR panorama (sphere) texture
     panorama = LoadTexture(skyboxFileName);
@@ -227,7 +227,7 @@ DefaultBlockModel.materials[0].maps[MATERIAL_MAP_CUBEMAP].texture = Global::Mesh
   else
   {
     // Load non HDR panorama (cube) texture
-    Image img = LoadImage("resources/skybox.png");
+    Image img = LoadImage("../../Minero-Game/resources/skybox.png");
     skybox.materials[0].maps[MATERIAL_MAP_CUBEMAP].texture = LoadTextureCubemap(
         img, CUBEMAP_LAYOUT_AUTO_DETECT); // CUBEMAP_LAYOUT_PANORAMA
     UnloadImage(img);
@@ -311,7 +311,7 @@ DefaultBlockModel.materials[0].maps[MATERIAL_MAP_CUBEMAP].texture = Global::Mesh
   // GenMeshHeightmap(Perlin, (Vector3){100.0f, 10.0f, 100.0f})
   Model terrain = LoadModelFromMesh(GenMeshCube(BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE));
 
-  terrain.materials[0].shader = LoadShader("resources/terrain.vert", "resources/terrain.frag");
+  terrain.materials[0].shader = LoadShader("../../Minero-Game/resources/terrain.vert", "../../Minero-Game/resources/terrain.frag");
 
   // UnloadImage(Perlin);
   // UnloadImage(PerlinTest);
@@ -337,7 +337,7 @@ DefaultBlockModel.materials[0].maps[MATERIAL_MAP_CUBEMAP].texture = Global::Mesh
 // Checks if the music should be played, and plays it if it should be.
  if (game->enableMusic)
  {
-   PlayMusicStream(LoadMusicStream("resources/Audio/OST/Minero.mp3"));
+   PlayMusicStream(LoadMusicStream("../../Minero-Game/resources/Audio/OST/Minero.mp3"));
  }
 
   // Main menu, Not complete!
@@ -374,9 +374,11 @@ DefaultBlockModel.materials[0].maps[MATERIAL_MAP_CUBEMAP].texture = Global::Mesh
   //player->Setup();
 //GameObject::PushObject(new Plane(postProcessShader, Vector3{0.0f, 0.0f, 0.0f}));
   // Game Loop
+
+  Logman::Log("hello from cmake");
   while (!WindowShouldClose())
   {
-    Global::Time::Update();
+    //Global::Time::Update();
 
     // TODO : Move input crap into another thread.
     // Pause Menu
@@ -391,7 +393,7 @@ DefaultBlockModel.materials[0].maps[MATERIAL_MAP_CUBEMAP].texture = Global::Mesh
       ButtonR *Options = new ButtonR("Options", 100, 200);
       ButtonR *exitButton = new ButtonR("Exit to Windows", 100, 300);
 
-      int cycle; // not used rn
+
       EnableCursor();
       while (!exit)
       {
@@ -405,6 +407,7 @@ DefaultBlockModel.materials[0].maps[MATERIAL_MAP_CUBEMAP].texture = Global::Mesh
 
         exitButton->draw();
         exitButton->update();
+        /*
         if (save->IsClicked())
         {
 
@@ -420,7 +423,7 @@ DefaultBlockModel.materials[0].maps[MATERIAL_MAP_CUBEMAP].texture = Global::Mesh
           SaveFileData(filename, &data, sizeof(data));
 
           Logman::CustomLog(LOG_DEBUG, LoadFileText(filename), NULL);
-        }
+        }*/
 
         if (exitButton->IsClicked())
         {
@@ -459,7 +462,7 @@ DefaultBlockModel.materials[0].maps[MATERIAL_MAP_CUBEMAP].texture = Global::Mesh
         }
       }
       // cleanup
-      UnloadTexture(tex);
+      //UnloadTexture(tex);
       delete men_pause;
       delete save;
       delete exitButton;
@@ -643,7 +646,7 @@ DefaultBlockModel.materials[0].maps[MATERIAL_MAP_CUBEMAP].texture = Global::Mesh
       
     // BeginShaderMode(shdrCubemap);
     // NOTE: Render texture must be y-flipped due to default OpenGL coordinates (left-bottom)
-    DrawTextureRec(game->renderer->fbo.texture, Rectangle{ 0, 0, (float)(game->renderer->fbo.texture.width), (float)(-game->renderer->fbo.texture.height) }, (Vector2){ 0, 0 }, WHITE);
+    DrawTextureRec(game->renderer->fbo.texture, Rectangle{ 0, 0, (float)(game->renderer->fbo.texture.width), (float)(-game->renderer->fbo.texture.height) }, Vector2{ 0, 0 }, WHITE);
                 ClearBackground(RAYWHITE);
 
     //BeginMode2D(menucamera->camera);
@@ -656,7 +659,7 @@ DefaultBlockModel.materials[0].maps[MATERIAL_MAP_CUBEMAP].texture = Global::Mesh
 
   }
 
-ExitGame:
+
   // De-Initialization
   //--------------------------------------------------------------------------------------
   CloseWindow(); // Close window and OpenGL context
@@ -667,6 +670,8 @@ ExitGame:
 
   // Unload Models/Textures
   // UnloadTexture(texture); // Unload texture
+
+
   UnloadModel(model); // Unload model
   UnloadModel(DefaultBlockModel);
 

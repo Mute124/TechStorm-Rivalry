@@ -2,14 +2,17 @@
 
 #include "../../lib/raylib.h"
 
-template <typename T>
 class Component
 {
 public:
-    Component(T Component) : comp(Component) {}
 
+    virtual void onStart() {}
 
+    virtual void onUpdate() {}
+
+    virtual void onDestroy() {}
+
+    
 
 private:
-    T comp;
 };

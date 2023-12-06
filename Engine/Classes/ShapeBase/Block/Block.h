@@ -55,13 +55,13 @@ public:
         this->shader = shader;
         this->model = model;
 
-        const static Texture2D Bricks = LoadTexture("resources/textures/Brick.png");
+        const static Texture2D Bricks = LoadTexture("../../Minero-Game/resources/textures/Brick.png");
         SetTextureFilter(Bricks, TEXTURE_FILTER_BILINEAR);
         SetTextureWrap(Bricks, TEXTURE_WRAP_CLAMP);
 
-        const static Texture2D BrickNormal = LoadTexture("resources/textures/Block/Brick/Brick_NORM.png");
+        const static Texture2D BrickNormal = LoadTexture("../../Minero-Game/resources/textures/Block/Brick/Brick_NORM.png");
 
-        const static Texture2D BrickSpecular = LoadTexture("resources/textures/Block/Brick/Brick_SPEC.png");
+        const static Texture2D BrickSpecular = LoadTexture("../../Minero-Game/resources/textures/Block/Brick/Brick_SPEC.png");
 
         this->model.materials[0].shader = shader;
         this->model.materials[0].shader.locs[SHADER_LOC_VECTOR_VIEW] = GetShaderLocation(this->shader, "viewPos");
@@ -120,7 +120,7 @@ public:
         else
         {
 
-            this->velocity = Vector3Subtract(this->velocity, (Vector3){0.0f, 0.001f * (float)Global::Time::GetGameTime(), 0.0f});
+            //this->velocity = Vector3Subtract(this->velocity, Vector3{0.0f, 0.001f * (float)Global::Time::GetGameTime(), 0.0f});
         }
 
         this->position = Vector3Add(this->position, this->velocity);

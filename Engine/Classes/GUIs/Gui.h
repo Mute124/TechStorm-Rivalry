@@ -1,42 +1,41 @@
 #pragma once
-#include "lib/raylib.h"
+#include "../../../lib/raylib.h"
+#include "../Component.h"
 
-typedef enum types
-{
-    HOTBAR = 0,
-    MAINMENU,
-    CONSOLE
+class GUI {
+    public:
 
-};
-// broad class for GUIs
-class GUI
-{
-public:
-    virtual void Draw() const = 0;
 
-    virtual void OnUpdate() const = 0;
+        GUI() {
+            
+        }
 
-    virtual ~GUI() {}
+        GUI(Vector2 dimensions, Vector2 position, Color backdrop) {
+            this->dimensions = dimensions;
+            this->position = position;
+            this->backdrop = backdrop;
+        }
+        
+        virtual void onStart() {
+            
+        }
 
-    virtual void SetTriggerKey(KeyboardKey key) const = 0;
+        virtual void onUpdate() {
+            
+        }
 
-    virtual void SetGUISize(int Width, int Height)
-    {
-        width = Width;
-        height = Height;
-    }
+        virtual void Draw() {
 
-    virtual void SetPosition(Vector2 position)
-    {
+            
+        }
 
-        position = position;
-    }
+        ~GUI() {
+            delete this;
+        }
+    Vector2 dimensions;
+    Vector2 position;
 
-private:
-    KeyboardKey triggerkey;
-    int width;        // width of GUI window
-    int height;       // height of GUI window
-    Vector2 position; // position on screen
-    bool is_open;     // variable to store if the screen is open
-    Color background; // what color the background of the GUI should be, it will be all the way on the back
+    Color backdrop;
+
+
 };
