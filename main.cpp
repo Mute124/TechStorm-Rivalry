@@ -557,6 +557,10 @@ DefaultBlockModel.materials[0].maps[MATERIAL_MAP_CUBEMAP].texture = Global::Mesh
     } else {
       player->isRunning = false;
     }
+
+    if (IsKeyDown(KEY_Y)) {
+      player->healthComp->DamagePlayer(0.1f);
+    }
     // TODO : day night affect
 
     // float h = Vector3Distance(player->getPosition(), Sun[0].position);
@@ -652,10 +656,13 @@ DefaultBlockModel.materials[0].maps[MATERIAL_MAP_CUBEMAP].texture = Global::Mesh
     //BeginMode2D(menucamera->camera);
 
     // Crosshair
+    player->healthComp->healthBar->Draw({0.0f, (float)screenWidth + 500});
+    
     DrawCircle(game->windowWidth/2, game->windowHeight/2, 3, GRAY);
     //EndMode2D();
 
     game->renderer->EndDraw();
+
 
   }
 

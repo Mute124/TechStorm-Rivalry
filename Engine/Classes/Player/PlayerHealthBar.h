@@ -4,18 +4,21 @@
 class HealthBar
 {
 public:
-    float CalculatePercentage(int hp, int max_hp)
+    float CalculatePercentage(float hp, float max_hp)
     {
         float percentage = (float)hp / (float)max_hp;
         return percentage;
     }
 
-    void Draw(Vector2 position, int hp, int max_hp)
+    void Draw(Vector2 position)
     {
-        int percentage = CalculatePercentage(hp, max_hp);
+        float percentage = CalculatePercentage(hp, maxHP);
 
-        DrawRectangle(position.x, position.y, 100, 20, BLACK);
-        DrawRectangleLines(position.x, position.y, 100, 20, RED);
-        DrawRectangle(position.x, position.y, 100 * percentage, 20, GREEN);
+        DrawRectangle((int)position.x, (int)position.y, 100, 20, BLACK);
+        DrawRectangleLines((int)position.x, (int)position.y, 100, 20, RED);
+        DrawRectangle((int)position.x, (int)position.y, 100 * percentage, 20, GREEN);
     };
+
+    float hp;
+    float maxHP;
 };

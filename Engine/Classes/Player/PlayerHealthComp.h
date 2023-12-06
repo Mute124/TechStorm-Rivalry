@@ -2,39 +2,41 @@
 #include "../../../lib/raylib.h"
 #include "PlayerHealthBar.h"
 
-struct PlayerHealthCompData
-{
-    HealthBar healthBar = HealthBar();
-    int hp;
-    const int max_hp = 100;
-};
-
 class PlayerHealthComp
 {
 
 public:
-    PlayerHealthCompData data;
-    PlayerHealthComp()
+    HealthBar *healthBar;
+    
+    PlayerHealthComp(int maxHP)
     {
+        healthBar = new HealthBar();
+
+        healthBar->hp = 100;
+        healthBar->maxHP = maxHP;
     }
 
-    void DamagePlayer(int damage)
+    ~PlayerHealthComp() {
+        delete this;
+    }
+
+    void DamagePlayer(float damage)
     {
-        data.hp -= damage;
+        healthBar->hp -= damage;
     }
 
     void HealPlayer(int heal)
     {
-        data.hp += heal;
+        healthBar->hp += heal;
     }
 
     int GetMaxHealth()
     {
-        return data.max_hp;
+        return healthBar->maxHP;
     }
 
     int GetHealth()
     {
-        return data.hp;
+        return healthBar->hp;
     }
 };

@@ -110,7 +110,7 @@ public:
         hand = new Hand(model);
         crosshair = new Crosshair(GetScreenWidth(), GetScreenHeight(), BLACK);
 
-        
+        healthComp = new PlayerHealthComp(m_max);
 
     };
 
@@ -223,8 +223,9 @@ public:
     bool isRunning;
 
     static inline Hand *hand;
-
     Crosshair *crosshair;
+    PlayerHealthComp *healthComp;
+
 private:
 
     bool startDriving = false;
