@@ -313,6 +313,7 @@ DefaultBlockModel.materials[0].maps[MATERIAL_MAP_CUBEMAP].texture = Global::Mesh
 
   terrain.materials[0].shader = LoadShader("../../Minero-Game/resources/terrain.vert", "../../Minero-Game/resources/terrain.frag");
 
+  
   // UnloadImage(Perlin);
   // UnloadImage(PerlinTest);
 
@@ -376,6 +377,7 @@ DefaultBlockModel.materials[0].maps[MATERIAL_MAP_CUBEMAP].texture = Global::Mesh
   // Game Loop
 
   Logman::Log("hello from cmake");
+  
   while (!WindowShouldClose())
   {
     //Global::Time::Update();
@@ -561,6 +563,12 @@ DefaultBlockModel.materials[0].maps[MATERIAL_MAP_CUBEMAP].texture = Global::Mesh
     if (IsKeyDown(KEY_Y)) {
       player->healthComp->DamagePlayer(0.1f);
     }
+
+    
+
+
+
+
     // TODO : day night affect
 
     // float h = Vector3Distance(player->getPosition(), Sun[0].position);
@@ -608,6 +616,7 @@ DefaultBlockModel.materials[0].maps[MATERIAL_MAP_CUBEMAP].texture = Global::Mesh
     GameObject::Render();
     EndShaderMode();
     BeginShaderMode(postProcessShader);
+    DrawModel(terrain, Vector3SubtractValue(Vector3Zero(), 2.0f), 1.0f, GREEN);
     GameObject::Render();
     EndShaderMode();
 

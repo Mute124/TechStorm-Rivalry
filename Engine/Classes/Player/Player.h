@@ -15,9 +15,12 @@
 #include "PlayerHealthComp.h"
 #include "PlayerController.h"
 
+#include "../../../Minero/Classes/Item/Item.h"
+
 #include <thread>
 #include <stdio.h>
 #include <stdlib.h>
+
 
 #define PLAYER_HP 100 
 
@@ -61,8 +64,8 @@ public:
             Vector3 offset;
             Vector3 position;
 
-            Model model;
 
+            Item item;
             Hand(Model model) : offset({0.0f, 0.0f, 0.0f}), model(model) {
 
             }
@@ -84,9 +87,11 @@ public:
             }
 
             void Draw() override {
-                DrawModel(model, this->position, 0.05f, GREEN);
+                //DrawModel(model, this->position, 0.05f, GREEN);
             }
 
+
+            
             
     };
 
@@ -118,6 +123,8 @@ public:
     {
         delete this;
     };
+
+    
 
     void onUpdate() override
     {

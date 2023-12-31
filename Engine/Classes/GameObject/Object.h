@@ -22,15 +22,19 @@ class Object : public GameObject {
         }
         
         void onUpdate() override {
-            this->rigidbody->Update();
+            
         }
 
+        void Draw() override {
+            DrawModel(this->model, this->position, this->scale, )
+        }
 
-        ObjectTransform *transform;
+        Vector3 position;
+        float scale;
+
+    
         Model model;
-        
-        RigidBody *rigidbody;
-        Texture2D texture;
+
     private:
         ~Object() {
             delete this;
