@@ -12,10 +12,7 @@
 
 #include "../../Player/Player.h"
 
-
 #include "../../Env/Environment.h"
-
-
 
 class Game
 {
@@ -24,7 +21,6 @@ class Game
     GameWindowFactory *windowfactory = new GameWindowFactory();
 
 public:
-
     class Renderer
     {
     public:
@@ -64,24 +60,25 @@ public:
 
         void StartTexturing()
         {
-            //StartDraw();
+            // StartDraw();
             BeginTextureMode(fbo);
             ClearBackground(RAYWHITE);
         }
 
-        void StartDepthMode() {
+        void StartDepthMode()
+        {
             BeginTextureMode(depthMapFBO);
         }
 
-        void StopDepthMode() {
+        void StopDepthMode()
+        {
             EndTextureMode();
         }
 
         void StopTexturing()
         {
-            //EndDraw();
+            // EndDraw();
             EndTextureMode();
-            
         }
 
         void CreateRenderTexture(int width, int height)
@@ -94,11 +91,6 @@ public:
         RenderTexture2D depthMapFBO; // shadowmap.
 
         static inline Environment *env = new Environment();
-
-
-        
-        
-        
 
     private:
         bool isDrawing;
@@ -121,17 +113,17 @@ public:
         delete this;
     }
 
-    toml::v3::parse_result GetGameConfig() {
+    toml::v3::parse_result GetGameConfig()
+    {
         return this->optionsConfig;
     }
 
     void StartGame()
     {
 
- 
         // Read config to decide what to set for the game
         Logman::CustomLog(LOG_INFO, "Initiating Config Manager", NULL);
-        
+
         optionsConfig = toml::parse_file("../../Minero-Game/Config/options.toml");
         Logman::CustomLog(LOG_INFO, "OptionsConfig file registered", NULL);
 
@@ -140,7 +132,7 @@ public:
 
         enableMusic = optionsConfig["Sound"]["enableMusic"].as_boolean();
         Logman::CustomLog(LOG_INFO, TextFormat("EnableMusic = %i", enableMusic), NULL);
-        
+
         if (isFullscreen == true)
         {
             windowWidth = ConfigTypeConverter::StrToInt(&optionsConfig["Window"]["windowWidth"].as_string()->operator std::string &());
@@ -150,16 +142,15 @@ public:
             Logman::CustomLog(LOG_INFO, TextFormat("Setting window height to %i", windowHeight), NULL);
 
             // since it isnt full screen, the window is resizeable
-            //windowfactory->StampFlag(FLAG_WINDOW_RESIZABLE);
+            // windowfactory->StampFlag(FLAG_WINDOW_RESIZABLE);
         }
         else
         {
-                    windowWidth = GetMonitorWidth(0);
+            windowWidth = GetMonitorWidth(0);
             windowHeight = GetMonitorHeight(0);
 
-            //windowfactory->StampFlag(FLAG_WINDOW_MAXIMIZED);
+            // windowfactory->StampFlag(FLAG_WINDOW_MAXIMIZED);
         }
-
         if (windowHeight == 0 || windowWidth == 0)
         {
             Logman::CustomLog(LOG_ERROR, "WINDOW WIDTH/HEIGHT CANT BE 0! Setting to config data.", NULL);
@@ -171,15 +162,13 @@ public:
             Logman::CustomLog(LOG_INFO, TextFormat("Setting window height to %i", windowHeight), NULL);
 
             // since it isnt full screen, the window is resizeable
-            //windowfactory->StampFlag(FLAG_WINDOW_RESIZABLE);
+            // windowfactory->StampFlag(FLAG_WINDOW_RESIZABLE);
         }
 
         // Stamp window config flags & Manufacture
-        //windowfactory->StampFlag(FLAG_MSAA_4X_HINT);
+        // windowfactory->StampFlag(FLAG_MSAA_4X_HINT);
 
         Logman::CustomLog(LOG_INFO, "Starting Game", NULL);
-
-
 
         windowfactory->ManufactureWindow(windowWidth, windowHeight, "Minero");
         InitAudioDevice(); // starts the audio driver(s).
@@ -195,17 +184,13 @@ public:
 
         // set up FBO
         rlglInit(windowWidth, windowHeight);
-        
+
         renderer = new Renderer();
 
         renderer->CreateRenderTexture(windowWidth, windowHeight);
-        
-        
-        
 
-        
         // optimization
-        //rlSetCullFace(RL_CULL_FACE_BACK);
+        // rlSetCullFace(RL_CULL_FACE_BACK);
     }
 
     void EndGame()
@@ -215,8 +200,6 @@ public:
         delete windowfactory;
         delete this;
     }
-
-
 
     // GRAPHICS
     //_____________________________________________________
