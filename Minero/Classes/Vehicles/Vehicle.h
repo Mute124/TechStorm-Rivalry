@@ -1,36 +1,22 @@
 #pragma once
 #include "../lib/raylib.h"
 #include "../lib/raymath.h"
-#include "../Gameobj.h"
-#include "VehicleID.h"
-#include "VehicleTypes.h"
+#include "../../../Engine/Classes/GameObject/Gameobject.h"
 
 
 
-class Vehicle : public GameObject, public VehicleID {
+class Vehicle : public GameObject {
     public:
-        Vehicle(const Vtypes VehicleType) :  vtype(VehicleType), VehicleID(this) {}
-
-
-        
-        virtual void onDrive() {
-
+        void Create(Vector3 position, Model model) {
+            
         }
 
-        virtual void onDriveUpdate() {
 
-        }
 
-        int GetType() const override {
-            return 3; // Vehicle
-        }
-        
-        bool isMobile;
-        const char *tag;
-        const Vtypes vtype;
-        
     private:
-        
-        
 
+        Vector3 position;
+        Model model;
+
+        Ray raylook;
 };

@@ -46,8 +46,8 @@ public:
     {
 
         if (driving) {
-            //model.transform = MatrixLookAt((Vector3){position.x, position.y + 2.0f, position.z}, Player::cameraComponent->getTarget(), (Vector3){0.0f, 1.0f, 0.0f});
-            //DrawModel(model, (Vector3){Player::cameraComponent->getPosition().x, Player::cameraComponent->getPosition().y -2.0f, Player::cameraComponent->getPosition().z}, 0.02f, WHITE);
+            model.transform = MatrixLookAt(Vector3{position.x, position.y + 2.0f, position.z}, Player::cameraComponent->getTarget(), Vector3{0.0f, 1.0f, 0.0f});
+            DrawModel(model, Vector3{Player::cameraComponent->getPosition().x, Player::cameraComponent->getPosition().y -2.0f, Player::cameraComponent->getPosition().z}, 0.02f, WHITE);
         } else {
             DrawModel(model, this->position, 0.02f, WHITE);
         }
