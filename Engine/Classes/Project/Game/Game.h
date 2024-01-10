@@ -5,6 +5,7 @@
 
 #include "Components/GameWindowFactory.h"
 #include "../../Player/Player.h"
+
 #include "../../Env/Environment.h"
 
 class Game
