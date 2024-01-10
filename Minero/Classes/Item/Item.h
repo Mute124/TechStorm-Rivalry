@@ -1,5 +1,5 @@
 #pragma once
-#include <raylib/src/raylib.h>
+#include "../../../Common.h"
 
 typedef enum ItemTypes {
     Placeable,
@@ -11,7 +11,7 @@ typedef enum ItemTypes {
 
 class ItemDictionary {
     
-}
+};
 
 class Item {
     public:

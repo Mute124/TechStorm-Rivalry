@@ -3,7 +3,7 @@
         Split this class into two. one for the controller, and the other for the actual playermodel
 */
 #pragma once
-#include "../../../lib/raylib.h"
+#include "../../../lib/raylib.h" // PLEASE FOR THE LOVE OF GOD DONT PUT. A. FUCKING. SPACE. YOU. MONKEY!
 #include "../../../lib/raymath.h"
 #include "../../../lib/rcamera.h"
 #include "../../DataSets/Globals.h"
@@ -24,7 +24,6 @@
 
 #define PLAYER_HP 100 
 
-
 typedef enum
 {
     Action_Idle = 0,
@@ -34,9 +33,9 @@ typedef enum
     Action_Place
 } Player_Action;
 
+
 class Player : public GameObject
 {
-
 public:
 
     class Crosshair {
@@ -66,7 +65,7 @@ public:
 
 
             Item item;
-            Hand(Model model) : offset({0.0f, 0.0f, 0.0f}), model(model) {
+            Hand(Model model) : offset({0.0f, 0.0f, 0.0f}) {
 
             }
 
@@ -191,10 +190,7 @@ public:
     }
 
     void Drive() {
-        
-        
         CameraMoveForward(cameraComponent->getSelfCameraPointer(), 0.01f, false);
-        
     }
 
 

@@ -13,7 +13,7 @@ bool SkipMainMenu = true;
 
 #include "lib/Buttons/src/ButtonR.h" // Needed for buttons.
 // Raylib Framework
-#include "lib/raylib.h"
+#include "../build/_deps/raylib-src/src/raylib.h"
 #include "lib/raymath.h"
 #include "lib/rcamera.h"
 #include "lib/rlgl.h"
