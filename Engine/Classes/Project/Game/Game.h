@@ -2,6 +2,7 @@
 #pragma once
 #include "../../../../Common.h"
 
+#include "../../Env/Light/Light.h"
 
 #include "Components/GameWindowFactory.h"
 #include "../../Player/Player.h"
@@ -84,6 +85,8 @@ public:
         RenderTexture2D fbo;
         RenderTexture2D depthMapFBO; // shadowmap.
 
+        Shader pbrShader;
+
         static inline Environment *env = new Environment();
 
     private:
@@ -163,7 +166,7 @@ public:
         // windowfactory->StampFlag(FLAG_MSAA_4X_HINT);
 
         Logman::CustomLog(LOG_INFO, "Starting Game", NULL);
-
+        
         windowfactory->ManufactureWindow(windowWidth, windowHeight, "Minero");
         InitAudioDevice(); // starts the audio driver(s).
 
@@ -183,7 +186,6 @@ public:
 
         renderer->CreateRenderTexture(windowWidth, windowHeight);
 
-        // optimization
         // rlSetCullFace(RL_CULL_FACE_BACK);
     }
 

@@ -4,8 +4,11 @@
 #pragma once
 #include "../build/_deps/raylib-src/src/raylib.h"
 #include "../build/_deps/raylib-src/src/raymath.h"
-
+#include "../build/_deps/raylib-src/src/rlgl.h"
+#include "../build/_deps/raylib-src/src/rcamera.h"
+#include "../build/_deps/raygui-src/src/raygui.h"
 // End of raylib Libraries
+
 
 // C++ Libraries
 #include <stdio.h>
@@ -44,5 +47,6 @@
 #include <Jolt/Physics/Body/BodyActivationListener.h>
 
 // End of External Libraries
+
 
 // End of Common.h

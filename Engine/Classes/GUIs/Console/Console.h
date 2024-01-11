@@ -1,5 +1,5 @@
 #pragma once
-#include "../../../../lib/raylib.h"
+
 #include "../../Logging/Logman.h"
 
 #include <stdio.h>

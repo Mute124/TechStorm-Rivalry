@@ -13,10 +13,7 @@ bool SkipMainMenu = true;
 
 #include "lib/Buttons/src/ButtonR.h" // Needed for buttons.
 // Raylib Framework
-#include "../build/_deps/raylib-src/src/raylib.h"
-#include "lib/raymath.h"
-#include "lib/rcamera.h"
-#include "lib/rlgl.h"
+#include "common.h"
 
 // Game Engine
 #include "Engine/Classes/Project/Game/Game.h"
@@ -28,6 +25,7 @@ bool SkipMainMenu = true;
 #include "Engine/Classes/Logging/Logman.h"
 #include "Engine/Classes/ConfigMan/ConfigMan.h" // config manager
 #include "Engine/Classes/GUIs/Console/Console.h"
+
 
 // Minero Classes
 #include "Minero/Classes/Vehicles/Plane.h"
@@ -48,8 +46,9 @@ bool SkipMainMenu = true;
 #include <fstream>
 #include <iostream>
 
-#define RLIGHTS_IMPLEMENTATION
-#include "lib/rlights.h"
+#include "Engine/Classes/Env/Light/Light.h"
+// #define RLIGHTS_IMPLEMENTATION
+// #include "lib/rlights.h"
 
 // This translates the current screen
 typedef enum
@@ -102,7 +101,7 @@ int main(void)
   Game *game = new Game();
   game->StartGame();
   // Game::Initialize();
-
+  
   ButtonR *mmen_start = new ButtonR("start", (float)middlex, (float)middley); // Main start button
 
   MenuCamera *menucamera = new MenuCamera(); // camera for the main menu is needed due to dimension differences
@@ -114,6 +113,38 @@ int main(void)
   //  std::vector<GameObject *>
   //      objects; // Declares the main list for all game objects. Do not touch or
   // bad things will happen. Like memory leaks :)
+  game->renderer->pbrShader = LoadShader(TextFormat("../../Minero-Game/resources/shaders/glsl%i/pbr.vs", GLSL_VERSION),
+                                         TextFormat("../../Minero-Game/resources/shaders/glsl%i/pbr.fs", GLSL_VERSION));
+  game->renderer->pbrShader.locs[SHADER_LOC_MAP_ALBEDO] = GetShaderLocation(game->renderer->pbrShader, "albedoMap");
+  // WARNING: Metalness, roughness, and ambient occlusion are all packed into a MRA texture
+  // They are passed as to the SHADER_LOC_MAP_METALNESS location for convenience,
+  // shader already takes care of it accordingly
+  game->renderer->pbrShader.locs[SHADER_LOC_MAP_METALNESS] = GetShaderLocation(game->renderer->pbrShader, "mraMap");
+  game->renderer->pbrShader.locs[SHADER_LOC_MAP_NORMAL] = GetShaderLocation(game->renderer->pbrShader, "normalMap");
+  // WARNING: Similar to the MRA map, the emissive map packs different information
+  // into a single texture: it stores height and emission data
+  // It is binded to SHADER_LOC_MAP_EMISSION location an properly processed on shader
+  game->renderer->pbrShader.locs[SHADER_LOC_MAP_EMISSION] = GetShaderLocation(game->renderer->pbrShader, "emissiveMap");
+  game->renderer->pbrShader.locs[SHADER_LOC_COLOR_DIFFUSE] = GetShaderLocation(game->renderer->pbrShader, "albedoColor");
+  // optimization
+
+  // Setup additional required shader locations, including lights data
+  game->renderer->pbrShader.locs[SHADER_LOC_VECTOR_VIEW] = GetShaderLocation(game->renderer->pbrShader, "viewPos");
+  int lightCountLoc = GetShaderLocation(game->renderer->pbrShader, "numOfLights");
+  int maxLightCount = MAX_LIGHTS;
+  SetShaderValue(game->renderer->pbrShader, lightCountLoc, &maxLightCount, SHADER_UNIFORM_INT);
+
+  // Setup ambient color and intensity parameters
+  float ambientIntensity = 0.02f;
+  Color ambientColor = Color{26, 32, 135, 255};
+  Vector3 ambientColorNormalized = Vector3{ambientColor.r / 255.0f, ambientColor.g / 255.0f, ambientColor.b / 255.0f};
+  SetShaderValue(game->renderer->pbrShader, GetShaderLocation(game->renderer->pbrShader, "ambientColor"), &ambientColorNormalized, SHADER_UNIFORM_VEC3);
+  SetShaderValue(game->renderer->pbrShader, GetShaderLocation(game->renderer->pbrShader, "ambient"), &ambientIntensity, SHADER_UNIFORM_FLOAT);
+
+  // Get location for shader parameters that can be modified in real time
+  int emissiveIntensityLoc = GetShaderLocation(game->renderer->pbrShader, "emissivePower");
+  int emissiveColorLoc = GetShaderLocation(game->renderer->pbrShader, "emissiveColor");
+  int textureTilingLoc = GetShaderLocation(game->renderer->pbrShader, "tiling");
 
   Model DefaultBlockModel = LoadModelFromMesh(
       GenMeshCube(BLOCK_SIZE, BLOCK_SIZE,
@@ -136,10 +167,10 @@ int main(void)
 
   // Set shader value: ambient light level
   int ambientLoc = GetShaderLocation(postProcessShader, "ambient");
-  static const Color ambientColor = WHITE;
-  SetShaderValue(postProcessShader, ambientLoc, &ambientColor, SHADER_UNIFORM_VEC4);
+  //static const Color ambientColor = WHITE;
+  //SetShaderValue(postProcessShader, ambientLoc, &ambientColor, SHADER_UNIFORM_VEC4);
 
-  SetShaderValue(postProcessShader, postProcessShader.locs[SHADER_LOC_COLOR_AMBIENT], &ambientColor, SHADER_UNIFORM_VEC4);
+  //SetShaderValue(postProcessShader, postProcessShader.locs[SHADER_LOC_COLOR_AMBIENT], &ambientColor, SHADER_UNIFORM_VEC4);
   // Player Object Creation
   const int Playersize = 3;
   Model PlayerModel = LoadModelFromMesh(GenMeshCube(3.0f, 3.0f, 3.0f)); // Generates the playermodel. For right now it is a cube.
@@ -149,12 +180,7 @@ int main(void)
 
   // Block Initialization
 
-DefaultBlockModel.materials[0].maps[MATERIAL_MAP_CUBEMAP].texture = Global::MeshTools::GenTextureCubemap(
-        postProcessShader, game->renderer->fbo.texture, 1024, PIXELFORMAT_UNCOMPRESSED_R8G8B8A8);
-
-
-  Block *block = new Block(BlockDirt, Vector3Zero(), WHITE,
-                           postProcessShader, DefaultBlockModel);
+  Block *block = new Block(BlockDirt, Vector3Zero(), WHITE, game->renderer->pbrShader, DefaultBlockModel);
 
   GameObject::PushObject(block);
 
@@ -162,8 +188,8 @@ DefaultBlockModel.materials[0].maps[MATERIAL_MAP_CUBEMAP].texture = Global::Mesh
 
   // Load skybox model
   // skybox creation.
-  Mesh cube = GenMeshCube(1.0f, 1.0f, 1.0f);
-  Model skybox = LoadModelFromMesh(cube);
+  Mesh skyboxMesh = GenMeshCube(1.0f, 1.0f, 1.0f);
+  Model skybox = LoadModelFromMesh(skyboxMesh);
 
   bool useHDR = true;
 
@@ -201,14 +227,13 @@ DefaultBlockModel.materials[0].maps[MATERIAL_MAP_CUBEMAP].texture = Global::Mesh
   Texture2D panorama; // Skybox texture.
   if (useHDR)
   {
-    TextCopy(skyboxFileName, "../../Minero-Game/resources/daytime.hdr");
+    TextCopy(skyboxFileName, "../../Minero-Game/resources/milkyWay.hdr");
 
     // Load HDR panorama (sphere) texture
     panorama = LoadTexture(skyboxFileName);
 
-
     game->renderer->env->Panorama = panorama;
-    
+
     // Generate cubemap (texture with 6 quads-cube-mapping) from panorama HDR
     // texture NOTE 1: New texture is generated rendering to texture, shader
     // calculates the sphere->cube coordinates mapping NOTE 2: It seems on some
@@ -222,12 +247,12 @@ DefaultBlockModel.materials[0].maps[MATERIAL_MAP_CUBEMAP].texture = Global::Mesh
     // /);
 
     // UnloadTexture(panorama); // Texture not required anymore, cubemap
-    //  already generated
+    //   already generated
   }
   else
   {
     // Load non HDR panorama (cube) texture
-    Image img = LoadImage("../../Minero-Game/resources/skybox.png");
+    Image img = LoadImage("../../Minero-Game/resources/textures/space.png");
     skybox.materials[0].maps[MATERIAL_MAP_CUBEMAP].texture = LoadTextureCubemap(
         img, CUBEMAP_LAYOUT_AUTO_DETECT); // CUBEMAP_LAYOUT_PANORAMA
     UnloadImage(img);
@@ -238,14 +263,12 @@ DefaultBlockModel.materials[0].maps[MATERIAL_MAP_CUBEMAP].texture = Global::Mesh
 
   Light Sun[2] = {0};
 
-  // Sun creation
-  Sun[0] = CreateLight(LIGHT_DIRECTIONAL, Vector3{50.0f, 50.0f, 50.0f},
-                       Vector3Zero(), WHITE, postProcessShader);
-  Sun[1] = CreateLight(LIGHT_POINT, Vector3{50.0f, 50.0f, 50.0f}, Vector3Zero(),
-                       BLACK, postProcessShader); // Ambient color.
+  Sun[1] = CreateLight(LIGHT_POINT, Vector3{1.0f, 10.0f, 1.0f}, player->GetPosition(),
+                       WHITE, 9.0f, game->renderer->pbrShader); // Ambient color.
 
-    
 
+
+  Sun[1].enabled = true;
   // Assignment of shaders
 
   //--------------------------------------------------------------------------------------
@@ -313,33 +336,21 @@ DefaultBlockModel.materials[0].maps[MATERIAL_MAP_CUBEMAP].texture = Global::Mesh
 
   terrain.materials[0].shader = LoadShader("../../Minero-Game/resources/terrain.vert", "../../Minero-Game/resources/terrain.frag");
 
-  
-  // UnloadImage(Perlin);
-  // UnloadImage(PerlinTest);
-
   // test if temp folder exists
   if (!DirectoryExists("temp"))
   {
     system("mkdir temp");
   }
 
-  Texture tex; // TODO : Find out what this is.
+  game->renderer->env->shdrCubemap = shdrCubemap;
 
-  // const static int res[2] = {game->windowHeight, game->windowWidth};
-  // SetShaderValue(postProcessShader, GetShaderLocation(postProcessShader, "resolution"), &res, SHADER_UNIFORM_VEC2);
- 
- game->renderer->env->shdrCubemap = shdrCubemap;
- 
-  
   ConsoleGUI *console = new ConsoleGUI(true);
 
-
-
-// Checks if the music should be played, and plays it if it should be.
- if (game->enableMusic)
- {
-   PlayMusicStream(LoadMusicStream("../../Minero-Game/resources/Audio/OST/Minero.mp3"));
- }
+  // Checks if the music should be played, and plays it if it should be.
+  if (game->enableMusic)
+  {
+    PlayMusicStream(LoadMusicStream("../../Minero-Game/resources/Audio/OST/Minero.mp3"));
+  }
 
   // Main menu, Not complete!
   if (SkipMainMenu != true)
@@ -372,15 +383,15 @@ DefaultBlockModel.materials[0].maps[MATERIAL_MAP_CUBEMAP].texture = Global::Mesh
     }
   }
   delete mmen_start;
-  //player->Setup();
-//GameObject::PushObject(new Plane(postProcessShader, Vector3{0.0f, 0.0f, 0.0f}));
-  // Game Loop
+  // player->Setup();
+  // GameObject::PushObject(new Plane(postProcessShader, Vector3{0.0f, 0.0f, 0.0f}));
+  //  Game Loop
 
   Logman::Log("hello from cmake");
-  
+
   while (!WindowShouldClose())
   {
-    //Global::Time::Update();
+    // Global::Time::Update();
 
     // TODO : Move input crap into another thread.
     // Pause Menu
@@ -394,7 +405,6 @@ DefaultBlockModel.materials[0].maps[MATERIAL_MAP_CUBEMAP].texture = Global::Mesh
       ButtonR *save = new ButtonR("Save", 100, 100);
       ButtonR *Options = new ButtonR("Options", 100, 200);
       ButtonR *exitButton = new ButtonR("Exit to Windows", 100, 300);
-
 
       EnableCursor();
       while (!exit)
@@ -439,8 +449,6 @@ DefaultBlockModel.materials[0].maps[MATERIAL_MAP_CUBEMAP].texture = Global::Mesh
           {
             // TODO : Add options
 
-
-            
             if (IsKeyDown(KEY_ESCAPE))
             {
               closeOptions = true;
@@ -464,7 +472,7 @@ DefaultBlockModel.materials[0].maps[MATERIAL_MAP_CUBEMAP].texture = Global::Mesh
         }
       }
       // cleanup
-      //UnloadTexture(tex);
+      // UnloadTexture(tex);
       delete men_pause;
       delete save;
       delete exitButton;
@@ -476,9 +484,8 @@ DefaultBlockModel.materials[0].maps[MATERIAL_MAP_CUBEMAP].texture = Global::Mesh
       }
     }
 
-
-    if (IsKeyPressed(KEY_U)) {
-
+    if (IsKeyPressed(KEY_U))
+    {
     }
     // update ray
     ray.position = player->cameraComponent->getPosition();
@@ -507,7 +514,7 @@ DefaultBlockModel.materials[0].maps[MATERIAL_MAP_CUBEMAP].texture = Global::Mesh
     {
       Vector3 placepos = player->cameraComponent->getTarget();
 
-      GameObject::PushObject(new Block(BlockStone, Vector3{roundf(placepos.x), roundf(placepos.y), roundf(placepos.z)}, WHITE, postProcessShader, DefaultBlockModel));
+      GameObject::PushObject(new Block(BlockStone, Vector3{roundf(placepos.x), roundf(placepos.y), roundf(placepos.z)}, WHITE, game->renderer->pbrShader, DefaultBlockModel));
     }
 
     if (!IsKeyDown(KEY_LEFT_ALT))
@@ -553,21 +560,19 @@ DefaultBlockModel.materials[0].maps[MATERIAL_MAP_CUBEMAP].texture = Global::Mesh
       CameraMoveUp(player->cameraComponent->getSelfCameraPointer(), -0.1f);
     }
 
-    if (IsKeyDown(KEY_LEFT_SHIFT)) {
+    if (IsKeyDown(KEY_LEFT_SHIFT))
+    {
       player->isRunning = true;
-      
-    } else {
+    }
+    else
+    {
       player->isRunning = false;
     }
 
-    if (IsKeyDown(KEY_Y)) {
+    if (IsKeyDown(KEY_Y))
+    {
       player->healthComp->DamagePlayer(0.1f);
     }
-
-    
-
-
-
 
     // TODO : day night affect
 
@@ -585,49 +590,36 @@ DefaultBlockModel.materials[0].maps[MATERIAL_MAP_CUBEMAP].texture = Global::Mesh
                           player->cameraComponent->getPosition().y,
                           player->cameraComponent->getPosition().z};
 
-    Vector3 SunPos = {Sun[0].position.x, Sun[0].position.y, Sun[0].position.z};
+    UpdateLight(game->renderer->pbrShader, Sun[1]);
 
-    UpdateLightValues(postProcessShader, Sun[0]);
-    UpdateLightValues(postProcessShader, Sun[1]);
-
-    // flashlight->Update(postProcessShader, player->cameraComponent->getPosition(), player->cameraComponent->getPosition());
-
-    SetShaderValue(postProcessShader, postProcessShader.locs[SHADER_LOC_VECTOR_VIEW], cameraPos, SHADER_UNIFORM_VEC3);
+    SetShaderValue(game->renderer->pbrShader, game->renderer->pbrShader.locs[SHADER_LOC_VECTOR_VIEW], cameraPos, SHADER_UNIFORM_VEC3);
 
     game->renderer->StartTexturing();
 
-
-    
     BeginMode3D(player->cameraComponent->getSelfCamera());
-
+ 
     rlDisableBackfaceCulling();
     rlDisableDepthMask();
     DrawModel(skybox, Vector3{0.0f, 0.0f, 0.0f}, 1.0f, WHITE);
     rlEnableBackfaceCulling();
     rlEnableDepthMask();
 
-    // rlPopMatrix()
-
-    // DrawModel(terrain, Vector3SubtractValue(Vector3Zero(), 2.0f), 1.0f, GREEN); // not needed atm, if it isnt for a while, it will get deleted
-
-    //  We are inside the cube, we need to disable backface culling!
-
-    BeginShaderMode(shdrCubemap);
-    GameObject::Render();
-    EndShaderMode();
-    BeginShaderMode(postProcessShader);
-    DrawModel(terrain, Vector3SubtractValue(Vector3Zero(), 2.0f), 1.0f, GREEN);
-    GameObject::Render();
-    EndShaderMode();
-
+    // Set old car model texture tiling, emissive color and emissive intensity parameters on shader
+    SetShaderValue(game->renderer->pbrShader, textureTilingLoc, &block->carTextureTiling, SHADER_UNIFORM_VEC2);
+    Vector4 carEmissiveColor = ColorNormalize(block->model.materials[0].maps[MATERIAL_MAP_EMISSION].color);
+    SetShaderValue(game->renderer->pbrShader, emissiveColorLoc, &carEmissiveColor, SHADER_UNIFORM_VEC4);
+    float emissiveIntensity = 0.01f;
+    SetShaderValue(game->renderer->pbrShader, emissiveIntensityLoc, &emissiveIntensity, SHADER_UNIFORM_FLOAT);
     
+    GameObject::RenderObjects();
+
+
     // EndShaderMode();
     game->renderer->End3D();
-
     game->renderer->StopTexturing();
     rlPopMatrix();
 
-
+    /*
     // depth mask
     game->renderer->StartDepthMode();
 
@@ -651,30 +643,26 @@ DefaultBlockModel.materials[0].maps[MATERIAL_MAP_CUBEMAP].texture = Global::Mesh
     game->renderer->End3D();
 
     game->renderer->StopTexturing();
-    rlPopMatrix();
+    rlPopMatrix();*/
 
-    SetTextureFilter(game->renderer->fbo.texture, TEXTURE_FILTER_BILINEAR);
-    
     game->renderer->StartDraw();
-      
+
     // BeginShaderMode(shdrCubemap);
     // NOTE: Render texture must be y-flipped due to default OpenGL coordinates (left-bottom)
-    DrawTextureRec(game->renderer->fbo.texture, Rectangle{ 0, 0, (float)(game->renderer->fbo.texture.width), (float)(-game->renderer->fbo.texture.height) }, Vector2{ 0, 0 }, WHITE);
-                ClearBackground(RAYWHITE);
+    DrawTextureRec(game->renderer->fbo.texture, Rectangle{0, 0, (float)(game->renderer->fbo.texture.width), (float)(-game->renderer->fbo.texture.height)}, Vector2{0, 0}, WHITE);
+    ClearBackground(RAYWHITE);
 
-    //BeginMode2D(menucamera->camera);
+    // BeginMode2D(menucamera->camera);
 
     // Crosshair
     player->healthComp->healthBar->Draw({0.0f, (float)screenWidth + 500});
-    
-    DrawCircle(game->windowWidth/2, game->windowHeight/2, 3, GRAY);
-    //EndMode2D();
+
+    DrawCircle(game->windowWidth / 2, game->windowHeight / 2, 3, GRAY);
+
+    // EndMode2D();
 
     game->renderer->EndDraw();
-
-
   }
-
 
   // De-Initialization
   //--------------------------------------------------------------------------------------
@@ -686,7 +674,6 @@ DefaultBlockModel.materials[0].maps[MATERIAL_MAP_CUBEMAP].texture = Global::Mesh
 
   // Unload Models/Textures
   // UnloadTexture(texture); // Unload texture
-
 
   UnloadModel(model); // Unload model
   UnloadModel(DefaultBlockModel);

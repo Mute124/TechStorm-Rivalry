@@ -1,5 +1,5 @@
 #pragma once
-#include "../../../lib/raylib.h"
+
 #include "CameraData.h"
 #include <vector>
 #include <stdio.h>

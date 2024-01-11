@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <time.h>
 
-#include "../../../lib/raylib.h"
+#include "../../../../build/_deps/raylib-src/src/raylib.h"
 
 // handles logging
 class Logman {

@@ -1,5 +1,5 @@
 #pragma once
-#include "../../../lib/raylib.h"
+#include "../../../common.h"
 #include "../../DataSets/Globals.h"
 #include "../Logging/Logman.h"
 #include <stdio.h>
@@ -7,6 +7,7 @@
 #include <vector>
 #include <thread>
 #include <mutex>
+
 typedef enum type
 {
   BLOCK = 0,  // Game object is a block
@@ -183,7 +184,7 @@ public:
    */
   static inline void Update()
   {
-    Render();
+    RenderObjects();
     for (auto &GameObject : GameObjects)
     {
 
@@ -203,7 +204,7 @@ public:
     GameObjects.push_back(_obj);
   }
 
-  static inline void Render()
+  static inline void RenderObjects()
   {
 
     for (auto &obj : GameObjects)

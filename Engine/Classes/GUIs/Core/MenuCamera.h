@@ -1,5 +1,5 @@
 #pragma once
-#include "../../../../lib/raylib.h"
+#include "../../../../common.h"
 #include "../../GameObject/Gameobject.h"
 
 #pragma 

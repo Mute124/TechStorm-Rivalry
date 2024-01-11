@@ -34,6 +34,23 @@ FetchContent_Declare(
     GIT_TAG        v3.4.0
 )
 FetchContent_MakeAvailable(tomlplusplus)
+
+# Include RRes
+FetchContent_Declare(
+        RRes
+        GIT_REPOSITORY "https://github.com/raysan5/rres"
+        GIT_TAG "1.2.0"
+)
+FetchContent_MakeAvailable(RRes)
+
+# Include RayGui
+FetchContent_Declare(
+        RayGui
+        GIT_REPOSITORY "https://github.com/raysan5/raygui"
+        GIT_TAG "4.0"
+)
+FetchContent_MakeAvailable(RayGui)
+
 # Our Project
 # The configurations we support
 set(CMAKE_CONFIGURATION_TYPES "Debug;Release;Distribution")
@@ -42,7 +59,7 @@ set(CMAKE_CONFIGURATION_TYPES "Debug;Release;Distribution")
 set(DOUBLE_PRECISION OFF)
 
 # When turning this option on, the library will be compiled with debug symbols
-set(GENERATE_DEBUG_SYMBOLS ON)
+set(GENERATE_DEBUG_SYMBOLS OFF)
 
 # When turning this option on, the library will be compiled in such a way to attempt to keep the simulation deterministic across platforms
 set(CROSS_PLATFORM_DETERMINISTIC OFF)
@@ -80,7 +97,6 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(JoltPhysics)
 
-
 # Set linker flags
 set(CMAKE_EXE_LINKER_FLAGS_DISTRIBUTION "${CMAKE_EXE_LINKER_FLAGS_RELEASE}")
 
@@ -92,8 +108,10 @@ SET_INTERPROCEDURAL_OPTIMIZATION()
 add_executable(${PROJECT_NAME} main.cpp)
 #set(raylib_VERBOSE 1)
 target_link_libraries(${PROJECT_NAME} raylib)
-target_include_directories(${PROJECT_NAME} PUBLIC ${JoltPhysics_SOURCE_DIR}/..)
+
 target_link_libraries(${PROJECT_NAME} Jolt)
+target_include_directories(${PROJECT_NAME} PUBLIC ${JoltPhysics_SOURCE_DIR}/..)
+
 
 include_directories(BEFORE SYSTEM ${CMAKE_CURRENT_SOURCE_DIR}/resources)
 

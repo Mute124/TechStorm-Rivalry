@@ -1,10 +1,10 @@
 #pragma once
-#include "../lib/raylib.h"
+#include "../../../common.h"
+
 #include "../../../Engine/Classes/GameObject/Gameobject.h"
-#include "../lib/rlgl.h"
+
 #include <math.h>
-#include "../lib/raymath.h"
-#include "../lib/rcamera.h"
+
 #include "../../../Engine/Classes/Player/Player.h"
 
 class Plane : public GameObject

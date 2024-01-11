@@ -4,10 +4,8 @@
 #include <stdlib.h>
 #include <thread>
 
-#include "../../../lib/raylib.h"
-#include "../../../lib/raymath.h"
-#include "../../../lib/rcamera.h"
-#include "../Physics/Velocity.h"
+#include "../../../common.h"
+
 
 //#define CAMERA_IMPLEMENTATION
 
@@ -25,6 +23,7 @@ private:
     KeyboardKey forward, backward, left, right, jump, crouch;
 public:
     
+    bool isRunning = false;
     bool canMove = true;
     bool isGrounded = false;
 
@@ -33,7 +32,7 @@ public:
         
     }
 
-    Velocity vel;
+
 
     void SetSpeed(float speed) {
         this->speed = speed;

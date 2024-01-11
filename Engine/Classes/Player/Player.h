@@ -3,9 +3,9 @@
         Split this class into two. one for the controller, and the other for the actual playermodel
 */
 #pragma once
-#include "../../../lib/raylib.h" // PLEASE FOR THE LOVE OF GOD DONT PUT. A. FUCKING. SPACE. YOU. MONKEY!
-#include "../../../lib/raymath.h"
-#include "../../../lib/rcamera.h"
+#include "../../../common.h" // PLEASE FOR THE LOVE OF GOD DONT PUT. A. FUCKING. SPACE. YOU. MONKEY!
+
+
 #include "../../DataSets/Globals.h"
 
 #include "../GameObject/Gameobject.h"
@@ -17,9 +17,6 @@
 
 #include "../../../Minero/Classes/Item/Item.h"
 
-#include <thread>
-#include <stdio.h>
-#include <stdlib.h>
 
 
 #define PLAYER_HP 100 
@@ -145,6 +142,18 @@ public:
         if (IsKeyDown(KEY_V)) {
             startDriving = false;
         }
+
+        if (IsKeyDown(KEY_LEFT_SHIFT)) {
+            controller->isRunning = true;
+            controller->SetSpeed(0.5f); //m/s
+        }
+        if (!IsKeyDown(KEY_LEFT_SHIFT)) {
+            controller->isRunning = false;
+            controller->SetSpeed(0.03f); //m/s
+        }
+
+        
+
         
         if (startDriving) {
             Drive();
@@ -228,6 +237,7 @@ public:
     static inline Hand *hand;
     Crosshair *crosshair;
     PlayerHealthComp *healthComp;
+
 
 private:
 

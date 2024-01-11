@@ -1,48 +1,44 @@
 #pragma once
 #include "Gameobject.h"
-#include "ObjectTransform.h"
-#include "../Physics/RigidBody.h"
+#include "../Project/Game/Game.h"
 
-#include "../../../lib/rlgl.h"
-#include "../../../lib/raymath.h"
-class Object : public GameObject {
-    public:
+typedef struct
+{
+    MaterialMap albedo;
+    MaterialMap normal;
+    MaterialMap emissive;
+    MaterialMap metallic;
+    MaterialMap roughness;
+    MaterialMap ao;
+
+    MaterialMap MRAO;
+} MaterialMapList;
+
+class Object : public GameObject
+{
+public:
+    Object(Model model, MaterialMapList materialMapList)
+    {
 
 
+    };
 
-        Object(Model model, ObjectTransform transform) {      
+    void Destroy()
+    {
+        this->~Object();
+    }
 
-            this->model = model;
-            this->transform = new ObjectTransform(transform);
-            
-        };
+    void onUpdate() override
+    {
+    }
 
-        void Destroy() {
-            this->~Object();
-        }
-        
-        void onUpdate() override {
-            
-        }
+    void Draw() override
+    {
+    }
 
-        void Draw() override {
-            DrawModel(this->model, this->position, this->scale, )
-        }
+    Vector3 position;
+    float scale;
+    Model model;
 
-        Vector3 position;
-        float scale;
-
-    
-        Model model;
-
-    private:
-        ~Object() {
-            delete this;
-        }
-
-        void GenCubemap(float roughness) {
-            
-        }
-        
+    MaterialMapList materialMapList;
 };
-

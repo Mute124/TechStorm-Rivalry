@@ -1,9 +1,8 @@
 #pragma once
-#include "../../../lib/raylib.h"
-#include "../../../lib/rlights.h"
+#include "../../../common.h"
 
-class Flashlight {
-    private:
+/*
+private:
         Light m_light_source;
         Vector3 position;
     public:
@@ -29,7 +28,7 @@ class Flashlight {
          * @param PlayerTarget the target of the player
          *
          * @throws ErrorType description of error
-         */
+         
         void Update(Shader shader, Vector3 PlayerPos, Vector3 PlayerTarget) {
             this->m_light_source.position = PlayerPos;
             this->m_light_source.target = PlayerTarget;
@@ -37,4 +36,7 @@ class Flashlight {
         }
         
     
+*/
+class Flashlight {
+    public:
 };

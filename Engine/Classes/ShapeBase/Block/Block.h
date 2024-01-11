@@ -3,7 +3,7 @@
 */
 #pragma once
 
-#include "../../../../lib/raylib.h"
+#include "../../../../common.h"
 #include "../../../../lib/glm/glm/glm.hpp"
 #include "../../GameObject/Gameobject.h"
 #include "../../../DataSets/Globals.h"
@@ -36,7 +36,7 @@ public:
         // DrawBoundingBox(this->Box, ORANGE);
         if (this->type != BlockAir)
         {
-            
+
             //BeginShaderMode(shader);
             DrawModel(model, position, BLOCK_SIZE, color);
             //EndShaderMode();
@@ -55,34 +55,34 @@ public:
         this->shader = shader;
         this->model = model;
 
-        const static Texture2D Bricks = LoadTexture("../../Minero-Game/resources/textures/Brick.png");
-        SetTextureFilter(Bricks, TEXTURE_FILTER_BILINEAR);
-        SetTextureWrap(Bricks, TEXTURE_WRAP_CLAMP);
-
-        const static Texture2D BrickNormal = LoadTexture("../../Minero-Game/resources/textures/Block/Brick/Brick_NORM.png");
-
-        const static Texture2D BrickSpecular = LoadTexture("../../Minero-Game/resources/textures/Block/Brick/Brick_SPEC.png");
-
+        const static Texture2D Bricks = LoadTexture("../../Minero-Game/resources/textures/Block/Brick/Brick.png");
         this->model.materials[0].shader = shader;
         this->model.materials[0].shader.locs[SHADER_LOC_VECTOR_VIEW] = GetShaderLocation(this->shader, "viewPos");
 
-        this->model.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = Bricks;
-        this->model.materials[0].maps[MATERIAL_MAP_ALBEDO].texture = Bricks;
-        this->model.materials[0].maps[MATERIAL_MAP_ROUGHNESS].texture = BrickNormal;
-        this->model.materials[0].maps[MATERIAL_MAP_SPECULAR].texture = BrickSpecular;
-       // this->model.materials[0].maps[MATERIAL_MAP_CUBEMAP].texture = Global::MeshTools::GenTextureCubemap(Game::Renderer::env->shdrCubemap, Game::Renderer::env->Panorama, 1024, PIXELFORMAT_UNCOMPRESSED_R8G8B8A8);
-        
-        const float roughness = 1.0f;
-        SetShaderValue(this->model.materials[0].shader, GetShaderLocation(this->model.materials[0].shader, "texture0"), &Bricks, SHADER_UNIFORM_SAMPLER2D);
-        SetShaderValue(this->model.materials[0].shader, GetShaderLocation(this->model.materials[0].shader, "roughness"), &roughness, SHADER_UNIFORM_FLOAT);
+    // Setup materials[0].maps default parameters
 
 
-        // SetShaderValueMatrix(this->model.materials[0].shader, GetShaderLocation(this->model.materials[0].shader, "matModel"), this->model.transform);
-        SetShaderValueMatrix(this->model.materials[0].shader, GetShaderLocation(this->model.materials[0].shader, "mvp"), this->model.transform);
+    this->model.materials[0].maps[MATERIAL_MAP_ALBEDO].color = WHITE;
+    this->model.materials[0].maps[MATERIAL_MAP_METALNESS].value = 0.0f;
+    this->model.materials[0].maps[MATERIAL_MAP_ROUGHNESS].value = 0.0f;
+    this->model.materials[0].maps[MATERIAL_MAP_OCCLUSION].value = 1.0f;
+    this->model.materials[0].maps[MATERIAL_MAP_EMISSION].color = Color{ 255, 162, 0, 100 };
 
+    // Setup materials[0].maps default textures
+    this->model.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = Bricks;
+    //this->model.materials[0].maps[MATERIAL_MAP_ALBEDO].texture = LoadTexture("../../Minero-Game/resources/textures/Block/Brick/brickA.png");
+    this->model.materials[0].maps[MATERIAL_MAP_METALNESS].texture = LoadTexture("../../Minero-Game/resources/textures/Block/Brick/brickMRAO.png");
+    this->model.materials[0].maps[MATERIAL_MAP_NORMAL].texture = LoadTexture("../../Minero-Game/resources/textures/Block/Brick/brick_NORM.png");
+    this->model.materials[0].maps[MATERIAL_MAP_HEIGHT].texture = LoadTexture("../../Minero-Game/resources/textures/Block/Brick/brick_DISP.png");
+        // Setup material texture maps usage in shader
+    // NOTE: By default, the texture maps are always used
+    int usage = 1;
+    SetShaderValue(this->shader, GetShaderLocation(this->shader, "useTexAlbedo"), &usage, SHADER_UNIFORM_INT);
+    SetShaderValue(this->shader, GetShaderLocation(this->shader, "useTexNormal"), &usage, SHADER_UNIFORM_INT);
+    SetShaderValue(this->shader, GetShaderLocation(this->shader, "useTexMRA"), &usage, SHADER_UNIFORM_INT);
+    SetShaderValue(this->shader, GetShaderLocation(this->shader, "useTexEmissive"), &usage, SHADER_UNIFORM_INT);
 
-
-        
+    
         // UnloadTexture(Bricks);
     }
     // main block constructor.
@@ -202,7 +202,7 @@ public:
     Texture2D texture;
 
     bool m_deleteRequested; // currently unused, since it only takes 1 bit, this isnt gonna be deleted just yet.
-
+    static inline Vector2 carTextureTiling = Vector2{ 0.5f, 0.5f };
     const Mesh mesh = GenMeshCube(BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE);
 
     // currently unused, this was supposed to be a break block method.

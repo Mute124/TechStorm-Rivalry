@@ -1,9 +1,7 @@
 // TODO : clean up this mess of a file. Now that we have a config system, we need to clean this up
 
 #pragma once
-#include "../../lib/raylib.h" // raylib framework
-#include "../../lib/raymath.h"
-#include "../../lib/rlgl.h"
+#include "../../common.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <iostream>   // For debugging purposes
