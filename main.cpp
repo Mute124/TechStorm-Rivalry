@@ -1,13 +1,3 @@
-/*
-  Minero Code. Common game startup (Ie. Engine shaders, player, etc) go into Game.h
-
-  TODO :
-    Work on graphics using the Erosion Standalone reference code.
-    Move config arguments into TOML files.
-
-
-*/
-
 // Run Args
 bool SkipMainMenu = true;
 
@@ -25,7 +15,6 @@ bool SkipMainMenu = true;
 #include "Engine/Classes/Logging/Logman.h"
 #include "Engine/Classes/ConfigMan/ConfigMan.h" // config manager
 #include "Engine/Classes/GUIs/Console/Console.h"
-
 
 // Minero Classes
 #include "Minero/Classes/Vehicles/Plane.h"
@@ -59,19 +48,10 @@ typedef enum
 
 } GameScreen;
 
+RenderTexture2D LoadShadowmapRenderTexture(int width, int height);
+void UnloadShadowmapRenderTexture(RenderTexture2D target);
 // This is a struct that is a utility for the terrain generator. Dont touch. It
 // is mainly used within the GenX, Y, and Z funcs
-
-// Get pixel data from image as a Color struct array // Generate GPU mipmaps for
-// a texture Generate cubemap (6 faces) from equirectangular (panorama) texture
-
-// gets the distance from the camera to well, the world
-
-// Audio Functions
-void PlayFootstepSound(void *data); // Plays a sound for footsteps
-
-// Physics functions
-bool CheckCollisionRayBox(Ray ray, BoundingBox box, float *outDistance);
 
 // Custom Functions
 
@@ -91,7 +71,6 @@ int main(void)
   int screenWidth = GetScreenWidth();
   int screenHeight = GetScreenHeight();
 
-  Logman::CustomLog(LOG_INFO, "Log man Created. ", NULL);
   GameScreen currentScreen = Main;
 
   // These store the center X and Y. Vector2 didnt work for some reason, idk
@@ -101,7 +80,7 @@ int main(void)
   Game *game = new Game();
   game->StartGame();
   // Game::Initialize();
-  
+
   ButtonR *mmen_start = new ButtonR("start", (float)middlex, (float)middley); // Main start button
 
   MenuCamera *menucamera = new MenuCamera(); // camera for the main menu is needed due to dimension differences
@@ -150,28 +129,6 @@ int main(void)
       GenMeshCube(BLOCK_SIZE, BLOCK_SIZE,
                   BLOCK_SIZE)); // this is the default model used in blocksd.
 
-  Shader postProcessShader = LoadShader(TextFormat("../../Minero-Game/resources/shaders/glsl330/lighting.vs", GLSL_VERSION), TextFormat("../../Minero-Game/resources/shaders/glsl330/lighting.fs", GLSL_VERSION));
-
-  // Shader fog = LoadShader("resources/shaders/glsl330/lighting.vs", "resources/shaders/glsl330/fog.fs");
-
-  // fog.locs[SHADER_LOC_MATRIX_MODEL] = GetShaderLocation(fog, "matModel");
-  // fog.locs[SHADER_LOC_VECTOR_VIEW] = GetShaderLocation(fog, "viewPos");
-
-  // float fogDensity = 1.0f;
-  // int fogDensityLoc = GetShaderLocation(fog, "fogDensity");
-  // SetShaderValue(fog, fogDensityLoc, &fogDensity, SHADER_UNIFORM_FLOAT);
-
-  postProcessShader.locs[SHADER_LOC_VECTOR_VIEW] = GetShaderLocation(postProcessShader, "viewPos");
-
-  postProcessShader.locs[SHADER_LOC_COLOR_AMBIENT] = GetShaderLocation(postProcessShader, "ambient");
-
-  // Set shader value: ambient light level
-  int ambientLoc = GetShaderLocation(postProcessShader, "ambient");
-  //static const Color ambientColor = WHITE;
-  //SetShaderValue(postProcessShader, ambientLoc, &ambientColor, SHADER_UNIFORM_VEC4);
-
-  //SetShaderValue(postProcessShader, postProcessShader.locs[SHADER_LOC_COLOR_AMBIENT], &ambientColor, SHADER_UNIFORM_VEC4);
-  // Player Object Creation
   const int Playersize = 3;
   Model PlayerModel = LoadModelFromMesh(GenMeshCube(3.0f, 3.0f, 3.0f)); // Generates the playermodel. For right now it is a cube.
   Player *player = new Player(Vector3{0.0f, 2.0f, 4.0f}, 100, PlayerModel, CAMERA_FIRST_PERSON);
@@ -180,11 +137,9 @@ int main(void)
 
   // Block Initialization
 
-  Block *block = new Block(BlockDirt, Vector3Zero(), WHITE, game->renderer->pbrShader, DefaultBlockModel);
+  Block *block = new Block(BlockDirt, Vector3Zero(), WHITE, game->renderer->pbrShader, LoadModel("resources/old_car_new.glb"));
 
   GameObject::PushObject(block);
-
-  int PostViewLoc = GetShaderLocation(postProcessShader, "viewPos"); // View pos shader location
 
   // Load skybox model
   // skybox creation.
@@ -258,80 +213,23 @@ int main(void)
     UnloadImage(img);
   }
 
-  player->model.materials[0].shader = postProcessShader;
-  postProcessShader.locs[SHADER_LOC_MATRIX_MODEL] = GetShaderLocation(postProcessShader, "matModel");
+  Light sun = CreateLight(LIGHT_POINT, Vector3{1.0f, 10.0f, 1.0f}, Vector3One(),
+                          BLUE, 4.0f, game->renderer->pbrShader); // Ambient color.;
+                                                                  // Assignment of shaders
+  // NOTE: By default, the texture maps are always used
+  int usage = 1;
+  SetShaderValue(game->renderer->pbrShader, GetShaderLocation(game->renderer->pbrShader, "useTexAlbedo"), &usage, SHADER_UNIFORM_INT);
+  SetShaderValue(game->renderer->pbrShader, GetShaderLocation(game->renderer->pbrShader, "useTexNormal"), &usage, SHADER_UNIFORM_INT);
+  SetShaderValue(game->renderer->pbrShader, GetShaderLocation(game->renderer->pbrShader, "useTexMRA"), &usage, SHADER_UNIFORM_INT);
+  SetShaderValue(game->renderer->pbrShader, GetShaderLocation(game->renderer->pbrShader, "useTexEmissive"), &usage, SHADER_UNIFORM_INT);
 
-  Light Sun[2] = {0};
-
-  Sun[1] = CreateLight(LIGHT_POINT, Vector3{1.0f, 10.0f, 1.0f}, player->GetPosition(),
-                       WHITE, 9.0f, game->renderer->pbrShader); // Ambient color.
-
-
-
-  Sun[1].enabled = true;
-  // Assignment of shaders
 
   //--------------------------------------------------------------------------------------
-  Image PerlinTest = GenImagePerlinNoise(1000, 1000, 0, 0, 10.0f);
-
-  ExportImage(PerlinTest, "PerlinTest.png");
-
-  Mesh mesh = GenMeshHeightmap(
-      PerlinTest, Vector3{16, 8, 16});   // Generate heightmap mesh (RAM and VRAM)
-  Model model = LoadModelFromMesh(mesh); // Load model from generated mesh
-
-  UnloadImage(PerlinTest); // Unload heightmap PerlinTest from RAM, already uploaded to VRAM
-
-  Color skyColor = SKYBLUE;
-  Color groundColor = GRAY;
-  // ambient light level
-  int amb = GetShaderLocation(postProcessShader, "ambient");
-  static float shaderamb[4] = {0.02f, 0.02f, 0.02f, 0.02f};
-
-  SetShaderValue(postProcessShader, amb, &shaderamb, UNIFORM_VEC4);
-
-  // commented since this needs to be cleaned up.
-  // Flashlight *flashlight = new Flashlight(player->cameraComponent->getSelfCamera(), postProcessShader);
-
-  Vector3 lightDirection[3] = {
-      Sun[0].target,
-      Sun[1].target,
-      // flashlight->GetLight().target
-
-  }; // Example light direction pointing upwards
-  SetShaderValue(postProcessShader, Sun[0].targetLoc, &lightDirection[0],
-                 SHADER_UNIFORM_VEC3);
-  SetShaderValue(postProcessShader, Sun[1].targetLoc, &lightDirection[1],
-                 SHADER_UNIFORM_VEC3);
-  // SetShaderValue(postProcessShader, flashlight->GetLight().targetLoc, &lightDirection[2], SHADER_UNIFORM_VEC3);
-
-  SetShaderValue(postProcessShader, GetShaderLocation(postProcessShader, "skyColor"), &skyColor, SHADER_UNIFORM_VEC4);
-  SetShaderValue(postProcessShader, GetShaderLocation(postProcessShader, "groundColor"), &groundColor, SHADER_UNIFORM_VEC4);
-
-  SetShaderValue(postProcessShader, GetShaderLocation(postProcessShader, "ambientColor"), &amb, SHADER_UNIFORM_VEC4);
-
-  bool CreateSunRay = true;
 
   Vector3 Orgin =
       Vector3{player->cameraComponent->getPosition().x, player->cameraComponent->getPosition().y - 10.0f,
               player->cameraComponent->getPosition().z};
-  Logman::CustomLog(LOG_DEBUG, "Trace ", NULL);
-  Vector3 testblock = Vector3One();
 
-  Logman::CustomLog(LOG_DEBUG, "Generating World...", NULL);
-
-  double Starttime = GetTime();
-
-  // terrain generation should go here
-
-  double current = GetTime();
-
-  Logman::CustomLog(LOG_DEBUG, TextFormat("World generated in %d", Starttime - current),
-                    NULL);
-
-  // Image Perlin = GenImagePerlinNoise(100, 100, 0, 0, 1.0f);
-  // ExportImage(Perlin, "perlin.png");
-  // GenMeshHeightmap(Perlin, (Vector3){100.0f, 10.0f, 100.0f})
   Model terrain = LoadModelFromMesh(GenMeshCube(BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE));
 
   terrain.materials[0].shader = LoadShader("../../Minero-Game/resources/terrain.vert", "../../Minero-Game/resources/terrain.frag");
@@ -383,11 +281,6 @@ int main(void)
     }
   }
   delete mmen_start;
-  // player->Setup();
-  // GameObject::PushObject(new Plane(postProcessShader, Vector3{0.0f, 0.0f, 0.0f}));
-  //  Game Loop
-
-  Logman::Log("hello from cmake");
 
   while (!WindowShouldClose())
   {
@@ -483,31 +376,9 @@ int main(void)
         break;
       }
     }
-
-    if (IsKeyPressed(KEY_U))
-    {
-    }
     // update ray
     ray.position = player->cameraComponent->getPosition();
     ray.direction = player->cameraComponent->getTarget();
-
-    // Show Debug shit
-    if (IsKeyDown(KEY_END))
-    {
-      BeginDrawing();
-      BeginMode3D(player->cameraComponent->getSelfCamera());
-      // Sun Rays
-      DrawLine3D(Sun[0].position, player->cameraComponent->getPosition(), RED);
-      EndMode3D();
-      EndDrawing();
-    }
-
-    // Check for left click
-
-    if (IsKeyPressed(KEY_F))
-    {
-      // flashlight->Switch();
-    }
 
     // If statement for block placing.
     if (IsMouseButtonPressed(MOUSE_BUTTON_RIGHT))
@@ -576,31 +447,23 @@ int main(void)
 
     // TODO : day night affect
 
-    // float h = Vector3Distance(player->getPosition(), Sun[0].position);
-    //   SetShaderValue(postProcessShader, GetShaderLocation(postProcessShader, "distance"), &h, SHADER_UNIFORM_FLOAT);
-    //----------------------------------------------------------------------------------
-
     PollInputEvents(); // helps for some reason?
-
-    // Update the light shader with the camera view position
-    // Update the shader with the camera view vector (points towards { 0.0f,
-    // 0.0f, 0.0f })
-
     float cameraPos[3] = {player->cameraComponent->getPosition().x,
                           player->cameraComponent->getPosition().y,
                           player->cameraComponent->getPosition().z};
 
-    UpdateLight(game->renderer->pbrShader, Sun[1]);
-
-    SetShaderValue(game->renderer->pbrShader, game->renderer->pbrShader.locs[SHADER_LOC_VECTOR_VIEW], cameraPos, SHADER_UNIFORM_VEC3);
+    sun.position = player->cameraComponent->getTarget();
+    UpdateLight(game->renderer->pbrShader, sun);
+    UpdateLight(game->renderer->bloomShader, sun);
+    SetShaderValue(game->renderer->pbrShader, game->renderer->pbrShader.locs[SHADER_LOC_VECTOR_VIEW], &cameraPos, SHADER_UNIFORM_VEC3);
 
     game->renderer->StartTexturing();
 
     BeginMode3D(player->cameraComponent->getSelfCamera());
- 
+
     rlDisableBackfaceCulling();
     rlDisableDepthMask();
-    DrawModel(skybox, Vector3{0.0f, 0.0f, 0.0f}, 1.0f, WHITE);
+    // DrawModel(skybox, Vector3{0.0f, 0.0f, 0.0f}, 1.0f, WHITE);
     rlEnableBackfaceCulling();
     rlEnableDepthMask();
 
@@ -610,53 +473,33 @@ int main(void)
     SetShaderValue(game->renderer->pbrShader, emissiveColorLoc, &carEmissiveColor, SHADER_UNIFORM_VEC4);
     float emissiveIntensity = 0.01f;
     SetShaderValue(game->renderer->pbrShader, emissiveIntensityLoc, &emissiveIntensity, SHADER_UNIFORM_FLOAT);
-    
-    GameObject::RenderObjects();
 
+    GameObject::RenderObjects();
 
     // EndShaderMode();
     game->renderer->End3D();
+
+
     game->renderer->StopTexturing();
     rlPopMatrix();
 
-    /*
-    // depth mask
-    game->renderer->StartDepthMode();
-
-    BeginMode3D(player->cameraComponent->getSelfCamera());
-
-    rlDisableBackfaceCulling();
-    rlDisableDepthMask();
-    DrawModel(skybox, Vector3{0.0f, 0.0f, 0.0f}, 1.0f, WHITE);
-    rlEnableBackfaceCulling();
-    rlEnableDepthMask();
 
 
-    BeginShaderMode(shdrCubemap);
-    GameObject::Render();
-    EndShaderMode();
-    BeginShaderMode(postProcessShader);
-    GameObject::Render();
-    EndShaderMode();
 
-    // EndShaderMode();
-    game->renderer->End3D();
-
-    game->renderer->StopTexturing();
-    rlPopMatrix();*/
+    SetTextureFilter(game->renderer->fbo.texture, TEXTURE_FILTER_ANISOTROPIC_16X);
 
     game->renderer->StartDraw();
-
-    // BeginShaderMode(shdrCubemap);
+    
+    BeginShaderMode(game->renderer->bloomShader);
     // NOTE: Render texture must be y-flipped due to default OpenGL coordinates (left-bottom)
     DrawTextureRec(game->renderer->fbo.texture, Rectangle{0, 0, (float)(game->renderer->fbo.texture.width), (float)(-game->renderer->fbo.texture.height)}, Vector2{0, 0}, WHITE);
+
+    EndShaderMode();
     ClearBackground(RAYWHITE);
-
-    // BeginMode2D(menucamera->camera);
-
-    // Crosshair
+DrawFPS(100, 100);
     player->healthComp->healthBar->Draw({0.0f, (float)screenWidth + 500});
 
+    // Crosshair
     DrawCircle(game->windowWidth / 2, game->windowHeight / 2, 3, GRAY);
 
     // EndMode2D();
@@ -675,13 +518,10 @@ int main(void)
   // Unload Models/Textures
   // UnloadTexture(texture); // Unload texture
 
-  UnloadModel(model); // Unload model
+
   UnloadModel(DefaultBlockModel);
 
-  UnloadShader(postProcessShader);
 
-  UnloadImage(PerlinTest);
-  UnloadImage(PerlinTest);
 
   using namespace std;
   {
@@ -697,21 +537,49 @@ int main(void)
   delete player;
   GameObject::FlushBuffer();
   delete console;
-  // delete heightmap;
-
-  // delete flashlight;
-
   return 0;
 }
 
-/*
-                                            Code Graveyard
-_________________________________________________________________________________________________________________________
+RenderTexture2D LoadShadowmapRenderTexture(int width, int height)
+{
+    RenderTexture2D target = { 0 };
 
-Wow such empty
+    target.id = rlLoadFramebuffer(width, height);   // Load an empty framebuffer
+    target.texture.width = width;
+    target.texture.height = height;
 
+    if (target.id > 0)
+    {
+        rlEnableFramebuffer(target.id);
 
+        // Create depth texture
+        // We don't need a color texture for the shadowmap
+        target.depth.id = rlLoadTextureDepth(width, height, false);
+        target.depth.width = width;
+        target.depth.height = height;
+        target.depth.format = 19;       //DEPTH_COMPONENT_24BIT?
+        target.depth.mipmaps = 1;
 
+        // Attach depth texture to FBO
+        rlFramebufferAttach(target.id, target.depth.id, RL_ATTACHMENT_DEPTH, RL_ATTACHMENT_TEXTURE2D, 0);
 
+        // Check if fbo is complete with attachments (valid)
+        if (rlFramebufferComplete(target.id)) TRACELOG(LOG_INFO, "FBO: [ID %i] Framebuffer object created successfully", target.id);
 
-*/
+        rlDisableFramebuffer();
+    }
+    else TRACELOG(LOG_WARNING, "FBO: Framebuffer object can not be created");
+
+    return target;
+}
+
+// Unload shadowmap render texture from GPU memory (VRAM)
+void UnloadShadowmapRenderTexture(RenderTexture2D target)
+{
+    if (target.id > 0)
+    {
+        // NOTE: Depth texture/renderbuffer is automatically
+        // queried and deleted before deleting framebuffer
+        rlUnloadFramebuffer(target.id);
+    }
+}

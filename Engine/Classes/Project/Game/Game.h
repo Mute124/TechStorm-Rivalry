@@ -57,7 +57,7 @@ public:
         {
             // StartDraw();
             BeginTextureMode(fbo);
-            ClearBackground(RAYWHITE);
+            ClearBackground(BLACK);
         }
 
         void StartDepthMode()
@@ -86,6 +86,8 @@ public:
         RenderTexture2D depthMapFBO; // shadowmap.
 
         Shader pbrShader;
+        Shader bloomShader;
+
 
         static inline Environment *env = new Environment();
 
@@ -185,6 +187,8 @@ public:
         renderer = new Renderer();
 
         renderer->CreateRenderTexture(windowWidth, windowHeight);
+
+        renderer->bloomShader = LoadShader(0, "../../Minero-Game/resources/shaders/bloom.fs");
 
         // rlSetCullFace(RL_CULL_FACE_BACK);
     }

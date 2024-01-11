@@ -38,7 +38,7 @@ public:
         {
 
             //BeginShaderMode(shader);
-            DrawModel(model, position, BLOCK_SIZE, color);
+            DrawModel(model, position, 0.2f, color);
             //EndShaderMode();
             //BeginBlendMode(BLEND_ALPHA_PREMULTIPLY);
 
@@ -57,32 +57,38 @@ public:
 
         const static Texture2D Bricks = LoadTexture("../../Minero-Game/resources/textures/Block/Brick/Brick.png");
         this->model.materials[0].shader = shader;
-        this->model.materials[0].shader.locs[SHADER_LOC_VECTOR_VIEW] = GetShaderLocation(this->shader, "viewPos");
 
     // Setup materials[0].maps default parameters
 
 
     this->model.materials[0].maps[MATERIAL_MAP_ALBEDO].color = WHITE;
     this->model.materials[0].maps[MATERIAL_MAP_METALNESS].value = 0.0f;
-    this->model.materials[0].maps[MATERIAL_MAP_ROUGHNESS].value = 0.0f;
+    this->model.materials[0].maps[MATERIAL_MAP_ROUGHNESS].value = 1.0f;
     this->model.materials[0].maps[MATERIAL_MAP_OCCLUSION].value = 1.0f;
     this->model.materials[0].maps[MATERIAL_MAP_EMISSION].color = Color{ 255, 162, 0, 100 };
 
-    // Setup materials[0].maps default textures
-    this->model.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = Bricks;
-    //this->model.materials[0].maps[MATERIAL_MAP_ALBEDO].texture = LoadTexture("../../Minero-Game/resources/textures/Block/Brick/brickA.png");
+this->model.materials[0].maps[MATERIAL_MAP_ALBEDO].texture = LoadTexture("../../Minero-Game/resources/textures/Old_Car/old_car_d.png");
+    this->model.materials[0].maps[MATERIAL_MAP_METALNESS].texture = LoadTexture("../../Minero-Game/resources/textures/Old_Car/old_car_mra.png");
+    this->model.materials[0].maps[MATERIAL_MAP_NORMAL].texture = LoadTexture("../../Minero-Game/resources/textures/Old_Car/old_car_n.png");
+ this->model.materials[0].maps[MATERIAL_MAP_EMISSION].texture = LoadTexture("../../Minero-Game/resources/textures/Old_Car/old_car_e.png");
+
+        /*
+
+
+        //this->model.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = Bricks;
+    this->model.materials[0].maps[MATERIAL_MAP_ALBEDO].texture = Bricks;
     this->model.materials[0].maps[MATERIAL_MAP_METALNESS].texture = LoadTexture("../../Minero-Game/resources/textures/Block/Brick/brickMRAO.png");
     this->model.materials[0].maps[MATERIAL_MAP_NORMAL].texture = LoadTexture("../../Minero-Game/resources/textures/Block/Brick/brick_NORM.png");
     this->model.materials[0].maps[MATERIAL_MAP_HEIGHT].texture = LoadTexture("../../Minero-Game/resources/textures/Block/Brick/brick_DISP.png");
-        // Setup material texture maps usage in shader
-    // NOTE: By default, the texture maps are always used
-    int usage = 1;
-    SetShaderValue(this->shader, GetShaderLocation(this->shader, "useTexAlbedo"), &usage, SHADER_UNIFORM_INT);
-    SetShaderValue(this->shader, GetShaderLocation(this->shader, "useTexNormal"), &usage, SHADER_UNIFORM_INT);
-    SetShaderValue(this->shader, GetShaderLocation(this->shader, "useTexMRA"), &usage, SHADER_UNIFORM_INT);
-    SetShaderValue(this->shader, GetShaderLocation(this->shader, "useTexEmissive"), &usage, SHADER_UNIFORM_INT);
 
+        // Setup materials[0].maps default textures
+   // this->model.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = Bricks;
     
+        // Setup materials[0].maps default textures
+    
+    */
+    
+
         // UnloadTexture(Bricks);
     }
     // main block constructor.

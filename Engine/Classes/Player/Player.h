@@ -152,7 +152,7 @@ public:
             controller->SetSpeed(0.03f); //m/s
         }
 
-        
+        // View Sway
 
         
         if (startDriving) {
@@ -241,6 +241,7 @@ public:
 
 private:
 
+    float SwayFactor;
     bool startDriving = false;
     const int id;
     static void CheckForBlockPlacement(MouseButton Trigger, Ray ray)

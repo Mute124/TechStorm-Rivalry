@@ -109,6 +109,7 @@ add_executable(${PROJECT_NAME} main.cpp)
 #set(raylib_VERBOSE 1)
 target_link_libraries(${PROJECT_NAME} raylib)
 
+target_link_libraries(${PROJECT_NAME} tomlplusplus)
 target_link_libraries(${PROJECT_NAME} Jolt)
 target_include_directories(${PROJECT_NAME} PUBLIC ${JoltPhysics_SOURCE_DIR}/..)
 
