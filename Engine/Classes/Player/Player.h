@@ -215,7 +215,8 @@ public:
 
     int GetType() const override
     {
-        return PLAYER; // returns the player obj type
+       // return PLAYER; // returns the player obj type
+       return 0;
     }
 
     Model model; // Player model

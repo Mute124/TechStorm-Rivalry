@@ -8,90 +8,44 @@
 #include <thread>
 #include <mutex>
 
-typedef enum type
-{
-  BLOCK = 0,  // Game object is a block
-  PLAYER = 1, // Player object.
-  SKYBOX,
-  VEHICLE,
-  WORLDFLOOR
+#include "../Graphics/ObjectMaterial.h"
 
-} objtype;
+// Cleaner version. yay! Hopefully to reduce boilerplate
 
-typedef struct
 
-{
-  float *l = new float();
-  float *w = new float();
-  float *h = new float();
-} ObjDim; // TODO : is this needed?
+/*
+class GameObject {
+  public:
+    GameObject(MaterialMapProperties properties, bool useDefaultShader, Model model, Color tint, Vector3 spawnPosition) : GameObjectMaterial(new GameObjectMaterial(properties, true)) {
 
-#include "../Lists/Registry.h"
+    }
 
-// TODO : code this
-class GameObjectRegistry;
+    virtual void Draw() {
+      
+    }
+
+    virtual void OnUpdate() {
+
+    }
+
+
+
+
+    Vector3 *position;
+    Model *model;
+    GameObjectMaterial *material;
+    Color *tint;
+
+
+};
+*/
+
 
 // used for organization reasons and makes C++ less torture.
 // TODO : Refactor for sake of sanity...
 class GameObject
 {
-
 public:
-  RenderTexture2D LoadRenderTextureDepthTex(int width, int height)
-  {
-    RenderTexture2D target = {0};
-
-    target.id = rlLoadFramebuffer(width, height); // Load an empty framebuffer
-
-    if (target.id > 0)
-    {
-      rlEnableFramebuffer(target.id);
-
-      // Create color texture (default to RGBA)
-      target.texture.id = rlLoadTexture(0, width, height, PIXELFORMAT_UNCOMPRESSED_R8G8B8A8, 1);
-      target.texture.width = width;
-      target.texture.height = height;
-      target.texture.format = PIXELFORMAT_UNCOMPRESSED_R8G8B8A8;
-      target.texture.mipmaps = 1;
-
-      // Create depth texture buffer (instead of raylib default renderbuffer)
-      target.depth.id = rlLoadTextureDepth(width, height, false);
-      target.depth.width = width;
-      target.depth.height = height;
-      target.depth.format = 19; // DEPTH_COMPONENT_24BIT?
-      target.depth.mipmaps = 1;
-
-      // Attach color texture and depth texture to FBO
-      rlFramebufferAttach(target.id, target.texture.id, RL_ATTACHMENT_COLOR_CHANNEL0, RL_ATTACHMENT_TEXTURE2D, 0);
-      rlFramebufferAttach(target.id, target.depth.id, RL_ATTACHMENT_DEPTH, RL_ATTACHMENT_TEXTURE2D, 0);
-
-      // Check if fbo is complete with attachments (valid)
-      if (rlFramebufferComplete(target.id))
-        TRACELOG(LOG_INFO, "FBO: [ID %i] Framebuffer object created successfully", target.id);
-
-      rlDisableFramebuffer();
-    }
-    else
-      TRACELOG(LOG_WARNING, "FBO: Framebuffer object can not be created");
-
-    return target;
-  }
-
-  // Unload render texture from GPU memory (VRAM)
-  void UnloadRenderTextureDepthTex(RenderTexture2D target)
-  {
-    if (target.id > 0)
-    {
-      // Color texture attached to FBO is deleted
-      rlUnloadTexture(target.texture.id);
-      rlUnloadTexture(target.depth.id);
-
-      // NOTE: Depth texture is automatically
-      // queried and deleted before deleting framebuffer
-      rlUnloadFramebuffer(target.id);
-    }
-  }
-
   virtual void Draw(){};
 
   virtual ~GameObject()
@@ -223,87 +177,5 @@ public:
     }
   }
   static inline std::vector<GameObject *> GameObjects; // game objects
-private:
-  objtype type; // TODO : is this needed?
+
 };
-
-// Load image from Color array data (RGBA - 32bit)
-// NOTE: Creates a copy of pixels data array
-Image LoadImageEx(Color *pixels, int width, int height)
-{
-  Image image = {0};
-  image.data = NULL;
-  image.width = width;
-  image.height = height;
-  image.mipmaps = 1;
-  image.format = PIXELFORMAT_UNCOMPRESSED_R8G8B8A8;
-
-  int k = 0;
-
-  image.data = (unsigned char *)RL_MALLOC(image.width * image.height * 4 * sizeof(unsigned char));
-
-  for (int i = 0; i < image.width * image.height * 4; i += 4)
-  {
-    ((unsigned char *)image.data)[i] = pixels[k].r;
-    ((unsigned char *)image.data)[i + 1] = pixels[k].g;
-    ((unsigned char *)image.data)[i + 2] = pixels[k].b;
-    ((unsigned char *)image.data)[i + 3] = pixels[k].a;
-    k++;
-  }
-
-  return image;
-}
-
-/*
-class GameObjectManager
-{
-public:
-  static void Update()
-  {
-
-    for (int i = 0; i < Objects.size(); i++)
-    {
-      Objects[i]->onUpdate();
-    }
-  }
-
-
-  static std::vector<NewGameObject *> Objects;
-};
-class NewGameObject
-{
-public:
-  NewGameObject()
-  {
-  }
-
-  Transform GetTransform()
-  {
-    return transform;
-  }
-
-  void SetTransform(Transform _transform)
-  {
-  }
-
-  virtual void onUpdate()
-  {
-  }
-
-  virtual void onDestroy()
-  {
-  }
-
-  virtual void Draw()
-  {
-  }
-
-private:
-  Transform transform = {0};
-
-  Mesh mesh;
-  Model model;
-
-  int id;
-};
-*/

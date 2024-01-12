@@ -9,7 +9,6 @@
 #include "../../../DataSets/Globals.h"
 #include "../../Project/Game/Game.h"
 
-
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -37,13 +36,13 @@ public:
         if (this->type != BlockAir)
         {
 
-            //BeginShaderMode(shader);
+            // BeginShaderMode(shader);
             DrawModel(model, position, 0.2f, color);
-            //EndShaderMode();
-            //BeginBlendMode(BLEND_ALPHA_PREMULTIPLY);
+            // EndShaderMode();
+            // BeginBlendMode(BLEND_ALPHA_PREMULTIPLY);
 
-            //DrawModel(model, position, BLOCK_SIZE, color);
-            //EndBlendMode();
+            // DrawModel(model, position, BLOCK_SIZE, color);
+            // EndBlendMode();
         }
     }
 
@@ -58,23 +57,20 @@ public:
         const static Texture2D Bricks = LoadTexture("../../Minero-Game/resources/textures/Block/Brick/Brick.png");
         this->model.materials[0].shader = shader;
 
-    // Setup materials[0].maps default parameters
+        // Setup materials[0].maps default parameters
 
+        this->model.materials[0].maps[MATERIAL_MAP_ALBEDO].color = WHITE;
+        this->model.materials[0].maps[MATERIAL_MAP_METALNESS].value = 1.0f;
+        this->model.materials[0].maps[MATERIAL_MAP_ROUGHNESS].value = 0.0f;
+        this->model.materials[0].maps[MATERIAL_MAP_OCCLUSION].value = 1.0f;
+        this->model.materials[0].maps[MATERIAL_MAP_EMISSION].color = Color{255, 162, 0, 100};
 
-    this->model.materials[0].maps[MATERIAL_MAP_ALBEDO].color = WHITE;
-    this->model.materials[0].maps[MATERIAL_MAP_METALNESS].value = 0.0f;
-    this->model.materials[0].maps[MATERIAL_MAP_ROUGHNESS].value = 1.0f;
-    this->model.materials[0].maps[MATERIAL_MAP_OCCLUSION].value = 1.0f;
-    this->model.materials[0].maps[MATERIAL_MAP_EMISSION].color = Color{ 255, 162, 0, 100 };
-
-this->model.materials[0].maps[MATERIAL_MAP_ALBEDO].texture = LoadTexture("../../Minero-Game/resources/textures/Old_Car/old_car_d.png");
-    this->model.materials[0].maps[MATERIAL_MAP_METALNESS].texture = LoadTexture("../../Minero-Game/resources/textures/Old_Car/old_car_mra.png");
-    this->model.materials[0].maps[MATERIAL_MAP_NORMAL].texture = LoadTexture("../../Minero-Game/resources/textures/Old_Car/old_car_n.png");
- this->model.materials[0].maps[MATERIAL_MAP_EMISSION].texture = LoadTexture("../../Minero-Game/resources/textures/Old_Car/old_car_e.png");
+        this->model.materials[0].maps[MATERIAL_MAP_ALBEDO].texture = LoadTexture("../../Minero-Game/resources/textures/Old_Car/old_car_d.png");
+        this->model.materials[0].maps[MATERIAL_MAP_METALNESS].texture = LoadTexture("../../Minero-Game/resources/textures/Old_Car/old_car_mra.png");
+        this->model.materials[0].maps[MATERIAL_MAP_NORMAL].texture = LoadTexture("../../Minero-Game/resources/textures/Old_Car/old_car_n.png");
+        this->model.materials[0].maps[MATERIAL_MAP_EMISSION].texture = LoadTexture("../../Minero-Game/resources/textures/Old_Car/old_car_e.png");
 
         /*
-
-
         //this->model.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = Bricks;
     this->model.materials[0].maps[MATERIAL_MAP_ALBEDO].texture = Bricks;
     this->model.materials[0].maps[MATERIAL_MAP_METALNESS].texture = LoadTexture("../../Minero-Game/resources/textures/Block/Brick/brickMRAO.png");
@@ -83,11 +79,10 @@ this->model.materials[0].maps[MATERIAL_MAP_ALBEDO].texture = LoadTexture("../../
 
         // Setup materials[0].maps default textures
    // this->model.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = Bricks;
-    
+
         // Setup materials[0].maps default textures
-    
+
     */
-    
 
         // UnloadTexture(Bricks);
     }
@@ -100,7 +95,7 @@ this->model.materials[0].maps[MATERIAL_MAP_ALBEDO].texture = LoadTexture("../../
     int GetType() const override
     {
 
-        return BLOCK;
+      return 0;
     }
 
     Model getModel()
@@ -126,7 +121,7 @@ this->model.materials[0].maps[MATERIAL_MAP_ALBEDO].texture = LoadTexture("../../
         else
         {
 
-            //this->velocity = Vector3Subtract(this->velocity, Vector3{0.0f, 0.001f * (float)Global::Time::GetGameTime(), 0.0f});
+            // this->velocity = Vector3Subtract(this->velocity, Vector3{0.0f, 0.001f * (float)Global::Time::GetGameTime(), 0.0f});
         }
 
         this->position = Vector3Add(this->position, this->velocity);
@@ -203,12 +198,11 @@ this->model.materials[0].maps[MATERIAL_MAP_ALBEDO].texture = LoadTexture("../../
 
     Color color; // color of the block, Right now not being used
 
-    objtype objecttype = BLOCK; // just boilerplate
 
     Texture2D texture;
 
     bool m_deleteRequested; // currently unused, since it only takes 1 bit, this isnt gonna be deleted just yet.
-    static inline Vector2 carTextureTiling = Vector2{ 0.5f, 0.5f };
+    static inline Vector2 carTextureTiling = Vector2{0.5f, 0.5f};
     const Mesh mesh = GenMeshCube(BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE);
 
     // currently unused, this was supposed to be a break block method.
@@ -230,12 +224,11 @@ this->model.materials[0].maps[MATERIAL_MAP_ALBEDO].texture = LoadTexture("../../
     Shader shader;
     Shader m_shader_cubemap;
 
-    //ObjectTransform transform;
+    // ObjectTransform transform;
 
     BoundingBox Box;
 
     Vector3 velocity;
 
     const int id;
-
 };

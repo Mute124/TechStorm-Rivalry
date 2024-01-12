@@ -31,7 +31,11 @@
 #pragma once
 #endif // _MSC_VER
 
-#include "../../../common.h"
+#include <raylib.h>
+#include <raymath.h>
+
+#include <string>
+
 #include <vector>
 
 using namespace std;

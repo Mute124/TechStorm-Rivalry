@@ -39,6 +39,13 @@ bool SkipMainMenu = true;
 // #define RLIGHTS_IMPLEMENTATION
 // #include "lib/rlights.h"
 
+#define RAYGUI_IMPLEMENTATION
+#include "../raygui.h"
+
+#define GUI_OPTIONS_IMPLEMENTATION
+#include "Minero/gui_Options.h"
+
+#include "Styles/bluish/style_bluish.h"
 // This translates the current screen
 typedef enum
 {
@@ -47,6 +54,7 @@ typedef enum
   Gameplay
 
 } GameScreen;
+
 
 RenderTexture2D LoadShadowmapRenderTexture(int width, int height);
 void UnloadShadowmapRenderTexture(RenderTexture2D target);
@@ -68,6 +76,7 @@ int targetFPS = GetMonitorRefreshRate(GetCurrentMonitor()); // This is what is u
 
 int main(void)
 {
+
   int screenWidth = GetScreenWidth();
   int screenHeight = GetScreenHeight();
 
@@ -223,7 +232,6 @@ int main(void)
   SetShaderValue(game->renderer->pbrShader, GetShaderLocation(game->renderer->pbrShader, "useTexMRA"), &usage, SHADER_UNIFORM_INT);
   SetShaderValue(game->renderer->pbrShader, GetShaderLocation(game->renderer->pbrShader, "useTexEmissive"), &usage, SHADER_UNIFORM_INT);
 
-
   //--------------------------------------------------------------------------------------
 
   Vector3 Orgin =
@@ -243,6 +251,8 @@ int main(void)
   game->renderer->env->shdrCubemap = shdrCubemap;
 
   ConsoleGUI *console = new ConsoleGUI(true);
+
+  GuiOptionsState optionsState = InitGuiOptions();
 
   // Checks if the music should be played, and plays it if it should be.
   if (game->enableMusic)
@@ -290,6 +300,8 @@ int main(void)
     // Pause Menu
     if (IsKeyPressed(KEY_ESCAPE))
     {
+      /*
+
       // Todo, move the menuCamera to be created on game startup and then hidden. it gets shown on if statement validation
       bool exit = false;
       bool manualExit = false;
@@ -328,7 +340,7 @@ int main(void)
           SaveFileData(filename, &data, sizeof(data));
 
           Logman::CustomLog(LOG_DEBUG, LoadFileText(filename), NULL);
-        }*/
+        }
 
         if (exitButton->IsClicked())
         {
@@ -375,6 +387,10 @@ int main(void)
         Logman::CustomLog(LOG_INFO, "Exiting Game", NULL);
         break;
       }
+
+
+      */
+
     }
     // update ray
     ray.position = player->cameraComponent->getPosition();
@@ -479,24 +495,20 @@ int main(void)
     // EndShaderMode();
     game->renderer->End3D();
 
-
     game->renderer->StopTexturing();
     rlPopMatrix();
-
-
-
 
     SetTextureFilter(game->renderer->fbo.texture, TEXTURE_FILTER_ANISOTROPIC_16X);
 
     game->renderer->StartDraw();
-    
+
     BeginShaderMode(game->renderer->bloomShader);
     // NOTE: Render texture must be y-flipped due to default OpenGL coordinates (left-bottom)
     DrawTextureRec(game->renderer->fbo.texture, Rectangle{0, 0, (float)(game->renderer->fbo.texture.width), (float)(-game->renderer->fbo.texture.height)}, Vector2{0, 0}, WHITE);
 
     EndShaderMode();
     ClearBackground(RAYWHITE);
-DrawFPS(100, 100);
+    DrawFPS(100, 100);
     player->healthComp->healthBar->Draw({0.0f, (float)screenWidth + 500});
 
     // Crosshair
@@ -518,10 +530,7 @@ DrawFPS(100, 100);
   // Unload Models/Textures
   // UnloadTexture(texture); // Unload texture
 
-
   UnloadModel(DefaultBlockModel);
-
-
 
   using namespace std;
   {
@@ -542,44 +551,47 @@ DrawFPS(100, 100);
 
 RenderTexture2D LoadShadowmapRenderTexture(int width, int height)
 {
-    RenderTexture2D target = { 0 };
+  RenderTexture2D target = {0};
 
-    target.id = rlLoadFramebuffer(width, height);   // Load an empty framebuffer
-    target.texture.width = width;
-    target.texture.height = height;
+  target.id = rlLoadFramebuffer(width, height); // Load an empty framebuffer
+  target.texture.width = width;
+  target.texture.height = height;
 
-    if (target.id > 0)
-    {
-        rlEnableFramebuffer(target.id);
+  if (target.id > 0)
+  {
+    rlEnableFramebuffer(target.id);
 
-        // Create depth texture
-        // We don't need a color texture for the shadowmap
-        target.depth.id = rlLoadTextureDepth(width, height, false);
-        target.depth.width = width;
-        target.depth.height = height;
-        target.depth.format = 19;       //DEPTH_COMPONENT_24BIT?
-        target.depth.mipmaps = 1;
+    // Create depth texture
+    // We don't need a color texture for the shadowmap
+    target.depth.id = rlLoadTextureDepth(width, height, false);
+    target.depth.width = width;
+    target.depth.height = height;
+    target.depth.format = 19; // DEPTH_COMPONENT_24BIT?
+    target.depth.mipmaps = 1;
 
-        // Attach depth texture to FBO
-        rlFramebufferAttach(target.id, target.depth.id, RL_ATTACHMENT_DEPTH, RL_ATTACHMENT_TEXTURE2D, 0);
+    // Attach depth texture to FBO
+    rlFramebufferAttach(target.id, target.depth.id, RL_ATTACHMENT_DEPTH, RL_ATTACHMENT_TEXTURE2D, 0);
 
-        // Check if fbo is complete with attachments (valid)
-        if (rlFramebufferComplete(target.id)) TRACELOG(LOG_INFO, "FBO: [ID %i] Framebuffer object created successfully", target.id);
+    // Check if fbo is complete with attachments (valid)
+    if (rlFramebufferComplete(target.id))
+      TRACELOG(LOG_INFO, "FBO: [ID %i] Framebuffer object created successfully", target.id);
 
-        rlDisableFramebuffer();
-    }
-    else TRACELOG(LOG_WARNING, "FBO: Framebuffer object can not be created");
+    rlDisableFramebuffer();
+  }
+  else
+    TRACELOG(LOG_WARNING, "FBO: Framebuffer object can not be created");
 
-    return target;
+  return target;
 }
 
 // Unload shadowmap render texture from GPU memory (VRAM)
 void UnloadShadowmapRenderTexture(RenderTexture2D target)
 {
-    if (target.id > 0)
-    {
-        // NOTE: Depth texture/renderbuffer is automatically
-        // queried and deleted before deleting framebuffer
-        rlUnloadFramebuffer(target.id);
-    }
+  if (target.id > 0)
+  {
+    // NOTE: Depth texture/renderbuffer is automatically
+    // queried and deleted before deleting framebuffer
+    rlUnloadFramebuffer(target.id);
+  }
 }
+
