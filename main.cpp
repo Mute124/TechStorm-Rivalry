@@ -358,16 +358,7 @@ int main(void)
 		}
 
 		if (IsKeyPressed(KEY_E)) {
-			// Todo, move the menuCamera to be created on game startup and then hidden. it gets shown on if statement validation
-			bool exit = false;
-			bool manualExit = false;
-
-			MenuCamera* men_pause = new MenuCamera();
-			ButtonR* save = new ButtonR("Save", 100, 100);
-			ButtonR* Options = new ButtonR("Options", 100, 200);
-			ButtonR* exitButton = new ButtonR("Exit to Windows", 100, 300);
-
-			EnableCursor();
+			// todo : Code the inventory menu AAAAAAAA
 		}
 		// breathing audio
 		if (!isBreathing) {
