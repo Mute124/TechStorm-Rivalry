@@ -30,18 +30,13 @@
 *
 **********************************************************************************************/
 
-#include <vector>
-#include <stdlib.h>
-#include <stdio.h>
-#include <stdlib.h>
-
 #ifndef RLIGHTS_H
 #define RLIGHTS_H
 
 //----------------------------------------------------------------------------------
 // Defines and Macros
 //----------------------------------------------------------------------------------
-#define MAX_LIGHTS  4         // Max dynamic lights supported by shader
+#define MAX_LIGHTS  5         // Max dynamic lights supported by shader
 
 //----------------------------------------------------------------------------------
 // Types and Structures Definition
@@ -65,6 +60,8 @@ typedef struct {
     int attenuationLoc;
 } Light;
 
+
+
 // Light type
 typedef enum {
     LIGHT_DIRECTIONAL = 0,
@@ -78,8 +75,8 @@ extern "C" {            // Prevents name mangling of functions
 //----------------------------------------------------------------------------------
 // Module Functions Declaration
 //----------------------------------------------------------------------------------
-Light CreateLight(int type, Vector3 position, Vector3 target, Color color, Shader shader);   // Create a light and get shader locations
-void UpdateLightValues(Shader shader, Light light);         // Send light properties to shader
+extern Light CreateLight(int type, Vector3 position, Vector3 target, Color color, Shader shader);   // Create a light and get shader locations
+extern void UpdateLightValues(Shader shader, Light light);         // Send light properties to shader
 
 #ifdef __cplusplus
 }
@@ -123,7 +120,7 @@ static int lightsCount = 0;    // Current amount of created lights
 //----------------------------------------------------------------------------------
 
 // Create a light and get shader locations
-Light CreateLight(int type, Vector3 position, Vector3 target, Color color, std::vector<Shader> Shaders)
+Light CreateLight(int type, Vector3 position, Vector3 target, Color color, Shader shader)
 {
     Light light = { 0 };
 
@@ -136,18 +133,13 @@ Light CreateLight(int type, Vector3 position, Vector3 target, Color color, std::
         light.color = color;
 
         // NOTE: Lighting shader naming must be the provided ones
-        for (int i = 0; i < Shaders.size(); i++) {
-            light.enabledLoc = GetShaderLocation(Shaders[i], TextFormat("lights[%i].enabled", lightsCount));
-            light.typeLoc = GetShaderLocation(Shaders[i], TextFormat("lights[%i].type", lightsCount));
-            light.positionLoc = GetShaderLocation(Shaders[i], TextFormat("lights[%i].position", lightsCount));
-            light.targetLoc = GetShaderLocation(Shaders[i], TextFormat("lights[%i].target", lightsCount));
-            light.colorLoc = GetShaderLocation(Shaders[i], TextFormat("lights[%i].color", lightsCount));
-            UpdateLightValues(Shaders[i], light);
+        light.enabledLoc = GetShaderLocation(shader, TextFormat("lights[%i].enabled", lightsCount));
+        light.typeLoc = GetShaderLocation(shader, TextFormat("lights[%i].type", lightsCount));
+        light.positionLoc = GetShaderLocation(shader, TextFormat("lights[%i].position", lightsCount));
+        light.targetLoc = GetShaderLocation(shader, TextFormat("lights[%i].target", lightsCount));
+        light.colorLoc = GetShaderLocation(shader, TextFormat("lights[%i].color", lightsCount));
 
-        }
-
-
-        
+        UpdateLightValues(shader, light);
         
         lightsCount++;
     }
@@ -175,8 +167,6 @@ void UpdateLightValues(Shader shader, Light light)
     float color[4] = { (float)light.color.r/(float)255, (float)light.color.g/(float)255, 
                        (float)light.color.b/(float)255, (float)light.color.a/(float)255 };
     SetShaderValue(shader, light.colorLoc, color, SHADER_UNIFORM_VEC4);
-
 }
-
 
 #endif // RLIGHTS_IMPLEMENTATION
