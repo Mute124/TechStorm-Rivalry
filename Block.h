@@ -37,7 +37,7 @@ public:
         {
 
             // BeginShaderMode(shader);
-            DrawModel(model, position, 0.2f, color);
+            DrawModel(model, position, 1.0f, color);
             // EndShaderMode();
             // BeginBlendMode(BLEND_ALPHA_PREMULTIPLY);
 

@@ -1,6 +1,7 @@
 // Run Args
 bool SkipMainMenu = true;
 
+
 #include "Button.h" // Needed for buttons.
 // Raylib Framework
 #include "common.h"
@@ -20,6 +21,7 @@ bool SkipMainMenu = true;
 // default libs
 #include <time.h>
 #include <vector> // needed for game object list
+
 
 // This translates the current screen
 typedef enum
@@ -61,7 +63,6 @@ int main(void)
 	Game* game = new Game();
 	game->StartGame();
 	// Game::Initialize();
-
 	ButtonR* mmen_start = new ButtonR("start", (float)middlex, (float)middley); // Main start button
 
 	MenuCamera* menucamera = new MenuCamera(); // camera for the main menu is needed due to dimension differences
@@ -118,7 +119,7 @@ int main(void)
 
 	// Block Initialization
 
-	Block* block = new Block(BlockDirt, Vector3Zero(), WHITE, game->renderer->pbrShader, LoadModel("resources/old_car_new.glb"));
+	Block* block = new Block(BlockDirt, Vector3Zero(), BLACK, game->renderer->pbrShader, DefaultBlockModel);
 
 	GameObject::PushObject(block);
 
@@ -126,7 +127,7 @@ int main(void)
 	// skybox creation.
 	Mesh skyboxMesh = GenMeshCube(1.0f, 1.0f, 1.0f);
 	Model skybox = LoadModelFromMesh(skyboxMesh);
-	bool useHDR = false;
+	bool useHDR = true;
 
 	// Load skybox shader and set required locations
 	// NOTE: Some locations are automatically set at shader loading
@@ -209,7 +210,7 @@ int main(void)
 
 	Model terrain = LoadModelFromMesh(GenMeshCube(BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE));
 
-	
+
 
 	// test if temp folder exists
 	if (!DirectoryExists("temp"))
@@ -255,6 +256,10 @@ int main(void)
 	}
 	delete mmen_start;
 
+
+	bool isBreathing = false;
+
+	Sound breathingSound = LoadSound("resources/audio/breathing.mp3");
 	while (!WindowShouldClose())
 	{
 		// Global::Time::Update();
@@ -263,80 +268,80 @@ int main(void)
 		// Pause Menu
 		if (IsKeyPressed(KEY_ESCAPE))
 		{
-			/*
+
 
 			// Todo, move the menuCamera to be created on game startup and then hidden. it gets shown on if statement validation
 			bool exit = false;
 			bool manualExit = false;
 
-			MenuCamera *men_pause = new MenuCamera();
-			ButtonR *save = new ButtonR("Save", 100, 100);
-			ButtonR *Options = new ButtonR("Options", 100, 200);
-			ButtonR *exitButton = new ButtonR("Exit to Windows", 100, 300);
+			MenuCamera* men_pause = new MenuCamera();
+			ButtonR* save = new ButtonR("Save", 100, 100);
+			ButtonR* Options = new ButtonR("Options", 100, 200);
+			ButtonR* exitButton = new ButtonR("Exit to Windows", 100, 300);
 
 			EnableCursor();
 			while (!exit)
 			{
-			  BeginDrawing();
-			  DrawText("PAUSE", 100, 100, 20, RED);
-			  save->draw();
-			  save->update();
+				BeginDrawing();
+				DrawText("PAUSE", 100, 100, 20, RED);
+				save->draw();
+				save->update();
 
-			  Options->draw();
-			  Options->update();
+				Options->draw();
+				Options->update();
 
-			  exitButton->draw();
-			  exitButton->update();
-			  /*
-			  if (save->IsClicked())
-			  {
-				// todo : implement Saving game data, probably use the Objects vector.
-				const char *filename = "save.sav";
+				exitButton->draw();
+				exitButton->update();
 
-				std::vector<void *> data;
-
-				for (int i = 0; i < GameObject::GameObjects.size(); i++)
+				if (save->IsClicked())
 				{
-				  data.push_back(GameObject::GameObjects[i]);
+					// todo : implement Saving game data, probably use the Objects vector.
+					const char* filename = "save.sav";
+
+					std::vector<void*> data;
+
+					for (int i = 0; i < GameObject::GameObjects.size(); i++)
+					{
+						data.push_back(GameObject::GameObjects[i]);
+					}
+					SaveFileData(filename, &data, sizeof(data));
+
+					Logman::CustomLog(LOG_DEBUG, LoadFileText(filename), NULL);
 				}
-				SaveFileData(filename, &data, sizeof(data));
 
-				Logman::CustomLog(LOG_DEBUG, LoadFileText(filename), NULL);
-			  }
-
-			  if (exitButton->IsClicked())
-			  {
-				manualExit = true;
-			  }
-
-			  if (Options->IsClicked())
-			  {
-				bool closeOptions = false;
-				while (!closeOptions)
+				if (exitButton->IsClicked())
 				{
-				  // TODO : Add options
-
-				  if (IsKeyDown(KEY_ESCAPE))
-				  {
-					closeOptions = true;
-				  }
+					manualExit = true;
 				}
-			  }
 
-			  EndDrawing();
-			  if (IsKeyPressed(KEY_ESCAPE) && exit == false)
-			  {
-				exit = true;
-			  }
-			  else if (IsKeyPressed(KEY_ESCAPE) && exit == true)
-			  {
-				break;
-			  }
+				if (Options->IsClicked())
+				{
+					bool closeOptions = false;
+					while (!closeOptions)
+					{
+						// TODO : Add options
 
-			  if (manualExit)
-			  {
-				exit = true;
-			  }
+						if (IsKeyDown(KEY_ESCAPE))
+						{
+							closeOptions = true;
+						}
+					}
+				}
+
+				EndDrawing();
+				if (IsKeyPressed(KEY_ESCAPE) && exit == false)
+				{
+					exit = true;
+				}
+				else if (IsKeyPressed(KEY_ESCAPE) && exit == true)
+				{
+					break;
+				}
+
+				if (manualExit)
+				{
+					exit = true;
+				}
 			}
 			// cleanup
 			// UnloadTexture(tex);
@@ -345,12 +350,38 @@ int main(void)
 			delete exitButton;
 			if (manualExit)
 			{
-			  Logman::CustomLog(LOG_INFO, "Exiting Game", NULL);
-			  break;
+				Logman::CustomLog(LOG_INFO, "Exiting Game", NULL);
+				break;
 			}
 
-			*/
+
 		}
+
+		if (IsKeyPressed(KEY_E)) {
+			// Todo, move the menuCamera to be created on game startup and then hidden. it gets shown on if statement validation
+			bool exit = false;
+			bool manualExit = false;
+
+			MenuCamera* men_pause = new MenuCamera();
+			ButtonR* save = new ButtonR("Save", 100, 100);
+			ButtonR* Options = new ButtonR("Options", 100, 200);
+			ButtonR* exitButton = new ButtonR("Exit to Windows", 100, 300);
+
+			EnableCursor();
+		}
+		// breathing audio
+		if (!isBreathing) {
+			isBreathing = true;
+
+
+			PlaySound(breathingSound);
+		}
+		else {
+			isBreathing = IsSoundPlaying(breathingSound);
+		}
+
+
+
 		// update ray
 		ray.position = player->cameraComponent->getPosition();
 		ray.direction = player->cameraComponent->getTarget();
@@ -360,8 +391,37 @@ int main(void)
 		{
 			Vector3 placepos = player->cameraComponent->getTarget();
 
-			GameObject::PushObject(new Block(BlockStone, Vector3{ roundf(placepos.x), roundf(placepos.y), roundf(placepos.z) }, WHITE, game->renderer->pbrShader, DefaultBlockModel));
+			GameObject::PushObject(new Block(BlockStone, Vector3{ roundf(placepos.x), roundf(placepos.y), roundf(placepos.z) }, BLACK, game->renderer->pbrShader, DefaultBlockModel));
 		}
+		if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
+		{
+
+			std::vector<GameObject*> objects = GameObject::GameObjects;
+			// Loop through all the objects and check for a collision, then poof!
+			for (auto& obj : objects)
+			{
+				if (obj->GetType() == 0)
+				{
+					Block* block = static_cast<Block*>(obj);
+
+					// Check for a collision between the mouse ray and the block's
+					// bounding box
+					if (Global::Math::CheckCollisionRayBox(ray, block->GetBounds(), NULL))
+					{
+						// Remove the block from the vector and free its memory
+						std::vector<GameObject*>::iterator it =
+							std::find(objects.begin(), objects.end(), obj);
+						if (it != objects.end())
+						{
+							objects.erase(it);
+						}
+						break;
+					}
+				}
+			}
+		}
+
+
 
 		if (!IsKeyDown(KEY_LEFT_ALT))
 		{
@@ -418,9 +478,13 @@ int main(void)
 			player->healthComp->DamagePlayer(0.1f);
 		}
 
+
+
 		// TODO : day night affect
 
 		PollInputEvents(); // helps for some reason?
+
+		//game->physman->Update();
 		float cameraPos[3] = { player->cameraComponent->getPosition().x,
 							  player->cameraComponent->getPosition().y,
 							  player->cameraComponent->getPosition().z };
@@ -433,6 +497,8 @@ int main(void)
 		game->renderer->StartTexturing();
 
 		BeginMode3D(player->cameraComponent->getSelfCamera());
+
+		DrawCubeWires(Vector3{ roundf(player->cameraComponent->getTarget().x), roundf(player->cameraComponent->getTarget().y), roundf(player->cameraComponent->getTarget().z) }, BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE, GREEN);
 
 		rlDisableBackfaceCulling();
 		rlDisableDepthMask();
@@ -466,7 +532,7 @@ int main(void)
 		EndShaderMode();
 
 		DrawFPS(100, 100);
-		
+
 		player->healthComp->healthBar->Draw({ 0.0f, (float)screenWidth + 500 });
 
 		// Crosshair
