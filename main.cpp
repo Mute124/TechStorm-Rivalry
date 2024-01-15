@@ -40,12 +40,11 @@ bool SkipMainMenu = true;
 // #include "lib/rlights.h"
 
 #define RAYGUI_IMPLEMENTATION
-#include "../raygui.h"
+#include "raygui.h"
 
 #define GUI_OPTIONS_IMPLEMENTATION
 #include "Minero/gui_Options.h"
 
-#include "Styles/bluish/style_bluish.h"
 // This translates the current screen
 typedef enum
 {
@@ -154,8 +153,7 @@ int main(void)
   // skybox creation.
   Mesh skyboxMesh = GenMeshCube(1.0f, 1.0f, 1.0f);
   Model skybox = LoadModelFromMesh(skyboxMesh);
-
-  bool useHDR = true;
+  bool useHDR = false;
 
   // Load skybox shader and set required locations
   // NOTE: Some locations are automatically set at shader loading

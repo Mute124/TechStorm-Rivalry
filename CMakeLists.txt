@@ -36,32 +36,50 @@ FetchContent_MakeAvailable(tomlplusplus)
 
 
 include(FetchContent)
-FetchContent_Declare(
-    qu3e
-    GIT_REPOSITORY "https://github.com/RandyGaul/qu3e"
-)
-FetchContent_MakeAvailable(qu3e)
-# Include RRes
-FetchContent_Declare(
-        RRes
-        GIT_REPOSITORY "https://github.com/raysan5/rres"
-        GIT_TAG "1.2.0"
-)
-FetchContent_MakeAvailable(RRes)
 
-# Include RayGui
+# Include PhysX
 FetchContent_Declare(
-        RayGui
-        GIT_REPOSITORY "https://github.com/raysan5/raygui"
-        GIT_TAG "4.0"
+        PhysX
+        GIT_REPOSITORY "https://github.com/NVIDIA-Omniverse/PhysX"
+        GIT_TAG        105.1-physx-5.3.1
 )
-FetchContent_MakeAvailable(RayGui)
+FetchContent_MakeAvailable(PhysX)
+
+
+
+option(PHYSX_BUILD_TYPE "The build type of PhysX, i.e., one of {debug, checked, profile, release}" "checked")
+
+include_directories(PhysX/include)
+
+if(CMAKE_BUILD_TYPE AND CMAKE_BUILD_TYPE STREQUAL "Debug")
+    message("Building snippet in debug configuration")
+    add_compile_definitions(_DEBUG)
+    link_directories("PhysX/bin/linux.clang/debug") # This is the path where PhysX libraries are installed
+else()
+    message("Building snippet in release configuration with PhysX ${PHYSX_BUILD_TYPE} configuration")
+    add_compile_definitions(NDEBUG)
+    link_directories("PhysX/bin/linux.clang/${PHYSX_BUILD_TYPE}") # This is the path where PhysX libraries are installed
+endif()
+
+add_executable(Snippet
+    main.cpp
+)
+
+target_link_libraries(Snippet
+    PhysXExtensions_static_64
+    PhysX_static_64
+    PhysXPvdSDK_static_64
+    PhysXCommon_static_64
+    PhysXFoundation_static_64
+
+    pthread
+    dl
+)
 
 add_executable(${PROJECT_NAME} main.cpp)
 #set(raylib_VERBOSE 1)
 target_link_libraries(${PROJECT_NAME} raylib)
-target_include_directories(${PROJECT_NAME} PUBLIC ${JoltPhysics_SOURCE_DIR}/..)
-target_link_libraries(${PROJECT_NAME} Jolt)
+
 
 
 # Web Configurations
