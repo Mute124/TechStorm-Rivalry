@@ -3,7 +3,6 @@
 #include "Light.h"
 #include "Player.h"
 
-
 class GameWindowFactory
 {
 public:
@@ -120,7 +119,7 @@ public:
 
     ConfigMan* configman = new ConfigMan();
     static inline Renderer* renderer;
-
+   
     Game() {}
 
     ~Game()
@@ -135,7 +134,7 @@ public:
 
     void StartGame()
     {
-
+        SetTargetFPS(60);
         // Read config to decide what to set for the game
         Logman::CustomLog(LOG_INFO, "Initiating Config Manager", NULL);
 
@@ -181,7 +180,7 @@ public:
         }
 
         // Stamp window config flags & Manufacture
-        // windowfactory->StampFlag(FLAG_MSAA_4X_HINT);
+
 
         Logman::CustomLog(LOG_INFO, "Starting Game", NULL);
 
@@ -205,6 +204,8 @@ public:
         renderer->CreateRenderTexture(windowWidth, windowHeight);
 
         renderer->bloomShader = LoadShader(0, "resources/shaders/bloom.fs");
+        
+        
 
         // rlSetCullFace(RL_CULL_FACE_BACK);
     }

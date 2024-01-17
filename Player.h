@@ -6,16 +6,7 @@
 #include "Item.h"
 
 
-#define PLAYER_HP 100 
-
-typedef enum
-{
-    Action_Idle = 0,
-    Action_Walk,
-    Action_Break,
-    Action_Fly,
-    Action_Place
-} Player_Action;
+#define STARTINGHP 100 
 class PlayerController
 {
 
@@ -24,10 +15,26 @@ private:
     int mode;
 
     float speed;
+    float tiltSpeed;
+    const float maxTiltRight = 10.0f; // Positive
+    const float maxTiltLeft = -10.0f; // Negative
+    float crouchSpeed;
+
+
+    float screenTilt;
 
     float mouseSensitivity = 0.05f;
 
-    KeyboardKey forward, backward, left, right, jump, crouch;
+    KeyboardKey forward, backward, left, right, jump, crouch, tiltLeft, tiltRight;
+
+    // needs to be optimized, technically we dont need parameters, we can just use this classes variable for it.
+    float CalculateCameraTilt() {
+
+        static const float NOCHANGE= 0.0f;
+
+        return NOCHANGE;
+    
+    }
 public:
 
     bool isRunning = false;
@@ -36,10 +43,15 @@ public:
 
     PlayerController(KeyboardKey Forward, KeyboardKey Backward, KeyboardKey Left, KeyboardKey Right, KeyboardKey Jump, KeyboardKey Crouch, int mode) : forward(Forward), backward(Backward), left(Left), right(Right), jump(Jump), crouch(Crouch), mode(mode)
     {
+#ifndef tiltLeft
+        tiltLeft = KEY_Q;
+#endif // !tiltLeft
+#ifndef tiltRight
+        tiltRight = KEY_E;
+#endif // !tiltRight
+
 
     }
-
-
 
     void SetSpeed(float speed) {
         this->speed = speed;
@@ -57,15 +69,18 @@ public:
                 (IsKeyDown(backward) || IsKeyDown(KEY_DOWN)) * speed,
                 (IsKeyDown(right) || IsKeyDown(KEY_RIGHT)) * speed -   // Move right-left
                 (IsKeyDown(left) || IsKeyDown(KEY_LEFT)) * speed,
-                0.0f                                                // Move up-down
+                (IsKeyDown(jump)) * speed -                                                 // Move up-down
+                (IsKeyDown(crouch)) * speed
             },
             Vector3{
                 GetMouseDelta().x * mouseSensitivity,                            // Rotation: yaw
                 GetMouseDelta().y * mouseSensitivity,                            // Rotation: pitch
-                0.0f                                                // Rotation: roll
+                CalculateCameraTilt()                // Rotation: roll
             },
 
             GetMouseWheelMove() * 2.0f);                              // Move to target (zoom)
+
+        
     }
 
 
@@ -335,14 +350,13 @@ public:
         if (IsKeyDown(KEY_V)) {
             startDriving = false;
         }
-
-        if (IsKeyDown(KEY_LEFT_SHIFT)) {
-            controller->isRunning = true;
-            controller->SetSpeed(0.5f); //m/s
-        }
         if (!IsKeyDown(KEY_LEFT_SHIFT)) {
             controller->isRunning = false;
             controller->SetSpeed(0.03f); //m/s
+        }
+        else {
+            controller->isRunning = true;
+            controller->SetSpeed(1.3f); //m/s
         }
 
         // View Sway
@@ -374,17 +388,7 @@ public:
     // sends player data to the games render
     void Draw() override
     {
-        if (cameraMode != CAMERA_FIRST_PERSON)
-        {
-            if (this->doDraw)
-            {
-                DrawModel(model, this->cameraComponent->getPosition(), 0.2f, GREEN);
-            }
-        }
-        else
-        {
-            // empty because it shouldnt draw anything
-        }
+        
 
         hand->Draw();
 
@@ -482,5 +486,5 @@ private:
     Vector3 velocity;
     BoundingBox Box = GetModelBoundingBox(this->model);
 
-    int m_max = PLAYER_HP;
+    int m_max = STARTINGHP;
 };

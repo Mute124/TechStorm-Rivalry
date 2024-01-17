@@ -16,6 +16,7 @@ bool SkipMainMenu = true;
 #include "Logman.h"
 #include "ConfigMan.h" // config manager
 #include "Light.h"
+#include "Layer.h"
 
 
 // default libs
@@ -119,9 +120,11 @@ int main(void)
 
 	// Block Initialization
 
-	Block* block = new Block(BlockDirt, Vector3Zero(), BLACK, game->renderer->pbrShader, DefaultBlockModel);
+	Block* block = new Block(BlockDirt, Vector3Zero(), BLACK, game->renderer->pbrShader, LoadModel("resources/old_car_new.glb"));
 
 	GameObject::PushObject(block);
+
+
 
 	// Load skybox model
 	// skybox creation.
@@ -192,7 +195,8 @@ int main(void)
 		UnloadImage(img);
 	}
 
-	Light sun = CreateLight(LIGHT_POINT, Vector3{ 1.0f, 10.0f, 1.0f }, Vector3One(),
+	
+	Light sun = CreateLight(LIGHT_POINT, Vector3{ 1.0f, 0.0f, 1.0f }, Vector3One(),
 		BLUE, 4.0f, game->renderer->pbrShader); // Ambient color.;
 	// Assignment of shaders
 // NOTE: By default, the texture maps are always used
@@ -208,19 +212,17 @@ int main(void)
 		Vector3{ player->cameraComponent->getPosition().x, player->cameraComponent->getPosition().y - 10.0f,
 				player->cameraComponent->getPosition().z };
 
-	Model terrain = LoadModelFromMesh(GenMeshCube(BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE));
-
-
+	//Model terrain = LoadModelFromMesh(GenMeshCube(BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE));
 
 	// test if temp folder exists
 	if (!DirectoryExists("temp"))
 	{
-		system("mkdir temp");
+		system("mkdir temp"); // sending system command
 	}
 
 
 	// Checks if the music should be played, and plays it if it should be.
-	if (game->enableMusic)
+	if (game->enableMusic) 
 	{
 		PlayMusicStream(LoadMusicStream("resources/Audio/OST/Minero.mp3"));
 	}
@@ -256,10 +258,13 @@ int main(void)
 	}
 	delete mmen_start;
 
-
 	bool isBreathing = false;
 
 	Sound breathingSound = LoadSound("resources/audio/breathing.mp3");
+
+
+	sun.enabled = true;
+	//PhysicsObject* obj = new PhysicsObject();
 	while (!WindowShouldClose())
 	{
 		// Global::Time::Update();
@@ -360,6 +365,7 @@ int main(void)
 		if (IsKeyPressed(KEY_E)) {
 			// todo : Code the inventory menu AAAAAAAA
 		}
+		
 		// breathing audio
 		if (!isBreathing) {
 			isBreathing = true;
@@ -373,6 +379,8 @@ int main(void)
 
 
 
+		//game->PhysicsMan->SimulateNextFrame();
+
 		// update ray
 		ray.position = player->cameraComponent->getPosition();
 		ray.direction = player->cameraComponent->getTarget();
@@ -382,35 +390,9 @@ int main(void)
 		{
 			Vector3 placepos = player->cameraComponent->getTarget();
 
-			GameObject::PushObject(new Block(BlockStone, Vector3{ roundf(placepos.x), roundf(placepos.y), roundf(placepos.z) }, BLACK, game->renderer->pbrShader, DefaultBlockModel));
+			GameObject::PushObject(new Block(BlockStone, Vector3{ roundf(placepos.x), roundf(placepos.y), roundf(placepos.z) }, WHITE, game->renderer->pbrShader, DefaultBlockModel));
 		}
-		if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
-		{
-
-			std::vector<GameObject*> objects = GameObject::GameObjects;
-			// Loop through all the objects and check for a collision, then poof!
-			for (auto& obj : objects)
-			{
-				if (obj->GetType() == 0)
-				{
-					Block* block = static_cast<Block*>(obj);
-
-					// Check for a collision between the mouse ray and the block's
-					// bounding box
-					if (Global::Math::CheckCollisionRayBox(ray, block->GetBounds(), NULL))
-					{
-						// Remove the block from the vector and free its memory
-						std::vector<GameObject*>::iterator it =
-							std::find(objects.begin(), objects.end(), obj);
-						if (it != objects.end())
-						{
-							objects.erase(it);
-						}
-						break;
-					}
-				}
-			}
-		}
+		
 
 
 
@@ -441,8 +423,9 @@ int main(void)
 				}
 			}
 		}
-
-		if (IsKeyDown(KEY_SPACE))
+		
+		/*
+				if (IsKeyDown(KEY_SPACE))
 		{
 			// player->cameraComponent->setPosition(Vector3{player->cameraComponent->getPosition().x, player->cameraComponent->getPosition().y + 1.0f, player->cameraComponent->getPosition().z});
 
@@ -454,7 +437,8 @@ int main(void)
 			// player->cameraComponent->setPosition(Vector3{player->cameraComponent->getPosition().x, player->cameraComponent->getPosition().y - 0.1f, player->cameraComponent->getPosition().z});
 			CameraMoveUp(player->cameraComponent->getSelfCameraPointer(), -0.1f);
 		}
-
+		*/
+		
 		if (IsKeyDown(KEY_LEFT_SHIFT))
 		{
 			player->isRunning = true;
@@ -475,12 +459,16 @@ int main(void)
 
 		PollInputEvents(); // helps for some reason?
 
+
+
 		//game->physman->Update();
 		float cameraPos[3] = { player->cameraComponent->getPosition().x,
 							  player->cameraComponent->getPosition().y,
 							  player->cameraComponent->getPosition().z };
 
-		sun.position = player->cameraComponent->getTarget();
+		sun.position = player->cameraComponent->getPosition();
+
+
 		UpdateLight(game->renderer->pbrShader, sun);
 		UpdateLight(game->renderer->bloomShader, sun);
 		SetShaderValue(game->renderer->pbrShader, game->renderer->pbrShader.locs[SHADER_LOC_VECTOR_VIEW], &cameraPos, SHADER_UNIFORM_VEC3);
@@ -489,6 +477,7 @@ int main(void)
 
 		BeginMode3D(player->cameraComponent->getSelfCamera());
 
+		// placement wires
 		DrawCubeWires(Vector3{ roundf(player->cameraComponent->getTarget().x), roundf(player->cameraComponent->getTarget().y), roundf(player->cameraComponent->getTarget().z) }, BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE, GREEN);
 
 		rlDisableBackfaceCulling();
@@ -516,7 +505,8 @@ int main(void)
 
 		game->renderer->StartDraw();
 
-		BeginShaderMode(game->renderer->bloomShader);
+		//BeginShaderMode(game->renderer->bloomShader);
+
 		// NOTE: Render texture must be y-flipped due to default OpenGL coordinates (left-bottom)
 		DrawTextureRec(game->renderer->fbo.texture, Rectangle{ 0, 0, (float)(game->renderer->fbo.texture.width), (float)(-game->renderer->fbo.texture.height) }, Vector2{ 0, 0 }, WHITE);
 
@@ -560,6 +550,7 @@ int main(void)
 	delete menucamera;
 	delete block;
 	delete player;
+
 	GameObject::FlushBuffer();
 	return 0;
 }

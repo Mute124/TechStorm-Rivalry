@@ -159,4 +159,4 @@ void main()
     color = pow(color, vec3(1.0/2.2));
 
     finalColor = vec4(color, 1.0);
-} 
+}

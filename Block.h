@@ -53,21 +53,22 @@ public:
         Logman::CustomLog(LOG_TRACE, "Block Constructor", NULL);
         this->shader = shader;
         this->model = model;
-
+        
         const static Texture2D Bricks = LoadTexture("resources/textures/Block/Brick/Brick.png");
         this->model.materials[0].shader = shader;
 
         this->model.materials[0].maps[MATERIAL_MAP_ALBEDO].color = WHITE;
-        this->model.materials[0].maps[MATERIAL_MAP_METALNESS].value = 1.0f;
-        this->model.materials[0].maps[MATERIAL_MAP_ROUGHNESS].value = 0.0f;
+        this->model.materials[0].maps[MATERIAL_MAP_METALNESS].value = 0.0f;
+        this->model.materials[0].maps[MATERIAL_MAP_ROUGHNESS].value = 1.0f;
         this->model.materials[0].maps[MATERIAL_MAP_OCCLUSION].value = 1.0f;
         this->model.materials[0].maps[MATERIAL_MAP_EMISSION].color = Color{ 255, 162, 0, 100 };
 
+        //this->model.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = Bricks;
         this->model.materials[0].maps[MATERIAL_MAP_ALBEDO].texture = Bricks;
         this->model.materials[0].maps[MATERIAL_MAP_METALNESS].texture = LoadTexture("resources/textures/Block/Brick/brickMRAO.png");
         this->model.materials[0].maps[MATERIAL_MAP_NORMAL].texture = LoadTexture("resources/textures/Block/Brick/brick_NORM.png");
         this->model.materials[0].maps[MATERIAL_MAP_HEIGHT].texture = LoadTexture("resources/textures/Block/Brick/brick_DISP.png");
-
+        //this->model.materials[0].maps[MATERIAL_MAP_EMISSION].texture = LoadTexture("resources/textures/Old_Car/old_car_e.png");
         /*
         * 
         * 
@@ -77,15 +78,15 @@ public:
         *         this->model.materials[0].maps[MATERIAL_MAP_ALBEDO].texture = LoadTexture("resources/textures/Old_Car/old_car_d.png");
         this->model.materials[0].maps[MATERIAL_MAP_METALNESS].texture = LoadTexture("resources/textures/Old_Car/old_car_mra.png");
         this->model.materials[0].maps[MATERIAL_MAP_NORMAL].texture = LoadTexture("resources/textures/Old_Car/old_car_n.png");
-        this->model.materials[0].maps[MATERIAL_MAP_EMISSION].texture = LoadTexture("resources/textures/Old_Car/old_car_e.png");
+       
                 // Setup materials[0].maps default parameters
         
         
 
-        //this->model.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = Bricks;
+        //
 
         // Setup materials[0].maps default textures
-   // this->model.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = Bricks;
+   // 
 
         // Setup materials[0].maps default textures
 
