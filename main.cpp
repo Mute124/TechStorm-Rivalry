@@ -120,7 +120,7 @@ int main(void)
 
 	// Block Initialization
 
-	Block* block = new Block(BlockDirt, Vector3Zero(), BLACK, game->renderer->pbrShader, LoadModel("resources/old_car_new.glb"));
+	Block* block = new Block(BlockDirt, Vector3Zero(), BLACK, game->renderer->pbrShader, DefaultBlockModel);
 
 	GameObject::PushObject(block);
 
@@ -468,18 +468,20 @@ int main(void)
 
 		sun.position = player->cameraComponent->getPosition();
 
-
+		sun.target = player->cameraComponent->getTarget();
 		UpdateLight(game->renderer->pbrShader, sun);
 		UpdateLight(game->renderer->bloomShader, sun);
 		SetShaderValue(game->renderer->pbrShader, game->renderer->pbrShader.locs[SHADER_LOC_VECTOR_VIEW], &cameraPos, SHADER_UNIFORM_VEC3);
 
+		Logman::Log(TextFormat("Light position is %f, %f, %f, Intensity : %f", sun.position.x, sun.position.y, sun.position.z, sun.intensity));
 		game->renderer->StartTexturing();
 
 		BeginMode3D(player->cameraComponent->getSelfCamera());
 
 		// placement wires
 		DrawCubeWires(Vector3{ roundf(player->cameraComponent->getTarget().x), roundf(player->cameraComponent->getTarget().y), roundf(player->cameraComponent->getTarget().z) }, BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE, GREEN);
-
+			
+		DrawSphere(sun.position, 5.0f, BLUE);
 		rlDisableBackfaceCulling();
 		rlDisableDepthMask();
 		// DrawModel(skybox, Vector3{0.0f, 0.0f, 0.0f}, 1.0f, WHITE);

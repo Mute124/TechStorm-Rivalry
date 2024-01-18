@@ -1,29 +1,39 @@
 #pragma once
-typedef enum ItemTypes {
-    Placeable,
-    Consumable,
-    Ranged,
-    Melee,
+#include "Common.h"
 
-}itype;
-
-class ItemDictionary {
-
+enum RawMaterials {
+	ITEM_NULL,
+	IRON,
+	STEEL,
+	MAGNESIUM,
+	LEAD,
+	CUPRIC_METAL,
+	SILICON,
+	SILVER,
+	GLASS,
+	PLUTONIUM,
+	URANIUM,
+	THORIUM,
+	RUBBER,
+	CHARCOAL,
+	LIGNITE,
+	SUBBITUMINOUS,
+	BITUMINOUS,
+	ANTHRACITE,
+	ADENOSINITE,
+	LOW_GRADE_OIL,
+	HIGH_GRADE_OIL,
+	RIDGITE_ORE,
+	RIDGITE,
+	RIGID_TUNGSTEN,
+	RIGID_STEEL,
+	IRIDIUM,
+	XENIUM,
+	SHINY,
+	PLASTIC,
+	SLIMEIUM
 };
 
+
 class Item {
-public:
-
-    Item() {}
-
-
-
-    ItemTypes itemtype;
-    Model itemModel;
-
-    virtual void Update() {
-
-    }
-
-
 };

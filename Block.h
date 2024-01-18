@@ -58,8 +58,8 @@ public:
         this->model.materials[0].shader = shader;
 
         this->model.materials[0].maps[MATERIAL_MAP_ALBEDO].color = WHITE;
-        this->model.materials[0].maps[MATERIAL_MAP_METALNESS].value = 0.0f;
-        this->model.materials[0].maps[MATERIAL_MAP_ROUGHNESS].value = 1.0f;
+        this->model.materials[0].maps[MATERIAL_MAP_METALNESS].value = 1.0f;
+        this->model.materials[0].maps[MATERIAL_MAP_ROUGHNESS].value = 0.0f;
         this->model.materials[0].maps[MATERIAL_MAP_OCCLUSION].value = 1.0f;
         this->model.materials[0].maps[MATERIAL_MAP_EMISSION].color = Color{ 255, 162, 0, 100 };
 
@@ -68,6 +68,7 @@ public:
         this->model.materials[0].maps[MATERIAL_MAP_METALNESS].texture = LoadTexture("resources/textures/Block/Brick/brickMRAO.png");
         this->model.materials[0].maps[MATERIAL_MAP_NORMAL].texture = LoadTexture("resources/textures/Block/Brick/brick_NORM.png");
         this->model.materials[0].maps[MATERIAL_MAP_HEIGHT].texture = LoadTexture("resources/textures/Block/Brick/brick_DISP.png");
+
         //this->model.materials[0].maps[MATERIAL_MAP_EMISSION].texture = LoadTexture("resources/textures/Old_Car/old_car_e.png");
         /*
         * 
