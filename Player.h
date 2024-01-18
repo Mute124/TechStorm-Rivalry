@@ -7,6 +7,15 @@
 
 
 #define STARTINGHP 100 
+
+class PlayerInventory {
+public:
+       
+
+
+    static inline int InventorySlots;
+};
+
 class PlayerController
 {
 
@@ -260,6 +269,9 @@ public:
         Vector2 position;
     };
 
+
+    
+
     class Hand : public GameObject {
 
     public:
@@ -267,10 +279,10 @@ public:
 
         Vector3 offset = Vector3Zero();
         Vector3 position = Vector3Zero();
+        Model model;
 
 
-        Item item;
-        Hand(Model model) : offset({ 0.0f, 0.0f, 0.0f }) {
+        Hand(Model model, Vector3 position, Shader shader) : model(model), {
 
         }
 
@@ -291,7 +303,7 @@ public:
         }
 
         void Draw() override {
-            //DrawModel(model, this->position, 0.05f, GREEN);
+            DrawModel(model, this->position, 1.0f, WHITE);
         }
 
 
