@@ -5,7 +5,6 @@
 #include "common.h"
 #include <stdio.h>
 #include <stdlib.h>
-#include <iostream>   // For debugging purposes
 #include <thread>     // needed for threading
 #include <vector>     // needed for game object list and other things
 #include <functional> // needed by thread class

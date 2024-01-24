@@ -17,6 +17,7 @@ bool SkipMainMenu = true;
 #include "ConfigMan.h" // config manager
 #include "Light.h"
 #include "Layer.h"
+#include "InventoryManager.h"
 
 
 // default libs
@@ -52,6 +53,7 @@ int targetFPS = GetMonitorRefreshRate(GetCurrentMonitor()); // This is what is u
 
 int main(void)
 {
+
 	int screenWidth = GetScreenWidth();
 	int screenHeight = GetScreenHeight();
 
@@ -262,7 +264,9 @@ int main(void)
 
 	Sound breathingSound = LoadSound("resources/audio/breathing.mp3");
 
+	InventoryMan* man = new InventoryMan("resources.tsr");
 
+	
 	sun.enabled = true;
 	//PhysicsObject* obj = new PhysicsObject();
 	while (!WindowShouldClose())
@@ -473,7 +477,7 @@ int main(void)
 		UpdateLight(game->renderer->bloomShader, sun);
 		SetShaderValue(game->renderer->pbrShader, game->renderer->pbrShader.locs[SHADER_LOC_VECTOR_VIEW], &cameraPos, SHADER_UNIFORM_VEC3);
 
-		Logman::Log(TextFormat("Light position is %f, %f, %f, Intensity : %f", sun.position.x, sun.position.y, sun.position.z, sun.intensity));
+		//Logman::Log(TextFormat("Light position is %f, %f, %f, Intensity : %f", sun.position.x, sun.position.y, sun.position.z, sun.intensity));
 		game->renderer->StartTexturing();
 
 		BeginMode3D(player->cameraComponent->getSelfCamera());
@@ -551,6 +555,7 @@ int main(void)
 	//delete mmen_start; // Deletes the main menu
 	delete menucamera;
 	delete block;
+	delete man;
 	delete player;
 
 	GameObject::FlushBuffer();

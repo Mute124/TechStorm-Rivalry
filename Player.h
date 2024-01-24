@@ -282,7 +282,7 @@ public:
         Model model;
 
 
-        Hand(Model model, Vector3 position, Shader shader) : model(model), {
+        Hand(Model model, Vector3 position, Shader shader) : model(model) {
 
         }
 
@@ -328,7 +328,7 @@ public:
                45.0f,
                CAMERA_PERSPECTIVE });
 
-        hand = new Hand(model);
+        //hand = new Hand(model);
         crosshair = new Crosshair(GetScreenWidth(), GetScreenHeight(), BLACK);
 
         healthComp = new PlayerHealthComp(m_max);
@@ -380,7 +380,7 @@ public:
 
 
 
-        hand->position = Vector3Add(this->cameraComponent->getPosition(), GetCameraForward(this->cameraComponent->getSelfCameraPointer()));//= Vector3Normalize(Vector3Add(Vector3Divide(this->cameraComponent->getTarget(), {2.0f, 2.0f, 2.0f}), GetCameraForward(this->cameraComponent->getSelfCameraPointer())));
+        //hand->position = Vector3Add(this->cameraComponent->getPosition(), GetCameraForward(this->cameraComponent->getSelfCameraPointer()));//= Vector3Normalize(Vector3Add(Vector3Divide(this->cameraComponent->getTarget(), {2.0f, 2.0f, 2.0f}), GetCameraForward(this->cameraComponent->getSelfCameraPointer())));
         //hand->model.transform = MatrixLookAt(this->cameraComponent->getPosition(), this->cameraComponent->getTarget(), {0.0f, 1.0f, 0.0f});
         //hand->model = model;
     };
@@ -402,7 +402,7 @@ public:
     {
         
 
-        hand->Draw();
+    
 
 
     }
