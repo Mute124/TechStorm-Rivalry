@@ -60,7 +60,7 @@ public:
         this->model.materials[0].maps[MATERIAL_MAP_ALBEDO].color = WHITE;
         this->model.materials[0].maps[MATERIAL_MAP_METALNESS].value = 0.0f;
         this->model.materials[0].maps[MATERIAL_MAP_ROUGHNESS].value = 1.0f;
-        this->model.materials[0].maps[MATERIAL_MAP_OCCLUSION].value = 1.0f;
+        this->model.materials[0].maps[MATERIAL_MAP_OCCLUSION].value = 0.0f;
         this->model.materials[0].maps[MATERIAL_MAP_EMISSION].color = Color{ 255, 162, 0, 100 };
 
         //this->model.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = Bricks;
