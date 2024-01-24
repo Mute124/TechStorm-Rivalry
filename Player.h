@@ -13,7 +13,7 @@ public:
        
 
 
-    static inline int InventorySlots;
+    int InventorySlots;
 };
 
 class PlayerController

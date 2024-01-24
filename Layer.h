@@ -5,5 +5,8 @@
 
 template<typename T>
 struct Layer {
+
+	
+	const char* LAYERNAME;
 	std::vector<T*> layerObjects;
 };

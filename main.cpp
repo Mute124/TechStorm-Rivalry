@@ -264,8 +264,14 @@ int main(void)
 
 	Sound breathingSound = LoadSound("resources/audio/breathing.mp3");
 
-	InventoryMan* man = new InventoryMan("resources.tsr");
+	InventoryMan *man = new InventoryMan("data/Items/resources.tsr");
 
+	std::thread itemsSetupThread(man->SetupItems);
+
+	
+	itemsSetupThread.join();
+
+	Logman::Log(TextFormat("%i", man->itemCount));
 	
 	sun.enabled = true;
 	//PhysicsObject* obj = new PhysicsObject();
@@ -472,7 +478,7 @@ int main(void)
 
 		sun.position = player->cameraComponent->getPosition();
 
-		sun.target = player->cameraComponent->getTarget();
+		
 		UpdateLight(game->renderer->pbrShader, sun);
 		UpdateLight(game->renderer->bloomShader, sun);
 		SetShaderValue(game->renderer->pbrShader, game->renderer->pbrShader.locs[SHADER_LOC_VECTOR_VIEW], &cameraPos, SHADER_UNIFORM_VEC3);
@@ -485,7 +491,7 @@ int main(void)
 		// placement wires
 		DrawCubeWires(Vector3{ roundf(player->cameraComponent->getTarget().x), roundf(player->cameraComponent->getTarget().y), roundf(player->cameraComponent->getTarget().z) }, BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE, GREEN);
 			
-		DrawSphere(sun.position, 5.0f, BLUE);
+		DrawSphere(sun.target, 0.5f, BLUE);
 		rlDisableBackfaceCulling();
 		rlDisableDepthMask();
 		// DrawModel(skybox, Vector3{0.0f, 0.0f, 0.0f}, 1.0f, WHITE);
