@@ -3,9 +3,18 @@
 #include "Globals.h"
 #include "Gameobject.h"
 #include "Block.h"
+#include "Item.h"
 
 
 #define STARTINGHP 100 
+
+class PlayerInventory {
+public:
+       
+
+
+    int InventorySlots;
+};
 
 class PlayerController
 {
@@ -371,7 +380,7 @@ public:
 
 
 
-        hand->position = Vector3Add(this->cameraComponent->getPosition(), GetCameraForward(this->cameraComponent->getSelfCameraPointer()));//= Vector3Normalize(Vector3Add(Vector3Divide(this->cameraComponent->getTarget(), {2.0f, 2.0f, 2.0f}), GetCameraForward(this->cameraComponent->getSelfCameraPointer())));
+        //hand->position = Vector3Add(this->cameraComponent->getPosition(), GetCameraForward(this->cameraComponent->getSelfCameraPointer()));//= Vector3Normalize(Vector3Add(Vector3Divide(this->cameraComponent->getTarget(), {2.0f, 2.0f, 2.0f}), GetCameraForward(this->cameraComponent->getSelfCameraPointer())));
         //hand->model.transform = MatrixLookAt(this->cameraComponent->getPosition(), this->cameraComponent->getTarget(), {0.0f, 1.0f, 0.0f});
         //hand->model = model;
     };
@@ -393,7 +402,7 @@ public:
     {
         
 
-        hand->Draw();
+    
 
 
     }
