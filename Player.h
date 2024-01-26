@@ -3,18 +3,9 @@
 #include "Globals.h"
 #include "Gameobject.h"
 #include "Block.h"
-#include "Item.h"
 
 
 #define STARTINGHP 100 
-
-class PlayerInventory {
-public:
-       
-
-
-    static inline int InventorySlots;
-};
 
 class PlayerController
 {
@@ -282,7 +273,7 @@ public:
         Model model;
 
 
-        Hand(Model model, Vector3 position, Shader shader) : model(model), {
+        Hand(Model model, Vector3 position, Shader shader) : model(model) {
 
         }
 
@@ -328,7 +319,7 @@ public:
                45.0f,
                CAMERA_PERSPECTIVE });
 
-        hand = new Hand(model);
+        //hand = new Hand(model);
         crosshair = new Crosshair(GetScreenWidth(), GetScreenHeight(), BLACK);
 
         healthComp = new PlayerHealthComp(m_max);
