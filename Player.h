@@ -6,6 +6,7 @@
 #include "Item.h"
 
 #define STARTINGHP 100
+#define MAX_AFFLICTIONS 20
 
 class PlayerController
 {
@@ -111,6 +112,7 @@ public:
 		delete this;
 	}
 
+
 	void DamagePlayer(float damage)
 	{
 		healthBar->hp -= damage;
@@ -130,6 +132,11 @@ public:
 	{
 		return healthBar->hp;
 	}
+
+private:
+
+
+
 };
 class CameraData
 {
@@ -281,9 +288,14 @@ public:
 
 		// View Sway
 
+	
+
 		if (startDriving) {
 			Drive();
 		}
+
+
+
 
 	};
 	// sends player data to the games render
@@ -313,13 +325,14 @@ public:
 
 	PlayerController* controller = new PlayerController(KEY_W, KEY_S, KEY_A, KEY_D, KEY_SPACE, KEY_C, cameraMode);
 
-	bool isRunning;
 
+	bool isRunning;
 	PlayerHealthComp* healthComp;
+
+	
 
 private:
 
-	float SwayFactor;
 	bool startDriving = false;
 
 	static void CheckForBlockPlacement(MouseButton Trigger, Ray ray)

@@ -222,10 +222,16 @@ int main(void)
 
 	Logman::Log(TextFormat("%i", man->itemCount));
 
-	sun.enabled = true;
+	float swayAmount = 0.0003f;
+	float swaySpeed = 0.02f;
+	float swayTimer = 0.0f;
 
+
+	sun.enabled = true;
+	static int time = 0;
 	while (!WindowShouldClose())
 	{
+		time++;
 		// Global::Time::Update();
 
 		// TODO : Move input crap into another thread.
@@ -382,8 +388,41 @@ int main(void)
 
 		if (IsKeyDown(KEY_Y))
 		{
-			player->healthComp->DamagePlayer(0.1f);
+			player->healthComp->DamagePlayer(5.0f);
 		}
+
+		
+		if (player->healthComp->GetHealth() <= 15) {
+			
+			/*
+			* float tintIntensity;
+				f(t)=A*sin(B*t)+C
+
+				In this equation:
+
+					tt represents time.
+					AA is the amplitude, controlling how far the function oscillates above and below its central value.
+					BB is the frequency, determining how fast the oscillation occurs.
+					CC is a constant that represents the central value or offset of the pulsation.
+
+
+									Image img = LoadImageFromTexture(game->renderer->fbo.texture);
+
+				ImageColorTint(&img, RED);
+				game->renderer->fbo.texture = LoadTextureFromImage(img);
+				tintProgress++;
+			*/
+
+			
+			 // Calculate pulsating red tint (change the intensity based on time)
+        //tintIntensity = (sinf(GetTime() * 2.0f) + 1.0f) / 2.0f; // Sin wave pulsation
+			
+		}
+		
+		swayTimer += GetFrameTime();
+
+		player->cameraComponent->SetTarget(Vector3{ player->cameraComponent->GetTarget().x + sin(swayTimer * swaySpeed) * swayAmount, player->cameraComponent->GetTarget().y, player->cameraComponent->GetTarget().z + cos(swayTimer * swaySpeed) * swayAmount});
+
 
 		PollInputEvents(); // helps for some reason?
 
@@ -404,10 +443,8 @@ int main(void)
 
 		BeginMode3D(player->cameraComponent->GetSelfCamera());
 
-		// placement wires
-		DrawCubeWires(Vector3{ roundf(player->cameraComponent->GetTarget().x), roundf(player->cameraComponent->GetTarget().y), roundf(player->cameraComponent->GetTarget().z) }, BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE, GREEN);
 
-		DrawSphere(sun.target, 0.5f, BLUE);
+		
 		rlDisableBackfaceCulling();
 		rlDisableDepthMask();
 		// DrawModel(skybox, Vector3{0.0f, 0.0f, 0.0f}, 1.0f, WHITE);
@@ -433,9 +470,10 @@ int main(void)
 
 		game->renderer->StartDraw();
 
-		//BeginShaderMode(game->renderer->bloomShader);
+		BeginShaderMode(game->renderer->bloomShader);
 
 		// NOTE: Render texture must be y-flipped due to default OpenGL coordinates (left-bottom)
+	
 		DrawTextureRec(game->renderer->fbo.texture, Rectangle{ 0, 0, (float)(game->renderer->fbo.texture.width), (float)(-game->renderer->fbo.texture.height) }, Vector2{ 0, 0 }, WHITE);
 
 		EndShaderMode();

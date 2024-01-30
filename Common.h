@@ -15,6 +15,7 @@
 #include <vector>
 #include <cstdarg>
 #include <thread>
+#include <math.h>
 
 #include "ConfigMan.h"
 #include "Logman.h"
