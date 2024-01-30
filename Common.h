@@ -7,12 +7,14 @@
 #include <rlgl.h>
 #include "rcamera.h"
 //#include "rguiapi.h"
+#include "rgui/src/raygui.h"
 
 // C++ Libraries
 #include <stdio.h>
 #include <stdlib.h>
 #include <string>
 #include <vector>
+#include <map>
 #include <cstdarg>
 #include <thread>
 

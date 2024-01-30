@@ -129,6 +129,7 @@ public:
 
 	void StartGame()
 	{
+		SetTraceLogCallback(Logman::CustomLog);
 		SetTargetFPS(60);
 		// Read config to decide what to set for the game
 		Logman::CustomLog(LOG_INFO, "Initiating Config Manager", NULL);

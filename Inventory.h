@@ -1,13 +1,22 @@
 #pragma once
 #include "common.h"
 #include "Item.h"
+#include "Data/gui/styles/techstorm-theme.h"
 
 class InventoryGUI {
 public:
 
-	InventoryGUI() {
+	InventoryGUI(std::map<const char*, Item*> items, std::vector<Item*> itemsVector) {
+		this->itemsMap = items;
+		this->itemsRegistry = itemsVector;
 	}
 
-	static inline std::map<const char*, Item*> itemsMap;
-	static inline std::vector<Item*> itemsRegistry;
+	void Draw() {
+
+	}
+
+	std::map<const char*, Item*> itemsMap;
+	std::vector<Item*> itemsRegistry;
+
+
 };
