@@ -12,12 +12,9 @@ using namespace tinyxml2;
 
 class InventoryMan {
 public:
-	InventoryMan(const char *itemsFilePath) : ITEMSPATH(itemsFilePath) {
-		
-
-
+	InventoryMan(const char* itemsFilePath) : ITEMSPATH(itemsFilePath) {
 	}
-	
+
 	static inline void SetupItems() {
 		XMLDocument doc;
 		doc.LoadFile("data/Items/resources.tsr");
@@ -41,8 +38,6 @@ public:
 
 					XMLElement* icon = itemElement->FirstChildElement("Icon");
 
-
-
 					item = new Item(itemName->GetText(), materialType->GetText(), LoadImage(icon->GetText()), NULL);
 
 					mapSize = Register(item);
@@ -55,25 +50,18 @@ public:
 		{
 			obj->log();
 		}
-		
-
-		
 	}
 
 	static inline std::map<const char*, Item*> itemMap;
 	static inline std::vector<Item*> simpleItemRegistry;
-	
+
 	static inline int itemCount = 0;
 
 private:
-	
+
 	const char* ITEMSPATH;
 
-
-
-	static inline int Register(Item *item) {
-
-		
+	static inline int Register(Item* item) {
 		itemMap[item->NAME] = item;
 
 		int mapSize = static_cast<const int>(itemMap.size());
@@ -83,6 +71,4 @@ private:
 		itemCount = mapSize;
 		return mapSize;
 	}
-	
-
 };
