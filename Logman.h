@@ -20,6 +20,15 @@ public:
 		CustomLog(LOG_INFO, message, NULL);
 	}
 
+	static void Error(const char* message) {
+		CustomLog(LOG_ERROR, message, NULL);
+	}
+
+	static void Warn(const char* message) {
+		CustomLog(LOG_WARN, message, NULL);
+	}
+	
+
 	// Custom logging function
 	static void CustomLog(int msgType, const char* text, va_list args = 0)
 	{
