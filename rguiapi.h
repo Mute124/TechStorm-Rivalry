@@ -3,6 +3,7 @@
 
 #ifndef RGUIAPI_H
 #define RGUIAPI_H
+
 #if defined(_WIN32)
 #if defined(BUILD_LIBTYPE_SHARED)
 #if defined(__TINYC__)
@@ -28,6 +29,7 @@
 #if (!defined(_DEBUG) && (defined(WIN32) || defined(_WIN32) || defined(__WIN32) && !defined(__CYGWIN__)))
 bool __stdcall FreeConsole(void);       // Close console from code (kernel32.lib)
 #endif
+
 #define ANCHOR_RADIUS               20      // Default anchor radius
 #define MIN_CONTROL_SIZE            10      // Minimum control size
 #define SCALE_BOX_CORNER_SIZE       12      // Scale box bottom-right corner square size
@@ -73,7 +75,6 @@ static void ResetLayout(GuiLayout* layout)
     layout->anchorCount = 0;
     layout->controlCount = 0;
 }
-
 
 // Load layout from text file
 // NOTE: If NULL provided, an empty layout is initialized
@@ -183,7 +184,7 @@ static GuiLayout* LoadLayout(const char* fileName)
         layout->refWindow.y = 40;
         layout->anchorCount = 1;
     }
-
+    Logman::Log("Loading Layout");
     return layout;
 }
 

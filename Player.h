@@ -4,17 +4,9 @@
 #include "Gameobject.h"
 #include "Block.h"
 #include "Item.h"
-
+#include "Inventory.h"
 
 #define STARTINGHP 100 
-
-class PlayerInventory {
-public:
-       
-
-
-    int InventorySlots;
-};
 
 class PlayerController
 {
@@ -321,6 +313,8 @@ public:
         id(RegisterObj(this))
 
     {
+
+        inv = new InventoryGUI();
         cameraComponent = new CameraComp(CameraData{
                {0.0f, 0.0f, 4.0f},
                {0.0f, 2.0f, 0.0f},
@@ -448,7 +442,7 @@ public:
     Crosshair* crosshair;
     PlayerHealthComp* healthComp;
 
-
+    InventoryGUI* inv;
 private:
 
     float SwayFactor;
