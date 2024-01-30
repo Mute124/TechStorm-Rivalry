@@ -25,7 +25,7 @@ public:
 	}
 
 	static void Warn(const char* message) {
-		CustomLog(LOG_WARN, message, NULL);
+		CustomLog(LOG_WARNING, message, NULL);
 	}
 	
 
