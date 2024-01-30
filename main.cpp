@@ -1,7 +1,6 @@
 // Run Args
 bool SkipMainMenu = true;
 
-
 #include "Button.h" // Needed for buttons.
 // Raylib Framework
 #include "common.h"
@@ -19,11 +18,9 @@ bool SkipMainMenu = true;
 #include "Layer.h"
 #include "InventoryManager.h"
 
-
 // default libs
 #include <time.h>
 #include <vector> // needed for game object list
-
 
 // This translates the current screen
 typedef enum
@@ -53,7 +50,6 @@ int targetFPS = GetMonitorRefreshRate(GetCurrentMonitor()); // This is what is u
 
 int main(void)
 {
-
 	int screenWidth = GetScreenWidth();
 	int screenHeight = GetScreenHeight();
 
@@ -126,8 +122,6 @@ int main(void)
 
 	GameObject::PushObject(block);
 
-
-
 	// Load skybox model
 	// skybox creation.
 	Mesh skyboxMesh = GenMeshCube(1.0f, 1.0f, 1.0f);
@@ -197,7 +191,6 @@ int main(void)
 		UnloadImage(img);
 	}
 
-	
 	Light sun = CreateLight(LIGHT_POINT, Vector3{ 1.0f, 0.0f, 1.0f }, Vector3One(),
 		BLUE, 4.0f, game->renderer->pbrShader); // Ambient color.;
 	// Assignment of shaders
@@ -222,9 +215,8 @@ int main(void)
 		system("mkdir temp"); // sending system command
 	}
 
-
 	// Checks if the music should be played, and plays it if it should be.
-	if (game->enableMusic) 
+	if (game->enableMusic)
 	{
 		PlayMusicStream(LoadMusicStream("resources/Audio/OST/Minero.mp3"));
 	}
@@ -264,15 +256,14 @@ int main(void)
 
 	Sound breathingSound = LoadSound("resources/audio/breathing.mp3");
 
-	InventoryMan *man = new InventoryMan("data/Items/resources.tsr");
+	InventoryMan* man = new InventoryMan("data/Items/resources.tsr");
 
 	std::thread itemsSetupThread(man->SetupItems);
 
-	
 	itemsSetupThread.join();
 
 	Logman::Log(TextFormat("%i", man->itemCount));
-	
+
 	sun.enabled = true;
 	//PhysicsObject* obj = new PhysicsObject();
 	while (!WindowShouldClose())
@@ -283,8 +274,6 @@ int main(void)
 		// Pause Menu
 		if (IsKeyPressed(KEY_ESCAPE))
 		{
-
-
 			// Todo, move the menuCamera to be created on game startup and then hidden. it gets shown on if statement validation
 			bool exit = false;
 			bool manualExit = false;
@@ -368,26 +357,21 @@ int main(void)
 				Logman::CustomLog(LOG_INFO, "Exiting Game", NULL);
 				break;
 			}
-
-
 		}
 
 		if (IsKeyPressed(KEY_E)) {
 			// todo : Code the inventory menu AAAAAAAA
 		}
-		
+
 		// breathing audio
 		if (!isBreathing) {
 			isBreathing = true;
-
 
 			PlaySound(breathingSound);
 		}
 		else {
 			isBreathing = IsSoundPlaying(breathingSound);
 		}
-
-
 
 		//game->PhysicsMan->SimulateNextFrame();
 
@@ -402,9 +386,6 @@ int main(void)
 
 			GameObject::PushObject(new Block(BlockStone, Vector3{ roundf(placepos.x), roundf(placepos.y), roundf(placepos.z) }, WHITE, game->renderer->pbrShader, DefaultBlockModel));
 		}
-		
-
-
 
 		if (!IsKeyDown(KEY_LEFT_ALT))
 		{
@@ -433,7 +414,7 @@ int main(void)
 				}
 			}
 		}
-		
+
 		/*
 				if (IsKeyDown(KEY_SPACE))
 		{
@@ -448,7 +429,7 @@ int main(void)
 			CameraMoveUp(player->cameraComponent->getSelfCameraPointer(), -0.1f);
 		}
 		*/
-		
+
 		if (IsKeyDown(KEY_LEFT_SHIFT))
 		{
 			player->isRunning = true;
@@ -463,13 +444,9 @@ int main(void)
 			player->healthComp->DamagePlayer(0.1f);
 		}
 
-
-
 		// TODO : day night affect
 
 		PollInputEvents(); // helps for some reason?
-
-
 
 		//game->physman->Update();
 		float cameraPos[3] = { player->cameraComponent->getPosition().x,
@@ -478,7 +455,6 @@ int main(void)
 
 		sun.position = player->cameraComponent->getPosition();
 
-		
 		UpdateLight(game->renderer->pbrShader, sun);
 		UpdateLight(game->renderer->bloomShader, sun);
 		SetShaderValue(game->renderer->pbrShader, game->renderer->pbrShader.locs[SHADER_LOC_VECTOR_VIEW], &cameraPos, SHADER_UNIFORM_VEC3);
@@ -490,7 +466,7 @@ int main(void)
 
 		// placement wires
 		DrawCubeWires(Vector3{ roundf(player->cameraComponent->getTarget().x), roundf(player->cameraComponent->getTarget().y), roundf(player->cameraComponent->getTarget().z) }, BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE, GREEN);
-			
+
 		DrawSphere(sun.target, 0.5f, BLUE);
 		rlDisableBackfaceCulling();
 		rlDisableDepthMask();

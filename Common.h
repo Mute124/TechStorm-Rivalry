@@ -1,5 +1,5 @@
 /*
-    This file will contain all the common headers used in the project. That way it can be updated easily.
+	This file will contain all the common headers used in the project. That way it can be updated easily.
 */
 #pragma once
 #include <raylib.h>
@@ -7,7 +7,6 @@
 #include <rlgl.h>
 #include "rcamera.h"
 //#include "rguiapi.h"
-
 
 // C++ Libraries
 #include <stdio.h>
