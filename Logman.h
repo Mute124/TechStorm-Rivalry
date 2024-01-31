@@ -16,6 +16,11 @@ public:
 		delete this;
 	}
 
+	// store data into a log file following the logman format
+	static void Store(const char* message) {
+		
+	}
+
 	static void Log(const char* message) {
 		CustomLog(LOG_INFO, message, NULL);
 	}
@@ -61,4 +66,7 @@ public:
 		vprintf(text, args);
 		printf("\n");
 	}
+
+private:
+
 };

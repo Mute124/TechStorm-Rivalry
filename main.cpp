@@ -222,16 +222,31 @@ int main(void)
 
 	Logman::Log(TextFormat("%i", man->itemCount));
 
+	// Viewsway
 	float swayAmount = 0.0003f;
 	float swaySpeed = 0.02f;
 	float swayTimer = 0.0f;
 
+	// Near death affect
+	float nearDeathTimer = 0.0f; // The X axis
+	float amplitude = 255; // How high the Parabola goes
+	float frequency = 5; // How often the arches are
+	float steepness = 2.4f; // How steep the curve is, NOTE : If it is an odd number, it will not show as it only works for even times.
+	float offset = 1; // Offset of the arches from x = 0
+	const float scaleFactor = 25; // Scaling factor, how much the parabolas is scaled
+	float nearDeathIntensity = 0.0f; // The Y Axis of the algorithm
+
+	Texture2D nearDeathTex = { 0 };
+	Image nearDeathAffect = { 0 };
+	Color nearDeathColor = { 0 };
+
+
 
 	sun.enabled = true;
-	static int time = 0;
+
 	while (!WindowShouldClose())
 	{
-		time++;
+		
 		// Global::Time::Update();
 
 		// TODO : Move input crap into another thread.
@@ -391,38 +406,29 @@ int main(void)
 			player->healthComp->DamagePlayer(5.0f);
 		}
 
-		
-		if (player->healthComp->GetHealth() <= 15) {
-			
-			/*
-			* float tintIntensity;
-				f(t)=A*sin(B*t)+C
-
-				In this equation:
-
-					tt represents time.
-					AA is the amplitude, controlling how far the function oscillates above and below its central value.
-					BB is the frequency, determining how fast the oscillation occurs.
-					CC is a constant that represents the central value or offset of the pulsation.
-
-
-									Image img = LoadImageFromTexture(game->renderer->fbo.texture);
-
-				ImageColorTint(&img, RED);
-				game->renderer->fbo.texture = LoadTextureFromImage(img);
-				tintProgress++;
-			*/
-
-			
-			 // Calculate pulsating red tint (change the intensity based on time)
-        //tintIntensity = (sinf(GetTime() * 2.0f) + 1.0f) / 2.0f; // Sin wave pulsation
-			
-		}
+	
 		
 		swayTimer += GetFrameTime();
 
 		player->cameraComponent->SetTarget(Vector3{ player->cameraComponent->GetTarget().x + sin(swayTimer * swaySpeed) * swayAmount, player->cameraComponent->GetTarget().y, player->cameraComponent->GetTarget().z + cos(swayTimer * swaySpeed) * swayAmount});
 
+
+		if (player->healthComp->GetHealth() <= 15) {
+			
+			nearDeathTimer += GetFrameTime();
+
+			nearDeathIntensity = ArchAlgorithm(amplitude, frequency, nearDeathTimer, steepness, offset, 255, scaleFactor);
+
+			nearDeathColor = Color{ (unsigned char)nearDeathIntensity, 0, 0, 100 };
+
+			nearDeathAffect = GenImageColor(game->renderer->fbo.texture.width, game->renderer->fbo.texture.height, nearDeathColor);
+
+			Vector3 nearDeathAmb = Vector3{ nearDeathColor.r / 255.0f, nearDeathColor.g / 255.0f, nearDeathColor.b / 255.0f };
+			SetShaderValue(game->renderer->pbrShader, GetShaderLocation(game->renderer->pbrShader, "ambientColor"), &nearDeathAmb, SHADER_UNIFORM_VEC3);
+
+			nearDeathTex = LoadTextureFromImage(nearDeathAffect);
+			UnloadImage(nearDeathAffect);
+		}
 
 		PollInputEvents(); // helps for some reason?
 
@@ -438,9 +444,10 @@ int main(void)
 
 		gameObjectManager->Update();
 
-		//Logman::Log(TextFormat("Light position is %f, %f, %f, Intensity : %f", sun.position.x, sun.position.y, sun.position.z, sun.intensity));
 		game->renderer->StartTexturing();
-
+		
+		DrawTextureRec(nearDeathTex, Rectangle{ 0, 0, (float)(game->renderer->fbo.texture.width), (float)(-game->renderer->fbo.texture.height) }, Vector2{ 0, 0 }, WHITE);
+		
 		BeginMode3D(player->cameraComponent->GetSelfCamera());
 
 

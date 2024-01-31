@@ -19,6 +19,7 @@
 
 #include "ConfigMan.h"
 #include "Logman.h"
+#include "Math.h"
 
 // End of Internal Libraries
 // External Libraries
