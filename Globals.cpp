@@ -2,24 +2,39 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <vector>
+
+/**
+ * Returns a CubeVerticies object with all coordinates initialized to 0.0f.
+ */
 CubeVerticies CubeVertZero() {
 	return CubeVerticies{ 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
 }
 
+
+// Returns the vertices of a cube with all coordinates set to 1.0f
 CubeVerticies CubeVertOne() {
 	return CubeVerticies{ 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f };
 }
 
+/*
+* Generate a custom mesh based on the provided vertices.
+*
+* @param verts - The vertices defining the mesh
+* @return The generated mesh
+*/
 Mesh GenMeshCustom(TriVert verts)
 {
+	// Initialize a new mesh
 	Mesh mesh = { 0 };
 	mesh.triangleCount = 1;
 	mesh.vertexCount = mesh.triangleCount * 3;
+
+	// Allocate memory for vertices, texture coordinates, and normals
 	mesh.vertices = (float*)MemAlloc(mesh.vertexCount * 3 * sizeof(float));  // 3 vertices, 3 coordinates each (x, y, z)
-	mesh.texcoords = (float*)MemAlloc(mesh.vertexCount * 2 * sizeof(float)); // 3 vertices, 2 coordinates each (x, y)
+	mesh.texcoords = (float*)MemAlloc(mesh.vertexCount * 2 * sizeof(float));  // 3 vertices, 2 coordinates each (x, y)
 	mesh.normals = (float*)MemAlloc(mesh.vertexCount * 3 * sizeof(float));   // 3 vertices, 3 coordinates each (x, y, z)
 
-	// Vertex at (0, 0, 0)
+	// Set vertex data
 	mesh.vertices[0] = verts.v1.x;
 	mesh.vertices[1] = verts.v2.x;
 	mesh.vertices[2] = verts.v3.x;
@@ -29,7 +44,6 @@ Mesh GenMeshCustom(TriVert verts)
 	mesh.texcoords[0] = 0;
 	mesh.texcoords[1] = 0;
 
-	// Vertex at (1, 0, 2)
 	mesh.vertices[3] = verts.v1.y;
 	mesh.vertices[4] = verts.v2.y;
 	mesh.vertices[5] = verts.v3.y;
@@ -39,7 +53,6 @@ Mesh GenMeshCustom(TriVert verts)
 	mesh.texcoords[2] = 0.5f;
 	mesh.texcoords[3] = 1.0f;
 
-	// Vertex at (2, 0, 0)
 	mesh.vertices[6] = verts.v1.z;
 	mesh.vertices[7] = verts.v2.z;
 	mesh.vertices[8] = verts.v3.z;
@@ -54,6 +67,8 @@ Mesh GenMeshCustom(TriVert verts)
 
 	return mesh;
 }
+
+
 
 bool CheckCollisionRayBox(Ray ray, BoundingBox box, float* outDistance)
 {

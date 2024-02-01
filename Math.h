@@ -22,7 +22,24 @@
 #include <math.h>
 
 // y = sqrt(a * sin(x *(f/F))^c * s) + o
+/**
+ * Calculate the value of an arched function.
+ *
+ * @param amplitude - The amplitude of the function
+ * @param frequency - The frequency of the function
+ * @param time - The time at which the function is evaluated
+ * @param steepness - The steepness of the function
+ * @param offset - The offset of the function
+ * @param rangeScaleValue - The range scale value of the function
+ * @param scaleFactor - The scale factor of the function
+ *
+ * @return The value of the arched function at the given time
+ */
 float ArchAlgorithm(float amplitude, float frequency, float time, float steepness, float offset, float rangeScaleValue, float scaleFactor) {
-	return sqrtf(amplitude * powf(sin(time * (frequency / scaleFactor)), steepness) * rangeScaleValue) + offset;
+	float sinValue = sin(time * (frequency / scaleFactor));
+	float powValue = powf(sinValue, steepness);
+	float result = sqrtf(amplitude * powValue * rangeScaleValue) + offset;
+	return result;
 }
+
 	
