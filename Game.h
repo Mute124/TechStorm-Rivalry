@@ -3,31 +3,9 @@
 #include "Light.h"
 #include "Player.h"
 
-class GameWindowFactory
-{
-public:
-	GameWindowFactory() {}
-
-	// Manufacture a window. NOTE : this finalizes the window! do your stamping before calling this.
-	void ManufactureWindow(int width, int height, const char* title)
-	{
-		SetConfigFlags(FLAG_MSAA_4X_HINT);
-		InitWindow(width, height, title);
-	};
-
-	void StampFlag(ConfigFlags flag)
-	{
-		SetConfigFlags(flag);
-	}
-
-private:
-};
-
 class Game
 {
 	toml::v3::parse_result optionsConfig;
-	GameWindowFactory* windowfactory = new GameWindowFactory();
-
 public:
 	class Renderer
 	{
@@ -129,7 +107,9 @@ public:
 
 	void StartGame()
 	{
+
 		SetTraceLogCallback(Logman::CustomLog);
+		
 		SetTargetFPS(60);
 		// Read config to decide what to set for the game
 		Logman::CustomLog(LOG_INFO, "Initiating Config Manager", NULL);
@@ -143,7 +123,7 @@ public:
 		enableMusic = optionsConfig["Sound"]["enableMusic"].as_boolean();
 		Logman::CustomLog(LOG_INFO, TextFormat("EnableMusic = %i", enableMusic), NULL);
 
-		if (isFullscreen == true)
+		if (isFullscreen == false)
 		{
 			windowWidth = ConfigTypeConverter::StrToInt(&optionsConfig["Window"]["windowWidth"].as_string()->operator std::string & ());
 			Logman::CustomLog(LOG_INFO, TextFormat("Setting window width to %i", windowWidth), NULL);
@@ -151,35 +131,47 @@ public:
 			windowHeight = ConfigTypeConverter::StrToInt(&optionsConfig["Window"]["windowHeight"].as_string()->operator std::string & ());
 			Logman::CustomLog(LOG_INFO, TextFormat("Setting window height to %i", windowHeight), NULL);
 
-			// since it isnt full screen, the window is resizeable
-			// windowfactory->StampFlag(FLAG_WINDOW_RESIZABLE);
+			
 		}
 		else
 		{
+			ToggleFullscreen();
 			windowWidth = GetMonitorWidth(0);
 			windowHeight = GetMonitorHeight(0);
 
 			// windowfactory->StampFlag(FLAG_WINDOW_MAXIMIZED);
 		}
+
 		if (windowHeight == 0 || windowWidth == 0)
 		{
 			Logman::CustomLog(LOG_ERROR, "WINDOW WIDTH/HEIGHT CANT BE 0! Setting to config data.", NULL);
+			if (isFullscreen) {
+				windowWidth = GetMonitorWidth(0);
+				windowHeight = GetMonitorHeight(0);
+			}
+			else {
 
-			windowWidth = ConfigTypeConverter::StrToInt(&optionsConfig["Window"]["windowWidth"].as_string()->operator std::string & ());
-			Logman::CustomLog(LOG_INFO, TextFormat("Setting window width to %i", windowWidth), NULL);
+				windowWidth = ConfigTypeConverter::StrToInt(&optionsConfig["Window"]["windowWidth"].as_string()->operator std::string & ());
+				Logman::CustomLog(LOG_INFO, TextFormat("Setting window width to %i", windowWidth), NULL);
 
-			windowHeight = ConfigTypeConverter::StrToInt(&optionsConfig["Window"]["windowHeight"].as_string()->operator std::string & ());
-			Logman::CustomLog(LOG_INFO, TextFormat("Setting window height to %i", windowHeight), NULL);
+				windowHeight = ConfigTypeConverter::StrToInt(&optionsConfig["Window"]["windowHeight"].as_string()->operator std::string & ());
+				Logman::CustomLog(LOG_INFO, TextFormat("Setting window height to %i", windowHeight), NULL);
+			}
 
-			// since it isnt full screen, the window is resizeable
-			// windowfactory->StampFlag(FLAG_WINDOW_RESIZABLE);
 		}
 
 		// Stamp window config flags & Manufacture
 
 		Logman::CustomLog(LOG_INFO, "Starting Game", NULL);
 
-		windowfactory->ManufactureWindow(windowWidth, windowHeight, "Minero");
+		if (isFullscreen == true) {
+			SetConfigFlags(FLAG_WINDOW_MAXIMIZED || FLAG_MSAA_4X_HINT);
+		}
+		else {
+			SetConfigFlags(FLAG_MSAA_4X_HINT);
+		}
+
+		InitWindow(windowWidth, windowHeight, "TechStorm-Rivalry");
 		InitAudioDevice(); // starts the audio driver(s).
 
 		DisableEventWaiting();
@@ -191,8 +183,7 @@ public:
 		ImageFormat(&icon, PIXELFORMAT_UNCOMPRESSED_R8G8B8A8);
 		SetWindowIcon(icon);
 
-		// set up FBO
-		rlglInit(windowWidth, windowHeight);
+		
 
 		renderer = new Renderer();
 
@@ -206,8 +197,9 @@ public:
 	void EndGame()
 	{
 		rlglClose();
+		CloseWindow(); // Close window and OpenGL context
+		CloseAudioDevice();
 		delete configman;
-		delete windowfactory;
 		delete this;
 	}
 

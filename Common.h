@@ -17,9 +17,11 @@
 #include <map>
 #include <cstdarg>
 #include <thread>
+#include <math.h>
 
 #include "ConfigMan.h"
 #include "Logman.h"
+#include "Math.h"
 
 // End of Internal Libraries
 // External Libraries

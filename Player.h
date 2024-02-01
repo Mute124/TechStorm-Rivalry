@@ -6,19 +6,13 @@
 #include "Item.h"
 
 #define STARTINGHP 100
-
-class PlayerInventory {
-public:
-
-	int InventorySlots;
-};
+#define MAX_AFFLICTIONS 20
 
 class PlayerController
 {
 private:
 
 	int mode;
-
 	float speed;
 	float tiltSpeed;
 	const float maxTiltRight = 10.0f; // Positive
@@ -118,6 +112,7 @@ public:
 		delete this;
 	}
 
+
 	void DamagePlayer(float damage)
 	{
 		healthBar->hp -= damage;
@@ -137,6 +132,11 @@ public:
 	{
 		return healthBar->hp;
 	}
+
+private:
+
+
+
 };
 class CameraData
 {
@@ -158,70 +158,71 @@ public:
 		return camera;
 	}
 };
+
 class CameraComp
 {
 public:
 	CameraComp(CameraData cameradata) : camera(cameradata.constructToCamera()) {
 	}
 
-	Vector3 getPosition()
+	Vector3 GetPosition()
 	{
 		return this->camera.position;
 	}
 
-	Vector3 getTarget()
+	Vector3 GetTarget()
 	{
 		return this->camera.target;
 	}
 
-	Vector3 getup()
+	Vector3 GetUp()
 	{
 		return this->camera.up;
 	}
-	float getFOVY()
+	float GetFOVY()
 	{
 		return this->camera.fovy;
 	}
 
-	float getProjection()
+	float GetProjection()
 	{
 		return this->camera.projection;
 	}
 
-	void setPosition(Vector3 value)
+	void SetPosition(Vector3 value)
 	{
 		this->camera.position = value;
 	}
 
-	void setTarget(Vector3 value)
+	void SetTarget(Vector3 value)
 	{
 		this->camera.target = value;
 	}
 
-	void setUp(Vector3 value)
+	void SetUp(Vector3 value)
 	{
 		this->camera.up = value;
 	}
 
-	void setFOVY(float value)
+	void SetFOVY(float value)
 	{
 		this->camera.fovy = value;
 	}
 
-	void setProjection(float value)
+	void SetProject(float value)
 	{
 		this->camera.projection = value;
 	}
 
-	Camera toCamera(CameraData data) {
+	Camera ToCamera(CameraData data) {
 		return data.constructToCamera();
 	}
 
-	Camera getSelfCamera() {
+	Camera GetSelfCamera() {
 		return this->camera;
 	}
 
-	Camera* getSelfCameraPointer() {
+	Camera* GetSelfCameraPointer() {
 		return &this->camera;
 	}
 
@@ -229,63 +230,17 @@ private:
 
 	Camera camera;
 };
+
 class Player : public GameObject
 {
 public:
 
-	class Crosshair {
-	public:
-		Crosshair(int width, int height, Color color) : width(width), height(height), color(color) {
-			position = { (float)width / 2, (float)height / 2 };
-		}
-
-		void Draw() {
-		}
-
-		int width, height;
-		Color color;
-
-		Vector2 position;
-	};
-
-	class Hand : public GameObject {
-	public:
-
-		Vector3 offset = Vector3Zero();
-		Vector3 position = Vector3Zero();
-		Model model;
-
-		Hand(Model model, Vector3 position, Shader shader) : model(model) {
-		}
-
-		void onUpdate() override {
-		}
-
-		void onDestroy() const override {
-		}
-
-		int GetId() const override {
-			return 0;
-		}
-
-		int GetType() const override {
-			return 0;
-		}
-
-		void Draw() override {
-			DrawModel(model, this->position, 1.0f, WHITE);
-		}
-	};
-
 	// main constructor
 	Player(Vector3 StartingPos, int MaxHP, const Model model, int CameraMode)
 		: position(StartingPos),
-		m_max(MaxHP),
+		maxHP(MaxHP),
 		model(model),
-		cameraMode(CameraMode),
-
-		id(RegisterObj(this))
-
+		cameraMode(CameraMode)
 	{
 		cameraComponent = new CameraComp(CameraData{
 			   {0.0f, 0.0f, 4.0f},
@@ -294,10 +249,8 @@ public:
 			   45.0f,
 			   CAMERA_PERSPECTIVE });
 
-		//hand = new Hand(model);
-		crosshair = new Crosshair(GetScreenWidth(), GetScreenHeight(), BLACK);
 
-		healthComp = new PlayerHealthComp(m_max);
+		healthComp = new PlayerHealthComp(maxHP);
 	};
 
 	void onDestroy() const override
@@ -309,12 +262,12 @@ public:
 	{
 		if (cameraMode != CAMERA_FIRST_PERSON) {
 			if (this->doDraw) {
-				DrawModel(model, this->cameraComponent->getPosition(), 0.2f, GREEN);
+				DrawModel(model, this->cameraComponent->GetPosition(), 0.2f, GREEN);
 			}
 		}
 
 		if (controller->canMove) {
-			controller->Update(cameraComponent->getSelfCameraPointer());
+			controller->Update(cameraComponent->GetSelfCameraPointer());
 		}
 
 		if (IsKeyDown(KEY_F)) {
@@ -335,34 +288,23 @@ public:
 
 		// View Sway
 
+	
+
 		if (startDriving) {
 			Drive();
 		}
 
-		//hand->position = Vector3Add(this->cameraComponent->getPosition(), GetCameraForward(this->cameraComponent->getSelfCameraPointer()));//= Vector3Normalize(Vector3Add(Vector3Divide(this->cameraComponent->getTarget(), {2.0f, 2.0f, 2.0f}), GetCameraForward(this->cameraComponent->getSelfCameraPointer())));
-		//hand->model.transform = MatrixLookAt(this->cameraComponent->getPosition(), this->cameraComponent->getTarget(), {0.0f, 1.0f, 0.0f});
-		//hand->model = model;
+
+
+
 	};
-
-	void onCollision() override {};
-
-	int GetId() const override
-	{
-		return this->id;
-	}
-
-	BoundingBox GetBoundingBox() override
-	{
-		return this->Box;
-	};
-
 	// sends player data to the games render
 	void Draw() override
 	{
 	}
 
 	void Drive() {
-		CameraMoveForward(cameraComponent->getSelfCameraPointer(), 0.01f, false);
+		CameraMoveForward(cameraComponent->GetSelfCameraPointer(), 0.01f, false);
 	}
 
 	// do not fucking touch this
@@ -370,38 +312,29 @@ public:
 	{
 		delete cameraComponent;
 		delete controller;
-		delete hand;
 		delete this;
 	}
 
-	int GetType() const override
-	{
-		// return PLAYER; // returns the player obj type
-		return 0;
-	}
 
 	Model model; // Player model
 	int cameraMode;
 
 	bool doDraw = true;
 
-	static void Setup() {
-	}
 	static inline CameraComp* cameraComponent;
 
 	PlayerController* controller = new PlayerController(KEY_W, KEY_S, KEY_A, KEY_D, KEY_SPACE, KEY_C, cameraMode);
 
-	bool isRunning;
 
-	static inline Hand* hand;
-	Crosshair* crosshair;
+	bool isRunning;
 	PlayerHealthComp* healthComp;
+
+	
 
 private:
 
-	float SwayFactor;
 	bool startDriving = false;
-	const int id;
+
 	static void CheckForBlockPlacement(MouseButton Trigger, Ray ray)
 	{
 		/*
@@ -433,16 +366,9 @@ private:
 				}*/
 	}
 
-	// CameraComp cameraComponent;
-	RayCollision collision = { 0 };
-
 	// KeyboardKey *CurrentKeyDown;
 	Vector3 position;
 	Mesh mesh;
 
-	// Global::ObjectTransform transform;
-	Vector3 velocity;
-	BoundingBox Box = GetModelBoundingBox(this->model);
-
-	int m_max = STARTINGHP;
+	int maxHP = STARTINGHP;
 };
