@@ -1,7 +1,6 @@
 // Run Args
 bool SkipMainMenu = true;
 
-
 #include "Button.h" // Needed for buttons.
 // Raylib Framework
 #include "common.h"
@@ -17,12 +16,11 @@ bool SkipMainMenu = true;
 #include "ConfigMan.h" // config manager
 #include "Light.h"
 #include "Layer.h"
-
+#include "InventoryManager.h"
 
 // default libs
 #include <time.h>
 #include <vector> // needed for game object list
-
 
 // This translates the current screen
 typedef enum
@@ -48,8 +46,6 @@ Ray ray; // Player View Ray. used for block breaking
 float position = 0.0f; // Circle position
 bool pause = false;    // Pause control flag
 
-int targetFPS = GetMonitorRefreshRate(GetCurrentMonitor()); // This is what is used to calculate DeltaTime and set target fps
-
 int main(void)
 {
 	int screenWidth = GetScreenWidth();
@@ -63,18 +59,15 @@ int main(void)
 
 	Game* game = new Game();
 	game->StartGame();
+
+	GameobjectManager* gameObjectManager = new GameobjectManager();
+
+
 	// Game::Initialize();
 	ButtonR* mmen_start = new ButtonR("start", (float)middlex, (float)middley); // Main start button
 
 	MenuCamera* menucamera = new MenuCamera(); // camera for the main menu is needed due to dimension differences
 
-	// Load postprocessing shader
-	// NOTE: Defining 0 (NULL) for vertex shader forces usage of internal default
-	// vertex shader
-
-	//  std::vector<GameObject *>
-	//      objects; // Declares the main list for all game objects. Do not touch or
-	// bad things will happen. Like memory leaks :)
 	game->renderer->pbrShader = LoadShader(TextFormat("resources/shaders/glsl%i/pbr.vs", GLSL_VERSION),
 		TextFormat("resources/shaders/glsl%i/pbr.fs", GLSL_VERSION));
 	game->renderer->pbrShader.locs[SHADER_LOC_MAP_ALBEDO] = GetShaderLocation(game->renderer->pbrShader, "albedoMap");
@@ -116,15 +109,13 @@ int main(void)
 	Model PlayerModel = LoadModelFromMesh(GenMeshCube(3.0f, 3.0f, 3.0f)); // Generates the playermodel. For right now it is a cube.
 	Player* player = new Player(Vector3{ 0.0f, 2.0f, 4.0f }, 100, PlayerModel, CAMERA_FIRST_PERSON);
 
-	GameObject::PushObject(player);
+	gameObjectManager->Push(player);
 
 	// Block Initialization
 
-	Block* block = new Block(BlockDirt, Vector3Zero(), BLACK, game->renderer->pbrShader, DefaultBlockModel);
+	Block* block = new Block( Vector3Zero(), BLACK, game->renderer->pbrShader, DefaultBlockModel);
 
-	GameObject::PushObject(block);
-
-
+	gameObjectManager->Push(block);
 
 	// Load skybox model
 	// skybox creation.
@@ -195,7 +186,6 @@ int main(void)
 		UnloadImage(img);
 	}
 
-	
 	Light sun = CreateLight(LIGHT_POINT, Vector3{ 1.0f, 0.0f, 1.0f }, Vector3One(),
 		BLUE, 4.0f, game->renderer->pbrShader); // Ambient color.;
 	// Assignment of shaders
@@ -209,10 +199,8 @@ int main(void)
 	//--------------------------------------------------------------------------------------
 
 	Vector3 Orgin =
-		Vector3{ player->cameraComponent->getPosition().x, player->cameraComponent->getPosition().y - 10.0f,
-				player->cameraComponent->getPosition().z };
-
-	//Model terrain = LoadModelFromMesh(GenMeshCube(BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE));
+		Vector3{ player->cameraComponent->GetPosition().x, player->cameraComponent->GetPosition().y - 10.0f,
+				player->cameraComponent->GetPosition().z };
 
 	// test if temp folder exists
 	if (!DirectoryExists("temp"))
@@ -220,61 +208,51 @@ int main(void)
 		system("mkdir temp"); // sending system command
 	}
 
-
-	// Checks if the music should be played, and plays it if it should be.
-	if (game->enableMusic) 
-	{
-		PlayMusicStream(LoadMusicStream("resources/Audio/OST/Minero.mp3"));
-	}
-
-	// Main menu, Not complete!
-	if (SkipMainMenu != true)
-	{
-		// Declare main loading done
-		Logman::CustomLog(LOG_INFO, "Main loading done, Main menu drawing", NULL);
-
-		// Main menu Loop
-		while (currentScreen == Main && !WindowShouldClose())
-		{
-			BeginDrawing();
-
-			ClearBackground(WHITE);
-
-			mmen_start->draw(); // draws the start button
-			EndDrawing();
-
-			// key to go to the game incase button kaput
-			if (IsKeyPressed(KEY_DELETE))
-			{
-				currentScreen = Gameplay;
-			}
-
-			// Main Menu Start Button
-			if (mmen_start->IsClicked())
-			{
-				currentScreen = Gameplay;
-			}
-		}
-	}
 	delete mmen_start;
 
 	bool isBreathing = false;
 
 	Sound breathingSound = LoadSound("resources/audio/breathing.mp3");
 
+	InventoryMan* man = new InventoryMan("data/Items/resources.tsr");
+
+	std::thread itemsSetupThread(man->SetupItems);
+
+	itemsSetupThread.join();
+
+	Logman::Log(TextFormat("%i", man->itemCount));
+
+	// Viewsway
+	float swayAmount = 0.0003f;
+	float swaySpeed = 0.02f;
+	float swayTimer = 0.0f;
+
+	// Near death affect
+	float nearDeathTimer = 0.0f; // The X axis
+	float amplitude = 255; // How high the Parabola goes
+	float frequency = 5; // How often the arches are
+	float steepness = 2.4f; // How steep the curve is, NOTE : If it is an odd number, it will not show as it only works for even times.
+	float offset = 1; // Offset of the arches from x = 0
+	const float scaleFactor = 25; // Scaling factor, how much the parabolas is scaled
+	float nearDeathIntensity = 0.0f; // The Y Axis of the algorithm
+
+	Texture2D nearDeathTex = { 0 };
+	Image nearDeathAffect = { 0 };
+	Color nearDeathColor = { 0 };
+
+
 
 	sun.enabled = true;
-	//PhysicsObject* obj = new PhysicsObject();
+
 	while (!WindowShouldClose())
 	{
+		
 		// Global::Time::Update();
 
 		// TODO : Move input crap into another thread.
 		// Pause Menu
 		if (IsKeyPressed(KEY_ESCAPE))
 		{
-
-
 			// Todo, move the menuCamera to be created on game startup and then hidden. it gets shown on if statement validation
 			bool exit = false;
 			bool manualExit = false;
@@ -305,9 +283,9 @@ int main(void)
 
 					std::vector<void*> data;
 
-					for (int i = 0; i < GameObject::GameObjects.size(); i++)
+					for (int i = 0; i < gameObjectManager->objectsVector.size(); i++)
 					{
-						data.push_back(GameObject::GameObjects[i]);
+						data.push_back(gameObjectManager->objectsVector[i]);
 					}
 					SaveFileData(filename, &data, sizeof(data));
 
@@ -358,18 +336,15 @@ int main(void)
 				Logman::CustomLog(LOG_INFO, "Exiting Game", NULL);
 				break;
 			}
-
-
 		}
 
 		if (IsKeyPressed(KEY_E)) {
 			// todo : Code the inventory menu AAAAAAAA
 		}
-		
+
 		// breathing audio
 		if (!isBreathing) {
 			isBreathing = true;
-
 
 			PlaySound(breathingSound);
 		}
@@ -377,24 +352,17 @@ int main(void)
 			isBreathing = IsSoundPlaying(breathingSound);
 		}
 
-
-
-		//game->PhysicsMan->SimulateNextFrame();
-
+	
 		// update ray
-		ray.position = player->cameraComponent->getPosition();
-		ray.direction = player->cameraComponent->getTarget();
+		ray.position = player->cameraComponent->GetPosition();
+		ray.direction = player->cameraComponent->GetTarget();
 
 		// If statement for block placing.
 		if (IsMouseButtonPressed(MOUSE_BUTTON_RIGHT))
 		{
-			Vector3 placepos = player->cameraComponent->getTarget();
-
-			GameObject::PushObject(new Block(BlockStone, Vector3{ roundf(placepos.x), roundf(placepos.y), roundf(placepos.z) }, WHITE, game->renderer->pbrShader, DefaultBlockModel));
+			Vector3 placepos = player->cameraComponent->GetTarget();
+			gameObjectManager->Push(new Block(Vector3{ roundf(placepos.x), roundf(placepos.y), roundf(placepos.z) }, WHITE, game->renderer->pbrShader, DefaultBlockModel));
 		}
-		
-
-
 
 		if (!IsKeyDown(KEY_LEFT_ALT))
 		{
@@ -402,7 +370,7 @@ int main(void)
 			{
 				DisableCursor();
 			}
-			UpdateCamera(player->cameraComponent->getSelfCameraPointer(), player->cameraMode); // Update camera
+			UpdateCamera(player->cameraComponent->GetSelfCameraPointer(), player->cameraMode); // Update camera
 		}
 		else
 		{
@@ -423,22 +391,7 @@ int main(void)
 				}
 			}
 		}
-		
-		/*
-				if (IsKeyDown(KEY_SPACE))
-		{
-			// player->cameraComponent->setPosition(Vector3{player->cameraComponent->getPosition().x, player->cameraComponent->getPosition().y + 1.0f, player->cameraComponent->getPosition().z});
 
-			CameraMoveUp(player->cameraComponent->getSelfCameraPointer(), 0.1f);
-		}
-
-		if (IsKeyDown(KEY_C))
-		{
-			// player->cameraComponent->setPosition(Vector3{player->cameraComponent->getPosition().x, player->cameraComponent->getPosition().y - 0.1f, player->cameraComponent->getPosition().z});
-			CameraMoveUp(player->cameraComponent->getSelfCameraPointer(), -0.1f);
-		}
-		*/
-		
 		if (IsKeyDown(KEY_LEFT_SHIFT))
 		{
 			player->isRunning = true;
@@ -450,38 +403,55 @@ int main(void)
 
 		if (IsKeyDown(KEY_Y))
 		{
-			player->healthComp->DamagePlayer(0.1f);
+			player->healthComp->DamagePlayer(5.0f);
 		}
 
+	
+		
+		swayTimer += GetFrameTime();
+
+		player->cameraComponent->SetTarget(Vector3{ player->cameraComponent->GetTarget().x + sin(swayTimer * swaySpeed) * swayAmount, player->cameraComponent->GetTarget().y, player->cameraComponent->GetTarget().z + cos(swayTimer * swaySpeed) * swayAmount});
 
 
-		// TODO : day night affect
+		if (player->healthComp->GetHealth() <= 15) {
+			
+			nearDeathTimer += GetFrameTime();
+
+			nearDeathIntensity = ArchAlgorithm(amplitude, frequency, nearDeathTimer, steepness, offset, 255, scaleFactor);
+
+			nearDeathColor = Color{ (unsigned char)nearDeathIntensity, 0, 0, 100 };
+
+			nearDeathAffect = GenImageColor(game->renderer->fbo.texture.width, game->renderer->fbo.texture.height, nearDeathColor);
+
+			Vector3 nearDeathAmb = Vector3{ nearDeathColor.r / 255.0f, nearDeathColor.g / 255.0f, nearDeathColor.b / 255.0f };
+			SetShaderValue(game->renderer->pbrShader, GetShaderLocation(game->renderer->pbrShader, "ambientColor"), &nearDeathAmb, SHADER_UNIFORM_VEC3);
+
+			nearDeathTex = LoadTextureFromImage(nearDeathAffect);
+			UnloadImage(nearDeathAffect);
+		}
 
 		PollInputEvents(); // helps for some reason?
 
+		float cameraPos[3] = { player->cameraComponent->GetPosition().x,
+							  player->cameraComponent->GetPosition().y,
+							  player->cameraComponent->GetPosition().z };
 
+		sun.position = player->cameraComponent->GetPosition();
 
-		//game->physman->Update();
-		float cameraPos[3] = { player->cameraComponent->getPosition().x,
-							  player->cameraComponent->getPosition().y,
-							  player->cameraComponent->getPosition().z };
-
-		sun.position = player->cameraComponent->getPosition();
-
-		sun.target = player->cameraComponent->getTarget();
 		UpdateLight(game->renderer->pbrShader, sun);
 		UpdateLight(game->renderer->bloomShader, sun);
 		SetShaderValue(game->renderer->pbrShader, game->renderer->pbrShader.locs[SHADER_LOC_VECTOR_VIEW], &cameraPos, SHADER_UNIFORM_VEC3);
 
-		Logman::Log(TextFormat("Light position is %f, %f, %f, Intensity : %f", sun.position.x, sun.position.y, sun.position.z, sun.intensity));
+		gameObjectManager->Update();
+
 		game->renderer->StartTexturing();
+		
+		DrawTextureRec(nearDeathTex, Rectangle{ 0, 0, (float)(game->renderer->fbo.texture.width), (float)(-game->renderer->fbo.texture.height) }, Vector2{ 0, 0 }, WHITE);
+		
+		BeginMode3D(player->cameraComponent->GetSelfCamera());
 
-		BeginMode3D(player->cameraComponent->getSelfCamera());
 
-		// placement wires
-		DrawCubeWires(Vector3{ roundf(player->cameraComponent->getTarget().x), roundf(player->cameraComponent->getTarget().y), roundf(player->cameraComponent->getTarget().z) }, BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE, GREEN);
-			
-		DrawSphere(sun.position, 5.0f, BLUE);
+		
 		rlDisableBackfaceCulling();
 		rlDisableDepthMask();
 		// DrawModel(skybox, Vector3{0.0f, 0.0f, 0.0f}, 1.0f, WHITE);
@@ -489,13 +459,13 @@ int main(void)
 		rlEnableDepthMask();
 
 		// Set old car model texture tiling, emissive color and emissive intensity parameters on shader
-		SetShaderValue(game->renderer->pbrShader, textureTilingLoc, &block->carTextureTiling, SHADER_UNIFORM_VEC2);
+		SetShaderValue(game->renderer->pbrShader, textureTilingLoc, &block->blockTextureTiling, SHADER_UNIFORM_VEC2);
 		Vector4 carEmissiveColor = ColorNormalize(block->model.materials[0].maps[MATERIAL_MAP_EMISSION].color);
 		SetShaderValue(game->renderer->pbrShader, emissiveColorLoc, &carEmissiveColor, SHADER_UNIFORM_VEC4);
 		float emissiveIntensity = 0.01f;
 		SetShaderValue(game->renderer->pbrShader, emissiveIntensityLoc, &emissiveIntensity, SHADER_UNIFORM_FLOAT);
 
-		GameObject::RenderObjects();
+		gameObjectManager->RenderObjects();
 
 		// EndShaderMode();
 		game->renderer->End3D();
@@ -507,9 +477,10 @@ int main(void)
 
 		game->renderer->StartDraw();
 
-		//BeginShaderMode(game->renderer->bloomShader);
+		BeginShaderMode(game->renderer->bloomShader);
 
 		// NOTE: Render texture must be y-flipped due to default OpenGL coordinates (left-bottom)
+	
 		DrawTextureRec(game->renderer->fbo.texture, Rectangle{ 0, 0, (float)(game->renderer->fbo.texture.width), (float)(-game->renderer->fbo.texture.height) }, Vector2{ 0, 0 }, WHITE);
 
 		EndShaderMode();
@@ -527,17 +498,6 @@ int main(void)
 		ClearBackground(BLACK);
 	}
 
-	// De-Initialization
-	//--------------------------------------------------------------------------------------
-	CloseWindow(); // Close window and OpenGL context
-	// UnloadRenderTexture(fbo);
-	CloseAudioDevice();
-
-	//--------------------------------------------------------------------------------------
-
-	// Unload Models/Textures
-	// UnloadTexture(texture); // Unload texture
-
 	UnloadModel(DefaultBlockModel);
 
 	using namespace std;
@@ -547,58 +507,13 @@ int main(void)
 	}
 
 	game->EndGame();
+
+	gameObjectManager->FlushBuffer();
 	delete game;
-	//delete mmen_start; // Deletes the main menu
 	delete menucamera;
 	delete block;
+	delete man;
 	delete player;
-
-	GameObject::FlushBuffer();
+	delete gameObjectManager;
 	return 0;
-}
-
-RenderTexture2D LoadShadowmapRenderTexture(int width, int height)
-{
-	RenderTexture2D target = { 0 };
-
-	target.id = rlLoadFramebuffer(width, height); // Load an empty framebuffer
-	target.texture.width = width;
-	target.texture.height = height;
-
-	if (target.id > 0)
-	{
-		rlEnableFramebuffer(target.id);
-
-		// Create depth texture
-		// We don't need a color texture for the shadowmap
-		target.depth.id = rlLoadTextureDepth(width, height, false);
-		target.depth.width = width;
-		target.depth.height = height;
-		target.depth.format = 19; // DEPTH_COMPONENT_24BIT?
-		target.depth.mipmaps = 1;
-
-		// Attach depth texture to FBO
-		rlFramebufferAttach(target.id, target.depth.id, RL_ATTACHMENT_DEPTH, RL_ATTACHMENT_TEXTURE2D, 0);
-
-		// Check if fbo is complete with attachments (valid)
-		if (rlFramebufferComplete(target.id))
-			TRACELOG(LOG_INFO, "FBO: [ID %i] Framebuffer object created successfully", target.id);
-
-		rlDisableFramebuffer();
-	}
-	else
-		TRACELOG(LOG_WARNING, "FBO: Framebuffer object can not be created");
-
-	return target;
-}
-
-// Unload shadowmap render texture from GPU memory (VRAM)
-void UnloadShadowmapRenderTexture(RenderTexture2D target)
-{
-	if (target.id > 0)
-	{
-		// NOTE: Depth texture/renderbuffer is automatically
-		// queried and deleted before deleting framebuffer
-		rlUnloadFramebuffer(target.id);
-	}
 }

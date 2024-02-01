@@ -23,8 +23,6 @@ struct ListEntry
 	int id;
 };
 
-
-
 class ConfigTypeConverter {
 public:
 
@@ -139,7 +137,6 @@ public:
 	}
 
 	static inline bool DoesFileExist(std::vector<ConfigFile>& Dataset, const char* TargetFile) {
-
 		bool found = false;
 		for (int i = 0; i < Dataset.size(); i++) {
 			if (Dataset[i].file.entry.FilePath == TargetFile) {
