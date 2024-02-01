@@ -240,8 +240,6 @@ int main(void)
 	Image nearDeathAffect = { 0 };
 	Color nearDeathColor = { 0 };
 
-
-
 	sun.enabled = true;
 
 	while (!WindowShouldClose())
@@ -499,6 +497,9 @@ int main(void)
 	}
 
 	UnloadModel(DefaultBlockModel);
+
+	UnloadTexture(nearDeathTex);
+	UnloadImage(nearDeathAffect);
 
 	using namespace std;
 	{
