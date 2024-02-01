@@ -112,7 +112,6 @@ public:
 		delete this;
 	}
 
-
 	void DamagePlayer(float damage)
 	{
 		healthBar->hp -= damage;
@@ -132,11 +131,6 @@ public:
 	{
 		return healthBar->hp;
 	}
-
-private:
-
-
-
 };
 class CameraData
 {

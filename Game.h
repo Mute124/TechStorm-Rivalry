@@ -7,21 +7,26 @@ class Game
 {
 	toml::v3::parse_result optionsConfig;
 public:
+	
+	// handles rendering
 	class Renderer
 	{
 	public:
+		// start drawing mode
 		void StartDraw()
 		{
 			isDrawing = true;
 			BeginDrawing();
 		}
 
+		// end draing move
 		void EndDraw()
 		{
 			isDrawing = false;
 			EndDrawing();
 		}
 
+		// start 3d drawing
 		void Start3D(Camera* camera)
 		{
 			if (!isDrawing)
@@ -35,6 +40,7 @@ public:
 			}
 		}
 
+		// end 3d drawing
 		void End3D()
 		{
 			if (isIn3DMode && isDrawing)
@@ -44,6 +50,7 @@ public:
 			}
 		}
 
+		// start baking to fbo
 		void StartTexturing()
 		{
 			// StartDraw();
@@ -51,32 +58,38 @@ public:
 			ClearBackground(BLACK);
 		}
 
+		// start shadow mapping
 		void StartDepthMode()
 		{
 			BeginTextureMode(depthMapFBO);
 		}
 
+		// stop shadow mapping
 		void StopDepthMode()
 		{
 			EndTextureMode();
 		}
 
+		// stop baking to fbo
 		void StopTexturing()
 		{
 			// EndDraw();
 			EndTextureMode();
 		}
 
+		// Create the FBO and depth map FBO
 		void CreateRenderTexture(int width, int height)
 		{
 			fbo = LoadRenderTexture(width, height);
 			depthMapFBO = LoadRenderTexture(width, height);
 		}
 
-		RenderTexture2D fbo;
+		RenderTexture2D fbo; // FBO render texture
 		RenderTexture2D depthMapFBO; // shadowmap.
 
+		// pbr shader
 		Shader pbrShader;
+		// bloom shader
 		Shader bloomShader;
 
 	private:
@@ -90,11 +103,15 @@ public:
 	bool isFullscreen = false;
 	bool enableMusic;
 
+	// Config manager instance
 	ConfigMan* configman = new ConfigMan();
+
+	// renderer instance
 	static inline Renderer* renderer;
 
 	Game() {}
 
+	// deconstructor. This just deletes itself, I guess it is suicide?
 	~Game()
 	{
 		delete this;

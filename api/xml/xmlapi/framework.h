@@ -12,17 +12,11 @@
 #endif
 
 
-
-
-
 // Per parent element
 #define MAX_CHILDREN_ELEMENTS 10
 
 // 16 bit limit
 #define MAX_LOADED_FILES 65536
-
-#ifdef XML_16BIT
-#define USE16BIT
 
 // WIP
 /*
@@ -82,6 +76,25 @@ extern "C" {            // Prevents name mangling of functions
 
 using namespace tinyxml2;
 
+typedef enum XMLDataTypes {
+	XMLTYPE_NULL,
+	XMLTYPE_INT,
+	XMLTYPE_FLOAT,
+	XMLTYPE_STR
+};
+
+typedef enum XMLFileType {
+	XML_NULL,
+	XML_GAME_ASSET,
+	XML_CONFIG
+};
+
+typedef struct XMLFileInfo {
+	const char* path;
+	XMLFileType xmlType;
+	bool isReady = false;
+};
+
 template<typename T>
 struct XMLChildElement {
 	T value;
@@ -93,8 +106,6 @@ template<typename T>
 struct XMLFile {
 	XMLDocument document;
 	XMLElement* root;
-
-
 	XMLFileInfo fileInfo;
 
 	int mapSize;
@@ -106,6 +117,7 @@ struct XMLFile {
 	int loadedCount = 0;
 };
 
+// Registers
 template<typename T>
 extern int Register();
 
