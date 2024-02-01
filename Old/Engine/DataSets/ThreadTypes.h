@@ -1,9 +1,0 @@
-
-typedef enum ThreadTypes {
-    THREAD_MAIN,
-    THREAD_FX,
-    THREAD_INPUT,
-    THREAD_DATASHIPMENT,
-    THREAD_CONFIG,
-    THREAD_PHYSICS
-};

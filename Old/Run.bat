@@ -1,2 +1,0 @@
-make main
-.\main.exe
