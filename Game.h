@@ -2,6 +2,7 @@
 #include "common.h"
 #include "Light.h"
 #include "Player.h"
+#include "ScriptManager.h"
 
 class Game
 {
@@ -108,6 +109,7 @@ public:
 
 	// renderer instance
 	static inline Renderer* renderer;
+	static inline ScriptManager* scriptManager;
 
 	Game() {}
 
@@ -209,7 +211,9 @@ public:
 
 		renderer->bloomShader = LoadShader(0, "resources/shaders/bloom.fs");
 
-		
+		scriptManager = new ScriptManager();
+
+		scriptManager->start();
 
 		// simply a optimization
 		rlSetCullFace(RL_CULL_FACE_BACK);
@@ -223,6 +227,8 @@ public:
 		CloseWindow(); // Close window and OpenGL context
 		CloseAudioDevice();
 		delete configman;
+		delete scriptManager;
+		delete renderer;
 		delete this;
 	}
 
