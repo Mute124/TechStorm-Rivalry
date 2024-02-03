@@ -6,6 +6,7 @@
 #include <raymath.h>
 #include <rlgl.h>
 #include "rcamera.h"
+#include "include/yse/yse.hpp"
 //#include "rguiapi.h"
 #include "rgui/src/raygui.h"
 
