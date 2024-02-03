@@ -127,7 +127,9 @@ public:
 
 		SetTraceLogCallback(Logman::CustomLog);
 		
-		SetTargetFPS(60);
+		
+
+		
 		// Read config to decide what to set for the game
 		Logman::CustomLog(LOG_INFO, "Initiating Config Manager", NULL);
 
@@ -201,14 +203,18 @@ public:
 		SetWindowIcon(icon);
 
 		
-
 		renderer = new Renderer();
 
 		renderer->CreateRenderTexture(windowWidth, windowHeight);
 
 		renderer->bloomShader = LoadShader(0, "resources/shaders/bloom.fs");
 
-		// rlSetCullFace(RL_CULL_FACE_BACK);
+		
+
+		// simply a optimization
+		rlSetCullFace(RL_CULL_FACE_BACK);
+
+		SetTargetFPS(60);
 	}
 
 	void EndGame()

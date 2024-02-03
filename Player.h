@@ -229,6 +229,8 @@ class Player : public GameObject
 {
 public:
 
+	Player() {}
+
 	// main constructor
 	Player(Vector3 StartingPos, int MaxHP, const Model model, int CameraMode)
 		: position(StartingPos),
@@ -297,11 +299,12 @@ public:
 	{
 	}
 
+	// is this even fucking used???
 	void Drive() {
 		CameraMoveForward(cameraComponent->GetSelfCameraPointer(), 0.01f, false);
 	}
 
-	// do not fucking touch this
+	// do not fucking touch this or it does some voodoo shit.
 	virtual ~Player()
 	{
 		delete cameraComponent;
@@ -329,6 +332,7 @@ private:
 
 	bool startDriving = false;
 
+	// why, just why
 	static void CheckForBlockPlacement(MouseButton Trigger, Ray ray)
 	{
 		/*

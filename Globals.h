@@ -155,12 +155,16 @@ typedef struct
 	Vector3 v3;
 } TriVert;
 
-
+// a global model that can be used if no model is present, or it can be used for testing. Set in main.cpp
+static Model defaultModel = { 0 };
 
 
 //-----------------------------------------------------------------------------
 // Functions
 //-----------------------------------------------------------------------------
+
+extern Model GetDefaultModel();
+extern void SetDefaultModel(Model model);
 
 // Mesh Tools
 extern CubeVerticies CubeVertZero();	// Returns a null cube verticies type

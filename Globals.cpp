@@ -3,13 +3,22 @@
 #include <stdio.h>
 #include <vector>
 
+// Not needed but makes things look nicer
+Model GetDefaultModel() {
+	return defaultModel;
+}
+
+// Not needed but makes things look nicer
+void SetDefaultModel(Model model) {
+	defaultModel = model;
+}
+
 /**
  * Returns a CubeVerticies object with all coordinates initialized to 0.0f.
  */
 CubeVerticies CubeVertZero() {
 	return CubeVerticies{ 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
 }
-
 
 // Returns the vertices of a cube with all coordinates set to 1.0f
 CubeVerticies CubeVertOne() {
@@ -67,8 +76,6 @@ Mesh GenMeshCustom(TriVert verts)
 
 	return mesh;
 }
-
-
 
 bool CheckCollisionRayBox(Ray ray, BoundingBox box, float* outDistance)
 {
@@ -275,6 +282,7 @@ Vector3 Vector3MaxPos()
 
 Vector3 Vector3RandomEx(Vector3 min, Vector3 max)
 {
+
 	return Vector3{ (float)GetRandomValue(min.x, max.x), (float)GetRandomValue(min.y, max.y), (float)GetRandomValue(min.z, max.z) };
 }
 
@@ -382,4 +390,3 @@ TextureCubemap GenTextureCubemap(Shader shader, Texture2D panorama, int size, in
 
 	return cubemap;
 }
-

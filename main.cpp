@@ -57,15 +57,15 @@ bool useHDR = true;
 // Initialie the condition for the breathing sound.
 bool isBreathing = false;
 
-// Floats
+
 
 // Viewsway
 float swayAmount = 0.0003f;
 float swaySpeed = 0.02f;
 float swayTimer = 0.0f;
 
-// Near death affect.
 
+// Near death affect.
 // Important : THESE ARE REQUIRED FOR THE ARCH ALGORITHM TO WORK!
 float nearDeathTimer = 0.0f; // The X axis
 float amplitude = 255; // How high the Parabola goes
@@ -75,14 +75,9 @@ float offset = 1; // Offset of the arches from x = 0
 const float scaleFactor = 25; // Scaling factor, how much the parabolas is scaled
 float nearDeathIntensity = 0.0f; // The Y Axis of the algorithm
 
-// Health bar
+// Health bar fuckery
 float healthBarPositionX = 0.0f;
 float healthBarPositionY = 0.0f;
-
-
-// Int
-
-// Health bar
 int healthBarOffsetX = 0;
 int healthBarOffsetY = 500;
 
@@ -99,8 +94,6 @@ int main(void)
 	// Game Setup
 	// -----------------------------------------------------------------------------
 
-	// This step is VERY important. The game will not work without it.
-
 	// Create game & load it into memory.
 	Game* game = new Game();
 
@@ -109,17 +102,6 @@ int main(void)
 
 	// IMPORTANT : Do not remove this or delete it as it is the manager of all game objects!
 	GameobjectManager* gameObjectManager = new GameobjectManager();
-
-
-	/*
-		When the main menu is reimplemented, this code can be reinstated.
-		
-		ButtonR* mmen_start = new ButtonR("start", (float)game->windowWidth / 2, (float)game->windowHeight / 2); // Main start button
-
-		MenuCamera* menucamera = new MenuCamera(); // camera for the main menu is needed due to dimension differences
-
-	*/
-
 
 	// test if temp folder exists, if not create it
 	if (!DirectoryExists("temp"))
@@ -133,13 +115,11 @@ int main(void)
 	// -----------------------------------------------------------------------------
 
 	// Ambiance
-
 	// The passive sound of your breathing.
 	//ToDo: tweak to sound more natural. This could be based on fatigue, stress, or something.
 	Sound breathingSound = LoadSound("resources/audio/breathing.mp3");
 
 	// Items
-	
 	// Create a new inventory manager instance
 	InventoryMan* inventoryMan = new InventoryMan("data/Items/resources.tsr");
 
@@ -216,6 +196,10 @@ int main(void)
 	Model DefaultBlockModel = LoadModelFromMesh(
 		GenMeshCube(BLOCK_SIZE, BLOCK_SIZE,
 			BLOCK_SIZE)); // this is the default model used in blocksd.
+
+
+	// todo : change all use instances of DefaultBlockModel to use the global default model.
+	SetDefaultModel(DefaultBlockModel);
 
 	// Construct the block object
 	Block* block = new Block(Vector3Zero(), BLACK, game->renderer->pbrShader, DefaultBlockModel);
@@ -397,10 +381,64 @@ int main(void)
 	healthBarPositionX = game->windowWidth + healthBarOffsetX;
 	healthBarPositionY = game->windowHeight + healthBarOffsetY;
 
+
 	// Now we can run the game loop and start playing!
 	while (!WindowShouldClose())
 	{
+		// NOTE : This is a very basic implementation of placing an object into the world. This is temporary and should be fleshed out.
+		if (IsMouseButtonPressed(MOUSE_BUTTON_RIGHT))
+		{
 
+			Vector3 placepos = player->cameraComponent->GetTarget();
+
+			gameObjectManager->Push(new Block(Vector3{ roundf(placepos.x), roundf(placepos.y), roundf(placepos.z) }, WHITE, game->renderer->pbrShader, GetDefaultModel()));
+		}
+
+		// Allow the cursor to be seen even if it is within the game. (It unlocks the cursor)
+		if (!IsKeyDown(KEY_LEFT_ALT))
+		{
+			if (!IsCursorHidden())
+			{
+				DisableCursor();
+			}
+			UpdateCamera(player->cameraComponent->GetSelfCameraPointer(), player->cameraMode); // Update camera
+		}
+		else
+		{
+			EnableCursor();
+		}
+
+		// Take a screenshot
+		if (IsKeyPressed(KEY_F9))
+		{
+			// take a screenshot
+			for (int i = 0; i < INT_MAX; i++)
+			{
+				const char* fileName = TextFormat("screen%i.png", i);
+				// if there isnt a duplicate file, it then will create a screenshot.
+				if (FileExists(fileName) == 0)
+				{
+					TakeScreenshot(fileName);
+					break;
+				}
+			}
+		}
+
+		// Sprinting Mechanic
+		if (IsKeyDown(KEY_LEFT_SHIFT))
+		{
+			player->isRunning = true;
+		}
+		else
+		{
+			player->isRunning = false;
+		}
+
+		// NOTE : This is temporary and is only to test the health system
+		if (IsKeyDown(KEY_Y))
+		{
+			player->healthComp->DamagePlayer(5.0f);
+		}
 		/*
 		---------------------------------------------------------------------------------
 		| 					         If Statements go here!								|
@@ -518,58 +556,7 @@ int main(void)
 		ray.position = player->cameraComponent->GetPosition();
 		ray.direction = player->cameraComponent->GetTarget();
 
-		// NOTE : This is a very basic implementation of placing an object into the world. This is temporary and should be fleshed out.
-		if (IsMouseButtonPressed(MOUSE_BUTTON_RIGHT))
-		{
-			Vector3 placepos = player->cameraComponent->GetTarget();
-			gameObjectManager->Push(new Block(Vector3{ roundf(placepos.x), roundf(placepos.y), roundf(placepos.z) }, WHITE, game->renderer->pbrShader, DefaultBlockModel));
-		}
 
-		// Allow the cursor to be seen even if it is within the game. (It unlocks the cursor)
-		if (!IsKeyDown(KEY_LEFT_ALT))
-		{
-			if (!IsCursorHidden())
-			{
-				DisableCursor();
-			}
-			UpdateCamera(player->cameraComponent->GetSelfCameraPointer(), player->cameraMode); // Update camera
-		}
-		else
-		{
-			EnableCursor();
-		}
-
-		// Take a screenshot
-		if (IsKeyPressed(KEY_F9))
-		{
-			// take a screenshot
-			for (int i = 0; i < INT_MAX; i++)
-			{
-				const char* fileName = TextFormat("screen%i.png", i);
-				// if there isnt a duplicate file, it then will create a screenshot.
-				if (FileExists(fileName) == 0)
-				{
-					TakeScreenshot(fileName);
-					break;
-				}
-			}
-		}
-
-		// Sprinting Mechanic
-		if (IsKeyDown(KEY_LEFT_SHIFT))
-		{
-			player->isRunning = true;
-		}
-		else
-		{
-			player->isRunning = false;
-		}
-
-		// NOTE : This is temporary and is only to test the health system
-		if (IsKeyDown(KEY_Y))
-		{
-			player->healthComp->DamagePlayer(5.0f);
-		}
 
 
 
@@ -653,6 +640,7 @@ int main(void)
 
 		/*
 			When Skyboxes are fixed, re-add the code snippet below
+
 			rlDisableBackfaceCulling();
 			rlDisableDepthMask();
 			// DrawModel(skybox, Vector3{0.0f, 0.0f, 0.0f}, 1.0f, WHITE);
@@ -688,7 +676,7 @@ int main(void)
 		// Stop texturing the FBO with what the user will be seeing.
 		game->renderer->StopTexturing();
 
-		// Warning : DO NOT MOVE THIS! this is important! due to a bug within raylib, this must be done after the texturing is done or a stack overflow WILL occur.
+		// Warning : DO NOT MOVE THIS! this is important! due to a bug within raylib, this must be done after the texturing is done or a stack overflow WILL occur. GOD DAMN IT!
 		rlPopMatrix();
 
 		/*
@@ -734,6 +722,9 @@ int main(void)
 		ClearBackground(BLACK);
 	}
 
+
+
+
 	/*
 	---------------------------------------------------------------------------------
 	| 					           Unloading										|
@@ -768,6 +759,8 @@ int main(void)
 	delete game;
 	delete block;
 	delete inventoryMan;
+
+
 	delete player;
 	delete gameObjectManager;
 

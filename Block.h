@@ -30,6 +30,8 @@ public:
 		const static Texture2D Bricks = LoadTexture("resources/textures/Block/Brick/Brick.png");
 		this->model.materials[0].shader = shader;
 
+
+		// why the fuck does PBR lighting not work on AMD cards but not nvidia?? 
 		this->model.materials[0].maps[MATERIAL_MAP_ALBEDO].color = WHITE;
 		this->model.materials[0].maps[MATERIAL_MAP_METALNESS].value = 1.0f;
 		this->model.materials[0].maps[MATERIAL_MAP_ROUGHNESS].value = 0.0f;

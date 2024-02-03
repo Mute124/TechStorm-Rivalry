@@ -34,12 +34,15 @@ public:
 	}
 	
 
-	// Custom logging function
+	// I dont even know what va_list is...
 	static void CustomLog(int msgType, const char* text, va_list args = 0)
 	{
-		char timeStr[64] = { 0 };
-		time_t now = time(NULL);
 
+		char timeStr[64] = { 0 };
+		
+		
+		// Works, but isnt the best. eh fuck it
+		time_t now = time(NULL);
 		struct tm* tm_info = localtime(&now);
 
 		strftime(timeStr, sizeof(timeStr), "%Y-%m-%d %H:%M:%S", tm_info);
