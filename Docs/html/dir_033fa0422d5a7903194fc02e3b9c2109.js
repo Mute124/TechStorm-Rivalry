@@ -21,7 +21,7 @@ var dir_033fa0422d5a7903194fc02e3b9c2109 =
     [ "Item.h", "_item_8h.html", "_item_8h" ],
     [ "ItemTypes.h", "_item_types_8h.html", "_item_types_8h" ],
     [ "Layer.cpp", "_layer_8cpp.html", null ],
-    [ "Layer.h", "_layer_8h.html", "_layer_8h" ],
+    [ "Layer.h", "_layer_8h.html", null ],
     [ "LayerMan.cpp", "_layer_man_8cpp.html", null ],
     [ "LayerMan.h", "_layer_man_8h.html", "_layer_man_8h" ],
     [ "Light.h", "_light_8h.html", "_light_8h" ],
@@ -35,7 +35,10 @@ var dir_033fa0422d5a7903194fc02e3b9c2109 =
     [ "resource.h", "resource_8h.html", null ],
     [ "rguiapi.h", "rguiapi_8h.html", "rguiapi_8h" ],
     [ "rguilayout.h", "rguilayout_8h.html", "rguilayout_8h" ],
-    [ "Script.h", "_script_8h.html", "_script_8h" ],
+    [ "Scriptable.h", "_scriptable_8h.html", "_scriptable_8h" ],
+    [ "Scripting.ixx", "_scripting_8ixx.html", null ],
+    [ "ScriptManager.cpp", "_script_manager_8cpp.html", null ],
+    [ "ScriptManager.h", "_script_manager_8h.html", "_script_manager_8h" ],
     [ "techstorm-rivalry.h", "techstorm-rivalry_8h.html", "techstorm-rivalry_8h" ],
     [ "toml.h", "toml_8h.html", "toml_8h" ]
 ];

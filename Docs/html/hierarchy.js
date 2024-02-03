@@ -197,7 +197,6 @@ var hierarchy =
     [ "Item", "struct_item.html", null ],
     [ "toml::key", "classtoml_1_1v3_1_1key.html", null ],
     [ "toml::v3::key", "classtoml_1_1v3_1_1key.html", null ],
-    [ "Layer< T >", "struct_layer.html", null ],
     [ "LayerMan", "class_layer_man.html", null ],
     [ "Light", "struct_light.html", null ],
     [ "ListEntry< T >", "struct_list_entry.html", null ],
@@ -311,7 +310,8 @@ var hierarchy =
     [ "rlDrawCall", "structrl_draw_call.html", null ],
     [ "rlRenderBatch", "structrl_render_batch.html", null ],
     [ "rlVertexBuffer", "structrl_vertex_buffer.html", null ],
-    [ "Script", "class_script.html", null ],
+    [ "Scriptable", "class_scriptable.html", null ],
+    [ "ScriptManager", "class_script_manager.html", null ],
     [ "Shader", "struct_shader.html", [
       [ "raylib::Shader", "classraylib_1_1_shader.html", null ]
     ] ],

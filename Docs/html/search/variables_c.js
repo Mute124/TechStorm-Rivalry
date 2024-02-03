@@ -1,8 +1,8 @@
 var searchData=
 [
   ['n_0',['n',['../struct_dual_vec3.html#ae73ccb7c269140febd0fed22508f5d59',1,'DualVec3']]],
-  ['name_1',['NAME',['../struct_item.html#a5f239284341646c0b98092be07599e8e',1,'Item']]],
-  ['name_2',['name',['../struct_bone_info.html#a3453c1293a238f728a339750bf13e565',1,'BoneInfo::name'],['../struct_model_animation.html#a23390ed9aa406568fd3aed70f12b0dd9',1,'ModelAnimation::name'],['../struct_gui_d_m_property.html#a0ab0337b3ef282d9c92799c9d2071461',1,'GuiDMProperty::name'],['../struct_gui_anchor_point.html#aca698da1392494cc468b10759d903a85',1,'GuiAnchorPoint::name'],['../struct_gui_layout_control.html#adbb93881ffdc39835a91af6e6c0f16fd',1,'GuiLayoutControl::name'],['../struct_gui_layout_config.html#af8247153fe87ecbcfb4e05ff3134a0e4',1,'GuiLayoutConfig::name']]],
+  ['name_1',['name',['../struct_bone_info.html#a3453c1293a238f728a339750bf13e565',1,'BoneInfo::name'],['../struct_model_animation.html#a23390ed9aa406568fd3aed70f12b0dd9',1,'ModelAnimation::name'],['../struct_gui_d_m_property.html#a0ab0337b3ef282d9c92799c9d2071461',1,'GuiDMProperty::name'],['../struct_gui_anchor_point.html#aca698da1392494cc468b10759d903a85',1,'GuiAnchorPoint::name'],['../struct_gui_layout_control.html#adbb93881ffdc39835a91af6e6c0f16fd',1,'GuiLayoutControl::name'],['../struct_gui_layout_config.html#af8247153fe87ecbcfb4e05ff3134a0e4',1,'GuiLayoutConfig::name']]],
+  ['name_2',['NAME',['../struct_item.html#a5f239284341646c0b98092be07599e8e',1,'Item']]],
   ['nanosecond_3',['nanosecond',['../structtoml_1_1v3_1_1time.html#a4a4b829a23b92e28732790a94fa77661',1,'toml::v3::time']]],
   ['neardeathintensity_4',['nearDeathIntensity',['../main_8cpp.html#a8e80bfa746a17f2e81326c8222cba7d7',1,'main.cpp']]],
   ['neardeathtimer_5',['nearDeathTimer',['../main_8cpp.html#a25218d9fce26d5c2dd8b6c97b276e775',1,'main.cpp']]],

@@ -76,7 +76,7 @@ var searchData=
   ['play_73',['Play',['../classraylib_1_1_audio_stream.html#a3aed292652e082b37396a66e48bf9858',1,'raylib::AudioStream::Play()'],['../classraylib_1_1_music.html#a5a99d2bf68843c860c6b5612b7e3d3df',1,'raylib::Music::Play()'],['../classraylib_1_1_sound.html#ab48935ee4d6c10329f68117b5862aed2',1,'raylib::Sound::Play()']]],
   ['playaudiostream_74',['PlayAudioStream',['../raylib_8h.html#a4103c4ab745e38641c696b81d3318cde',1,'raylib.h']]],
   ['playautomationevent_75',['PlayAutomationEvent',['../raylib_8h.html#a7e41cf1e7b39d831cf4d290ec119e731',1,'raylib.h']]],
-  ['player_76',['Player',['../class_player.html',1,'Player'],['../class_player.html#a54b1c35a0f11dc9689c2491138866d7e',1,'Player::Player()']]],
+  ['player_76',['Player',['../class_player.html',1,'Player'],['../class_player.html#affe0cc3cb714f6deb4e62f0c0d3f1fd8',1,'Player::Player()'],['../class_player.html#a54b1c35a0f11dc9689c2491138866d7e',1,'Player::Player(Vector3 StartingPos, int MaxHP, const Model model, int CameraMode)']]],
   ['player_2eh_77',['Player.h',['../_player_8h.html',1,'']]],
   ['playercontroller_78',['PlayerController',['../class_player_controller.html',1,'PlayerController'],['../class_player_controller.html#a0809f9eac84d65cdd520cf9daf0c32a7',1,'PlayerController::PlayerController()']]],
   ['playerhealthcomp_79',['PlayerHealthComp',['../class_player_health_comp.html',1,'PlayerHealthComp'],['../class_player_health_comp.html#ac625fb5e73e7a0f86d6718bff49d01f7',1,'PlayerHealthComp::PlayerHealthComp()']]],

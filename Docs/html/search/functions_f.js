@@ -23,7 +23,7 @@ var searchData=
   ['play_20',['Play',['../classraylib_1_1_audio_stream.html#a3aed292652e082b37396a66e48bf9858',1,'raylib::AudioStream::Play()'],['../classraylib_1_1_music.html#a5a99d2bf68843c860c6b5612b7e3d3df',1,'raylib::Music::Play()'],['../classraylib_1_1_sound.html#ab48935ee4d6c10329f68117b5862aed2',1,'raylib::Sound::Play()']]],
   ['playaudiostream_21',['PlayAudioStream',['../raylib_8h.html#a4103c4ab745e38641c696b81d3318cde',1,'raylib.h']]],
   ['playautomationevent_22',['PlayAutomationEvent',['../raylib_8h.html#a7e41cf1e7b39d831cf4d290ec119e731',1,'raylib.h']]],
-  ['player_23',['Player',['../class_player.html#a54b1c35a0f11dc9689c2491138866d7e',1,'Player']]],
+  ['player_23',['Player',['../class_player.html#affe0cc3cb714f6deb4e62f0c0d3f1fd8',1,'Player::Player()'],['../class_player.html#a54b1c35a0f11dc9689c2491138866d7e',1,'Player::Player(Vector3 StartingPos, int MaxHP, const Model model, int CameraMode)']]],
   ['playercontroller_24',['PlayerController',['../class_player_controller.html#a0809f9eac84d65cdd520cf9daf0c32a7',1,'PlayerController']]],
   ['playerhealthcomp_25',['PlayerHealthComp',['../class_player_health_comp.html#ac625fb5e73e7a0f86d6718bff49d01f7',1,'PlayerHealthComp']]],
   ['playmusicstream_26',['PlayMusicStream',['../raylib_8h.html#a4c5a0e67b853412824da3882ddd99914',1,'raylib.h']]],

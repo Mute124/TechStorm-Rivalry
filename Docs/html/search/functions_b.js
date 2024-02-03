@@ -1,8 +1,8 @@
 var searchData=
 [
   ['leaf_0',['leaf',['../classtoml_1_1v3_1_1path.html#a0dfceddf44738ba021312290d1d25ab7',1,'toml::v3::path']]],
-  ['length_1',['length',['../classtoml_1_1v3_1_1key.html#a53fbd9434efb09534dd98b4927e6f53c',1,'toml::v3::key']]],
-  ['length_2',['Length',['../classraylib_1_1_vector2.html#a31b7bc465faebf07ef894eee4291e725',1,'raylib::Vector2::Length()'],['../classraylib_1_1_vector3.html#a8a34da2f9489bb78d4862cdedd14cd5e',1,'raylib::Vector3::Length()'],['../classraylib_1_1_vector4.html#a8595e296feb4b4ecb2caccecd5bbef39',1,'raylib::Vector4::Length()']]],
+  ['length_1',['Length',['../classraylib_1_1_vector2.html#a31b7bc465faebf07ef894eee4291e725',1,'raylib::Vector2::Length()'],['../classraylib_1_1_vector3.html#a8a34da2f9489bb78d4862cdedd14cd5e',1,'raylib::Vector3::Length()'],['../classraylib_1_1_vector4.html#a8595e296feb4b4ecb2caccecd5bbef39',1,'raylib::Vector4::Length()']]],
+  ['length_2',['length',['../classtoml_1_1v3_1_1key.html#a53fbd9434efb09534dd98b4927e6f53c',1,'toml::v3::key']]],
   ['lengthsqr_3',['LengthSqr',['../classraylib_1_1_vector2.html#a3e68ca85bfbd5cbe8ebce0ad9e4688a4',1,'raylib::Vector2']]],
   ['lerp_4',['Lerp',['../classraylib_1_1_vector2.html#a295e4514f3a3842d83aee1106543e294',1,'raylib::Vector2::Lerp()'],['../classraylib_1_1_vector3.html#a81c113692317fc0eab01128c10f44373',1,'raylib::Vector3::Lerp()'],['../classraylib_1_1_vector4.html#a0ab98322e7425630c16fe296c667e37b',1,'raylib::Vector4::Lerp()'],['../raymath_8h.html#a85f483f8e4e60eb1d990ca3ef32edae7',1,'Lerp():&#160;raymath.h']]],
   ['lightgray_5',['LightGray',['../classraylib_1_1_color.html#adbb50ad15745dddeaa73d04f8b40ad35',1,'raylib::Color']]],
@@ -61,8 +61,8 @@ var searchData=
   ['loadwave_58',['LoadWave',['../raylib_8h.html#a27f494d9da576990a700dea633dae401',1,'raylib.h']]],
   ['loadwavefrommemory_59',['LoadWaveFromMemory',['../raylib_8h.html#acfa56e4d55a15424c53108b89c7dbd79',1,'raylib.h']]],
   ['loadwavesamples_60',['LoadWaveSamples',['../raylib_8h.html#affb263377ed0c2a267db4c7d0339dfbb',1,'raylib.h']]],
-  ['log_61',['log',['../struct_item.html#a3f0ff06a69c3a7143a8cb50e1ea294aa',1,'Item']]],
-  ['log_62',['Log',['../class_logman.html#ae91e79e99a564ca7a4d9bd9217b16d30',1,'Logman']]],
+  ['log_61',['Log',['../class_logman.html#ae91e79e99a564ca7a4d9bd9217b16d30',1,'Logman']]],
+  ['log_62',['log',['../struct_item.html#a3f0ff06a69c3a7143a8cb50e1ea294aa',1,'Item']]],
   ['logman_63',['Logman',['../class_logman.html#a506d9deabe97db8e81edfb5cb43f9788',1,'Logman']]],
   ['lookat_64',['LookAt',['../classraylib_1_1_matrix.html#a4eeb4cdf09fd97c38d990a27e894f6f1',1,'raylib::Matrix']]],
   ['lower_5fbound_65',['lower_bound',['../classtoml_1_1v3_1_1table.html#abeff60097cc57d0acd95a79a8885e4d5',1,'toml::v3::table::lower_bound(std::string_view key) noexcept'],['../classtoml_1_1v3_1_1table.html#a93b579004ba7c9afab89c9bba9140bb0',1,'toml::v3::table::lower_bound(std::string_view key) const noexcept']]]

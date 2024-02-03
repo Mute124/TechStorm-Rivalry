@@ -1,5 +1,6 @@
 var class_player =
 [
+    [ "Player", "class_player.html#affe0cc3cb714f6deb4e62f0c0d3f1fd8", null ],
     [ "Player", "class_player.html#a54b1c35a0f11dc9689c2491138866d7e", null ],
     [ "~Player", "class_player.html#a8981c201ffb2270c0b6dbd467b627376", null ],
     [ "Draw", "class_player.html#a5b60ad157bb1e8debca89ed6903ca2a4", null ],

@@ -20,11 +20,12 @@ var searchData=
   ['max_5flayers_17',['MAX_LAYERS',['../_layer_man_8h.html#ade9d4b2ac5f29fe89ffea40e7c58c9d6',1,'LayerMan.h']]],
   ['max_5flights_18',['MAX_LIGHTS',['../_light_8h.html#a737b417f16ea225cf15e8d4c23df53dc',1,'Light.h']]],
   ['max_5floaded_5ffiles_19',['MAX_LOADED_FILES',['../framework_8h.html#a441eac2e6762a2c91220cf4cf0e18c5c',1,'framework.h']]],
-  ['max_5fshaders_20',['MAX_SHADERS',['../_globals_8h.html#a3e81bce4adf8cfce68f5dea670fac3f0',1,'Globals.h']]],
-  ['max_5fundo_5flevels_21',['MAX_UNDO_LEVELS',['../rguiapi_8h.html#ab405e5b66be432e95cc9400666db7942',1,'rguiapi.h']]],
-  ['min_5fcontrol_5fsize_22',['MIN_CONTROL_SIZE',['../rguiapi_8h.html#a895e48c3b7a84550ba078715e9ae6345',1,'rguiapi.h']]],
-  ['mouse_5fleft_5fbutton_23',['MOUSE_LEFT_BUTTON',['../raylib_8h.html#afb42537b362f394ed4db90fd34c87330',1,'MOUSE_LEFT_BUTTON:&#160;raylib.h'],['../raygui__custom__backend_8h.html#afb42537b362f394ed4db90fd34c87330',1,'MOUSE_LEFT_BUTTON:&#160;raygui_custom_backend.h']]],
-  ['mouse_5fmiddle_5fbutton_24',['MOUSE_MIDDLE_BUTTON',['../raylib_8h.html#af198ea1d58a225ba7fce4ae77e2faa04',1,'raylib.h']]],
-  ['mouse_5fright_5fbutton_25',['MOUSE_RIGHT_BUTTON',['../raylib_8h.html#aa1092e0190b6ee5bc6733943d970fed7',1,'raylib.h']]],
-  ['movement_5fframe_5fspeed_26',['MOVEMENT_FRAME_SPEED',['../rguiapi_8h.html#ac87c46d0d2aa4422077958868a1aaed5',1,'rguiapi.h']]]
+  ['max_5fscriptables_20',['MAX_SCRIPTABLES',['../_script_manager_8h.html#a7e0a5e660ac7103d960eb71e690c7068',1,'ScriptManager.h']]],
+  ['max_5fshaders_21',['MAX_SHADERS',['../_globals_8h.html#a3e81bce4adf8cfce68f5dea670fac3f0',1,'Globals.h']]],
+  ['max_5fundo_5flevels_22',['MAX_UNDO_LEVELS',['../rguiapi_8h.html#ab405e5b66be432e95cc9400666db7942',1,'rguiapi.h']]],
+  ['min_5fcontrol_5fsize_23',['MIN_CONTROL_SIZE',['../rguiapi_8h.html#a895e48c3b7a84550ba078715e9ae6345',1,'rguiapi.h']]],
+  ['mouse_5fleft_5fbutton_24',['MOUSE_LEFT_BUTTON',['../raylib_8h.html#afb42537b362f394ed4db90fd34c87330',1,'MOUSE_LEFT_BUTTON:&#160;raylib.h'],['../raygui__custom__backend_8h.html#afb42537b362f394ed4db90fd34c87330',1,'MOUSE_LEFT_BUTTON:&#160;raygui_custom_backend.h']]],
+  ['mouse_5fmiddle_5fbutton_25',['MOUSE_MIDDLE_BUTTON',['../raylib_8h.html#af198ea1d58a225ba7fce4ae77e2faa04',1,'raylib.h']]],
+  ['mouse_5fright_5fbutton_26',['MOUSE_RIGHT_BUTTON',['../raylib_8h.html#aa1092e0190b6ee5bc6733943d970fed7',1,'raylib.h']]],
+  ['movement_5fframe_5fspeed_27',['MOVEMENT_FRAME_SPEED',['../rguiapi_8h.html#ac87c46d0d2aa4422077958868a1aaed5',1,'rguiapi.h']]]
 ];
