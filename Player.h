@@ -5,6 +5,9 @@
 #include "Block.h"
 #include "Item.h"
 
+#include "EquipSlot.h"
+
+
 #define STARTINGHP 100
 #define MAX_AFFLICTIONS 20
 

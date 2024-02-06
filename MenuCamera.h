@@ -1,5 +1,7 @@
 #pragma once
 #include "common.h"
+
+// TODO : This can be a humble struct
 class MenuCamera
 {
 public:

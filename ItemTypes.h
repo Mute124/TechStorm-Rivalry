@@ -1,9 +1,19 @@
 #pragma once
 
-typedef enum MaterialTypes {
+typedef enum EMaterialTypes {
 	METAL
 };
 
-typedef enum ItemTypes {
+typedef enum EItemRarity {
+	COMMON,
+	UNCOMMON, 
+	RARE,
+	EPIC,
+	LEGENDARY,
+	MYTHICAL,
+	UNUSUAL
+};
+
+typedef enum EItemTypes {
 	RAW_MATERIAL,
 };
