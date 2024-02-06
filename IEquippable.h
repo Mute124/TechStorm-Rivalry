@@ -3,7 +3,7 @@
 #include "IScriptable.h"
 #include "ScriptManager.h"
 
-// 
+
 class IEquippable : public IScriptable
 {
 public: 
@@ -16,13 +16,11 @@ public:
 
 	void SetModel(Model model);
 
-private:
-
 	bool equipped = false;
 
 	Model model;
 	
-
+	Transform transform;
 	
 };
 

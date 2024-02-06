@@ -3,8 +3,11 @@
 #include "EEquipmentTypes.h"
 #include "EAfflictions.h"
 
+#include "IEquippable.h"
+
 // Character Weapon
 struct CWeapon {
+
 	EEquipmentTypes weaponType;
 	EEquipmentSlots weaponSlot;
 
