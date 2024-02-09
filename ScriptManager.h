@@ -5,7 +5,7 @@
 #include <stdlib.h>
 #include <vector>
 
-#include "Scriptable.h"
+#include "IScriptable.h"
 
 
 using namespace std;
@@ -22,6 +22,6 @@ public:
 
 	void Flush();
 
-	void AddScript(Scriptable* script);
-	vector<Scriptable*> scriptables;
+	void AddScript(IScriptable* script);
+	vector<IScriptable*> scriptables;
 };

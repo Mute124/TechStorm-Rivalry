@@ -128,10 +128,10 @@ public:
 	{
 
 		SetTraceLogCallback(Logman::CustomLog);
-		
-		
 
-		
+
+
+
 		// Read config to decide what to set for the game
 		Logman::CustomLog(LOG_INFO, "Initiating Config Manager", NULL);
 
@@ -152,7 +152,7 @@ public:
 			windowHeight = ConfigTypeConverter::StrToInt(&optionsConfig["Window"]["windowHeight"].as_string()->operator std::string & ());
 			Logman::CustomLog(LOG_INFO, TextFormat("Setting window height to %i", windowHeight), NULL);
 
-			
+
 		}
 		else
 		{
@@ -204,10 +204,18 @@ public:
 		ImageFormat(&icon, PIXELFORMAT_UNCOMPRESSED_R8G8B8A8);
 		SetWindowIcon(icon);
 
-		
+
 		renderer = new Renderer();
 
-		renderer->CreateRenderTexture(windowWidth, windowHeight);
+
+		if (isFullscreen == true) {
+			renderer->CreateRenderTexture(GetScreenWidth(), GetScreenHeight());
+
+		}
+		else {
+			renderer->CreateRenderTexture(windowWidth, windowHeight);
+
+		}
 
 		renderer->bloomShader = LoadShader(0, "resources/shaders/bloom.fs");
 

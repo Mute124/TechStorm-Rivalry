@@ -1,0 +1,10 @@
+#pragma once
+
+
+
+typedef enum EEquipmentTypes {
+	EQUIPMENT_NULL,
+	EQUIPMENT_PRIMARY,
+	EQUIPMENT_SECONDARY,
+	EQUIPMENT_MELEE,
+};

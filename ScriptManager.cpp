@@ -19,7 +19,7 @@ void ScriptManager::Flush() {
 	scriptables.clear();
 }
 
-void ScriptManager::AddScript(Scriptable* script) {
+void ScriptManager::AddScript(IScriptable* script) {
 	scriptables.push_back(script);
 
 	script->onStart();
