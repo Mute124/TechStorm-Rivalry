@@ -9,5 +9,4 @@ typedef enum EAfflictions {
 	AFFLICTION_NULL = 0,
 	AFFLICTION_BURNING,
 	AFFLICTION_PUNCTURE,
-	
 };

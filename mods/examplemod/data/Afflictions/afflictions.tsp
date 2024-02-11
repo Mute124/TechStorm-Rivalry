@@ -2,14 +2,21 @@
 <file>
 	<afflictions>
 		<affliction>
-			<name>Bleeding</name>
-			<tooltip>Blood is coming out of the wound!</tooltip>
+			<name>Example Name</name>
+			<tooltip>This is how you add afflictions!</tooltip>
+			<!--0 = bad 1 = mixed-->
+			<implication></implication>
+			<severity></severity>
 			<causes>
-				<cause>Sharps</cause>
+				<!--Put the damage type tag that can cause this here!-->
+				<cause></cause>
 			</causes>
+			<!--What can treat this affliction?-->
 			<treatments>
-				<treatment>bandage</treatment>
+				<!--What heals the player of this affliction?-->
+				<treatment></treatment>
 			</treatments>
+			<!--What does this affliction do?-->
 			<affects>
 				<affect>
 					<!--What about the player gets affected?-->

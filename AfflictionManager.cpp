@@ -1,0 +1,1 @@
+#include "AfflictionManager.h"

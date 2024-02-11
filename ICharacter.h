@@ -1,4 +1,5 @@
 #pragma once
+#include "Common.h"
 #include "EBodySlots.h"
 #include "BodySlot.h"
 #include "IScriptable.h"
@@ -22,11 +23,9 @@ class ICharacter : public IScriptable
 	bool isSprinting;
 	const bool isPlayer;
 
+	Ray characterLookDirection = { 0 };
+
 	const int characterID;
 	const EFaction characterFaction = FACTION_NULL;
-
-	
-
-public:
 };
 
