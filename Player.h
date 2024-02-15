@@ -7,6 +7,7 @@
 
 #include "EquipSlot.h"
 
+#include "Character.h"
 
 #define STARTINGHP 100
 #define MAX_AFFLICTIONS 20
@@ -373,3 +374,4 @@ private:
 
 	int maxHP = STARTINGHP;
 };
+

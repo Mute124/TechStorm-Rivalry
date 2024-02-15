@@ -1,0 +1,11 @@
+#pragma once
+
+typedef enum EAfflictionSeverity
+{
+	SEVERITY_NULL = 0,
+	SEVERITY_MILD,
+	SEVERITY_MODERATE,
+	SEVERITY_SEVERE,
+	SEVERITY_CRITICAL,
+	SEVERITY_LETHAL
+} ESeverity;

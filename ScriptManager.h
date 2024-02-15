@@ -6,22 +6,34 @@
 #include <vector>
 
 #include "IScriptable.h"
-
-
-using namespace std;
+#include "Registry.h"
 
 // Class that manages scripting and calls the script functions
 // Todo : make this load script files and run them, also make it have a script cap.
-class ScriptManager {
+class ScriptManager : public MapRegistry<IScriptable> {
 public:
 
 
-	void start();
+	void start() {
+	
+	}
 
-	void update();
+	// Override function
+	void Update() override {
 
-	void Flush();
+	}
 
-	void AddScript(IScriptable* script);
-	vector<IScriptable*> scriptables;
+
+
+	void AddScript(IScriptable* script) {
+		Add(script);
+	}
+
+	void RemoveScript(int ID) {
+		Get(ID)->onEnd();
+		Remove(ID);
+	}
+
+
+
 };
