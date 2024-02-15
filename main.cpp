@@ -617,7 +617,7 @@ int main(void)
 
 		// Update the game object manager
 		gameObjectManager->Update();
-		game->scriptManager->update();
+		game->scriptManager->Update();
 
 
 		// Start texturing the FBO with what the user will be seeing. This includes UI and Scene objects.

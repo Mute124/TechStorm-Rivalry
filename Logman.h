@@ -16,6 +16,7 @@ public:
 		delete this;
 	}
 
+
 	// store data into a log file following the logman format
 	static void Store(const char* message) {
 		
@@ -69,6 +70,8 @@ public:
 		vprintf(text, args);
 		printf("\n");
 	}
+
+	
 
 private:
 
