@@ -9,7 +9,7 @@
 class Logman {
 public:
 	Logman() {
-		SetTraceLogCallback(this->CustomLog);
+		SetTraceLogCallback(this->customLog);
 	}
 
 	~Logman() {
@@ -22,21 +22,21 @@ public:
 		
 	}
 
-	static void Log(const char* message) {
-		CustomLog(LOG_INFO, message, NULL);
+	static void log(const char* message) {
+		customLog(LOG_INFO, message, NULL);
 	}
 
 	static void Error(const char* message) {
-		CustomLog(LOG_ERROR, message, NULL);
+		customLog(LOG_ERROR, message, NULL);
 	}
 
 	static void Warn(const char* message) {
-		CustomLog(LOG_WARNING, message, NULL);
+		customLog(LOG_WARNING, message, NULL);
 	}
 	
 
 	// I dont even know what va_list is...
-	static void CustomLog(int msgType, const char* text, va_list args = 0)
+	static void customLog(int msgType, const char* text, va_list args = 0)
 	{
 
 		char timeStr[64] = { 0 };

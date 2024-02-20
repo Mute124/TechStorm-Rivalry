@@ -41,8 +41,8 @@ namespace YSE {
             Flt getLength () const;
             Int getChannel() const;
 
-            bool update(); // returns false if note wants to stop
-            bool update(Flt delta); // a special, more accurate version of update. This can only be called at DSP level
+            bool updateObjects(); // returns false if note wants to stop
+            bool updateObjects(Flt delta); // a special, more accurate version of update. This can only be called at DSP level
             
             // these operators work on pitch only,
             // volume is never changed

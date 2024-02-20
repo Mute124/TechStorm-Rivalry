@@ -70,12 +70,12 @@ class AfflictionManager : public IScriptable {
 
                     while (affAffects) {
 						XMLElement* affAffect = affAffects->FirstChildElement("affect");
-                        affAffectData->affects = 
+                       
                     }
 
                     // TODO: Get causes, treatments, affects
 
-					aff = new Affliction(name->GetText(), tooltip->GetText(), description->GetText(), icon->GetText(), implication->GetText(), severity->IntText(), ));
+					//aff = new Affliction(name->GetText(), tooltip->GetText(), description->GetText(), icon->GetText(), implication->GetText(), severity->IntText(), ));
 
                 }
 

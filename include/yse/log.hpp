@@ -60,7 +60,7 @@ namespace YSE {
   /**
       A functor to retrieve the Logging object.
   */
-  API log & Log();
+  API log & log();
 }
 
 

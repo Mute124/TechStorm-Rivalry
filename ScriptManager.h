@@ -19,18 +19,18 @@ public:
 	}
 
 	// Override function
-	void Update() override {
+	void updateObjects() override {
 
 	}
 
 
 
-	void AddScript(IScriptable* script) {
+	void addScript(IScriptable* script) {
 		Add(script);
 	}
 
-	void RemoveScript(int ID) {
-		Get(ID)->onEnd();
+	void removeScript(int ID) {
+		getConfig(ID)->onEnd();
 		Remove(ID);
 	}
 

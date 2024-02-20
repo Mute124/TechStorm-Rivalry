@@ -538,7 +538,7 @@
 #elif TOML_MSVC
 
 #define TOML_PUSH_WARNINGS                                                                                             \
-	__pragma(warning(push))                                                                                            \
+	__pragma(warning(pushObject))                                                                                            \
 	static_assert(true)
 
 #if TOML_HAS_INCLUDE(<CodeAnalysis/Warnings.h>)
@@ -599,7 +599,7 @@
 	static_assert(true)
 
 #define TOML_DISABLE_WARNINGS                                                                                          \
-	__pragma(warning(push, 0))                                                                                         \
+	__pragma(warning(pushObject, 0))                                                                                         \
 	__pragma(warning(disable : 4348))                                                                                  \
 	__pragma(warning(disable : 4668))                                                                                  \
 	__pragma(warning(disable : 5105))                                                                                  \
@@ -641,7 +641,7 @@
 #elif TOML_GCC
 
 #define TOML_PUSH_WARNINGS                                                                                             \
-	TOML_PRAGMA_GCC(diagnostic push)                                                                                   \
+	TOML_PRAGMA_GCC(diagnostic pushObject)                                                                                   \
 	static_assert(true)
 
 #define TOML_DISABLE_SWITCH_WARNINGS                                                                                   \
@@ -681,7 +681,7 @@
 	static_assert(true)
 
 #define TOML_DISABLE_WARNINGS                                                                                          \
-	TOML_PRAGMA_GCC(diagnostic push)                                                                                   \
+	TOML_PRAGMA_GCC(diagnostic pushObject)                                                                                   \
 	TOML_PRAGMA_GCC(diagnostic ignored "-Wall")                                                                        \
 	TOML_PRAGMA_GCC(diagnostic ignored "-Wextra")                                                                      \
 	TOML_PRAGMA_GCC(diagnostic ignored "-Wpedantic")                                                                   \

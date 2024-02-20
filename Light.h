@@ -15,7 +15,7 @@ typedef enum
 	LIGHT_DIRECTIONAL = 0,
 	LIGHT_POINT,
 	LIGHT_SPOT
-} LightType;
+} ELightType;
 
 // Light data
 typedef struct {

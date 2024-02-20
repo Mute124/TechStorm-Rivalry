@@ -14,7 +14,7 @@ template<typename T>
 class MapRegistry {
 public:
 
-	T* Get(int id) {
+	T* getConfig(int id) {
 		return registry[id];
 	}
 
@@ -34,9 +34,9 @@ public:
 		registry.erase(id);
 	}
 
-	virtual void Update() {}
+	virtual void updateObjects() {}
 
-	void Flush() {
+	void flushConfig() {
 		registry.clear();
 	}
 

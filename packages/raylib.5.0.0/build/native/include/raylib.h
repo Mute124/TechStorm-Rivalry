@@ -1474,7 +1474,7 @@ RLAPI int TextFindIndex(const char *text, const char *find);                    
 RLAPI const char *TextToUpper(const char *text);                      // Get upper case version of provided string
 RLAPI const char *TextToLower(const char *text);                      // Get lower case version of provided string
 RLAPI const char *TextToPascal(const char *text);                     // Get Pascal case notation version of provided string
-RLAPI int TextToInteger(const char *text);                            // Get integer value from text (negative values not supported)
+RLAPI int textToInteger(const char *text);                            // Get integer value from text (negative values not supported)
 
 //------------------------------------------------------------------------------------
 // Basic 3d Shapes Drawing Functions (Module: models)

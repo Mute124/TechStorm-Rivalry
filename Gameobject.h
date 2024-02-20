@@ -13,7 +13,7 @@ using namespace std;
 class GameObject
 {
 public:
-	virtual void Draw() {};
+	virtual void draw() {};
 
 	virtual ~GameObject()
 	{
@@ -32,16 +32,16 @@ public:
 
 class GameobjectManager {
 public:
-	void RenderObjects()
+	void renderObjects()
 	{
 		for (auto& obj : objectsVector)
 		{
-			obj->Draw();
+			obj->draw();
 			obj->onUpdate();
 		}
 	}
 
-	void FlushBuffer()
+	void flushBuffer()
 	{
 		// we have to use this implementation due to each object can have their own behavior.
 		for (auto& obj : objectsVector)
@@ -50,7 +50,7 @@ public:
 		}
 	}
 
-	void Update() {
+	void updateObjects() {
 
 		for (auto& GameObject : objectsVector)
 		{
@@ -58,7 +58,7 @@ public:
 		}
 	}
 
-	void Push(GameObject* obj) {
+	void pushObject(GameObject* obj) {
 		objectsVector.push_back(obj);
 	}
 
@@ -73,7 +73,7 @@ public:
 		// Startup code. Done only once
 		
 	}
-	void Draw() override {
+	void draw() override {
 		// On draw
 	}
 	void onUpdate() override {

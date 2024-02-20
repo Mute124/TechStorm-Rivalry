@@ -9,7 +9,7 @@ bool SkipMainMenu = true;
 */
 #include "Button.h" // TODO : Can this be moved to common.h?
 #include "common.h"
-
+#include "Math.h"
 // Game Engine Includes
 #include "Game.h"
 #include "Globals.h"
@@ -22,6 +22,9 @@ bool SkipMainMenu = true;
 #include "Light.h"
 #include "Layer.h"
 #include "InventoryManager.h"
+
+#define FNL_IMPL
+#include "include/FastNoiseLite.h"
 
 // std library includes. TODO : Is this still needed?
 #include <time.h>
@@ -36,10 +39,10 @@ typedef enum
 } GameScreen;
 
 
+
 // TODO : Finish shadowmapping
 RenderTexture2D LoadShadowmapRenderTexture(int width, int height);
 void UnloadShadowmapRenderTexture(RenderTexture2D target);
-
 
 /*
 ---------------------------------------------------------------------------------
@@ -109,6 +112,9 @@ int main(void)
 		system("mkdir temp"); // run the system command to create the folder. Note : This is a windows command.
 	}
 
+	// Set initial random seed
+	srand(time(NULL));
+
 
 	// -----------------------------------------------------------------------------
 	// Load Game Assets
@@ -130,7 +136,7 @@ int main(void)
 	itemsSetupThread.join();
 
 	// Note : This is temporary and is solely to test the inventory system loading items
-	Logman::Log(TextFormat("%i", inventoryMan->itemCount));
+	Logman::log(TextFormat("%i", inventoryMan->itemCount));
 
 
 	/*
@@ -205,7 +211,7 @@ int main(void)
 	Block* block = new Block(Vector3Zero(), BLACK, game->renderer->pbrShader, DefaultBlockModel);
 
 	// Finally push it off to the object manager
-	gameObjectManager->Push(block);
+	gameObjectManager->pushObject(block);
 
 	// -----------------------------------------------------------------------------
 	// Player Initialization
@@ -223,7 +229,7 @@ int main(void)
 	Player* player = new Player(Vector3{ 0.0f, 2.0f, 4.0f }, 100, PlayerModel, CAMERA_FIRST_PERSON);
 
 	// Finally push it off to the object manager
-	gameObjectManager->Push(player);
+	gameObjectManager->pushObject(player);
 
 	// -----------------------------------------------------------------------------
 	// skybox creation.
@@ -354,9 +360,9 @@ int main(void)
 	// TODO : Is this still relevant and figure out what the hell this does.
 	Vector3 Orgin = Vector3
 	{ 
-		player->cameraComponent->GetPosition().x, 
-		player->cameraComponent->GetPosition().y - 10.0f,
-		player->cameraComponent->GetPosition().z 	
+		player->cameraComponent->getPosition().x, 
+		player->cameraComponent->getPosition().y - 10.0f,
+		player->cameraComponent->getPosition().z 	
 	};
 
 
@@ -381,17 +387,26 @@ int main(void)
 	healthBarPositionX = game->windowWidth + healthBarOffsetX;
 	healthBarPositionY = game->windowHeight + healthBarOffsetY;
 
+	Image cell = GenImageCellular(100, 100, 2);
+	Image perlin = GenImagePerlinNoise(100, 100, 1, 0.5f, 1.0f);
+	//ImageDraw(&perlin, cell, Rectangle{0, 0, (float)cell.width, (float)cell.height}, Rectangle{0, 0, (float)perlin.width, (float)perlin.height}, WHITE);
+	
+	ImageAlphaMask(&perlin, cell);
+	Mesh test = GenMeshHeightmap(perlin, Vector3{100, 100, 100});
+
+	gameObjectManager->pushObject(new Block(Vector3{ 0.0f, 0.0f, 0.0f }, WHITE, game->renderer->pbrShader, LoadModelFromMesh(test)));
 
 	// Now we can run the game loop and start playing!
 	while (!WindowShouldClose())
 	{
+
 		// NOTE : This is a very basic implementation of placing an object into the world. This is temporary and should be fleshed out.
 		if (IsMouseButtonPressed(MOUSE_BUTTON_RIGHT))
 		{
 
-			Vector3 placepos = player->cameraComponent->GetTarget();
+			Vector3 placepos = player->cameraComponent->setTarget();
 
-			gameObjectManager->Push(new Block(Vector3{ roundf(placepos.x), roundf(placepos.y), roundf(placepos.z) }, WHITE, game->renderer->pbrShader, GetDefaultModel()));
+			gameObjectManager->pushObject(new Block(Vector3{ roundf(placepos.x), roundf(placepos.y), roundf(placepos.z) }, WHITE, game->renderer->pbrShader, GetDefaultModel()));
 		}
 
 		// Allow the cursor to be seen even if it is within the game. (It unlocks the cursor)
@@ -401,7 +416,7 @@ int main(void)
 			{
 				DisableCursor();
 			}
-			UpdateCamera(player->cameraComponent->GetSelfCameraPointer(), player->cameraMode); // Update camera
+			UpdateCamera(player->cameraComponent->getSelfCameraPointer(), player->cameraMode); // Update camera
 		}
 		else
 		{
@@ -427,17 +442,17 @@ int main(void)
 		// Sprinting Mechanic
 		if (IsKeyDown(KEY_LEFT_SHIFT))
 		{
-			player->isRunning = true;
+			player->controller->isRunning = true;
 		}
 		else
 		{
-			player->isRunning = false;
+			player->controller->isRunning = false;
 		}
 
 		// NOTE : This is temporary and is only to test the health system
 		if (IsKeyDown(KEY_Y))
 		{
-			player->healthComp->DamagePlayer(5.0f);
+			player->healthComp->damagePlayer(5.0f);
 		}
 		/*
 		---------------------------------------------------------------------------------
@@ -463,13 +478,13 @@ int main(void)
 				BeginDrawing();
 				DrawText("PAUSE", 100, 100, 20, RED);
 				save->draw();
-				save->update();
+				save->updateObjects();
 
 				Options->draw();
-				Options->update();
+				Options->updateObjects();
 
 				exitButton->draw();
-				exitButton->update();
+				exitButton->updateObjects();
 
 				if (save->IsClicked())
 				{
@@ -484,7 +499,7 @@ int main(void)
 					}
 					SaveFileData(filename, &data, sizeof(data));
 
-					Logman::CustomLog(LOG_DEBUG, LoadFileText(filename), NULL);
+					Logman::customLog(LOG_DEBUG, LoadFileText(filename), NULL);
 				}
 
 				if (exitButton->IsClicked())
@@ -528,7 +543,7 @@ int main(void)
 			delete exitButton;
 			if (manualExit)
 			{
-				Logman::CustomLog(LOG_INFO, "Exiting Game", NULL);
+				Logman::customLog(LOG_INFO, "Exiting Game", NULL);
 				break;
 			}
 		}
@@ -553,8 +568,8 @@ int main(void)
 
 		// The player's looking direction is the target of the camera. This is the direction the player is looking
 		// TODO : Check relevancy.
-		ray.position = player->cameraComponent->GetPosition();
-		ray.direction = player->cameraComponent->GetTarget();
+		ray.position = player->cameraComponent->getPosition();
+		ray.direction = player->cameraComponent->setTarget();
 
 
 
@@ -564,10 +579,10 @@ int main(void)
 		swayTimer += GetFrameTime();
 
 		// sway the camera according to the sway algorithm.
-		player->cameraComponent->SetTarget(Vector3{ player->cameraComponent->GetTarget().x + sin(swayTimer * swaySpeed) * swayAmount, player->cameraComponent->GetTarget().y, player->cameraComponent->GetTarget().z + cos(swayTimer * swaySpeed) * swayAmount });
+		player->cameraComponent->setTarget(Vector3{ player->cameraComponent->setTarget().x + sin(swayTimer * swaySpeed) * swayAmount, player->cameraComponent->setTarget().y, player->cameraComponent->setTarget().z + cos(swayTimer * swaySpeed) * swayAmount });
 
 
-		if (player->healthComp->GetHealth() <= 15) {
+		if (player->healthComp->getHealth() <= 15) {
 
 			// equal to nearDeathTimer + frame delta time
 			nearDeathTimer += GetFrameTime();
@@ -598,14 +613,14 @@ int main(void)
 		// Where the player's camera is. We need to have this as a float array for the shader
 		float cameraPos[3] =
 		{
-			player->cameraComponent->GetPosition().x,
-			player->cameraComponent->GetPosition().y,
-			player->cameraComponent->GetPosition().z
+			player->cameraComponent->getPosition().x,
+			player->cameraComponent->getPosition().y,
+			player->cameraComponent->getPosition().z
 		};
 
 
 		// Update light position
-		sun.position = player->cameraComponent->GetPosition();
+		sun.position = player->cameraComponent->getPosition();
 
 
 		// Update the shader with the new light data. Note : any shader that uses lighting will need this data!
@@ -616,12 +631,12 @@ int main(void)
 		SetShaderValue(game->renderer->pbrShader, game->renderer->pbrShader.locs[SHADER_LOC_VECTOR_VIEW], &cameraPos, SHADER_UNIFORM_VEC3);
 
 		// Update the game object manager
-		gameObjectManager->Update();
-		game->scriptManager->Update();
+		gameObjectManager->updateObjects();
+		game->scriptManager->updateObjects();
 
 
 		// Start texturing the FBO with what the user will be seeing. This includes UI and Scene objects.
-		game->renderer->StartTexturing();
+		game->renderer->startTexturing();
 
 		/*
 		---------------------------------------------------------------------------------
@@ -632,7 +647,7 @@ int main(void)
 
 		DrawTextureRec(nearDeathTex, Rectangle{ 0, 0, (float)(game->renderer->fbo.texture.width), (float)(-game->renderer->fbo.texture.height) }, Vector2{ 0, 0 }, WHITE);
 
-		BeginMode3D(player->cameraComponent->GetSelfCamera());
+		BeginMode3D(player->cameraComponent->getSelfCamera());
 
 		/*
 		---------------------------------------------------------------------------------
@@ -664,10 +679,10 @@ int main(void)
 		SetShaderValue(game->renderer->pbrShader, emissiveIntensityLoc, &emissiveIntensity, SHADER_UNIFORM_FLOAT);
 
 		// Render all game objects
-		gameObjectManager->RenderObjects();
+		gameObjectManager->renderObjects();
 
 		// end 3d rendering.
-		game->renderer->End3D();
+		game->renderer->end3D();
 
 		/*
 		---------------------------------------------------------------------------------
@@ -676,7 +691,7 @@ int main(void)
 		*/
 
 		// Stop texturing the FBO with what the user will be seeing.
-		game->renderer->StopTexturing();
+		game->renderer->stopTexturing();
 
 		// Warning : DO NOT MOVE THIS! this is important! due to a bug within raylib, this must be done after the texturing is done or a stack overflow WILL occur. GOD DAMN IT!
 		rlPopMatrix();
@@ -689,7 +704,7 @@ int main(void)
 		SetTextureFilter(game->renderer->fbo.texture, TEXTURE_FILTER_ANISOTROPIC_16X);
 
 		// Begin drawing mode so we can actually see stuff!
-		game->renderer->StartDraw();
+		game->renderer->startDraw();
 
 		// We must tell OpenGL that we want to use the bloom shader on the FBO!
 		BeginShaderMode(game->renderer->bloomShader);
@@ -710,7 +725,7 @@ int main(void)
 		DrawFPS(100, 100);
 
 		// Draw the player's health bar
-		player->healthComp->healthBar->Draw({  healthBarPositionX, healthBarPositionY});
+		player->healthComp->healthBar->draw({  healthBarPositionX, healthBarPositionY});
 
 		// Crosshair
 
@@ -718,7 +733,7 @@ int main(void)
 		DrawCircle(game->windowWidth / 2, game->windowHeight / 2, 3, GRAY);
 
 		// Let raylib know that we're done drawing to the screen.
-		game->renderer->EndDraw();
+		game->renderer->endDraw();
 
 		// clear the screen and replace it with black.
 		ClearBackground(BLACK);
@@ -752,10 +767,10 @@ int main(void)
 	}
 
 	// End the game, do closing actions within the EndGame() function
-	game->EndGame();
+	game->endGame();
 
 	// Flush all game objects within the buffer. This is important! Otherwise, the game objects will not be deleted, cause memory leaks, and negates the entire purpose of this system.
-	gameObjectManager->FlushBuffer();
+	gameObjectManager->flushBuffer();
 
 	// Delete pointers declared within this function
 	delete game;

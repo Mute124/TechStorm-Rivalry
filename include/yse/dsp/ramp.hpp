@@ -22,7 +22,7 @@ namespace YSE {
       ramp& set(Flt target, Int time = 0);
       ramp& setIfNew(Flt target, Int time = 0);
       ramp& stop();
-      ramp& update();
+      ramp& updateObjects();
       // TODO: check update and operator functions for consistency with other DSP objects
       YSE::DSP::buffer & operator()();
       YSE::DSP::buffer & getSample();
@@ -52,7 +52,7 @@ namespace YSE {
       lint& set(Flt target, Int time); // set new target and time
       lint& setIfNew(Flt target, Int time); // set only if target is different from current target
       lint& stop(); // sets target to current value
-      lint& update(); // call this once for every buffer update
+      lint& updateObjects(); // call this once for every buffer update
       Flt target(); // returns target
       Flt operator()(); // returns current value
       lint();

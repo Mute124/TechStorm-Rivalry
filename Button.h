@@ -116,7 +116,7 @@ public:
 
 	void draw()
 	{
-		update();
+		updateObjects();
 
 		if (isShadow)
 			DrawRectangleRec(shadow, shadowColor);
@@ -126,7 +126,7 @@ public:
 		DrawTextEx(font, text.c_str(), textPos, fontSize, fontSpacing, fontColor);
 	}
 
-	int update()
+	int updateObjects()
 	{
 		int result = -1;
 
@@ -254,7 +254,7 @@ public:
 
 	bool IsClicked()
 	{
-		int result = update();
+		int result = updateObjects();
 
 		Vector2 Mouse = GetMousePosition();
 		this->position.x = this->rect.x;

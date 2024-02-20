@@ -28,12 +28,16 @@ struct ListEntry
 class ConfigTypeConverter {
 public:
 
-	static int CharToInt(const char* value) {
-		return TextToInteger(value);
+	static int charToInt(const char* value) {
+		return textToInteger(value);
+	}
+
+	static int textToInteger(const char* value) {
+		return atoi(value);
 	}
 
 	// converts string into C readable const char *, then passes it to a function.
-	static int StrToInt(std::string* value) {
+	static int strToInt(std::string* value) {
 		if (value->c_str() == "true") {
 			return 1;
 		}
@@ -43,11 +47,11 @@ public:
 		else {
 			const char* charconversion = value->c_str();
 
-			return TextToInteger(charconversion);
+			return textToInteger(charconversion);
 		}
 	}
 
-	static int Int64ToInt(int64_t* value) {
+	static int int64ToInt(int64_t* value) {
 		return *value;
 	}
 
@@ -60,7 +64,7 @@ public:
 	// FilePath path goes in here
 	ConfigFile(const char* File)
 	{
-		file.id = AssignId(); // Assign the file's id;
+		file.id = assignId(); // Assign the file's id;
 
 		file.entry.FilePath = File;
 		file.entry.Data = toml::parse_file(File);
@@ -73,12 +77,12 @@ public:
 		// creates a Null.
 	}
 
-	ConfigFile* Get() {
+	ConfigFile* getConfig() {
 		return this;
 	}
 
 	// The solution to the issue of not being able to get a int from a config file.
-	int GetIntEntry(const char* section, const char* entry)
+	int getIntEntry(const char* section, const char* entry)
 	{
 		// convert from int64_t to int
 		toml::table tbl = *(file.entry.Data[section][entry].as_table()); // Tableize
@@ -88,7 +92,7 @@ public:
 		return result;
 	}
 
-	bool GetBoolEntry(const char* section, const char* entry)
+	bool getBoolEntry(const char* section, const char* entry)
 	{
 		toml::table tbl = *(file.entry.Data[section][entry].as_table());
 
@@ -98,27 +102,27 @@ public:
 	}
 
 	// since VSCode complains, this needs to be here.
-	static void Innit() {
-		ConfigFileCount = 0;
+	static void initConfigFile() {
+		configFileCount = 0;
 	}
 
 	// reset count
-	static inline void Flush()
+	static inline void flushConfig()
 	{
-		ConfigFileCount = 0;
+		configFileCount = 0;
 	}
 
 	ListEntry<File<toml::v3::parse_result>> file;
 
 private:
-	static inline int AssignId()
+	static inline int assignId()
 	{
-		int id = ConfigFileCount;
-		ConfigFileCount += 1;
+		int id = configFileCount;
+		configFileCount += 1;
 		return id;
 	}
 
-	static int ConfigFileCount; // Corrosponds with place in what list it is in
+	static int configFileCount; // Corrosponds with place in what list it is in
 };
 
 // Component class of ConfigRegistry
@@ -126,9 +130,9 @@ class ConfigRegistrySecretary {
 public:
 	ConfigRegistrySecretary() {}
 
-	static inline ConfigFile FindFile(std::vector<ConfigFile>& Dataset, const char* TargetFile) {
+	static inline ConfigFile findFile(std::vector<ConfigFile>& Dataset, const char* TargetFile) {
 		ConfigFile file;
-		if (DoesFileExist(Dataset, TargetFile)) {
+		if (doesFileExist(Dataset, TargetFile)) {
 			for (int i = 0; i < Dataset.size(); i++) {
 				if (Dataset[i].file.entry.FilePath == TargetFile) {
 					file = Dataset[i];
@@ -138,7 +142,7 @@ public:
 		return file;
 	}
 
-	static inline bool DoesFileExist(std::vector<ConfigFile>& Dataset, const char* TargetFile) {
+	static inline bool doesFileExist(std::vector<ConfigFile>& Dataset, const char* TargetFile) {
 		bool found = false;
 		for (int i = 0; i < Dataset.size(); i++) {
 			if (Dataset[i].file.entry.FilePath == TargetFile) {
@@ -163,27 +167,27 @@ public:
 		delete ConfigSecretary;
 	}
 
-	bool IsFileRegistered(const char* FileName)
+	bool isFileRegistered(const char* FileName)
 	{
-		return ConfigSecretary->DoesFileExist(registry, FileName);
+		return ConfigSecretary->doesFileExist(registry, FileName);
 	}
 
 	// Get a config FileName
-	ConfigFile GetFile(const char* FileName)
+	ConfigFile getFile(const char* FileName)
 	{
-		return ConfigSecretary->FindFile(registry, FileName);
+		return ConfigSecretary->findFile(registry, FileName);
 	}
 
 	// register a config FileName into the registry
-	void RegisterFile(const char* FileName)
+	void registerFile(const char* FileName)
 	{
 		registry.push_back(ConfigFile(FileName));
 	}
 
 	// Flush the registry, WILL NOT SAVE!
-	int Flush()
+	int flushConfig()
 	{
-		ConfigFile::Flush();
+		ConfigFile::flushConfig();
 		bool issuccessful = registry.empty();
 		return issuccessful;
 	}
@@ -200,24 +204,24 @@ class ConfigMan : public ConfigRegistrySecretary, public ConfigTypeConverter
 public:
 
 	ConfigMan() {
-		Logman::CustomLog(LOG_INFO, "New Config Manager instance created successfully!", NULL);
+		Logman::customLog(LOG_INFO, "New Config Manager instance created successfully!", NULL);
 	};
 
 	~ConfigMan() {
 		delete this;
 	}
 
-	static void Innit() {
+	static void initConfigFile() {
 		Registry = new ConfigRegistry();
 
-		ConfigFile::Innit();
-		Logman::CustomLog(LOG_INFO, "Loading TOML files from Config folder...", NULL);
+		ConfigFile::initConfigFile();
+		Logman::customLog(LOG_INFO, "Loading TOML files from Config folder...", NULL);
 
 		// TODO : Make this automatic.
-		Registry->RegisterFile("Config/Engine.toml");
-		Registry->RegisterFile("Config/options.toml");
+		Registry->registerFile("Config/Engine.toml");
+		Registry->registerFile("Config/options.toml");
 
-		Logman::CustomLog(LOG_INFO, "Loaded TOML files from Config folder", NULL);
+		Logman::customLog(LOG_INFO, "Loaded TOML files from Config folder", NULL);
 	}
 
 	static ConfigRegistry* Registry;

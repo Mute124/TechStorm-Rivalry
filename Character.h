@@ -11,7 +11,8 @@
 class Character 
 {
 public:
-	Character(int characterID, bool isPlayer, EFaction faction) : characterID(characterID), isPlayer(isPlayer), characterFaction(faction) {
+	
+	Character(int characterID, EFaction faction) : characterID(characterID), characterFaction(faction) {
 
 	}
 
@@ -22,7 +23,7 @@ public:
 	bool isCrouched;
 	bool isRunning;
 	bool isSprinting;
-	const bool isPlayer;
+
 
 	Ray characterLookDirection = { 0 };
 
@@ -32,6 +33,13 @@ public:
 
 	Model characterModel;
 	Vector3 characterPosition;
+
+	double walkSpeed;
+
+	// how much faster you run than walking
+	double runSpeedFactor;
+
+	
 
 };
 

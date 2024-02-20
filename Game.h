@@ -14,14 +14,14 @@ public:
 	{
 	public:
 		// start drawing mode
-		void StartDraw()
+		void startDraw()
 		{
 			isDrawing = true;
 			BeginDrawing();
 		}
 
 		// end draing move
-		void EndDraw()
+		void endDraw()
 		{
 			isDrawing = false;
 			EndDrawing();
@@ -32,7 +32,7 @@ public:
 		{
 			if (!isDrawing)
 			{
-				StartDraw();
+				startDraw();
 			}
 			else
 			{
@@ -42,7 +42,7 @@ public:
 		}
 
 		// end 3d drawing
-		void End3D()
+		void end3D()
 		{
 			if (isIn3DMode && isDrawing)
 			{
@@ -52,7 +52,7 @@ public:
 		}
 
 		// start baking to fbo
-		void StartTexturing()
+		void startTexturing()
 		{
 			// StartDraw();
 			BeginTextureMode(fbo);
@@ -72,7 +72,7 @@ public:
 		}
 
 		// stop baking to fbo
-		void StopTexturing()
+		void stopTexturing()
 		{
 			// EndDraw();
 			EndTextureMode();
@@ -127,30 +127,30 @@ public:
 	void StartGame()
 	{
 
-		SetTraceLogCallback(Logman::CustomLog);
+		SetTraceLogCallback(Logman::customLog);
 
 
 
 
 		// Read config to decide what to set for the game
-		Logman::CustomLog(LOG_INFO, "Initiating Config Manager", NULL);
+		Logman::customLog(LOG_INFO, "Initiating Config Manager", NULL);
 
 		optionsConfig = toml::parse_file("Config/options.toml");
-		Logman::CustomLog(LOG_INFO, "OptionsConfig file registered", NULL);
+		Logman::customLog(LOG_INFO, "OptionsConfig file registered", NULL);
 
 		isFullscreen = optionsConfig["Window"]["isFullScreen"].as_boolean();
-		Logman::CustomLog(LOG_INFO, TextFormat("IsFullscreen = %i", isFullscreen), NULL);
+		Logman::customLog(LOG_INFO, TextFormat("IsFullscreen = %i", isFullscreen), NULL);
 
 		enableMusic = optionsConfig["Sound"]["enableMusic"].as_boolean();
-		Logman::CustomLog(LOG_INFO, TextFormat("EnableMusic = %i", enableMusic), NULL);
+		Logman::customLog(LOG_INFO, TextFormat("EnableMusic = %i", enableMusic), NULL);
 
 		if (isFullscreen == false)
 		{
-			windowWidth = ConfigTypeConverter::StrToInt(&optionsConfig["Window"]["windowWidth"].as_string()->operator std::string & ());
-			Logman::CustomLog(LOG_INFO, TextFormat("Setting window width to %i", windowWidth), NULL);
+			windowWidth = ConfigTypeConverter::strToInt(&optionsConfig["Window"]["windowWidth"].as_string()->operator std::string & ());
+			Logman::customLog(LOG_INFO, TextFormat("Setting window width to %i", windowWidth), NULL);
 
-			windowHeight = ConfigTypeConverter::StrToInt(&optionsConfig["Window"]["windowHeight"].as_string()->operator std::string & ());
-			Logman::CustomLog(LOG_INFO, TextFormat("Setting window height to %i", windowHeight), NULL);
+			windowHeight = ConfigTypeConverter::strToInt(&optionsConfig["Window"]["windowHeight"].as_string()->operator std::string & ());
+			Logman::customLog(LOG_INFO, TextFormat("Setting window height to %i", windowHeight), NULL);
 
 
 		}
@@ -165,25 +165,25 @@ public:
 
 		if (windowHeight == 0 || windowWidth == 0)
 		{
-			Logman::CustomLog(LOG_ERROR, "WINDOW WIDTH/HEIGHT CANT BE 0! Setting to config data.", NULL);
+			Logman::customLog(LOG_ERROR, "WINDOW WIDTH/HEIGHT CANT BE 0! Setting to config data.", NULL);
 			if (isFullscreen) {
 				windowWidth = GetMonitorWidth(0);
 				windowHeight = GetMonitorHeight(0);
 			}
 			else {
 
-				windowWidth = ConfigTypeConverter::StrToInt(&optionsConfig["Window"]["windowWidth"].as_string()->operator std::string & ());
-				Logman::CustomLog(LOG_INFO, TextFormat("Setting window width to %i", windowWidth), NULL);
+				windowWidth = ConfigTypeConverter::strToInt(&optionsConfig["Window"]["windowWidth"].as_string()->operator std::string & ());
+				Logman::customLog(LOG_INFO, TextFormat("Setting window width to %i", windowWidth), NULL);
 
-				windowHeight = ConfigTypeConverter::StrToInt(&optionsConfig["Window"]["windowHeight"].as_string()->operator std::string & ());
-				Logman::CustomLog(LOG_INFO, TextFormat("Setting window height to %i", windowHeight), NULL);
+				windowHeight = ConfigTypeConverter::strToInt(&optionsConfig["Window"]["windowHeight"].as_string()->operator std::string & ());
+				Logman::customLog(LOG_INFO, TextFormat("Setting window height to %i", windowHeight), NULL);
 			}
 
 		}
 
 		// Stamp window config flags & Manufacture
 
-		Logman::CustomLog(LOG_INFO, "Starting Game", NULL);
+		Logman::customLog(LOG_INFO, "Starting Game", NULL);
 
 		if (isFullscreen == true) {
 			SetConfigFlags(FLAG_WINDOW_MAXIMIZED || FLAG_MSAA_4X_HINT);
@@ -229,7 +229,7 @@ public:
 		SetTargetFPS(60);
 	}
 
-	void EndGame()
+	void endGame()
 	{
 		rlglClose();
 		CloseWindow(); // Close window and OpenGL context

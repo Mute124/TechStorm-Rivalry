@@ -26,7 +26,7 @@ namespace YSE {
    ~system();
 
     Bool init();
-    void update();
+    void updateObjects();
     void close();
 
     /** Get a reference to the global reverb object. It's not active by default,

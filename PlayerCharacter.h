@@ -25,11 +25,11 @@ public:
 		playerScriptable = new PlayerCharacterScriptable();
 
 
-		Game::scriptManager->AddScript(this->getScriptable());
+		Game::scriptManager->addScript(this->getScriptable());
 	}
 
 	~PlayerCharacter() {
-		Game::scriptManager->RemoveScript(this->getScriptable()->ID);
+		Game::scriptManager->removeScript(this->getScriptable()->ID);
 	}
 	// todo : add player specific functions
 	PlayerCharacterScriptable* getScriptable() {

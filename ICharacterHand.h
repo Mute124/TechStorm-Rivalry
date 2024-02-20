@@ -7,10 +7,8 @@ public:
 	
 	const char* equippedWeapon;
 
-	void EquipWeapon(const char* weapon) {
+	void equipWeapon(const char* weapon) {
 		equippedWeapon = weapon;
-
-		
 	}
 };
 

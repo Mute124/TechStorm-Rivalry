@@ -16,15 +16,17 @@ class Block : public GameObject
 {
 public:
 	// Automatically sends it to the renderer.
-	void Draw() override
+	void draw() override
 	{
 			DrawModel(model, position, 1.0f, color);
 	}
 
+
+	
 	// main block constructor.
 	Block(Vector3 position, const Color color, Shader shader, Model model) : color(color), position(position), model(model)
 	{
-		Logman::CustomLog(LOG_TRACE, "Block Constructor", NULL);
+		Logman::customLog(LOG_TRACE, "Block Constructor", NULL);
 		this->model = model;
 
 		const static Texture2D Bricks = LoadTexture("resources/textures/Block/Brick/Brick.png");
@@ -38,12 +40,12 @@ public:
 		this->model.materials[0].maps[MATERIAL_MAP_OCCLUSION].value = 1.0f;
 		this->model.materials[0].maps[MATERIAL_MAP_EMISSION].color = Color{ 255, 162, 0, 100 };
 
-		//this->model.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = Bricks;
+		this->model.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = Bricks;
 		this->model.materials[0].maps[MATERIAL_MAP_ALBEDO].texture = Bricks;
 		this->model.materials[0].maps[MATERIAL_MAP_METALNESS].texture = LoadTexture("resources/textures/Block/Brick/brickMRAO.png");
 		this->model.materials[0].maps[MATERIAL_MAP_NORMAL].texture = LoadTexture("resources/textures/Block/Brick/brick_NORM.png");
 		this->model.materials[0].maps[MATERIAL_MAP_HEIGHT].texture = LoadTexture("resources/textures/Block/Brick/brick_DISP.png");
-
+		this->model.materials[0].maps[MATERIAL_MAP_SPECULAR].texture = LoadTexture("resources/textures/Block/Brick/brick_SPEC.png");
 
 		
 		//this->model.materials[0].maps[MATERIAL_MAP_EMISSION].texture = LoadTexture("resources/textures/Old_Car/old_car_e.png");

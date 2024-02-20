@@ -41,6 +41,10 @@ public:
 	bool canMove = true;
 	bool isGrounded = false;
 
+
+	float walkSpeed = 0.03f;
+	float runChangeFactor = 43.33f;
+
 	PlayerController(KeyboardKey Forward, KeyboardKey Backward, KeyboardKey Left, KeyboardKey Right, KeyboardKey Jump, KeyboardKey Crouch, int mode) : forward(Forward), backward(Backward), left(Left), right(Right), jump(Jump), crouch(Crouch), mode(mode)
 	{
 #ifndef tiltLeft
@@ -51,12 +55,21 @@ public:
 #endif // !tiltRight
 	}
 
-	void SetSpeed(float speed) {
+	void setSpeed(float speed) {
 		this->speed = speed;
 	}
 
-	void Update(Camera* camera)
+	void update(Camera* camera)
 	{
+
+		if (!this->isRunning) {
+			this->isRunning = false;
+			setSpeed(this->walkSpeed); //m/s
+		}
+		else {
+			this->isRunning = true;
+			setSpeed(this->walkSpeed * runChangeFactor); //m/s
+		}
 		// Camera PRO usage example (EXPERIMENTAL)
 		// This new camera function allows custom movement/rotation values to be directly provided
 		// as input parameters, with this approach, rcamera module is internally independent of raylib inputs
@@ -81,15 +94,15 @@ public:
 class HealthBar
 {
 public:
-	float CalculatePercentage(float hp, float max_hp)
+	float calculatePercentage(float hp, float max_hp)
 	{
 		float percentage = (float)hp / (float)max_hp;
 		return percentage;
 	}
 
-	void Draw(Vector2 position)
+	void draw(Vector2 position)
 	{
-		float percentage = CalculatePercentage(hp, maxHP);
+		float percentage = calculatePercentage(hp, maxHP);
 
 		DrawRectangle((int)position.x, (int)position.y, 100, 20, BLACK);
 		DrawRectangleLines((int)position.x, (int)position.y, 100, 20, RED);
@@ -116,22 +129,22 @@ public:
 		delete this;
 	}
 
-	void DamagePlayer(float damage)
+	void damagePlayer(float damage)
 	{
 		healthBar->hp -= damage;
 	}
 
-	void HealPlayer(int heal)
+	void healPlayer(int heal)
 	{
 		healthBar->hp += heal;
 	}
 
-	int GetMaxHealth()
+	int getMaxHealth()
 	{
 		return healthBar->maxHP;
 	}
 
-	int GetHealth()
+	int getHealth()
 	{
 		return healthBar->hp;
 	}
@@ -163,64 +176,64 @@ public:
 	CameraComp(CameraData cameradata) : camera(cameradata.constructToCamera()) {
 	}
 
-	Vector3 GetPosition()
+	Vector3 getPosition()
 	{
 		return this->camera.position;
 	}
 
-	Vector3 GetTarget()
+	Vector3 setTarget()
 	{
 		return this->camera.target;
 	}
 
-	Vector3 GetUp()
+	Vector3 getUp()
 	{
 		return this->camera.up;
 	}
-	float GetFOVY()
+	float getFOVY()
 	{
 		return this->camera.fovy;
 	}
 
-	float GetProjection()
+	float getProjection()
 	{
 		return this->camera.projection;
 	}
 
-	void SetPosition(Vector3 value)
+	void getPosition(Vector3 value)
 	{
 		this->camera.position = value;
 	}
 
-	void SetTarget(Vector3 value)
+	void setTarget(Vector3 value)
 	{
 		this->camera.target = value;
 	}
 
-	void SetUp(Vector3 value)
+	void setUp(Vector3 value)
 	{
 		this->camera.up = value;
 	}
 
-	void SetFOVY(float value)
+	void setFOVY(float value)
 	{
 		this->camera.fovy = value;
 	}
 
-	void SetProject(float value)
+	void setProject(float value)
 	{
 		this->camera.projection = value;
 	}
 
-	Camera ToCamera(CameraData data) {
+	Camera toCamera(CameraData data) {
 		return data.constructToCamera();
 	}
 
-	Camera GetSelfCamera() {
+	Camera getSelfCamera() {
 		return this->camera;
 	}
 
-	Camera* GetSelfCameraPointer() {
+	Camera* getSelfCameraPointer() {
 		return &this->camera;
 	}
 
@@ -262,12 +275,12 @@ public:
 	{
 		if (cameraMode != CAMERA_FIRST_PERSON) {
 			if (this->doDraw) {
-				DrawModel(model, this->cameraComponent->GetPosition(), 0.2f, GREEN);
+				DrawModel(model, this->cameraComponent->getPosition(), 0.2f, GREEN);
 			}
 		}
 
 		if (controller->canMove) {
-			controller->Update(cameraComponent->GetSelfCameraPointer());
+			controller->update(cameraComponent->getSelfCameraPointer());
 		}
 
 		if (IsKeyDown(KEY_F)) {
@@ -277,21 +290,14 @@ public:
 		if (IsKeyDown(KEY_V)) {
 			startDriving = false;
 		}
-		if (!IsKeyDown(KEY_LEFT_SHIFT)) {
-			controller->isRunning = false;
-			controller->SetSpeed(0.03f); //m/s
-		}
-		else {
-			controller->isRunning = true;
-			controller->SetSpeed(1.3f); //m/s
-		}
+
 
 		// View Sway
 
 	
 
 		if (startDriving) {
-			Drive();
+			drive();
 		}
 
 
@@ -299,13 +305,13 @@ public:
 
 	};
 	// sends player data to the games render
-	void Draw() override
+	void draw() override
 	{
 	}
 
 	// is this even fucking used???
-	void Drive() {
-		CameraMoveForward(cameraComponent->GetSelfCameraPointer(), 0.01f, false);
+	void drive() {
+		CameraMoveForward(cameraComponent->getSelfCameraPointer(), 0.01f, false);
 	}
 
 	// do not fucking touch this or it does some voodoo shit.

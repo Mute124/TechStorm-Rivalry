@@ -98,6 +98,3 @@ typedef enum EAffectable {
 	AFFECTABLE_RESISTANCE, // character resistances to other afflictions
 };
 
-EAffectable GetEaffectableFromString(const char* str) {
-	
-}

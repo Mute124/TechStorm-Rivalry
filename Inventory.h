@@ -11,7 +11,7 @@ public:
 		this->itemsRegistry = itemsVector;
 	}
 
-	void Draw() {
+	void draw() {
 
 	}
 
