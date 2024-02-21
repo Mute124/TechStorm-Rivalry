@@ -1,42 +1,31 @@
 // Run Args
 bool SkipMainMenu = true;
 
-
 /*
 ---------------------------------------------------------------------------------
 | 					         Includes											|
 ---------------------------------------------------------------------------------
 */
-#include "Button.h" // TODO : Can this be moved to common.h?
-#include "common.h"
+#include "techstorm/core/utils/Button.h" // TODO : Can this be moved to common.h?
+#include "techstorm/common.h"
 #include "Math.h"
 // Game Engine Includes
-#include "Game.h"
-#include "Globals.h"
-#include "Block.h"
-#include "Gameobject.h"
-#include "MenuCamera.h"
-#include "Player.h"
-#include "Logman.h"
-#include "ConfigMan.h" 
-#include "Light.h"
-#include "Layer.h"
-#include "InventoryManager.h"
+#include "techstorm/Game.h"
+#include "techstorm/Globals.h"
+#include "techstorm/globalobj/Block.h"
+#include "techstorm/core/obj/Gameobject.h"
+#include "techstorm/core/gamescreen/MenuCamera.h"
+#include "techstorm/core/player/Player.h"	
+#include "techstorm/core/rendering/Light.h"
 
-#define FNL_IMPL
-#include "include/FastNoiseLite.h"
+#include "techstorm/core/enum/EGameState.h"
 
 // std library includes. TODO : Is this still needed?
 #include <time.h>
 #include <vector> // needed for game object list
 
 // the enumeration of what screen is being run. See Documentation for more info.
-typedef enum
-{
-	Main = 0,
-	PauseMenu,
-	Gameplay
-} GameScreen;
+
 
 
 
@@ -91,7 +80,7 @@ Ray ray;
 int main(void)
 {
 	//TODO: Is this still relevant?
-	GameScreen currentScreen = Main;
+	EGameState currentScreen = Main;
 
 	// -----------------------------------------------------------------------------
 	// Game Setup
@@ -127,16 +116,16 @@ int main(void)
 
 	// Items
 	// Create a new inventory manager instance
-	InventoryMan* inventoryMan = new InventoryMan("data/Items/resources.tsr");
+	//InventoryMan* inventoryMan = new InventoryMan("data/Items/resources.tsr");
 
 	// set up all the items concurrently.
-	std::thread itemsSetupThread(inventoryMan->SetupItems);
+	//std::thread itemsSetupThread(inventoryMan->SetupItems);
 
 	// Tell the thread to join with the main thread. (Merges the two)
-	itemsSetupThread.join();
+	//itemsSetupThread.join();
 
 	// Note : This is temporary and is solely to test the inventory system loading items
-	Logman::log(TextFormat("%i", inventoryMan->itemCount));
+	//Logman::log(TextFormat("%i", inventoryMan->itemCount));
 
 
 	/*
@@ -394,7 +383,6 @@ int main(void)
 	ImageAlphaMask(&perlin, cell);
 	Mesh test = GenMeshHeightmap(perlin, Vector3{100, 100, 100});
 
-	gameObjectManager->pushObject(new Block(Vector3{ 0.0f, 0.0f, 0.0f }, WHITE, game->renderer->pbrShader, LoadModelFromMesh(test)));
 
 	// Now we can run the game loop and start playing!
 	while (!WindowShouldClose())
@@ -707,7 +695,7 @@ int main(void)
 		game->renderer->startDraw();
 
 		// We must tell OpenGL that we want to use the bloom shader on the FBO!
-		BeginShaderMode(game->renderer->bloomShader);
+		//BeginShaderMode(game->renderer->bloomShader);
 
 		/*
 		---------------------------------------------------------------------------------
@@ -719,7 +707,7 @@ int main(void)
 		DrawTextureRec(game->renderer->fbo.texture, Rectangle{ 0, 0, (float)(game->renderer->fbo.texture.width), (float)(-game->renderer->fbo.texture.height) }, Vector2{ 0, 0 }, WHITE);
 
 		// We need to tell OpenGL that we no longer need the bloom shader to be active.
-		EndShaderMode();
+		//EndShaderMode();
 
 		// Draw the FPS onto the screen.
 		DrawFPS(100, 100);
@@ -775,7 +763,7 @@ int main(void)
 	// Delete pointers declared within this function
 	delete game;
 	delete block;
-	delete inventoryMan;
+	//delete inventoryMan;
 
 
 	delete player;
