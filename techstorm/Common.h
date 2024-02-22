@@ -26,7 +26,7 @@
 #include "core/logging/Logman.h"
 #include "core/obj/Gameobject.h"
 #include "core/utils/Math.h"
-#include "core/utils/Registry.h"
+#include "core/registry/Registry.h"
 #include "core/scripting/ScriptManager.h"
 #include "core/scripting/IScriptable.h"
 #include "core/utils/ArrayUtils.h"

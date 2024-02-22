@@ -6,7 +6,7 @@
 #include <vector>
 
 #include "IScriptable.h"
-#include "../utils/Registry.h"
+#include "../registry/Registry.h"
 
 // Class that manages scripting and calls the script functions
 // Todo : make this load script files and run them, also make it have a script cap.
