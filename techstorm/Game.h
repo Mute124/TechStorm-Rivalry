@@ -11,8 +11,6 @@ private:
 	toml::v3::parse_result optionsConfig;
 public:
 
-	static inline Game* instance = nullptr;
-
 	static inline Vector2 windowSize = { 0, 0 };
 
 	int windowWidth;
@@ -24,9 +22,8 @@ public:
 	// Config manager instance
 	ConfigMan* configman = new ConfigMan();
 
-	Layers* layers;
-	Renderers* renderers;
-
+	static inline Layers* layers;
+	static inline Renderers* renderers;
 	static inline ScriptManager* scriptManager;
 
 	Game() {}
@@ -44,6 +41,10 @@ public:
 
 	Vector2 GetWindowSize() {
 		return { (float)windowWidth, (float)windowHeight };
+	}
+
+	void init() {
+		
 	}
 
 	void StartGame()
@@ -126,7 +127,7 @@ public:
 		ImageFormat(&icon, PIXELFORMAT_UNCOMPRESSED_R8G8B8A8);
 		SetWindowIcon(icon);
 
-
+		layers = new Layers();
 		layers->init();
 
 		Renderers* renderers = new Renderers();
@@ -152,19 +153,22 @@ public:
 
 		SetTargetFPS(60);
 
-		instance = this;
+		
 
 		windowSize = { (float)windowWidth, (float)windowHeight };
 	}
 
+	
+
 	void endGame()
 	{
-		rlglClose();
+
 		CloseWindow(); // Close window and OpenGL context
 		CloseAudioDevice();
 		delete configman;
 		delete scriptManager;
 		delete renderers;
+		delete layers;
 		delete this;
 	}
 

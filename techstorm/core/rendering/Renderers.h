@@ -15,6 +15,8 @@ public:
 	static void init() {
 		forwardRenderer = new ForwardRenderer();
 		deferedRenderer = new DeferedRenderer();
+
+		forwardRenderer->init();
 	}
 
 };

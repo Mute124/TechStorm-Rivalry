@@ -5,12 +5,22 @@
 #include <queue>
 #include <functional>
 #include <thread>
+#include "../logging/logman.h"
+
 class Layer abstract {
 public:
+
 	/**
 	 * @brief Pure virtual function to initialize the layer
 	 */
 	virtual void init() = 0;
+
+	// Pushes tasks into the passive task queue, use if you want to do something before initialization, like loading resources/library into a thread.
+	void passivePush(std::function<void()> task) {
+		if (task) {
+			passiveTaskQueue.push(std::move(task));
+		}
+	}
 
 	/**
 	 * @brief Pushes a task into the task queue
@@ -32,7 +42,7 @@ public:
 			taskQueue.push(task);
 		}
 		else {
-			throw std::invalid_argument("Task function is null");
+			throw std::invalid_argument("Task function is null!");
 		}
 	}
 
@@ -47,28 +57,32 @@ protected:
 	/**
 	 * @brief Asserts that the task queue is not empty before starting
 	 */
-	void start() {
-		assert(!taskQueue.empty());
+	void startLayer() {
+		Logman::Log("Starting Layer");
+		// push all the tasks in the passive task queue into the task queue
+		for (passiveTaskQueue.size(); !passiveTaskQueue.empty(); passiveTaskQueue.pop()) {
+			push(passiveTaskQueue.front());
+		}
+		std::thread t(&Layer::startLoop, this);
+		t.detach();
 	}
 
 	void startLoop() {
-		while (!WindowShouldClose()) {
-			if (this->exit) {
-				break;
-			}
-
+		Logman::Log("Layer Started");
+		while (!WindowShouldClose() && !this->exit) {
 			if (!taskQueue.empty()) {
 				std::function<void()> task = std::move(taskQueue.front());
 				taskQueue.pop();
 				if (task) {
-						std::thread thread = std::thread(task);
-						thread.detach();
-
+					task();
 				}
 			}
 		}
+
 		assert(taskQueue.empty());
 	}
 	bool exit = false; ///< Flag to indicate shutdown
 	std::queue<std::function<void()>> taskQueue; ///< Queue for storing tasks
+
+	std::queue<std::function<void()>> passiveTaskQueue;
 };

@@ -12,7 +12,7 @@ public:
 	}
 
 	void init() final override {
-		Logman::log("RenderLayer::init()");
+		Logman::Log("RenderLayer::init()");
 	}
 
 	// push the tasks to the render queue

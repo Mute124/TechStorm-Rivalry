@@ -9,10 +9,14 @@ public:
 	static inline WorkerLayer* workerLayer;
 	static inline InputLayer* inputLayer;
 
+	static inline std::thread workerThread;
+
 	static inline void init() {
 		renderLayer = new RenderLayer();
 		workerLayer = new WorkerLayer();
 		inputLayer = new InputLayer();
+
+		
 	}
 
 	static inline void destroy() {

@@ -5,38 +5,34 @@
 #include <raylib.h>
 
 #pragma warning(disable : 4996)
+
 // handles logging
 class Logman {
 public:
-	Logman() {
-		SetTraceLogCallback(this->customLog);
+	static inline void init() {
+		SetTraceLogCallback(customLog);
 	}
-
-	~Logman() {
-		delete this;
-	}
-
 
 	// store data into a log file following the logman format
-	static void Store(const char* message) {
+	static inline void Store(const char* message) {
 		
 	}
 
-	static void log(const char* message) {
+	static inline void Log(const char* message) {
 		customLog(LOG_INFO, message, NULL);
 	}
 
-	static void Error(const char* message) {
+	static inline void Error(const char* message) {
 		customLog(LOG_ERROR, message, NULL);
 	}
 
-	static void Warn(const char* message) {
+	static inline void Warn(const char* message) {
 		customLog(LOG_WARNING, message, NULL);
 	}
 	
 
 	// I dont even know what va_list is...
-	static void customLog(int msgType, const char* text, va_list args = 0)
+	static inline void customLog(int msgType, const char* text, va_list args = 0)
 	{
 
 		char timeStr[64] = { 0 };
@@ -71,8 +67,5 @@ public:
 		printf("\n");
 	}
 
-	
-
-private:
 
 };

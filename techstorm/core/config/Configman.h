@@ -1,5 +1,7 @@
 #pragma once
 
+#include "../fileSystem/File.h"
+
 #include "../logging/Logman.h"
 #include "../../lib/toml.h"
 #include <vector>
@@ -8,20 +10,8 @@
 
 class ConfigFile;
 
-template<typename T>
-struct File
-{
-	T Data;
-	const char* FilePath; // full path to file.
-	bool isLoaded;
-};
-template<typename T>
-struct ListEntry
-{
-	T entry;
-	const char* tag;
-	int id;
-};
+
+
 
 class ConfigTypeConverter {
 public:

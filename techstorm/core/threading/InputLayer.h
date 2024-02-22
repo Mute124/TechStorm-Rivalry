@@ -10,7 +10,6 @@ typedef enum EWatchCondition {
 	CONDITION_PRESSED_REPEAT,
 	CONDITION_DOWN,
 	CONDITION_UP,
-
 };
 
 class InputAction {
@@ -24,78 +23,69 @@ public:
 	std::function<void()> doIfNotPressed;
 
 	EWatchCondition condition = EWatchCondition::CONDITION_NULL;
-};
 
+	bool isConditionMet;
+
+	bool operator<(const InputAction& other) const {
+		// Define the logic for comparison here
+		// For example:
+		return this->key < other.key;
+	}
+};
 
 class InputLayer final : public Layer {
 public:
+
+
+
 	/**
 	 * @brief Pure virtual function to initialize the layer
 	 */
 	void init() final override {
-		Logman::log("InputLayer::init()");
 
-		this->keyMap.clear();
-		this->push([this]() { this->update(); });
 	}
 
 	// goes through map, check if key is pressed, and calls doIfPressed or doIfNotPressed depending on if not a nullptr. Also checks it's watch condition and follows it.
 	// Note: THIS IS A THREADED FUNCTION
 	void update() {
+		Logman::Log("InputLayer::update()");
 
-		InputActionFactory *inputActionFactory = new InputActionFactory();
+		InputActionFactory* factory = new InputActionFactory();
 		while (!exit) {
 			for (auto& pair : this->keyMap) {
-				if (pair.first.key != KEY_NULL) {
-					EWatchCondition condition = pair.first.condition;
+				KeyboardKey watchKey = pair.first->key;
 
-					// go through condition of the input action and check if it's met and call the doIfPressed or doIfNotPressed functions
-					switch (condition) {
-					case EWatchCondition::CONDITION_PRESSED:
-						if (IsKeyPressed(pair.first.key)) {
-							inputActionFactory->CallAction(pair.first);
-						}
-						break;
+				EWatchCondition condition = pair.first->condition;
+				watchKey = pair.first->key;
+				bool isConditionMet = IsKeyDown(watchKey);
+				
 
-					case EWatchCondition::CONDITION_PRESSED_REPEAT:
-						if (IsKeyPressedRepeat(pair.first.key)) {
-							inputActionFactory->CallAction(pair.first);
-						}
-						break;
-
-					case EWatchCondition::CONDITION_DOWN:
-						if (IsKeyDown(pair.first.key)) {
-							inputActionFactory->CallAction(pair.first);
-						}
-						break;
-
-					case EWatchCondition::CONDITION_UP:
-						if (IsKeyUp(pair.first.key)) {
-							inputActionFactory->CallAction(pair.first);
-						}
-						break;
-
-					default:
-						break;
-
-						
-					}	
+				if (isConditionMet) {
+					factory->CallAction(pair.first);
+					pair.second = pair.first->isConditionMet;
 				}
 			}
 		}
+
+		this->RemoveAllInputs();
 		std::this_thread::sleep_for(std::chrono::milliseconds(10));
-		std::this_thread::yield();
 	}
 
-
 	void AddInput(KeyboardKey key, std::function<void()> doIfPressed) {
-		this->keyMap[InputActionFactory::makeAction(key, doIfPressed, nullptr)] = false;
+		if (key != 0 && doIfPressed != nullptr) {
+			this->keyMap[InputActionFactory::makeAction(key, doIfPressed, nullptr)] = false;
+		}
 	}
 
 	void AddInput(KeyboardKey key, std::function<void()> doIfPressed, std::function<void()> doIfNotPressed) {
-		this->keyMap[InputActionFactory::makeAction(key, doIfPressed, doIfNotPressed)] = false;
+		if (key != 0 && doIfPressed != nullptr && doIfNotPressed != nullptr) {
+			this->keyMap[InputActionFactory::makeAction(key, doIfPressed, doIfNotPressed)] = false;
+		}
 	}
 
+	void AddInput(InputAction* action) {
+		this->keyMap[action] = false;
+	}
 
 	void RemoveAllInputs() {
 		this->keyMap.clear();
@@ -105,31 +95,37 @@ private:
 
 	class InputActionFactory {
 	public:
-		static inline InputAction makeAction(KeyboardKey key, std::function<void()> doIfPressed, std::function<void()> doIfNotPressed) {
+
+		static inline InputAction* makeAction(KeyboardKey key, std::function<void()> doIfPressed, std::function<void()> doIfNotPressed) {
 			InputAction action;
 			action.key = key;
 			action.doIfPressed = doIfPressed;
 			action.doIfNotPressed = doIfNotPressed;
-			return action;
+			return new InputAction(action);
 		}
 
-		void CallAction(InputAction action) {
+		void CallAction(InputAction* action) {
 			try {
-				if (action.doIfPressed != nullptr) {
-					action.doIfPressed();
+				action->isConditionMet = true;
+				if (action->doIfPressed != nullptr) {
+					action->doIfPressed();
 				}
-				if (action.doIfNotPressed != nullptr) {
-					action.doIfNotPressed();
+				if (action->doIfNotPressed != nullptr) {
+					action->doIfNotPressed();
 				}
 			}
-			catch (std::exception e) {
-				Logman::log(e.what());
+			catch (std::exception& e) {
+				Logman::Error(
+					TextFormat(
+						"Error in InputActionFactory::CallAction: {} : %s",
+						e.what()
+					)
+				);
 			}
 		}
 	};
 
-
 	// Calls first pair if key is pressed, second pair if key is not pressed (leave null if not needed)
 	// WHY WONT THIS WOOOORRRKKKK HOLY HELL
-	std::map<InputAction, bool> keyMap;
+	std::map<InputAction*, bool, std::less<InputAction*>> keyMap;
 };

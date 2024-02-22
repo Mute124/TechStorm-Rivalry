@@ -17,7 +17,7 @@ bool SkipMainMenu = true;
 #include "techstorm/core/gamescreen/MenuCamera.h"
 #include "techstorm/core/player/Player.h"
 #include "techstorm/core/rendering/Light.h"
-
+#include "techstorm/core/window/ConfigFlag.h"
 #include "techstorm/core/enum/EGameState.h"
 
 // std library includes. TODO : Is this still needed?
@@ -70,8 +70,7 @@ int healthBarOffsetY = 500;
 // represents the raycasting from the player to the world.
 Ray ray;
 
-int main(void)
-{
+int mainThread() {
 	//TODO: Is this still relevant?
 	EGameState currentScreen = Main;
 
@@ -117,7 +116,7 @@ int main(void)
 	//itemsSetupThread.join();
 
 	// Note : This is temporary and is solely to test the inventory system loading items
-	//Logman::log(TextFormat("%i", inventoryMan->itemCount));
+	//Logman::Log(TextFormat("%i", inventoryMan->itemCount));
 
 	/*
 	---------------------------------------------------------------------------------
@@ -366,33 +365,36 @@ int main(void)
 	ImageAlphaMask(&perlin, cell);
 	Mesh test = GenMeshHeightmap(perlin, Vector3{ 100, 100, 100 });
 
-/*
-if (player && player->cameraComponent)
-		{
-			if (!IsCursorHidden())
+	/*
+	if (player && player->cameraComponent)
 			{
-				DisableCursor();
+				if (!IsCursorHidden())
+				{
+					DisableCursor();
+				}
+				UpdateCamera(player->cameraComponent->getSelfCameraPointer(), player->cameraMode); // Update camera
 			}
-			UpdateCamera(player->cameraComponent->getSelfCameraPointer(), player->cameraMode); // Update camera
-		}
-		else
-		{
-			// Handle null pointer reference or unhandled exception
-			// Add error handling code here
-		}
+			else
+			{
+				// Handle null pointer reference or unhandled exception
+				// Add error handling code here
+			}
 
-		EnableCursor();
+			EnableCursor();
 
-*/
-	
-	std::function<void()> cursorLock = [player]() {
+	*/
+
+
+	/*
+		std::function<void()> cursorLock = [player]() {
 		if (player && player->cameraComponent)
 		{
 			if (!IsCursorHidden())
 			{
 				DisableCursor();
+				UpdateCamera(player->cameraComponent->getSelfCameraPointer(), player->cameraMode); // Update camera
 			}
-			UpdateCamera(player->cameraComponent->getSelfCameraPointer(), player->cameraMode); // Update camera
+
 		}
 		else
 		{
@@ -401,11 +403,18 @@ if (player && player->cameraComponent)
 		}
 		};
 
-	std::function<void()> cursorUnlock = []() {
+	std::function<void()> cursorUnlock = [player]() {
 		EnableCursor();
+		UpdateCamera(player->cameraComponent->getSelfCameraPointer(), player->cameraMode); // Update camera
 		};
 
-	game->layers->inputLayer->AddInput(KEY_LEFT_ALT, cursorUnlock);
+	game->layers->inputLayer->AddInput(KEY_LEFT_ALT, cursorUnlock, cursorLock);
+
+	*/
+	
+	
+
+	
 	// Now we can run the game loop and start playing!
 	while (!WindowShouldClose())
 	{
@@ -759,4 +768,10 @@ if (player && player->cameraComponent)
 
 	// The software returns a 0 (success) and exits.
 	return 0;
+}
+
+int main(void)
+{
+	std::thread t = std::thread(mainThread);
+	
 }
