@@ -6,57 +6,84 @@
 #include <functional>
 #include <thread>
 #include "../logging/logman.h"
+#include "ThreadGroups.h"
 
 class Layer abstract {
 public:
-
-	/**
-	 * @brief Pure virtual function to initialize the layer
-	 */
 	virtual void init() = 0;
+	virtual void destroy() = 0;
 
-	// Pushes tasks into the passive task queue, use if you want to do something before initialization, like loading resources/library into a thread.
-	void passivePush(std::function<void()> task) {
-		if (task) {
-			passiveTaskQueue.push(std::move(task));
-		}
+	void startLayer(ThreadGroup* threadGroup) {
+		Logman::Log(
+			std::string("starting layer of " + std::string(threadGroup->getName())).c_str()
+		);
+		this->layerThreadGroup = std::move(threadGroup);
 	}
 
-	/**
-	 * @brief Pushes a task into the task queue
-	 * @param task The task to be pushed
-	 */
+	void startLayer(int threadGroup) {
+		this->startLayer(&this->layerThreadGroup[threadGroup]);
+	}
+
+	
 	void push(std::function<void()> task) {
 		if (task) {
-			taskQueue.push(std::move(task));
-		}
-	}
-
-	// go through the args array and pass them to the task, and push the task into the task queue
-	template<typename T>
-	void push(std::function<void(T[])> task, T args[]) {
-		if (task) {
-			for (int i = 0; args[i] != nullptr; i++) {
-				task(args[i]);
-			}
-			taskQueue.push(task);
+			this->layerThreadGroup->assignTask(std::move(task));
 		}
 		else {
 			throw std::invalid_argument("Task function is null!");
 		}
 	}
 
-	/**
-	 * @brief Sets the exit flag to true, indicating shutdown
-	 */
 	void shutdown() {
-		this->exit = true;
+		this->layerThreadGroup->shutdown();
 	}
+protected:
+	ThreadGroup *layerThreadGroup;
+};
+
+/*
+* 
+class Layer abstract {
+public:
+
+
+virtual void init() = 0;
+
+// Pushes tasks into the passive task queue, use if you want to do something before initialization, like loading resources/library into a thread.
+void passivePush(std::function<void()> task) {
+	if (task) {
+		passiveTaskQueue.push(std::move(task));
+	}
+}
+
+
+void push(std::function<void()> task) {
+	if (task) {
+		taskQueue.push(std::move(task));
+	}
+}
+
+// go through the args array and pass them to the task, and push the task into the task queue
+template<typename T>
+void push(std::function<void(T[])> task, T args[]) {
+	if (task) {
+		for (int i = 0; args[i] != nullptr; i++) {
+			task(args[i]);
+		}
+		taskQueue.push(task);
+	}
+	else {
+		throw std::invalid_argument("Task function is null!");
+	}
+}
+
+
+void shutdown() {
+	this->exit = true;
+}
 
 protected:
-	/**
-	 * @brief Asserts that the task queue is not empty before starting
-	 */
+
 	void startLayer() {
 		Logman::Log("Starting Layer");
 		// push all the tasks in the passive task queue into the task queue
@@ -86,3 +113,4 @@ protected:
 
 	std::queue<std::function<void()>> passiveTaskQueue;
 };
+*/
