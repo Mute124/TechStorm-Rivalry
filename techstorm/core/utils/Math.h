@@ -42,4 +42,3 @@ float ArchAlgorithm(float amplitude, float frequency, float time, float steepnes
 	return result;
 }
 
-	

@@ -5,6 +5,7 @@
 #include <raylib.h>
 #include <raymath.h>
 #include <rlgl.h>
+
 #include "lib/rcamera.h"
 #include "lib/yse/yse.hpp"
 //#include "rguiapi.h"
@@ -28,8 +29,12 @@
 #include "core/utils/Registry.h"
 #include "core/scripting/ScriptManager.h"
 #include "core/scripting/IScriptable.h"
-#include "core/scripting/IScriptable.h"
+#include "core/utils/ArrayUtils.h"
 #include "Globals.h"
+
+// thread
+#include "core/threading/Layer.h"
+#include "core/threading/layers.h"
 
 
 

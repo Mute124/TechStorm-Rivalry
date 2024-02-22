@@ -1,5 +1,5 @@
 #pragma once
-#include "common.h"
+#include "../../common.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <vector>
@@ -8,19 +8,18 @@
 
 using namespace std;
 
-// used for organization reasons and makes C++ less torture.
-// TODO : Refactor for sake of sanity...
-class GameObject
+class GameObject abstract
 {
 public:
-	virtual void draw() {};
-
+	virtual void draw() abstract;
 	virtual ~GameObject()
 	{
 
 	}
 
-
+	void finalize() {
+		
+	}
 
 	virtual void onUpdate() {}; // Called every frame
 
@@ -30,7 +29,7 @@ public:
 	
 };
 
-class GameobjectManager {
+class GameobjectManager final {
 public:
 	void renderObjects()
 	{

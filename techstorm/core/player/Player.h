@@ -259,6 +259,7 @@ public:
 
 
 		healthComp = new PlayerHealthComp(maxHP);
+		instance = this;
 	};
 
 	void onDestroy() const override
@@ -331,7 +332,7 @@ public:
 	bool isRunning;
 	PlayerHealthComp* healthComp;
 
-	
+	static inline Player* instance;
 
 private:
 

@@ -34,14 +34,17 @@ protected:
 	bool isEmpty;
 	
 private:
+	// probably not the best to use but eh
 	void load(const char *vs, const char *fs, int position) {
 		this->isEmpty = false;
 		this->shdr = LoadShader(vs, fs);
 		this->pos = position;
-		
+		manager->push(*this);
 	}
 
 	void load(const char* vs, const char* fs) {
-
+		this->isEmpty = false;
+		this->shdr = LoadShader(vs, fs);
+		this->pos = manager->pushAndGetSlot(*this);
 	}
 };

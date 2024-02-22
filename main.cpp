@@ -15,7 +15,7 @@ bool SkipMainMenu = true;
 #include "techstorm/globalobj/Block.h"
 #include "techstorm/core/obj/Gameobject.h"
 #include "techstorm/core/gamescreen/MenuCamera.h"
-#include "techstorm/core/player/Player.h"	
+#include "techstorm/core/player/Player.h"
 #include "techstorm/core/rendering/Light.h"
 
 #include "techstorm/core/enum/EGameState.h"
@@ -25,9 +25,6 @@ bool SkipMainMenu = true;
 #include <vector> // needed for game object list
 
 // the enumeration of what screen is being run. See Documentation for more info.
-
-
-
 
 // TODO : Finish shadowmapping
 RenderTexture2D LoadShadowmapRenderTexture(int width, int height);
@@ -49,13 +46,10 @@ bool useHDR = true;
 // Initialie the condition for the breathing sound.
 bool isBreathing = false;
 
-
-
 // Viewsway
 float swayAmount = 0.0003f;
 float swaySpeed = 0.02f;
 float swayTimer = 0.0f;
-
 
 // Near death affect.
 // Important : THESE ARE REQUIRED FOR THE ARCH ALGORITHM TO WORK!
@@ -73,9 +67,8 @@ float healthBarPositionY = 0.0f;
 int healthBarOffsetX = 0;
 int healthBarOffsetY = 500;
 
-// represents the raycasting from the player to the world. 
+// represents the raycasting from the player to the world.
 Ray ray;
-
 
 int main(void)
 {
@@ -104,7 +97,6 @@ int main(void)
 	// Set initial random seed
 	srand(time(NULL));
 
-
 	// -----------------------------------------------------------------------------
 	// Load Game Assets
 	// -----------------------------------------------------------------------------
@@ -127,7 +119,6 @@ int main(void)
 	// Note : This is temporary and is solely to test the inventory system loading items
 	//Logman::log(TextFormat("%i", inventoryMan->itemCount));
 
-
 	/*
 	---------------------------------------------------------------------------------
 	| 					        Shader Setup										|
@@ -137,44 +128,44 @@ int main(void)
 	// -----------------------------------------------------------------------------
 	// Set up the PBR shader
 	// -----------------------------------------------------------------------------
-	
+
 	// Load the shader into memory
-	game->renderer->pbrShader = LoadShader(TextFormat("resources/shaders/glsl%i/pbr.vs", GLSL_VERSION), TextFormat("resources/shaders/glsl%i/pbr.fs", GLSL_VERSION));
+	game->renderers->forwardRenderer->pbrShader = LoadShader(TextFormat("resources/shaders/glsl%i/pbr.vs", GLSL_VERSION), TextFormat("resources/shaders/glsl%i/pbr.fs", GLSL_VERSION));
 
 	// Get shader locations
-	game->renderer->pbrShader.locs[SHADER_LOC_MAP_ALBEDO] = GetShaderLocation(game->renderer->pbrShader, "albedoMap");
+	game->renderers->forwardRenderer->pbrShader.locs[SHADER_LOC_MAP_ALBEDO] = GetShaderLocation(game->renderers->forwardRenderer->pbrShader, "albedoMap");
 
 	// WARNING: Metalness, roughness, and ambient occlusion are all packed into a MRA texture
 	// They are passed as to the SHADER_LOC_MAP_METALNESS location for convenience,
 	// shader already takes care of it accordingly
-	game->renderer->pbrShader.locs[SHADER_LOC_MAP_METALNESS] = GetShaderLocation(game->renderer->pbrShader, "mraMap");
-	game->renderer->pbrShader.locs[SHADER_LOC_MAP_NORMAL] = GetShaderLocation(game->renderer->pbrShader, "normalMap");
+	game->renderers->forwardRenderer->pbrShader.locs[SHADER_LOC_MAP_METALNESS] = GetShaderLocation(game->renderers->forwardRenderer->pbrShader, "mraMap");
+	game->renderers->forwardRenderer->pbrShader.locs[SHADER_LOC_MAP_NORMAL] = GetShaderLocation(game->renderers->forwardRenderer->pbrShader, "normalMap");
 
 	// WARNING: Similar to the MRA map, the emissive map packs different information
 	// into a single texture: it stores height and emission data
 	// It is binded to SHADER_LOC_MAP_EMISSION location an properly processed on shader
-	game->renderer->pbrShader.locs[SHADER_LOC_MAP_EMISSION] = GetShaderLocation(game->renderer->pbrShader, "emissiveMap");
-	game->renderer->pbrShader.locs[SHADER_LOC_COLOR_DIFFUSE] = GetShaderLocation(game->renderer->pbrShader, "albedoColor");
+	game->renderers->forwardRenderer->pbrShader.locs[SHADER_LOC_MAP_EMISSION] = GetShaderLocation(game->renderers->forwardRenderer->pbrShader, "emissiveMap");
+	game->renderers->forwardRenderer->pbrShader.locs[SHADER_LOC_COLOR_DIFFUSE] = GetShaderLocation(game->renderers->forwardRenderer->pbrShader, "albedoColor");
 
 	// Setup additional required shader locations, including lights data
-	game->renderer->pbrShader.locs[SHADER_LOC_VECTOR_VIEW] = GetShaderLocation(game->renderer->pbrShader, "viewPos");
-	int lightCountLoc = GetShaderLocation(game->renderer->pbrShader, "numOfLights"); 
-	
+	game->renderers->forwardRenderer->pbrShader.locs[SHADER_LOC_VECTOR_VIEW] = GetShaderLocation(game->renderers->forwardRenderer->pbrShader, "viewPos");
+	int lightCountLoc = GetShaderLocation(game->renderers->forwardRenderer->pbrShader, "numOfLights");
+
 	// set it to the value of the MAX_LIGHTS macro and pass it to the shader
-	int maxLightCount = MAX_LIGHTS; 
-	SetShaderValue(game->renderer->pbrShader, lightCountLoc, &maxLightCount, SHADER_UNIFORM_INT);
+	int maxLightCount = MAX_LIGHTS;
+	SetShaderValue(game->renderers->forwardRenderer->pbrShader, lightCountLoc, &maxLightCount, SHADER_UNIFORM_INT);
 
 	// Setup ambient color and intensity (brightness) parameters
 	float ambientIntensity = 0.02f;
 	Color ambientColor = Color{ 26, 32, 135, 255 };
 	Vector3 ambientColorNormalized = Vector3{ ambientColor.r / 255.0f, ambientColor.g / 255.0f, ambientColor.b / 255.0f };
-	SetShaderValue(game->renderer->pbrShader, GetShaderLocation(game->renderer->pbrShader, "ambientColor"), &ambientColorNormalized, SHADER_UNIFORM_VEC3);
-	SetShaderValue(game->renderer->pbrShader, GetShaderLocation(game->renderer->pbrShader, "ambient"), &ambientIntensity, SHADER_UNIFORM_FLOAT);
+	SetShaderValue(game->renderers->forwardRenderer->pbrShader, GetShaderLocation(game->renderers->forwardRenderer->pbrShader, "ambientColor"), &ambientColorNormalized, SHADER_UNIFORM_VEC3);
+	SetShaderValue(game->renderers->forwardRenderer->pbrShader, GetShaderLocation(game->renderers->forwardRenderer->pbrShader, "ambient"), &ambientIntensity, SHADER_UNIFORM_FLOAT);
 
 	// Get location for shader parameters that can be modified
-	int emissiveIntensityLoc = GetShaderLocation(game->renderer->pbrShader, "emissivePower");
-	int emissiveColorLoc = GetShaderLocation(game->renderer->pbrShader, "emissiveColor");
-	int textureTilingLoc = GetShaderLocation(game->renderer->pbrShader, "tiling");
+	int emissiveIntensityLoc = GetShaderLocation(game->renderers->forwardRenderer->pbrShader, "emissivePower");
+	int emissiveColorLoc = GetShaderLocation(game->renderers->forwardRenderer->pbrShader, "emissiveColor");
+	int textureTilingLoc = GetShaderLocation(game->renderers->forwardRenderer->pbrShader, "tiling");
 
 	/*
 	---------------------------------------------------------------------------------
@@ -182,22 +173,21 @@ int main(void)
 	---------------------------------------------------------------------------------
 	*/
 
-	// -----------------------------------------------------------------------------	
+	// -----------------------------------------------------------------------------
 	// Block Initialization
-	// -----------------------------------------------------------------------------	
-	
-	// Create a default block model with a length, width, and height of the value of BLOCK_SIZE. This creates a cube mesh with a length, width, and height of BLOCK_SIZE and then converts it to a model, loading it 
+	// -----------------------------------------------------------------------------
+
+	// Create a default block model with a length, width, and height of the value of BLOCK_SIZE. This creates a cube mesh with a length, width, and height of BLOCK_SIZE and then converts it to a model, loading it
 	// into memory.
 	Model DefaultBlockModel = LoadModelFromMesh(
 		GenMeshCube(BLOCK_SIZE, BLOCK_SIZE,
 			BLOCK_SIZE)); // this is the default model used in blocksd.
 
-
 	// todo : change all use instances of DefaultBlockModel to use the global default model.
 	SetDefaultModel(DefaultBlockModel);
 
 	// Construct the block object
-	Block* block = new Block(Vector3Zero(), BLACK, game->renderer->pbrShader, DefaultBlockModel);
+	Block* block = new Block(Vector3Zero(), BLACK, game->renderers->forwardRenderer->pbrShader, DefaultBlockModel);
 
 	// Finally push it off to the object manager
 	gameObjectManager->pushObject(block);
@@ -205,15 +195,15 @@ int main(void)
 	// -----------------------------------------------------------------------------
 	// Player Initialization
 	// -----------------------------------------------------------------------------
-	
+
 	// TODO : Is the Playersize variable needed and or relevant?
-	
+
 	// Create the player model
 	// NOTE: This model is TEMPORARY! It will be deleted after a proper model is made.
 	// Refers to the size of the player model. Same process as the default block model creation.
 	const int Playersize = 3;
-	Model PlayerModel = LoadModelFromMesh(GenMeshCube(Playersize, Playersize, Playersize)); 
-	
+	Model PlayerModel = LoadModelFromMesh(GenMeshCube(Playersize, Playersize, Playersize));
+
 	// Construct the player object
 	Player* player = new Player(Vector3{ 0.0f, 2.0f, 4.0f }, 100, PlayerModel, CAMERA_FIRST_PERSON);
 
@@ -223,7 +213,6 @@ int main(void)
 	// -----------------------------------------------------------------------------
 	// skybox creation.
 	// -----------------------------------------------------------------------------
-	
 
 	// Skybox geometry generation step
 	Mesh skyboxMesh = GenMeshCube(1.0f, 1.0f, 1.0f);
@@ -272,7 +261,6 @@ int main(void)
 	const static int equimap = 0;
 	SetShaderValue(shdrCubemap, GetShaderLocation(shdrCubemap, "equirectangularMap"), &equimap, SHADER_UNIFORM_INT);
 
-
 	// Note: The filename is hardcoded here and also has a limit of 256 characters!
 	// I will be dissapointed if you somehow dont know what that variable does...
 	char skyboxFileName[256] = { 0 };
@@ -313,47 +301,42 @@ int main(void)
 		UnloadImage(img);
 	}
 
-
 	// -----------------------------------------------------------------------------
 	// Light Setup
 	// -----------------------------------------------------------------------------
 
-	
 	// Create the Sunlight
 	// Note : this is not it's final form, it is just a placeholder for testing
 	// ToDo: finalize this step and functionality
 	Light sun = CreateLight(LIGHT_POINT, Vector3{ 1.0f, 0.0f, 1.0f }, Vector3One(),
-		BLUE, 4.0f, game->renderer->pbrShader); // Ambient color.;
+		BLUE, 4.0f, game->renderers->forwardRenderer->pbrShader); // Ambient color.;
 
 	// Enable the sun as a precautionary measure.
 	sun.enabled = true;
-
 
 	// -----------------------------------------------------------------------------
 	// PBR Finalizations
 	// -----------------------------------------------------------------------------
 
 	// we need to finalize the PBR shader and give the shader any last minute data.
-	
+
 	// Assignment of shaders
 	// NOTE: By default, the texture maps are always used
 	int usage = 1;
-	SetShaderValue(game->renderer->pbrShader, GetShaderLocation(game->renderer->pbrShader, "useTexAlbedo"), &usage, SHADER_UNIFORM_INT);
-	SetShaderValue(game->renderer->pbrShader, GetShaderLocation(game->renderer->pbrShader, "useTexNormal"), &usage, SHADER_UNIFORM_INT);
-	SetShaderValue(game->renderer->pbrShader, GetShaderLocation(game->renderer->pbrShader, "useTexMRA"), &usage, SHADER_UNIFORM_INT);
-	SetShaderValue(game->renderer->pbrShader, GetShaderLocation(game->renderer->pbrShader, "useTexEmissive"), &usage, SHADER_UNIFORM_INT);
+	SetShaderValue(game->renderers->forwardRenderer->pbrShader, GetShaderLocation(game->renderers->forwardRenderer->pbrShader, "useTexAlbedo"), &usage, SHADER_UNIFORM_INT);
+	SetShaderValue(game->renderers->forwardRenderer->pbrShader, GetShaderLocation(game->renderers->forwardRenderer->pbrShader, "useTexNormal"), &usage, SHADER_UNIFORM_INT);
+	SetShaderValue(game->renderers->forwardRenderer->pbrShader, GetShaderLocation(game->renderers->forwardRenderer->pbrShader, "useTexMRA"), &usage, SHADER_UNIFORM_INT);
+	SetShaderValue(game->renderers->forwardRenderer->pbrShader, GetShaderLocation(game->renderers->forwardRenderer->pbrShader, "useTexEmissive"), &usage, SHADER_UNIFORM_INT);
 
 	//--------------------------------------------------------------------------------------
 
-
 	// TODO : Is this still relevant and figure out what the hell this does.
 	Vector3 Orgin = Vector3
-	{ 
-		player->cameraComponent->getPosition().x, 
+	{
+		player->cameraComponent->getPosition().x,
 		player->cameraComponent->getPosition().y - 10.0f,
-		player->cameraComponent->getPosition().z 	
+		player->cameraComponent->getPosition().z
 	};
-
 
 	// Note: See the comment regarding main menu
 	//delete mmen_start;
@@ -379,26 +362,12 @@ int main(void)
 	Image cell = GenImageCellular(100, 100, 2);
 	Image perlin = GenImagePerlinNoise(100, 100, 1, 0.5f, 1.0f);
 	//ImageDraw(&perlin, cell, Rectangle{0, 0, (float)cell.width, (float)cell.height}, Rectangle{0, 0, (float)perlin.width, (float)perlin.height}, WHITE);
-	
+
 	ImageAlphaMask(&perlin, cell);
-	Mesh test = GenMeshHeightmap(perlin, Vector3{100, 100, 100});
+	Mesh test = GenMeshHeightmap(perlin, Vector3{ 100, 100, 100 });
 
-
-	// Now we can run the game loop and start playing!
-	while (!WindowShouldClose())
-	{
-
-		// NOTE : This is a very basic implementation of placing an object into the world. This is temporary and should be fleshed out.
-		if (IsMouseButtonPressed(MOUSE_BUTTON_RIGHT))
-		{
-
-			Vector3 placepos = player->cameraComponent->setTarget();
-
-			gameObjectManager->pushObject(new Block(Vector3{ roundf(placepos.x), roundf(placepos.y), roundf(placepos.z) }, WHITE, game->renderer->pbrShader, GetDefaultModel()));
-		}
-
-		// Allow the cursor to be seen even if it is within the game. (It unlocks the cursor)
-		if (!IsKeyDown(KEY_LEFT_ALT))
+/*
+if (player && player->cameraComponent)
 		{
 			if (!IsCursorHidden())
 			{
@@ -408,7 +377,44 @@ int main(void)
 		}
 		else
 		{
-			EnableCursor();
+			// Handle null pointer reference or unhandled exception
+			// Add error handling code here
+		}
+
+		EnableCursor();
+
+*/
+	
+	std::function<void()> cursorLock = [player]() {
+		if (player && player->cameraComponent)
+		{
+			if (!IsCursorHidden())
+			{
+				DisableCursor();
+			}
+			UpdateCamera(player->cameraComponent->getSelfCameraPointer(), player->cameraMode); // Update camera
+		}
+		else
+		{
+			// Handle null pointer reference or unhandled exception
+			// Add error handling code here
+		}
+		};
+
+	std::function<void()> cursorUnlock = []() {
+		EnableCursor();
+		};
+
+	game->layers->inputLayer->AddInput(KEY_LEFT_ALT, cursorUnlock);
+	// Now we can run the game loop and start playing!
+	while (!WindowShouldClose())
+	{
+		// NOTE : This is a very basic implementation of placing an object into the world. This is temporary and should be fleshed out.
+		if (IsMouseButtonPressed(MOUSE_BUTTON_RIGHT))
+		{
+			Vector3 placepos = player->cameraComponent->setTarget();
+
+			gameObjectManager->pushObject(new Block(Vector3{ roundf(placepos.x), roundf(placepos.y), roundf(placepos.z) }, WHITE, game->renderers->forwardRenderer->pbrShader, GetDefaultModel()));
 		}
 
 		// Take a screenshot
@@ -553,15 +559,10 @@ int main(void)
 			isBreathing = IsSoundPlaying(breathingSound);
 		}
 
-
 		// The player's looking direction is the target of the camera. This is the direction the player is looking
 		// TODO : Check relevancy.
 		ray.position = player->cameraComponent->getPosition();
 		ray.direction = player->cameraComponent->setTarget();
-
-
-
-
 
 		// Sway timer is equal to swayTimer + frame delta time
 		swayTimer += GetFrameTime();
@@ -569,9 +570,7 @@ int main(void)
 		// sway the camera according to the sway algorithm.
 		player->cameraComponent->setTarget(Vector3{ player->cameraComponent->setTarget().x + sin(swayTimer * swaySpeed) * swayAmount, player->cameraComponent->setTarget().y, player->cameraComponent->setTarget().z + cos(swayTimer * swaySpeed) * swayAmount });
 
-
 		if (player->healthComp->getHealth() <= 15) {
-
 			// equal to nearDeathTimer + frame delta time
 			nearDeathTimer += GetFrameTime();
 
@@ -582,13 +581,12 @@ int main(void)
 			nearDeathColor = Color{ (unsigned char)nearDeathIntensity, 0, 0, 100 };
 
 			// convert nearDeathColor to an image
-			nearDeathAffect = GenImageColor(game->renderer->fbo.texture.width, game->renderer->fbo.texture.height, nearDeathColor);
-
+			nearDeathAffect = GenImageColor(game->renderers->forwardRenderer->fbo.texture.width, game->renderers->forwardRenderer->fbo.texture.height, nearDeathColor);
 
 			// Set the ambient color to the normalized nearDeathColor
 			Vector3 nearDeathAmb = Vector3{ nearDeathColor.r / 255.0f, nearDeathColor.g / 255.0f, nearDeathColor.b / 255.0f };
 			// Inform the shader about the new ambient color.
-			SetShaderValue(game->renderer->pbrShader, GetShaderLocation(game->renderer->pbrShader, "ambientColor"), &nearDeathAmb, SHADER_UNIFORM_VEC3);
+			SetShaderValue(game->renderers->forwardRenderer->pbrShader, GetShaderLocation(game->renderers->forwardRenderer->pbrShader, "ambientColor"), &nearDeathAmb, SHADER_UNIFORM_VEC3);
 
 			// Load the image into the texture
 			nearDeathTex = LoadTextureFromImage(nearDeathAffect);
@@ -606,25 +604,22 @@ int main(void)
 			player->cameraComponent->getPosition().z
 		};
 
-
 		// Update light position
 		sun.position = player->cameraComponent->getPosition();
 
-
 		// Update the shader with the new light data. Note : any shader that uses lighting will need this data!
-		UpdateLight(game->renderer->pbrShader, sun);
-		UpdateLight(game->renderer->bloomShader, sun);
+		UpdateLight(game->renderers->forwardRenderer->pbrShader, sun);
+		UpdateLight(game->renderers->forwardRenderer->bloomShader, sun);
 
 		// Send the camera position to the shader
-		SetShaderValue(game->renderer->pbrShader, game->renderer->pbrShader.locs[SHADER_LOC_VECTOR_VIEW], &cameraPos, SHADER_UNIFORM_VEC3);
+		SetShaderValue(game->renderers->forwardRenderer->pbrShader, game->renderers->forwardRenderer->pbrShader.locs[SHADER_LOC_VECTOR_VIEW], &cameraPos, SHADER_UNIFORM_VEC3);
 
 		// Update the game object manager
 		gameObjectManager->updateObjects();
 		game->scriptManager->updateObjects();
 
-
 		// Start texturing the FBO with what the user will be seeing. This includes UI and Scene objects.
-		game->renderer->startTexturing();
+		game->renderers->forwardRenderer->startTexturing();
 
 		/*
 		---------------------------------------------------------------------------------
@@ -632,8 +627,7 @@ int main(void)
 		---------------------------------------------------------------------------------
 		*/
 
-
-		DrawTextureRec(nearDeathTex, Rectangle{ 0, 0, (float)(game->renderer->fbo.texture.width), (float)(-game->renderer->fbo.texture.height) }, Vector2{ 0, 0 }, WHITE);
+		DrawTextureRec(nearDeathTex, Rectangle{ 0, 0, (float)(game->renderers->forwardRenderer->fbo.texture.width), (float)(-game->renderers->forwardRenderer->fbo.texture.height) }, Vector2{ 0, 0 }, WHITE);
 
 		BeginMode3D(player->cameraComponent->getSelfCamera());
 
@@ -654,23 +648,22 @@ int main(void)
 
 		*/
 
-
 		// Set old car model texture tiling, emissive color and emissive intensity parameters on shader
-		SetShaderValue(game->renderer->pbrShader, textureTilingLoc, &block->blockTextureTiling, SHADER_UNIFORM_VEC2);
+		SetShaderValue(game->renderers->forwardRenderer->pbrShader, textureTilingLoc, &block->blockTextureTiling, SHADER_UNIFORM_VEC2);
 
 		// Normalize the Emissive map into a 0-1 range. Note : This turns the map into a Vector4, not a color.
 		Vector4 carEmissiveColor = ColorNormalize(block->model.materials[0].maps[MATERIAL_MAP_EMISSION].color);
-		SetShaderValue(game->renderer->pbrShader, emissiveColorLoc, &carEmissiveColor, SHADER_UNIFORM_VEC4);
+		SetShaderValue(game->renderers->forwardRenderer->pbrShader, emissiveColorLoc, &carEmissiveColor, SHADER_UNIFORM_VEC4);
 
 		// How bright should the object emit it's emission color.
 		float emissiveIntensity = 0.01f;
-		SetShaderValue(game->renderer->pbrShader, emissiveIntensityLoc, &emissiveIntensity, SHADER_UNIFORM_FLOAT);
+		SetShaderValue(game->renderers->forwardRenderer->pbrShader, emissiveIntensityLoc, &emissiveIntensity, SHADER_UNIFORM_FLOAT);
 
 		// Render all game objects
 		gameObjectManager->renderObjects();
 
 		// end 3d rendering.
-		game->renderer->end3D();
+		game->renderers->forwardRenderer->end3D();
 
 		/*
 		---------------------------------------------------------------------------------
@@ -679,7 +672,7 @@ int main(void)
 		*/
 
 		// Stop texturing the FBO with what the user will be seeing.
-		game->renderer->stopTexturing();
+		game->renderers->forwardRenderer->stopTexturing();
 
 		// Warning : DO NOT MOVE THIS! this is important! due to a bug within raylib, this must be done after the texturing is done or a stack overflow WILL occur. GOD DAMN IT!
 		rlPopMatrix();
@@ -689,10 +682,10 @@ int main(void)
 		| 					Post Process Affects										|
 		---------------------------------------------------------------------------------
 		*/
-		SetTextureFilter(game->renderer->fbo.texture, TEXTURE_FILTER_ANISOTROPIC_16X);
+		SetTextureFilter(game->renderers->forwardRenderer->fbo.texture, TEXTURE_FILTER_ANISOTROPIC_16X);
 
 		// Begin drawing mode so we can actually see stuff!
-		game->renderer->startDraw();
+		game->renderers->forwardRenderer->startDraw();
 
 		// We must tell OpenGL that we want to use the bloom shader on the FBO!
 		//BeginShaderMode(game->renderer->bloomShader);
@@ -704,7 +697,7 @@ int main(void)
 		*/
 
 		// NOTE: Render texture must be y-flipped due to default OpenGL coordinates (left-bottom)
-		DrawTextureRec(game->renderer->fbo.texture, Rectangle{ 0, 0, (float)(game->renderer->fbo.texture.width), (float)(-game->renderer->fbo.texture.height) }, Vector2{ 0, 0 }, WHITE);
+		DrawTextureRec(game->renderers->forwardRenderer->fbo.texture, Rectangle{ 0, 0, (float)(game->renderers->forwardRenderer->fbo.texture.width), (float)(-game->renderers->forwardRenderer->fbo.texture.height) }, Vector2{ 0, 0 }, WHITE);
 
 		// We need to tell OpenGL that we no longer need the bloom shader to be active.
 		//EndShaderMode();
@@ -713,7 +706,7 @@ int main(void)
 		DrawFPS(100, 100);
 
 		// Draw the player's health bar
-		player->healthComp->healthBar->draw({  healthBarPositionX, healthBarPositionY});
+		player->healthComp->healthBar->draw({ healthBarPositionX, healthBarPositionY });
 
 		// Crosshair
 
@@ -721,14 +714,11 @@ int main(void)
 		DrawCircle(game->windowWidth / 2, game->windowHeight / 2, 3, GRAY);
 
 		// Let raylib know that we're done drawing to the screen.
-		game->renderer->endDraw();
+		game->renderers->forwardRenderer->endDraw();
 
 		// clear the screen and replace it with black.
 		ClearBackground(BLACK);
 	}
-
-
-
 
 	/*
 	---------------------------------------------------------------------------------
@@ -739,7 +729,6 @@ int main(void)
 	// Unload models.
 	// Note : Technically we dont need to unload models as they get automatically unloaded, but it is still good practice. Same goes with textures.
 	UnloadModel(DefaultBlockModel);
-
 
 	// Unload textures
 	UnloadTexture(nearDeathTex);
@@ -764,7 +753,6 @@ int main(void)
 	delete game;
 	delete block;
 	//delete inventoryMan;
-
 
 	delete player;
 	delete gameObjectManager;

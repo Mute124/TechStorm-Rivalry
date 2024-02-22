@@ -3,100 +3,17 @@
 #include "core/rendering/Light.h"
 #include "core/player/Player.h"
 #include "core/scripting/ScriptManager.h"
+#include "core/rendering/Renderers.h"
 
-class Game
+class Game final
 {
+private:
 	toml::v3::parse_result optionsConfig;
 public:
-	
-	// handles rendering
-	class Renderer
-	{
-	public:
-		// start drawing mode
-		void startDraw()
-		{
-			isDrawing = true;
-			BeginDrawing();
-		}
 
-		// end draing move
-		void endDraw()
-		{
-			isDrawing = false;
-			EndDrawing();
-		}
+	static inline Game* instance = nullptr;
 
-		// start 3d drawing
-		void Start3D(Camera* camera)
-		{
-			if (!isDrawing)
-			{
-				startDraw();
-			}
-			else
-			{
-				isIn3DMode = true;
-				BeginMode3D(*camera);
-			}
-		}
-
-		// end 3d drawing
-		void end3D()
-		{
-			if (isIn3DMode && isDrawing)
-			{
-				EndMode3D();
-				isIn3DMode = false;
-			}
-		}
-
-		// start baking to fbo
-		void startTexturing()
-		{
-			// StartDraw();
-			BeginTextureMode(fbo);
-			ClearBackground(BLACK);
-		}
-
-		// start shadow mapping
-		void StartDepthMode()
-		{
-			BeginTextureMode(depthMapFBO);
-		}
-
-		// stop shadow mapping
-		void StopDepthMode()
-		{
-			EndTextureMode();
-		}
-
-		// stop baking to fbo
-		void stopTexturing()
-		{
-			// EndDraw();
-			EndTextureMode();
-		}
-
-		// Create the FBO and depth map FBO
-		void CreateRenderTexture(int width, int height)
-		{
-			fbo = LoadRenderTexture(width, height);
-			depthMapFBO = LoadRenderTexture(width, height);
-		}
-
-		RenderTexture2D fbo; // FBO render texture
-		RenderTexture2D depthMapFBO; // shadowmap.
-
-		// pbr shader
-		Shader pbrShader;
-		// bloom shader
-		Shader bloomShader;
-
-	private:
-		bool isDrawing;
-		bool isIn3DMode;
-	};
+	static inline Vector2 windowSize = { 0, 0 };
 
 	int windowWidth;
 	int windowHeight;
@@ -107,8 +24,9 @@ public:
 	// Config manager instance
 	ConfigMan* configman = new ConfigMan();
 
-	// renderer instance
-	static inline Renderer* renderer;
+	Layers* layers;
+	Renderers* renderers;
+
 	static inline ScriptManager* scriptManager;
 
 	Game() {}
@@ -122,6 +40,10 @@ public:
 	toml::v3::parse_result GetGameConfig()
 	{
 		return this->optionsConfig;
+	}
+
+	Vector2 GetWindowSize() {
+		return { (float)windowWidth, (float)windowHeight };
 	}
 
 	void StartGame()
@@ -205,19 +127,21 @@ public:
 		SetWindowIcon(icon);
 
 
-		renderer = new Renderer();
+		layers->init();
+
+		Renderers* renderers = new Renderers();
 
 
 		if (isFullscreen == true) {
-			renderer->CreateRenderTexture(GetScreenWidth(), GetScreenHeight());
+			renderers->forwardRenderer->createRenderTexture(GetScreenWidth(), GetScreenHeight());
 
 		}
 		else {
-			renderer->CreateRenderTexture(windowWidth, windowHeight);
+			renderers->forwardRenderer->createRenderTexture(windowWidth, windowHeight);
 
 		}
 
-		renderer->bloomShader = LoadShader(0, "resources/shaders/bloom.fs");
+		renderers->forwardRenderer->bloomShader = LoadShader(0, "resources/shaders/bloom.fs");
 
 		scriptManager = new ScriptManager();
 
@@ -227,6 +151,10 @@ public:
 		rlSetCullFace(RL_CULL_FACE_BACK);
 
 		SetTargetFPS(60);
+
+		instance = this;
+
+		windowSize = { (float)windowWidth, (float)windowHeight };
 	}
 
 	void endGame()
@@ -236,12 +164,12 @@ public:
 		CloseAudioDevice();
 		delete configman;
 		delete scriptManager;
-		delete renderer;
+		delete renderers;
 		delete this;
 	}
 
 	// GRAPHICS
 	//_____________________________________________________
 
-	// Renderer *renderer;
+	// ForwardRenderer *renderer;
 };

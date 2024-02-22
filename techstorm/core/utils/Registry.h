@@ -52,7 +52,7 @@ class MRegistry_Str {
 public:
 
 	T* getConfig(std::string name) {
-		return registry[id];
+		return registry[name];
 	}
 
 	// Get the next available slot. Use this if you need to assign an ID to an object before pushing it.
