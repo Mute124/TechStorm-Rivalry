@@ -22,7 +22,7 @@ public:
 	// Config manager instance
 	ConfigMan* configman = new ConfigMan();
 
-	static inline Layers* layers;
+
 	static inline Renderers* renderers;
 	static inline ScriptManager* scriptManager;
 
@@ -127,8 +127,6 @@ public:
 		ImageFormat(&icon, PIXELFORMAT_UNCOMPRESSED_R8G8B8A8);
 		SetWindowIcon(icon);
 
-		layers = new Layers();
-		layers->init();
 
 		Renderers* renderers = new Renderers();
 
@@ -168,7 +166,7 @@ public:
 		delete configman;
 		delete scriptManager;
 		delete renderers;
-		delete layers;
+
 		delete this;
 	}
 

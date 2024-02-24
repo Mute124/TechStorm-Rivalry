@@ -1,99 +1,85 @@
 #pragma once
+#include <raylib.h>
 #include <thread>
-#include <functional>
+#include <queue>
+#include "../utils/Task.h"
+#include "../logging/Logman.h"
 
 class Thread {
 public:
-	Thread(std::function<void()> task, int threadGroupID = -1) {
-		this->taskFunction = task;
-		this->isRunning = false;
-		this->isPaused = false;
-		this->isTerminated = false;
-		this->threadGroupID = threadGroupID;
 
-		this->invokeTask();
+	Thread(int groupID, int workerID = 0) {
+		Logman::Log("test");
+		this->groupID = groupID;
+		this->workerID = workerID;
+		isRunning = true;
+		isBusy = false;
+		isRouge = false;
+		terminate = false;
+
+		std::string threadName = "Thread " + std::to_string(groupID) + " Worker " + std::to_string(workerID);
+
+		Logman::Log(threadName.c_str());
+		localThread = new std::thread(std::move(([this, threadName]() {
+			Logman::Log(threadName.c_str());
+			Logman::Log(TextFormat("Threadname : %s, localThread var id : %i, this thread : %i", threadName.c_str(), localThread->get_id(), std::this_thread::get_id()));
+			while (isRunning && !terminate) {
+				// check if we are busy, if not we are idle. Wait until a task is added to the queue.
+				if (!isBusy) {
+					std::this_thread::sleep_for(std::chrono::milliseconds(10));
+				}
+				else {
+					isIdle = false;
+					Task* task = taskQueue.front();
+					taskQueue.pop();
+					run(task);
+					isBusy = false;
+				}
+
+				if (WindowShouldClose()) {
+					exit();
+				}
+			}
+			})));
+		
 	}
 
-	Thread(int groupID) {
-		this->isRunning = false;
-		this->isPaused = false;
-		this->isTerminated = false;
-		this->threadGroupID = threadGroupID;
+	
+
+	void addTask(Task* task) {
+		taskQueue.push(task);
+		this->isBusy = true;
+	}
+
+	void exit() {
+		isRunning = false;
+		terminate = true;
+		std::this_thread::yield();
+
 	}
 
 	void join() {
-		this->localThread.join();
+		std::this_thread::yield();
 	}
+	bool isRunning;
+	bool isBusy;
+	bool isIdle = !isBusy;
+	bool terminate;
+	bool isRouge;
+	
+	const char* name;
 
-	void pause() {
-		this->isPaused = true;
-	}
-
-	void kill() {
-		this->isTerminated = true;
-		this->isRunning = false;
-		this->isPaused = false;
-		this->localThread.join();
-	}
-
-	std::thread localThread;
-
-	// conditional information
-	// is a task being executed
-	bool isRunning = false;
-	// is the thread idle (opposite of running)
-	bool isIdle = !isRunning;
-
-	// is the thread paused
-	bool isPaused = false;
-
-	// is the thread terminated (dead, NOT IDLE)
-	bool isTerminated = false;
-
-	// has it finished it's task?
-	bool finishedTask = false;
-
-	// A rogue thread is a thread that is not part of a thread group
-	bool isRogue = threadGroupID < 0;
-
-	// the group it belongs to. -1 = no group and it becomes rogue
-	int threadGroupID;
-
-
-
-	int getGroupId() {
-		return this->threadGroupID;
-	}
-
-	bool isAvailable() {
-		return this->isIdle;
-	}
-
-	void assignTask(std::function<void()> task) {
-		this->taskFunction = task;
-		this->invokeTask();
-	}
+	int groupID;
+	int workerID;
 private:
 
+	void run(Task* task) {
+		task->get();
 
-	std::function<void()> taskFunction;
-
-	void invokeTask() {
-		
-		this->localThread = std::thread([this]() {
-			if (!this->isPaused && !isTerminated) {
-				this->isRunning = true;
-				this->finishedTask = false;
-
-				this->taskFunction();
-
-				this->finishedTask = true;
-				this->isRunning = false;
-
-			}
-		});
-		this->localThread.detach();
 	}
 
+	std::queue<Task*> taskQueue;
+
+	std::thread* localThread;
 	
 };

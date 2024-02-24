@@ -20,60 +20,51 @@ bool SkipMainMenu = true;
 #include "techstorm/core/window/ConfigFlag.h"
 #include "techstorm/core/enum/EGameState.h"
 
+#include "techstorm/core/threading/ThreadGroups.h"
+
+import ErrorHandling;
 // std library includes. TODO : Is this still needed?
 #include <time.h>
 #include <vector> // needed for game object list
 
-// the enumeration of what screen is being run. See Documentation for more info.
+void mainThread() {
 
-// TODO : Finish shadowmapping
-RenderTexture2D LoadShadowmapRenderTexture(int width, int height);
-void UnloadShadowmapRenderTexture(RenderTexture2D target);
+	
 
-/*
----------------------------------------------------------------------------------
-| 					        Variable Setup										|
----------------------------------------------------------------------------------
-*/
-
-// Main.cpp global variables get declared here! (if they need to be used by the main function and other functions, they belong here)
-
-// Booleans
-
-// Lets the program know if the game should use HDR as the skybox
-bool useHDR = true;
-
-// Initialie the condition for the breathing sound.
-bool isBreathing = false;
-
-// Viewsway
-float swayAmount = 0.0003f;
-float swaySpeed = 0.02f;
-float swayTimer = 0.0f;
-
-// Near death affect.
-// Important : THESE ARE REQUIRED FOR THE ARCH ALGORITHM TO WORK!
-float nearDeathTimer = 0.0f; // The X axis
-float amplitude = 255; // How high the Parabola goes
-float frequency = 5; // How often the arches are
-float steepness = 2.4f; // How steep the curve is, NOTE : If it is an odd number, it will not show as it only works for even times.
-float offset = 1; // Offset of the arches from x = 0
-const float scaleFactor = 25; // Scaling factor, how much the parabolas is scaled
-float nearDeathIntensity = 0.0f; // The Y Axis of the algorithm
-
-// Health bar fuckery
-float healthBarPositionX = 0.0f;
-float healthBarPositionY = 0.0f;
-int healthBarOffsetX = 0;
-int healthBarOffsetY = 500;
-
-// represents the raycasting from the player to the world.
-Ray ray;
-
-int mainThread() {
+	ThreadGroups threadGroups = ThreadGroups();
 	//TODO: Is this still relevant?
 	EGameState currentScreen = Main;
+	// Booleans
 
+// Lets the program know if the game should use HDR as the skybox
+	bool useHDR = true;
+
+	// Initialie the condition for the breathing sound.
+	bool isBreathing = false;
+
+	// Viewsway
+	float swayAmount = 0.0003f;
+	float swaySpeed = 0.02f;
+	float swayTimer = 0.0f;
+
+	// Near death affect.
+	// Important : THESE ARE REQUIRED FOR THE ARCH ALGORITHM TO WORK!
+	float nearDeathTimer = 0.0f; // The X axis
+	float amplitude = 255; // How high the Parabola goes
+	float frequency = 5; // How often the arches are
+	float steepness = 2.4f; // How steep the curve is, NOTE : If it is an odd number, it will not show as it only works for even times.
+	float offset = 1; // Offset of the arches from x = 0
+	const float scaleFactor = 25; // Scaling factor, how much the parabolas is scaled
+	float nearDeathIntensity = 0.0f; // The Y Axis of the algorithm
+
+	// Health bar fuckery
+	float healthBarPositionX = 0.0f;
+	float healthBarPositionY = 0.0f;
+	int healthBarOffsetX = 0;
+	int healthBarOffsetY = 500;
+
+	// represents the raycasting from the player to the world.
+	Ray ray;
 	// -----------------------------------------------------------------------------
 	// Game Setup
 	// -----------------------------------------------------------------------------
@@ -96,6 +87,8 @@ int mainThread() {
 	// Set initial random seed
 	srand(time(NULL));
 
+
+
 	// -----------------------------------------------------------------------------
 	// Load Game Assets
 	// -----------------------------------------------------------------------------
@@ -105,28 +98,12 @@ int mainThread() {
 	//ToDo: tweak to sound more natural. This could be based on fatigue, stress, or something.
 	Sound breathingSound = LoadSound("resources/audio/breathing.mp3");
 
-	// Items
-	// Create a new inventory manager instance
-	//InventoryMan* inventoryMan = new InventoryMan("data/Items/resources.tsr");
-
-	// set up all the items concurrently.
-	//std::thread itemsSetupThread(inventoryMan->SetupItems);
-
-	// Tell the thread to join with the main thread. (Merges the two)
-	//itemsSetupThread.join();
-
-	// Note : This is temporary and is solely to test the inventory system loading items
-	//Logman::Log(TextFormat("%i", inventoryMan->itemCount));
 
 	/*
 	---------------------------------------------------------------------------------
 	| 					        Shader Setup										|
 	---------------------------------------------------------------------------------
 	*/
-
-	// -----------------------------------------------------------------------------
-	// Set up the PBR shader
-	// -----------------------------------------------------------------------------
 
 	// Load the shader into memory
 	game->renderers->forwardRenderer->pbrShader = LoadShader(TextFormat("resources/shaders/glsl%i/pbr.vs", GLSL_VERSION), TextFormat("resources/shaders/glsl%i/pbr.fs", GLSL_VERSION));
@@ -405,7 +382,7 @@ int mainThread() {
 
 	std::function<void()> cursorUnlock = [player]() {
 		EnableCursor();
-		UpdateCamera(player->cameraComponent->getSelfCameraPointer(), player->cameraMode); // Update camera
+		
 		};
 
 	game->layers->inputLayer->AddInput(KEY_LEFT_ALT, cursorUnlock, cursorLock);
@@ -414,10 +391,11 @@ int mainThread() {
 	
 	
 
-	
+
 	// Now we can run the game loop and start playing!
 	while (!WindowShouldClose())
 	{
+		UpdateCamera(player->cameraComponent->getSelfCameraPointer(), player->cameraMode); // Update camera
 		// NOTE : This is a very basic implementation of placing an object into the world. This is temporary and should be fleshed out.
 		if (IsMouseButtonPressed(MOUSE_BUTTON_RIGHT))
 		{
@@ -757,6 +735,7 @@ int mainThread() {
 
 	// Flush all game objects within the buffer. This is important! Otherwise, the game objects will not be deleted, cause memory leaks, and negates the entire purpose of this system.
 	gameObjectManager->flushBuffer();
+	threadGroups.join();
 
 	// Delete pointers declared within this function
 	delete game;
@@ -767,11 +746,17 @@ int mainThread() {
 	delete gameObjectManager;
 
 	// The software returns a 0 (success) and exits.
-	return 0;
+
 }
 
-int main(void)
+#include <memory>
+int main()
 {
-	std::thread t = std::thread(mainThread);
-	
+
+
+	// Run the game
+	std::thread t(std::move(mainThread));
+	t.join();
+
+	return 0;
 }

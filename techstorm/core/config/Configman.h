@@ -71,7 +71,12 @@ public:
 	};
 
 	~ConfigMan() {
-		delete this;
+		try {
+			delete this;
+		}
+		catch(std::exception e) {
+			throw e.what();
+		}
 	}
 
 	static void initConfigFile() {

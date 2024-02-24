@@ -25,26 +25,36 @@ public:
 		return this->isEmpty;
 	}
 
+	int getLoc(ShaderLocationIndex index) {
+		return this->shdrLocations[index];
+	}
+
+	void setLoc(ShaderLocationIndex index, int loc) {
+		this->shdrLocations[index] = loc;
+	}
+
+	int getID() {
+		return this->id;
+	}
+	
+	const char* getName() {
+		return this->name;
+	}
+
+
 protected:
 
 	static GameShaderManager* manager;
 
+	int id;
+	const char* name;
 	int pos;
 	Shader shdr;
 	bool isEmpty;
+	std::map<ShaderLocationIndex, int> shdrLocations;
 	
 private:
-	// probably not the best to use but eh
-	void load(const char *vs, const char *fs, int position) {
-		this->isEmpty = false;
-		this->shdr = LoadShader(vs, fs);
-		this->pos = position;
-		manager->push(*this);
-	}
 
-	void load(const char* vs, const char* fs) {
-		this->isEmpty = false;
-		this->shdr = LoadShader(vs, fs);
-		this->pos = manager->pushAndGetSlot(*this);
-	}
+
+	
 };

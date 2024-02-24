@@ -2,6 +2,7 @@
 #include <raylib.h>
 #include <map>
 #include <vector>
+#include <queue>
 
 
 class ConfigFlag {

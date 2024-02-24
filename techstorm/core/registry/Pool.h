@@ -8,7 +8,7 @@ public:
 	// gets the front and DOES NOT remove it. if empty returns a new nullptr
 	T* get() {
 		if (pool.empty()) {
-			return new nullptr;
+			return nullptr;
 		}
 		else {
 			return pool.front();
@@ -23,7 +23,7 @@ public:
 			return obj;
 		}
 		else {
-			return new nullptr;
+			return nullptr;
 		}
 	}
 	// put into pool
@@ -40,9 +40,7 @@ public:
 		return pool.empty();
 	}
 
-	Pool* getPool() {
-		return this;
-	}
+
 
 
 private:
@@ -55,7 +53,7 @@ public:
 	// gets the front and DOES NOT remove it. if empty returns a new nullptr
 	T get() {
 		if (pool.empty()) {
-			return new nullptr;
+			return nullptr;
 		}
 		else {
 			return pool.front();
@@ -70,7 +68,7 @@ public:
 			return obj;
 		}
 		else {
-			return new nullptr;
+			return nullptr;
 		}
 	}
 	// put into pool

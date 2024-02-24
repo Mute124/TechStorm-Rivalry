@@ -6,35 +6,34 @@
 class GameShaderManager final {
 public:
 
-	// push shader to a certain slot and if taken it will replace.
-	void push(GameShader shdr, int slot) {
-		nextAvailableSlot++;
-		shaders[slot] = shdr;
+	static void init() {
 	}
 
-	// push shader into array at next available slot
-	void push(GameShader shdr) {
-		shaders[nextAvailableSlot] = shdr;
-		nextAvailableSlot++;
+	void push(GameShader shader) {
+		gameShadersByID[shader.getID()] = &shader;
+		gameShadersByName[shader.getName()] = &shader;
 	}
 
-	// push shader into array and get slot number
-	int pushAndGetSlot(GameShader shdr) {
-		shaders[nextAvailableSlot] = shdr;
-		return this->nextAvailableSlot;
-		nextAvailableSlot++;
-	}
-	
-	// is the given slot in the array empty
-	bool isSlotClear(int slot) {
-		return shaders[slot].isShaderEmpty();
+	void remove(int id) {
+		gameShadersByID.erase(id);
+		//todo: go through gameShadersByName and remove that
 	}
 
-	GameShader get(int slot) {
-		return shaders[slot];
+	GameShader* get(int id) {
+		return gameShadersByID[id];
+	}
+
+	GameShader* get(const char* name) {
+		return gameShadersByName[name];
+	}
+
+	void clear() {
+		gameShadersByID.clear();
+		gameShadersByName.clear();
 	}
 
 private:
-	int nextAvailableSlot;
-	GameShader shaders[];
+	static inline std::map<int, GameShader*> gameShadersByID;
+
+	static inline std::map<const char *, GameShader*> gameShadersByName;
 };

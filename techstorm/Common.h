@@ -32,11 +32,6 @@
 #include "core/utils/ArrayUtils.h"
 #include "Globals.h"
 
-// thread
-#include "core/threading/Layer.h"
-#include "core/threading/layers.h"
-
-
 
 // End of Internal Libraries
 // External Libraries
