@@ -23,19 +23,18 @@ bool SkipMainMenu = true;
 #include "techstorm/core/threading/ThreadGroups.h"
 
 import ErrorHandling;
+import Debugger;
 // std library includes. TODO : Is this still needed?
 #include <time.h>
 #include <vector> // needed for game object list
 
 void mainThread() {
-
-	
-
 	ThreadGroups threadGroups = ThreadGroups();
 	//TODO: Is this still relevant?
 	EGameState currentScreen = Main;
 	// Booleans
-
+	
+	
 // Lets the program know if the game should use HDR as the skybox
 	bool useHDR = true;
 
@@ -47,8 +46,7 @@ void mainThread() {
 	float swaySpeed = 0.02f;
 	float swayTimer = 0.0f;
 
-	// Near death affect.
-	// Important : THESE ARE REQUIRED FOR THE ARCH ALGORITHM TO WORK!
+	// Near death affect. Important : THESE ARE REQUIRED FOR THE ARCH ALGORITHM TO WORK!
 	float nearDeathTimer = 0.0f; // The X axis
 	float amplitude = 255; // How high the Parabola goes
 	float frequency = 5; // How often the arches are
@@ -65,9 +63,7 @@ void mainThread() {
 
 	// represents the raycasting from the player to the world.
 	Ray ray;
-	// -----------------------------------------------------------------------------
-	// Game Setup
-	// -----------------------------------------------------------------------------
+	// ----------------------------------------------------------------------------- Game Setup -----------------------------------------------------------------------------
 
 	// Create game & load it into memory.
 	Game* game = new Game();
@@ -87,17 +83,13 @@ void mainThread() {
 	// Set initial random seed
 	srand(time(NULL));
 
-
-
-	// -----------------------------------------------------------------------------
-	// Load Game Assets
-	// -----------------------------------------------------------------------------
+	// ----------------------------------------------------------------------------- Load Game
+	// Assets -----------------------------------------------------------------------------
 
 	// Ambiance
 	// The passive sound of your breathing.
 	//ToDo: tweak to sound more natural. This could be based on fatigue, stress, or something.
 	Sound breathingSound = LoadSound("resources/audio/breathing.mp3");
-
 
 	/*
 	---------------------------------------------------------------------------------
@@ -111,15 +103,15 @@ void mainThread() {
 	// Get shader locations
 	game->renderers->forwardRenderer->pbrShader.locs[SHADER_LOC_MAP_ALBEDO] = GetShaderLocation(game->renderers->forwardRenderer->pbrShader, "albedoMap");
 
-	// WARNING: Metalness, roughness, and ambient occlusion are all packed into a MRA texture
-	// They are passed as to the SHADER_LOC_MAP_METALNESS location for convenience,
-	// shader already takes care of it accordingly
+	// WARNING: Metalness, roughness, and ambient occlusion are all packed into a MRA texture They
+	// are passed as to the SHADER_LOC_MAP_METALNESS location for convenience, shader already takes
+	// care of it accordingly
 	game->renderers->forwardRenderer->pbrShader.locs[SHADER_LOC_MAP_METALNESS] = GetShaderLocation(game->renderers->forwardRenderer->pbrShader, "mraMap");
 	game->renderers->forwardRenderer->pbrShader.locs[SHADER_LOC_MAP_NORMAL] = GetShaderLocation(game->renderers->forwardRenderer->pbrShader, "normalMap");
 
-	// WARNING: Similar to the MRA map, the emissive map packs different information
-	// into a single texture: it stores height and emission data
-	// It is binded to SHADER_LOC_MAP_EMISSION location an properly processed on shader
+	// WARNING: Similar to the MRA map, the emissive map packs different information into a single
+	// texture: it stores height and emission data It is binded to SHADER_LOC_MAP_EMISSION location
+	// an properly processed on shader
 	game->renderers->forwardRenderer->pbrShader.locs[SHADER_LOC_MAP_EMISSION] = GetShaderLocation(game->renderers->forwardRenderer->pbrShader, "emissiveMap");
 	game->renderers->forwardRenderer->pbrShader.locs[SHADER_LOC_COLOR_DIFFUSE] = GetShaderLocation(game->renderers->forwardRenderer->pbrShader, "albedoColor");
 
@@ -149,12 +141,12 @@ void mainThread() {
 	---------------------------------------------------------------------------------
 	*/
 
-	// -----------------------------------------------------------------------------
-	// Block Initialization
-	// -----------------------------------------------------------------------------
+	// ----------------------------------------------------------------------------- Block
+	// Initialization -----------------------------------------------------------------------------
 
-	// Create a default block model with a length, width, and height of the value of BLOCK_SIZE. This creates a cube mesh with a length, width, and height of BLOCK_SIZE and then converts it to a model, loading it
-	// into memory.
+	// Create a default block model with a length, width, and height of the value of BLOCK_SIZE.
+	// This creates a cube mesh with a length, width, and height of BLOCK_SIZE and then converts it
+	// to a model, loading it into memory.
 	Model DefaultBlockModel = LoadModelFromMesh(
 		GenMeshCube(BLOCK_SIZE, BLOCK_SIZE,
 			BLOCK_SIZE)); // this is the default model used in blocksd.
@@ -168,15 +160,14 @@ void mainThread() {
 	// Finally push it off to the object manager
 	gameObjectManager->pushObject(block);
 
-	// -----------------------------------------------------------------------------
-	// Player Initialization
-	// -----------------------------------------------------------------------------
+	// ----------------------------------------------------------------------------- Player
+	// Initialization -----------------------------------------------------------------------------
 
 	// TODO : Is the Playersize variable needed and or relevant?
 
 	// Create the player model
-	// NOTE: This model is TEMPORARY! It will be deleted after a proper model is made.
-	// Refers to the size of the player model. Same process as the default block model creation.
+	// NOTE: This model is TEMPORARY! It will be deleted after a proper model is made. Refers to the
+	// size of the player model. Same process as the default block model creation.
 	const int Playersize = 3;
 	Model PlayerModel = LoadModelFromMesh(GenMeshCube(Playersize, Playersize, Playersize));
 
@@ -186,9 +177,8 @@ void mainThread() {
 	// Finally push it off to the object manager
 	gameObjectManager->pushObject(player);
 
-	// -----------------------------------------------------------------------------
-	// skybox creation.
-	// -----------------------------------------------------------------------------
+	// ----------------------------------------------------------------------------- skybox
+	// creation. -----------------------------------------------------------------------------
 
 	// Skybox geometry generation step
 	Mesh skyboxMesh = GenMeshCube(1.0f, 1.0f, 1.0f);
@@ -200,8 +190,8 @@ void mainThread() {
 	// NOTE: Some locations are automatically set at shader loading
 	skybox.materials[0].shader = LoadShader("resources/skybox.vs", "resources/skybox.fs");
 
-	// since the compiler complains about the references of such, these three vars
-	// are for the skybox shaders. They will be deleted after.
+	// since the compiler complains about the references of such, these three vars are for the
+	// skybox shaders. They will be deleted after.
 	static int skyboxEnvironmentMap = MATERIAL_MAP_CUBEMAP;
 
 	// Both variables are equal to 1 if useHDR is true, otherwise 0
@@ -224,10 +214,9 @@ void mainThread() {
 		GetShaderLocation(skybox.materials[0].shader, "vflipped"), &skyboxIsVFlipped,
 		SHADER_UNIFORM_INT);
 
-	// -----------------------------------------------------------------------------
-	// Cubemap Loading
-	// -----------------------------------------------------------------------------
-	// This step is part of the skybox creation.
+	// ----------------------------------------------------------------------------- Cubemap Loading
+	// ----------------------------------------------------------------------------- This step is
+	// part of the skybox creation.
 
 	// Load cubemap shader and setup required shader locations
 	Shader shdrCubemap =
@@ -237,8 +226,8 @@ void mainThread() {
 	const static int equimap = 0;
 	SetShaderValue(shdrCubemap, GetShaderLocation(shdrCubemap, "equirectangularMap"), &equimap, SHADER_UNIFORM_INT);
 
-	// Note: The filename is hardcoded here and also has a limit of 256 characters!
-	// I will be dissapointed if you somehow dont know what that variable does...
+	// Note: The filename is hardcoded here and also has a limit of 256 characters! I will be
+	// dissapointed if you somehow dont know what that variable does...
 	char skyboxFileName[256] = { 0 };
 
 	// This is the panoramic texture, It is used IF useHDR is true
@@ -251,13 +240,11 @@ void mainThread() {
 		// Load HDR panorama (sphere) texture
 		panorama = LoadTexture(skyboxFileName);
 
-		// Generate cubemap (texture with 6 quads-cube-mapping) from panorama HDR
-		// texture NOTE 1: New texture is generated rendering to texture, shader
-		// calculates the sphere->cube coordinates mapping NOTE 2: It seems on some
-		// Android devices WebGL, fbo does not properly support a FLOAT-based
-		// attachment, despite texture can be successfully created.. so using
-		// PIXELFORMAT_UNCOMPRESSED_R8G8B8A8 instead of
-		// PIXELFORMAT_UNCOMPRESSED_R32G32B32A32
+		// Generate cubemap (texture with 6 quads-cube-mapping) from panorama HDR texture NOTE 1:
+		// New texture is generated rendering to texture, shader calculates the sphere->cube
+		// coordinates mapping NOTE 2: It seems on some Android devices WebGL, fbo does not properly
+		// support a FLOAT-based attachment, despite texture can be successfully created.. so using
+		// PIXELFORMAT_UNCOMPRESSED_R8G8B8A8 instead of PIXELFORMAT_UNCOMPRESSED_R32G32B32A32
 		skybox.materials[0].maps[MATERIAL_MAP_CUBEMAP].texture = GenTextureCubemap(
 			shdrCubemap, panorama, 1024, PIXELFORMAT_UNCOMPRESSED_R8G8B8A8);
 	}
@@ -277,12 +264,9 @@ void mainThread() {
 		UnloadImage(img);
 	}
 
-	// -----------------------------------------------------------------------------
-	// Light Setup
-	// -----------------------------------------------------------------------------
+	// ----------------------------------------------------------------------------- Light Setup -----------------------------------------------------------------------------
 
-	// Create the Sunlight
-	// Note : this is not it's final form, it is just a placeholder for testing
+	// Create the Sunlight Note : this is not it's final form, it is just a placeholder for testing
 	// ToDo: finalize this step and functionality
 	Light sun = CreateLight(LIGHT_POINT, Vector3{ 1.0f, 0.0f, 1.0f }, Vector3One(),
 		BLUE, 4.0f, game->renderers->forwardRenderer->pbrShader); // Ambient color.;
@@ -290,9 +274,8 @@ void mainThread() {
 	// Enable the sun as a precautionary measure.
 	sun.enabled = true;
 
-	// -----------------------------------------------------------------------------
-	// PBR Finalizations
-	// -----------------------------------------------------------------------------
+	// ----------------------------------------------------------------------------- PBR
+	// Finalizations -----------------------------------------------------------------------------
 
 	// we need to finalize the PBR shader and give the shader any last minute data.
 
@@ -353,14 +336,12 @@ void mainThread() {
 			}
 			else
 			{
-				// Handle null pointer reference or unhandled exception
-				// Add error handling code here
+				// Handle null pointer reference or unhandled exception Add error handling code here
 			}
 
 			EnableCursor();
 
 	*/
-
 
 	/*
 		std::function<void()> cursorLock = [player]() {
@@ -371,32 +352,27 @@ void mainThread() {
 				DisableCursor();
 				UpdateCamera(player->cameraComponent->getSelfCameraPointer(), player->cameraMode); // Update camera
 			}
-
 		}
 		else
 		{
-			// Handle null pointer reference or unhandled exception
-			// Add error handling code here
+			// Handle null pointer reference or unhandled exception Add error handling code here
 		}
 		};
 
 	std::function<void()> cursorUnlock = [player]() {
 		EnableCursor();
-		
 		};
 
 	game->layers->inputLayer->AddInput(KEY_LEFT_ALT, cursorUnlock, cursorLock);
 
 	*/
-	
-	
-
 
 	// Now we can run the game loop and start playing!
 	while (!WindowShouldClose())
 	{
 		UpdateCamera(player->cameraComponent->getSelfCameraPointer(), player->cameraMode); // Update camera
-		// NOTE : This is a very basic implementation of placing an object into the world. This is temporary and should be fleshed out.
+		// NOTE : This is a very basic implementation of placing an object into the world. This is
+		// temporary and should be fleshed out.
 		if (IsMouseButtonPressed(MOUSE_BUTTON_RIGHT))
 		{
 			Vector3 placepos = player->cameraComponent->setTarget();
@@ -440,11 +416,11 @@ void mainThread() {
 		| 					         If Statements go here!								|
 		---------------------------------------------------------------------------------
 		*/
-		// TODO : Move input crap into another thread.
-		// Pause Menu
+		// TODO : Move input crap into another thread. Pause Menu
 		if (IsKeyPressed(KEY_ESCAPE))
 		{
-			// Todo, move the menuCamera to be created on game startup and then hidden. it gets shown on if statement validation
+			// Todo, move the menuCamera to be created on game startup and then hidden. it gets
+			// shown on if statement validation
 			bool exit = false;
 			bool manualExit = false;
 
@@ -517,8 +493,7 @@ void mainThread() {
 					exit = true;
 				}
 			}
-			// cleanup
-			// UnloadTexture(tex);
+			// cleanup UnloadTexture(tex);
 			delete men_pause;
 			delete save;
 			delete exitButton;
@@ -546,8 +521,8 @@ void mainThread() {
 			isBreathing = IsSoundPlaying(breathingSound);
 		}
 
-		// The player's looking direction is the target of the camera. This is the direction the player is looking
-		// TODO : Check relevancy.
+		// The player's looking direction is the target of the camera. This is the direction the
+		// player is looking TODO : Check relevancy.
 		ray.position = player->cameraComponent->getPosition();
 		ray.direction = player->cameraComponent->setTarget();
 
@@ -594,7 +569,8 @@ void mainThread() {
 		// Update light position
 		sun.position = player->cameraComponent->getPosition();
 
-		// Update the shader with the new light data. Note : any shader that uses lighting will need this data!
+		// Update the shader with the new light data. Note : any shader that uses lighting will need
+		// this data!
 		UpdateLight(game->renderers->forwardRenderer->pbrShader, sun);
 		UpdateLight(game->renderers->forwardRenderer->bloomShader, sun);
 
@@ -638,7 +614,8 @@ void mainThread() {
 		// Set old car model texture tiling, emissive color and emissive intensity parameters on shader
 		SetShaderValue(game->renderers->forwardRenderer->pbrShader, textureTilingLoc, &block->blockTextureTiling, SHADER_UNIFORM_VEC2);
 
-		// Normalize the Emissive map into a 0-1 range. Note : This turns the map into a Vector4, not a color.
+		// Normalize the Emissive map into a 0-1 range. Note : This turns the map into a Vector4,
+		// not a color.
 		Vector4 carEmissiveColor = ColorNormalize(block->model.materials[0].maps[MATERIAL_MAP_EMISSION].color);
 		SetShaderValue(game->renderers->forwardRenderer->pbrShader, emissiveColorLoc, &carEmissiveColor, SHADER_UNIFORM_VEC4);
 
@@ -661,7 +638,8 @@ void mainThread() {
 		// Stop texturing the FBO with what the user will be seeing.
 		game->renderers->forwardRenderer->stopTexturing();
 
-		// Warning : DO NOT MOVE THIS! this is important! due to a bug within raylib, this must be done after the texturing is done or a stack overflow WILL occur. GOD DAMN IT!
+		// Warning : DO NOT MOVE THIS! this is important! due to a bug within raylib, this must be
+		// done after the texturing is done or a stack overflow WILL occur. GOD DAMN IT!
 		rlPopMatrix();
 
 		/*
@@ -697,7 +675,8 @@ void mainThread() {
 
 		// Crosshair
 
-		// In order to have it in the middle of the screen, we need to divide the screen dimensions by half. We can then draw a circle in the middle of the screen.
+		// In order to have it in the middle of the screen, we need to divide the screen dimensions
+		// by half. We can then draw a circle in the middle of the screen.
 		DrawCircle(game->windowWidth / 2, game->windowHeight / 2, 3, GRAY);
 
 		// Let raylib know that we're done drawing to the screen.
@@ -713,8 +692,8 @@ void mainThread() {
 	---------------------------------------------------------------------------------
 	*/
 
-	// Unload models.
-	// Note : Technically we dont need to unload models as they get automatically unloaded, but it is still good practice. Same goes with textures.
+	// Unload models. Note : Technically we dont need to unload models as they get automatically
+	// unloaded, but it is still good practice. Same goes with textures.
 	UnloadModel(DefaultBlockModel);
 
 	// Unload textures
@@ -733,27 +712,25 @@ void mainThread() {
 	// End the game, do closing actions within the EndGame() function
 	game->endGame();
 
-	// Flush all game objects within the buffer. This is important! Otherwise, the game objects will not be deleted, cause memory leaks, and negates the entire purpose of this system.
+	// Flush all game objects within the buffer. This is important! Otherwise, the game objects will
+	// not be deleted, cause memory leaks, and negates the entire purpose of this system.
 	gameObjectManager->flushBuffer();
 	threadGroups.join();
 
 	// Delete pointers declared within this function
 	delete game;
 	delete block;
-	//delete inventoryMan;
+
 
 	delete player;
 	delete gameObjectManager;
 
 	// The software returns a 0 (success) and exits.
-
 }
 
 #include <memory>
 int main()
 {
-
-
 	// Run the game
 	std::thread t(std::move(mainThread));
 	t.join();
