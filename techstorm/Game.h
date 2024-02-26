@@ -31,6 +31,7 @@ public:
 	// deconstructor. This just deletes itself, I guess it is suicide?
 	~Game()
 	{
+		
 		delete this;
 	}
 

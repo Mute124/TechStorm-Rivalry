@@ -5,11 +5,10 @@
 #include <raylib.h>
 #include <raymath.h>
 #include <rlgl.h>
-
+#include "lib/raygui.h"
 #include "lib/rcamera.h"
 #include "lib/yse/yse.hpp"
 //#include "rguiapi.h"
-#include "rgui/src/raygui.h"
 #include "lib/toml.h"
 
 // C++ Libraries

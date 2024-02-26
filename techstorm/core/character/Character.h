@@ -1,44 +1,103 @@
 #pragma once
-#include "Common.h"
-#include "EBodySlots.h"
-#include "BodySlot.h"
-#include "IScriptable.h"
-#include "ScriptManager.h"
-#include "EFaction.h"
-#include "CharacterHealth.h"
+// local includes
+#include "CharacterComponent.h"
+#include "../obj/Gameobject.h"
 
+#include "../../Common.h"
+#include "../ecs/ECSMan.h"
+
+#include "../threading/ThreadGroups.h"
+
+typedef struct CharacterStat {
+	float val;
+	float valChange;
+	const char* name;
+};
 
 // A game character abstract class
-class Character 
+class Character abstract : public GameObject, public IScriptable
 {
 public:
-	
-	Character(int characterID, EFaction faction) : characterID(characterID), characterFaction(faction) {
+
+	// use derived class's constructor instead of this!
+	void init() final override
+	{
+		this->addStats(
+			std::vector<CharacterStat>
+		{
+			CharacterStat{
+					0.0f,
+					0.0f,
+					"boredom"
+			},
+				CharacterStat{
+						0.0f,
+						0.0f,
+						"happiness"
+			},
+				CharacterStat{
+					100.0f,
+					0.0f,
+					"health"
+			},
+				CharacterStat{
+					0.0f,
+					0.0f,
+					"stress"
+			},
+				CharacterStat{
+				0.0f,
+				0.0f,
+				"hunger"
+			},
+				CharacterStat{
+				0.0f,
+				0.0f,
+				"thirst"
+			}
+		}
+		);
+		
+		ScriptManager::addScript(this);
+
+	}
+
+	void debugDraw() {
 		
 	}
 
-	EBodySlots bodySlots;
-	BodySlot* bodySlot[SLOT_COUNT] = { 0 };
+	void update() final override {
+		tick();
+	}
 
-	bool isCrouched;
+	// updates values of health
+	void tick() {
+		for (auto& stat : stats) {
+			stat.second.val += stat.second.valChange;
+		}
+	}
+
+	void addStat(CharacterStat stat) {
+		this->stats[stat.name] = stat;
+	}
+
+	void addStats(std::vector<CharacterStat> stats) {
+		for (int i = 0; i < stats.size(); i++) {
+			addStat(stats[i]);
+		}
+	}
+
+	void end() final override {
+
+	}
+
+protected:
+
+	bool isDead;
 	bool isRunning;
-	bool isPlayer;
+	bool isWalking;
 
-	Ray characterLookDirection = { 0 };
+	Ray* target;
 
-	const int characterID;
-
-	const EFaction characterFaction = FACTION_NULL;
-
-	Model characterModel;
-	Vector3 characterPosition;
-
-	double walkSpeed;
-	double runSpeedMultiplyer;
-
-	CharacterHealth* health;
-
-	
-
+	std::map<const char*, CharacterStat> stats;
 };
-

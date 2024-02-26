@@ -4,6 +4,7 @@
 #include <queue>
 #include "../utils/Task.h"
 #include "../logging/Logman.h"
+#include "ThreadGroupTask.h"
 
 class Thread {
 public:
@@ -30,7 +31,7 @@ public:
 				}
 				else {
 					isIdle = false;
-					Task* task = taskQueue.front();
+					ThreadGroupTask* task = taskQueue.front();
 					taskQueue.pop();
 					run(task);
 					isBusy = false;
@@ -44,9 +45,7 @@ public:
 		
 	}
 
-	
-
-	void addTask(Task* task) {
+	void addTask(ThreadGroupTask* task) {
 		taskQueue.push(task);
 		this->isBusy = true;
 	}
@@ -73,12 +72,11 @@ public:
 	int workerID;
 private:
 
-	void run(Task* task) {
+	void run(ThreadGroupTask* task) {
 		task->get();
-
 	}
 
-	std::queue<Task*> taskQueue;
+	std::queue<ThreadGroupTask*> taskQueue;
 
 	std::thread* localThread;
 	

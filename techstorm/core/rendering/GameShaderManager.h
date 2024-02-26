@@ -9,31 +9,27 @@ public:
 	static void init() {
 	}
 
-	void push(GameShader shader) {
-		gameShadersByID[shader.getID()] = &shader;
-		gameShadersByName[shader.getName()] = &shader;
+	static inline void push(Shader shader, const char *name) {
+		_shaders[name] = shader;
 	}
 
-	void remove(int id) {
-		gameShadersByID.erase(id);
-		//todo: go through gameShadersByName and remove that
+
+	static inline Shader get(const char* name) {
+		return _shaders[name];
 	}
 
-	GameShader* get(int id) {
-		return gameShadersByID[id];
+	static inline int getLoc(const char* shdrName, const char* locationName) {
+		return GetShaderLocation(_shaders[shdrName], locationName);
 	}
 
-	GameShader* get(const char* name) {
-		return gameShadersByName[name];
+	static inline void clear() {
+		_shaders.clear();
 	}
 
-	void clear() {
-		gameShadersByID.clear();
-		gameShadersByName.clear();
-	}
+	
 
 private:
-	static inline std::map<int, GameShader*> gameShadersByID;
 
-	static inline std::map<const char *, GameShader*> gameShadersByName;
+	static inline int _registeredShaders = 0;
+	static inline std::map<const char *, Shader> _shaders;
 };

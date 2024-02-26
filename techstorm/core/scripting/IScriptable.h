@@ -1,14 +1,18 @@
 #pragma once
-
+#include "ScriptManager.h"
 
 class IScriptable abstract {
 public:
 
+	IScriptable() {
+		
+	}
 
 
-	virtual void onStart();
-	virtual void onUpdate();
-	virtual void onEnd();
+
+	virtual void init();
+	virtual void update();
+	virtual void end();
 
 	int ID;
 

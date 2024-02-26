@@ -22,13 +22,19 @@ bool SkipMainMenu = true;
 
 #include "techstorm/core/threading/ThreadGroups.h"
 
+
+
 import ErrorHandling;
-import Debugger;
+import Debug;
+
 // std library includes. TODO : Is this still needed?
 #include <time.h>
 #include <vector> // needed for game object list
 
 void mainThread() {
+
+	
+
 	ThreadGroups threadGroups = ThreadGroups();
 	//TODO: Is this still relevant?
 	EGameState currentScreen = Main;
@@ -317,7 +323,9 @@ void mainThread() {
 
 	healthBarPositionX = game->windowWidth + healthBarOffsetX;
 	healthBarPositionY = game->windowHeight + healthBarOffsetY;
+	
 
+	// the below lines are just me messing with heightmaps.
 	Image cell = GenImageCellular(100, 100, 2);
 	Image perlin = GenImagePerlinNoise(100, 100, 1, 0.5f, 1.0f);
 	//ImageDraw(&perlin, cell, Rectangle{0, 0, (float)cell.width, (float)cell.height}, Rectangle{0, 0, (float)perlin.width, (float)perlin.height}, WHITE);
@@ -581,9 +589,11 @@ void mainThread() {
 		gameObjectManager->updateObjects();
 		game->scriptManager->updateObjects();
 
+		//UIMan::update();
+
 		// Start texturing the FBO with what the user will be seeing. This includes UI and Scene objects.
 		game->renderers->forwardRenderer->startTexturing();
-
+		//DrawError(0);
 		/*
 		---------------------------------------------------------------------------------
 		|     2d Ui rendering for BEFORE 3d drawing										|
@@ -634,6 +644,7 @@ void mainThread() {
 		|     2d Ui rendering for AFTER 3d drawing										|
 		---------------------------------------------------------------------------------
 		*/
+		//UIMan::draw();
 
 		// Stop texturing the FBO with what the user will be seeing.
 		game->renderers->forwardRenderer->stopTexturing();
@@ -649,8 +660,8 @@ void mainThread() {
 		*/
 		SetTextureFilter(game->renderers->forwardRenderer->fbo.texture, TEXTURE_FILTER_ANISOTROPIC_16X);
 
-		// Begin drawing mode so we can actually see stuff!
 		game->renderers->forwardRenderer->startDraw();
+		// Begin drawing mode so we can actually see stuff!
 
 		// We must tell OpenGL that we want to use the bloom shader on the FBO!
 		//BeginShaderMode(game->renderer->bloomShader);
@@ -660,6 +671,8 @@ void mainThread() {
 		| 					      Bloom Affected										|
 		---------------------------------------------------------------------------------
 		*/
+
+		
 
 		// NOTE: Render texture must be y-flipped due to default OpenGL coordinates (left-bottom)
 		DrawTextureRec(game->renderers->forwardRenderer->fbo.texture, Rectangle{ 0, 0, (float)(game->renderers->forwardRenderer->fbo.texture.width), (float)(-game->renderers->forwardRenderer->fbo.texture.height) }, Vector2{ 0, 0 }, WHITE);
@@ -715,7 +728,7 @@ void mainThread() {
 	// Flush all game objects within the buffer. This is important! Otherwise, the game objects will
 	// not be deleted, cause memory leaks, and negates the entire purpose of this system.
 	gameObjectManager->flushBuffer();
-	threadGroups.join();
+	//threadGroups.join();
 
 	// Delete pointers declared within this function
 	delete game;
@@ -728,12 +741,19 @@ void mainThread() {
 	// The software returns a 0 (success) and exits.
 }
 
-#include <memory>
+
 int main()
 {
+	
+
 	// Run the game
 	std::thread t(std::move(mainThread));
+	
+	ScriptManager* scriptManager = new ScriptManager();
+
+	scriptManager->start(true);
 	t.join();
 
+	
 	return 0;
 }

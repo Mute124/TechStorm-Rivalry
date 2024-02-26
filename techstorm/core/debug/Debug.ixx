@@ -1,33 +1,12 @@
 #include <raylib.h>
+#include <memory>
+#include "../utils/Task.h"
 export module Debug;
 
-export template<typename T>
-class DebugObject {
-public:
-	// set trigger key
-	void setTriggerKey(KeyboardKey key) {
-		triggerKey = key;
-	}
-
-	// get trigger key
-	KeyboardKey getTriggerKey() {
-		return triggerKey;
-	}
-
-	// set debug info
-	void setDebugInfo(T info) {
-		debugInfo = info;
-	}
-
-	// get debug info
-	T getDebugInfo() {
-		return debugInfo;
-	}
-
-
-private:
-	T debugInfo;
-
-	KeyboardKey triggerKey;
-	
-};
+// draws a new error box
+export void DrawError(int code) {
+	// rises up from the bottom right corner, with a red background, black outline, the error code, and then goes back down
+	DrawRectangle(500, 500, 100, 100, RED);
+	DrawRectangleLines(500, 500, 100, 100, BLACK);
+	DrawText("ERROR: " + code, 100, 100, 20, WHITE);
+}

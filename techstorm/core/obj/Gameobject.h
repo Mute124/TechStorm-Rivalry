@@ -1,5 +1,6 @@
 #pragma once
 #include "../../common.h"
+#include "../ECS/ECSMan.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <vector>
@@ -8,25 +9,28 @@
 
 using namespace std;
 
-class GameObject abstract
+class GameObject abstract 
 {
 public:
-	virtual void draw() abstract;
+	virtual void draw() {
+		DrawModel(this->model, this->position, scale, tint);
+	}
+
 	virtual ~GameObject()
 	{
 
-	}
-
-	void finalize() {
-		
 	}
 
 	virtual void onUpdate() {}; // Called every frame
 
 	virtual void onDestroy() const = 0; // NOTE : This deletes the object and shall be overridden for custom behaviors
 
+	Vector3 position;
+	Model model;
+	float scale;
+	Color tint;
+	Shader shdr;
 
-	
 };
 
 class GameobjectManager final {

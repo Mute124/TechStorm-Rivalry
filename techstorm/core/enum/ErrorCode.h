@@ -1,6 +1,7 @@
 #pragma once
 
 typedef enum ErrorCodes {
-	ERROR_OPERATION_FAILED = 0,
+	ERROR_UNKNOWN = 0,
+	ERROR_INVALID_TYPE,
 };
 

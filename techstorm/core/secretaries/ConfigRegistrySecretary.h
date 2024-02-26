@@ -30,7 +30,6 @@ public:
 		if (!found) {
 			found = false;
 		}
-
 		return found;
 	}
 };

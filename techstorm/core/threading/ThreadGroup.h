@@ -2,6 +2,7 @@
 #include "Thread.h"
 #include <map>
 #include "../utils/task.h"
+#include "ThreadGroupTask.h"
 
 using namespace std;
 
@@ -20,7 +21,7 @@ public:
 
 	void init(const char* groupName, int groupSize) {
 		this->groupName = groupName;
-		this->groupID = assignGroupID();
+		this->groupID = _assignGroupID();
 		for (int i = 0; i < groupSize; i++) {
 			Thread* t = new Thread(this->groupID);
 			threads.insert(pair<int, Thread*>(i, t));
@@ -30,7 +31,7 @@ public:
 		Logman::Log(groupName);
 	}
 
-	void addTask(Task* task) {
+	void addTask(ThreadGroupTask* task) {
 		// go through map, find first idle thread and give it a task.
 		for (auto& thread : threads) {
 			if (thread.second->isIdle) {
@@ -41,7 +42,11 @@ public:
 	}
 
 	void addTask(std::function<void()> task) {
-		addTask(new Task(task));
+		addTask(new ThreadGroupTask(task));
+	}
+
+	void addTask(std::unique_ptr<ThreadGroupTask> task) {
+		addTask(std::move(task));
 	}
 
 	void exit() {
@@ -60,10 +65,10 @@ private:
 	const char *groupName;
 	int groupID;
 
-	static inline int groupCount = 0;
-	static int assignGroupID() {
-		return groupCount;
-		groupCount++;
+	static inline int _groupCount = 0;
+	static int _assignGroupID() {
+		return _groupCount;
+		_groupCount++;
 	}
 
 	map<int, Thread*> threads;
