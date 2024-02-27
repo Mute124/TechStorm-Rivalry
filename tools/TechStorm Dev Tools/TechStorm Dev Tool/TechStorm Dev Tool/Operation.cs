@@ -10,7 +10,7 @@ namespace TechStormDevTool {
         
         public void ClearScreen() {
             Operation operation = new Operation("clear");
-            
+
         }
 
         // Does something in CMD. and returns it's exit code

@@ -14,6 +14,10 @@
 class Block : public GameObject
 {
 public:	
+
+	void draw() override {
+		DrawModel(this->model, this->position, 1.0f, WHITE);
+	}
 	// main block constructor.
 	Block(Vector3 position, const Color color, Shader shader, Model model)
 	{
@@ -69,13 +73,11 @@ public:
 
 	void onUpdate() override
 	{
-		this->draw();
 		
 	};
 
-	void onDestroy() const override
-	{
-		delete this;
+	void onDestroy() const override {
+	
 	};
 
 

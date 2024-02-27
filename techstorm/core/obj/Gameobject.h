@@ -14,10 +14,10 @@ class GameObject abstract
 {
 public:
 
-	virtual void draw() {
-		DrawModel(this->model, this->position, scale, tint);
-	}
+	virtual void draw() abstract {
 
+		Logman::Log("Gameobj");
+	}
 	virtual ~GameObject()
 	{
 

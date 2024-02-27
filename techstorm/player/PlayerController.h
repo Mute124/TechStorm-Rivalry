@@ -7,7 +7,7 @@ class PlayerController
 protected:
 
 	int mode;
-	float movementSpeed;
+	float movementSpeed = 1.0f;
 	float tiltSpeed;
 	const float maxTiltRight = 10.0f; // Positive
 	const float maxTiltLeft = -10.0f; // Negative
@@ -50,7 +50,7 @@ public:
 
 	void updateController(Camera* camera)
 	{
-		
+	
 
 		// Camera PRO usage example (EXPERIMENTAL)
 		// This new camera function allows custom movement/rotation values to be directly provided

@@ -104,35 +104,4 @@ float IncrementDelta(float x, float y, float z) {
 * f(x) = 
 * 
 */
-float levelDelta(int levels, int calculateFor, float max) {
-	float mean;
-	std::vector<float> levelsVec;
-	
 
-	if (calculateFor == levels) return max;
-	else {
-		mean = (calculateFor*max) / levels;
-
-		for (int i = 0; i < levels; i++) {
-			if (i == 0) {
-				levelsVec.push_back(mean);
-			}
-			else if (i != max) {
-				//(max - mean + levelsVec[i - 1]) / (levels - i)
-				levelsVec.push_back((mean + levelsVec[i - 1])/max);
-			}
-			else if (i == calculateFor) {
-				return (mean + levelsVec[i - 1]) / max;
-			}
-			else {
-				levelsVec.push_back(max);
-			}
-		}
-		Logman::Log(TextFormat("mean is : %f", mean));
-		for (int i = 0; i < DatasetLength<float>(levelsVec); i++) {
-			Logman::Log(TextFormat("Value is : %f", levelsVec[i]));
-
-			//printf((const char*)i);
-		}
-	}
-}

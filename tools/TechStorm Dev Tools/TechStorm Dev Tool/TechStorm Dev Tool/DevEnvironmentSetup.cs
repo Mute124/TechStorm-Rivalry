@@ -15,7 +15,7 @@ namespace TechStormDevTool
         // Check if git is installed. Simply does git --version, if it doesnt go through well we know it isnt installed.
         private void CheckForGitAndInstall() {
             // Check if git is installed
-            Operation operation = new Operation();
+            Operation operation = new();
 
 
             int taskResult = operation.NewTask("git --version");

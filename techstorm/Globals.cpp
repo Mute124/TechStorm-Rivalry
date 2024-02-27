@@ -284,7 +284,7 @@ Vector3 Vector3MaxPos()
 Vector3 Vector3RandomEx(Vector3 min, Vector3 max)
 {
 
-	return Vector3{ (float)GetRandomValue(min.x, max.x), (float)GetRandomValue(min.y, max.y), (float)GetRandomValue(min.z, max.z) };
+	return Vector3{ (float)GetRandomValue(min.x, max.x), (float)GetRandomValue(min.y, max.y), (float)GetRandomValue(min	.z, max.z) };
 }
 
 TextureCubemap GenTextureCubemap(Shader shader, Texture2D panorama, int size, int format)

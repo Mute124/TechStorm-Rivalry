@@ -36,8 +36,7 @@ public:
 		return this->camera.position;
 	}
 
-	Vector3 setTarget()
-	{
+	Vector3 getTarget() {
 		return this->camera.target;
 	}
 

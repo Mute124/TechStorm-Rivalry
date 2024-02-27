@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("TechStorm Dev Tool")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+4354a8af52d88d78a72f46df34cd0855b6499cc6")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+876b9cecfb4e70ec1c82fc2f665951cf11fb62a1")]
 [assembly: System.Reflection.AssemblyProductAttribute("TechStorm Dev Tool")]
 [assembly: System.Reflection.AssemblyTitleAttribute("TechStorm Dev Tool")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

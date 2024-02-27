@@ -33,21 +33,24 @@ import Debug;
 
 void mainThread() {
 
-	
+
 
 	ThreadGroups threadGroups = ThreadGroups();
 	//TODO: Is this still relevant?
 	EGameState currentScreen = Main;
 	// Booleans
-	
-	
+
+
 // Lets the program know if the game should use HDR as the skybox
 	bool useHDR = true;
 
 	// Initialie the condition for the breathing sound.
 	bool isBreathing = false;
 
-
+	// Viewsway
+	float swayAmount = 0.0003f;
+	float swaySpeed = 0.02f;
+	float swayTimer = 0.0f;
 
 	// Near death affect. Important : THESE ARE REQUIRED FOR THE ARCH ALGORITHM TO WORK!
 	float nearDeathTimer = 0.0f; // The X axis
@@ -83,7 +86,8 @@ void mainThread() {
 		system("mkdir temp"); // run the system command to create the folder. Note : This is a windows command.
 	}
 
-
+	// Set initial random seed
+	srand(time(NULL));
 
 	// ----------------------------------------------------------------------------- Load Game
 	// Assets -----------------------------------------------------------------------------
@@ -294,9 +298,9 @@ void mainThread() {
 	// TODO : Is this still relevant and figure out what the hell this does.
 	Vector3 Orgin = Vector3
 	{
-		player->getPosition().x,
-		player->getPosition().y - 10.0f,
-		player->getPosition().z
+		player->cameraComponent->getPosition().x,
+		player->cameraComponent->getPosition().y - 10.0f,
+		player->cameraComponent->getPosition().z
 	};
 
 	// Note: See the comment regarding main menu
@@ -319,7 +323,7 @@ void mainThread() {
 
 	healthBarPositionX = game->windowWidth + healthBarOffsetX;
 	healthBarPositionY = game->windowHeight + healthBarOffsetY;
-	
+
 
 	// the below lines are just me messing with heightmaps.
 	Image cell = GenImageCellular(100, 100, 2);
@@ -329,15 +333,57 @@ void mainThread() {
 	ImageAlphaMask(&perlin, cell);
 	Mesh test = GenMeshHeightmap(perlin, Vector3{ 100, 100, 100 });
 
+	/*
+	if (player && player->cameraComponent)
+			{
+				if (!IsCursorHidden())
+				{
+					DisableCursor();
+				}
+				UpdateCamera(player->cameraComponent->getSelfCameraPointer(), player->cameraMode); // Update camera
+			}
+			else
+			{
+				// Handle null pointer reference or unhandled exception Add error handling code here
+			}
+
+			EnableCursor();
+
+	*/
+
+	/*
+		std::function<void()> cursorLock = [player]() {
+		if (player && player->cameraComponent)
+		{
+			if (!IsCursorHidden())
+			{
+				DisableCursor();
+				UpdateCamera(player->cameraComponent->getSelfCameraPointer(), player->cameraMode); // Update camera
+			}
+		}
+		else
+		{
+			// Handle null pointer reference or unhandled exception Add error handling code here
+		}
+		};
+
+	std::function<void()> cursorUnlock = [player]() {
+		EnableCursor();
+		};
+
+	game->layers->inputLayer->AddInput(KEY_LEFT_ALT, cursorUnlock, cursorLock);
+
+	*/
+
 	// Now we can run the game loop and start playing!
 	while (!WindowShouldClose())
 	{
-		UpdateCamera(player->getSelfCameraPointer(), player->cameraMode); // Update camera
+		UpdateCamera(player->cameraComponent->getSelfCameraPointer(), player->cameraMode); // Update camera
 		// NOTE : This is a very basic implementation of placing an object into the world. This is
 		// temporary and should be fleshed out.
 		if (IsMouseButtonPressed(MOUSE_BUTTON_RIGHT))
 		{
-			Vector3 placepos = player->setTarget();
+			Vector3 placepos = player->cameraComponent->setTarget();
 
 			gameObjectManager->pushObject(new Block(Vector3{ roundf(placepos.x), roundf(placepos.y), roundf(placepos.z) }, WHITE, game->renderers->forwardRenderer->pbrShader, GetDefaultModel()));
 		}
@@ -361,17 +407,17 @@ void mainThread() {
 		// Sprinting Mechanic
 		if (IsKeyDown(KEY_LEFT_SHIFT))
 		{
-			player->run();
+			player->controller->isRunning = true;
 		}
 		else
 		{
-			player->stopRunning();
+			player->controller->isRunning = false;
 		}
 
 		// NOTE : This is temporary and is only to test the health system
 		if (IsKeyDown(KEY_Y))
 		{
-			player->damage(5.0f);
+			//player->healthComp->damagePlayer(5.0f);
 		}
 		/*
 		---------------------------------------------------------------------------------
@@ -485,14 +531,16 @@ void mainThread() {
 
 		// The player's looking direction is the target of the camera. This is the direction the
 		// player is looking TODO : Check relevancy.
-		ray.position = player->getPosition();
-		ray.direction = player->setTarget();
+		ray.position = player->cameraComponent->getPosition();
+		ray.direction = player->cameraComponent->setTarget();
 
+		// Sway timer is equal to swayTimer + frame delta time
+		swayTimer += GetFrameTime();
 
+		// sway the camera according to the sway algorithm.
+		player->cameraComponent->setTarget(Vector3{ player->cameraComponent->setTarget().x + sin(swayTimer * swaySpeed) * swayAmount, player->cameraComponent->setTarget().y, player->cameraComponent->setTarget().z + cos(swayTimer * swaySpeed) * swayAmount });
 
-
-
-		if (player->health <= 15.0f) {
+		if (player->health <= 15) {
 			// equal to nearDeathTimer + frame delta time
 			nearDeathTimer += GetFrameTime();
 
@@ -521,13 +569,13 @@ void mainThread() {
 		// Where the player's camera is. We need to have this as a float array for the shader
 		float cameraPos[3] =
 		{
-			player->getPosition().x,
-			player->getPosition().y,
-			player->getPosition().z
+			player->cameraComponent->getPosition().x,
+			player->cameraComponent->getPosition().y,
+			player->cameraComponent->getPosition().z
 		};
 
 		// Update light position
-		sun.position = player->getPosition();
+		sun.position = player->cameraComponent->getPosition();
 
 		// Update the shader with the new light data. Note : any shader that uses lighting will need
 		// this data!
@@ -545,16 +593,16 @@ void mainThread() {
 
 		// Start texturing the FBO with what the user will be seeing. This includes UI and Scene objects.
 		game->renderers->forwardRenderer->startTexturing();
-		DrawError(0);
+		//DrawError(0);
 		/*
 		---------------------------------------------------------------------------------
 		|     2d Ui rendering for BEFORE 3d drawing										|
 		---------------------------------------------------------------------------------
 		*/
 
-		//DrawTextureRec(nearDeathTex, Rectangle{ 0, 0, (float)(game->renderers->forwardRenderer->fbo.texture.width), (float)(-game->renderers->forwardRenderer->fbo.texture.height) }, Vector2{ 0, 0 }, WHITE);
+		DrawTextureRec(nearDeathTex, Rectangle{ 0, 0, (float)(game->renderers->forwardRenderer->fbo.texture.width), (float)(-game->renderers->forwardRenderer->fbo.texture.height) }, Vector2{ 0, 0 }, WHITE);
 
-		BeginMode3D(player->getSelfCamera());
+		BeginMode3D(player->cameraComponent->getSelfCamera());
 
 		/*
 		---------------------------------------------------------------------------------
@@ -562,7 +610,17 @@ void mainThread() {
 		---------------------------------------------------------------------------------
 		*/
 
-		DrawCube(Vector3Zero(), 2.0f, 2.0f, 2.0f, WHITE);
+		/*
+			When Skyboxes are fixed, re-add the code snippet below
+
+			rlDisableBackfaceCulling();
+			rlDisableDepthMask();
+			// DrawModel(skybox, Vector3{0.0f, 0.0f, 0.0f}, 1.0f, WHITE);
+			rlEnableBackfaceCulling();
+			rlEnableDepthMask();
+
+		*/
+
 		// Set old car model texture tiling, emissive color and emissive intensity parameters on shader
 		SetShaderValue(game->renderers->forwardRenderer->pbrShader, textureTilingLoc, &block->blockTextureTiling, SHADER_UNIFORM_VEC2);
 
@@ -614,7 +672,7 @@ void mainThread() {
 		---------------------------------------------------------------------------------
 		*/
 
-		
+
 
 		// NOTE: Render texture must be y-flipped due to default OpenGL coordinates (left-bottom)
 		DrawTextureRec(game->renderers->forwardRenderer->fbo.texture, Rectangle{ 0, 0, (float)(game->renderers->forwardRenderer->fbo.texture.width), (float)(-game->renderers->forwardRenderer->fbo.texture.height) }, Vector2{ 0, 0 }, WHITE);
@@ -686,16 +744,16 @@ void mainThread() {
 
 int main()
 {
-	
+
 
 	// Run the game
 	std::thread t(std::move(mainThread));
-	
+
 	ScriptManager* scriptManager = new ScriptManager();
 
 	scriptManager->start(true);
 	t.join();
 
-	
-		return 0;
+
+	return 0;
 }

@@ -20,6 +20,6 @@ public:
 		
 	};
 
-	float hp;
-	float maxHP;
+	float hp = 100.0f;
+	float maxHP = 100.0f;
 };
