@@ -10,7 +10,7 @@
 #include <variant>
 
 template<typename comp>
-class Components_CSTR : public MRegistry_CSTR<T> {
+class Components_CSTR : public MRegistry_CSTR<comp> {
 
 public:
 
@@ -33,7 +33,7 @@ protected:
 class ComponentManager {
 public:
 
-	std::vector <Component*> comps;
+	//std::vector <Component*> comps;
 };
 
 

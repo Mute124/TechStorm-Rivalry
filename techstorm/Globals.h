@@ -18,6 +18,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "core/logging/Logman.h"
+
 // Plain structures in C++ (without constructors) can be initialized with { }
 #if defined(__cplusplus)
 #define CLITERAL(type) type
@@ -89,7 +91,7 @@
 #define GLSL_VERSION 100
 #endif
 
-
+#define MAX_KEYBINDS 40
 
 
 // -----------------------------------------------------------------------------
@@ -155,9 +157,11 @@ typedef struct
 	Vector3 v3;
 } TriVert;
 
+
 // a global model that can be used if no model is present, or it can be used for testing. Set in main.cpp
 static Model defaultModel = { 0 };
 
+//static std::map<const char*, KeyboardKey> GlobalKeyBinds;
 
 //-----------------------------------------------------------------------------
 // Functions
@@ -185,3 +189,7 @@ extern Vector3 Vector3Random(int min, int max);
 extern Vector3 RoundVec3(Vector3 Target);
 extern Vector3 Vector3MaxPos();
 extern Vector3 Vector3RandomEx(Vector3 min, Vector3 max);
+
+static void PrintFloat(const char *name, float val) {
+	Logman::Log(TextFormat("Value of %s is %f", name, val));
+}

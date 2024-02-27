@@ -1,15 +1,17 @@
 #pragma once
 #include "common.h"
 #include "core/rendering/Light.h"
-#include "core/player/Player.h"
+#include "player/Player.h"
 #include "core/scripting/ScriptManager.h"
 #include "core/rendering/Renderers.h"
 
+#include <any>
 class Game final
 {
 private:
 	toml::v3::parse_result optionsConfig;
 public:
+
 
 	static inline Vector2 windowSize = { 0, 0 };
 
@@ -156,8 +158,6 @@ public:
 
 		windowSize = { (float)windowWidth, (float)windowHeight };
 	}
-
-	
 
 	void endGame()
 	{

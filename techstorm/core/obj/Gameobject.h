@@ -1,5 +1,6 @@
 #pragma once
 #include "../../common.h"
+#include "Gameobject2D.h"
 #include "../ECS/ECSMan.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -12,6 +13,7 @@ using namespace std;
 class GameObject abstract 
 {
 public:
+
 	virtual void draw() {
 		DrawModel(this->model, this->position, scale, tint);
 	}
@@ -30,7 +32,6 @@ public:
 	float scale;
 	Color tint;
 	Shader shdr;
-
 };
 
 class GameobjectManager final {
@@ -44,6 +45,12 @@ public:
 		}
 	}
 
+//	void renderObjects2D() {
+	//	for (auto& obj : objects2DVector) {
+			//obj->draw();
+		//}
+	//}
+
 	void flushBuffer()
 	{
 		// we have to use this implementation due to each object can have their own behavior.
@@ -55,18 +62,28 @@ public:
 
 	void updateObjects() {
 
-		for (auto& GameObject : objectsVector)
+		for (auto& obj : objectsVector)
 		{
-			GameObject->onUpdate();
+			obj->onUpdate();
 		}
 	}
+
+//	void update2D() {
+//		for (auto& obj : objects2DVector) {
+//			obj->onUpdate();
+	//	}
+	//}
 
 	void pushObject(GameObject* obj) {
 		objectsVector.push_back(obj);
 	}
 
-	vector<GameObject*> objectsVector;
+	//void pushObject2D(GameObject2D* obj) {
+		//objects2DVector.push_back(obj);
+	//}
 
+	vector<GameObject*> objectsVector;
+	//vector<GameObject2D*> objects2DVector;
 };
 
 // Example game object

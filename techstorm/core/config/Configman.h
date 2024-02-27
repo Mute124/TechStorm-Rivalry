@@ -13,12 +13,7 @@
 
 class ConfigFile;
 
-
-
-
-
 // Component class of ConfigRegistry
-
 
 class ConfigRegistry
 {
@@ -61,7 +56,6 @@ private:
 	std::vector<ConfigFile> registry;
 };
 
-
 // NOTE : NO LONGER BROKEN!!! Still have to refactor though to use Registry Class. FUUUUUUUUUUUUUUUUUUUUUU
 class ConfigMan : public ConfigRegistrySecretary, public ConfigTypeConverter
 {
@@ -72,12 +66,7 @@ public:
 	};
 
 	~ConfigMan() {
-		try {
-			delete this;
-		}
-		catch(std::exception e) {
-			throw e.what();
-		}
+		delete this;
 	}
 
 	static void initConfigFile() {

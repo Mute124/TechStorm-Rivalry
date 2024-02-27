@@ -30,6 +30,9 @@ public:
 		customLog(LOG_WARNING, message, NULL);
 	}
 	
+	static inline void BlandLog() {
+		printf("\n");
+	}
 
 	// I dont even know what va_list is...
 	static inline void customLog(int msgType, const char* text, va_list args = 0)

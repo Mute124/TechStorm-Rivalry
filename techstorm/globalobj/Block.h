@@ -13,27 +13,21 @@
 // The class for, well blocks!
 class Block : public GameObject
 {
-public:
-	// Automatically sends it to the renderer.
-	void draw() override
-	{
-			DrawModel(model, position, 1.0f, color);
-	}
-
-
-	
+public:	
 	// main block constructor.
-	Block(Vector3 position, const Color color, Shader shader, Model model) : color(color), position(position), model(model)
+	Block(Vector3 position, const Color color, Shader shader, Model model)
 	{
 		Logman::customLog(LOG_TRACE, "Block Constructor", NULL);
 		this->model = model;
-
+		this->tint = color;
+		this->position = position;
+		this->shdr = shader;
 		const static Texture2D Bricks = LoadTexture("resources/textures/Block/Brick/Brick.png");
 		this->model.materials[0].shader = shader;
 
 
 		// why the fuck does PBR lighting not work on AMD cards but not nvidia?? 
-		this->model.materials[0].maps[MATERIAL_MAP_ALBEDO].color = BLUE;
+		this->model.materials[0].maps[MATERIAL_MAP_ALBEDO].color = WHITE;
 		this->model.materials[0].maps[MATERIAL_MAP_METALNESS].value = 0.0f;
 		this->model.materials[0].maps[MATERIAL_MAP_ROUGHNESS].value = 0.0f;
 		this->model.materials[0].maps[MATERIAL_MAP_OCCLUSION].value = 1.0f;
@@ -75,6 +69,8 @@ public:
 
 	void onUpdate() override
 	{
+		this->draw();
+		
 	};
 
 	void onDestroy() const override
@@ -86,16 +82,7 @@ public:
 	// deconstructor. DO NOT TOUCH OR I SWEAR TO GOD!
 	virtual ~Block()
 	{
-		deleteRequested = true;
+		delete this;
 	}
-
-
-	Color color; // color of the block, Right now not being used
-
-	bool deleteRequested; // currently unused, since it only takes 1 bit, this isnt gonna be deleted just yet.
 	static inline Vector2 blockTextureTiling = Vector2{ 0.5f, 0.5f };
-
-	const Mesh mesh = GenMeshCube(BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE);
-	Vector3 position; // position of the block
-	Model model;
 };
