@@ -1,26 +1,22 @@
 /*
-	Here is how a character's health is calculated. 
+	Here is how a character's health is calculated.
 
 	There are multiple factors, the main broad ones are bone health, circulatory health, brain health, critical organ health, risk factors (like weight),
 	Immune health, skin health, etc.
 
 	All of these are calculated in the same way.
 
-	All of the character's bodily functions are the face value of how healthy that part is, this also affects the other parts, for example the circulatory system is 
+	All of the character's bodily functions are the face value of how healthy that part is, this also affects the other parts, for example the circulatory system is
 	paramount to the health of ALL parts.
 */
 #pragma once
 #include "IScriptable.h"
 
-
 class CharacterHealth : public IScriptable {
 public:
-	
+
 	CharacterHealth(double defaultBloodOxygenation, double defaultBloodVolume) {
-
 	}
-
-
 
 	int overallHealth;
 
@@ -36,7 +32,6 @@ public:
 
 	int heartRate;
 
-
 	bool isDead;
 
 private:
@@ -45,7 +40,5 @@ private:
 	}
 
 	void calculateOverallHealth() {
-		
 	}
-
 };

@@ -6,6 +6,4 @@
 
 class ThreadGroupsSecretary : public IScriptable {
 public:
-
-
 };

@@ -2,19 +2,16 @@
 #include "../core/player/Player.h"
 #include "../core/scripting/ScriptManager.h"
 
-
 class InventoryItem abstract {
 protected:
 
 	Player* parentPlayer;
 
-	
-
 	const bool consumable;
 	const bool singleUse;
 
 	const char* name;
-	const char *rarity;
+	const char* rarity;
 
 	int uses;
 
@@ -27,7 +24,4 @@ protected:
 	void SetParentPlayer(Player* player) {
 		parentPlayer = player;
 	}
-
-
-	
 };

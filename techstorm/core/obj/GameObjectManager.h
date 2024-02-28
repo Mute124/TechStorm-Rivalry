@@ -15,8 +15,6 @@ public:
 		}
 	}
 
-
-
 	void flushBuffer()
 	{
 		// we have to use this implementation due to each object can have their own behavior.
@@ -27,23 +25,20 @@ public:
 	}
 
 	void updateObjects() {
-
 		for (auto& obj : objectsVector)
 		{
 			obj->onUpdate();
 		}
 	}
 
-
 	void pushObject(GameObject* obj) {
 		objectsVector.push_back(obj);
 	}
 
 	std::vector<GameObject*> objectsVector;
-	
 
 	/*
-	* 
+	*
 	* 	void renderObjects2D() {
 		for (auto& obj : objects2DVector) {
 			obj->draw();

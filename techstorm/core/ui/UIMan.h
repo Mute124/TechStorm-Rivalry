@@ -9,7 +9,6 @@ public:
 		addRogueContainer();
 	}
 
-	static inline Font fontTtf;
 	static inline void init() {
 	}
 	void draw(EDrawType drawType) {

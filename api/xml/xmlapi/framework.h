@@ -11,7 +11,6 @@
 #define CLITERAL(type)      (type)
 #endif
 
-
 // Per parent element
 #define MAX_CHILDREN_ELEMENTS 10
 
@@ -24,14 +23,14 @@
 |	C API																		    |
 -------------------------------------------------------------------------------------
 */
-#ifdef XML_C 
+#ifdef XML_C
 
-	// Some compilers (mostly macos clang) default to C++98,
-	// where aggregate initialization can't be used
-	// So, give a more clear error stating how to fix this
-	#if !defined(_MSC_VER) && (defined(__cplusplus) && __cplusplus < 201103L)
-	#error "C++11 or later is required. Add -std=c++11"
-	#endif
+// Some compilers (mostly macos clang) default to C++98,
+// where aggregate initialization can't be used
+// So, give a more clear error stating how to fix this
+#if !defined(_MSC_VER) && (defined(__cplusplus) && __cplusplus < 201103L)
+#error "C++11 or later is required. Add -std=c++11"
+#endif
 
 #if defined(__cplusplus)
 extern "C" {            // Prevents name mangling of functions
@@ -57,9 +56,7 @@ extern "C" {            // Prevents name mangling of functions
 	};
 
 	typedef struct XMLFile {
-		
 	};
-
 
 #if defined(__cplusplus)
 }
@@ -72,7 +69,6 @@ extern "C" {            // Prevents name mangling of functions
 -------------------------------------------------------------------------------------
 */
 #ifdef XML_CPP
-
 
 using namespace tinyxml2;
 

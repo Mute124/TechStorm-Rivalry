@@ -87,8 +87,6 @@ public:
 		depthMapFBO = LoadRenderTexture(width, height);
 	}
 
-
-
 	RenderTexture2D fbo; // FBO render texture
 	RenderTexture2D depthMapFBO; // shadowmap.
 
@@ -100,9 +98,6 @@ public:
 private:
 
 	// Task Templates
-
-
-
 
 	bool isDrawing;
 	bool isIn3DMode;

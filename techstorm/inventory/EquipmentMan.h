@@ -7,8 +7,6 @@
 #include <map>
 #include "IEquippable.h"
 
-
-
 using namespace std;
 class EquipmentMan
 {
@@ -16,7 +14,4 @@ public:
 
 	map<int, IEquippable*> equippablesMap;
 	vector<IEquippable*> equippablesVector;
-
-
 };
-

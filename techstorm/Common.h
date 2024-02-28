@@ -20,7 +20,7 @@
 #include <thread>
 #include <math.h>
 
-#include "core/config/Configman.h" 
+#include "core/config/Configman.h"
 #include "core/logging/Logman.h"
 #include "core/obj/Gameobject.h"
 #include "core/utils/Math.h"
@@ -29,7 +29,6 @@
 #include "core/scripting/IScriptable.h"
 #include "core/utils/ArrayUtils.h"
 #include "Globals.h"
-
 
 // End of Internal Libraries
 // External Libraries

@@ -18,5 +18,4 @@ public:
 
 		forwardRenderer->init();
 	}
-
 };

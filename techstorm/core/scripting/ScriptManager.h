@@ -11,7 +11,6 @@
 #include "../threading/ThreadGroups.h"
 #include "../threading/ThreadGroupTask.h"
 
-
 // Class that manages scripting and calls the script functions
 // todo: make this thread safe, and run in a threadgroup.
 class ScriptManager : public MRegistry<IScriptable> {
@@ -20,7 +19,6 @@ public:
 	static void init() {}
 
 	void start(bool threaded = false) {
-
 		_isThreaded = threaded;
 		for (int i = 0; i < _scripts.size(); i++) {
 			_scripts[i]->init();
@@ -28,21 +26,14 @@ public:
 			_scripts[i]->update();
 		}
 
-
-
 		if (_isThreaded) {
-			
 #ifdef USE_PROTOTYPE_THREADING
 			ThreadGroups::_threadGroups["scripting"]->addTask(std::make_unique<ThreadGroupTask>(std::move(std::bind(&ScriptManager::beginLoop, this))));
 #else
 			ThreadGroups::push("scripting", ThreadGroupTask::MakeThreadGroupTask(std::bind(&ScriptManager::beginLoop, this)));
 #endif
 		}
-
-
 	}
-
-
 
 	// Override function
 	void updateObjects() {
@@ -62,7 +53,7 @@ public:
 		// remove from map
 		_scripts.erase(ID);
 	}
-	
+
 	void end() {
 		for (int i = 0; i < _scripts.size(); i++) {
 			_scripts[i]->end();

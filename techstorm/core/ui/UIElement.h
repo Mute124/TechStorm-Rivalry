@@ -8,6 +8,39 @@ class UIContainer;
 
 class UIElement {
 public:
+	static inline Vector2 cursorPos;
+	static inline Vector2 mouseDelta;
+	static inline bool debugMode = true;
+	static inline bool inUIMode;
+	static inline Font font = LoadFont("Data/gui/fonts/Tektur-VariableFont_wdth,wght.ttf");
+	const char* text;
+	int id; // the id inside of it's container.
+	float fontSize = (float)font.baseSize;
+	float fontSpacing = 2.0f;
+	int globalID; // it's "nickname" globally
+	Vector2 anchor = Vector2Zero();
+	Vector2 position = Vector2Zero();
+	Vector2 offset = Vector2Zero();
+	Rectangle bounds;
+	Rectangle outline;
+	Color color = BLUE;
+	Vector2 velocity = Vector2Zero(); // use if you want to be able to move the element around.
+	int width;
+	int height;
+	int	scrollIndex;
+	bool alwaysVisible;	// persistance flag.
+	bool shouldUpdate;
+	bool isVisible;
+	bool isActive;
+	bool isHovered;
+	bool isClippable = false;// can 3d objects clip this?
+	bool affectedByPost = false; // should post process affects get calculated for this aswell?
+	bool drawable = true;
+	bool checkDrawEligibility;
+	bool deleteMe = false;	// whether or not the element is suicidal, and should be executed immediatly
+	EDrawType drawTime;
+	EUIType uiType = EUI_NULL;
+	UIContainer* parent;
 
 	UIElement() {
 		this->position = Vector2Add(this->offset, this->anchor);
@@ -17,18 +50,27 @@ public:
 	void draw() {
 		UpdateInfo();
 		if (debugMode) {
-			DrawCircleV(cursorPos, 4.0f, YELLOW);
-			DrawCircleV(mouseDelta, 8.0f, RED);
 		}
 
 		if (isActive && isVisible) {
+			if (this->uiType == EUI_TEXT) {
+			}
+
+			switch (this->uiType)
+			{
+			case EUI_TEXT:
+				DrawTextEx(font, this->text, this->position, this->fontSize, this->fontSpacing, this->color);
+				break;
+			default:
+				break;
+			}
+
 			customDraw();
 		}
 	}
 
 	// override this to add your own features
-	virtual void customDraw() {
-	}
+	virtual void customDraw() {}
 
 	void onUpdate() {
 		if (isActive) {
@@ -45,6 +87,7 @@ public:
 			}
 
 			UpdateInfo();
+
 			customUpdate();
 		}
 	}
@@ -68,56 +111,11 @@ public:
 		this->parent = container;
 	}
 
-	// globals
+protected:
 
-	// cursor crap
-	static inline Vector2 cursorPos;
-	static inline Vector2 mouseDelta;
-
-	static inline bool debugMode = true;
-	static inline bool inUIMode;
-
-	// the id inside of it's container.
-	int id;
-
-	// it's "nickname" globally
-	int globalID;
-
-	Vector2 anchor;
-	Vector2 position;
-	Vector2 offset;
-
-	Rectangle bounds;
-	Rectangle outline;
-
-	// use if you want to be able to move the element around.
-	Vector2 velocity;
-
-	int width;
-	int height;
-	int	scrollIndex;
-
-	// persistance flag.
-	bool alwaysVisible;
-	bool shouldUpdate;
-	bool isVisible;
-	bool isActive;
-	bool isHovered;
-	// can 3d objects clip this?
-	bool isClippable = false;
-	// should post process affects get calculated for this aswell?
-	bool affectedByPost;
-
-	bool drawable = true;
-
-	bool checkDrawEligibility;
-
-	// whether or not the element is suicidal, and should be executed immediatly
-	bool deleteMe = false;
-
-	EDrawType drawTime;
-	EUIType uiType;
-	UIContainer* parent;
+	void SetType(EUIType type) {
+		this->uiType = type;
+	}
 };
 
 // The UI container not only contains all elements, but also manages them aswell.

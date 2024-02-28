@@ -12,8 +12,6 @@ class PlayerController : public PlayerCharacter
 {
 protected:
 
-	
-
 	int mode;
 	float speed;
 	float tiltSpeed;
@@ -39,7 +37,6 @@ public:
 	bool canMove = true;
 	bool isGrounded = false;
 
-
 	float walkSpeed = 0.03f;
 	float runChangeFactor = 43.33f;
 
@@ -54,7 +51,6 @@ public:
 	}
 
 	PlayerController() {
-
 	}
 
 	void setSpeed(float speed) {
@@ -63,7 +59,6 @@ public:
 
 	void update(Camera* camera)
 	{
-
 		if (!this->isRunning) {
 			this->isRunning = false;
 			setSpeed(this->walkSpeed); //m/s
@@ -139,7 +134,6 @@ public:
 
 class CameraComp
 {
-
 public:
 	CameraComp* cameraComp;
 	CameraComp(CameraData cameradata) : camera(cameradata.constructToCamera()) {
@@ -260,18 +254,11 @@ public:
 			startDriving = false;
 		}
 
-
 		// View Sway
-
-
 
 		if (startDriving) {
 			drive();
 		}
-
-
-
-
 	};
 	// sends player data to the games render
 	void draw() override
@@ -291,7 +278,6 @@ public:
 		delete this;
 	}
 
-
 	Model model; // Player model
 	int cameraMode;
 
@@ -300,7 +286,6 @@ public:
 	static inline CameraComp* cameraComponent;
 
 	PlayerController* controller = new PlayerController(KEY_W, KEY_S, KEY_A, KEY_D, KEY_SPACE, KEY_C, cameraMode);
-
 
 	bool isRunning;
 
@@ -348,5 +333,3 @@ private:
 
 	int maxHP = STARTINGHP;
 };
-
-

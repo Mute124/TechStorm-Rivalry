@@ -15,7 +15,6 @@ public:
 
 	// store data into a log file following the logman format
 	static inline void Store(const char* message) {
-		
 	}
 
 	static inline void Log(const char* message) {
@@ -29,7 +28,7 @@ public:
 	static inline void Warn(const char* message) {
 		customLog(LOG_WARNING, message, NULL);
 	}
-	
+
 	static inline void BlandLog() {
 		printf("\n");
 	}
@@ -37,10 +36,8 @@ public:
 	// I dont even know what va_list is...
 	static inline void customLog(int msgType, const char* text, va_list args = 0)
 	{
-
 		char timeStr[64] = { 0 };
-		
-		
+
 		// Works, but isnt the best. eh fuck it
 		time_t now = time(NULL);
 		struct tm* tm_info = localtime(&now);
@@ -69,6 +66,4 @@ public:
 		vprintf(text, args);
 		printf("\n");
 	}
-
-
 };

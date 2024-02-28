@@ -4,5 +4,4 @@
 class RenderObject abstract : public GameObject
 {
 public:
-	
 };

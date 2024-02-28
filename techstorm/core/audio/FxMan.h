@@ -2,10 +2,9 @@
 
 class FxMan {
 public:
-FxMan();
-virtual ~FxMan();
+	FxMan();
+	virtual ~FxMan();
 
-void test() {
-
+	void test() {
 	}
 };

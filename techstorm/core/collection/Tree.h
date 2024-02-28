@@ -17,7 +17,7 @@ class Tree {
 public:
 
 	template<typename t>
-	std::vector<t> getBranch(const char *branch) {
+	std::vector<t> getBranch(const char* branch) {
 		return branches[branch];
 	}
 
@@ -25,4 +25,3 @@ private:
 
 	std::map<const char*, std::vector<std::any>> branches;
 };
-

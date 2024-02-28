@@ -6,21 +6,17 @@
 #include <stdlib.h>
 #include <vector>
 
-
-
 using namespace std;
 
-class GameObject abstract 
+class GameObject abstract
 {
 public:
 
 	virtual void draw() abstract {
-
 		Logman::Log("Gameobj");
 	}
 	virtual ~GameObject()
 	{
-
 	}
 
 	virtual void onUpdate() {}; // Called every frame
@@ -45,7 +41,6 @@ public:
 		}
 	}
 
-
 	void flushBuffer()
 	{
 		// we have to use this implementation due to each object can have their own behavior.
@@ -56,23 +51,17 @@ public:
 	}
 
 	void updateObjects() {
-
 		for (auto& obj : objectsVector)
 		{
 			obj->onUpdate();
 		}
 	}
 
-
-
-
 	void pushObject(GameObject* obj) {
 		objectsVector.push_back(obj);
 	}
 
-
 	vector<GameObject*> objectsVector;
-
 };
 
 // Example game object
@@ -80,13 +69,12 @@ class ExampleObject : public GameObject {
 public:
 	ExampleObject(/*Initialization Variables*/) {
 		// Startup code. Done only once
-		
 	}
 	void draw() override {
 		// On draw
 	}
 	void onUpdate() override {
-		// tasks to do on each update. 
+		// tasks to do on each update.
 	}
 	// What to do when destroyed.
 	void onDestroy() const override {
@@ -94,7 +82,6 @@ public:
 	}
 
 	// Other methods
-
 
 	// Other variables.
 

@@ -4,5 +4,4 @@
 typedef struct AfflictionAffect {
 	int affects[AFFECTABLE_MAX];
 	const int changeFactor;
-
 };

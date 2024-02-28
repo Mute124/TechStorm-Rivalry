@@ -15,7 +15,7 @@ public:
 	InventoryMan(const char* itemsFilePath) : ITEMSPATH(itemsFilePath) {
 	}
 
-	// Essentially loads and sets up all items within resources.tsr file. 
+	// Essentially loads and sets up all items within resources.tsr file.
 	// .tsr file stands for TechStorm Resources.
 	static inline void SetupItems() {
 		XMLDocument doc;
@@ -44,7 +44,6 @@ public:
 
 					XMLElement* rarity = itemElement->FirstChildElement("Rarity");
 
-					
 					// todo : Assign IDs
 					item = new Item(itemName->GetText(), materialType->GetText(), LoadImage(icon->GetText()), NULL, rarity->GetText());
 

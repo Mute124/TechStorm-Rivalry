@@ -12,7 +12,6 @@ private:
 	toml::v3::parse_result optionsConfig;
 public:
 
-
 	static inline Vector2 windowSize = { 0, 0 };
 
 	int windowWidth;
@@ -24,7 +23,6 @@ public:
 	// Config manager instance
 	ConfigMan* configman = new ConfigMan();
 
-
 	static inline Renderers* renderers;
 	static inline ScriptManager* scriptManager;
 
@@ -33,7 +31,6 @@ public:
 	// deconstructor. This just deletes itself, I guess it is suicide?
 	~Game()
 	{
-		
 		delete this;
 	}
 
@@ -47,16 +44,11 @@ public:
 	}
 
 	void init() {
-		
 	}
 
 	void StartGame()
 	{
-
 		SetTraceLogCallback(Logman::customLog);
-
-
-
 
 		// Read config to decide what to set for the game
 		Logman::customLog(LOG_INFO, "Initiating Config Manager", NULL);
@@ -77,8 +69,6 @@ public:
 
 			windowHeight = ConfigTypeConverter::strToInt(&optionsConfig["Window"]["windowHeight"].as_string()->operator std::string & ());
 			Logman::customLog(LOG_INFO, TextFormat("Setting window height to %i", windowHeight), NULL);
-
-
 		}
 		else
 		{
@@ -97,14 +87,12 @@ public:
 				windowHeight = GetMonitorHeight(0);
 			}
 			else {
-
 				windowWidth = ConfigTypeConverter::strToInt(&optionsConfig["Window"]["windowWidth"].as_string()->operator std::string & ());
 				Logman::customLog(LOG_INFO, TextFormat("Setting window width to %i", windowWidth), NULL);
 
 				windowHeight = ConfigTypeConverter::strToInt(&optionsConfig["Window"]["windowHeight"].as_string()->operator std::string & ());
 				Logman::customLog(LOG_INFO, TextFormat("Setting window height to %i", windowHeight), NULL);
 			}
-
 		}
 
 		// Stamp window config flags & Manufacture
@@ -130,17 +118,13 @@ public:
 		ImageFormat(&icon, PIXELFORMAT_UNCOMPRESSED_R8G8B8A8);
 		SetWindowIcon(icon);
 
-
 		Renderers* renderers = new Renderers();
-
 
 		if (isFullscreen == true) {
 			renderers->forwardRenderer->createRenderTexture(GetScreenWidth(), GetScreenHeight());
-
 		}
 		else {
 			renderers->forwardRenderer->createRenderTexture(windowWidth, windowHeight);
-
 		}
 
 		renderers->forwardRenderer->bloomShader = LoadShader(0, "resources/shaders/bloom.fs");
@@ -154,14 +138,11 @@ public:
 
 		SetTargetFPS(60);
 
-		
-
 		windowSize = { (float)windowWidth, (float)windowHeight };
 	}
 
 	void endGame()
 	{
-
 		CloseWindow(); // Close window and OpenGL context
 		CloseAudioDevice();
 		delete configman;

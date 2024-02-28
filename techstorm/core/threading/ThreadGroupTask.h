@@ -4,8 +4,6 @@
 #include <stdlib.h>
 #include <functional>
 
-
-
 class ThreadGroupTask {
 public:
 

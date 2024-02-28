@@ -42,7 +42,6 @@ public:
 				}
 			}
 			})));
-		
 	}
 
 	void addTask(ThreadGroupTask* task) {
@@ -54,7 +53,6 @@ public:
 		isRunning = false;
 		terminate = true;
 		std::this_thread::yield();
-
 	}
 
 	void join() {
@@ -65,7 +63,7 @@ public:
 	bool isIdle = !isBusy;
 	bool terminate;
 	bool isRouge;
-	
+
 	const char* name;
 
 	int groupID;
@@ -79,5 +77,4 @@ private:
 	std::queue<ThreadGroupTask*> taskQueue;
 
 	std::thread* localThread;
-	
 };

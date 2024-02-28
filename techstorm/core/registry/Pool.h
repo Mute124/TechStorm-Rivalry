@@ -40,9 +40,6 @@ public:
 		return pool.empty();
 	}
 
-
-
-
 private:
 	std::queue<T*> pool;
 };

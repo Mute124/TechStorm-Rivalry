@@ -12,23 +12,20 @@
 
 #include "IMoveableCharacter.h"
 
-
-
 // A game character abstract class
 class Character abstract : public GameObject
 {
-
 public:
 
 	/*
 	* Classifications are based off of real wound classifications. Green (minor), yellow(moderate), and red(critical)
-	* 
+	*
 	* Minor severity denotes it is in early stage of healing, and most likely to recover with adequate care
-	* 
+	*
 	* Moderate severity denotes it should get more medical attention and treatment than minor ones, but is unlikely to become lethal.
-	* 
+	*
 	* Critical severity denotes it NEEDS medical attention
-	* 
+	*
 	*/
 	enum EStatSeverity {
 		SEVERITY_NULL,
@@ -40,7 +37,7 @@ public:
 	class CharacterStat {
 	public:
 		// Set isBad to true if it should start AT ZERO
-		CharacterStat(bool isBad, float delta, const char* name) : name(name){
+		CharacterStat(bool isBad, float delta, const char* name) : name(name) {
 			if (!isBad) {
 				this->val = 100.0f;
 			}
@@ -61,12 +58,9 @@ public:
 			}
 
 			this->deltaVal = 0.0f;
-
-
 		}
 
 		CharacterStat() {
-
 		}
 
 		// Note: THE DELTA MUST BE POSITIVE!
@@ -74,7 +68,7 @@ public:
 			this->isTreated = true;
 			this->treatmentDelta = -delta;
 		}
-		
+
 		// adds the changeVal parameter to the deltaVal
 		void changeDelta(float delta) {
 			this->previousDelta = this->deltaVal;
@@ -86,46 +80,40 @@ public:
 			/*
 			* incremental delta is calculated based on the slope of the previous and current delta times treatmentDelta + the stat's base severity delta.
 			* equation looks like below
-			* 
+			*
 			* idelta = tDelta(pDelta - cDelta) + bSeverity
-			* 
-			* 
+			*
+			*
 			*/
-			
-			
+
 			this->severityDelta = (deltaVal * treatmentDelta) * 100.0f;
 			this->val += (deltaVal * treatmentDelta) * 100.0f;
-			
 		}
 
 		float val;
 		float deltaVal;
-		
-		
+
 		const char* name;
 		bool isBad;
 		bool isTreated;
-		
-		
+
 	protected:
 		// used to calculate incremental severity
 		float previousDelta;
 		float severityDelta;
 
-
 		float treatmentDelta;
 		float incrementalDelta;
 	};
 
-
 protected:
 
-		Ray* target;
+	Ray* target;
 
-		std::map<const char*, CharacterStat> stats;
+	std::map<const char*, CharacterStat> stats;
 
 public:
-	
+
 	bool godMode = false;
 	bool invisible = false;
 	float health = 100.0f;
@@ -214,7 +202,6 @@ public:
 		return this->speed == 0.0f;
 	}
 
-
 	void initCharacter(float baseSpeed, float runDelta, float crawlDelta, float walkDelta) {
 		this->init(baseSpeed, runDelta, crawlDelta, walkDelta);
 
@@ -228,14 +215,13 @@ public:
 		this->addStats(stats);
 	}
 
-
 	// updates values of health
 	void tick() {
 		for (auto& stat : stats) {
 			stat.second.tick();
 		}
 
-		// update vitals 
+		// update vitals
 		if (this->health <= 0.0f) {
 			this->isDead = true;
 		}

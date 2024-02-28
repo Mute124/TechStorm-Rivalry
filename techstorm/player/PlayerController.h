@@ -17,7 +17,6 @@ protected:
 
 	float mouseSensitivity = 0.05f;
 
-
 	// needs to be optimized, technically we dont need parameters, we can just use this classes variable for it.
 	float CalculateCameraTilt() {
 		static const float NOCHANGE = 0.0f;
@@ -26,8 +25,6 @@ protected:
 	}
 public:
 
-	
-
 	float walkSpeed = 0.03f;
 	float runChangeFactor = 43.33f;
 
@@ -35,12 +32,9 @@ public:
 		this->movementSpeed = speed;
 	}
 
-	PlayerController(int mode) :  mode(mode)
+	PlayerController(int mode) : mode(mode)
 	{
-		
 	}
-
-
 
 	PlayerController() = default;
 
@@ -50,14 +44,12 @@ public:
 
 	void updateController(Camera* camera)
 	{
-	
-
 		// Camera PRO usage example (EXPERIMENTAL)
 		// This new camera function allows custom movement/rotation values to be directly provided
 		// as input parameters, with this approach, rcamera module is internally independent of raylib inputs
 		UpdateCameraPro(camera,
 			Vector3{
-				(IsKeyDown(KEY_W) || IsKeyDown(KEY_UP))* movementSpeed -      // Move forward-backward
+				(IsKeyDown(KEY_W) || IsKeyDown(KEY_UP)) * movementSpeed -      // Move forward-backward
 				(IsKeyDown(KEY_S) || IsKeyDown(KEY_DOWN)) * movementSpeed,
 				(IsKeyDown(KEY_D) || IsKeyDown(KEY_RIGHT)) * movementSpeed -   // Move right-left
 				(IsKeyDown(KEY_A) || IsKeyDown(KEY_LEFT)) * movementSpeed,

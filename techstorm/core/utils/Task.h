@@ -5,7 +5,7 @@
 class Task {
 public:
 
-	Task(){}
+	Task() {}
 	Task(std::function<void()> task) {
 		this->task = task;
 		this->threaded = false;

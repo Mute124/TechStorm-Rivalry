@@ -15,7 +15,7 @@ public:
 		init(groupName, groupSize);
 	}
 
-	ThreadGroup(const char *groupName) {
+	ThreadGroup(const char* groupName) {
 		init(groupName, 1);
 	}
 
@@ -27,7 +27,6 @@ public:
 			threads.insert(pair<int, Thread*>(i, t));
 		}
 
-		
 		Logman::Log(groupName);
 	}
 
@@ -62,7 +61,7 @@ public:
 	}
 
 private:
-	const char *groupName;
+	const char* groupName;
 	int groupID;
 
 	static inline int _groupCount = 0;

@@ -3,10 +3,9 @@
 #include "IScriptable.h"
 #include "ScriptManager.h"
 
-
 class IEquippable : public IScriptable
 {
-public: 
+public:
 
 	bool IsEquipped();
 
@@ -19,8 +18,6 @@ public:
 	bool equipped = false;
 
 	Model model;
-	
-	Transform transform;
-	
-};
 
+	Transform transform;
+};

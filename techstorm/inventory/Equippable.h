@@ -4,8 +4,5 @@
 class Equippable : public IEquippable
 {
 	Equippable() {
-
 	}
-
 };
-

@@ -2,7 +2,6 @@
 #include "common.h"
 
 typedef struct {
-	
 	Texture albedoMap; // The diffuse texture
 	Texture normalMap;
 	Texture mraoMap; // metallic, roughness, ao
@@ -23,16 +22,13 @@ public:
 		if (useDefaultShader) {
 			delete shader;
 
-
 			// Set material values
 			this->material.maps[MATERIAL_MAP_ALBEDO].color = properties.albedoColor;
 			this->material.maps[MATERIAL_MAP_METALNESS].value = properties.metallic;
 			this->material.maps[MATERIAL_MAP_ROUGHNESS].value = properties.roughness;
 			this->material.maps[MATERIAL_MAP_OCCLUSION].value = properties.ao;
-			
-			
+
 			bool useEmmisive = properties.emissiveColor.a != 0;
-			
 
 			// check if disabled
 			if (useEmmisive) {
@@ -46,10 +42,6 @@ public:
 			this->material.maps[MATERIAL_MAP_METALNESS].texture = properties.mraoMap;
 			this->material.maps[MATERIAL_MAP_NORMAL].texture = properties.normalMap;
 			this->material.maps[MATERIAL_MAP_ALBEDO].texture = properties.albedoMap;
-
-
-
-
 		}
 	};
 

@@ -42,11 +42,10 @@
 #define NUM_FRAMES 3          // Number of frames (rectangles) for the button sprite texture
 
 // Max amount of objects. Unused for now, will eventually be used later on.
-#define MAX_INSTANCES 10000 
+#define MAX_INSTANCES 10000
 
 // Max amount of loaded shaders. Unused for right now
 #define MAX_SHADERS 10
-
 
 // -----------------------------------------------------------------------------
 // Skybox Constants
@@ -94,12 +93,11 @@
 
 #define MAX_KEYBINDS 40
 
-
 // -----------------------------------------------------------------------------
 // Utilities
 // -----------------------------------------------------------------------------
 
-// Types 
+// Types
 
 // the same as Vector2 but with int
 typedef struct
@@ -158,8 +156,6 @@ typedef struct
 	Vector3 v3;
 } TriVert;
 
-
-
 // a global model that can be used if no model is present, or it can be used for testing. Set in main.cpp
 static Model defaultModel = { 0 };
 
@@ -192,7 +188,6 @@ extern Vector3 RoundVec3(Vector3 Target);
 extern Vector3 Vector3MaxPos();
 extern Vector3 Vector3RandomEx(Vector3 min, Vector3 max);
 
-
-static void PrintFloat(const char *name, float val) {
+static void PrintFloat(const char* name, float val) {
 	Logman::Log(TextFormat("Value of %s is %f", name, val));
 }

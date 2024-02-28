@@ -17,7 +17,6 @@ public:
 		DrawRectangle((int)position.x, (int)position.y, 100, 20, BLACK);
 		DrawRectangleLines((int)position.x, (int)position.y, 100, 20, RED);
 		DrawRectangle((int)position.x, (int)position.y, 100 * percentage, 20, GREEN);
-		
 	};
 
 	float hp = 100.0f;

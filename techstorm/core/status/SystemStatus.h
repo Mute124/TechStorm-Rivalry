@@ -3,8 +3,6 @@
 
 class SystemStatus {
 public:
-	
-	
 
 private:
 	ESystemStatus systemStatus;

@@ -7,4 +7,3 @@ typedef struct GameState {
 	int screenWidth;
 	int screenHeight;
 };
-

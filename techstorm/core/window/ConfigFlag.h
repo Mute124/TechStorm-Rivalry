@@ -4,7 +4,6 @@
 #include <vector>
 #include <queue>
 
-
 class ConfigFlag {
 public:
 
@@ -175,10 +174,9 @@ public:
 
 		// set flags
 		SetConfigFlags(*flagsArray);
-
 	}
 
-	static void testStamps(unsigned int flags) { 
+	static void testStamps(unsigned int flags) {
 		Logman::Log(std::to_string(flags).c_str());
 	}
 
@@ -194,7 +192,6 @@ public:
 	void logStampValues() {
 		// get all flags
 		for (auto& flag : flagStamps) {
-
 			std::string str = "Flag: " + std::to_string((int)ConfigFlag::getFlagValue(flag.first)) + " : " + std::to_string(flag.second);
 			Logman::Log(str.c_str());
 		}
@@ -203,5 +200,4 @@ public:
 private:
 	// A map of flags and if they have been stamped (enabled or disabled)
 	std::map<ConfigFlags, bool> flagStamps;
-
 };

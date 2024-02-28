@@ -11,24 +11,17 @@
 
 template<typename comp>
 class Components_CSTR : public MRegistry_CSTR<comp> {
-
 public:
 
 	void update() {
-		
 	}
-	
+
 	template<typename T>
 	void addComponent(T comp) {
-		
 	}
 
-
 protected:
-
-
 };
-
 
 class ComponentManager {
 public:
@@ -36,17 +29,14 @@ public:
 	//std::vector <Component*> comps;
 };
 
-
 /*
 class ESCMan : public IScriptable, public MRegistry_Ext<int, Entity> {
 public:
 
 	// register a new entity
 	void registerEntity(Entity* newEntity) {
-
 		if (newEntity == nullptr) {
 			// handle null entity.
-
 		}
 		else {
 			if (newEntity->id == 0) {
@@ -56,9 +46,6 @@ public:
 			// Add logic here to register the new entity
 			this->Add(newEntity);
 		}
-
-
-
 	}
 
 	void kill(Vector3 position) {
@@ -75,7 +62,6 @@ public:
 			pushTestSuccess = true;
 		}
 		catch (...) {
-
 			Logman::Log("Push Test Failed");
 		}
 
@@ -92,10 +78,7 @@ public:
 
 			Entity* closest = getClosest(Vector3(0, 0, 0));
 
-
 			Logman::Log(TextFormat("Closest Entity: %s", closest->id));
-
-
 		} catch (...) {
 			Logman::Log("Get Closest Test Failed");
 		}
@@ -103,8 +86,6 @@ public:
 
 	// bubble sort entities by distance and get the closest entity to a given position.
 	Entity* getClosest(Vector3 position) {
-
-
 Entity* closest = nullptr;
 std::map<int, Entity*>* entities = getEntities();
 
@@ -125,7 +106,6 @@ if (entities) {
 	}
 }
 	}
-
 
 private:
 	static inline int idCounter = 0;

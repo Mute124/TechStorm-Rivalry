@@ -13,4 +13,3 @@ typedef enum EBodySlots {
 	SLOT_HANDS,
 	SLOT_ARMS,
 } ebs;
-

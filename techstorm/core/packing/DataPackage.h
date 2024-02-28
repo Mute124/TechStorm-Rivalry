@@ -20,12 +20,11 @@ public:
 		memcpy(&result, this->data, sizeof(T));
 		return result;
 	}
-	
 
 	DataPackage get() {
 		return *this;
 	}
 private:
-	char *data = nullptr;
+	char* data = nullptr;
 	int size = 0;
 };

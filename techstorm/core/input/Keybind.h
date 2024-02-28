@@ -6,4 +6,3 @@ typedef struct Keybind {
 	const char* name;
 	Task* onPress;
 };
-

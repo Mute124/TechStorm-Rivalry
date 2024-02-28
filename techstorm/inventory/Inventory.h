@@ -12,11 +12,8 @@ public:
 	}
 
 	void draw() {
-
 	}
 
 	std::map<const char*, Item*> itemsMap;
 	std::vector<Item*> itemsRegistry;
-
-
 };

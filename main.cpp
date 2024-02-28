@@ -377,11 +377,7 @@ void mainThread() {
 
 	uiMan->pushRogueElement(elementTest);
 
-	int index = 0;
-
 	const char* mode = "Unknown";
-
-	Font font = LoadFont("Data/gui/fonts/Tektur-VariableFont_wdth,wght.ttf");
 
 	SetTextLineSpacing(48);
 	//MenuCamera* camera2D = new MenuCamera();
@@ -728,7 +724,7 @@ void mainThread() {
 		// by half. We can then draw a circle in the middle of the screen.
 		DrawCircle(game->windowWidth / 2, game->windowHeight / 2, 3, GRAY);
 
-		DrawTextEx(font, mode, Vector2{ 20.0f, 100.0f }, (float)font.baseSize, 2, LIME);
+		//DrawTextEx(UIElement, mode, Vector2{ 20.0f, 100.0f }, (float)font.baseSize, 2, LIME);
 
 		// Let raylib know that we're done drawing to the screen.
 		game->renderers->forwardRenderer->endDraw();

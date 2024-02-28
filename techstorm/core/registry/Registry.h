@@ -7,8 +7,6 @@
 class VectorRegistry
 {
 public:
-	
-	
 };
 
 template<typename T>
@@ -21,7 +19,7 @@ public:
 
 	// Get the next available slot. Use this if you need to assign an ID to an object before pushing it.
 	int GetNextSlot() {
-		return objectCount+1;
+		return objectCount + 1;
 	}
 
 	// Adds it to registry and gives you it's slot
@@ -94,10 +92,9 @@ private:
 	std::map<SortType, T*, std::less<SortType>> registry;
 };
 
-
 template<typename T>
 class MRegistry_Str {
-public: 
+public:
 
 	T* getConfig(std::string name) {
 		return registry[name];
@@ -163,5 +160,4 @@ private:
 
 	int objectCount = 0;
 	std::map<const char*, T*> registry;
-
 };

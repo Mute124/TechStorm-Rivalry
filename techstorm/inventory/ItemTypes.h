@@ -6,7 +6,7 @@ typedef enum EMaterialTypes {
 
 typedef enum EItemRarity {
 	COMMON,
-	UNCOMMON, 
+	UNCOMMON,
 	RARE,
 	EPIC,
 	LEGENDARY,

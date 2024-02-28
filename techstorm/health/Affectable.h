@@ -76,7 +76,6 @@ typedef enum EAffectable {
 	AFFECTABLE_LUNG_SIZE, // lung size
 	AFFECTABLE_LUNG_HEALTH, // lung health
 
-
 	// Brain
 	AFFECTABLE_BRAIN_OXYGEN, // brain oxygen levels
 	AFFECTABLE_BRAIN_DAMAGE,
@@ -90,11 +89,9 @@ typedef enum EAffectable {
 	AFFECTABLE_NEED_BLOOD, // Healthy threshold for blood level
 	AFFECTABLE_NEED_OXYGEN, // Healthy threshold for oxygen level
 
-
 	// Overall factors
 	AFFECTABLE_OXYGEN, // Overall oxygen levels
 	AFFECTABLE_FATIGUE, // how sore the character is
 	AFFECTABLE_TEMPERATURE, // character temperature
 	AFFECTABLE_RESISTANCE, // character resistances to other afflictions
 };
-

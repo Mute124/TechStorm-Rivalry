@@ -3,7 +3,6 @@
 #include <stdlib.h>
 #include <string>
 
-
 int getArrayLength(int sizeOfArray, int typeSize) {
 	return sizeOfArray / typeSize;
 }

@@ -2,17 +2,15 @@
 #include "../../Common.h"
 #include "GameShaders.h"
 
-
 class GameShaderManager final {
 public:
 
 	static void init() {
 	}
 
-	static inline void push(Shader shader, const char *name) {
+	static inline void push(Shader shader, const char* name) {
 		_shaders[name] = shader;
 	}
-
 
 	static inline Shader get(const char* name) {
 		return _shaders[name];
@@ -26,10 +24,8 @@ public:
 		_shaders.clear();
 	}
 
-	
-
 private:
 
 	static inline int _registeredShaders = 0;
-	static inline std::map<const char *, Shader> _shaders;
+	static inline std::map<const char*, Shader> _shaders;
 };
