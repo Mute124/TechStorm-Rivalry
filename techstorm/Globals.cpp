@@ -391,3 +391,4 @@ TextureCubemap GenTextureCubemap(Shader shader, Texture2D panorama, int size, in
 
 	return cubemap;
 }
+

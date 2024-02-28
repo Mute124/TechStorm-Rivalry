@@ -13,6 +13,7 @@
 
 #include "raylib.h"
 #include "raymath.h"
+#include "core/utils/Math.h"
 #include "rlgl.h"
 #include <vector>
 #include <stdio.h>
@@ -158,6 +159,7 @@ typedef struct
 } TriVert;
 
 
+
 // a global model that can be used if no model is present, or it can be used for testing. Set in main.cpp
 static Model defaultModel = { 0 };
 
@@ -189,6 +191,7 @@ extern Vector3 Vector3Random(int min, int max);
 extern Vector3 RoundVec3(Vector3 Target);
 extern Vector3 Vector3MaxPos();
 extern Vector3 Vector3RandomEx(Vector3 min, Vector3 max);
+
 
 static void PrintFloat(const char *name, float val) {
 	Logman::Log(TextFormat("Value of %s is %f", name, val));

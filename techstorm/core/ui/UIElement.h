@@ -1,96 +1,209 @@
 #pragma once
-#include "UIMan.h"
+#include "../scripting/IScriptable.h"
+#include "../registry/Registry.h"
+#include "EUITypes.h"
+#include "EDrawType.h"
 
+class UIContainer;
 
-
-class UIElement abstract {
+class UIElement {
 public:
 
-	virtual void draw() = 0;
+	UIElement() {
+		this->position = Vector2Add(this->offset, this->anchor);
+		this->drawTime = EDrawType::DRAW_FINAL;
+	}
 
-	virtual void update() = 0;
+	void draw() {
+		UpdateInfo();
+		if (debugMode) {
+			DrawCircleV(cursorPos, 4.0f, YELLOW);
+			DrawCircleV(mouseDelta, 8.0f, RED);
+		}
 
-	virtual void onHover() = 0;
+		if (isActive && isVisible) {
+			customDraw();
+		}
+	}
 
-	virtual void onClick() = 0;
+	// override this to add your own features
+	virtual void customDraw() {
+	}
 
-	virtual void onRelease() = 0;
+	void onUpdate() {
+		if (isActive) {
+			if (this->checkDrawEligibility) {
+				if (isActive || alwaysVisible) {
+					this->drawable = true;
+				}
+				else {
+					if (isVisible) {
+						this->drawable = true;
+					}
+				}
+				this->checkDrawEligibility = false;
+			}
 
-	virtual void onMove() = 0;
+			UpdateInfo();
+			customUpdate();
+		}
+	}
 
-	virtual void onScroll() = 0;
+	virtual void customUpdate() {
+	}
 
-	virtual void onKey() = 0;
+	static void UpdateInfo() {
+		cursorPos = GetMousePosition();
+		mouseDelta = GetMouseDelta();
+	}
 
-	virtual void onChar() = 0;
+	virtual void onDestroy() {
+	}
 
+	void kill() {
+		delete this;
+	}
 
+	void setContainer(UIContainer* container) {
+		this->parent = container;
+	}
 
-protected:
+	// globals
 
+	// cursor crap
+	static inline Vector2 cursorPos;
+	static inline Vector2 mouseDelta;
+
+	static inline bool debugMode = true;
+	static inline bool inUIMode;
+
+	// the id inside of it's container.
 	int id;
+
+	// it's "nickname" globally
+	int globalID;
 
 	Vector2 anchor;
 	Vector2 position;
+	Vector2 offset;
+
+	Rectangle bounds;
+	Rectangle outline;
 
 	// use if you want to be able to move the element around.
 	Vector2 velocity;
 
 	int width;
 	int height;
+	int	scrollIndex;
 
+	// persistance flag.
+	bool alwaysVisible;
+	bool shouldUpdate;
 	bool isVisible;
 	bool isActive;
 	bool isHovered;
+	// can 3d objects clip this?
+	bool isClippable = false;
+	// should post process affects get calculated for this aswell?
+	bool affectedByPost;
 
-	friend class UIMan;
+	bool drawable = true;
+
+	bool checkDrawEligibility;
+
+	// whether or not the element is suicidal, and should be executed immediatly
+	bool deleteMe = false;
+
+	EDrawType drawTime;
+	EUIType uiType;
+	UIContainer* parent;
 };
 
-class UIContainer : public UIElement {
+// The UI container not only contains all elements, but also manages them aswell.
+class UIContainer {
 public:
 
-	virtual void draw() = 0;
+	virtual void update() {
+		if (!isSleeping) {
+			for (auto& element : children) {
+				// check if it should be deleted.
+				if (element.second->deleteMe) {
+					element.second->onDestroy();
+					killChild(element.second->id);
+				}
+				else {
+					element.second->UpdateInfo();
+					element.second->onUpdate();
+				}
+			}
+		}
+	}
 
-	virtual void update() = 0;
+	bool isAsleep() {
+		return this->isSleeping == true;
+	}
 
-	virtual void onHover() = 0;
+	// amimir
+	void sleep() {
+		this->isSleeping = true;
+	}
 
-	virtual void onClick() = 0;
+	// ugh... 5 more minutes! please (he did not get 5 more minutes)
+	void wake() {
+		this->isSleeping = false;
+	}
 
-	virtual void onRelease() = 0;
+	// Let this container it is their time to shine!
+	void drawChildren(EDrawType drawMode) {
+		for (auto& element : children) {
+			if (element.second->drawTime == drawMode) {
+				element.second->UpdateInfo();
+				element.second->draw();
+			}
+			else {
+				continue;
+			}
+		}
+	}
 
-	virtual void onMove() = 0;
+	void addChild(UIElement* element) {
+		int newID = assignID();
 
-	virtual void onScroll() = 0;
+		element->id = newID;
 
-	virtual void onKey() = 0;
+		element->setContainer(this);
 
-	virtual void onChar() = 0;
+		children[newID] = element;
+	}
 
-	protected:
-		std::vector<UIElement*> children;
-};
+	// abduct the child and yeet it!
+	UIElement* getChild(int id) {
+		return children[id];
+	}
 
-// only draw and update need to be defined. 
-class SimpleUIElement abstract : public UIElement {
-public:
+	void clear() {
+		children.empty();
+	}
 
-	virtual void draw() = 0;
+	const char* containerTag;
 
-	virtual void update() = 0;
+	int containerID;
+	// threat eliminated! (It gets deleted next frame.)
+	void killChild(int target) {
+		this->children[target]->isVisible = false;
+		this->children.erase(target);
+		elements--;
+	}
+private:
 
-	virtual void onHover() final override {};
+	int elements = 0;
 
-	virtual void onClick() final override {};
+	int assignID() {
+		return elements;
+		elements++;
+	}
 
-	virtual void onRelease() final override {};
-
-	virtual void onMove() final override {};
-
-	virtual void onScroll() final override {};
-
-	virtual void onKey() final override {};
-
-	virtual void onChar() final override {};
-
+	bool isSleeping = true;
+	std::map<int, UIElement*> children;
 };

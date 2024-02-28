@@ -20,9 +20,11 @@
 
 #pragma once
 
-#include <math.h>
+#include <raylib.h>
+//#include <math.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <vector>
 
 // y = sqrt(a * sin(x *(f/F))^c * s) + o
 /**
@@ -38,7 +40,7 @@
  *
  * @return The value of the arched function at the given time
  */
-float ArchAlgorithm(float amplitude, float frequency, float time, float steepness, float offset, float rangeScaleValue, float scaleFactor) {
+inline float ArchAlgorithm(float amplitude, float frequency, float time, float steepness, float offset, float rangeScaleValue, float scaleFactor) {
 	float sinValue = sin(time * (frequency / scaleFactor));
 	float powValue = powf(sinValue, steepness);
 	float result = sqrtf(amplitude * powValue * rangeScaleValue) + offset;
@@ -46,7 +48,7 @@ float ArchAlgorithm(float amplitude, float frequency, float time, float steepnes
 }
 
 template<typename T>
-float DatasetLength(std::vector<T> dataset) {
+inline float DatasetLength(std::vector<T> dataset) {
 	return sizeof(dataset) / sizeof(T);
 }
 
@@ -60,7 +62,7 @@ float DatasetLength(std::vector<T> dataset) {
 *
 */
 template<typename T>
-float DataSetAverage(std::vector<T> dataset) {
+inline float DataSetAverage(std::vector<T> dataset) {
 	float sum;
 	const int length = DatasetLength<T>(dataset);
 	for (int i = 0; i < length; i++ ){
@@ -80,28 +82,53 @@ float DataSetAverage(std::vector<T> dataset) {
 * y, z = data points
 * o = offset
 */
-float IncrementDelta(float x, float y, float z, float o) {
+inline float IncrementDelta(float x, float y, float z, float o) {
 	return x * (y - z) + o;
 }
 
 /*
-*
-* Calculate a incremented value (the slope between two values)
-*
-* f(x,y,z) = x(y - z) + o
-*
-* x = normalizing factor
-* y, z = data points
-* o = offset
+* Calculates a point in a 4 point quadrilateral. from the top left point and it's width/height.
+* 
+* Formula :
+* L1 = given
+* L2 = (L1.x, L1.y - height)
+* 
+* R1 = (L1.x + width, L1.y)
+* R2 = (L1.x + width, L1.y - height)
+* 
+* Corners:
+* 
+* Top left L1 (0)
+* Top Right R1 (1)
+* 
+* Bottom Left L2 (2)
+* Bottom Right R2 (3)
+* 
 */
-float IncrementDelta(float x, float y, float z) {
-	return IncrementDelta(x, y, z, 0.0f);
+inline Vector2 CalculatePoint(Vector2 orgin, float width, float height, int corner) {
+	// todo: Calculate any point from any point, width, and height.
+	Vector2 point;
+	switch (corner) {
+	case 0:
+		point = orgin;
+		break;
+
+	case 1:
+		point = { orgin.x + width, orgin.y };
+		break;
+
+	case 2:
+		point = { orgin.x, orgin.y - height};
+		break;
+
+	case 3:
+		point = { orgin.x + height, orgin.y - height };
+		break;
+
+	default:
+		break;
+
+	}
+
+	return point;
 }
-
-/*
-* Create deltas for a level. (Thresholds)
-* 
-* f(x) = 
-* 
-*/
-

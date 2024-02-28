@@ -45,11 +45,6 @@ public:
 		}
 	}
 
-//	void renderObjects2D() {
-	//	for (auto& obj : objects2DVector) {
-			//obj->draw();
-		//}
-	//}
 
 	void flushBuffer()
 	{
@@ -68,22 +63,16 @@ public:
 		}
 	}
 
-//	void update2D() {
-//		for (auto& obj : objects2DVector) {
-//			obj->onUpdate();
-	//	}
-	//}
+
+
 
 	void pushObject(GameObject* obj) {
 		objectsVector.push_back(obj);
 	}
 
-	//void pushObject2D(GameObject2D* obj) {
-		//objects2DVector.push_back(obj);
-	//}
 
 	vector<GameObject*> objectsVector;
-	//vector<GameObject2D*> objects2DVector;
+
 };
 
 // Example game object

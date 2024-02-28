@@ -1,45 +1,80 @@
 #pragma once
-#define RAYGUI_IMPLEMENTATION
 #include "../../Common.h"
-#include "../scripting/ScriptManager.h"
+#include "../gameScreen/MenuCamera.h"
+#include "UIElement.h"
 
-class UIMan  {
+class UIMan {
 public:
+	UIMan() {
+		addRogueContainer();
+	}
+
 	static inline Font fontTtf;
 	static inline void init() {
-		// load default style.
-		GuiLoadStyle("Data/gui/styles/default.rgs");
-
-		// load default font.
-		fontTtf = LoadFontEx("Data/gui/fonts/Tektur-VariableFont_wdth,wght.ttf", 32, 0, 250);
-		SetTextLineSpacing(48);
 	}
-
-	static inline void update() {
-		for (UIElement* element : elements) {
-			element->update();
+	void draw(EDrawType drawType) {
+		for (auto& container : containers) {
+			container.second->drawChildren(drawType);
 		}
 	}
 
-	static inline void draw() {
-		for (UIElement* element : elements) {
-			element->draw();
+	// IF ROGUE IT WILL OVERRIDE THE 0 INDEX!
+	void pushContainer(UIContainer* container, bool wakeOnPush = false, bool isRogue = false) {
+		if (!isRogue) {
+			int newID = assignId();
+			container->containerID = newID;
+
+			container->wake();
+
+			this->containers[newID] = container;
+		}
+		else {
+			container->wake();
+
+			this->containers[0] = container;
 		}
 	}
 
-	static inline void drawText(const char* text, Vector2 anchor, Color color) {
-		DrawTextEx(fontTtf, text, anchor, 32, 0, RAYWHITE);
+	void pushRogueElement(UIElement* element) {
+		containers[0]->addChild(element);
 	}
 
-	static void push(UIElement* element) {
-		elements.push_back(element);
+	// a container that holds all rogue UIElements. Always will be zero.
+	void addRogueContainer() {
+		pushContainer(new UIContainer(), true, true);
 	}
 
-	
+	void clear(int id) {
+	}
 
+	static UIMan* getInstance() {
+		return currentInstance;
+	}
 
+	void end() {
+		delete this;
+	}
+
+	UIContainer* getContainer(int container) {
+		return containers[container];
+	}
+
+	void update() {
+		for (auto& container : containers) {
+			container.second->update();
+		}
+	}
 private:
-	static inline std::vector<UIElement*> elements;
+	int containerCount = 1;
 
-	
+	int assignId() {
+		return containerCount;
+		containerCount++;
+	}
+
+	static inline UIMan* currentInstance;
+
+	std::map<int, UIContainer*> containers;
+
+	//MenuCamera* cam = new MenuCamera();
 };

@@ -6,9 +6,9 @@ bool SkipMainMenu = true;
 | 					         Includes											|
 ---------------------------------------------------------------------------------
 */
-#include "techstorm/core/utils/Button.h" // TODO : Can this be moved to common.h?
-#include "techstorm/common.h"
 #include "Math.h"
+#include "techstorm/common.h"
+#include "techstorm/core/utils/Button.h" // TODO : Can this be moved to common.h?
 // Game Engine Includes
 #include "techstorm/Game.h"
 #include "techstorm/Globals.h"
@@ -21,8 +21,8 @@ bool SkipMainMenu = true;
 #include "techstorm/core/enum/EGameState.h"
 
 #include "techstorm/core/threading/ThreadGroups.h"
-
-
+#include "techstorm/core/ui/UIElement.h"
+#include "techstorm/core/ui/UIMan.h"
 
 import ErrorHandling;
 import Debug;
@@ -32,14 +32,10 @@ import Debug;
 #include <vector> // needed for game object list
 
 void mainThread() {
-
-
-
 	ThreadGroups threadGroups = ThreadGroups();
 	//TODO: Is this still relevant?
 	EGameState currentScreen = Main;
 	// Booleans
-
 
 // Lets the program know if the game should use HDR as the skybox
 	bool useHDR = true;
@@ -324,7 +320,6 @@ void mainThread() {
 	healthBarPositionX = game->windowWidth + healthBarOffsetX;
 	healthBarPositionY = game->windowHeight + healthBarOffsetY;
 
-
 	// the below lines are just me messing with heightmaps.
 	Image cell = GenImageCellular(100, 100, 2);
 	Image perlin = GenImagePerlinNoise(100, 100, 1, 0.5f, 1.0f);
@@ -374,6 +369,22 @@ void mainThread() {
 	game->layers->inputLayer->AddInput(KEY_LEFT_ALT, cursorUnlock, cursorLock);
 
 	*/
+	UIMan* uiMan = new UIMan();
+
+	uiMan->init();
+
+	UIElement* elementTest = new UIElement();
+
+	uiMan->pushRogueElement(elementTest);
+
+	int index = 0;
+
+	const char* mode = "Unknown";
+
+	Font font = LoadFont("Data/gui/fonts/Tektur-VariableFont_wdth,wght.ttf");
+
+	SetTextLineSpacing(48);
+	//MenuCamera* camera2D = new MenuCamera();
 
 	// Now we can run the game loop and start playing!
 	while (!WindowShouldClose())
@@ -516,6 +527,30 @@ void mainThread() {
 			// todo : Code the inventory menu AAAAAAAA
 		}
 
+		if (IsKeyDown(KEY_ONE)) {
+			mode = "clippable segment";
+			elementTest->drawTime = DRAW_CLIPPABLE;
+		}
+		else if (IsKeyDown(KEY_TWO)) {
+			mode = "after 3d segment";
+			elementTest->drawTime = DRAW_AFTER3D;
+		}
+		else if (IsKeyDown(KEY_THREE)) {
+			mode = "Postprocess segment";
+			elementTest->drawTime = DRAW_POST;
+		}
+		else if (IsKeyDown(KEY_FOUR)) {
+			mode = "Final draw segment";
+			elementTest->drawTime = DRAW_FINAL;
+		}
+		else if (IsKeyDown(KEY_FIVE)) {
+			mode = "Nullified! no drawing";
+			elementTest->drawTime = DRAW_NULL;
+		}
+
+		UIContainer* te = uiMan->getContainer(0);
+		te->clear();
+		uiMan->pushRogueElement(elementTest);
 		// breathing ambiance code
 
 		// If the sound is not playing, play it
@@ -589,8 +624,6 @@ void mainThread() {
 		gameObjectManager->updateObjects();
 		game->scriptManager->updateObjects();
 
-		//UIMan::update();
-
 		// Start texturing the FBO with what the user will be seeing. This includes UI and Scene objects.
 		game->renderers->forwardRenderer->startTexturing();
 		//DrawError(0);
@@ -599,7 +632,8 @@ void mainThread() {
 		|     2d Ui rendering for BEFORE 3d drawing										|
 		---------------------------------------------------------------------------------
 		*/
-
+		uiMan->update();
+		uiMan->draw(DRAW_CLIPPABLE);
 		DrawTextureRec(nearDeathTex, Rectangle{ 0, 0, (float)(game->renderers->forwardRenderer->fbo.texture.width), (float)(-game->renderers->forwardRenderer->fbo.texture.height) }, Vector2{ 0, 0 }, WHITE);
 
 		BeginMode3D(player->cameraComponent->getSelfCamera());
@@ -637,7 +671,8 @@ void mainThread() {
 		gameObjectManager->renderObjects();
 
 		// end 3d rendering.
-		game->renderers->forwardRenderer->end3D();
+
+		game->renderers->forwardRenderer->stopTexturing();
 
 		/*
 		---------------------------------------------------------------------------------
@@ -646,6 +681,7 @@ void mainThread() {
 		*/
 		//UIMan::draw();
 
+		uiMan->draw(DRAW_AFTER3D);
 		// Stop texturing the FBO with what the user will be seeing.
 		game->renderers->forwardRenderer->stopTexturing();
 
@@ -664,7 +700,7 @@ void mainThread() {
 		// Begin drawing mode so we can actually see stuff!
 
 		// We must tell OpenGL that we want to use the bloom shader on the FBO!
-		//BeginShaderMode(game->renderer->bloomShader);
+		BeginShaderMode(game->renderers->forwardRenderer->bloomShader);
 
 		/*
 		---------------------------------------------------------------------------------
@@ -672,25 +708,27 @@ void mainThread() {
 		---------------------------------------------------------------------------------
 		*/
 
-
-
+		uiMan->draw(DRAW_POST);
 		// NOTE: Render texture must be y-flipped due to default OpenGL coordinates (left-bottom)
 		DrawTextureRec(game->renderers->forwardRenderer->fbo.texture, Rectangle{ 0, 0, (float)(game->renderers->forwardRenderer->fbo.texture.width), (float)(-game->renderers->forwardRenderer->fbo.texture.height) }, Vector2{ 0, 0 }, WHITE);
 
 		// We need to tell OpenGL that we no longer need the bloom shader to be active.
-		//EndShaderMode();
+		EndShaderMode();
 
 		// Draw the FPS onto the screen.
-		DrawFPS(100, 100);
+		//DrawFPS(100, 100);
 
 		// Draw the player's health bar
 		//player->healthBar->draw({ healthBarPositionX, healthBarPositionY });
 
 		// Crosshair
 
+		uiMan->draw(DRAW_FINAL);
 		// In order to have it in the middle of the screen, we need to divide the screen dimensions
 		// by half. We can then draw a circle in the middle of the screen.
 		DrawCircle(game->windowWidth / 2, game->windowHeight / 2, 3, GRAY);
+
+		DrawTextEx(font, mode, Vector2{ 20.0f, 100.0f }, (float)font.baseSize, 2, LIME);
 
 		// Let raylib know that we're done drawing to the screen.
 		game->renderers->forwardRenderer->endDraw();
@@ -734,18 +772,15 @@ void mainThread() {
 	delete game;
 	delete block;
 
-
+	delete uiMan;
 	delete player;
 	delete gameObjectManager;
 
 	// The software returns a 0 (success) and exits.
 }
 
-
 int main()
 {
-
-
 	// Run the game
 	std::thread t(std::move(mainThread));
 
@@ -753,7 +788,6 @@ int main()
 
 	scriptManager->start(true);
 	t.join();
-
 
 	return 0;
 }

@@ -4,20 +4,9 @@
 
 
 
-class UITextElement : public SimpleUIElement {
+class UITextElement : public UIElement {
 public:
-
-	void draw() override {
-		UIMan::drawText(text, this->anchor);
-	}
-
-	UITextElement(Vector2 anchor, const char* text) {
-		this->anchor = anchor;
-		this->text = text;
+	void test() {
 		
 	}
-
-private:
-
-	const char* text;
 };
