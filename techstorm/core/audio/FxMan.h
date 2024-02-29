@@ -1,10 +1,87 @@
 #pragma once
 
-class FxMan {
-public:
-	FxMan();
-	virtual ~FxMan();
+#include "Fx.h"
+#include "../scripting/ScriptManager.h"
+#include <stdlib.h>
+#include <stdio.h>
+#include <queue>
 
-	void test() {
+#define NUM_BUFFERS 4
+
+class FxMan {
+private:
+	static inline std::map<const char*, Fx*> sources;
+
+	std::queue<Fx*> stream;
+
+	bool isLoaded(const char* source) {
+		return sources.contains(source);
+	}
+
+	bool isLoaded(Fx* fx) {
+		return sources.contains(fx->name);
+	}
+
+public:
+
+	void init() {
+	}
+
+	void playActive() {
+		Fx* sound = stream.front();
+
+		sound->isPlaying = IsSoundPlaying(sound->fxSound);
+
+		if (!sound->isPlaying) {
+			sound->play();
+		}
+
+		// if the sound is persistant, add it into the stream again. then pop the bitch
+		if (sound->persistant) {
+			stream.push(sound);
+		}
+		stream.pop();
+	}
+
+	void update() {
+		Fx* sound = stream.front();
+
+		sound->update();
+	}
+
+	// methods
+	static inline Fx* get(const char* name) {
+		return sources[name];
+	}
+
+	/*
+	* Loads a Fx from a file.
+	*
+	* Note:
+	*	The name put into the map IS THE FILENAME (without extension). use that to search for it.
+	*/
+	void loadFx(const char* path) {
+		// check it's extension.
+		const char* ext = GetFileExtension(path);
+
+		if (ext == "wav") {
+			loadFx(new Fx(LoadWave(path), GetFileNameWithoutExt(path)));
+		}
+		else if (ext == "mp3") {
+		}
+		else {
+		}
+	}
+
+	void loadFx(Fx* fx) {
+		sources[fx->name] = fx;
+	}
+
+	void addToStream(const char* sound) {
+		stream.push(sources[sound]);
+	}
+
+	void addToStream(Fx* fx) {
+		stream.push(fx);
 	}
 };

@@ -8,39 +8,37 @@ class UIContainer;
 
 class UIElement {
 public:
-	static inline Vector2 cursorPos;
-	static inline Vector2 mouseDelta;
+	static inline Vector2 cursorPos = Vector2Zero();
+	static inline Vector2 mouseDelta = Vector2Zero();
 	static inline bool debugMode = true;
-	static inline bool inUIMode;
-	static inline Font font = LoadFont("Data/gui/fonts/Tektur-VariableFont_wdth,wght.ttf");
-	const char* text;
-	int id; // the id inside of it's container.
+	static inline Font font;
+	const char* text = "null";
+	int id = 0; // the id inside of it's container.
 	float fontSize = (float)font.baseSize;
 	float fontSpacing = 2.0f;
-	int globalID; // it's "nickname" globally
+	int globalID = 0; // it's "nickname" globally
 	Vector2 anchor = Vector2Zero();
 	Vector2 position = Vector2Zero();
 	Vector2 offset = Vector2Zero();
-	Rectangle bounds;
-	Rectangle outline;
+	Rectangle bounds = Rectangle{ 0.0f, 0.0f, 0.0f, 0.0f };
+	Rectangle outline = Rectangle{ 0.0f, 0.0f, 0.0f, 0.0f };
 	Color color = BLUE;
 	Vector2 velocity = Vector2Zero(); // use if you want to be able to move the element around.
-	int width;
-	int height;
-	int	scrollIndex;
-	bool alwaysVisible;	// persistance flag.
-	bool shouldUpdate;
-	bool isVisible;
-	bool isActive;
-	bool isHovered;
+	int width = 0;
+	int height = 0;
+	int	scrollIndex = 0;
+	bool alwaysVisible = false;	// persistance flag.
+	bool isVisible = false;
+	bool isActive = true;
+	bool isHovered = false;
 	bool isClippable = false;// can 3d objects clip this?
 	bool affectedByPost = false; // should post process affects get calculated for this aswell?
 	bool drawable = true;
-	bool checkDrawEligibility;
+	bool checkDrawEligibility = false;
 	bool deleteMe = false;	// whether or not the element is suicidal, and should be executed immediatly
-	EDrawType drawTime;
+	EDrawType drawTime = DRAW_NULL;
 	EUIType uiType = EUI_NULL;
-	UIContainer* parent;
+	UIContainer* parent = nullptr;
 
 	UIElement() {
 		this->position = Vector2Add(this->offset, this->anchor);
@@ -122,6 +120,10 @@ protected:
 class UIContainer {
 public:
 
+	static void start() {
+		UIElement::font = LoadFont("Data/gui/fonts/Tektur-VariableFont_wdth,wght.ttf");
+	}
+
 	virtual void update() {
 		if (!isSleeping) {
 			for (auto& element : children) {
@@ -138,6 +140,7 @@ public:
 		}
 	}
 
+	//
 	bool isAsleep() {
 		return this->isSleeping == true;
 	}
@@ -147,7 +150,11 @@ public:
 		this->isSleeping = true;
 	}
 
-	// ugh... 5 more minutes! please (he did not get 5 more minutes)
+	/*
+	* Rise and shine, Mr.Freeman. Rise and... shine. Not that I... wish to imply you have been sleeping on the job. No one is more deserving of a rest...
+	* and all the effort in the world would have gone to waste until... well, let's just say your hour has... come again.
+	* The right man in the wrong place can make all the difference in the world. So, wake up, Mister Freeman. Wake up and... smell the ashes...
+	*/
 	void wake() {
 		this->isSleeping = false;
 	}

@@ -9,7 +9,7 @@
 
 // add headers that you want to pre-compile here
 #include "framework.h"
-#include <tinyxml2.h>
+
 #include <map>
 #include <vector>
 

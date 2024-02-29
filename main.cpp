@@ -1,5 +1,7 @@
-// Run Args
-bool SkipMainMenu = true;
+/*
+* TODO:
+* Try to lower the line count of this file.
+*/
 
 /*
 ---------------------------------------------------------------------------------
@@ -8,7 +10,9 @@ bool SkipMainMenu = true;
 */
 #include "Math.h"
 #include "techstorm/common.h"
+//#include "techstorm/lib/yse/yse.hpp"
 #include "techstorm/core/utils/Button.h" // TODO : Can this be moved to common.h?
+
 // Game Engine Includes
 #include "techstorm/Game.h"
 #include "techstorm/Globals.h"
@@ -19,13 +23,12 @@ bool SkipMainMenu = true;
 #include "techstorm/core/rendering/Light.h"
 #include "techstorm/core/window/ConfigFlag.h"
 #include "techstorm/core/enum/EGameState.h"
-
 #include "techstorm/core/threading/ThreadGroups.h"
 #include "techstorm/core/ui/UIElement.h"
 #include "techstorm/core/ui/UIMan.h"
+#include "techstorm/core/audio/FxMan.h"
 
 import ErrorHandling;
-import Debug;
 
 // std library includes. TODO : Is this still needed?
 #include <time.h>
@@ -44,11 +47,19 @@ void mainThread() {
 	bool isBreathing = false;
 
 	// Viewsway
-	float swayAmount = 0.0003f;
-	float swaySpeed = 0.02f;
-	float swayTimer = 0.0f;
+	float swayAmount = 0.0003f; // how much should the view sway be affected.
+	float swaySpeed = 0.02f; // how fast should camera sway
+	float swayTimer = 0.0f; // Dont mess with this. it will fuck up the swaying.
 
-	// Near death affect. Important : THESE ARE REQUIRED FOR THE ARCH ALGORITHM TO WORK!
+	/*
+	* Near death affect.
+	* Important :
+	*	THESE ARE REQUIRED FOR THE ARCH ALGORITHM TO WORK!
+	*	See Math.h for the Arch algorithm explanation and uses.
+	*
+	* Note:
+	*	Use a graphing calculator to visualize the algorithm
+	*/
 	float nearDeathTimer = 0.0f; // The X axis
 	float amplitude = 255; // How high the Parabola goes
 	float frequency = 5; // How often the arches are
@@ -65,6 +76,7 @@ void mainThread() {
 
 	// represents the raycasting from the player to the world.
 	Ray ray;
+
 	// ----------------------------------------------------------------------------- Game Setup -----------------------------------------------------------------------------
 
 	// Create game & load it into memory.
@@ -73,10 +85,11 @@ void mainThread() {
 	// Start the game and do any needed setup
 	game->StartGame();
 
-	// IMPORTANT : Do not remove this or delete it as it is the manager of all game objects!
+	// IMPORTANT : Do not remove this or delete it as it is the manager of all game objects! (it will fuck up everything)
 	GameobjectManager* gameObjectManager = new GameobjectManager();
 
 	// test if temp folder exists, if not create it
+	// currently not used for anything
 	if (!DirectoryExists("temp"))
 	{
 		system("mkdir temp"); // run the system command to create the folder. Note : This is a windows command.
@@ -85,8 +98,9 @@ void mainThread() {
 	// Set initial random seed
 	srand(time(NULL));
 
-	// ----------------------------------------------------------------------------- Load Game
-	// Assets -----------------------------------------------------------------------------
+	// -----------------------------------------------------------------------------
+	// Load Game Assets
+	// -----------------------------------------------------------------------------
 
 	// Ambiance
 	// The passive sound of your breathing.
@@ -276,8 +290,9 @@ void mainThread() {
 	// Enable the sun as a precautionary measure.
 	sun.enabled = true;
 
-	// ----------------------------------------------------------------------------- PBR
-	// Finalizations -----------------------------------------------------------------------------
+	// -----------------------------------------------------------------------------
+	// PBR Finalizations
+	// -----------------------------------------------------------------------------
 
 	// we need to finalize the PBR shader and give the shader any last minute data.
 
@@ -328,59 +343,19 @@ void mainThread() {
 	ImageAlphaMask(&perlin, cell);
 	Mesh test = GenMeshHeightmap(perlin, Vector3{ 100, 100, 100 });
 
-	/*
-	if (player && player->cameraComponent)
-			{
-				if (!IsCursorHidden())
-				{
-					DisableCursor();
-				}
-				UpdateCamera(player->cameraComponent->getSelfCameraPointer(), player->cameraMode); // Update camera
-			}
-			else
-			{
-				// Handle null pointer reference or unhandled exception Add error handling code here
-			}
+	// end of height map tomfoolery
 
-			EnableCursor();
-
-	*/
-
-	/*
-		std::function<void()> cursorLock = [player]() {
-		if (player && player->cameraComponent)
-		{
-			if (!IsCursorHidden())
-			{
-				DisableCursor();
-				UpdateCamera(player->cameraComponent->getSelfCameraPointer(), player->cameraMode); // Update camera
-			}
-		}
-		else
-		{
-			// Handle null pointer reference or unhandled exception Add error handling code here
-		}
-		};
-
-	std::function<void()> cursorUnlock = [player]() {
-		EnableCursor();
-		};
-
-	game->layers->inputLayer->AddInput(KEY_LEFT_ALT, cursorUnlock, cursorLock);
-
-	*/
 	UIMan* uiMan = new UIMan();
 
-	uiMan->init();
-
-	UIElement* elementTest = new UIElement();
-
-	uiMan->pushRogueElement(elementTest);
-
-	const char* mode = "Unknown";
-
+	// set default line spacing to 48.
 	SetTextLineSpacing(48);
-	//MenuCamera* camera2D = new MenuCamera();
+	FxMan* fxman = new FxMan();
+
+	fxman->init();
+
+	Fx* fx = new Fx(breathingSound, Vector3Zero(), "test");
+
+	fxman->loadFx(fx);
 
 	// Now we can run the game loop and start playing!
 	while (!WindowShouldClose())
@@ -523,42 +498,11 @@ void mainThread() {
 			// todo : Code the inventory menu AAAAAAAA
 		}
 
-		if (IsKeyDown(KEY_ONE)) {
-			mode = "clippable segment";
-			elementTest->drawTime = DRAW_CLIPPABLE;
-		}
-		else if (IsKeyDown(KEY_TWO)) {
-			mode = "after 3d segment";
-			elementTest->drawTime = DRAW_AFTER3D;
-		}
-		else if (IsKeyDown(KEY_THREE)) {
-			mode = "Postprocess segment";
-			elementTest->drawTime = DRAW_POST;
-		}
-		else if (IsKeyDown(KEY_FOUR)) {
-			mode = "Final draw segment";
-			elementTest->drawTime = DRAW_FINAL;
-		}
-		else if (IsKeyDown(KEY_FIVE)) {
-			mode = "Nullified! no drawing";
-			elementTest->drawTime = DRAW_NULL;
-		}
-
-		UIContainer* te = uiMan->getContainer(0);
-		te->clear();
-		uiMan->pushRogueElement(elementTest);
 		// breathing ambiance code
 
 		// If the sound is not playing, play it
-		if (!isBreathing) {
-			isBreathing = true;
 
-			PlaySound(breathingSound);
-		}
-		else {
-			// set isBreathing to the result of IsSoundPlaying(breathingSound)
-			isBreathing = IsSoundPlaying(breathingSound);
-		}
+		fxman->playActive();
 
 		// The player's looking direction is the target of the camera. This is the direction the
 		// player is looking TODO : Check relevancy.
@@ -622,12 +566,9 @@ void mainThread() {
 
 		// Start texturing the FBO with what the user will be seeing. This includes UI and Scene objects.
 		game->renderers->forwardRenderer->startTexturing();
-		//DrawError(0);
-		/*
-		---------------------------------------------------------------------------------
-		|     2d Ui rendering for BEFORE 3d drawing										|
-		---------------------------------------------------------------------------------
-		*/
+
+		//fxman->playActive();
+		fxman->update();
 		uiMan->update();
 		uiMan->draw(DRAW_CLIPPABLE);
 		DrawTextureRec(nearDeathTex, Rectangle{ 0, 0, (float)(game->renderers->forwardRenderer->fbo.texture.width), (float)(-game->renderers->forwardRenderer->fbo.texture.height) }, Vector2{ 0, 0 }, WHITE);
@@ -666,8 +607,8 @@ void mainThread() {
 		// Render all game objects
 		gameObjectManager->renderObjects();
 
-		// end 3d rendering.
-
+		// end 3d rendering and texturing.
+		game->renderers->forwardRenderer->end3D();
 		game->renderers->forwardRenderer->stopTexturing();
 
 		/*
@@ -698,33 +639,21 @@ void mainThread() {
 		// We must tell OpenGL that we want to use the bloom shader on the FBO!
 		BeginShaderMode(game->renderers->forwardRenderer->bloomShader);
 
-		/*
-		---------------------------------------------------------------------------------
-		| 					      Bloom Affected										|
-		---------------------------------------------------------------------------------
-		*/
-
 		uiMan->draw(DRAW_POST);
+
 		// NOTE: Render texture must be y-flipped due to default OpenGL coordinates (left-bottom)
 		DrawTextureRec(game->renderers->forwardRenderer->fbo.texture, Rectangle{ 0, 0, (float)(game->renderers->forwardRenderer->fbo.texture.width), (float)(-game->renderers->forwardRenderer->fbo.texture.height) }, Vector2{ 0, 0 }, WHITE);
 
-		// We need to tell OpenGL that we no longer need the bloom shader to be active.
+		// tell OpenGL that we no longer need the bloom shader to be active. so in other words tell it to fuck off.
 		EndShaderMode();
 
 		// Draw the FPS onto the screen.
-		//DrawFPS(100, 100);
-
-		// Draw the player's health bar
-		//player->healthBar->draw({ healthBarPositionX, healthBarPositionY });
-
-		// Crosshair
+		DrawFPS(100, 100);
 
 		uiMan->draw(DRAW_FINAL);
 		// In order to have it in the middle of the screen, we need to divide the screen dimensions
 		// by half. We can then draw a circle in the middle of the screen.
 		DrawCircle(game->windowWidth / 2, game->windowHeight / 2, 3, GRAY);
-
-		//DrawTextEx(UIElement, mode, Vector2{ 20.0f, 100.0f }, (float)font.baseSize, 2, LIME);
 
 		// Let raylib know that we're done drawing to the screen.
 		game->renderers->forwardRenderer->endDraw();

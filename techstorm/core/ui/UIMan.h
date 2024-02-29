@@ -3,14 +3,23 @@
 #include "../gameScreen/MenuCamera.h"
 #include "UIElement.h"
 
+/*
+* Manages UIElements, containers, and any UIElement derivatives.
+*
+* rogue elements are those that DO NOT belong to any container, but since elements need a parent container, they are put into the predesignated rogue container (always at index 0)
+*
+* TODO:
+*	Add push to container function
+*
+*/
 class UIMan {
 public:
+	// constructor, creates the designated rogue container.
 	UIMan() {
+		UIContainer::start();
 		addRogueContainer();
 	}
 
-	static inline void init() {
-	}
 	void draw(EDrawType drawType) {
 		for (auto& container : containers) {
 			container.second->drawChildren(drawType);
@@ -34,6 +43,7 @@ public:
 		}
 	}
 
+	// push a rogue element
 	void pushRogueElement(UIElement* element) {
 		containers[0]->addChild(element);
 	}
@@ -43,6 +53,7 @@ public:
 		pushContainer(new UIContainer(), true, true);
 	}
 
+	// TODO: this
 	void clear(int id) {
 	}
 
@@ -50,30 +61,35 @@ public:
 		return currentInstance;
 	}
 
+	// murder the uiman, muahahaha
 	void end() {
 		delete this;
 	}
 
+	// get a UIcontainer
 	UIContainer* getContainer(int container) {
 		return containers[container];
 	}
 
+	// update ze elements.
 	void update() {
 		for (auto& container : containers) {
 			container.second->update();
 		}
 	}
 private:
+	// set to 1 as 0 is always the rogue container
 	int containerCount = 1;
 
+	// get a free ID.
 	int assignId() {
 		return containerCount;
 		containerCount++;
 	}
 
+	// global instance of this class.
 	static inline UIMan* currentInstance;
 
+	// holds what it says, containers!
 	std::map<int, UIContainer*> containers;
-
-	//MenuCamera* cam = new MenuCamera();
 };
