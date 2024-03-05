@@ -39,6 +39,9 @@ public:
 		registry.clear();
 	}
 
+	int getCount() {
+		return objectCount;
+	}
 private:
 
 	int objectCount = 0;

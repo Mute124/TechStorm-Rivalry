@@ -33,5 +33,5 @@
 #include "core/utils/ArrayUtils.h"
 #include "Globals.h"
 #include "core/audio/FxMan.h"
-
+#include "core/ui/UIMan.h"
 // end of common.h

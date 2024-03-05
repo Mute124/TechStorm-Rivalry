@@ -11,18 +11,13 @@ class Game final
 private:
 	toml::v3::parse_result optionsConfig;
 public:
-
 	static inline Vector2 windowSize = { 0, 0 };
-
 	int windowWidth;
 	int windowHeight;
-
 	bool isFullscreen = false;
 	bool enableMusic;
-
 	// Config manager instance
 	ConfigMan* configman = new ConfigMan();
-
 	static inline Renderers* renderers;
 	static inline ScriptManager* scriptManager;
 
@@ -132,9 +127,6 @@ public:
 		scriptManager = new ScriptManager();
 
 		scriptManager->start();
-
-		// simply a optimization
-		rlSetCullFace(RL_CULL_FACE_BACK);
 
 		SetTargetFPS(60);
 

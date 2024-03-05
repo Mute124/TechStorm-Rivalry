@@ -4,6 +4,9 @@
 #include "../inventory/Item.h"
 #include "../inventory/EquipSlot.h"
 #include "PlayerCharacter.h"
+#include "../core/ui/UIElement.h"
+#include "Hand.h"
+#include "../Game.h"
 
 #define STARTINGHP 100
 #define MAX_AFFLICTIONS 20
@@ -92,6 +95,7 @@ public:
 class HealthBar
 {
 public:
+
 	float calculatePercentage(float hp, float max_hp)
 	{
 		float percentage = (float)hp / (float)max_hp;
@@ -144,7 +148,7 @@ public:
 		return this->camera.position;
 	}
 
-	Vector3 setTarget()
+	Vector3 getTarget()
 	{
 		return this->camera.target;
 	}
@@ -208,6 +212,7 @@ private:
 class Player : public PlayerController
 {
 public:
+	Model gun = { 0 };
 
 	Player() {
 	}
@@ -225,8 +230,12 @@ public:
 			   {0.0f, 2.0f, 0.0f},
 			   45.0f,
 			   CAMERA_PERSPECTIVE });
-
+		initCharacter(0.0004f, 0.002f, 0.002f, 0.03f);
 		instance = this;
+
+		this->gun = LoadModel("resources/Sniper_Rifle.glb");
+
+		//this->gun.materials[0].shader = Game::renderers->forwardRenderer->pbrShader;
 	};
 
 	void onDestroy() const override
@@ -234,8 +243,9 @@ public:
 		delete this;
 	};
 
-	void onUpdate() override
+	void onUpdate()
 	{
+		tick();
 		if (cameraMode != CAMERA_FIRST_PERSON) {
 			if (this->doDraw) {
 				DrawModel(model, this->cameraComponent->getPosition(), 0.2f, GREEN);
@@ -263,6 +273,15 @@ public:
 	// sends player data to the games render
 	void draw() override
 	{
+		Vector3 forward = GetCameraForward(cameraComponent->getSelfCameraPointer());
+
+		forward.y -= 0.5f;
+
+		//DrawModel(this->gun, Vector3Add(this->cameraComponent->getPosition(), forward), 0.3f, WHITE);
+
+		//DrawSphere(CameraToWorld(this->cameraComponent->getSelfCamera()), 0.1f, RED);
+
+		// this->gun.transform = MatrixLookAt(CameraToWorld(this->cameraComponent->getSelfCamera()), forward, GetCameraUp(cameraComponent->getSelfCameraPointer()));
 	}
 
 	// is this even fucking used???
@@ -294,38 +313,6 @@ public:
 private:
 
 	bool startDriving = false;
-
-	// why, just why
-	static void CheckForBlockPlacement(MouseButton Trigger, Ray ray)
-	{
-		/*
-		if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
-				{
-					std::vector<GameObject *> objects = RequestObjectList();
-					// Loop through all the objects and check for a collision, then poof!
-					for (auto &obj : objects)
-					{
-						if (obj->GetType() == BLOCK)
-						{
-							Block *block = static_cast<Block *>(obj);
-
-							// Check for a collision between the mouse ray and the block's
-							// bounding box
-							if (Global::Math::CheckCollisionRayBox(ray, block->GetBounds(), NULL))
-							{
-								// Remove the block from the vector and free its memory
-								std::vector<GameObject *>::iterator it =
-									std::find(objects.begin(), objects.end(), obj);
-								if (it != objects.end())
-								{
-									objects.erase(it);
-								}
-								break;
-							}
-						}
-					}
-				}*/
-	}
 
 	// KeyboardKey *CurrentKeyDown;
 	Vector3 position;

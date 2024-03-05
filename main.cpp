@@ -21,12 +21,14 @@
 #include "techstorm/core/gamescreen/MenuCamera.h"
 #include "techstorm/player/Player.h"
 #include "techstorm/core/rendering/Light.h"
-#include "techstorm/core/window/ConfigFlag.h"
+
 #include "techstorm/core/enum/EGameState.h"
 #include "techstorm/core/threading/ThreadGroups.h"
 #include "techstorm/core/ui/UIElement.h"
 #include "techstorm/core/ui/UIMan.h"
+#include "techstorm/ui/UIFadingMsg.h"
 #include "techstorm/core/audio/FxMan.h"
+#include "techstorm/globalobj/Objects.h"
 
 import ErrorHandling;
 
@@ -95,9 +97,6 @@ void mainThread() {
 		system("mkdir temp"); // run the system command to create the folder. Note : This is a windows command.
 	}
 
-	// Set initial random seed
-	srand(time(NULL));
-
 	// -----------------------------------------------------------------------------
 	// Load Game Assets
 	// -----------------------------------------------------------------------------
@@ -141,7 +140,7 @@ void mainThread() {
 
 	// Setup ambient color and intensity (brightness) parameters
 	float ambientIntensity = 0.02f;
-	Color ambientColor = Color{ 26, 32, 135, 255 };
+	Color ambientColor = GRAY;
 	Vector3 ambientColorNormalized = Vector3{ ambientColor.r / 255.0f, ambientColor.g / 255.0f, ambientColor.b / 255.0f };
 	SetShaderValue(game->renderers->forwardRenderer->pbrShader, GetShaderLocation(game->renderers->forwardRenderer->pbrShader, "ambientColor"), &ambientColorNormalized, SHADER_UNIFORM_VEC3);
 	SetShaderValue(game->renderers->forwardRenderer->pbrShader, GetShaderLocation(game->renderers->forwardRenderer->pbrShader, "ambient"), &ambientIntensity, SHADER_UNIFORM_FLOAT);
@@ -285,7 +284,7 @@ void mainThread() {
 	// Create the Sunlight Note : this is not it's final form, it is just a placeholder for testing
 	// ToDo: finalize this step and functionality
 	Light sun = CreateLight(LIGHT_POINT, Vector3{ 1.0f, 0.0f, 1.0f }, Vector3One(),
-		BLUE, 4.0f, game->renderers->forwardRenderer->pbrShader); // Ambient color.;
+		WHITE, 4.0f, game->renderers->forwardRenderer->pbrShader); // Ambient color.;
 
 	// Enable the sun as a precautionary measure.
 	sun.enabled = true;
@@ -349,27 +348,39 @@ void mainThread() {
 
 	// set default line spacing to 48.
 	SetTextLineSpacing(48);
-	FxMan* fxman = new FxMan();
+	TestInteractive::init();
+	//TestInteractive::setShader(game->renderers->forwardRenderer->pbrShader);
 
-	fxman->init();
+	int y = 0;
+	for (int x = 0; x < 100; x++) {
+		for (int z = 0; z < 100; z++) {
+			gameObjectManager->pushObject(new TestInteractive(Vector3{ (float)x, (float)y, (float)z }, WHITE, game->renderers->forwardRenderer->pbrShader, GetDefaultModel()));
+		}
+	}
 
-	Fx* fx = new Fx(breathingSound, Vector3Zero(), "test");
+	DisableCursor();
 
-	fxman->loadFx(fx);
+	float brightness = 1.0f;
+
+	SetShaderValue(game->renderers->forwardRenderer->pbrShader, GetShaderLocation(game->renderers->forwardRenderer->pbrShader, "brightness"), &brightness, UNIFORM_FLOAT);
 
 	// Now we can run the game loop and start playing!
 	while (!WindowShouldClose())
 	{
+		//player->tick();
 		UpdateCamera(player->cameraComponent->getSelfCameraPointer(), player->cameraMode); // Update camera
 		// NOTE : This is a very basic implementation of placing an object into the world. This is
 		// temporary and should be fleshed out.
 		if (IsMouseButtonPressed(MOUSE_BUTTON_RIGHT))
 		{
-			Vector3 placepos = player->cameraComponent->setTarget();
+			Vector3 placepos = player->cameraComponent->getTarget();
+			//new Block(Vector3{ roundf(placepos.x), roundf(placepos.y), roundf(placepos.z) }, WHITE, game->renderers->forwardRenderer->pbrShader, GetDefaultModel());
+			//tester = new TestInteractive(Vector3{ roundf(placepos.x), roundf(placepos.y), roundf(placepos.z) }, WHITE, game->renderers->forwardRenderer->pbrShader, GetDefaultModel());
 
-			gameObjectManager->pushObject(new Block(Vector3{ roundf(placepos.x), roundf(placepos.y), roundf(placepos.z) }, WHITE, game->renderers->forwardRenderer->pbrShader, GetDefaultModel()));
+			///tester->create(Vector3{ roundf(placepos.x), roundf(placepos.y), roundf(placepos.z) }, GetDefaultModel(), 1.0f, WHITE, block->model.materials[0]);
+			//gameObjectManager->pushObject(tester);
 		}
-
+		TestInteractive::setCam(player->cameraComponent->getSelfCamera());
 		// Take a screenshot
 		if (IsKeyPressed(KEY_F9))
 		{
@@ -423,7 +434,7 @@ void mainThread() {
 			while (!exit)
 			{
 				BeginDrawing();
-				DrawText("PAUSE", 100, 100, 20, RED);
+
 				save->draw();
 				save->updateObjects();
 
@@ -440,9 +451,9 @@ void mainThread() {
 
 					std::vector<void*> data;
 
-					for (int i = 0; i < gameObjectManager->objectsVector.size(); i++)
+					for (int i = 0; i < gameObjectManager->threadSafeObjects.size(); i++)
 					{
-						data.push_back(gameObjectManager->objectsVector[i]);
+						data.push_back(gameObjectManager->threadSafeObjects[i]);
 					}
 					SaveFileData(filename, &data, sizeof(data));
 
@@ -495,25 +506,18 @@ void mainThread() {
 		}
 
 		if (IsKeyPressed(KEY_E)) {
-			// todo : Code the inventory menu AAAAAAAA
 		}
-
-		// breathing ambiance code
-
-		// If the sound is not playing, play it
-
-		fxman->playActive();
 
 		// The player's looking direction is the target of the camera. This is the direction the
 		// player is looking TODO : Check relevancy.
 		ray.position = player->cameraComponent->getPosition();
-		ray.direction = player->cameraComponent->setTarget();
+		ray.direction = player->cameraComponent->getTarget();
 
 		// Sway timer is equal to swayTimer + frame delta time
 		swayTimer += GetFrameTime();
 
 		// sway the camera according to the sway algorithm.
-		player->cameraComponent->setTarget(Vector3{ player->cameraComponent->setTarget().x + sin(swayTimer * swaySpeed) * swayAmount, player->cameraComponent->setTarget().y, player->cameraComponent->setTarget().z + cos(swayTimer * swaySpeed) * swayAmount });
+		player->cameraComponent->setTarget(Vector3{ player->cameraComponent->getTarget().x + sin(swayTimer * swaySpeed) * swayAmount, player->cameraComponent->getTarget().y, player->cameraComponent->getTarget().z + cos(swayTimer * swaySpeed) * swayAmount });
 
 		if (player->health <= 15) {
 			// equal to nearDeathTimer + frame delta time
@@ -562,35 +566,16 @@ void mainThread() {
 
 		// Update the game object manager
 		gameObjectManager->updateObjects();
-		game->scriptManager->updateObjects();
+		//game->scriptManager->updateObjects();
 
 		// Start texturing the FBO with what the user will be seeing. This includes UI and Scene objects.
 		game->renderers->forwardRenderer->startTexturing();
 
-		//fxman->playActive();
-		fxman->update();
 		uiMan->update();
 		uiMan->draw(DRAW_CLIPPABLE);
 		DrawTextureRec(nearDeathTex, Rectangle{ 0, 0, (float)(game->renderers->forwardRenderer->fbo.texture.width), (float)(-game->renderers->forwardRenderer->fbo.texture.height) }, Vector2{ 0, 0 }, WHITE);
-
+		BeginShaderMode(game->renderers->forwardRenderer->bloomShader);
 		BeginMode3D(player->cameraComponent->getSelfCamera());
-
-		/*
-		---------------------------------------------------------------------------------
-		|					Simple Game Objects Drawing									|
-		---------------------------------------------------------------------------------
-		*/
-
-		/*
-			When Skyboxes are fixed, re-add the code snippet below
-
-			rlDisableBackfaceCulling();
-			rlDisableDepthMask();
-			// DrawModel(skybox, Vector3{0.0f, 0.0f, 0.0f}, 1.0f, WHITE);
-			rlEnableBackfaceCulling();
-			rlEnableDepthMask();
-
-		*/
 
 		// Set old car model texture tiling, emissive color and emissive intensity parameters on shader
 		SetShaderValue(game->renderers->forwardRenderer->pbrShader, textureTilingLoc, &block->blockTextureTiling, SHADER_UNIFORM_VEC2);
@@ -605,10 +590,12 @@ void mainThread() {
 		SetShaderValue(game->renderers->forwardRenderer->pbrShader, emissiveIntensityLoc, &emissiveIntensity, SHADER_UNIFORM_FLOAT);
 
 		// Render all game objects
+		//rlEnableWireMode();
 		gameObjectManager->renderObjects();
-
 		// end 3d rendering and texturing.
 		game->renderers->forwardRenderer->end3D();
+
+		EndShaderMode();
 		game->renderers->forwardRenderer->stopTexturing();
 
 		/*
@@ -618,7 +605,6 @@ void mainThread() {
 		*/
 		//UIMan::draw();
 
-		uiMan->draw(DRAW_AFTER3D);
 		// Stop texturing the FBO with what the user will be seeing.
 		game->renderers->forwardRenderer->stopTexturing();
 
@@ -637,23 +623,18 @@ void mainThread() {
 		// Begin drawing mode so we can actually see stuff!
 
 		// We must tell OpenGL that we want to use the bloom shader on the FBO!
-		BeginShaderMode(game->renderers->forwardRenderer->bloomShader);
-
-		uiMan->draw(DRAW_POST);
+		//BeginShaderMode(game->renderers->forwardRenderer->bloomShader);
 
 		// NOTE: Render texture must be y-flipped due to default OpenGL coordinates (left-bottom)
 		DrawTextureRec(game->renderers->forwardRenderer->fbo.texture, Rectangle{ 0, 0, (float)(game->renderers->forwardRenderer->fbo.texture.width), (float)(-game->renderers->forwardRenderer->fbo.texture.height) }, Vector2{ 0, 0 }, WHITE);
 
 		// tell OpenGL that we no longer need the bloom shader to be active. so in other words tell it to fuck off.
-		EndShaderMode();
+		//EndShaderMode();
 
 		// Draw the FPS onto the screen.
 		DrawFPS(100, 100);
 
 		uiMan->draw(DRAW_FINAL);
-		// In order to have it in the middle of the screen, we need to divide the screen dimensions
-		// by half. We can then draw a circle in the middle of the screen.
-		DrawCircle(game->windowWidth / 2, game->windowHeight / 2, 3, GRAY);
 
 		// Let raylib know that we're done drawing to the screen.
 		game->renderers->forwardRenderer->endDraw();

@@ -20,12 +20,22 @@ public:
 		this->position = position;
 		this->name = name;
 		this->isLoaded = true;
+
+		//manager->loadFx(this);
+	}
+
+	Fx(Wave wave, const char* name) {
+		this->fxSound = LoadSoundFromWave(wave);
+		this->position = Vector3Zero();
+		this->name = name;
+		this->isLoaded = true;
+
 		//manager->loadFx(this);
 	}
 
 	Fx(Sound sound, Vector3 position, const char* name) {
 		this->fxSound = sound;
-		this->position = position;
+		this->position = Vector3Zero();
 		this->name = name;
 		this->isLoaded = true;
 		//	manager->loadFx(this);
@@ -68,9 +78,7 @@ public:
 
 	void update() {
 		isPlayingSound();
-		if (persistant) {
-			this->play();
-		}
+
 	}
 
 	void isPlayingSound() {

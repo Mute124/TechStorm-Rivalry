@@ -2,6 +2,7 @@
 #include "../Common.h"
 #include "../core/input/Keybind.h"
 
+// Obsolete, Use the one defined in Player.h instead!
 class PlayerController
 {
 protected:

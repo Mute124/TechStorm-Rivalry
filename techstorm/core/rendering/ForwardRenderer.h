@@ -5,6 +5,10 @@
 class ForwardRenderer final
 {
 public:
+	RenderTexture2D fbo; // FBO render texture
+	RenderTexture2D depthMapFBO; // shadowmap.
+	Shader pbrShader; // pbr shader
+	Shader bloomShader; // bloom shader
 
 	ForwardRenderer() {
 		init();
@@ -87,18 +91,7 @@ public:
 		depthMapFBO = LoadRenderTexture(width, height);
 	}
 
-	RenderTexture2D fbo; // FBO render texture
-	RenderTexture2D depthMapFBO; // shadowmap.
-
-	// pbr shader
-	Shader pbrShader;
-	// bloom shader
-	Shader bloomShader;
-
 private:
-
-	// Task Templates
-
 	bool isDrawing;
 	bool isIn3DMode;
 };

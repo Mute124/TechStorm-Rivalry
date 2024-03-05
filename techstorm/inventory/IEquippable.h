@@ -1,23 +1,8 @@
 #pragma once
-#include "Common.h"
-#include "IScriptable.h"
-#include "ScriptManager.h"
+#include "../core/obj/Gameobject.h"
 
-class IEquippable : public IScriptable
+class IEquippable abstract
 {
 public:
-
-	bool IsEquipped();
-
-	void Equip();
-
-	void Unequip();
-
-	void SetModel(Model model);
-
-	bool equipped = false;
-
-	Model model;
-
-	Transform transform;
+	bool isEquipped;
 };

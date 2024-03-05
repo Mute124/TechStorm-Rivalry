@@ -48,6 +48,9 @@ uniform float roughnessValue;
 uniform float aoValue;
 uniform float emissivePower;
 
+uniform vec3 position;
+uniform float brightness;
+
 // Input lighting values
 uniform Light lights[MAX_LIGHTS];
 uniform vec3 viewPos;
@@ -79,7 +82,9 @@ float GeomSmith(float nDotV,float nDotL,float roughness)
     float ggx2 = nDotL/(nDotL*ik + k);
     return ggx1*ggx2;
 }
-
+float CalculateDst(vec3 org, vec3 dst) {
+    return sqrt(pow((org.x - dst.x),2.) + pow((org.y - dst.y), 2.) + pow((org.z - dst.z), 2.));
+}
 vec3 ComputePBR()
 {
     vec3 albedo = texture(albedoMap,vec2(fragTexCoord.x*tiling.x + offset.x, fragTexCoord.y*tiling.y + offset.y)).rgb;
@@ -145,12 +150,20 @@ vec3 ComputePBR()
 
     vec3 ambientFinal = (ambientColor + albedo)*ambient*0.5;
 
-    return ambientFinal + lightAccum*ao + emissive;
+    return ambientFinal + lightAccum*ao + emissive * metallic;
 }
 
 void main()
 {
-    vec3 color = ComputePBR();
+
+    vec3 darkening = vec3(ambientColor * ambient);
+
+    for (int i = 0; i < numOfLights; i++) {
+         darkening -= (lights[i].color.rgb * ambientColor.rgb * brightness / CalculateDst(viewPos, fragPosition) * brightness);
+
+    }
+
+    vec3 color = ComputePBR() * darkening;
 
     // HDR tonemapping
     color = pow(color, color + vec3(1.0));

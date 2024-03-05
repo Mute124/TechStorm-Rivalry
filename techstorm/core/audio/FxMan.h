@@ -1,7 +1,8 @@
 #pragma once
 
 #include "Fx.h"
-#include "../scripting/ScriptManager.h"
+#include "../ui/UIText.h"
+#include "../ui/UIContainer.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <queue>
@@ -38,7 +39,10 @@ public:
 
 		// if the sound is persistant, add it into the stream again. then pop the bitch
 		if (sound->persistant) {
-			stream.push(sound);
+			if (!sound->isPlaying) {
+				stream.push(sound);
+				Logman::Log("pushing ");
+			}
 		}
 		stream.pop();
 	}

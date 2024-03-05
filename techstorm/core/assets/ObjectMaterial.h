@@ -1,5 +1,5 @@
 #pragma once
-#include "common.h"
+#include "../../Common.h"
 
 typedef struct {
 	Texture albedoMap; // The diffuse texture

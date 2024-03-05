@@ -6,6 +6,7 @@
 
 class UIContainer;
 
+// Note, Icons are not natively supported. You have to implement the logic yourself sorry.
 class UIElement {
 public:
 	static inline Vector2 cursorPos = Vector2Zero();
@@ -16,6 +17,7 @@ public:
 	int id = 0; // the id inside of it's container.
 	float fontSize = (float)font.baseSize;
 	float fontSpacing = 2.0f;
+	float opacity = 100.0f;
 	int globalID = 0; // it's "nickname" globally
 	Vector2 anchor = Vector2Zero();
 	Vector2 position = Vector2Zero();
@@ -36,9 +38,11 @@ public:
 	bool drawable = true;
 	bool checkDrawEligibility = false;
 	bool deleteMe = false;	// whether or not the element is suicidal, and should be executed immediatly
-	EDrawType drawTime = DRAW_NULL;
+	bool outlined = false;
+	bool opacityDirty = true;
+	EDrawType drawTime = DRAW_FINAL;
 	EUIType uiType = EUI_NULL;
-	UIContainer* parent = nullptr;
+	UIContainer* parent;
 
 	UIElement() {
 		this->position = Vector2Add(this->offset, this->anchor);
@@ -51,16 +55,8 @@ public:
 		}
 
 		if (isActive && isVisible) {
-			if (this->uiType == EUI_TEXT) {
-			}
-
-			switch (this->uiType)
-			{
-			case EUI_TEXT:
+			if (this->uiType = EUI_TEXT) {
 				DrawTextEx(font, this->text, this->position, this->fontSize, this->fontSpacing, this->color);
-				break;
-			default:
-				break;
 			}
 
 			customDraw();
@@ -72,6 +68,10 @@ public:
 
 	void onUpdate() {
 		if (isActive) {
+			if (this->opacityDirty) {
+				this->color.a = this->opacity;
+				this->opacityDirty = false;
+			}
 			if (this->checkDrawEligibility) {
 				if (isActive || alwaysVisible) {
 					this->drawable = true;
@@ -109,6 +109,11 @@ public:
 		this->parent = container;
 	}
 
+	void setOpacity(float opacity) {
+		this->opacity = opacity;
+		this->opacityDirty = true;
+	}
+
 protected:
 
 	void SetType(EUIType type) {
@@ -137,7 +142,11 @@ public:
 					element.second->onUpdate();
 				}
 			}
+			customUpdate();
 		}
+	}
+
+	virtual void customUpdate() {
 	}
 
 	//
@@ -172,6 +181,8 @@ public:
 		}
 	}
 
+	virtual void onChildrenDraw() {}
+
 	void addChild(UIElement* element) {
 		int newID = assignID();
 
@@ -182,6 +193,8 @@ public:
 		children[newID] = element;
 	}
 
+	virtual void onChildAdded() {}
+
 	// abduct the child and yeet it!
 	UIElement* getChild(int id) {
 		return children[id];
@@ -190,6 +203,8 @@ public:
 	void clear() {
 		children.empty();
 	}
+
+	virtual void onClear() {}
 
 	const char* containerTag;
 
@@ -200,6 +215,8 @@ public:
 		this->children.erase(target);
 		elements--;
 	}
+
+	virtual void onChildKilled() {}
 private:
 
 	int elements = 0;

@@ -19,4 +19,11 @@ public:
 		// push to uiman
 		UIMan::getInstance()->pushRogueElement(this);
 	}
+
+	UITextElement() {
+	}
+
+	void setText(const char* text) {
+		this->text = text;
+	}
 };

@@ -1,9 +1,33 @@
 #pragma once
+#include <stdlib.h>
+#include <stdio.h>
+#include <array>
 
-typedef struct GameState {
-	int windowWidth;
-	int windowHeight;
+class GameStateManager;
 
-	int screenWidth;
-	int screenHeight;
+class GameState {
+public:
+	GameState() = default;
+
+	static inline int screenWidth;
+	static inline int screenHeight;
+	bool isPaused;
+	bool isOnTop;
+	bool alwaysOnTop;
+
+	virtual void onSwitch() {
+	}
+
+	void switchTo() {
+		this->isOnTop = true;
+	}
+};
+
+class GameStateManager final {
+public:
+	unsigned int activeGameState;
+	vector<GameState*> test;
+
+	unsigned int getActiveState() {
+	}
 };

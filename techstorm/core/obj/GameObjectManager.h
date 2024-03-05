@@ -8,7 +8,7 @@ public:
 
 	void renderObjects()
 	{
-		for (auto& obj : objectsVector)
+		for (auto& obj : threadSafeObjects)
 		{
 			obj->draw();
 			obj->onUpdate();
@@ -18,24 +18,24 @@ public:
 	void flushBuffer()
 	{
 		// we have to use this implementation due to each object can have their own behavior.
-		for (auto& obj : objectsVector)
+		for (auto& obj : threadSafeObjects)
 		{
 			obj->onDestroy();
 		}
 	}
 
 	void updateObjects() {
-		for (auto& obj : objectsVector)
+		for (auto& obj : threadSafeObjects)
 		{
 			obj->onUpdate();
 		}
 	}
 
 	void pushObject(GameObject* obj) {
-		objectsVector.push_back(obj);
+		threadSafeObjects.push_back(obj);
 	}
 
-	std::vector<GameObject*> objectsVector;
+	std::vector<GameObject*> threadSafeObjects;
 
 	/*
 	*

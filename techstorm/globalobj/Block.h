@@ -21,6 +21,9 @@ public:
 	Block(Vector3 position, const Color color, Shader shader, Model model)
 	{
 		Logman::customLog(LOG_TRACE, "Block Constructor", NULL);
+
+		this->threadSafe = true;
+
 		this->model = model;
 		this->tint = color;
 		this->position = position;
