@@ -29,7 +29,8 @@
 #include "techstorm/ui/UIFadingMsg.h"
 #include "techstorm/core/audio/FxMan.h"
 #include "techstorm/globalobj/Objects.h"
-
+#include "techstorm/core/physics/GravityWells.h"
+#include "techstorm/core/physics/PhysObject.h"
 import ErrorHandling;
 
 // std library includes. TODO : Is this still needed?
@@ -350,17 +351,20 @@ void mainThread() {
 	SetTextLineSpacing(48);
 	TestInteractive::init();
 	//TestInteractive::setShader(game->renderers->forwardRenderer->pbrShader);
+	GravityWells* wells = new GravityWells();
 
-	int y = 0;
-	for (int x = 0; x < 100; x++) {
-		for (int z = 0; z < 100; z++) {
-			gameObjectManager->pushObject(new TestInteractive(Vector3{ (float)x, (float)y, (float)z }, WHITE, game->renderers->forwardRenderer->pbrShader, GetDefaultModel()));
-		}
-	}
+	wells->tester();
+
+	gameObjectManager->pushObject(wells->gravWells[0]);
+
+	PhysObject* obj = new PhysObject();
+	obj->init(game->renderers->forwardRenderer->pbrShader);
+
+	gameObjectManager->pushObject(obj);
 
 	DisableCursor();
 
-	float brightness = 1.0f;
+	float brightness = 10.0f;
 
 	SetShaderValue(game->renderers->forwardRenderer->pbrShader, GetShaderLocation(game->renderers->forwardRenderer->pbrShader, "brightness"), &brightness, UNIFORM_FLOAT);
 
@@ -379,6 +383,11 @@ void mainThread() {
 
 			///tester->create(Vector3{ roundf(placepos.x), roundf(placepos.y), roundf(placepos.z) }, GetDefaultModel(), 1.0f, WHITE, block->model.materials[0]);
 			//gameObjectManager->pushObject(tester);
+
+			PhysObject* ob = new PhysObject();
+			ob->init(game->renderers->forwardRenderer->pbrShader, placepos);
+
+			gameObjectManager->pushObject(ob);
 		}
 		TestInteractive::setCam(player->cameraComponent->getSelfCamera());
 		// Take a screenshot
@@ -517,7 +526,7 @@ void mainThread() {
 		swayTimer += GetFrameTime();
 
 		// sway the camera according to the sway algorithm.
-		player->cameraComponent->setTarget(Vector3{ player->cameraComponent->getTarget().x + sin(swayTimer * swaySpeed) * swayAmount, player->cameraComponent->getTarget().y, player->cameraComponent->getTarget().z + cos(swayTimer * swaySpeed) * swayAmount });
+		//player->cameraComponent->setTarget(Vector3{ player->cameraComponent->getTarget().x + sin(swayTimer * swaySpeed) * swayAmount, player->cameraComponent->getTarget().y, player->cameraComponent->getTarget().z + cos(swayTimer * swaySpeed) * swayAmount });
 
 		if (player->health <= 15) {
 			// equal to nearDeathTimer + frame delta time

@@ -6,15 +6,53 @@
 #include "../registry/Registry.h"
 
 class GravityWells;
-class GravityWell {
+
+Vector3 CalculateWellPower(Vector3 center, double gravIntensity, double mass) {
+	return Vector3AddValue(center, (gravIntensity * mass));
+}
+
+// an object with gravitational influence.
+class GravityWell : public GameObject {
 public:
-	double gravitationalAttraction; // how powerful this gravity well is.
+	double gravIntensity; // how powerful this gravity well is.
 	double mass; // How big the gravity well is, Remember, it can be powerful but small.
-	Vector3D position; // where the gravity well is.
-	double acceleration;
-	unsigned int id; // it's id. duh
+	Vector3 center; // center of mass!
+	Vector3 wellPower;
+	unsigned int id; // it's id.
+
+	GravityWell() {
+		this->threadSafe = true;
+		this->isDynamic = true;
+		this->gravIntensity = 1.0f;
+		this->mass = 8.0f;
+		this->position = Vector3One();
+		this->center = position;
+	}
+
+	void draw() override {
+		DrawSphere(this->position, 0.5f, RED);
+	}
+
+	void onUpdate() override {
+	}
+
+	void onDestroy() const override {
+		delete this;
+	}
 };
 
-class GravityWells : public MRegistry<GravityWell*> {
+class GravityWells {
 public:
+	static inline std::map<int, GravityWell*> gravWells;
+	static inline int count = 0;
+
+	void tester() {
+		push(new GravityWell());
+	}
+
+	void push(GravityWell* well) {
+		well->id = count;
+		gravWells[count] = well;
+		count++;
+	}
 };

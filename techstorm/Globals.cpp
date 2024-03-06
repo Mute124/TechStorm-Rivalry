@@ -390,3 +390,14 @@ TextureCubemap GenTextureCubemap(Shader shader, Texture2D panorama, int size, in
 
 	return cubemap;
 }
+
+Vector3 Vector3Pow(Vector3 vec, float exp) {
+	return Vector3{ powf(vec.x, exp), powf(vec.y, exp), powf(vec.z, exp) };
+}
+
+float Vector3Dist(Vector3 v1, Vector3 v2) {
+	return sqrt(
+		powf((v2.x - v1.x), 2.0f) +
+		powf((v2.y - v1.y), 2.0f) +
+		powf((v2.z - v1.z), 2.0f));
+}

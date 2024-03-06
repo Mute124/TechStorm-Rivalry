@@ -10,6 +10,7 @@
 #include <thread>
 
 using namespace std;
+class GameobjectManager;
 class GameObjectComponent;
 
 /*
@@ -42,9 +43,6 @@ public:
 		if (!hasComponents) {
 			hasComponents = true;
 		}
-		component->id = componentCount;
-		components.push_back(component);
-		componentCount++;
 	}
 
 	Vector3 position;
@@ -64,7 +62,8 @@ public:
 
 	int componentCount = 0;
 	std::vector<GameObjectComponent*> components;
-	friend class GameObjectManager;
+
+	friend class GameobjectManager;
 };
 
 // Components only get updated ONCE per frame, Make sure to account for this!
@@ -91,7 +90,11 @@ class GameobjectManager final {
 public:
 	vector<GameObject*> threadSafeObjects; // objects that are threadsafe
 	vector<GameObject*> nonThreadSafeObjects; // objects that are not threadsafe.
+	static inline GameobjectManager* instance;
 
+	GameobjectManager() {
+		instance = this;
+	}
 	void renderObjects()
 	{
 		for (auto& obj : threadSafeObjects)
@@ -122,6 +125,7 @@ public:
 	}
 
 	void updateObjects() {
+		instance = this;
 		// update threadsafe objects on another thread
 		function<void()> threadsafeUpdate = [this]() {
 			for (auto& obj : threadSafeObjects) {

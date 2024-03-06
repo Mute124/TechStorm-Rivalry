@@ -5,4 +5,7 @@
 
 class PhysGravityWell : public PhysProperty, public GravityWell {
 public:
+
+	virtual void update() override {
+	}
 };
