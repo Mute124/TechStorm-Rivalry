@@ -29,6 +29,15 @@ public:
 		this->center = position;
 	}
 
+	GravityWell(int a) {
+		this->threadSafe = true;
+		this->isDynamic = true;
+		this->gravIntensity = 1.0f;
+		this->mass = 8.0f;
+		this->position = Vector3{ 5, 5, 5 };
+		this->center = position;
+	}
+
 	void draw() override {
 		DrawSphere(this->position, 0.5f, RED);
 	}
@@ -48,6 +57,10 @@ public:
 
 	void tester() {
 		push(new GravityWell());
+	}
+
+	void ndTester() {
+		push(new GravityWell(1));
 	}
 
 	void push(GravityWell* well) {

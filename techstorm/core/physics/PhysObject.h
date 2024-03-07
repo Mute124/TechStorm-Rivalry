@@ -6,12 +6,19 @@
 class PhysObject : public GameObject {
 public:
 
-	double envResistance = 0.004; // how much resistance is in the env
+	double envResistance = 0.04; // how much resistance is in the env
 	Vector3 pull = Vector3One();
 	double mass = 3.0f;
 	Velocity vel;
 	Quaternion rot;
 	Vector3 prevAcc;
+
+	PhysObject() {
+	}
+
+	PhysObject(Shader shdr, Vector3 pos) {
+		this->init(shdr, pos);
+	}
 
 	void init(Shader shdr, Vector3 pos) {
 		this->threadSafe = true;
@@ -92,16 +99,21 @@ public:
 			double power = (well->gravIntensity * well->mass / pow(dst, 2.0f) * this->mass) * envResistance;
 
 			Vector3 wellPos = well->position;
-			this->vel.vel = Vector3Lerp(wellPos, Vector3Invert(this->position), sin(power) + cos(dst) * GetFrameTime());
-			this->vel.acc = Vector3AddValue(this->vel.vel, power * vel.momentum);
+			this->vel.acc = Vector3AddValue(Vector3Add(this->vel.vel, Vector3Subtract(this->vel.acc, this->prevAcc)), power);
+			this->vel.vel = Vector3Lerp(wellPos, this->position, dst);
 
-			this->position = Vector3Lerp(this->position, this->vel.vel, power * dst);
-			rot = QuaternionFromVector3ToVector3(this->position, Vector3AddValue(wellPos, power));
+			this->position = Vector3Lerp(this->position, this->vel.vel, -power);
+			rot = QuaternionFromVector3ToVector3(this->position, Vector3AddValue(wellPos, -power));
 			float x = this->vel.vel.x * this->mass;
 			float y = this->vel.vel.y * this->mass;
 			float z = this->vel.vel.z * this->mass;
 
-			this->vel.momentum = x * y * z;
+			this->vel.momentum = x + y + z;
+
+			this->prevAcc = this->vel.acc;
+			this->vel.acc = Vector3SubtractValue(this->vel.vel, this->envResistance);
+
+			this->vel.vel = Vector3AddValue(this->vel.vel, this->vel.momentum);
 			//this->prevAcc = this->vel.acc;
 
 			//this->vel.acc = Vector3Zero();

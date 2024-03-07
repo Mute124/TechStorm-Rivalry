@@ -387,6 +387,8 @@ void mainThread() {
 			PhysObject* ob = new PhysObject();
 			ob->init(game->renderers->forwardRenderer->pbrShader, placepos);
 
+			ob->vel.vel = Vector3AddValue(GetCameraForward(player->cameraComponent->getSelfCameraPointer()), 100.0f);
+
 			gameObjectManager->pushObject(ob);
 		}
 		TestInteractive::setCam(player->cameraComponent->getSelfCamera());

@@ -57,7 +57,7 @@ public:
 		this->walkDelta = walkDelta;
 
 		this->speed = baseSpeed + speedAffectDelta;
-		this->threadSafe = false;
+		this->threadSafe = true;
 	}
 
 	virtual void setSpeedAffectDelta(float val) {
