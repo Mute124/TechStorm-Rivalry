@@ -135,36 +135,3 @@ inline Vector2 CalculatePoint(Vector2 orgin, float width, float height, int corn
 
 	return point;
 }
-
-/*
-* e = mc^2
-*
-* Energy is equal to mass times the speed of light squared
-*/
-double CalculateEnergyConstant(double mass) {
-	return mass * pow(LIGHT_SPEED, (double)2.0f);
-}
-
-double CalculateMomentumVelAvg(double mass, double VelocityAvg) {
-	return mass * VelocityAvg;
-}
-
-double CalculateAngularMomentum(double mass, double dst, double angle) {
-	return mass * pow(dst, 2) * angle;
-}
-
-/*
-* E = -(GM/r)
-*/
-double CalculateEscapeVelocity(double wellMass, double r, const double GravConstant) {
-	return -((GravConstant * wellMass) / r);
-}
-
-double SpecificOrbitalEnergy(double kineticEnergy, double potentialEnergy) {
-	return kineticEnergy + potentialEnergy;
-}
-
-// calculate the attractive force between two objects
-double AttractiveForce(double G, double m1, double m2, double r) {
-	return G * ((m1 * m2) / pow(r, 2));
-}

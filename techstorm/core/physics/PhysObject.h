@@ -5,26 +5,15 @@
 #include "GravityWell.h"
 
 class PhysObject : public GameObject {
-private:
-
-	void recomputeDynamics() {
-		// calculate kinetic / potential energy
-		// All we need to do is calculate the kinetic energy and subtract that from the energy constant to get the potential energy.
-		kinetic = 0.5 * mass * pow(velocity, 2);
-
-		potential = energyConstant - kinetic;
-		// calculate Tangiental speed
-		// tan( 2 * pi * r)
-	}
-
 public:
-	double mass = 3.0f; // mass IN KILOGRAMS!
+
 	double envResistance = 0.04; // how much resistance is in the env
-	const Energy energyConstant = CalculateEnergyConstant(this->mass); // potential/kinetic energy cap;
-	Energy kinetic;
-	Energy potential;
-	double velocity;
-	double tangientalSpeed;
+	Vector3 pull = Vector3One();
+	double mass = 3.0f;
+	Velocity vel;
+	Quaternion rot;
+	Vector3 prevAcc;
+	UIElement* debug;
 	PhysObject() {
 	}
 
@@ -54,6 +43,12 @@ public:
 		this->model.materials[0].maps[MATERIAL_MAP_ALBEDO].texture = Bricks;
 		this->model.materials[0].maps[MATERIAL_MAP_METALNESS].texture = LoadTexture("resources/textures/Block/Brick/brickMRAO.png");
 		this->model.materials[0].maps[MATERIAL_MAP_NORMAL].texture = LoadTexture("resources/textures/Block/Brick/brick_NORM.png");
+
+		float x = this->vel.vel.x * this->mass;
+		float y = this->vel.vel.y * this->mass;
+		float z = this->vel.vel.z * this->mass;
+
+		this->vel.momentum = x * y * z;
 	}
 
 	void init(Shader shdr) {
@@ -79,16 +74,16 @@ public:
 		this->model.materials[0].maps[MATERIAL_MAP_METALNESS].texture = LoadTexture("resources/textures/Block/Brick/brickMRAO.png");
 		this->model.materials[0].maps[MATERIAL_MAP_NORMAL].texture = LoadTexture("resources/textures/Block/Brick/brick_NORM.png");
 
-		//float x = this->vel.vel.x * this->mass;
-		//float y = this->vel.vel.y * this->mass;
-		//float z = this->vel.vel.z * this->mass;
+		float x = this->vel.vel.x * this->mass;
+		float y = this->vel.vel.y * this->mass;
+		float z = this->vel.vel.z * this->mass;
 
-		//this->vel.momentum = x + y + z;
+		this->vel.momentum = x + y + z;
 	}
 
 	virtual void draw() override {
-		//this->model.transform = QuaternionToMatrix(rot);
-		//DrawModel(this->model, this->position, 1.0f, WHITE);
+		this->model.transform = QuaternionToMatrix(rot);
+		DrawModel(this->model, this->position, 1.0f, WHITE);
 
 		//DrawLine3D(this->position, Vector3Add(this->vel.vel, this->position), WHITE);
 		//DrawSphere(Vector3Add(this->vel.vel, this->position), 0.2f, RED);
@@ -98,8 +93,7 @@ public:
 		double wellPull;
 
 		for (int i = 0; i < GravityWells::count; i++) {
-			/*
-			* 			GravityWell* well = GravityWells::gravWells.at(i);
+			GravityWell* well = GravityWells::gravWells.at(i);
 
 			double dst = Vector3DistanceSqr(well->position, this->position);
 
@@ -109,8 +103,12 @@ public:
 			this->vel.acc = Vector3AddValue(Vector3Add(this->vel.vel, Vector3Subtract(this->vel.acc, this->prevAcc)), power);
 			this->vel.vel = Vector3Lerp(wellPos, this->position, dst);
 
+			this->vel.vel.x = this->vel.vel.x + tan(2 * PI * (dst));
+			//this->vel.vel.z = this->vel.vel.x + tan(2 * PI * (dst));
 			this->position = Vector3Lerp(this->position, this->vel.vel, -power);
-			rot = QuaternionFromVector3ToVector3(this->position, Vector3AddValue(wellPos, -power));
+
+			rot = QuaternionFromVector3ToVector3(this->position, Vector3AddValue(wellPos, power));
+
 			float x = this->vel.vel.x * this->mass;
 			float y = this->vel.vel.y * this->mass;
 			float z = this->vel.vel.z * this->mass;
@@ -121,12 +119,9 @@ public:
 			this->vel.acc = Vector3SubtractValue(this->vel.vel, this->envResistance);
 
 			this->vel.vel = Vector3AddValue(this->vel.vel, this->vel.momentum);
-			*/
 
 			//this->prevAcc = this->vel.acc;
-
 			//this->vel.acc = Vector3Zero();
-
 			//Vector3 WellPowerV = Vector3AddValue(well->center, (well->gravIntensity * well->mass));
 			//Logman::Log(TextFormat("[%i] Intensity : %f, Mass : %f,  pos : %f, %f, %f : well : %f, %f, %f : dst : %f : power : %f", i, well->gravIntensity, well->mass, (float)position.x, (float)this->position.y, this->position.z, well->position.x, well->position.y, well->position.z, dst, power));
 			//wellPull = Vector3Distance(well->position, this->position);

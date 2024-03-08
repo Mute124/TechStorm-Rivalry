@@ -1,16 +1,10 @@
 /*
-* TODO:
-* Try to lower the line count of this file.
-*/
-
-/*
 ---------------------------------------------------------------------------------
 | 					         Includes											|
 ---------------------------------------------------------------------------------
 */
 #include "Math.h"
 #include "techstorm/common.h"
-//#include "techstorm/lib/yse/yse.hpp"
 #include "techstorm/core/utils/Button.h" // TODO : Can this be moved to common.h?
 
 // Game Engine Includes
@@ -21,7 +15,6 @@
 #include "techstorm/core/gamescreen/MenuCamera.h"
 #include "techstorm/player/Player.h"
 #include "techstorm/core/rendering/Light.h"
-
 #include "techstorm/core/enum/EGameState.h"
 #include "techstorm/core/threading/ThreadGroups.h"
 #include "techstorm/core/ui/UIElement.h"
@@ -346,7 +339,7 @@ void mainThread() {
 
 	// set default line spacing to 48.
 	SetTextLineSpacing(48);
-	TestInteractive::init();
+	//TestInteractive::init();
 	//TestInteractive::setShader(game->renderers->forwardRenderer->pbrShader);
 	GravityWells* wells = new GravityWells();
 
@@ -372,11 +365,12 @@ void mainThread() {
 	// Now we can run the game loop and start playing!
 	while (!WindowShouldClose())
 	{
-		//player->tick();
+		int scroll = GetMouseWheelMove();
 		UpdateCamera(player->cameraComponent->getSelfCameraPointer(), player->cameraMode); // Update camera
+
 		// NOTE : This is a very basic implementation of placing an object into the world. This is
 		// temporary and should be fleshed out.
-		if (IsMouseButtonPressed(MOUSE_BUTTON_RIGHT))
+		if (IsMouseButtonDown(MOUSE_BUTTON_RIGHT))
 		{
 			Vector3 placepos = player->cameraComponent->getTarget();
 			//new Block(Vector3{ roundf(placepos.x), roundf(placepos.y), roundf(placepos.z) }, WHITE, game->renderers->forwardRenderer->pbrShader, GetDefaultModel());
@@ -392,18 +386,19 @@ void mainThread() {
 
 			game->objMan->pushObject(ob);
 		}
-		TestInteractive::setCam(player->cameraComponent->getSelfCamera());
+		//TestInteractive::setCam(player->cameraComponent->getSelfCamera());
 		// Take a screenshot
 		if (IsKeyPressed(KEY_F9))
 		{
 			// take a screenshot
 			for (int i = 0; i < INT_MAX; i++)
 			{
-				const char* fileName = TextFormat("screen%i.png", i);
+				const char* fileName = TextFormat("screenshots/screen%i.png", i);
 				// if there isnt a duplicate file, it then will create a screenshot.
 				if (FileExists(fileName) == 0)
 				{
 					TakeScreenshot(fileName);
+
 					break;
 				}
 			}
@@ -626,7 +621,6 @@ void mainThread() {
 		| 					Post Process Affects										|
 		---------------------------------------------------------------------------------
 		*/
-		SetTextureFilter(game->renderers->forwardRenderer->fbo.texture, TEXTURE_FILTER_ANISOTROPIC_16X);
 
 		game->renderers->forwardRenderer->startDraw();
 		// Begin drawing mode so we can actually see stuff!
@@ -647,6 +641,7 @@ void mainThread() {
 
 		// Let raylib know that we're done drawing to the screen.
 		game->renderers->forwardRenderer->endDraw();
+		SetTextureFilter(game->renderers->forwardRenderer->fbo.texture, TEXTURE_FILTER_ANISOTROPIC_16X);
 
 		// clear the screen and replace it with black.
 		ClearBackground(BLACK);

@@ -2,12 +2,9 @@
 // local includes
 #include "CharacterComponent.h"
 #include "../core/obj/Gameobject.h"
-
 #include "../Common.h"
 #include "../core/ecs/ECSMan.h"
-
 #include "../core/threading/ThreadGroups.h"
-
 #include "../core/utils/Math.h"
 #include "IMoveableCharacter.h"
 #include "CharacterStat.h"
@@ -28,18 +25,13 @@ public:
 
 	bool godMode = false;
 	bool invisible = false;
-
 	float health = 100.0f;
-
 	bool isDead;
 	bool isplayer = false;
-
 	bool running;
 	float runDelta;
-
 	bool walking = true;
 	float walkDelta;
-
 	bool crawling;
 
 	// subtracts from the runDelta only if crawlRunning;

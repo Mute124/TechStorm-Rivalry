@@ -223,6 +223,7 @@ public:
 	bool isRunning;
 	static inline Player* instance;
 	Crosshair* crosshair;
+
 	Player() {
 	}
 
