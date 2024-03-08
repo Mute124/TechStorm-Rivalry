@@ -156,6 +156,33 @@ typedef struct
 	Vector3 v3;
 } TriVert;
 
+// Physics crap
+/*
+* All units are in the METRIC system.
+*/
+#define CelestialPlane double
+#define GravitationalConstant double
+#define GravitationalConstantParameter double
+#define Eccentricity int
+#define Energy double
+#define Force double
+
+// A position on a celestial plane
+typedef struct CelestialVector {
+	double x;
+	double z;
+};
+
+typedef struct CelestialOrbit : public CelestialVector {
+	double r; // distance from well
+	int eccentricity; // min=0 max=1
+	double frequency;
+};
+
+typedef struct Collision {
+	Force force;
+};
+
 // a global model that can be used if no model is present, or it can be used for testing. Set in main.cpp
 static Model defaultModel = { 0 };
 
@@ -187,6 +214,9 @@ extern Vector3 Vector3Random(int min, int max);
 extern Vector3 RoundVec3(Vector3 Target);
 extern Vector3 Vector3MaxPos();
 extern Vector3 Vector3RandomEx(Vector3 min, Vector3 max);
+
+extern float Vector3Avg(Vector3 vec);
+extern Vector3 Vector3DstAvg(Vector3 v1, Vector3 v2);
 
 static void PrintFloat(const char* name, float val) {
 	Logman::Log(TextFormat("Value of %s is %f", name, val));

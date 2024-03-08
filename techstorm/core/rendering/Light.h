@@ -1,5 +1,5 @@
 #pragma once
-#include "common.h"
+#include "../../Common.h"
 
 #if defined(PLATFORM_DESKTOP)
 #define GLSL_VERSION 330

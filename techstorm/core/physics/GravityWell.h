@@ -15,7 +15,10 @@ Vector3 CalculateWellPower(Vector3 center, double gravIntensity, double mass) {
 class GravityWell : public GameObject {
 public:
 	double gravIntensity; // how powerful this gravity well is.
-	double mass; // How big the gravity well is, Remember, it can be powerful but small.
+	const Force gravitationalConstant;
+	double mass; // The mass of the Gravity well. IN KG
+	double escapeVelocity;
+
 	Vector3 center; // center of mass!
 	Vector3 wellPower;
 	unsigned int id; // it's id.
@@ -36,6 +39,11 @@ public:
 		this->mass = 8.0f;
 		this->position = Vector3{ 5, 5, 5 };
 		this->center = position;
+	}
+
+	// precompute all non-dynamic variables
+	void precompute() {
+		this->escapeVelocity =
 	}
 
 	void draw() override {

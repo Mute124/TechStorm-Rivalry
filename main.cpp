@@ -89,7 +89,6 @@ void mainThread() {
 	game->StartGame();
 
 	// IMPORTANT : Do not remove this or delete it as it is the manager of all game objects! (it will fuck up everything)
-	GameobjectManager* gameObjectManager = new GameobjectManager();
 
 	// test if temp folder exists, if not create it
 	// currently not used for anything
@@ -174,7 +173,7 @@ void mainThread() {
 	Block* block = new Block(Vector3Zero(), BLACK, game->renderers->forwardRenderer->pbrShader, DefaultBlockModel);
 
 	// Finally push it off to the object manager
-	gameObjectManager->pushObject(block);
+	game->objMan->pushObject(block);
 
 	// ----------------------------------------------------------------------------- Player
 	// Initialization -----------------------------------------------------------------------------
@@ -191,7 +190,7 @@ void mainThread() {
 	Player* player = new Player(Vector3{ 0.0f, 2.0f, 4.0f }, 100, PlayerModel, CAMERA_FIRST_PERSON);
 
 	// Finally push it off to the object manager
-	gameObjectManager->pushObject(player);
+	game->objMan->pushObject(player);
 
 	// ----------------------------------------------------------------------------- skybox
 	// creation. -----------------------------------------------------------------------------
@@ -345,8 +344,6 @@ void mainThread() {
 
 	// end of height map tomfoolery
 
-	UIMan* uiMan = new UIMan();
-
 	// set default line spacing to 48.
 	SetTextLineSpacing(48);
 	TestInteractive::init();
@@ -355,15 +352,19 @@ void mainThread() {
 
 	wells->tester();
 
-	gameObjectManager->pushObject(wells->gravWells[0]);
+	game->objMan->pushObject(wells->gravWells[0]);
 
 	PhysObject* obj = new PhysObject();
 	obj->init(game->renderers->forwardRenderer->pbrShader);
 
-	gameObjectManager->pushObject(obj);
+	game->objMan->pushObject(obj);
+
+	UIElement* elm = new UIElement(GetMousePosition(), GetMouseDelta(), 100, 100, YELLOW);
+
+	game->uiMan->pushRogueElement(elm);
 
 	DisableCursor();
-
+	Crosshair* crosshair = new Crosshair(game->screenMiddle, game->uiMan);
 	float brightness = 10.0f;
 
 	SetShaderValue(game->renderers->forwardRenderer->pbrShader, GetShaderLocation(game->renderers->forwardRenderer->pbrShader, "brightness"), &brightness, UNIFORM_FLOAT);
@@ -389,7 +390,7 @@ void mainThread() {
 
 			ob->vel.vel = Vector3AddValue(GetCameraForward(player->cameraComponent->getSelfCameraPointer()), 100.0f);
 
-			gameObjectManager->pushObject(ob);
+			game->objMan->pushObject(ob);
 		}
 		TestInteractive::setCam(player->cameraComponent->getSelfCamera());
 		// Take a screenshot
@@ -462,9 +463,9 @@ void mainThread() {
 
 					std::vector<void*> data;
 
-					for (int i = 0; i < gameObjectManager->threadSafeObjects.size(); i++)
+					for (int i = 0; i < game->objMan->threadSafeObjects.size(); i++)
 					{
-						data.push_back(gameObjectManager->threadSafeObjects[i]);
+						data.push_back(game->objMan->threadSafeObjects[i]);
 					}
 					SaveFileData(filename, &data, sizeof(data));
 
@@ -576,14 +577,14 @@ void mainThread() {
 		SetShaderValue(game->renderers->forwardRenderer->pbrShader, game->renderers->forwardRenderer->pbrShader.locs[SHADER_LOC_VECTOR_VIEW], &cameraPos, SHADER_UNIFORM_VEC3);
 
 		// Update the game object manager
-		gameObjectManager->updateObjects();
+		game->objMan->updateObjects();
 		//game->scriptManager->updateObjects();
 
 		// Start texturing the FBO with what the user will be seeing. This includes UI and Scene objects.
 		game->renderers->forwardRenderer->startTexturing();
 
-		uiMan->update();
-		uiMan->draw(DRAW_CLIPPABLE);
+		game->uiMan->update();
+		game->uiMan->draw(DRAW_CLIPPABLE);
 		DrawTextureRec(nearDeathTex, Rectangle{ 0, 0, (float)(game->renderers->forwardRenderer->fbo.texture.width), (float)(-game->renderers->forwardRenderer->fbo.texture.height) }, Vector2{ 0, 0 }, WHITE);
 		BeginShaderMode(game->renderers->forwardRenderer->bloomShader);
 		BeginMode3D(player->cameraComponent->getSelfCamera());
@@ -602,7 +603,7 @@ void mainThread() {
 
 		// Render all game objects
 		//rlEnableWireMode();
-		gameObjectManager->renderObjects();
+		game->objMan->renderObjects();
 		// end 3d rendering and texturing.
 		game->renderers->forwardRenderer->end3D();
 
@@ -615,9 +616,6 @@ void mainThread() {
 		---------------------------------------------------------------------------------
 		*/
 		//UIMan::draw();
-
-		// Stop texturing the FBO with what the user will be seeing.
-		game->renderers->forwardRenderer->stopTexturing();
 
 		// Warning : DO NOT MOVE THIS! this is important! due to a bug within raylib, this must be
 		// done after the texturing is done or a stack overflow WILL occur. GOD DAMN IT!
@@ -645,7 +643,7 @@ void mainThread() {
 		// Draw the FPS onto the screen.
 		DrawFPS(100, 100);
 
-		uiMan->draw(DRAW_FINAL);
+		game->uiMan->draw(DRAW_FINAL);
 
 		// Let raylib know that we're done drawing to the screen.
 		game->renderers->forwardRenderer->endDraw();
@@ -682,16 +680,15 @@ void mainThread() {
 
 	// Flush all game objects within the buffer. This is important! Otherwise, the game objects will
 	// not be deleted, cause memory leaks, and negates the entire purpose of this system.
-	gameObjectManager->flushBuffer();
+	game->objMan->flushBuffer();
 	//threadGroups.join();
 
 	// Delete pointers declared within this function
 	delete game;
 	delete block;
+	delete elm;
 
-	delete uiMan;
 	delete player;
-	delete gameObjectManager;
 
 	// The software returns a 0 (success) and exits.
 }

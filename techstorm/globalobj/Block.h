@@ -44,30 +44,6 @@ public:
 		this->model.materials[0].maps[MATERIAL_MAP_NORMAL].texture = LoadTexture("resources/textures/Block/Brick/brick_NORM.png");
 		this->model.materials[0].maps[MATERIAL_MAP_HEIGHT].texture = LoadTexture("resources/textures/Block/Brick/brick_DISP.png");
 		this->model.materials[0].maps[MATERIAL_MAP_SPECULAR].texture = LoadTexture("resources/textures/Block/Brick/brick_SPEC.png");
-
-		//this->model.materials[0].maps[MATERIAL_MAP_EMISSION].texture = LoadTexture("resources/textures/Old_Car/old_car_e.png");
-		/*
-		*
-		*
-		*
-		*
-		*
-		*         this->model.materials[0].maps[MATERIAL_MAP_ALBEDO].texture = LoadTexture("resources/textures/Old_Car/old_car_d.png");
-		this->model.materials[0].maps[MATERIAL_MAP_METALNESS].texture = LoadTexture("resources/textures/Old_Car/old_car_mra.png");
-		this->model.materials[0].maps[MATERIAL_MAP_NORMAL].texture = LoadTexture("resources/textures/Old_Car/old_car_n.png");
-
-				// Setup materials[0].maps default parameters
-
-		//
-
-		// Setup materials[0].maps default textures
-   //
-
-		// Setup materials[0].maps default textures
-
-	*/
-
-	// UnloadTexture(Bricks);
 	}
 
 	void onUpdate() override

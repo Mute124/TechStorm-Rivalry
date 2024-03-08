@@ -6,7 +6,8 @@
 #include "PlayerCharacter.h"
 #include "../core/ui/UIElement.h"
 #include "Hand.h"
-#include "../Game.h"
+
+#include "../ui/Crosshair.h"
 
 #define STARTINGHP 100
 #define MAX_AFFLICTIONS 20
@@ -211,19 +212,28 @@ private:
 
 class Player : public PlayerController
 {
+private:
+	bool startDriving = false;
+	int maxHP = STARTINGHP;
 public:
-	Model gun = { 0 };
-
+	int cameraMode;
+	bool doDraw = true;
+	static inline CameraComp* cameraComponent;
+	PlayerController* controller = new PlayerController(KEY_W, KEY_S, KEY_A, KEY_D, KEY_SPACE, KEY_C, cameraMode);
+	bool isRunning;
+	static inline Player* instance;
+	Crosshair* crosshair;
 	Player() {
 	}
 
 	// main constructor
 	Player(Vector3 StartingPos, int MaxHP, const Model model, int CameraMode)
-		: position(StartingPos),
-		maxHP(MaxHP),
-		model(model),
+		: maxHP(MaxHP),
 		cameraMode(CameraMode)
 	{
+		this->model = model;
+		this->position = position;
+
 		cameraComponent = new CameraComp(CameraData{
 			   {0.0f, 0.0f, 4.0f},
 			   {0.0f, 2.0f, 0.0f},
@@ -233,7 +243,7 @@ public:
 		initCharacter(0.0004f, 0.002f, 0.002f, 0.03f);
 		instance = this;
 
-		this->gun = LoadModel("resources/Sniper_Rifle.glb");
+		//this->gun = LoadModel("resources/Sniper_Rifle.glb");
 
 		//this->gun.materials[0].shader = Game::renderers->forwardRenderer->pbrShader;
 	};
@@ -296,27 +306,4 @@ public:
 		delete controller;
 		delete this;
 	}
-
-	Model model; // Player model
-	int cameraMode;
-
-	bool doDraw = true;
-
-	static inline CameraComp* cameraComponent;
-
-	PlayerController* controller = new PlayerController(KEY_W, KEY_S, KEY_A, KEY_D, KEY_SPACE, KEY_C, cameraMode);
-
-	bool isRunning;
-
-	static inline Player* instance;
-
-private:
-
-	bool startDriving = false;
-
-	// KeyboardKey *CurrentKeyDown;
-	Vector3 position;
-	Mesh mesh;
-
-	int maxHP = STARTINGHP;
 };

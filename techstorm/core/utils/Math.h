@@ -1,4 +1,6 @@
 /*
+	Important : All math is using the METRIC system!
+
 	This file is part of the TechStorm Engine. This is simply a set of math functions and algorithms.
 
 	Algorithm Explanations
@@ -14,6 +16,7 @@
 
 		Formula :
 			y = sqrt(a * sin(x *(f/F))^c * s) + o
+
 */
 
 #pragma once
@@ -23,6 +26,9 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <vector>
+
+// Speed of light!
+#define LIGHT_SPEED (double)299792458.0f
 
 // y = sqrt(a * sin(x *(f/F))^c * s) + o
 /**
@@ -128,4 +134,37 @@ inline Vector2 CalculatePoint(Vector2 orgin, float width, float height, int corn
 	}
 
 	return point;
+}
+
+/*
+* e = mc^2
+*
+* Energy is equal to mass times the speed of light squared
+*/
+double CalculateEnergyConstant(double mass) {
+	return mass * pow(LIGHT_SPEED, (double)2.0f);
+}
+
+double CalculateMomentumVelAvg(double mass, double VelocityAvg) {
+	return mass * VelocityAvg;
+}
+
+double CalculateAngularMomentum(double mass, double dst, double angle) {
+	return mass * pow(dst, 2) * angle;
+}
+
+/*
+* E = -(GM/r)
+*/
+double CalculateEscapeVelocity(double wellMass, double r, const double GravConstant) {
+	return -((GravConstant * wellMass) / r);
+}
+
+double SpecificOrbitalEnergy(double kineticEnergy, double potentialEnergy) {
+	return kineticEnergy + potentialEnergy;
+}
+
+// calculate the attractive force between two objects
+double AttractiveForce(double G, double m1, double m2, double r) {
+	return G * ((m1 * m2) / pow(r, 2));
 }

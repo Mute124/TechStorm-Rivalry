@@ -4,22 +4,25 @@
 #include "player/Player.h"
 #include "core/scripting/ScriptManager.h"
 #include "core/rendering/Renderers.h"
-
+#include "core/ui/UIMan.h"
 #include <any>
-class Game final
+class Game
 {
 private:
 	toml::v3::parse_result optionsConfig;
 public:
+	static inline Renderers* renderers;
+	static inline ScriptManager* scriptManager;
+	static inline UIMan* uiMan;
+	static inline GameobjectManager* objMan;
 	static inline Vector2 windowSize = { 0, 0 };
+	static inline Vector2 screenMiddle = { 0, 0 };
 	int windowWidth;
 	int windowHeight;
 	bool isFullscreen = false;
 	bool enableMusic;
 	// Config manager instance
 	ConfigMan* configman = new ConfigMan();
-	static inline Renderers* renderers;
-	static inline ScriptManager* scriptManager;
 
 	Game() {}
 
@@ -124,13 +127,16 @@ public:
 
 		renderers->forwardRenderer->bloomShader = LoadShader(0, "resources/shaders/bloom.fs");
 
-		scriptManager = new ScriptManager();
-
-		scriptManager->start();
+		objMan = new GameobjectManager();
+		uiMan = new UIMan();
 
 		SetTargetFPS(60);
 
 		windowSize = { (float)windowWidth, (float)windowHeight };
+
+		screenMiddle = { (float)GetScreenWidth() / 2.0f, (float)GetScreenHeight() / 2.0f };
+
+		Logman::Log(TextFormat("%f %f: ", screenMiddle.x, screenMiddle.y));
 	}
 
 	void endGame()
@@ -140,7 +146,8 @@ public:
 		delete configman;
 		delete scriptManager;
 		delete renderers;
-
+		delete uiMan;
+		delete objMan;
 		delete this;
 	}
 

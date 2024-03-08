@@ -46,13 +46,40 @@ public:
 
 	UIElement() {
 		this->position = Vector2Add(this->offset, this->anchor);
+
+		//this->bounds.width = Vector2Distance()
+		this->drawTime = EDrawType::DRAW_FINAL;
+	}
+
+	UIElement(Vector2 anchor, Vector2 offset, int width, int height, Color color) : anchor(anchor), offset(offset), width(width), height(height), color(color) {
+		this->position = Vector2Add(this->offset, this->anchor);
+
+		this->bounds.height = Vector2Distance(anchor, offset);
+		this->bounds.width = Vector2Distance(anchor, offset);
+		this->bounds.x = this->position.x;
+		this->bounds.y = this->position.y;
+
+		//this->bounds.width = Vector2Distance()
 		this->drawTime = EDrawType::DRAW_FINAL;
 	}
 
 	void draw() {
 		UpdateInfo();
-		if (debugMode) {
+
+		/*
+		*
+		*		if (debugMode) {
+			// draw element bounds dimensions.
+			DrawTextEx(font, TextFormat("Bounds : (w: %f, h: %f)", this->bounds.width, this->bounds.height), Vector2{ this->bounds.x, this->bounds.y + (this->fontSize / 2) }, this->fontSize / 2, this->fontSpacing, GREEN);
+
+			// draw anchor pos text
+			Vector2 anchorText = Vector2{ this->anchor.x, this->anchor.y + (this->fontSize) };
+			DrawTextEx(font, TextFormat("Anchor : (x: %f, y: %f)", this->anchor.x, this->anchor.y), anchorText, this->fontSize / 2, this->fontSpacing, GREEN);
+
+			// draw anchor.
+			DrawCircleV(this->anchor, 5.0f, RED);
 		}
+		*/
 
 		if (isActive && isVisible) {
 			if (this->uiType = EUI_TEXT) {
@@ -84,6 +111,13 @@ public:
 				this->checkDrawEligibility = false;
 			}
 
+			this->anchor = cursorPos;
+			this->position = Vector2Add(this->offset, this->anchor);
+
+			this->bounds.height = height;
+			this->bounds.width = width;
+			this->bounds.x = this->position.x;
+			this->bounds.y = this->position.y;
 			UpdateInfo();
 
 			customUpdate();

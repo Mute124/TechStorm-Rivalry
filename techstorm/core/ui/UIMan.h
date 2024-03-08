@@ -18,6 +18,8 @@ public:
 	UIMan() {
 		UIContainer::start();
 		addRogueContainer();
+
+		currentInstance = this;
 	}
 
 	void draw(EDrawType drawType) {

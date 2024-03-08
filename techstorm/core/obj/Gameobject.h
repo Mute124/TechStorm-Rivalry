@@ -20,6 +20,9 @@ class GameObjectComponent;
 class GameObject abstract
 {
 public:
+
+	GameObject() {
+	}
 	virtual void draw() abstract {
 		Logman::Log("Gameobj");
 	}
@@ -50,6 +53,7 @@ public:
 	float scale;
 	Color tint;
 	Shader shdr;
+
 #ifdef DEBUG
 	bool debugMode = true;
 #else // DEBUG
