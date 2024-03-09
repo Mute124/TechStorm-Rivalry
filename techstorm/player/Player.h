@@ -5,8 +5,8 @@
 #include "../inventory/EquipSlot.h"
 #include "PlayerCharacter.h"
 #include "../core/ui/UIElement.h"
+#include "../core/ui/UIMan.h"
 #include "Hand.h"
-
 #include "../ui/Crosshair.h"
 
 #define STARTINGHP 100

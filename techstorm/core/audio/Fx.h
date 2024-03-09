@@ -1,15 +1,18 @@
 #pragma once
 #include "ESoundChannels.h"
 #include "EFxType.h"
+
 class Fx {
 public:
-	//static inline FxMan* manager = nullptr;
-	EFxType fxType = FX_NULL;
+	static inline bool mute = false;
+	AudioStream* stream = nullptr;
+	EFxType fxType = FX_AMBIENT;
 	Sound fxSound = { 0 };
 	Vector3 position = Vector3Zero();
 	const char* name = "null";
 	float volume = 0.0f;
 	float pitch = 0.0f;
+
 	bool isLoaded = false;
 	bool persistant = false;
 	bool isPlaying = false;
@@ -20,8 +23,6 @@ public:
 		this->position = position;
 		this->name = name;
 		this->isLoaded = true;
-
-		//manager->loadFx(this);
 	}
 
 	Fx(Wave wave, const char* name) {
@@ -29,8 +30,6 @@ public:
 		this->position = Vector3Zero();
 		this->name = name;
 		this->isLoaded = true;
-
-		//manager->loadFx(this);
 	}
 
 	Fx(Sound sound, Vector3 position, const char* name) {
@@ -78,7 +77,6 @@ public:
 
 	void update() {
 		isPlayingSound();
-
 	}
 
 	void isPlayingSound() {

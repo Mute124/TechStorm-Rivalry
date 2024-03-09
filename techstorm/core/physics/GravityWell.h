@@ -17,7 +17,9 @@ public:
 	double gravIntensity; // how powerful this gravity well is.
 	//const Force gravitationalConstant;
 	double mass; // The mass of the Gravity well. IN KG
-	double escapeVelocity;
+	GravitationalConstant constant;
+	GravitationalConstantParameter constantParameter;
+	CelestialPlane celestialPlane;
 
 	Vector3 center; // center of mass!
 	Vector3 wellPower;

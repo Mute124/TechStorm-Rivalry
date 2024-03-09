@@ -3,5 +3,4 @@
 
 class RigidBody : public ObjectCollider {
 public:
-	Vector3 velocity;
 };
