@@ -17,7 +17,7 @@ public:
 	double momentum;
 	double avgVelocity;
 	double tangientalVelocity;
-	CelestialOrbit orbit;
+
 	Velocity vel;
 	Quaternion rot;
 	Vector3 prevAcc;
@@ -102,9 +102,9 @@ public:
 			this->specificPotentialEnergy;
 
 			this->vel.acc = Vector3AddValue(Vector3Add(this->vel.vel, Vector3Subtract(this->vel.acc, this->prevAcc)), power);
-			this->vel.vel = Vector3Lerp(wellPos, this->position, dst);
+			this->vel.vel = Vector3Lerp(wellPos, this->position, dst * GetFrameTime());
 
-			this->position = Vector3Lerp(this->position, this->vel.vel, -power);
+			this->position = Vector3Lerp(this->position, this->vel.vel, -power * GetFrameTime());
 
 			rot = QuaternionFromVector3ToVector3(this->position, Vector3AddValue(wellPos, power));
 

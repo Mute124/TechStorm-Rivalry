@@ -1,7 +1,7 @@
 #pragma once
 #include "../character/Character.h"
 
-class PlayerCharacter : public Character {
+class PlayerCharacter : public Character<4> {
 public:
 	void onDestroy() const override
 	{

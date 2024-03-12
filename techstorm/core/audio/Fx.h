@@ -1,5 +1,5 @@
 #pragma once
-#include "ESoundChannels.h"
+
 #include "EFxType.h"
 
 class Fx {

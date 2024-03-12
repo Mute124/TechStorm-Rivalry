@@ -9,8 +9,10 @@
 #include "IMoveableCharacter.h"
 #include "CharacterStat.h"
 #include "../affliction/Affliction.h"
+#include "../bodyParts/Limb.h"
 
 // A game character abstract class
+template<size_t limbs>
 class Character abstract : public GameObject
 {
 public:
@@ -19,6 +21,7 @@ protected:
 
 	Ray* target;
 
+	Limb* limbs[limbs];
 	std::map<const char*, CharacterStat*> stats;
 
 public:

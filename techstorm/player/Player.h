@@ -241,7 +241,7 @@ public:
 			   {0.0f, 2.0f, 0.0f},
 			   45.0f,
 			   CAMERA_PERSPECTIVE });
-		initCharacter(0.0004f, 0.002f, 0.002f, 0.03f);
+		initCharacter(0.4f, 2.0f, 0.7f, 1.0f);
 		instance = this;
 
 		//this->gun = LoadModel("resources/Sniper_Rifle.glb");

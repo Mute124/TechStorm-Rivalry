@@ -1,4 +1,5 @@
 #pragma once
+
 /*
 * FX_NULL is the default and denotes an unset type.
 * FX_AMBIENT are those that are well ambient, examples of which include room tone, environment mood, etc

@@ -11,8 +11,6 @@
 #include <stdlib.h>
 #include <map>
 
-class ConfigFile;
-
 // Component class of ConfigRegistry
 
 class ConfigRegistry

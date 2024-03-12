@@ -5,7 +5,7 @@
 
 #include "../common.h"
 #include "../Game.h"
-
+#include "../core/ui/UIElement.h"
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -13,6 +13,12 @@
 class Block : public GameObject
 {
 public:
+	class debug : public UIElement {
+	public:
+		Vector3 pos;
+		void customDraw() override {
+		}
+	};
 
 	void draw() override {
 		DrawModel(this->model, this->position, 1.0f, WHITE);

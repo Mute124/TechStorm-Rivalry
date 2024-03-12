@@ -1,4 +1,5 @@
 #pragma once
+#include "../player/Player.h"
 
 class InventoryItem abstract {
 public:
@@ -13,11 +14,6 @@ public:
 	int uses = -1; // if -1, it has infinite uses.
 	int conditionMax;
 	float conditionDelta; // Each time the item is used, it
-
-	virtual void use() {
-		if (!singleUse) {
-		}
-	};
 
 	EMaterialTypes* TranslateMaterialType(const char* target) {
 		if (target == "Metal") {

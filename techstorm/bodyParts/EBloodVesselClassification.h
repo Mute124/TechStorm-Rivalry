@@ -1,0 +1,8 @@
+#pragma once
+
+typedef enum EBloodVesselClassification {
+	EBLOODVESSEL_CAPPILARY,
+	EBLOODVESSEL_VEIN,
+	EBLOODVESSEL_ARTERY,
+	EBLOODVESSEL_AORTA
+};

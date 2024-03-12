@@ -12,5 +12,3 @@ const char* StrToCStr(string str) {
 string CStrToStr(const char* cstr) {
 	return (string)cstr;
 }
-
-string

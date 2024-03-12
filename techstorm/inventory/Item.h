@@ -2,10 +2,15 @@
 * Items should be put within the resources.tsr file!
 */
 #pragma once
-#include "Common.h"
+#include "../Common.h"
 #include "ItemTypes.h"
 
-typedef struct Item {
+typedef class Item {
+	const char* NAME; // Item Name
+	const EMaterialTypes* TYPE; // What type of item is this
+	const EItemRarity* RARITY;
+	const Image* ICON; // Item icon
+	const int* ID; // The id for this type of item.
 	void log() {
 		Logman::Log(NAME);
 	}
@@ -18,13 +23,6 @@ typedef struct Item {
 	~Item() {
 		delete this;
 	}
-
-	const char* NAME; // Item Name
-	const EMaterialTypes* TYPE; // What type of item is this
-	const EItemRarity* RARITY;
-
-	const Image* ICON; // Item icon
-	const int* ID; // The id for this type of item.
 
 	EMaterialTypes* TranslateMaterialType(const char* target) {
 		if (target == "Metal") {

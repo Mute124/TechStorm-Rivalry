@@ -7,7 +7,6 @@ public:
 	Vector2 middle;
 	Crosshair(Vector2 middlePos, UIMan* man) {
 		this->drawTime = DRAW_FINAL;
-		man->pushRogueElement(this);
 	}
 
 	void customDraw() override {

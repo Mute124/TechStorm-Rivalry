@@ -3,7 +3,6 @@
 #include "ConfigFile.h"
 #include "../registry/ListEntry.h"
 #include "../fileSystem/File.h"
-
 class ConfigFile
 {
 public:
