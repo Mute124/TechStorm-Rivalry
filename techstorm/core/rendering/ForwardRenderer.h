@@ -14,7 +14,8 @@ public:
 		init();
 	}
 
-	void init() {}
+	void init() {
+	}
 
 	void update() {
 	}

@@ -14,6 +14,10 @@ void SetDefaultModel(Model model) {
 	defaultModel = model;
 }
 
+Texture GetDefaultTexture() {
+	return LoadTexture("resources/textures/default.png");
+}
+
 /**
  * Returns a CubeVerticies object with all coordinates initialized to 0.0f.
  */
