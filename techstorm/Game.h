@@ -17,6 +17,7 @@ public:
 	static inline GameobjectManager* objMan;
 	static inline Vector2 windowSize = { 0, 0 };
 	static inline Vector2 screenMiddle = { 0, 0 };
+	Font gameFont;
 	int windowWidth;
 	int windowHeight;
 	bool isFullscreen = false;
@@ -109,10 +110,10 @@ public:
 
 		DisableEventWaiting();
 
-		SetExitKey(KEY_BACKSPACE); // In event of your fuck up press this.
+		SetExitKey(KEY_NULL); // In event of your fuck up press this.
 
 		// Setting the window icon in task bar
-		Image icon = LoadImage("resources/images/icon.png");
+		Image icon = LoadImage("resources/icons/icon1.png");
 		ImageFormat(&icon, PIXELFORMAT_UNCOMPRESSED_R8G8B8A8);
 		SetWindowIcon(icon);
 
@@ -135,7 +136,7 @@ public:
 		windowSize = { (float)windowWidth, (float)windowHeight };
 
 		screenMiddle = { (float)GetScreenWidth() / 2.0f, (float)GetScreenHeight() / 2.0f };
-
+		gameFont = LoadFont("Data/gui/fonts/Tektur-VariableFont_wdth,wght.ttf");
 		Logman::Log(TextFormat("%f %f: ", screenMiddle.x, screenMiddle.y));
 	}
 

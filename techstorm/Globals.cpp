@@ -32,7 +32,7 @@ CubeVerticies CubeVertOne() {
 * @param verts - The vertices defining the mesh
 * @return The generated mesh
 */
-Mesh GenMeshCustom(TriVert verts)
+Mesh GenMeshCustomT(TriVert verts)
 {
 	// Initialize a new mesh
 	Mesh mesh = { 0 };
@@ -406,4 +406,70 @@ float Vector3Avg(Vector3 vec) {
 	double sum = vec.x + vec.y + vec.z;
 
 	return sum / 3;
+}
+static Mesh GenMeshCustom(void)
+{
+	Mesh mesh = { 0 };
+	mesh.triangleCount = 2;
+	mesh.vertexCount = mesh.triangleCount * 4;
+	mesh.vertices = (float*)MemAlloc(mesh.vertexCount * 3 * sizeof(float));    // 3 vertices, 3 coordinates each (x, y, z)
+	mesh.texcoords = (float*)MemAlloc(mesh.vertexCount * 2 * sizeof(float));   // 3 vertices, 2 coordinates each (x, y)
+	mesh.normals = (float*)MemAlloc(mesh.vertexCount * 3 * sizeof(float));     // 3 vertices, 3 coordinates each (x, y, z)
+
+	// Vertex at (0, 0, 0)
+	mesh.vertices[0] = 0;
+	mesh.vertices[1] = 0;
+	mesh.vertices[2] = 0;
+	mesh.normals[0] = 0;
+	mesh.normals[1] = 1;
+	mesh.normals[2] = 0;
+	mesh.texcoords[0] = 0;
+	mesh.texcoords[1] = 0;
+
+	// Vertex at (1, 0, 2)
+	mesh.vertices[3] = 1;
+	mesh.vertices[4] = 0;
+	mesh.vertices[5] = 2;
+	mesh.normals[3] = 0;
+	mesh.normals[4] = 1;
+	mesh.normals[5] = 0;
+	mesh.texcoords[2] = 0.5f;
+	mesh.texcoords[3] = 1.0f;
+
+	// Vertex at (2, 0, 0)
+	mesh.vertices[6] = 2;
+	mesh.vertices[7] = 0;
+	mesh.vertices[8] = 0;
+	mesh.normals[6] = 0;
+	mesh.normals[7] = 1;
+	mesh.normals[8] = 0;
+	mesh.texcoords[4] = 1;
+	mesh.texcoords[5] = 0;
+
+	// Vertex at (2, 0, 0)
+	mesh.vertices[9] = 3;
+	mesh.vertices[10] = 0;
+	mesh.vertices[11] = 0;
+	mesh.normals[9] = 0;
+	mesh.normals[10] = 2;
+	mesh.normals[11] = 0;
+	mesh.texcoords[6] = 1;
+	mesh.texcoords[7] = 1;
+
+	// Upload mesh data from CPU (RAM) to GPU (VRAM) memory
+	UploadMesh(&mesh, true);
+
+	return mesh;
+}
+
+// Check if any key is pressed
+// NOTE: We limit keys check to keys between 32 (KEY_SPACE) and 126
+bool IsAnyKeyPressed()
+{
+	bool keyPressed = false;
+	int key = GetKeyPressed();
+
+	if ((key >= 32) && (key <= 126)) keyPressed = true;
+
+	return keyPressed;
 }

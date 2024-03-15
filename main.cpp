@@ -3,6 +3,7 @@
 | 					         Includes											|
 ---------------------------------------------------------------------------------
 */
+
 #include "Math.h"
 #include "techstorm/common.h"
 #include "techstorm/core/utils/Button.h" // TODO : Can this be moved to common.h?
@@ -24,11 +25,17 @@
 #include "techstorm/globalobj/Objects.h"
 #include "techstorm/core/physics/GravityWells.h"
 #include "techstorm/core/physics/PhysObject.h"
+#include "techstorm/console/Console.h"
 import ErrorHandling;
+
+// Check if any key is pressed
+// NOTE: We limit keys check to keys between 32 (KEY_SPACE) and 126
 
 // std library includes. TODO : Is this still needed?
 #include <time.h>
 #include <vector> // needed for game object list
+
+#define NUM_MODELS  9               // Parametric 3d shapes to generate
 
 void mainThread() {
 	ThreadGroups threadGroups = ThreadGroups();
@@ -108,6 +115,55 @@ void mainThread() {
 	// Load the shader into memory
 	game->renderers->forwardRenderer->pbrShader = LoadShader(TextFormat("resources/shaders/glsl%i/pbr.vs", GLSL_VERSION), TextFormat("resources/shaders/glsl%i/pbr.fs", GLSL_VERSION));
 
+	// declare main menu variables here :
+	bool closeMainMenu = false;
+	bool windowUnfocused = false;
+	bool windowReFocused = false;
+	//RenderTexture mainMenuTexture = LoadRenderTexture(game->windowWidth, game->windowHeight);
+	Image backdropImg = LoadImage("resources/textures/background.png");
+	ImageResize(&backdropImg, GetScreenWidth(), GetScreenHeight());
+	Texture backdrop = LoadTextureFromImage(backdropImg);
+	Music menuMusic = LoadMusicStream("resources/audio/ost/starstruck.mp3");
+	ButtonR* start = new ButtonR("Start", game->screenMiddle.x - (game->screenMiddle.x) + 100, game->screenMiddle.y);
+
+	start->font = game->gameFont;
+	
+	
+	PlayMusicStream(menuMusic);
+
+	Logman::Log("Main menu ready");
+
+backup:
+	while (!closeMainMenu) {
+		// check eligibility.
+		if (WindowShouldClose()) {
+			closeMainMenu = true;
+		}
+
+		// pause and unpause music depending on focus
+		if (!IsWindowFocused()) {
+			PauseMusicStream(menuMusic);
+			windowReFocused = false;
+			windowUnfocused = true;
+		}
+		else if ((IsWindowFocused() == true) && (windowUnfocused == true)) {
+			windowUnfocused = false;
+			windowReFocused = true;
+			ResumeMusicStream(menuMusic);
+		}
+
+		UpdateMusicStream(menuMusic);   // Update music buffer with new stream data
+
+		BeginDrawing();
+
+		// ALWAYS ON TOP!
+		DrawTextureRec(backdrop, Rectangle{ 0, 0, (float)(backdrop.width), (float)(backdrop.height) }, Vector2{ 0, 0 }, WHITE);
+
+		start->draw();
+		DrawTextEx(game->gameFont, "TechStorm-Rivalry", Vector2{ game->screenMiddle.x - 100, (float)GetScreenHeight() * 0.05f }, 48, 20, WHITE);
+		EndDrawing();
+	}
+
 	// Get shader locations
 	game->renderers->forwardRenderer->pbrShader.locs[SHADER_LOC_MAP_ALBEDO] = GetShaderLocation(game->renderers->forwardRenderer->pbrShader, "albedoMap");
 
@@ -143,14 +199,13 @@ void mainThread() {
 	int emissiveColorLoc = GetShaderLocation(game->renderers->forwardRenderer->pbrShader, "emissiveColor");
 	int textureTilingLoc = GetShaderLocation(game->renderers->forwardRenderer->pbrShader, "tiling");
 
-	/*
-	---------------------------------------------------------------------------------
-	| 					        Object Creation										|
-	---------------------------------------------------------------------------------
-	*/
-
-	// ----------------------------------------------------------------------------- Block
-	// Initialization -----------------------------------------------------------------------------
+	// Assignment of shaders
+	// NOTE: By default, the texture maps are always used
+	int usage = 1;
+	SetShaderValue(game->renderers->forwardRenderer->pbrShader, GetShaderLocation(game->renderers->forwardRenderer->pbrShader, "useTexAlbedo"), &usage, SHADER_UNIFORM_INT);
+	SetShaderValue(game->renderers->forwardRenderer->pbrShader, GetShaderLocation(game->renderers->forwardRenderer->pbrShader, "useTexNormal"), &usage, SHADER_UNIFORM_INT);
+	SetShaderValue(game->renderers->forwardRenderer->pbrShader, GetShaderLocation(game->renderers->forwardRenderer->pbrShader, "useTexMRA"), &usage, SHADER_UNIFORM_INT);
+	SetShaderValue(game->renderers->forwardRenderer->pbrShader, GetShaderLocation(game->renderers->forwardRenderer->pbrShader, "useTexEmissive"), &usage, SHADER_UNIFORM_INT);
 
 	// Create a default block model with a length, width, and height of the value of BLOCK_SIZE.
 	// This creates a cube mesh with a length, width, and height of BLOCK_SIZE and then converts it
@@ -168,14 +223,9 @@ void mainThread() {
 	// Finally push it off to the object manager
 	game->objMan->pushObject(block);
 
-	// ----------------------------------------------------------------------------- Player
-	// Initialization -----------------------------------------------------------------------------
-
-	// TODO : Is the Playersize variable needed and or relevant?
-
 	// Create the player model
-	// NOTE: This model is TEMPORARY! It will be deleted after a proper model is made. Refers to the
-	// size of the player model. Same process as the default block model creation.
+// NOTE: This model is TEMPORARY! It will be deleted after a proper model is made. Refers to the
+// size of the player model. Same process as the default block model creation.
 	const int Playersize = 3;
 	Model PlayerModel = LoadModelFromMesh(GenMeshCube(Playersize, Playersize, Playersize));
 
@@ -184,9 +234,6 @@ void mainThread() {
 
 	// Finally push it off to the object manager
 	game->objMan->pushObject(player);
-
-	// ----------------------------------------------------------------------------- skybox
-	// creation. -----------------------------------------------------------------------------
 
 	// Skybox geometry generation step
 	Mesh skyboxMesh = GenMeshCube(1.0f, 1.0f, 1.0f);
@@ -221,10 +268,6 @@ void mainThread() {
 	SetShaderValue(skybox.materials[0].shader,
 		GetShaderLocation(skybox.materials[0].shader, "vflipped"), &skyboxIsVFlipped,
 		SHADER_UNIFORM_INT);
-
-	// ----------------------------------------------------------------------------- Cubemap Loading
-	// ----------------------------------------------------------------------------- This step is
-	// part of the skybox creation.
 
 	// Load cubemap shader and setup required shader locations
 	Shader shdrCubemap =
@@ -281,22 +324,6 @@ void mainThread() {
 
 	// Enable the sun as a precautionary measure.
 	sun.enabled = true;
-
-	// -----------------------------------------------------------------------------
-	// PBR Finalizations
-	// -----------------------------------------------------------------------------
-
-	// we need to finalize the PBR shader and give the shader any last minute data.
-
-	// Assignment of shaders
-	// NOTE: By default, the texture maps are always used
-	int usage = 1;
-	SetShaderValue(game->renderers->forwardRenderer->pbrShader, GetShaderLocation(game->renderers->forwardRenderer->pbrShader, "useTexAlbedo"), &usage, SHADER_UNIFORM_INT);
-	SetShaderValue(game->renderers->forwardRenderer->pbrShader, GetShaderLocation(game->renderers->forwardRenderer->pbrShader, "useTexNormal"), &usage, SHADER_UNIFORM_INT);
-	SetShaderValue(game->renderers->forwardRenderer->pbrShader, GetShaderLocation(game->renderers->forwardRenderer->pbrShader, "useTexMRA"), &usage, SHADER_UNIFORM_INT);
-	SetShaderValue(game->renderers->forwardRenderer->pbrShader, GetShaderLocation(game->renderers->forwardRenderer->pbrShader, "useTexEmissive"), &usage, SHADER_UNIFORM_INT);
-
-	//--------------------------------------------------------------------------------------
 
 	// TODO : Is this still relevant and figure out what the hell this does.
 	Vector3 Orgin = Vector3
@@ -357,6 +384,7 @@ void mainThread() {
 	game->uiMan->pushRogueElement(elm);
 
 	DisableCursor();
+
 	Crosshair* crosshair = new Crosshair(game->screenMiddle, game->uiMan);
 	float brightness = 10.0f;
 
@@ -419,6 +447,7 @@ void mainThread() {
 		{
 			//player->healthComp->damagePlayer(5.0f);
 		}
+
 		/*
 		---------------------------------------------------------------------------------
 		| 					         If Statements go here!								|
@@ -573,14 +602,19 @@ void mainThread() {
 
 		// Update the game object manager
 		game->objMan->updateObjects();
-		//game->scriptManager->updateObjects();
 
 		// Start texturing the FBO with what the user will be seeing. This includes UI and Scene objects.
 		game->renderers->forwardRenderer->startTexturing();
 
 		game->uiMan->update();
 		game->uiMan->draw(DRAW_CLIPPABLE);
+
 		DrawTextureRec(nearDeathTex, Rectangle{ 0, 0, (float)(game->renderers->forwardRenderer->fbo.texture.width), (float)(-game->renderers->forwardRenderer->fbo.texture.height) }, Vector2{ 0, 0 }, WHITE);
+
+		BeginMode3D(player->cameraComponent->getSelfCamera());
+
+		EndMode3D();
+
 		BeginShaderMode(game->renderers->forwardRenderer->bloomShader);
 		BeginMode3D(player->cameraComponent->getSelfCamera());
 
@@ -686,6 +720,144 @@ void mainThread() {
 	delete player;
 
 	// The software returns a 0 (success) and exits.
+}
+
+void otherTest() {
+	// Initialization
+	//--------------------------------------------------------------------------------------
+	const int screenWidth = 1000;
+	const int screenHeight = 800;
+
+	InitWindow(screenWidth, screenHeight, "raylib [models] example - mesh generation");
+
+	// We generate a checked image for texturing
+	Image checked = GenImageChecked(2, 2, 1, 1, RED, GREEN);
+	Texture2D texture = LoadTextureFromImage(checked);
+	UnloadImage(checked);
+
+	Model models[NUM_MODELS] = { 0 };
+
+	models[0] = LoadModelFromMesh(GenMeshPlane(2, 2, 4, 3));
+	models[1] = LoadModelFromMesh(GenMeshCube(2.0f, 1.0f, 2.0f));
+	models[2] = LoadModelFromMesh(GenMeshSphere(2, 32, 32));
+	models[3] = LoadModelFromMesh(GenMeshHemiSphere(2, 16, 16));
+	models[4] = LoadModelFromMesh(GenMeshCylinder(1, 2, 16));
+	models[5] = LoadModelFromMesh(GenMeshTorus(0.25f, 4.0f, 16, 32));
+	models[6] = LoadModelFromMesh(GenMeshKnot(1.0f, 2.0f, 16, 128));
+	models[7] = LoadModelFromMesh(GenMeshPoly(5, 2.0f));
+	models[8] = LoadModelFromMesh(GenMeshHeightmap(GenImageCellular(100, 100, 2), Vector3AddValue(Vector3Zero(), 5)));
+
+	// Generated meshes could be exported as .obj files
+	//ExportMesh(models[0].meshes[0], "plane.obj");
+	//ExportMesh(models[1].meshes[0], "cube.obj");
+	//ExportMesh(models[2].meshes[0], "sphere.obj");
+	//ExportMesh(models[3].meshes[0], "hemisphere.obj");
+	//ExportMesh(models[4].meshes[0], "cylinder.obj");
+	//ExportMesh(models[5].meshes[0], "torus.obj");
+	//ExportMesh(models[6].meshes[0], "knot.obj");
+	//ExportMesh(models[7].meshes[0], "poly.obj");
+	//ExportMesh(models[8].meshes[0], "custom.obj");
+
+	// Set checked texture as default diffuse component for all models material
+	for (int i = 0; i < NUM_MODELS; i++) models[i].materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = texture;
+
+	// Define the camera to look into our 3d world
+	Camera camera = { { 5.0f, 5.0f, 5.0f }, { 0.0f, 0.0f, 0.0f }, { 0.0f, 1.0f, 0.0f }, 45.0f, 0 };
+
+	// Model drawing position
+	Vector3 position = { 0.0f, 0.0f, 0.0f };
+
+	int currentModel = 0;
+	bool isDirty = false;
+	SetTargetFPS(60);               // Set our game to run at 60 frames-per-second
+	//--------------------------------------------------------------------------------------
+
+	// Main game loop
+	while (!WindowShouldClose())    // Detect window close button or ESC key
+	{
+		// Update
+		//----------------------------------------------------------------------------------
+		UpdateCamera(&camera, CAMERA_FIRST_PERSON);
+
+		if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
+		{
+			currentModel = (currentModel + 1) % NUM_MODELS; // Cycle between the textures
+		}
+
+		if (IsKeyDown(KEY_C)) {
+			camera.position.y -= 0.5f;
+		}
+
+		if (IsKeyDown(KEY_SPACE)) {
+			camera.position.y += 0.5f;
+		}
+
+		if (IsKeyPressed(KEY_P)) rlEnablePointMode();
+
+		if (IsKeyPressed(KEY_RIGHT))
+		{
+			currentModel++;
+			if (currentModel >= NUM_MODELS) currentModel = 0;
+
+			if (currentModel == 8) {
+				isDirty = true;
+			}
+		}
+		else if (IsKeyPressed(KEY_LEFT))
+		{
+			currentModel--;
+			if (currentModel < 0) currentModel = NUM_MODELS - 1;
+		}
+		//----------------------------------------------------------------------------------
+
+		if (IsKeyPressed(KEY_Y)) {
+			models[8] = LoadModelFromMesh(GenMeshHeightmap(GenImageCellular(100, 100, 2), Vector3AddValue(Vector3Zero(), 5)));
+			models[8].materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = texture;
+		}
+		// Draw
+		//----------------------------------------------------------------------------------
+		BeginDrawing();
+
+		ClearBackground(BLACK);
+
+		BeginMode3D(camera);
+
+		DrawModel(models[currentModel], position, 1.0f, WHITE);
+		DrawGrid(10, 1.0);
+
+		EndMode3D();
+
+		DrawRectangle(30, 400, 310, 30, Fade(SKYBLUE, 0.5f));
+		DrawRectangleLines(30, 400, 310, 30, Fade(DARKBLUE, 0.5f));
+		DrawText("MOUSE LEFT BUTTON to CYCLE PROCEDURAL MODELS", 40, 410, 10, BLUE);
+
+		switch (currentModel)
+		{
+		case 0: DrawText("PLANE", 680, 10, 20, DARKBLUE); break;
+		case 1: DrawText("CUBE", 680, 10, 20, DARKBLUE); break;
+		case 2: DrawText("SPHERE", 680, 10, 20, DARKBLUE); break;
+		case 3: DrawText("HEMISPHERE", 640, 10, 20, DARKBLUE); break;
+		case 4: DrawText("CYLINDER", 680, 10, 20, DARKBLUE); break;
+		case 5: DrawText("TORUS", 680, 10, 20, DARKBLUE); break;
+		case 6: DrawText("KNOT", 680, 10, 20, DARKBLUE); break;
+		case 7: DrawText("POLY", 680, 10, 20, DARKBLUE); break;
+		case 8: DrawText("Custom (triangle)", 580, 10, 20, DARKBLUE); break;
+		default: break;
+		}
+
+		EndDrawing();
+		//----------------------------------------------------------------------------------
+	}
+
+	// De-Initialization
+	//--------------------------------------------------------------------------------------
+	UnloadTexture(texture); // Unload texture
+
+	// Unload models data (GPU VRAM)
+	for (int i = 0; i < NUM_MODELS; i++) UnloadModel(models[i]);
+
+	CloseWindow();          // Close window and OpenGL context
+	//--------------------------------------------------------------------------------------
 }
 
 int main()

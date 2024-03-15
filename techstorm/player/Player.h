@@ -241,6 +241,7 @@ public:
 			   {0.0f, 2.0f, 0.0f},
 			   45.0f,
 			   CAMERA_PERSPECTIVE });
+
 		initCharacter(0.4f, 2.0f, 0.7f, 1.0f);
 		instance = this;
 

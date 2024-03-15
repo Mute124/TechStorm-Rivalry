@@ -1,2 +1,6 @@
 #pragma once
-#include ""
+#include "../../Common.h"
+
+class UIButton : public UIElement {
+public:
+};

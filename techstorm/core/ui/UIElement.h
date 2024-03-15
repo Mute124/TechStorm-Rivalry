@@ -6,6 +6,10 @@
 
 class UIContainer;
 
+// bare bones UI element.
+class BareUIElement {
+};
+
 // Note, Icons are not natively supported. You have to implement the logic yourself sorry.
 class UIElement {
 public:
@@ -64,30 +68,6 @@ public:
 	}
 
 	void draw() {
-		UpdateInfo();
-
-		/*
-		*
-		*		if (debugMode) {
-			// draw element bounds dimensions.
-			DrawTextEx(font, TextFormat("Bounds : (w: %f, h: %f)", this->bounds.width, this->bounds.height), Vector2{ this->bounds.x, this->bounds.y + (this->fontSize / 2) }, this->fontSize / 2, this->fontSpacing, GREEN);
-
-			// draw anchor pos text
-			Vector2 anchorText = Vector2{ this->anchor.x, this->anchor.y + (this->fontSize) };
-			DrawTextEx(font, TextFormat("Anchor : (x: %f, y: %f)", this->anchor.x, this->anchor.y), anchorText, this->fontSize / 2, this->fontSpacing, GREEN);
-
-			// draw anchor.
-			DrawCircleV(this->anchor, 5.0f, RED);
-		}
-		*/
-
-		if (isActive && isVisible) {
-			if (this->uiType = EUI_TEXT) {
-				DrawTextEx(font, this->text, this->position, this->fontSize, this->fontSpacing, this->color);
-			}
-
-			customDraw();
-		}
 	}
 
 	// override this to add your own features
@@ -111,25 +91,11 @@ public:
 				this->checkDrawEligibility = false;
 			}
 
-			this->anchor = cursorPos;
 			this->position = Vector2Add(this->offset, this->anchor);
-
-			this->bounds.height = height;
-			this->bounds.width = width;
-			this->bounds.x = this->position.x;
-			this->bounds.y = this->position.y;
-			UpdateInfo();
-
-			customUpdate();
 		}
 	}
 
 	virtual void customUpdate() {
-	}
-
-	static void UpdateInfo() {
-		cursorPos = GetMousePosition();
-		mouseDelta = GetMouseDelta();
 	}
 
 	virtual void onDestroy() {
@@ -165,18 +131,21 @@ public:
 
 	virtual void update() {
 		if (!isSleeping) {
-			for (auto& element : children) {
-				// check if it should be deleted.
-				if (element.second->deleteMe) {
-					element.second->onDestroy();
-					killChild(element.second->id);
+			std::function<void()> updateFunc = [this]() {
+				for (auto& element : children) {
+					// check if it should be deleted.
+					if (element.second->deleteMe) {
+						element.second->onDestroy();
+						killChild(element.second->id);
+					}
+					else {
+						element.second->onUpdate();
+						element.second->customUpdate();
+					}
 				}
-				else {
-					element.second->UpdateInfo();
-					element.second->onUpdate();
-				}
-			}
-			customUpdate();
+				};
+			std::thread* updater = new std::thread(updateFunc);
+			updater->join();
 		}
 	}
 
@@ -206,8 +175,8 @@ public:
 	void drawChildren(EDrawType drawMode) {
 		for (auto& element : children) {
 			if (element.second->drawTime == drawMode) {
-				element.second->UpdateInfo();
 				element.second->draw();
+				element.second->customDraw();
 			}
 			else {
 				continue;

@@ -200,7 +200,8 @@ extern CubeVerticies CubeVertZero();	// Returns a null cube verticies type
 extern CubeVerticies CubeVertOne();
 
 // Todo : make this more modular
-extern Mesh GenMeshCustom(TriVert verts); // Generates a mesh from a triangle verticies
+extern Mesh GenMeshCustom(void);
+extern Mesh GenMeshCustomT(TriVert verts); // Generates a mesh from a triangle verticies
 extern TextureCubemap GenTextureCubemap(Shader shader, Texture2D panorama, int size, int format);
 // Collisions
 extern bool CheckCollisionRayBox(Ray ray, BoundingBox box, float* outDistance);
@@ -217,7 +218,7 @@ extern Vector3 Vector3RandomEx(Vector3 min, Vector3 max);
 
 extern float Vector3Avg(Vector3 vec);
 extern Vector3 Vector3DstAvg(Vector3 v1, Vector3 v2);
-
+extern bool IsAnyKeyPressed();
 static void PrintFloat(const char* name, float val) {
 	Logman::Log(TextFormat("Value of %s is %f", name, val));
 }
