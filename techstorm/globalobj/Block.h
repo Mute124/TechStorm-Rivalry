@@ -13,12 +13,6 @@
 class Block : public GameObject
 {
 public:
-	class debug : public UIElement {
-	public:
-		Vector3 pos;
-		void customDraw() override {
-		}
-	};
 
 	void draw() override {
 		DrawModel(this->model, this->position, 1.0f, WHITE);

@@ -18,6 +18,8 @@
 #include <vector>
 #include <stdio.h>
 #include <stdlib.h>
+#include <lua.h>
+#include <sol/sol.hpp>
 
 #include "core/logging/Logman.h"
 

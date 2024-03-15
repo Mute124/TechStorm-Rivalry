@@ -6,99 +6,32 @@
 
 class UIContainer;
 
-// bare bones UI element.
-class BareUIElement {
-};
+class BareUIElement;
 
 // Note, Icons are not natively supported. You have to implement the logic yourself sorry.
 class UIElement {
 public:
-	static inline Vector2 cursorPos = Vector2Zero();
-	static inline Vector2 mouseDelta = Vector2Zero();
-	static inline bool debugMode = true;
 	static inline Font font;
-	const char* text = "null";
 	int id = 0; // the id inside of it's container.
 	float fontSize = (float)font.baseSize;
 	float fontSpacing = 2.0f;
-	float opacity = 100.0f;
 	int globalID = 0; // it's "nickname" globally
 	Vector2 anchor = Vector2Zero();
-	Vector2 position = Vector2Zero();
-	Vector2 offset = Vector2Zero();
-	Rectangle bounds = Rectangle{ 0.0f, 0.0f, 0.0f, 0.0f };
-	Rectangle outline = Rectangle{ 0.0f, 0.0f, 0.0f, 0.0f };
-	Color color = BLUE;
-	Vector2 velocity = Vector2Zero(); // use if you want to be able to move the element around.
-	int width = 0;
-	int height = 0;
-	int	scrollIndex = 0;
 	bool alwaysVisible = false;	// persistance flag.
 	bool isVisible = false;
 	bool isActive = true;
-	bool isHovered = false;
-	bool isClippable = false;// can 3d objects clip this?
-	bool affectedByPost = false; // should post process affects get calculated for this aswell?
 	bool drawable = true;
-	bool checkDrawEligibility = false;
 	bool deleteMe = false;	// whether or not the element is suicidal, and should be executed immediatly
-	bool outlined = false;
-	bool opacityDirty = true;
 	EDrawType drawTime = DRAW_FINAL;
-	EUIType uiType = EUI_NULL;
 	UIContainer* parent;
 
-	UIElement() {
-		this->position = Vector2Add(this->offset, this->anchor);
+	virtual void init() {}
 
-		//this->bounds.width = Vector2Distance()
-		this->drawTime = EDrawType::DRAW_FINAL;
-	}
-
-	UIElement(Vector2 anchor, Vector2 offset, int width, int height, Color color) : anchor(anchor), offset(offset), width(width), height(height), color(color) {
-		this->position = Vector2Add(this->offset, this->anchor);
-
-		this->bounds.height = Vector2Distance(anchor, offset);
-		this->bounds.width = Vector2Distance(anchor, offset);
-		this->bounds.x = this->position.x;
-		this->bounds.y = this->position.y;
-
-		//this->bounds.width = Vector2Distance()
-		this->drawTime = EDrawType::DRAW_FINAL;
-	}
-
-	void draw() {
-	}
-
-	// override this to add your own features
-	virtual void customDraw() {}
-
-	void onUpdate() {
-		if (isActive) {
-			if (this->opacityDirty) {
-				this->color.a = this->opacity;
-				this->opacityDirty = false;
-			}
-			if (this->checkDrawEligibility) {
-				if (isActive || alwaysVisible) {
-					this->drawable = true;
-				}
-				else {
-					if (isVisible) {
-						this->drawable = true;
-					}
-				}
-				this->checkDrawEligibility = false;
-			}
-
-			this->position = Vector2Add(this->offset, this->anchor);
-		}
-	}
-
-	virtual void customUpdate() {
-	}
+	virtual void draw() {}
+	virtual void onUpdate() {}
 
 	virtual void onDestroy() {
+		kill();
 	}
 
 	void kill() {
@@ -107,17 +40,6 @@ public:
 
 	void setContainer(UIContainer* container) {
 		this->parent = container;
-	}
-
-	void setOpacity(float opacity) {
-		this->opacity = opacity;
-		this->opacityDirty = true;
-	}
-
-protected:
-
-	void SetType(EUIType type) {
-		this->uiType = type;
 	}
 };
 
@@ -140,12 +62,11 @@ public:
 					}
 					else {
 						element.second->onUpdate();
-						element.second->customUpdate();
 					}
 				}
 				};
 			std::thread* updater = new std::thread(updateFunc);
-			updater->join();
+			updater->detach();
 		}
 	}
 
@@ -176,7 +97,6 @@ public:
 		for (auto& element : children) {
 			if (element.second->drawTime == drawMode) {
 				element.second->draw();
-				element.second->customDraw();
 			}
 			else {
 				continue;

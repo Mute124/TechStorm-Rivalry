@@ -1,22 +1,30 @@
 using System.Numerics;
-using Raylib_cs;
 
 namespace TechStormDevTool.Core.UI
 {
-    abstract class UIElement {
+    internal abstract class UIElement
+    {
+        #region Public Fields
+
         public Vector2 anchor;
 
-        public void init(Vector2 anchor) {
+        #endregion Public Fields
+
+        #region Public Methods
+
+        public void Draw()
+        {
+        }
+
+        public void init(Vector2 anchor)
+        {
             this.anchor = anchor;
         }
-        
-        public void Draw() {
 
-        }   
-
-
-        public void Update() {
-            
+        public void Update()
+        {
         }
+
+        #endregion Public Methods
     }
 }

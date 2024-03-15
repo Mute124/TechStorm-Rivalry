@@ -5,6 +5,7 @@
 #include "core/scripting/ScriptManager.h"
 #include "core/rendering/Renderers.h"
 #include "core/ui/UIMan.h"
+#include "lua/LuaManager.h"
 #include <any>
 
 class Game
@@ -19,6 +20,7 @@ public:
 	static inline GameobjectManager* objMan;
 	static inline Vector2 windowSize = { 0, 0 };
 	static inline Vector2 screenMiddle = { 0, 0 };
+	static inline LuaManager* lua;
 	Font gameFont;
 	int windowWidth;
 	int windowHeight;
@@ -52,6 +54,10 @@ public:
 	}
 
 	void init() {
+	}
+
+	void StartGame()
+	{
 		SetTraceLogCallback(Logman::customLog);
 
 		// Read config to decide what to set for the game
@@ -135,67 +141,15 @@ public:
 
 		objMan = new GameobjectManager();
 		uiMan = new UIMan();
-
+		lua = new LuaManager();
 		windowSize = { (float)windowWidth, (float)windowHeight };
 
 		screenMiddle = { (float)GetScreenWidth() / 2.0f, (float)GetScreenHeight() / 2.0f };
 		gameFont = LoadFont("Data/gui/fonts/Tektur-VariableFont_wdth,wght.ttf");
 		Logman::Log(TextFormat("%f %f: ", screenMiddle.x, screenMiddle.y));
-	}
 
-	// called before the game starts, or when the game is reloaded
-	void loadGame() {
-		// Load the shader into memory
-		gameRenderers->forwardRenderer->pbrShader = LoadShader(TextFormat("resources/shaders/glsl%i/pbr.vs", GLSL_VERSION), TextFormat("resources/shaders/glsl%i/pbr.fs", GLSL_VERSION));
+		lua->init();
 
-		// Get shader locations
-		gameRenderers->forwardRenderer->pbrShader.locs[SHADER_LOC_MAP_ALBEDO] = GetShaderLocation(game->renderers->forwardRenderer->pbrShader, "albedoMap");
-
-		// WARNING: Metalness, roughness, and ambient occlusion are all packed into a MRA texture They
-		// are passed as to the SHADER_LOC_MAP_METALNESS location for convenience, shader already takes
-		// care of it accordingly
-		gameRenderers->forwardRenderer->pbrShader.locs[SHADER_LOC_MAP_METALNESS] = GetShaderLocation(game->renderers->forwardRenderer->pbrShader, "mraMap");
-		gameRenderers->forwardRenderer->pbrShader.locs[SHADER_LOC_MAP_NORMAL] = GetShaderLocation(game->renderers->forwardRenderer->pbrShader, "normalMap");
-
-		// WARNING: Similar to the MRA map, the emissive map packs different information into a single
-		// texture: it stores height and emission data It is binded to SHADER_LOC_MAP_EMISSION location
-		// an properly processed on shader
-		gameRenderers->forwardRenderer->pbrShader.locs[SHADER_LOC_MAP_EMISSION] = GetShaderLocation(game->renderers->forwardRenderer->pbrShader, "emissiveMap");
-		gameRenderers->forwardRenderer->pbrShader.locs[SHADER_LOC_COLOR_DIFFUSE] = GetShaderLocation(game->renderers->forwardRenderer->pbrShader, "albedoColor");
-
-		// Setup additional required shader locations, including lights data
-		gameRenderers->forwardRenderer->pbrShader.locs[SHADER_LOC_VECTOR_VIEW] = GetShaderLocation(game->renderers->forwardRenderer->pbrShader, "viewPos");
-		lightCountLoc = GetShaderLocation(game->renderers->forwardRenderer->pbrShader, "numOfLights");
-
-		// set it to the value of the MAX_LIGHTS macro and pass it to the shader
-		int maxLightCount = MAX_LIGHTS;
-		SetShaderValue(game->renderers->forwardRenderer->pbrShader, lightCountLoc, &maxLightCount, SHADER_UNIFORM_INT);
-
-		// Setup ambient color and intensity (brightness) parameters
-
-		SetShaderValue(game->renderers->forwardRenderer->pbrShader, GetShaderLocation(game->renderers->forwardRenderer->pbrShader, "ambientColor"), &ambientColorNormalized, SHADER_UNIFORM_VEC3);
-		SetShaderValue(game->renderers->forwardRenderer->pbrShader, GetShaderLocation(game->renderers->forwardRenderer->pbrShader, "ambient"), &ambientIntensity, SHADER_UNIFORM_FLOAT);
-
-		// Get location for shader parameters that can be modified
-		emissiveIntensityLoc = GetShaderLocation(game->renderers->forwardRenderer->pbrShader, "emissivePower");
-		emissiveColorLoc = GetShaderLocation(game->renderers->forwardRenderer->pbrShader, "emissiveColor");
-		textureTilingLoc = GetShaderLocation(game->renderers->forwardRenderer->pbrShader, "tiling");
-
-		// Create the player model
-		// NOTE: This model is TEMPORARY! It will be deleted after a proper model is made. Refers to the
-		// size of the player model. Same process as the default block model creation.
-		const int Playersize = 3;
-		Model PlayerModel = LoadModelFromMesh(GenMeshCube(Playersize, Playersize, Playersize));
-
-		// Construct the player object
-		Player* player = new Player(Vector3{ 0.0f, 2.0f, 4.0f }, 100, PlayerModel, CAMERA_FIRST_PERSON);
-
-		// Finally push it off to the object manager
-		game->objMan->pushObject(player);
-	}
-
-	void StartGame()
-	{
 		SetTargetFPS(60);
 	}
 
@@ -210,9 +164,5 @@ public:
 		delete objMan;
 		delete this;
 	}
-
-	// GRAPHICS
-	//_____________________________________________________
-
-	// ForwardRenderer *renderer;
+private:
 };

@@ -9,7 +9,7 @@ public:
 		this->drawTime = DRAW_FINAL;
 	}
 
-	void customDraw() override {
+	void draw() override {
 		// top line
 		DrawLineV({ middle.x, middle.y + offset }, { middle.x, middle.y + (offset * 2) }, GRAY);
 	}

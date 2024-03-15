@@ -4,10 +4,13 @@
 * Any headers added here are considered commonly used, or simply provide utilities to the engine. Please sort them into the correct section.
 */
 #pragma once
+#define SOL_ALL_SAFETIES_ON 1
 // framework(s)
 #include <raylib.h>
 #include <raymath.h>
 #include <rlgl.h>
+#include <lua.hpp>
+#include <sol/sol.hpp>
 #include "lib/raygui.h"
 #include "lib/rcamera.h"
 #include "lib/yse/yse.hpp"
@@ -21,6 +24,7 @@
 #include <map>
 #include <thread>
 #include <math.h>
+#include <cassert>
 
 // Engine Includes
 #include "core/config/Configman.h"
