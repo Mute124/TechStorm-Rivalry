@@ -194,7 +194,7 @@ static Model defaultModel = { 0 };
 
 extern Model GetDefaultModel();
 extern void SetDefaultModel(Model model);
-
+extern Texture GetDefaultTexture();
 // Mesh Tools
 extern CubeVerticies CubeVertZero();	// Returns a null cube verticies type
 extern CubeVerticies CubeVertOne();
