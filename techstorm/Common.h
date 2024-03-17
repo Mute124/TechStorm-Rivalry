@@ -5,17 +5,11 @@
 */
 #pragma once
 #define SOL_ALL_SAFETIES_ON 1
-// framework(s)
+
+// framework(s) / external libraries
 #include <raylib.h>
 #include <raymath.h>
-#include <rlgl.h>
-#include <lua.hpp>
-#include <sol/sol.hpp>
-#include "lib/raygui.h"
 #include "lib/rcamera.h"
-#include "lib/yse/yse.hpp"
-#include "lib/toml.h"
-
 // C++ Libraries
 #include <stdio.h>
 #include <stdlib.h>
@@ -26,7 +20,16 @@
 #include <math.h>
 #include <cassert>
 
+// lua
+#include <lua.hpp>
+#include <sol/sol.hpp>
+
+// config
+#include <toml++/toml.hpp>
+#include <tinyxml2.h>
+
 // Engine Includes
+#include "Globals.h"
 #include "core/config/Configman.h"
 #include "core/logging/Logman.h"
 #include "core/obj/Gameobject.h"
@@ -35,7 +38,7 @@
 #include "core/scripting/ScriptManager.h"
 #include "core/scripting/IScriptable.h"
 #include "core/utils/ArrayUtils.h"
-#include "Globals.h"
 #include "core/audio/FxMan.h"
 #include "core/ui/UIMan.h"
+
 // end of common.h

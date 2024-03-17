@@ -17,7 +17,8 @@ public:
 	double momentum;
 	double avgVelocity;
 	double tangientalVelocity;
-
+	static inline Sound nyoom;
+	static inline bool isNyoom;
 	Velocity vel;
 	Quaternion rot;
 	Vector3 prevAcc;
@@ -30,6 +31,9 @@ public:
 	}
 
 	void init(Shader shdr, Vector3 pos) {
+		if (!isNyoom) {
+			nyoom = LoadSound("resources/audio/nyoom.mp3");
+		}
 		this->threadSafe = true;
 		this->isDynamic = true;
 		this->position = pos;
@@ -55,6 +59,9 @@ public:
 	}
 
 	void init(Shader shdr) {
+		if (!isNyoom) {
+			nyoom = LoadSound("resources/audio/nyoom.mp3");
+		}
 		this->threadSafe = true;
 		this->isDynamic = true;
 		this->position = Vector3{ 10, 10, 10 };
@@ -101,10 +108,10 @@ public:
 
 			this->specificPotentialEnergy;
 
-			this->vel.acc = Vector3AddValue(Vector3Add(this->vel.vel, Vector3Subtract(this->vel.acc, this->prevAcc)), power);
+			this->vel.acc = Vector3AddValue(Vector3Add(this->vel.vel, Vector3Subtract(this->vel.acc, this->prevAcc)), -power);
 			this->vel.vel = Vector3Lerp(wellPos, this->position, dst * GetFrameTime());
 
-			this->position = Vector3Lerp(this->position, this->vel.vel, -power * GetFrameTime());
+			this->position = Vector3Lerp(this->position, this->vel.vel, power * GetFrameTime());
 
 			rot = QuaternionFromVector3ToVector3(this->position, Vector3AddValue(wellPos, power));
 

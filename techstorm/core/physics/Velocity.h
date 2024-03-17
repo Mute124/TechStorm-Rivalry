@@ -1,7 +1,6 @@
 #pragma once
 #include <raylib.h>
 #include <raymath.h>
-#include "Vector3D.h"
 
 // per tick
 typedef struct AngularVelocity {

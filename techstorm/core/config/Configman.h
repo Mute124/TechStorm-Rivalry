@@ -6,7 +6,7 @@
 #include "../secretaries/ConfigRegistrySecretary.h"
 #include "../registry/ListEntry.h"
 #include "../logging/Logman.h"
-#include "../../lib/toml.h"
+#include <toml++/toml.hpp>
 #include <vector>
 #include <stdlib.h>
 #include <map>
@@ -49,18 +49,17 @@ public:
 	}
 
 	ConfigRegistrySecretary* ConfigSecretary = new ConfigRegistrySecretary(); // Searching component
-private:
 
 	std::vector<ConfigFile> registry;
 };
 
-// NOTE : NO LONGER BROKEN!!! Still have to refactor though to use Registry Class. FUUUUUUUUUUUUUUUUUUUUUU
 class ConfigMan : public ConfigRegistrySecretary, public ConfigTypeConverter
 {
 public:
+	static ConfigRegistry* Registry;
 
 	ConfigMan() {
-		Logman::customLog(LOG_INFO, "New Config Manager instance created successfully!", NULL);
+		Logman::customLog(LOG_INFO, "New Config Manager instance created successfully, finding valid TOML and XML files...", NULL);
 	};
 
 	~ConfigMan() {
@@ -79,8 +78,6 @@ public:
 
 		Logman::customLog(LOG_INFO, "Loaded TOML files from Config folder", NULL);
 	}
-
-	static ConfigRegistry* Registry;
 
 private:
 };

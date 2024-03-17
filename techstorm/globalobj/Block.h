@@ -23,7 +23,7 @@ public:
 		Logman::customLog(LOG_TRACE, "Block Constructor", NULL);
 
 		this->threadSafe = true;
-
+		this->isDynamic = true;
 		this->model = model;
 		this->tint = color;
 		this->position = position;

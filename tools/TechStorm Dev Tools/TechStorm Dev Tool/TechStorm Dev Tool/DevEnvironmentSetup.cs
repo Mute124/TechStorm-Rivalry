@@ -1,4 +1,4 @@
-namespace TechStormDevTool
+namespace TechStorm_Dev_Tool
 {
     internal class DevEnvironmentSetup
     {
@@ -20,14 +20,14 @@ namespace TechStormDevTool
 
                 if (installConfiguration == 1)
                 {
-                    if (!this.isGitInstalled)
+                    if (!isGitInstalled)
                     {
                         CheckForGitAndInstall();
                     }
                 }
                 else if (installConfiguration == 2)
                 {
-                    if (!this.isGitInstalled)
+                    if (!isGitInstalled)
                     {
                         CheckForGitAndInstall();
                     }
@@ -68,7 +68,7 @@ namespace TechStormDevTool
             }
 
             // if git is not installed, install it!
-            if (this.isGitInstalled == false)
+            if (isGitInstalled == false)
             {
                 // use winget to install git
                 Operation gitInstall = new Operation("winget install --id Git.Git -e --source winget");

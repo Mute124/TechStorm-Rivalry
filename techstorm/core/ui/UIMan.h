@@ -59,6 +59,12 @@ public:
 	void clear(int id) {
 	}
 
+	void flush() {
+		for (auto& cont : containers) {
+			cont.second->clear();
+		}
+	}
+
 	static UIMan* getInstance() {
 		return currentInstance;
 	}

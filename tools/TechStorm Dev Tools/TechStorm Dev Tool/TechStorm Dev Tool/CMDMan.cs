@@ -1,29 +1,29 @@
 using System.Diagnostics;
 
-namespace TechStormDevTool
+namespace TechStorm_Dev_Tool
 {
     // Cmd manager. gets given commands that it then passes into the cmd variable.
     public class CMDMan
     {
         #region Public Methods
 
-        public void NewTask(String task)
+        public void NewTask(string task)
         {
             if (shouldLog)
             {
                 Console.WriteLine("Executing command : " + task);
 
-                this.cmd.StartInfo.Arguments = "/c " + task;        // Start the process.
-                this.cmd.Start();        // Wait for the process to finish.
-                this.cmd.WaitForExit();        // Read the output of the process.
+                cmd.StartInfo.Arguments = "/c " + task;        // Start the process.
+                cmd.Start();        // Wait for the process to finish.
+                cmd.WaitForExit();        // Read the output of the process.
             }
             else
             {
-                this.cmd.StartInfo.Arguments = "/c " + task;        // Start the process.
-                this.cmd.Start();        // Wait for the process to finish.
+                cmd.StartInfo.Arguments = "/c " + task;        // Start the process.
+                cmd.Start();        // Wait for the process to finish.
             }
 
-            this.cmd.StartInfo.Arguments = "";
+            cmd.StartInfo.Arguments = "";
         }
 
         #endregion Public Methods

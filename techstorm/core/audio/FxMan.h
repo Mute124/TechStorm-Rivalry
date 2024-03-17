@@ -15,14 +15,6 @@ private:
 
 	std::queue<Fx*> stream;
 
-	bool isLoaded(const char* source) {
-		return sources.contains(source);
-	}
-
-	bool isLoaded(Fx* fx) {
-		return sources.contains(fx->name);
-	}
-
 public:
 
 	void init() {

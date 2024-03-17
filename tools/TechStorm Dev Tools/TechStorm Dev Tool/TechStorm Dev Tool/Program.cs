@@ -1,8 +1,8 @@
 ﻿// See https://aka.ms/new-console-template for more information
 
-namespace TechStormDevTool
+namespace TechStorm_Dev_Tool
 {
-    internal class Program
+    public class Program
     {
         #region Private Fields
 
@@ -12,7 +12,7 @@ namespace TechStormDevTool
 
         #region Private Methods
 
-        private static void Main(string[] args)
+        public static void Main(string[] args)
         {
             // Setup Dev env. TODO: If already set up, skip this step.
             DevEnvironmentSetup environmentSetup = new DevEnvironmentSetup();
@@ -22,7 +22,7 @@ namespace TechStormDevTool
 
             while (stayOpen)
             {
-                String usrInput = Console.ReadLine();
+                string usrInput = Console.ReadLine();
                 if (usrInput.Equals("q"))
                 {
                     stayOpen = false;
@@ -33,7 +33,7 @@ namespace TechStormDevTool
         private static void PrintHeader()
         {
             Console.WriteLine("--------------------------------Tech-Storm Dev Tools--------------------------------------------");
-            Console.WriteLine("| (1)  |");
+            Console.WriteLine("| (1) Export | (2) Package Manager |");
             Console.WriteLine("------------------------------------------------------------------------------------------------");
         }
 

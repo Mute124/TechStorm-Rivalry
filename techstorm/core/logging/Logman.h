@@ -13,10 +13,6 @@ public:
 		SetTraceLogCallback(customLog);
 	}
 
-	// store data into a log file following the logman format
-	static inline void Store(const char* message) {
-	}
-
 	static inline void Log(const char* message) {
 		customLog(LOG_INFO, message, NULL);
 	}
@@ -65,5 +61,11 @@ public:
 
 		vprintf(text, args);
 		printf("\n");
+	}
+
+private:
+
+	// store data into a log file following the logman format
+	static inline void Store(const char* message) {
 	}
 };

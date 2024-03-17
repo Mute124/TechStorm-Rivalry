@@ -3,6 +3,7 @@
 #include "ConfigFile.h"
 #include "../registry/ListEntry.h"
 #include "../fileSystem/File.h"
+
 class ConfigFile
 {
 public:
@@ -56,15 +57,13 @@ public:
 	{
 		configFileCount = 0;
 	}
-
 	ListEntry<File<toml::v3::parse_result>> file;
-
 private:
 	static inline int assignId()
 	{
-		int id = configFileCount;
-		configFileCount += 1;
-		return id;
+		int fileId = configFileCount;
+		configFileCount++;
+		return fileId;
 	}
 
 	static int configFileCount; // Corrosponds with place in what list it is in

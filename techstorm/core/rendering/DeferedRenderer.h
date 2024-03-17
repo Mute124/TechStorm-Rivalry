@@ -1,7 +1,7 @@
 #pragma once
 #include "../../Common.h"
 #include "../states/GameState.h"
-
+#include <rlgl.h>
 // GBuffer data
 typedef struct GBuffer {
 	unsigned int framebuffer;

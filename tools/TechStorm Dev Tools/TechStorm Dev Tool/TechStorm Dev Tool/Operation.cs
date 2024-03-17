@@ -1,14 +1,14 @@
 using System.Diagnostics;
 
-namespace TechStormDevTool
+namespace TechStorm_Dev_Tool
 {
     // Use only for one time operations. Also kinda slow.
-    internal class Operation
+    public class Operation
     {
         #region Public Constructors
 
         // just does something but doesnt return
-        public Operation(String task)
+        public Operation(string task)
         {
             Console.WriteLine("Executing command : " + task);
 
@@ -34,7 +34,7 @@ namespace TechStormDevTool
         }
 
         // Does something in CMD. and returns it's exit code
-        public int NewTask(String task)
+        public int NewTask(string task)
         {
             Console.WriteLine("Executing command : " + task);
 

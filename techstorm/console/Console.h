@@ -27,7 +27,6 @@ namespace Console {
 		virtual void draw() override {
 			if ((this->isVisible) || (this->alwaysVisible)) {
 				if (updateBackdrop) {
-
 					if ((this->consoleBackDrop.width >= 0) || (this->consoleBackDrop.height >= 0)) {
 						this->consoleBackDrop = Rectangle{
 							this->anchor.x + 0,
@@ -41,10 +40,9 @@ namespace Console {
 							this->anchor.x + 0,
 							this->anchor.y + 0,
 							(textBox.width + 5) ,
-							((float)GetScreenHeight() - (GetScreenHeight() * 0.10f) + 5) 
+							((float)GetScreenHeight() - (GetScreenHeight() * 0.10f) + 5)
 						};
 					}
-
 
 					this->textBox.x = this->anchor.x;
 					this->textBox.y = this->anchor.y + GetScreenHeight() - (GetScreenHeight() * 0.10f);
@@ -90,50 +88,48 @@ namespace Console {
 				else mouseOnText = false;
 				if (mouseOnText)
 				{
+					// Set the window's cursor to the I-Beam
+					SetMouseCursor(MOUSE_CURSOR_IBEAM);
 
-						// Set the window's cursor to the I-Beam
-						SetMouseCursor(MOUSE_CURSOR_IBEAM);
+					// Get char pressed (unicode character) on the queue
+					char key = GetCharPressed();
 
-						// Get char pressed (unicode character) on the queue
-						char key = GetCharPressed();
-
-						// Check if more characters have been pressed on the same frame
-						while (key > 0)
+					// Check if more characters have been pressed on the same frame
+					while (key > 0)
+					{
+						// NOTE: Only allow keys in range [32..125]
+						if ((key >= 32) && (key <= 125) && (letterCount < MAX_INPUT_CHARS))
 						{
-							// NOTE: Only allow keys in range [32..125]
-							if ((key >= 32) && (key <= 125) && (letterCount < MAX_INPUT_CHARS))
-							{
-								name[letterCount] = key;
-								name[letterCount + 1] = '\0'; // Add null terminator at the end of the string.
-								letterCount++;
-							}
-
-							key = GetCharPressed();  // Check next character in the queue
+							name[letterCount] = key;
+							name[letterCount + 1] = '\0'; // Add null terminator at the end of the string.
+							letterCount++;
 						}
 
-						if (waitTimer == 0) {
-							if (IsKeyDown(KEY_BACKSPACE))
-							{
-								letterCount--;
-								if (letterCount < 0) letterCount = 0;
-								name[letterCount] = '\0';
-								this->waitTimer = GetFrameTime() + 10;
-							}
-						}
-						else {
-							waitTimer--;
-						}
+						key = GetCharPressed();  // Check next character in the queue
+					}
 
-						if (IsKeyDown(KEY_ENTER)) {
-							parseCommand(name);
-
-							for (int i = 0; i < MAX_INPUT_CHARS; i++) {
-								letterCount--;
-								if (letterCount < 0) letterCount = 0;
-								name[letterCount] = '\0';
-							}
-						
+					if (waitTimer == 0) {
+						if (IsKeyDown(KEY_BACKSPACE))
+						{
+							letterCount--;
+							if (letterCount < 0) letterCount = 0;
+							name[letterCount] = '\0';
+							this->waitTimer = GetFrameTime() + 10;
 						}
+					}
+					else {
+						waitTimer--;
+					}
+
+					if (IsKeyDown(KEY_ENTER)) {
+						parseCommand(name);
+
+						for (int i = 0; i < MAX_INPUT_CHARS; i++) {
+							letterCount--;
+							if (letterCount < 0) letterCount = 0;
+							name[letterCount] = '\0';
+						}
+					}
 				}
 				else SetMouseCursor(MOUSE_CURSOR_DEFAULT);
 
@@ -153,11 +149,17 @@ namespace Console {
 				else framesCounter = 0;
 			}
 		}
-
 	private:
-
 		void parseCommand(const char* txt) {
-			Game::lua->lua.script(txt);
+			try
+			{
+				Logman::Log(TextFormat("Running Command : %s", txt));
+				Game::lua->lua.script(txt);
+			}
+			catch (const std::exception& e)
+			{
+				Logman::Error(TextFormat("Lua Error : %s", e.what()));
+			}
 		}
 	};
 }

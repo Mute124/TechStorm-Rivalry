@@ -1,6 +1,6 @@
 using System.Numerics;
 
-namespace TechStormDevTool.Core.UI
+namespace TechStorm_Dev_Tool.core.ui
 {
     internal abstract class UIElement
     {

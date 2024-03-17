@@ -10,7 +10,6 @@
 
 // Game Engine Includes
 #include "techstorm/Game.h"
-#include "techstorm/Globals.h"
 #include "techstorm/globalobj/Block.h"
 #include "techstorm/core/obj/Gameobject.h"
 #include "techstorm/core/gamescreen/MenuCamera.h"
@@ -37,7 +36,6 @@
 #define NUM_MODELS  9               // Parametric 3d shapes to generate
 
 void mainThread() {
-	ThreadGroups threadGroups = ThreadGroups();
 	//TODO: Is this still relevant?
 	EGameState currentScreen = Main;
 	// Booleans
@@ -129,7 +127,6 @@ void mainThread() {
 
 	Logman::Log("Main menu ready");
 
-backup:
 	while (!closeMainMenu) {
 		// check eligibility.
 		if (WindowShouldClose()) {
@@ -148,6 +145,10 @@ backup:
 			ResumeMusicStream(menuMusic);
 		}
 
+		if (start->IsClicked()) {
+			break;
+		}
+
 		UpdateMusicStream(menuMusic);   // Update music buffer with new stream data
 		game->uiMan->update();
 		BeginDrawing();
@@ -160,7 +161,9 @@ backup:
 
 		EndDrawing();
 	}
-	delete consoleUI;
+	StopMusicStream(menuMusic);
+
+	delete start;
 
 	// Load the shader into memory
 	game->gameRenderers->forwardRenderer->pbrShader = LoadShader(TextFormat("resources/shaders/glsl%i/pbr.vs", GLSL_VERSION), TextFormat("resources/shaders/glsl%i/pbr.fs", GLSL_VERSION));
@@ -219,7 +222,7 @@ backup:
 	SetDefaultModel(DefaultBlockModel);
 
 	// Construct the block object
-	Block* block = new Block(Vector3Zero(), BLACK, game->gameRenderers->forwardRenderer->pbrShader, DefaultBlockModel);
+	Block* block = new Block(Vector3Zero(), WHITE, game->gameRenderers->forwardRenderer->pbrShader, DefaultBlockModel);
 
 	// Finally push it off to the object manager
 	game->objMan->pushObject(block);
@@ -297,8 +300,8 @@ backup:
 		// coordinates mapping NOTE 2: It seems on some Android devices WebGL, fbo does not properly
 		// support a FLOAT-based attachment, despite texture can be successfully created.. so using
 		// PIXELFORMAT_UNCOMPRESSED_R8G8B8A8 instead of PIXELFORMAT_UNCOMPRESSED_R32G32B32A32
-		skybox.materials[0].maps[MATERIAL_MAP_CUBEMAP].texture = GenTextureCubemap(
-			shdrCubemap, panorama, 1024, PIXELFORMAT_UNCOMPRESSED_R8G8B8A8);
+		//skybox.materials[0].maps[MATERIAL_MAP_CUBEMAP].texture = GenTextureCubemap(
+		//	shdrCubemap, panorama, 1024, PIXELFORMAT_UNCOMPRESSED_R8G8B8A8);
 	}
 	else
 	{
@@ -371,7 +374,7 @@ backup:
 	//TestInteractive::setShader(game->renderers->forwardRenderer->pbrShader);
 	GravityWells* wells = new GravityWells();
 
-	wells->tester();
+	wells->ndTester();
 
 	game->objMan->pushObject(wells->gravWells[0]);
 
@@ -382,6 +385,9 @@ backup:
 
 	DisableCursor();
 
+	for (int i = 0; i < 100; i++) {
+		game->objMan->pushObject(new PhysObject(game->gameRenderers->forwardRenderer->pbrShader, Vector3Random(1, 6)));
+	}
 	Crosshair* crosshair = new Crosshair(game->screenMiddle, game->uiMan);
 	float brightness = 10.0f;
 
@@ -391,7 +397,7 @@ backup:
 	while (!WindowShouldClose())
 	{
 		int scroll = GetMouseWheelMove();
-		UpdateCamera(player->cameraComponent->getSelfCameraPointer(), player->cameraMode); // Update camera
+		UpdateCamera(player->cameraComponent->getSelfCameraPointer(), CAMERA_FIRST_PERSON); // Update camera
 
 		// NOTE : This is a very basic implementation of placing an object into the world. This is
 		// temporary and should be fleshed out.
@@ -407,7 +413,7 @@ backup:
 			PhysObject* ob = new PhysObject();
 			ob->init(game->gameRenderers->forwardRenderer->pbrShader, placepos);
 
-			ob->vel.vel = Vector3AddValue(GetCameraForward(player->cameraComponent->getSelfCameraPointer()), 100.0f);
+			ob->vel.vel = Vector3AddValue(GetCameraForward(player->cameraComponent->getSelfCameraPointer()), 1.0f);
 
 			game->objMan->pushObject(ob);
 		}
@@ -608,11 +614,7 @@ backup:
 
 		DrawTextureRec(nearDeathTex, Rectangle{ 0, 0, (float)(game->gameRenderers->forwardRenderer->fbo.texture.width), (float)(-game->gameRenderers->forwardRenderer->fbo.texture.height) }, Vector2{ 0, 0 }, WHITE);
 
-		BeginMode3D(player->cameraComponent->getSelfCamera());
-
-		EndMode3D();
-
-		BeginShaderMode(game->gameRenderers->forwardRenderer->bloomShader);
+		//BeginShaderMode(game->gameRenderers->forwardRenderer->bloomShader);
 		BeginMode3D(player->cameraComponent->getSelfCamera());
 
 		// Set old car model texture tiling, emissive color and emissive intensity parameters on shader
@@ -633,7 +635,7 @@ backup:
 		// end 3d rendering and texturing.
 		game->gameRenderers->forwardRenderer->end3D();
 
-		EndShaderMode();
+		//EndShaderMode();
 		game->gameRenderers->forwardRenderer->stopTexturing();
 
 		/*
@@ -652,7 +654,7 @@ backup:
 		| 					Post Process Affects										|
 		---------------------------------------------------------------------------------
 		*/
-
+		SetTextureFilter(game->gameRenderers->forwardRenderer->fbo.texture, TEXTURE_FILTER_ANISOTROPIC_16X);
 		game->gameRenderers->forwardRenderer->startDraw();
 		// Begin drawing mode so we can actually see stuff!
 
@@ -672,7 +674,6 @@ backup:
 
 		// Let raylib know that we're done drawing to the screen.
 		game->gameRenderers->forwardRenderer->endDraw();
-		SetTextureFilter(game->gameRenderers->forwardRenderer->fbo.texture, TEXTURE_FILTER_ANISOTROPIC_16X);
 
 		// clear the screen and replace it with black.
 		ClearBackground(BLACK);
@@ -858,13 +859,20 @@ void otherTest() {
 
 int main()
 {
-	// Run the game
-	std::thread t(std::move(mainThread));
+	try
+	{
+		// Run the game
+		std::thread t(std::move(mainThread));
 
-	ScriptManager* scriptManager = new ScriptManager();
+		ScriptManager* scriptManager = new ScriptManager();
 
-	scriptManager->start(true);
-	t.join();
+		scriptManager->start(true);
+		t.join();
+	}
+	catch (const std::exception& e)
+	{
+		Logman::Log(e.what());
+	}
 
 	return 0;
 }
