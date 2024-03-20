@@ -66,5 +66,5 @@ private:
 		return fileId;
 	}
 
-	static int configFileCount; // Corrosponds with place in what list it is in
+	static inline int configFileCount; // Corrosponds with place in what list it is in
 };

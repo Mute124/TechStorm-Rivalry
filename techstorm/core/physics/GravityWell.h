@@ -1,4 +1,5 @@
 #pragma once
+#include "../../Common.h"
 #include <raylib.h>
 #include "Velocity.h"
 #include <vector>
@@ -16,7 +17,7 @@ class GravityWell : public GameObject {
 public:
 	double gravIntensity; // how powerful this gravity well is.
 	//const Force gravitationalConstant;
-	double mass; // The mass of the Gravity well. IN KG
+	float mass; // The mass of the Gravity well. IN KG
 	GravitationalConstant constant;
 	GravitationalConstantParameter constantParameter;
 	CelestialPlane celestialPlane;
@@ -72,7 +73,7 @@ public:
 		push(new GravityWell(1));
 	}
 
-	void push(GravityWell* well) {
+	static inline void push(GravityWell* well) {
 		well->id = count;
 		gravWells[count] = well;
 		count++;

@@ -3,41 +3,45 @@
 #include "../../Common.h"
 #include "Velocity.h"
 #include "GravityWell.h"
+#include "PhysicsConstants.h"
 
 class PhysObject : public GameObject {
 public:
-
 	double envResistance = 0.04; // how much resistance is in the env
 	Vector3 pull = Vector3One();
-	double mass = 3.0f; // in kg
+	float mass = 3.0f; // in kg
 	Energy energyConstant;
 	Energy specificPotentialEnergy;
 	Energy specificKineticEnergy;
 	Energy specificOrbitalEnergy;
-	double momentum;
-	double avgVelocity;
+	Force impactForce; // in newtons.
 	double tangientalVelocity;
-	static inline Sound nyoom;
-	static inline bool isNyoom;
-	Velocity vel;
+	double scalarMomentum;
+	float scalarSpeed;
+	float averageVelocity;
+	float scalarAcceleration;
+	Vector3 linearVelocity;
+	Vector3 linearSpeed;
+	Vector3 linearAcceleration;
+	Vector3 prevLinearAcceleration;
+	Vector3 prevLinearVelocity;
 	Quaternion rot;
-	Vector3 prevAcc;
+	GravityWell* selfWell;
 
 	PhysObject() {
 	}
 
 	PhysObject(Shader shdr, Vector3 pos) {
+		this->selfWell = new GravityWell();
+		this->selfWell->gravIntensity = 1.5f;
+		GravityWells::push(this->selfWell);
 		this->init(shdr, pos);
 	}
 
 	void init(Shader shdr, Vector3 pos) {
-		if (!isNyoom) {
-			nyoom = LoadSound("resources/audio/nyoom.mp3");
-		}
 		this->threadSafe = true;
 		this->isDynamic = true;
 		this->position = pos;
-
 		this->model = GetDefaultModel();
 		this->tint = WHITE;
 		this->shdr = shdr;
@@ -55,13 +59,12 @@ public:
 		this->model.materials[0].maps[MATERIAL_MAP_ALBEDO].texture = Bricks;
 		this->model.materials[0].maps[MATERIAL_MAP_METALNESS].texture = LoadTexture("resources/textures/Block/Brick/brickMRAO.png");
 		this->model.materials[0].maps[MATERIAL_MAP_NORMAL].texture = LoadTexture("resources/textures/Block/Brick/brick_NORM.png");
+		this->selfWell = new GravityWell();
 		this->precompute();
-	}
 
+	
+	}
 	void init(Shader shdr) {
-		if (!isNyoom) {
-			nyoom = LoadSound("resources/audio/nyoom.mp3");
-		}
 		this->threadSafe = true;
 		this->isDynamic = true;
 		this->position = Vector3{ 10, 10, 10 };
@@ -90,57 +93,72 @@ public:
 		this->model.transform = QuaternionToMatrix(rot);
 		DrawModel(this->model, this->position, 1.0f, WHITE);
 
-		//DrawLine3D(this->position, Vector3Add(this->vel.vel, this->position), WHITE);
-		//DrawSphere(Vector3Add(this->vel.vel, this->position), 0.2f, RED);
+		DrawLine3D(this->position, this->linearVelocity, YELLOW);
+		DrawSphere(this->linearVelocity, 0.2f, YELLOW);
+
+		DrawLine3D(this->position, this->linearAcceleration, RED);
+		DrawSphere(this->linearAcceleration, 0.2f, RED);
 	}
 
 	virtual void onUpdate() override {
 		double wellPull;
-
+		Vector3 preCalculationPosition = this->position;
 		for (int i = 0; i < GravityWells::count; i++) {
 			GravityWell* well = GravityWells::gravWells.at(i);
 
-			double dst = Vector3Distance(well->position, this->position);
-
-			double power = (well->gravIntensity * well->mass / pow(dst, 2.0f) * this->mass) * envResistance;
-
 			Vector3 wellPos = well->position;
 
-			this->specificPotentialEnergy;
+			double dst = Vector3Distance(wellPos, this->position);
+			double force = GRAVITATIONAL_CONSTANT * ((well->mass * this->mass) / powf(dst, 2));
 
-			this->vel.acc = Vector3AddValue(Vector3Add(this->vel.vel, Vector3Subtract(this->vel.acc, this->prevAcc)), -power);
-			this->vel.vel = Vector3Lerp(wellPos, this->position, dst * GetFrameTime());
+			// a = dV / dT
+			this->scalarAcceleration = Vector3Distance(this->linearVelocity, this->prevLinearVelocity) / GetFrameTime();
 
-			this->position = Vector3Lerp(this->position, this->vel.vel, power * GetFrameTime());
+			this->impactForce = this->mass * this->scalarAcceleration;
+
+			//Vector3 pullByGravity = Vector3Lerp(this->position, wellPos, )
+
+				// average velocity is equal to speed divided by time, we are using frame time as it is a good representation of time passed.
+			this->averageVelocity = scalarSpeed / GetFrameTime();
+
+			//this->linearVelocity = Vector3Distance(this->position, );
+
+			// k = 1/2 * m * v^2
+			this->specificKineticEnergy = 0.5 * this->mass * pow(this->averageVelocity, 2);
+
+			// the rest of the energy is potential energy.
+			this->specificPotentialEnergy = abs(this->specificKineticEnergy - this->energyConstant);
+
+			this->prevLinearVelocity = this->linearVelocity;
+			/*
+			* this->specificKineticEnergy = 0.5 * this->mass;
+
+			this->linearAcceleration = Vector3AddValue(Vector3Add(this->linearVelocity, Vector3Subtract(this->linearAcceleration, this->prevLinearAcceleration)), -power);
+			this->linearVelocity = Vector3Lerp(wellPos, this->position, dst * GetFrameTime());
+
+			this->position = Vector3Lerp(this->position, this->linearVelocity, power * GetFrameTime());
 
 			rot = QuaternionFromVector3ToVector3(this->position, Vector3AddValue(wellPos, power));
 
-			float x = this->vel.vel.x * this->mass;
-			float y = this->vel.vel.y * this->mass;
-			float z = this->vel.vel.z * this->mass;
+			float x = this->linearVelocity.x * this->mass;
+			float y = this->linearVelocity.y * this->mass;
+			float z = this->linearVelocity.z * this->mass;
 
-			this->vel.momentum = x + y + z;
+			this->scalarMomentum = x + y + z;
 
-			this->prevAcc = this->vel.acc;
-			this->vel.acc = Vector3SubtractValue(this->vel.vel, this->envResistance);
-			this->avgVelocity = Vector3Avg(this->vel.vel);
+			this->prevLinearAcceleration = this->linearVelocity;
+			this->linearAcceleration = Vector3SubtractValue(this->linearVelocity, this->envResistance);
 
 			this->tangientalVelocity = (Vector3Angle(this->position, wellPos) / 2.0f) * dst;
 
-			this->vel.vel.z = this->vel.vel.z + this->tangientalVelocity;
-			this->vel.vel = Vector3AddValue(this->vel.vel, this->avgVelocity + this->vel.momentum + this->tangientalVelocity);
-
-			//this->prevAcc = this->vel.acc;
-			//this->vel.acc = Vector3Zero();
-			//Vector3 WellPowerV = Vector3AddValue(well->center, (well->gravIntensity * well->mass));
-			//Logman::Log(TextFormat("[%i] Intensity : %f, Mass : %f,  pos : %f, %f, %f : well : %f, %f, %f : dst : %f : power : %f", i, well->gravIntensity, well->mass, (float)position.x, (float)this->position.y, this->position.z, well->position.x, well->position.y, well->position.z, dst, power));
-			//wellPull = Vector3Distance(well->position, this->position);
-
-			//pull = Vector3Subtract(pull, Vector3Subtract(WellPowerV, Vector3{ (float)this->vel.momentum * this->position.x + (float)wellPull, (float)this->vel.momentum * this->position.y + (float)wellPull, (float)this->vel.momentum * this->position.z + (float)wellPull }));
-			//Logman::Log(TextFormat("Well Power : %f, %f, %f : Well pull : %f : total Pull : %f, %f, %f : Momentum : %f", WellPowerV.x, WellPowerV.y, WellPowerV.z, wellPull, this->pull.x, pull.y, pull.z, this->vel.momentum));
+			this->linearVelocity.z = this->linearVelocity.z + this->tangientalVelocity;
+			this->linearVelocity = Vector3AddValue(this->linearVelocity, this->scalarMomentum + this->tangientalVelocity);
+			*/
 		}
 
-		//Logman::Log(TextFormat("position : %f, %f, %f", position.x, position.y, position.z));
+		this->scalarSpeed = CalculateVector3Speed(preCalculationPosition, this->position);
+
+		// calculate impact force.
 	}
 
 	void onDestroy() const override {
@@ -149,15 +167,14 @@ public:
 
 private:
 
+	// precompute constants.
 	void precompute() {
 		this->energyConstant = this->mass * pow(LIGHT_SPEED, 2);
 
-		float x = this->vel.vel.x * this->mass;
-		float y = this->vel.vel.y * this->mass;
-		float z = this->vel.vel.z * this->mass;
+		float x = this->linearVelocity.x * this->mass;
+		float y = this->linearVelocity.y * this->mass;
+		float z = this->linearVelocity.z * this->mass;
 
-		this->vel.momentum = x + y + z;
-
-		this->avgVelocity = Vector3Avg(this->vel.vel);
+		this->scalarMomentum = x + y + z;
 	}
 };

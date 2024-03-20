@@ -20,7 +20,6 @@
 */
 
 #pragma once
-
 #include <raylib.h>
 //#include <math.h>
 #include <stdlib.h>
@@ -134,4 +133,8 @@ inline Vector2 CalculatePoint(Vector2 orgin, float width, float height, int corn
 	}
 
 	return point;
+}
+
+inline float CalculateVector3Speed(Vector3 pre, Vector3 post) {
+	return Vector3Distance(pre, post);
 }
