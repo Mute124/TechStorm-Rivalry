@@ -62,7 +62,7 @@ public:
 			// Stamp window config flags & Manufacture
 			// Read config to decide what to set for the game
 			Logman::customLog(LOG_INFO, "Initiating Config Manager", NULL);
-			optionsConfig = toml::parse_file("Config/options.toml");
+			optionsConfig = toml::parse_file("data/config/options.toml");
 
 			Logman::customLog(LOG_INFO, "OptionsConfig file registered", NULL);
 
@@ -80,7 +80,6 @@ public:
 				windowHeight = ConfigTypeConverter::strToInt(&optionsConfig["Window"]["windowHeight"].as_string()->operator std::string & ());
 				Logman::customLog(LOG_INFO, TextFormat("Setting window height to %i", windowHeight), NULL);
 			}
-
 
 			if (windowHeight == 0 || windowWidth == 0)
 			{
@@ -111,7 +110,6 @@ public:
 
 			InitWindow(windowWidth, windowHeight, "TechStorm-Rivalry");
 			InitAudioDevice(); // starts the audio driver(s).
-			
 
 			DisableEventWaiting();
 

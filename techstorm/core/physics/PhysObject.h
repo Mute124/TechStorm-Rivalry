@@ -61,8 +61,6 @@ public:
 		this->model.materials[0].maps[MATERIAL_MAP_NORMAL].texture = LoadTexture("resources/textures/Block/Brick/brick_NORM.png");
 		this->selfWell = new GravityWell();
 		this->precompute();
-
-	
 	}
 	void init(Shader shdr) {
 		this->threadSafe = true;

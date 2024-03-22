@@ -66,7 +66,7 @@ public:
 
 		try
 		{
-			FilePathList tomlConfigs = LoadDirectoryFilesEx("Config", ".toml", false);
+			FilePathList tomlConfigs = LoadDirectoryFilesEx("data/config", ".toml", false);
 			Logman::Log("Configman : Loading all game and engine config files...");
 
 			if (tomlConfigs.count == 0) {
