@@ -5,7 +5,6 @@
 */
 #pragma once
 #define SOL_ALL_SAFETIES_ON 1
-
 // framework(s) / external libraries
 #include <raylib.h>
 #include <raymath.h>
@@ -28,6 +27,8 @@
 #include <toml++/toml.hpp>
 #include <tinyxml2.h>
 
+// Project Chrono declaration
+
 // Engine Includes
 #include "Globals.h"
 #include "core/config/Configman.h"
@@ -40,5 +41,6 @@
 #include "core/utils/ArrayUtils.h"
 #include "core/audio/FxMan.h"
 #include "core/ui/UIMan.h"
+#include "core/chronoWrapper/ChronoWrapper.h"
 
 // end of common.h

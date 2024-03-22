@@ -3,7 +3,7 @@
 | 					         Includes											|
 ---------------------------------------------------------------------------------
 */
-
+#pragma once
 #include "Math.h"
 #include "techstorm/common.h"
 #include "techstorm/core/utils/Button.h" // TODO : Can this be moved to common.h?
@@ -26,7 +26,7 @@
 #include "techstorm/core/physics/PhysObject.h"
 #include "techstorm/console/Console.h"
 #include "techstorm/core/physics/PhysMan.h"
-#include "techstorm/core/chronoWrapper/ChronoWrapper.h"
+
 // Check if any key is pressed
 // NOTE: We limit keys check to keys between 32 (KEY_SPACE) and 126
 
