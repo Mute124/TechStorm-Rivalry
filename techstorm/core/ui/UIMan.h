@@ -16,13 +16,16 @@ class UIMan {
 public:
 	// constructor, creates the designated rogue container.
 	UIMan() {
+	}
+
+	void initUIMan() {
 		UIContainer::start();
 		addRogueContainer();
 
 		currentInstance = this;
 	}
 
-	void draw(EDrawType drawType) {
+	void drawUI(EDrawType drawType) {
 		for (auto& container : containers) {
 			container.second->drawChildren(drawType);
 		}
@@ -56,21 +59,21 @@ public:
 	}
 
 	// TODO: this
-	void clear(int id) {
+	void clearUI(int id) {
 	}
 
-	void flush() {
+	void flushUI() {
 		for (auto& cont : containers) {
 			cont.second->clear();
 		}
 	}
 
-	static UIMan* getInstance() {
+	static UIMan* getUIInstance() {
 		return currentInstance;
 	}
 
 	// murder the uiman, muahahaha
-	void end() {
+	void endUIMan() {
 		delete this;
 	}
 
@@ -80,7 +83,7 @@ public:
 	}
 
 	// update ze elements.
-	void update() {
+	void updateUI() {
 		for (auto& container : containers) {
 			container.second->update();
 		}

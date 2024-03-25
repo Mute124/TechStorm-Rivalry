@@ -36,7 +36,7 @@ public:
 	}
 
 	// Override function
-	void updateObjects() {
+	void updateScripts() {
 		for (int i = 0; i < _scripts.size(); i++) {
 			_scripts[i]->update();
 		}
@@ -63,7 +63,7 @@ public:
 private:
 
 	void beginLoop() {
-		this->updateObjects();
+		this->updateScripts();
 	}
 
 	static inline int _count = 0;

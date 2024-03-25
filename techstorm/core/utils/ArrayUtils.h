@@ -3,7 +3,9 @@
 #include <stdlib.h>
 #include <string>
 
-int getArrayLength(int sizeOfArray, int typeSize) {
+/*
+*
+* int getArrayLength(int sizeOfArray, int typeSize) {
 	return sizeOfArray / typeSize;
 }
 
@@ -11,8 +13,6 @@ template<typename T>
 int getArrayLength(T data[]) {
 	return sizeof(data) / sizeof(T);
 }
-
-/*
 template<typename T>
 class Array {
 public:

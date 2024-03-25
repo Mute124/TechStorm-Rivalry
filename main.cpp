@@ -22,8 +22,6 @@
 #include "techstorm/ui/UIFadingMsg.h"
 #include "techstorm/core/audio/FxMan.h"
 #include "techstorm/globalobj/Objects.h"
-#include "techstorm/core/physics/GravityWells.h"
-#include "techstorm/core/physics/PhysObject.h"
 #include "techstorm/console/Console.h"
 #include "techstorm/core/physics/PhysMan.h"
 
@@ -79,10 +77,12 @@ void mainThread() {
 	Ray ray;
 
 	// Create game & load it into memory.
-	Game* game = new Game();
+	Game* game;
+
+	game = new Game();
 
 	// Start the game and do any needed setup
-	game->StartGame();
+	game->init();
 
 	// IMPORTANT : Do not remove this or delete it as it is the manager of all game objects! (it will fuck up everything)
 
@@ -121,8 +121,8 @@ void mainThread() {
 
 	Console::ConsoleUI* consoleUI = new Console::ConsoleUI();
 
-	game->uiMan->pushRogueElement(consoleUI);
-	start->font = game->gameFont;
+	//game->pushRogueElement(consoleUI);
+	start->font = game->defaultFont;
 
 	PlayMusicStream(menuMusic);
 
@@ -151,14 +151,14 @@ void mainThread() {
 		}
 
 		UpdateMusicStream(menuMusic);   // Update music buffer with new stream data
-		game->uiMan->update();
+		game->updateUI();
 		BeginDrawing();
 
 		// ALWAYS ON TOP!
 		DrawTextureRec(backdrop, Rectangle{ 0, 0, (float)(backdrop.width), (float)(backdrop.height) }, Vector2{ 0, 0 }, WHITE);
 		start->draw();
-		DrawTextEx(game->gameFont, "TechStorm-Rivalry", Vector2{ game->screenMiddle.x - 100, (float)GetScreenHeight() * 0.05f }, 48, 20, WHITE);
-		game->uiMan->draw(EDrawType::DRAW_FINAL);
+		DrawTextEx(game->defaultFont, "TechStorm-Rivalry", Vector2{ game->screenMiddle.x - 100, (float)GetScreenHeight() * 0.05f }, 48, 20, WHITE);
+		game->drawUI(EDrawType::DRAW_FINAL);
 
 		EndDrawing();
 	}
@@ -226,7 +226,7 @@ void mainThread() {
 	Block* block = new Block(Vector3Zero(), WHITE, game->gameRenderers->forwardRenderer->pbrShader, DefaultBlockModel);
 
 	// Finally push it off to the object manager
-	game->objMan->pushObject(block);
+	game->pushObject(block);
 
 	// Create the player model
 // NOTE: This model is TEMPORARY! It will be deleted after a proper model is made. Refers to the
@@ -238,7 +238,7 @@ void mainThread() {
 	Player* player = new Player(Vector3{ 0.0f, 2.0f, 4.0f }, 100, PlayerModel, CAMERA_FIRST_PERSON);
 
 	// Finally push it off to the object manager
-	game->objMan->pushObject(player);
+	game->pushObject(player);
 
 	// Skybox geometry generation step
 	Mesh skyboxMesh = GenMeshCube(1.0f, 1.0f, 1.0f);
@@ -356,8 +356,8 @@ void mainThread() {
 	---------------------------------------------------------------------------------
 	*/
 
-	healthBarPositionX = game->windowWidth + healthBarOffsetX;
-	healthBarPositionY = game->windowHeight + healthBarOffsetY;
+	healthBarPositionX = game->winWidth + healthBarOffsetX;
+	healthBarPositionY = game->winHeight + healthBarOffsetY;
 
 	// the below lines are just me messing with heightmaps.
 	Image cell = GenImageCellular(100, 100, 2);
@@ -367,34 +367,30 @@ void mainThread() {
 	ImageAlphaMask(&perlin, cell);
 	Mesh test = GenMeshHeightmap(perlin, Vector3{ 100, 100, 100 });
 
-	// end of height map tomfoolery
+	// endUIMan of height map tomfoolery
 
 	// set default line spacing to 48.
 	SetTextLineSpacing(48);
 	//TestInteractive::init();
 	//TestInteractive::setShader(game->renderers->forwardRenderer->pbrShader);
-	GravityWells* wells = new GravityWells();
+	//GravityWells* wells = new GravityWells();
 
-	wells->ndTester();
+	//wells->ndTester();
 
-	game->objMan->pushObject(wells->gravWells[0]);
+	//game->objMan->pushObject(wells->gravWells[0]);
 
-	PhysObject* obj = new PhysObject();
-	obj->init(game->gameRenderers->forwardRenderer->pbrShader);
-
-	game->objMan->pushObject(obj);
+	//game->objMan->pushObject(obj);
 
 	DisableCursor();
 
-	for (int i = 0; i < 100; i++) {
-		game->objMan->pushObject(new PhysObject(game->gameRenderers->forwardRenderer->pbrShader, Vector3Random(1, 6)));
-	}
-	Crosshair* crosshair = new Crosshair(game->screenMiddle, game->uiMan);
+	Crosshair* crosshair = new Crosshair(game->screenMiddle, game);
 	float brightness = 10.0f;
 
 	SetShaderValue(game->gameRenderers->forwardRenderer->pbrShader, GetShaderLocation(game->gameRenderers->forwardRenderer->pbrShader, "brightness"), &brightness, UNIFORM_FLOAT);
 
-	// Now we can run the game loop and start playing!
+	//PhysMan* man = new PhysMan();
+
+	// Now we can run the game loop and startScriptMan playing!
 	while (!WindowShouldClose())
 	{
 		int scroll = GetMouseWheelMove();
@@ -411,12 +407,12 @@ void mainThread() {
 			///tester->create(Vector3{ roundf(placepos.x), roundf(placepos.y), roundf(placepos.z) }, GetDefaultModel(), 1.0f, WHITE, block->model.materials[0]);
 			//gameObjectManager->pushObject(tester);
 
-			PhysObject* ob = new PhysObject();
-			ob->init(game->gameRenderers->forwardRenderer->pbrShader, placepos);
+			//PhysObject* ob = new PhysObject();
+			//ob->init(game->gameRenderers->forwardRenderer->pbrShader, placepos);
 
 			//ob->vel.vel = Vector3AddValue(GetCameraForward(player->cameraComponent->getSelfCameraPointer()), 1.0f);
 
-			game->objMan->pushObject(ob);
+			//game->objMan->pushObject(ob);
 		}
 		//TestInteractive::setCam(player->cameraComponent->getSelfCamera());
 		// Take a screenshot
@@ -494,9 +490,9 @@ void mainThread() {
 
 					std::vector<void*> data;
 
-					for (int i = 0; i < game->objMan->threadSafeObjects.size(); i++)
+					for (int i = 0; i < game->threadSafeObjects.size(); i++)
 					{
-						data.push_back(game->objMan->threadSafeObjects[i]);
+						data.push_back(game->threadSafeObjects[i]);
 					}
 					SaveFileData(filename, &data, sizeof(data));
 
@@ -608,13 +604,13 @@ void mainThread() {
 		SetShaderValue(game->gameRenderers->forwardRenderer->pbrShader, game->gameRenderers->forwardRenderer->pbrShader.locs[SHADER_LOC_VECTOR_VIEW], &cameraPos, SHADER_UNIFORM_VEC3);
 
 		// Update the game object manager
-		game->objMan->updateObjects();
+		game->updateObjects();
 
 		// Start texturing the FBO with what the user will be seeing. This includes UI and Scene objects.
 		game->gameRenderers->forwardRenderer->startTexturing();
 
-		game->uiMan->update();
-		game->uiMan->draw(DRAW_CLIPPABLE);
+		game->updateUI();
+		game->drawUI(DRAW_CLIPPABLE);
 
 		DrawTextureRec(nearDeathTex, Rectangle{ 0, 0, (float)(game->gameRenderers->forwardRenderer->fbo.texture.width), (float)(-game->gameRenderers->forwardRenderer->fbo.texture.height) }, Vector2{ 0, 0 }, WHITE);
 
@@ -635,8 +631,8 @@ void mainThread() {
 
 		// Render all game objects
 		//rlEnableWireMode();
-		game->objMan->renderObjects();
-		// end 3d rendering and texturing.
+		game->renderObjects();
+		// endUIMan 3d rendering and texturing.
 		game->gameRenderers->forwardRenderer->end3D();
 
 		//EndShaderMode();
@@ -647,7 +643,7 @@ void mainThread() {
 		|     2d Ui rendering for AFTER 3d drawing										|
 		---------------------------------------------------------------------------------
 		*/
-		//UIMan::draw();
+		//UIMan::drawUI();
 
 		// Warning : DO NOT MOVE THIS! this is important! due to a bug within raylib, this must be
 		// done after the texturing is done or a stack overflow WILL occur. GOD DAMN IT!
@@ -674,7 +670,7 @@ void mainThread() {
 		// Draw the FPS onto the screen.
 		DrawFPS(100, 100);
 
-		game->uiMan->draw(DRAW_FINAL);
+		game->drawUI(DRAW_FINAL);
 
 		// Let raylib know that we're done drawing to the screen.
 		game->gameRenderers->forwardRenderer->endDraw();
@@ -711,13 +707,13 @@ void mainThread() {
 
 	// Flush all game objects within the buffer. This is important! Otherwise, the game objects will
 	// not be deleted, cause memory leaks, and negates the entire purpose of this system.
-	game->objMan->flushBuffer();
+	game->flushBuffer();
 	//threadGroups.join();
 
 	// Delete pointers declared within this function
 	delete game;
 	delete block;
-
+	//delete man;
 	delete player;
 
 	// The software returns a 0 (success) and exits.
@@ -868,9 +864,7 @@ int main()
 		// Run the game
 		std::thread t(std::move(mainThread));
 
-		ScriptManager* scriptManager = new ScriptManager();
-
-		scriptManager->start(true);
+		//scriptManager->startScriptMan(true);
 		t.join();
 	}
 	catch (const std::exception& e)

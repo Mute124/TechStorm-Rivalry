@@ -21,7 +21,8 @@ namespace Console {
 		Rectangle consoleBackDrop;
 
 		ConsoleUI() {
-			Game::uiMan->pushRogueElement(this);
+			//Game& game = Game::getInstance();
+			//game.pushRogueElement(this);
 		}
 
 		virtual void draw() override {
@@ -154,12 +155,15 @@ namespace Console {
 			try
 			{
 				Logman::Log(TextFormat("Running Command : %s", txt));
-				Game::lua->lua.script(txt);
+				//Game::getInstance().lua.script(txt);
 			}
 			catch (const std::exception& e)
 			{
 				Logman::Error(TextFormat("Lua Error : %s", e.what()));
 			}
 		}
+	};
+
+	class Console {
 	};
 }

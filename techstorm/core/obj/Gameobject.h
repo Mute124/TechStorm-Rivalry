@@ -90,7 +90,7 @@ public:
 	}
 };
 
-class GameobjectManager final {
+class GameobjectManager {
 public:
 	vector<GameObject*> threadSafeObjects; // objects that are threadsafe
 	vector<GameObject*> nonThreadSafeObjects; // objects that are not threadsafe.

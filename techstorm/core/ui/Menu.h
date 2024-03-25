@@ -3,13 +3,10 @@
 #include "../utils/Button.h"
 #include "../gamescreen/MenuCamera.h"
 
-class Menu {
+// just a modified UI container
+class Menu : UIContainer {
 public:
-
-protected:
-	MenuCamera* camera;
-	KeyboardKey trigger = KEY_NULL;
-	bool isOpen;
-	bool shouldExit;
-	UIContainer* menuContainer;
+	void constructMenu(bool awakeOnPush);
+	virtual void initMenu();
+	virtual void tickMenu();
 };

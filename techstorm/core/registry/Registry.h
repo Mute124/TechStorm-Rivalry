@@ -33,7 +33,7 @@ public:
 		registry.erase(id);
 	}
 
-	virtual void updateObjects() {}
+	virtual void updateRegistry() {}
 
 	void flushConfig() {
 		registry.clear();

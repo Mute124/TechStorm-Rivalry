@@ -29,9 +29,9 @@ public:
 	}
 
 	// Get a config FileName
-	ConfigFile getFile(const char* FileName)
+	ConfigFile* getFile(const char* FileName)
 	{
-		return ConfigSecretary->findFile(registry, FileName);
+		return &ConfigSecretary->findFile(registry, FileName);
 	}
 
 	// register a config FileName into the registry
@@ -57,16 +57,22 @@ public:
 class ConfigMan : public ConfigRegistrySecretary, public ConfigTypeConverter
 {
 public:
-	static inline ConfigRegistry* Registry;
+	static inline ConfigRegistry* confRegistry;
 
-	ConfigMan() {
+	ConfigMan() {};
+
+	~ConfigMan() {
+		delete this;
+	}
+
+	void initConfigMan() {
 		Logman::customLog(LOG_INFO, "New Config Manager instance created successfully, finding valid TOML and XML files...", NULL);
-		Registry = new ConfigRegistry();
+		confRegistry = new ConfigRegistry();
 		ConfigFile::initConfigFile();
 
 		try
 		{
-			FilePathList tomlConfigs = LoadDirectoryFilesEx("data/config", ".toml", false);
+			FilePathList tomlConfigs = LoadDirectoryFilesEx("data\config", ".toml", false);
 			Logman::Log("Configman : Loading all game and engine config files...");
 
 			if (tomlConfigs.count == 0) {
@@ -77,7 +83,7 @@ public:
 					const char* path = tomlConfigs.paths[i];
 					Logman::Log(TextFormat("Configman : TOML Config file found at %s! Loading file...", path));
 
-					Registry->registerFile(path);
+					confRegistry->registerFile(path);
 				}
 			}
 
@@ -94,7 +100,7 @@ public:
 				for (int i = 0; i < modConfigs.count; i++) {
 					const char* path = modConfigs.paths[i];
 					Logman::Log(TextFormat("Configman : TOML Config file found at %s! Loading file...", path));
-					Registry->registerFile(path);
+					confRegistry->registerFile(path);
 				}
 			}
 
@@ -106,14 +112,9 @@ public:
 		{
 			Logman::Error(TextFormat("Configman : I have experienced an error! %s", e.what()));
 		}
-	};
-
-	~ConfigMan() {
-		delete this;
 	}
-
 	static void initConfigFile() {
-		Registry = new ConfigRegistry();
+		confRegistry = new ConfigRegistry();
 
 		Logman::customLog(LOG_INFO, "Loading TOML files from Config folder...", NULL);
 

@@ -41,6 +41,5 @@
 #include "core/utils/ArrayUtils.h"
 #include "core/audio/FxMan.h"
 #include "core/ui/UIMan.h"
-#include "core/chronoWrapper/ChronoWrapper.h"
 
 // end of common.h

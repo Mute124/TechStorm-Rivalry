@@ -13,7 +13,7 @@ public:
 	LuaManager() {
 	}
 
-	void init() {
+	void initLua() {
 		startLua();
 		loadMods();
 	}
