@@ -16,7 +16,6 @@ public:
 	Vector3 ambientColorNormalized = Vector3{ ambientColor.r / 255.0f, ambientColor.g / 255.0f, ambientColor.b / 255.0f };
 	bool enableMusic;
 	bool loaded;
-	Player* player;
 
 	Vector2 GetWindowSize() {
 		return { (float)winWidth, (float)winHeight };
@@ -40,10 +39,8 @@ public:
 			this->customLog(LOG_INFO, TextFormat("EnableMusic = %i", true), NULL);
 
 			// Stamp window config flags & Manufacture
-
 			this->customLog(LOG_INFO, "Starting Game", NULL);
 			this->initApplication(800, 600, "Techstorm Rivalry", FLAG_MSAA_4X_HINT);
-
 
 			DisableEventWaiting();
 

@@ -4,6 +4,9 @@
 
 // The Jolt headers don't include Jolt.h. Always include Jolt.h before including any other Jolt header.
 // You can use Jolt.h in your precompiled header to speed up compilation.
+
+*/
+
 #include <Jolt/Jolt.h>
 
 // Jolt includes
@@ -132,5 +135,3 @@ public:
 	//void tick(BodyInterface&& bInterface);
 	void makeFloor();
 };
-
-*/
