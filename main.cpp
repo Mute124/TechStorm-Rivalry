@@ -388,8 +388,6 @@ void mainThread() {
 
 	SetShaderValue(game->gameRenderers->forwardRenderer->pbrShader, GetShaderLocation(game->gameRenderers->forwardRenderer->pbrShader, "brightness"), &brightness, UNIFORM_FLOAT);
 
-	//PhysMan* man = new PhysMan();
-
 	// Now we can run the game loop and startScriptMan playing!
 	while (!WindowShouldClose())
 	{
