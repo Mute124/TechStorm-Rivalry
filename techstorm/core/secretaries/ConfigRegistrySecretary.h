@@ -20,10 +20,35 @@ public:
 		return file;
 	}
 
+	static inline ConfigFile findFileName(std::vector<ConfigFile*>& Dataset, const char* name) {
+		ConfigFile file;
+		if (doesFileExistName(Dataset, name)) {
+			for (int i = 0; i < Dataset.size(); i++) {
+				if (Dataset[i]->file.name == name) {
+					file = *Dataset[i];
+				}
+			}
+		}
+		return file;
+	}
+
 	static inline bool doesFileExist(std::vector<ConfigFile*>& Dataset, const char* TargetFile) {
 		bool found = false;
 		for (int i = 0; i < Dataset.size(); i++) {
 			if (Dataset[i]->file.entry.FilePath == TargetFile) {
+				found = true;
+			}
+		}
+		if (!found) {
+			found = false;
+		}
+		return found;
+	}
+
+	static inline bool doesFileExistName(std::vector<ConfigFile*>& Dataset, const char* name) {
+		bool found = false;
+		for (int i = 0; i < Dataset.size(); i++) {
+			if (Dataset[i]->file.name == name) {
 				found = true;
 			}
 		}

@@ -41,5 +41,6 @@
 #include "core/utils/ArrayUtils.h"
 #include "core/audio/FxMan.h"
 #include "core/ui/UIMan.h"
-
+#include "core/TechStorm.h"
+#include "TechStorm-Rivalry.h"
 // end of common.h

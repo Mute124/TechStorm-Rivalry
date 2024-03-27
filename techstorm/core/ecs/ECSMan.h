@@ -10,7 +10,7 @@
 #include <variant>
 
 template<typename comp>
-class Components_CSTR : public MRegistry_CSTR<comp> {
+class Components_CSTR : public TechStorm::MRegistry_CSTR<comp> {
 public:
 
 	void update() {

@@ -2,7 +2,7 @@
 #include "../core/utils/Math.h"
 #include "../core/ui/UIElement.h"
 
-class UIFadingMsg : public UIElement {
+class UIFadingMsg : public TechStorm::UIElement {
 public:
 
 private:

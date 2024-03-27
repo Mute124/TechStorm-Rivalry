@@ -101,7 +101,7 @@ public:
 
 		onTick();
 
-		Logman::Log(TextFormat("Delta : %f, Val : %f, tDelta : %f", deltaVal, val, treatmentDelta));
+		TechStorm::Logman::Log(TextFormat("Delta : %f, Val : %f, tDelta : %f", deltaVal, val, treatmentDelta));
 	}
 
 	// override this in the event you want extra behaviors in the stat.

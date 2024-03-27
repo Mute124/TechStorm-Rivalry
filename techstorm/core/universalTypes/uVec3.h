@@ -7,7 +7,6 @@ namespace TechStorm {
 	// Forward declaration
 	template<typename T>
 	class uVec3Base;
-
 	// Overload subtraction operator for subtracting Jolt's Vector3 from uVec3Base
 	template<typename T>
 	uVec3Base<T> operator-(const uVec3Base<T>& lhs, const JPH::Vec3& rhs) {
@@ -33,26 +32,26 @@ namespace TechStorm {
 
 		// No parameters provided so it will be set to zero.
 		uVec3Base() :
-			this->x((T)0),
-			this->y((T)0),
-			this->z((T)0);
+			x((T)0),
+			y((T)0),
+			z((T)0) {}
 
 		// Normal construction from values
 		uVec3Base(T x, T y, T z) :
-			this->x(x),
-			this->y(y),
-			this->z(z) {}
+			x(x),
+			y(y),
+			z(z) {}
 
 		// Construct from a Jolt Vector
 		uVec3Base(JPH::Vec3& val) :
-			this->x((T)val.GetX()),
-			this->y((T)val.GetY()),
-			this->z((T)val.GetZ()) {}
+			x((T)val.GetX()),
+			y((T)val.GetY()),
+			z((T)val.GetZ()) {}
 
 		uVec3Base(Vector3& val) :
-			this->x((T)val.GetX()),
-			this->y((T)val.GetY()),
-			this->z((T)val.GetZ()) {
+			x((T)val.x),
+			y((T)val.y),
+			z((T)val.z) {
 		}
 
 		// functions
@@ -66,17 +65,6 @@ namespace TechStorm {
 		}
 
 		// Math Operators
-
-		// Subtraction operator for uVec3Base
-		uVec3Base operator-(const uVec3Base& rhs) const {
-			return uVec3Base(x - rhs.x, y - rhs.y, z - rhs.z);
-		}
-
-		// Friend declaration for operator- with Jolt's Vector3
-		friend uVec3Base operator-<>(const uVec3Base& lhs, const Jolt::Vector3& rhs);
-
-		// Friend declaration for operator- with Raylib's Vector3
-		friend uVec3Base operator-<>(const uVec3Base& lhs, const Vector3& rhs);
 
 		// Conversion Operators
 		virtual operator Vector3() const {
@@ -93,6 +81,17 @@ namespace TechStorm {
 		}
 	};
 
+	class uVec3f;
+	class uVec3d;
+
+	class uVec3i : public uVec3Base<int> {
+	public:
+		uVec3i() : uVec3Base() {}
+		uVec3i(double x, double y, double z) : uVec3Base(x, y, z) {}
+		uVec3i(JPH::Vec3& val) : uVec3Base(val) {}
+		uVec3i(Vector3& val) : uVec3Base(val) {}
+	};
+
 	class uVec3f : public uVec3Base<float> {
 	public:
 
@@ -100,6 +99,11 @@ namespace TechStorm {
 		uVec3f(float x, float y, float z) : uVec3Base(x, y, z) {}
 		uVec3f(JPH::Vec3& val) : uVec3Base(val) {}
 		uVec3f(Vector3& val) : uVec3Base(val) {}
+
+		// Note : This only will TRUNCATE the vector, not round it!
+		virtual operator uVec3i() const {
+			return uVec3i((int)this->x, (int)this->y, (int)this->z);
+		}
 	};
 
 	class uVec3d : public uVec3Base<double> {
@@ -108,13 +112,10 @@ namespace TechStorm {
 		uVec3d(double x, double y, double z) : uVec3Base(x, y, z) {}
 		uVec3d(JPH::Vec3& val) : uVec3Base(val) {}
 		uVec3d(Vector3& val) : uVec3Base(val) {}
-	};
 
-	class uVec3i : public uVec3Base<int> {
-	public:
-		uVec3i() : uVec3Base() {}
-		uVec3i(double x, double y, double z) : uVec3Base(x, y, z) {}
-		uVec3i(JPH::Vec3& val) : uVec3Base(val) {}
-		uVec3i(Vector3& val) : uVec3Base(val) {}
+		// Note : This only will TRUNCATE the vector, not round it!
+		virtual operator uVec3i() const {
+			return uVec3i((int)this->x, (int)this->y, (int)this->z);
+		}
 	};
 }

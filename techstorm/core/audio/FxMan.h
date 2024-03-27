@@ -33,7 +33,7 @@ public:
 		if (sound->persistant) {
 			if (!sound->isPlaying) {
 				stream.push(sound);
-				Logman::Log("pushing ");
+				TechStorm::Logman::Log("pushing ");
 			}
 		}
 		stream.pop();

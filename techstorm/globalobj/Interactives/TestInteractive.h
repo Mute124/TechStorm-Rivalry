@@ -1,7 +1,7 @@
 #pragma once
 #include "../../core/obj/InteractiveObject.h"
 
-class TestInteractive : public InteractiveObject {
+class TestInteractive : public TechStorm::InteractiveObject {
 public:
 	static void init() {
 		br = LoadTexture("resources/textures/Block/Brick/Brick.png");

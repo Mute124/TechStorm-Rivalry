@@ -12,12 +12,12 @@ typedef class Item {
 	const Image* ICON; // Item icon
 	const int* ID; // The id for this type of item.
 	void log() {
-		Logman::Log(NAME);
+		TechStorm::Logman::Log(NAME);
 	}
 
 	// there are probably better ways to go about this, but I dont care right now
 	Item(const char* name, const char* type, const Image icon, const int id, const char* rarity) : NAME(name), TYPE(TranslateMaterialType(type)), ICON(&icon), ID(&id), RARITY(TranslateRarity(rarity)) {
-		Logman::Log(TextFormat("Item Created: %s, id of %i, rarity of %s", name, id, rarity));
+		TechStorm::Logman::Log(TextFormat("Item Created: %s, id of %i, rarity of %s", name, id, rarity));
 	}
 
 	~Item() {

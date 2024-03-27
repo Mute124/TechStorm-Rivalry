@@ -13,7 +13,7 @@
 
 // A game character abstract class
 template<size_t limbs>
-class Character abstract : public GameObject
+class Character abstract : public TechStorm::GameObject
 {
 public:
 

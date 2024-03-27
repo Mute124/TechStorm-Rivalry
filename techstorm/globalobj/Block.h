@@ -10,7 +10,7 @@
 #include <stdlib.h>
 
 // The class for, well blocks!
-class Block : public GameObject
+class Block : public TechStorm::GameObject
 {
 public:
 
@@ -20,7 +20,7 @@ public:
 	// main block constructor.
 	Block(Vector3 position, const Color color, Shader shader, Model model)
 	{
-		Logman::customLog(LOG_TRACE, "Block Constructor", NULL);
+		TechStorm::Logman::customLog(LOG_TRACE, "Block Constructor", NULL);
 
 		this->threadSafe = true;
 		this->isDynamic = true;

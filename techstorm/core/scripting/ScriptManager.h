@@ -13,7 +13,7 @@
 
 // Class that manages scripting and calls the script functions
 // todo: make this thread safe, and run in a threadgroup.
-class ScriptManager : public MRegistry<IScriptable> {
+class ScriptManager : public TechStorm::MRegistry<IScriptable> {
 public:
 
 	static void init() {}

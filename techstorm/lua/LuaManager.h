@@ -4,6 +4,7 @@
 #include <tuple>
 #include <cassert>
 #include <utility> // for std::pair
+#include "../core/universalTypes/uString.h"
 
 class LuaManager {
 public:
@@ -18,8 +19,8 @@ public:
 		loadMods();
 	}
 
-	void log(std::string b) {
-		Logman::Log(b.c_str());
+	void log(const char* b) {
+		TechStorm::Logman::Log(b);
 	}
 
 	void startLua() {

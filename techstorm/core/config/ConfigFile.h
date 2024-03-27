@@ -8,14 +8,21 @@ class ConfigFile
 {
 public:
 	// FilePath path goes in here
-	ConfigFile(const char* File)
+	ConfigFile(const char* path)
 	{
-		file.id = assignId(); // Assign the file's id;
+		try
+		{
+			file.id = assignId(); // Assign the file's id;
 
-		file.entry.FilePath = File;
-		file.entry.Data = toml::parse_file(File);
-		file.tag = "Config";
-		file.entry.isLoaded = true; // signals that this is ready.
+			file.entry.FilePath = path;
+			file.entry.Data = toml::parse_file(path);
+			file.tag = "Config";
+			file.entry.isLoaded = true; // signals that this is ready
+		}
+		catch (const std::exception& e)
+		{
+			printf(e.what());
+		}
 	}
 
 	ConfigFile()
@@ -30,12 +37,14 @@ public:
 	// The solution to the issue of not being able to get a int from a config file.
 	int getIntEntry(const char* section, const char* entry)
 	{
-		// convert from int64_t to int
-		toml::table tbl = *(file.entry.Data[section][entry].as_table()); // Tableize
 
-		int result = tbl[section][entry].as_integer()->operator int64_t & ();
+			// convert from int64_t to int
+			toml::table tbl = *(file.entry.Data[section][entry].as_table()); // Tableize
 
-		return result;
+			int result = tbl[section][entry].as_integer()->operator const int64_t & ();
+
+			return result;
+
 	}
 
 	bool getBoolEntry(const char* section, const char* entry)
@@ -66,5 +75,5 @@ private:
 		return fileId;
 	}
 
-	static inline int configFileCount; // Corrosponds with place in what list it is in
+	static inline int configFileCount = 0; // Corrosponds with place in what list it is in
 };

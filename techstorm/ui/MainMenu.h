@@ -1,61 +1,116 @@
 #pragma once
-#include "../core/ui/Menu.h"
+#include "../core/ui/UIMenu.h"
+#include "../core/utils/Button.h"
+#include <raylib.h>
 
-class MainMenu : public Menu {
-public:
-	MainMenu() {
-		// declare main menu variables here :
-		bool closeMainMenu = false;
+namespace MainMenu {
+	bool closeMainMenu = false;
+
+	class MainMenuBackground : public TechStorm::UIElement {
+	private:
+
+	public:
+		MainMenuBackground() {
+
+			
+		}
+
+		void drawElement() override {
+
+			
+		}
+	};
+
+	class MainMenuTitle : public TechStorm::UIElement {
+	private:
+		const char* m_text = "TechStorm-Rivalry";
+		TechStorm::uVec2i screenMiddle;
+	public:
+
+		void initTitle(TechStorm::uVec2i screenMiddle) {
+			this->screenMiddle = screenMiddle;
+		}
+
+		void drawElement() override {
+			DrawTextEx(font, m_text, TechStorm::uVec2f((float)screenMiddle.x - 100, (float)GetScreenHeight() * 0.05f), 48, 20, WHITE);
+		}
+	};
+
+	class MainMenuStart : public TechStorm::UIElement {
+	public:
+		TechStorm::ButtonR* button;
+
+		MainMenuStart(TechStorm::ButtonR* button) : button(button) {
+			this->button->font = font;
+		}
+
+		void drawElement() override {
+			button->draw();
+
+			if (button->IsClicked()) {
+				this->parent->requestKill();
+				
+			}
+		}
+	};
+
+	class MainMenu final : public TechStorm::UIMenu {
+	private:
+		Music menuMusic;
 		bool windowUnfocused = false;
 		bool windowReFocused = false;
-		//RenderTexture mainMenuTexture = LoadRenderTexture(game->windowWidth, game->windowHeight);
-		Image backdropImg = LoadImage("resources/textures/background.png");
-		ImageResize(&backdropImg, GetScreenWidth(), GetScreenHeight());
-		Texture backdrop = LoadTextureFromImage(backdropImg);
-		Music menuMusic = LoadMusicStream("resources/audio/ost/starstruck.mp3");
-		ButtonR* start = new ButtonR("Start", game->screenMiddle.x - (game->screenMiddle.x) + 100, game->screenMiddle.y);
+		Texture m_backdrop;
+	public:
 
-		//game->pushRogueElement(consoleUI);
-		start->font = game->defaultFont;
-
-		PlayMusicStream(menuMusic);
-
-		Logman::Log("Main menu ready");
-
-		while (!closeMainMenu) {
-			// check eligibility.
-			if (WindowShouldClose()) {
-				closeMainMenu = true;
-			}
-
-			// pause and unpause music depending on focus
-			if (!IsWindowFocused()) {
-				PauseMusicStream(menuMusic);
-				windowReFocused = false;
-				windowUnfocused = true;
-			}
-			else if ((IsWindowFocused() == true) && (windowUnfocused == true)) {
-				windowUnfocused = false;
-				windowReFocused = true;
-				ResumeMusicStream(menuMusic);
-			}
-
-			if (start->IsClicked()) {
-				break;
-			}
-
-			UpdateMusicStream(menuMusic);   // Update music buffer with new stream data
-			game->uiMan->update();
-			BeginDrawing();
-
-			// ALWAYS ON TOP!
-			DrawTextureRec(backdrop, Rectangle{ 0, 0, (float)(backdrop.width), (float)(backdrop.height) }, Vector2{ 0, 0 }, WHITE);
-			start->draw();
-			DrawTextEx(game->gameFont, "TechStorm-Rivalry", Vector2{ game->screenMiddle.x - 100, (float)GetScreenHeight() * 0.05f }, 48, 20, WHITE);
-			game->uiMan->drawUI(EDrawType::DRAW_FINAL);
-
-			EndDrawing();
+		MainMenu(Game& game) {
+			
+			menuMusic = LoadMusicStream("resources/audio/ost/starstruck.mp3");
+			Image backdropImg = LoadImage("resources/textures/background.png");
+			ImageResize(&backdropImg, GetScreenWidth(), GetScreenHeight());
+			m_backdrop = LoadTextureFromImage(backdropImg);
+			//game->pushRogueElement(consoleUI);
+			addChild(new MainMenuTitle());
+			addChild(new MainMenuStart(new TechStorm::ButtonR("Start", game.screenMiddle.x - (game.screenMiddle.x) + 100, game.screenMiddle.y)));
+			
+			initMenu(game);
 		}
-		StopMusicStream(menuMusic);
-	}
-};
+
+		void drawMenu() override {
+			PlayMusicStream(menuMusic);
+			while (!closeMainMenu) {
+				// check eligibility.
+				if (WindowShouldClose()) {
+					closeMainMenu = true;
+				}
+
+				// pause and unpause music depending on focus
+				if (!IsWindowFocused()) {
+					PauseMusicStream(menuMusic);
+					windowReFocused = false;
+					windowUnfocused = true;
+				}
+				else if ((IsWindowFocused() == true) && (windowUnfocused == true)) {
+					windowUnfocused = false;
+					windowReFocused = true;
+					ResumeMusicStream(menuMusic);
+				}
+
+				if (shouldKill) {
+					this->destruct();
+					
+					break;
+				}
+
+				UpdateMusicStream(menuMusic);   // Update music buffer with new stream data
+
+				BeginDrawing();
+				DrawTextureRec(m_backdrop, Rectangle{ 0, 0, (float)(m_backdrop.width), (float)(-m_backdrop.height) }, Vector2{ 0, 0 }, WHITE);
+
+				this->drawChildren(DRAW_FINAL);
+
+				EndDrawing();
+			}
+			StopMusicStream(menuMusic);
+		}
+	};
+}

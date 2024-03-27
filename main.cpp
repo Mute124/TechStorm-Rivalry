@@ -24,6 +24,8 @@
 #include "techstorm/globalobj/Objects.h"
 #include "techstorm/console/Console.h"
 #include "techstorm/core/physics/PhysMan.h"
+#include "techstorm/core/ui/UIMenu.h"
+#include "techstorm/ui/MainMenu.h"
 
 // Check if any key is pressed
 // NOTE: We limit keys check to keys between 32 (KEY_SPACE) and 126
@@ -77,9 +79,7 @@ void mainThread() {
 	Ray ray;
 
 	// Create game & load it into memory.
-	Game* game;
-
-	game = new Game();
+	Game* game = new Game();
 
 	// Start the game and do any needed setup
 	game->init();
@@ -107,110 +107,65 @@ void mainThread() {
 	| 					        Shader Setup										|
 	---------------------------------------------------------------------------------
 	*/
-
+	TechStorm::Console::ConsoleUI* consoleUI = new TechStorm::Console::ConsoleUI();
 	// declare main menu variables here :
-	bool closeMainMenu = false;
-	bool windowUnfocused = false;
-	bool windowReFocused = false;
+
 	//RenderTexture mainMenuTexture = LoadRenderTexture(game->windowWidth, game->windowHeight);
-	Image backdropImg = LoadImage("resources/textures/background.png");
-	ImageResize(&backdropImg, GetScreenWidth(), GetScreenHeight());
-	Texture backdrop = LoadTextureFromImage(backdropImg);
+
 	Music menuMusic = LoadMusicStream("resources/audio/ost/starstruck.mp3");
-	ButtonR* start = new ButtonR("Start", game->screenMiddle.x - (game->screenMiddle.x) + 100, game->screenMiddle.y);
 
-	Console::ConsoleUI* consoleUI = new Console::ConsoleUI();
+	TechStorm::Logman::Log("Main menu ready");
 
-	//game->pushRogueElement(consoleUI);
-	start->font = game->defaultFont;
+	MainMenu::MainMenu* menu = new MainMenu::MainMenu(*game);
 
-	PlayMusicStream(menuMusic);
-
-	Logman::Log("Main menu ready");
-
-	while (!closeMainMenu) {
-		// check eligibility.
-		if (WindowShouldClose()) {
-			closeMainMenu = true;
-		}
-
-		// pause and unpause music depending on focus
-		if (!IsWindowFocused()) {
-			PauseMusicStream(menuMusic);
-			windowReFocused = false;
-			windowUnfocused = true;
-		}
-		else if ((IsWindowFocused() == true) && (windowUnfocused == true)) {
-			windowUnfocused = false;
-			windowReFocused = true;
-			ResumeMusicStream(menuMusic);
-		}
-
-		if (start->IsClicked()) {
-			break;
-		}
-
-		UpdateMusicStream(menuMusic);   // Update music buffer with new stream data
-		game->updateUI();
-		BeginDrawing();
-
-		// ALWAYS ON TOP!
-		DrawTextureRec(backdrop, Rectangle{ 0, 0, (float)(backdrop.width), (float)(backdrop.height) }, Vector2{ 0, 0 }, WHITE);
-		start->draw();
-		DrawTextEx(game->defaultFont, "TechStorm-Rivalry", Vector2{ game->screenMiddle.x - 100, (float)GetScreenHeight() * 0.05f }, 48, 20, WHITE);
-		game->drawUI(EDrawType::DRAW_FINAL);
-
-		EndDrawing();
-	}
-	StopMusicStream(menuMusic);
-
-	delete start;
+	menu->awakeMenu();
+	menu->drawMenu();
 
 	// Load the shader into memory
-	game->gameRenderers->forwardRenderer->pbrShader = LoadShader(TextFormat("resources/shaders/glsl330/pbr.vs", GLSL_VERSION), TextFormat("resources/shaders/glsl330/pbr.fs", GLSL_VERSION));
+	game->renderer->pbrShader = LoadShader(TextFormat("resources/shaders/glsl330/pbr.vs", GLSL_VERSION), TextFormat("resources/shaders/glsl330/pbr.fs", GLSL_VERSION));
 
 	// Get shader locations
-	game->gameRenderers->forwardRenderer->pbrShader.locs[SHADER_LOC_MAP_ALBEDO] = GetShaderLocation(game->gameRenderers->forwardRenderer->pbrShader, "albedoMap");
+	game->renderer->pbrShader.locs[SHADER_LOC_MAP_ALBEDO] = GetShaderLocation(game->renderer->pbrShader, "albedoMap");
 
 	// WARNING: Metalness, roughness, and ambient occlusion are all packed into a MRA texture They
 	// are passed as to the SHADER_LOC_MAP_METALNESS location for convenience, shader already takes
 	// care of it accordingly
-	game->gameRenderers->forwardRenderer->pbrShader.locs[SHADER_LOC_MAP_METALNESS] = GetShaderLocation(game->gameRenderers->forwardRenderer->pbrShader, "mraMap");
-	game->gameRenderers->forwardRenderer->pbrShader.locs[SHADER_LOC_MAP_NORMAL] = GetShaderLocation(game->gameRenderers->forwardRenderer->pbrShader, "normalMap");
+	game->renderer->pbrShader.locs[SHADER_LOC_MAP_METALNESS] = GetShaderLocation(game->renderer->pbrShader, "mraMap");
+	game->renderer->pbrShader.locs[SHADER_LOC_MAP_NORMAL] = GetShaderLocation(game->renderer->pbrShader, "normalMap");
 
 	// WARNING: Similar to the MRA map, the emissive map packs different information into a single
 	// texture: it stores height and emission data It is binded to SHADER_LOC_MAP_EMISSION location
 	// an properly processed on shader
-	game->gameRenderers->forwardRenderer->pbrShader.locs[SHADER_LOC_MAP_EMISSION] = GetShaderLocation(game->gameRenderers->forwardRenderer->pbrShader, "emissiveMap");
-	game->gameRenderers->forwardRenderer->pbrShader.locs[SHADER_LOC_COLOR_DIFFUSE] = GetShaderLocation(game->gameRenderers->forwardRenderer->pbrShader, "albedoColor");
+	game->renderer->pbrShader.locs[SHADER_LOC_MAP_EMISSION] = GetShaderLocation(game->renderer->pbrShader, "emissiveMap");
+	game->renderer->pbrShader.locs[SHADER_LOC_COLOR_DIFFUSE] = GetShaderLocation(game->renderer->pbrShader, "albedoColor");
 
 	// Setup additional required shader locations, including lights data
-	game->gameRenderers->forwardRenderer->pbrShader.locs[SHADER_LOC_VECTOR_VIEW] = GetShaderLocation(game->gameRenderers->forwardRenderer->pbrShader, "viewPos");
-	int lightCountLoc = GetShaderLocation(game->gameRenderers->forwardRenderer->pbrShader, "numOfLights");
+	game->renderer->pbrShader.locs[SHADER_LOC_VECTOR_VIEW] = GetShaderLocation(game->renderer->pbrShader, "viewPos");
+	int lightCountLoc = GetShaderLocation(game->renderer->pbrShader, "numOfLights");
 
 	// set it to the value of the MAX_LIGHTS macro and pass it to the shader
 	int maxLightCount = MAX_LIGHTS;
-	SetShaderValue(game->gameRenderers->forwardRenderer->pbrShader, lightCountLoc, &maxLightCount, SHADER_UNIFORM_INT);
+	SetShaderValue(game->renderer->pbrShader, lightCountLoc, &maxLightCount, SHADER_UNIFORM_INT);
 
 	// Setup ambient color and intensity (brightness) parameters
 	float ambientIntensity = 0.02f;
 	Color ambientColor = GRAY;
 	Vector3 ambientColorNormalized = Vector3{ ambientColor.r / 255.0f, ambientColor.g / 255.0f, ambientColor.b / 255.0f };
-	SetShaderValue(game->gameRenderers->forwardRenderer->pbrShader, GetShaderLocation(game->gameRenderers->forwardRenderer->pbrShader, "ambientColor"), &ambientColorNormalized, SHADER_UNIFORM_VEC3);
-	SetShaderValue(game->gameRenderers->forwardRenderer->pbrShader, GetShaderLocation(game->gameRenderers->forwardRenderer->pbrShader, "ambient"), &ambientIntensity, SHADER_UNIFORM_FLOAT);
+	SetShaderValue(game->renderer->pbrShader, GetShaderLocation(game->renderer->pbrShader, "ambientColor"), &ambientColorNormalized, SHADER_UNIFORM_VEC3);
+	SetShaderValue(game->renderer->pbrShader, GetShaderLocation(game->renderer->pbrShader, "ambient"), &ambientIntensity, SHADER_UNIFORM_FLOAT);
 
 	// Get location for shader parameters that can be modified
-	int emissiveIntensityLoc = GetShaderLocation(game->gameRenderers->forwardRenderer->pbrShader, "emissivePower");
-	int emissiveColorLoc = GetShaderLocation(game->gameRenderers->forwardRenderer->pbrShader, "emissiveColor");
-	int textureTilingLoc = GetShaderLocation(game->gameRenderers->forwardRenderer->pbrShader, "tiling");
+	int emissiveIntensityLoc = GetShaderLocation(game->renderer->pbrShader, "emissivePower");
+	int emissiveColorLoc = GetShaderLocation(game->renderer->pbrShader, "emissiveColor");
+	int textureTilingLoc = GetShaderLocation(game->renderer->pbrShader, "tiling");
 
 	// Assignment of shaders
 	// NOTE: By default, the texture maps are always used
 	int usage = 1;
-	SetShaderValue(game->gameRenderers->forwardRenderer->pbrShader, GetShaderLocation(game->gameRenderers->forwardRenderer->pbrShader, "useTexAlbedo"), &usage, SHADER_UNIFORM_INT);
-	SetShaderValue(game->gameRenderers->forwardRenderer->pbrShader, GetShaderLocation(game->gameRenderers->forwardRenderer->pbrShader, "useTexNormal"), &usage, SHADER_UNIFORM_INT);
-	SetShaderValue(game->gameRenderers->forwardRenderer->pbrShader, GetShaderLocation(game->gameRenderers->forwardRenderer->pbrShader, "useTexMRA"), &usage, SHADER_UNIFORM_INT);
-	SetShaderValue(game->gameRenderers->forwardRenderer->pbrShader, GetShaderLocation(game->gameRenderers->forwardRenderer->pbrShader, "useTexEmissive"), &usage, SHADER_UNIFORM_INT);
+	SetShaderValue(game->renderer->pbrShader, GetShaderLocation(game->renderer->pbrShader, "useTexAlbedo"), &usage, SHADER_UNIFORM_INT);
+	SetShaderValue(game->renderer->pbrShader, GetShaderLocation(game->renderer->pbrShader, "useTexNormal"), &usage, SHADER_UNIFORM_INT);
+	SetShaderValue(game->renderer->pbrShader, GetShaderLocation(game->renderer->pbrShader, "useTexMRA"), &usage, SHADER_UNIFORM_INT);
+	SetShaderValue(game->renderer->pbrShader, GetShaderLocation(game->renderer->pbrShader, "useTexEmissive"), &usage, SHADER_UNIFORM_INT);
 
 	// Create a default block model with a length, width, and height of the value of BLOCK_SIZE.
 	// This creates a cube mesh with a length, width, and height of BLOCK_SIZE and then converts it
@@ -223,7 +178,7 @@ void mainThread() {
 	SetDefaultModel(DefaultBlockModel);
 
 	// Construct the block object
-	Block* block = new Block(Vector3Zero(), WHITE, game->gameRenderers->forwardRenderer->pbrShader, DefaultBlockModel);
+	Block* block = new Block(Vector3Zero(), WHITE, game->renderer->pbrShader, DefaultBlockModel);
 
 	// Finally push it off to the object manager
 	game->pushObject(block);
@@ -324,8 +279,8 @@ void mainThread() {
 
 	// Create the Sunlight Note : this is not it's final form, it is just a placeholder for testing
 	// ToDo: finalize this step and functionality
-	Light sun = CreateLight(LIGHT_POINT, Vector3{ 1.0f, 0.0f, 1.0f }, Vector3One(),
-		WHITE, 4.0f, game->gameRenderers->forwardRenderer->pbrShader); // Ambient color.;
+	TechStorm::Light sun = TechStorm::CreateLight(TechStorm::LIGHT_POINT, Vector3{ 1.0f, 0.0f, 1.0f }, Vector3One(),
+		WHITE, 4.0f, game->renderer->pbrShader); // Ambient color.;
 
 	// Enable the sun as a precautionary measure.
 	sun.enabled = true;
@@ -386,7 +341,7 @@ void mainThread() {
 	Crosshair* crosshair = new Crosshair(game->screenMiddle, game);
 	float brightness = 10.0f;
 
-	SetShaderValue(game->gameRenderers->forwardRenderer->pbrShader, GetShaderLocation(game->gameRenderers->forwardRenderer->pbrShader, "brightness"), &brightness, UNIFORM_FLOAT);
+	SetShaderValue(game->renderer->pbrShader, GetShaderLocation(game->renderer->pbrShader, "brightness"), &brightness, UNIFORM_FLOAT);
 
 	// Now we can run the game loop and startScriptMan playing!
 	while (!WindowShouldClose())
@@ -426,7 +381,7 @@ void mainThread() {
 					std::ofstream outfile(fileName);
 
 					outfile.close();
-					ExportImage(LoadImageFromTexture(game->gameRenderers->forwardRenderer->fbo.texture), fileName);
+					ExportImage(LoadImageFromTexture(game->renderer->operator RenderTexture().texture), fileName);
 
 					break;
 				}
@@ -463,9 +418,9 @@ void mainThread() {
 			bool manualExit = false;
 
 			MenuCamera* men_pause = new MenuCamera();
-			ButtonR* save = new ButtonR("Save", 100, 100);
-			ButtonR* Options = new ButtonR("Options", 100, 200);
-			ButtonR* exitButton = new ButtonR("Exit to Windows", 100, 300);
+			TechStorm::ButtonR* save = new TechStorm::ButtonR("Save", 100, 100);
+			TechStorm::ButtonR* Options = new TechStorm::ButtonR("Options", 100, 200);
+			TechStorm::ButtonR* exitButton = new TechStorm::ButtonR("Exit to Windows", 100, 300);
 
 			EnableCursor();
 			while (!exit)
@@ -494,7 +449,7 @@ void mainThread() {
 					}
 					SaveFileData(filename, &data, sizeof(data));
 
-					Logman::customLog(LOG_DEBUG, LoadFileText(filename), NULL);
+					TechStorm::Logman::customLog(LOG_DEBUG, LoadFileText(filename), NULL);
 				}
 
 				if (exitButton->IsClicked())
@@ -537,7 +492,7 @@ void mainThread() {
 			delete exitButton;
 			if (manualExit)
 			{
-				Logman::customLog(LOG_INFO, "Exiting Game", NULL);
+				TechStorm::Logman::customLog(LOG_INFO, "Exiting Game", NULL);
 				break;
 			}
 		}
@@ -567,12 +522,12 @@ void mainThread() {
 			nearDeathColor = Color{ (unsigned char)nearDeathIntensity, 0, 0, 100 };
 
 			// convert nearDeathColor to an image
-			nearDeathAffect = GenImageColor(game->gameRenderers->forwardRenderer->fbo.texture.width, game->gameRenderers->forwardRenderer->fbo.texture.height, nearDeathColor);
+			nearDeathAffect = GenImageColor(game->renderer->fboDimensions.x, game->renderer->fboDimensions.y, nearDeathColor);
 
 			// Set the ambient color to the normalized nearDeathColor
 			Vector3 nearDeathAmb = Vector3{ nearDeathColor.r / 255.0f, nearDeathColor.g / 255.0f, nearDeathColor.b / 255.0f };
 			// Inform the shader about the new ambient color.
-			SetShaderValue(game->gameRenderers->forwardRenderer->pbrShader, GetShaderLocation(game->gameRenderers->forwardRenderer->pbrShader, "ambientColor"), &nearDeathAmb, SHADER_UNIFORM_VEC3);
+			SetShaderValue(game->renderer->pbrShader, GetShaderLocation(game->renderer->pbrShader, "ambientColor"), &nearDeathAmb, SHADER_UNIFORM_VEC3);
 
 			// Load the image into the texture
 			nearDeathTex = LoadTextureFromImage(nearDeathAffect);
@@ -595,46 +550,45 @@ void mainThread() {
 
 		// Update the shader with the new light data. Note : any shader that uses lighting will need
 		// this data!
-		UpdateLight(game->gameRenderers->forwardRenderer->pbrShader, sun);
-		UpdateLight(game->gameRenderers->forwardRenderer->bloomShader, sun);
+		UpdateLight(game->renderer->pbrShader, sun);
+		UpdateLight(game->renderer->bloomShader, sun);
 
 		// Send the camera position to the shader
-		SetShaderValue(game->gameRenderers->forwardRenderer->pbrShader, game->gameRenderers->forwardRenderer->pbrShader.locs[SHADER_LOC_VECTOR_VIEW], &cameraPos, SHADER_UNIFORM_VEC3);
+		SetShaderValue(game->renderer->pbrShader, game->renderer->pbrShader.locs[SHADER_LOC_VECTOR_VIEW], &cameraPos, SHADER_UNIFORM_VEC3);
 
 		// Update the game object manager
 		game->updateObjects();
 
 		// Start texturing the FBO with what the user will be seeing. This includes UI and Scene objects.
-		game->gameRenderers->forwardRenderer->startTexturing();
+		game->renderer->startTexturing();
 
 		game->updateUI();
 		game->drawUI(DRAW_CLIPPABLE);
 
-		DrawTextureRec(nearDeathTex, Rectangle{ 0, 0, (float)(game->gameRenderers->forwardRenderer->fbo.texture.width), (float)(-game->gameRenderers->forwardRenderer->fbo.texture.height) }, Vector2{ 0, 0 }, WHITE);
+		DrawTextureRec(nearDeathTex, Rectangle{ 0, 0, (float)(game->renderer->fboDimensions.x), (float)(-game->renderer->fboDimensions.y) }, Vector2{ 0, 0 }, WHITE);
 
-		//BeginShaderMode(game->gameRenderers->forwardRenderer->bloomShader);
-		BeginMode3D(player->cameraComponent->getSelfCamera());
+		game->renderer->start3D(player->cameraComponent->getSelfCameraPointer());
 
 		// Set old car model texture tiling, emissive color and emissive intensity parameters on shader
-		SetShaderValue(game->gameRenderers->forwardRenderer->pbrShader, textureTilingLoc, &block->blockTextureTiling, SHADER_UNIFORM_VEC2);
+		SetShaderValue(game->renderer->pbrShader, textureTilingLoc, &block->blockTextureTiling, SHADER_UNIFORM_VEC2);
 
 		// Normalize the Emissive map into a 0-1 range. Note : This turns the map into a Vector4,
 		// not a color.
 		Vector4 carEmissiveColor = ColorNormalize(block->model.materials[0].maps[MATERIAL_MAP_EMISSION].color);
-		SetShaderValue(game->gameRenderers->forwardRenderer->pbrShader, emissiveColorLoc, &carEmissiveColor, SHADER_UNIFORM_VEC4);
+		SetShaderValue(game->renderer->pbrShader, emissiveColorLoc, &carEmissiveColor, SHADER_UNIFORM_VEC4);
 
 		// How bright should the object emit it's emission color.
 		float emissiveIntensity = 0.01f;
-		SetShaderValue(game->gameRenderers->forwardRenderer->pbrShader, emissiveIntensityLoc, &emissiveIntensity, SHADER_UNIFORM_FLOAT);
+		SetShaderValue(game->renderer->pbrShader, emissiveIntensityLoc, &emissiveIntensity, SHADER_UNIFORM_FLOAT);
 
 		// Render all game objects
 		//rlEnableWireMode();
 		game->renderObjects();
 		// endUIMan 3d rendering and texturing.
-		game->gameRenderers->forwardRenderer->end3D();
+		game->renderer->end3D();
 
 		//EndShaderMode();
-		game->gameRenderers->forwardRenderer->stopTexturing();
+		game->renderer->stopTexturing();
 
 		/*
 		---------------------------------------------------------------------------------
@@ -652,15 +606,14 @@ void mainThread() {
 		| 					Post Process Affects										|
 		---------------------------------------------------------------------------------
 		*/
-		SetTextureFilter(game->gameRenderers->forwardRenderer->fbo.texture, TEXTURE_FILTER_ANISOTROPIC_16X);
-		game->gameRenderers->forwardRenderer->startDraw();
+		SetTextureFilter(game->renderer->operator RenderTexture().texture, TEXTURE_FILTER_ANISOTROPIC_16X);
+		game->renderer->startDraw();
 		// Begin drawing mode so we can actually see stuff!
 
 		// We must tell OpenGL that we want to use the bloom shader on the FBO!
 		//BeginShaderMode(game->renderers->forwardRenderer->bloomShader);
 
 		// NOTE: Render texture must be y-flipped due to default OpenGL coordinates (left-bottom)
-		DrawTextureRec(game->gameRenderers->forwardRenderer->fbo.texture, Rectangle{ 0, 0, (float)(game->gameRenderers->forwardRenderer->fbo.texture.width), (float)(-game->gameRenderers->forwardRenderer->fbo.texture.height) }, Vector2{ 0, 0 }, WHITE);
 
 		// tell OpenGL that we no longer need the bloom shader to be active. so in other words tell it to fuck off.
 		//EndShaderMode();
@@ -671,10 +624,9 @@ void mainThread() {
 		game->drawUI(DRAW_FINAL);
 
 		// Let raylib know that we're done drawing to the screen.
-		game->gameRenderers->forwardRenderer->endDraw();
+		game->renderer->endDraw();
 
 		// clear the screen and replace it with black.
-		ClearBackground(BLACK);
 	}
 
 	/*
@@ -867,7 +819,7 @@ int main()
 	}
 	catch (const std::exception& e)
 	{
-		Logman::Log(e.what());
+		TechStorm::Logman::Log(e.what());
 	}
 
 	return 0;

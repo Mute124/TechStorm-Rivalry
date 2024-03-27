@@ -10,7 +10,7 @@ class Thread {
 public:
 
 	Thread(int groupID, int workerID = 0) {
-		Logman::Log("test");
+		TechStorm::Logman::Log("test");
 		this->groupID = groupID;
 		this->workerID = workerID;
 		isRunning = true;
@@ -20,9 +20,9 @@ public:
 
 		std::string threadName = "Thread " + std::to_string(groupID) + " Worker " + std::to_string(workerID);
 
-		Logman::Log(threadName.c_str());
+		TechStorm::Logman::Log(threadName.c_str());
 		std::thread worker(([this, threadName]() {
-			Logman::Log(threadName.c_str());
+			TechStorm::Logman::Log(threadName.c_str());
 			//Logman::Log(TextFormat("Threadname : %s, localThread var id : %i, this thread : %i", threadName.c_str(), localThread->get_id(), std::this_thread::get_id()));
 			while (isRunning && !terminate) {
 				// check if we are busy, if not we are idle. Wait until a task is added to the queue.

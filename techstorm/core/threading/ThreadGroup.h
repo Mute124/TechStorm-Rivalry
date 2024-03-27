@@ -27,7 +27,7 @@ public:
 			threads.insert(pair<int, Thread*>(i, t));
 		}
 
-		Logman::Log(groupName);
+		TechStorm::Logman::Log(groupName);
 	}
 
 	void addTask(ThreadGroupTask* task) {

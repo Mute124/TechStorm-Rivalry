@@ -3,104 +3,106 @@
 #include "../gameScreen/MenuCamera.h"
 #include "UIElement.h"
 
-/*
-* Manages UIElements, containers, and any UIElement derivatives.
-*
-* rogue elements are those that DO NOT belong to any container, but since elements need a parent container, they are put into the predesignated rogue container (always at index 0)
-*
-* TODO:
-*	Add push to container function
-*
-*/
-class UIMan {
-public:
-	// constructor, creates the designated rogue container.
-	UIMan() {
-	}
-
-	void initUIMan() {
-		UIContainer::start();
-		addRogueContainer();
-
-		currentInstance = this;
-	}
-
-	void drawUI(EDrawType drawType) {
-		for (auto& container : containers) {
-			container.second->drawChildren(drawType);
+namespace TechStorm {
+	/*
+	* Manages UIElements, containers, and any UIElement derivatives.
+	*
+	* rogue elements are those that DO NOT belong to any container, but since elements need a parent container, they are put into the predesignated rogue container (always at index 0)
+	*
+	* TODO:
+	*	Add push to container function
+	*
+	*/
+	class UIMan {
+	public:
+		// constructor, creates the designated rogue container.
+		UIMan() {
 		}
-	}
 
-	// IF ROGUE IT WILL OVERRIDE THE 0 INDEX!
-	void pushContainer(UIContainer* container, bool wakeOnPush = false, bool isRogue = false) {
-		if (!isRogue) {
-			int newID = assignId();
-			container->containerID = newID;
+		void initUIMan() {
+			UIContainer::start();
+			addRogueContainer();
 
-			container->wake();
-
-			this->containers[newID] = container;
+			currentInstance = this;
 		}
-		else {
-			container->wake();
 
-			this->containers[0] = container;
+		void drawUI(EDrawType drawType) {
+			for (auto& container : containers) {
+				container.second->drawChildren(drawType);
+			}
 		}
-	}
 
-	// push a rogue element
-	void pushRogueElement(UIElement* element) {
-		containers[0]->addChild(element);
-	}
+		// IF ROGUE IT WILL OVERRIDE THE 0 INDEX!
+		void pushContainer(UIContainer* container, bool wakeOnPush = false, bool isRogue = false) {
+			if (!isRogue) {
+				int newID = assignId();
+				container->containerID = newID;
 
-	// a container that holds all rogue UIElements. Always will be zero.
-	void addRogueContainer() {
-		pushContainer(new UIContainer(), true, true);
-	}
+				container->wake();
 
-	// TODO: this
-	void clearUI(int id) {
-	}
+				this->containers[newID] = container;
+			}
+			else {
+				container->wake();
 
-	void flushUI() {
-		for (auto& cont : containers) {
-			cont.second->clear();
+				this->containers[0] = container;
+			}
 		}
-	}
 
-	static UIMan* getUIInstance() {
-		return currentInstance;
-	}
-
-	// murder the uiman, muahahaha
-	void endUIMan() {
-		delete this;
-	}
-
-	// get a UIcontainer
-	UIContainer* getContainer(int container) {
-		return containers[container];
-	}
-
-	// update ze elements.
-	void updateUI() {
-		for (auto& container : containers) {
-			container.second->update();
+		// push a rogue element
+		void pushRogueElement(UIElement* element) {
+			containers[0]->addChild(element);
 		}
-	}
-private:
-	// set to 1 as 0 is always the rogue container
-	int containerCount = 1;
 
-	// get a free ID.
-	int assignId() {
-		return containerCount;
-		containerCount++;
-	}
+		// a container that holds all rogue UIElements. Always will be zero.
+		void addRogueContainer() {
+			pushContainer(new UIContainer(), true, true);
+		}
 
-	// global instance of this class.
-	static inline UIMan* currentInstance;
+		// TODO: this
+		void clearUI(int id) {
+		}
 
-	// holds what it says, containers!
-	std::map<int, UIContainer*> containers;
-};
+		void flushUI() {
+			for (auto& cont : containers) {
+				cont.second->clear();
+			}
+		}
+
+		static UIMan* getUIInstance() {
+			return currentInstance;
+		}
+
+		// murder the uiman, muahahaha
+		void endUIMan() {
+			delete this;
+		}
+
+		// get a UIcontainer
+		UIContainer* getContainer(int container) {
+			return containers[container];
+		}
+
+		// update ze elements.
+		void updateUI() {
+			for (auto& container : containers) {
+				container.second->update();
+			}
+		}
+	private:
+		// set to 1 as 0 is always the rogue container
+		int containerCount = 1;
+
+		// get a free ID.
+		int assignId() {
+			return containerCount;
+			containerCount++;
+		}
+
+		// global instance of this class.
+		static inline UIMan* currentInstance;
+
+		// holds what it says, containers!
+		std::map<int, UIContainer*> containers;
+	};
+}
