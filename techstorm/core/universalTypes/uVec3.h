@@ -56,6 +56,10 @@ namespace TechStorm {
 
 		// functions
 
+		// resets values
+		static void zero() {
+			uVec3Base();
+		}
 		// operators
 
 		// Comparison Operators

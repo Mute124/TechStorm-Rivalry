@@ -1,5 +1,5 @@
 #pragma once
-#include "../TechStorm.h"
+#include "../universalTypes/uVec3.h"
 
 #if defined(PLATFORM_DESKTOP)
 #define GLSL_VERSION 330
@@ -40,7 +40,7 @@ namespace TechStorm {
 	};
 
 	// Send light properties to shader
-// NOTE: Light shader locations should be available
+	// NOTE: Light shader locations should be available
 	static void UpdateLight(Shader shader, Light light)
 	{
 		SetShaderValue(shader, light.enabledLoc, &light.enabled, SHADER_UNIFORM_INT);

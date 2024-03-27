@@ -7,7 +7,7 @@ namespace TechStorm {
 	public:
 
 		// Only call when the menu is finalized and all elements are added!
-		virtual void initMenu(Game& game) {
+		virtual void initMenu(TechStormRivalry::Game& game) {
 			game.pushContainer(this, false, false);
 		}
 

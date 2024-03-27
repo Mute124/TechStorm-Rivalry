@@ -35,7 +35,6 @@
 #include "../TechStorm.h"
 
 #include <string>
-
 #include <vector>
 
 using namespace std;
@@ -45,7 +44,7 @@ namespace TechStorm {
 	{
 	public:
 		Font font = GetFontDefault();
-		float fontSize = 32,
+		float fontSize = 32.0f,
 			fontSpacing = 3.0f;
 		uColor fontColor = BLACK;
 		bool isRayFont = true;
@@ -293,5 +292,4 @@ namespace TechStorm {
 	private:
 	};
 }
-
 #endif

@@ -26,7 +26,7 @@ namespace TechStorm {
 		uVec3f position;
 		Model model;
 		float scale;
-		Color tint;
+		uColor tint;
 		Shader shdr;
 		static inline Shader* globalShader;
 #ifdef DEBUG
@@ -47,7 +47,7 @@ namespace TechStorm {
 		GameObject() {
 		}
 		virtual void draw() abstract {
-			TechStorm::Logman::Log("Gameobj");
+			Logman::Log("Gameobj");
 		}
 
 		virtual ~GameObject()

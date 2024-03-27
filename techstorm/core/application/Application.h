@@ -16,6 +16,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <any>
+
 namespace TechStorm {
 	class Application abstract : public Display, public LuaManager, public UIMan, public ConfigMan, public GameobjectManager, public ScriptManager, public Logman {
 	public:
@@ -30,7 +31,7 @@ namespace TechStorm {
 		}
 		void initApplication(int winWidth, int winHeight, const char* winTitle, unsigned int flags) {
 
-			this->initDisplay(winWidth, winHeight, winTitle, flags);
+			initDisplay(winWidth, winHeight, winTitle, flags);
 			this->initLua();
 			this->initUIMan();
 			

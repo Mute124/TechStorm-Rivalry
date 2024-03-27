@@ -5,6 +5,7 @@
 */
 #pragma once
 #define SOL_ALL_SAFETIES_ON 1
+
 // framework(s) / external libraries
 #include <raylib.h>
 #include <raymath.h>
@@ -43,4 +44,5 @@
 #include "core/ui/UIMan.h"
 #include "core/TechStorm.h"
 #include "TechStorm-Rivalry.h"
+
 // end of common.h
