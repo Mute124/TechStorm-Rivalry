@@ -112,6 +112,7 @@ public:
 	}
 
 protected:
+
 	// used to calculate incremental severity
 	float previousDelta;
 	float severityDelta = 0.04f;

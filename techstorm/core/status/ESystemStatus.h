@@ -1,4 +1,5 @@
 #pragma once
+
 // represents the status of a system.
 /*
 * Unknown = 0 and represents an unknown status (Default value).

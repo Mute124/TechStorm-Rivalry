@@ -21,8 +21,8 @@ namespace TechStorm {
 			InitWindow(this->winWidth, this->winHeight, this->wintitle);
 
 			this->screenMiddle = Vector2{
-				(float)winWidth / 2,
-				(float)winHeight / 2
+				(float)width / 2.0f,
+				(float)height / 2.0f
 			};
 		}
 

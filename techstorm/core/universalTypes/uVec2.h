@@ -3,6 +3,7 @@
 #include <glm/glm.hpp>
 
 namespace TechStorm {
+
 	// Forward declaration
 	template<typename T>
 	class uVec2Base;
@@ -17,6 +18,7 @@ namespace TechStorm {
 	template<typename T>
 	class uVec2Base abstract {
 	public:
+
 		// data
 		T x;
 		T y;
@@ -68,7 +70,7 @@ namespace TechStorm {
 	class uVec2i : public uVec2Base<int> {
 	public:
 		uVec2i() : uVec2Base() {}
-		uVec2i(double x, double y) : uVec2Base(x, y) {}
+		uVec2i(int x, int y) : uVec2Base(x, y) {}
 		uVec2i(Vector2& val) : uVec2Base(val) {}
 	};
 
@@ -78,6 +80,7 @@ namespace TechStorm {
 		uVec2f() : uVec2Base() {}
 		uVec2f(float x, float y) : uVec2Base(x, y) {}
 		uVec2f(Vector2& val) : uVec2Base(val) {}
+		uVec2f(Vector2 val) : uVec2Base(val) {}
 
 		// Note : This only will TRUNCATE the vector, not round it!
 		virtual operator uVec2i() const {

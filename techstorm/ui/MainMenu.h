@@ -42,11 +42,15 @@ namespace TechStormRivalry {
 			}
 
 			void drawElement() override {
-				button->draw();
-
+				if (this != nullptr) {
+					button->draw();
+				}
 				if (button->IsClicked()) {
 					this->parent->requestKill();
 				}
+			}
+
+			void updateElement() override {
 			}
 		};
 
@@ -56,23 +60,26 @@ namespace TechStormRivalry {
 			bool windowUnfocused = false;
 			bool windowReFocused = false;
 			Texture m_backdrop;
+			Console::ConsoleUI* console = new Console::ConsoleUI();
 		public:
 
-			MainMenu(Game& game) {
+			MainMenu(Game* game) {
 				menuMusic = LoadMusicStream("resources/audio/ost/starstruck.mp3");
 				Image backdropImg = LoadImage("resources/textures/background.png");
 				ImageResize(&backdropImg, GetScreenWidth(), GetScreenHeight());
 				m_backdrop = LoadTextureFromImage(backdropImg);
+
 				//game->pushRogueElement(consoleUI);
 				addChild(new MainMenuTitle());
-				addChild(new MainMenuStart(new TechStorm::ButtonR("Start", game.screenMiddle.x - (game.screenMiddle.x) + 100, game.screenMiddle.y)));
+				addChild(new MainMenuStart(new TechStorm::ButtonR("Start", (game->screenMiddle.x - (game->screenMiddle.x) + (sqrt(GetScreenWidth()))), (game->screenMiddle.y - (game->screenMiddle.y) + (sqrt(GetScreenHeight()))))));
 
-				initMenu(game);
+				game->pushContainer(this, false, false);
 			}
 
 			void drawMenu() override {
 				PlayMusicStream(menuMusic);
 				while (!closeMainMenu) {
+
 					// check eligibility.
 					if (WindowShouldClose()) {
 						closeMainMenu = true;
@@ -91,21 +98,24 @@ namespace TechStormRivalry {
 					}
 
 					if (shouldKill) {
-						this->destruct();
-
 						break;
 					}
+					this->console->updateElement();
 
+					//this->update();
 					UpdateMusicStream(menuMusic);   // Update music buffer with new stream data
 
 					BeginDrawing();
 					DrawTextureRec(m_backdrop, Rectangle{ 0, 0, (float)(m_backdrop.width), (float)(-m_backdrop.height) }, Vector2{ 0, 0 }, WHITE);
-
+					this->console->drawElement();
 					this->drawChildren(DRAW_FINAL);
 
 					EndDrawing();
 				}
+
 				StopMusicStream(menuMusic);
+				Game::appInstance->removeContainer(this->containerID);
+				delete this;
 			}
 		};
 	}

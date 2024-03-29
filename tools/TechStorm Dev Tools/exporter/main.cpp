@@ -14,6 +14,7 @@ void createOutputFolder() {
 }
 
 void moveFolder(const char* folder) {
+
 	// go to the main folder.
 
 	printf("moving folder...");

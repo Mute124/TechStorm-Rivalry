@@ -7,6 +7,7 @@
 #pragma warning(disable : 4996)
 
 namespace TechStorm {
+
 	// handles logging
 	class Logman {
 	public:

@@ -2,7 +2,6 @@
 
 // Override the what() function to provide error message
 
-
 // Constructor with a custom error message
 
 inline TechStorm::EngineException::EngineException(const char* message, EExceptionSeverity severity) : m_message(message), severity(severity) {}

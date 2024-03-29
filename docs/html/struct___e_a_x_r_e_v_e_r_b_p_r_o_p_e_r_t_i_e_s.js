@@ -1,0 +1,27 @@
+var struct___e_a_x_r_e_v_e_r_b_p_r_o_p_e_r_t_i_e_s =
+[
+    [ "flAirAbsorptionHF", "struct___e_a_x_r_e_v_e_r_b_p_r_o_p_e_r_t_i_e_s.html#a9bdb52e731a5a6a21c916d9068ed4fcc", null ],
+    [ "flDecayHFRatio", "struct___e_a_x_r_e_v_e_r_b_p_r_o_p_e_r_t_i_e_s.html#a4425dbecf09478f005a78766847478a9", null ],
+    [ "flDecayLFRatio", "struct___e_a_x_r_e_v_e_r_b_p_r_o_p_e_r_t_i_e_s.html#a4edd8756b0c584b82f9e7ad268f99685", null ],
+    [ "flDecayTime", "struct___e_a_x_r_e_v_e_r_b_p_r_o_p_e_r_t_i_e_s.html#a8a6e3a305ec55d07478cc74c7fa5a1e2", null ],
+    [ "flEchoDepth", "struct___e_a_x_r_e_v_e_r_b_p_r_o_p_e_r_t_i_e_s.html#af41e21a360427eb72bf2b1a2f8b9717d", null ],
+    [ "flEchoTime", "struct___e_a_x_r_e_v_e_r_b_p_r_o_p_e_r_t_i_e_s.html#af10abbfedcf6cdce56c0b8ec1376563e", null ],
+    [ "flEnvironmentDiffusion", "struct___e_a_x_r_e_v_e_r_b_p_r_o_p_e_r_t_i_e_s.html#aeadcea3b1c53873cb2ac2fad0cb52d74", null ],
+    [ "flEnvironmentSize", "struct___e_a_x_r_e_v_e_r_b_p_r_o_p_e_r_t_i_e_s.html#ac885d48b390efbb5be394d825b703009", null ],
+    [ "flHFReference", "struct___e_a_x_r_e_v_e_r_b_p_r_o_p_e_r_t_i_e_s.html#a162addba6e4ce55ab086c8d71db9ea48", null ],
+    [ "flLFReference", "struct___e_a_x_r_e_v_e_r_b_p_r_o_p_e_r_t_i_e_s.html#a02e1fb15e4144ecc3fadf61aec7290b5", null ],
+    [ "flModulationDepth", "struct___e_a_x_r_e_v_e_r_b_p_r_o_p_e_r_t_i_e_s.html#ac954c74c933cae3085b5d05622e4ca96", null ],
+    [ "flModulationTime", "struct___e_a_x_r_e_v_e_r_b_p_r_o_p_e_r_t_i_e_s.html#a1d74c8f294fbaa581cebd41c9e8292f3", null ],
+    [ "flReflectionsDelay", "struct___e_a_x_r_e_v_e_r_b_p_r_o_p_e_r_t_i_e_s.html#a20dfe4d22ef34b1b46c5943b2c2cf7e6", null ],
+    [ "flReverbDelay", "struct___e_a_x_r_e_v_e_r_b_p_r_o_p_e_r_t_i_e_s.html#a161556dc186a3893c15803d4573b7844", null ],
+    [ "flRoomRolloffFactor", "struct___e_a_x_r_e_v_e_r_b_p_r_o_p_e_r_t_i_e_s.html#a600ccd5a63c5345c240bbd1ce0fa1834", null ],
+    [ "lReflections", "struct___e_a_x_r_e_v_e_r_b_p_r_o_p_e_r_t_i_e_s.html#a30a084c6f4436ed2447447e8a816a452", null ],
+    [ "lReverb", "struct___e_a_x_r_e_v_e_r_b_p_r_o_p_e_r_t_i_e_s.html#a79c98e02bfbec4d4289742336b7f8994", null ],
+    [ "lRoom", "struct___e_a_x_r_e_v_e_r_b_p_r_o_p_e_r_t_i_e_s.html#a4952db6fcf14f4da4481418384ab9955", null ],
+    [ "lRoomHF", "struct___e_a_x_r_e_v_e_r_b_p_r_o_p_e_r_t_i_e_s.html#a92e46886c7e7957eba71f6045f9dca24", null ],
+    [ "lRoomLF", "struct___e_a_x_r_e_v_e_r_b_p_r_o_p_e_r_t_i_e_s.html#a9955800522480e26d6eb1a7896963df3", null ],
+    [ "ulEnvironment", "struct___e_a_x_r_e_v_e_r_b_p_r_o_p_e_r_t_i_e_s.html#a071a10ced2b96967960531e9638a98cf", null ],
+    [ "ulFlags", "struct___e_a_x_r_e_v_e_r_b_p_r_o_p_e_r_t_i_e_s.html#ac6d657b4e263f88e190826a5abfdfbd0", null ],
+    [ "vReflectionsPan", "struct___e_a_x_r_e_v_e_r_b_p_r_o_p_e_r_t_i_e_s.html#a043671a2974455375d994a1231cce5ac", null ],
+    [ "vReverbPan", "struct___e_a_x_r_e_v_e_r_b_p_r_o_p_e_r_t_i_e_s.html#a0aa8f46c1e68cfc98d80c0a1ccf92e5e", null ]
+];

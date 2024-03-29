@@ -1,13 +1,12 @@
 #pragma once
 #include "../Common.h"
 #include "../core/ui/UIElement.h"
-#include "../Game.h"
 
 #define MAX_INPUT_CHARS 32
 
-namespace TechStorm {
+namespace TechStormRivalry {
 	namespace Console {
-		class ConsoleUI : public UIElement {
+		class ConsoleUI : public TechStorm::UIElement {
 		public:
 			bool mouseOnText = false;
 			bool isHidden = true;
@@ -23,6 +22,8 @@ namespace TechStorm {
 
 			ConsoleUI() {
 				this->drawTime = DRAW_FINAL;
+
+				//game.pushRogueElement(this);
 			}
 
 			virtual void drawElement() override {
@@ -67,6 +68,7 @@ namespace TechStorm {
 					DrawTextEx(UIElement::font, this->name, pos, (float)UIElement::font.baseSize, 2.0f, MAROON);
 
 					if ((MAX_INPUT_CHARS - this->letterCount) < (MAX_INPUT_CHARS * 0.90)) {
+
 						//DrawText(TextFormat("INPUT CHARS: %i/%i", this->letterCount, MAX_INPUT_CHARS), 315, 250, 20, DARKGRAY);
 					}
 
@@ -75,6 +77,7 @@ namespace TechStorm {
 						// Draw blinking underscore char
 						if (((framesCounter / 20) % 2) == 0) DrawText("_", (int)textBox.x + 8 + MeasureText(name, fontSize - fontSpacing), (int)textBox.y + 12, 40, MAROON);
 					}
+
 					//else DrawText("Press BACKSPACE to delete chars...", 230, 300, 20, GRAY);
 				}
 			}
@@ -136,9 +139,20 @@ namespace TechStorm {
 
 					if ((IsKeyDown(KEY_LEFT_ALT)) && (IsMouseButtonDown(MOUSE_BUTTON_LEFT))) {
 						SetMouseCursor(MOUSE_CURSOR_RESIZE_ALL);
-						this->anchor = GetMousePosition();
+						this->anchor = Vector2Divide(GetMousePosition(), Vector2{ 2, 2 });
 						updateBackdrop = true;
 						beingMoved = true;
+					}
+
+					if ((IsKeyDown(KEY_LEFT_CONTROL)) && (IsMouseButtonDown(MOUSE_BUTTON_LEFT))) {
+						TechStorm::uVec2f pos = GetMousePosition();
+						const static TechStorm::uVec2i start = pos;
+
+						this->textBox.width = Vector2Distance(pos, start);
+						this->textBox.height = Vector2Distance(pos, start);
+
+						this->consoleBackDrop.width = Vector2Distance(pos, start);
+						this->consoleBackDrop.height = Vector2Distance(pos, start);
 					}
 
 					if (IsKeyDown((KEY_LEFT_ALT))) {
@@ -154,17 +168,14 @@ namespace TechStorm {
 			void parseCommand(const char* txt) {
 				try
 				{
-					Logman::Log(TextFormat("Running Command : %s", txt));
-					//Game::getInstance().lua.script(txt);
+					TechStorm::Logman::Log(TextFormat("Running Command : %s", txt));
+					Game::LuaManager::lua.script(txt);
 				}
 				catch (const std::exception& e)
 				{
-					Logman::Error(TextFormat("Lua Error : %s", e.what()));
+					TechStorm::Logman::Error(TextFormat("Lua Error : %s", e.what()));
 				}
 			}
-		};
-
-		class Console {
 		};
 	}
 }

@@ -1,4 +1,5 @@
 #pragma once
+
 // local includes
 #include "CharacterComponent.h"
 #include "../core/obj/Gameobject.h"
@@ -13,6 +14,7 @@
 #include "../bodyParts/Limb.h"
 
 namespace TechStormRivalry {
+
 	// A game character abstract class
 	template<size_t limbs>
 	class Character abstract : public TechStorm::GameObject
@@ -153,7 +155,7 @@ namespace TechStormRivalry {
 		}
 
 		void printDebugStatement() {
-			Logman::Log(TextFormat("Speed : %i", this->speed));
+			TechStorm::Logman::Log(TextFormat("Speed : %i", this->speed));
 		}
 	};
 }

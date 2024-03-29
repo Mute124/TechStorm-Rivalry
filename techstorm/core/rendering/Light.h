@@ -1,5 +1,5 @@
 #pragma once
-#include "../universalTypes/uVec3.h"
+#include "../TechStorm.h"
 
 #if defined(PLATFORM_DESKTOP)
 #define GLSL_VERSION 330
@@ -11,6 +11,7 @@
 
 namespace TechStorm {
 	static int lightsCount;
+
 	// Light type
 	typedef enum
 	{
@@ -40,7 +41,7 @@ namespace TechStorm {
 	};
 
 	// Send light properties to shader
-	// NOTE: Light shader locations should be available
+// NOTE: Light shader locations should be available
 	static void UpdateLight(Shader shader, Light light)
 	{
 		SetShaderValue(shader, light.enabledLoc, &light.enabled, SHADER_UNIFORM_INT);
@@ -56,6 +57,7 @@ namespace TechStorm {
 		SetShaderValue(shader, light.colorLoc, light.color, SHADER_UNIFORM_VEC4);
 		SetShaderValue(shader, light.intensityLoc, &light.intensity, SHADER_UNIFORM_FLOAT);
 	}
+
 	// Create light with provided data
 	// NOTE: It updated the global lightCount and it's limited to MAX_LIGHTS
 	static Light CreateLight(int type, uVec3f position, uVec3f target, Color color, float intensity, Shader shader) {

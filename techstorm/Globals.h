@@ -8,8 +8,10 @@
 #ifndef VERSION
 #define VERSION "0.0.1"
 #endif
+
 // TODO : clean up this mess of a file. Now that we have a config system, we need to clean this up
 #pragma once
+
 // frameworks
 
 #include "raylib.h"
@@ -24,6 +26,7 @@
 #else
 #define CLITERAL(type) (type)
 #endif
+
 // -----------------------------------------------------------------------------
 // Engine Constants
 // -----------------------------------------------------------------------------
@@ -193,6 +196,7 @@ static Model defaultModel = { 0 };
 inline Model GetDefaultModel() {
 	return defaultModel;
 }
+
 // Not needed but makes things look nicer
 inline void SetDefaultModel(Model model) {
 	defaultModel = model;
@@ -214,6 +218,7 @@ float Vector3Dist(Vector3 v1, Vector3 v2) {
 inline CubeVerticies CubeVertZero() {
 	return CubeVerticies{ 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
 }	// Returns a null cube verticies type
+
 	// Returns the vertices of a cube with all coordinates set to 1.0f
 inline CubeVerticies CubeVertOne() {
 	return CubeVerticies{ 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f };
@@ -418,9 +423,11 @@ inline bool CheckCollisionRayBox(Ray ray, BoundingBox box, float* outDistance)
 inline Vector3 CameraToWorld(Camera3D camera)
 {
 	float distance;
+
 	// Calculate the ray from the camera to the mouse position
 	Vector2 mousePos = GetMousePosition();
 	Vector3 mousePos3 = { mousePos.x, mousePos.y, 0 };
+
 	// Get the direction vector of the ray
 	Vector3 rayDirection =
 		Vector3Normalize(Vector3Subtract(mousePos3, camera.position));
@@ -549,6 +556,7 @@ inline bool IsAnyKeyPressed()
 
 /*
 * //--------------------------------------------------------------------------------------------
+
 // Load/Save/Export data functions
 //--------------------------------------------------------------------------------------------
 // Load layout from text file
@@ -718,6 +726,7 @@ static void SaveLayout(GuiLayout* layout, const char* fileName)
 
 		// Write reference window and reference anchor (anchor[0])
 		fprintf(rglFile, "r %i %i %i %i\n", (int)layout->refWindow.x, (int)layout->refWindow.y, (int)layout->refWindow.width, (int)layout->refWindow.height);
+
 		//fprintf(rglFile, "a %03i %s %i %i %i\n", layout->anchors[0].id, layout->anchors[0].name, layout->anchors[0].x, layout->anchors[0].y, layout->anchors[0].enabled);
 
 		for (int i = 1; i < MAX_ANCHOR_POINTS; i++)

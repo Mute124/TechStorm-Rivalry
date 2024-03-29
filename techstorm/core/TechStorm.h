@@ -32,4 +32,5 @@
 #include "universalTypes/uColor.h"
 
 namespace TechStorm {
+	using namespace TechStorm;
 }

@@ -16,6 +16,7 @@ Vector3 CalculateWellPower(Vector3 center, double gravIntensity, double mass) {
 class GravityWell : public GameObject {
 public:
 	double gravIntensity; // how powerful this gravity well is.
+
 	//const Force gravitationalConstant;
 	float mass; // The mass of the Gravity well. IN KG
 	GravitationalConstant constant;

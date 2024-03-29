@@ -1,0 +1,24 @@
+var searchData=
+[
+  ['wf_5fex_0',['WF_EX',['../_c_waves_8h.html#aeceefd2d662bf58cf4cfa5dce10e7ffeace10ce998ec7c45199133798334792aa',1,'CWaves.h']]],
+  ['wf_5fext_1',['WF_EXT',['../_c_waves_8h.html#aeceefd2d662bf58cf4cfa5dce10e7ffea4ace09e968cccd9e0f6a371cabf5e0e3',1,'CWaves.h']]],
+  ['withprefix64k_2',['withPrefix64k',['../lz4_8c.html#ab22d25a446ad3e8288401052deccda4ca34c34b9cfe0046130ff97acf6914519d',1,'lz4.c']]],
+  ['wr_5fbadwavefile_3',['WR_BADWAVEFILE',['../_c_waves_8h.html#a71b9ab562419cb4fee5269df86a3ce1daa1c4ddb4b5f29133248234d109a15ab4',1,'CWaves.h']]],
+  ['wr_5ffileerror_4',['WR_FILEERROR',['../_c_waves_8h.html#a71b9ab562419cb4fee5269df86a3ce1da6607f2a3dfca2f9beb4a84825ccdd70e',1,'CWaves.h']]],
+  ['wr_5finvalidfilename_5',['WR_INVALIDFILENAME',['../_c_waves_8h.html#a71b9ab562419cb4fee5269df86a3ce1dae120bc35631a9398b7a85b080a1049ec',1,'CWaves.h']]],
+  ['wr_5finvalidparam_6',['WR_INVALIDPARAM',['../_c_waves_8h.html#a71b9ab562419cb4fee5269df86a3ce1daa15dd6e019d8de4126721107b5d5fd58',1,'CWaves.h']]],
+  ['wr_5finvalidspeakerpos_7',['WR_INVALIDSPEAKERPOS',['../_c_waves_8h.html#a71b9ab562419cb4fee5269df86a3ce1da70e6a5efb185c1e0e987353dc64888f3',1,'CWaves.h']]],
+  ['wr_5finvalidwavefiletype_8',['WR_INVALIDWAVEFILETYPE',['../_c_waves_8h.html#a71b9ab562419cb4fee5269df86a3ce1da8dc0e3f50048bd490106d7f5d4827fdf',1,'CWaves.h']]],
+  ['wr_5finvalidwaveid_9',['WR_INVALIDWAVEID',['../_c_waves_8h.html#a71b9ab562419cb4fee5269df86a3ce1da6c135412575e22c448003b80e2e0e5d5',1,'CWaves.h']]],
+  ['wr_5fnotsupportedyet_10',['WR_NOTSUPPORTEDYET',['../_c_waves_8h.html#a71b9ab562419cb4fee5269df86a3ce1da9025ba08e3e26c77303fc76442b1c5e8',1,'CWaves.h']]],
+  ['wr_5fnotwaveformatextensibleformat_11',['WR_NOTWAVEFORMATEXTENSIBLEFORMAT',['../_c_waves_8h.html#a71b9ab562419cb4fee5269df86a3ce1da28576fd2c083f6cff1464bd23b612982',1,'CWaves.h']]],
+  ['wr_5foffsetoutofdatarange_12',['WR_OFFSETOUTOFDATARANGE',['../_c_waves_8h.html#a71b9ab562419cb4fee5269df86a3ce1da6d83fb744edf9d48b0702ee692ffab79',1,'CWaves.h']]],
+  ['wr_5fok_13',['WR_OK',['../_c_waves_8h.html#a71b9ab562419cb4fee5269df86a3ce1da2fd4abf30646c16cc818f5af80261bbd',1,'CWaves.h']]],
+  ['wr_5foutofmemory_14',['WR_OUTOFMEMORY',['../_c_waves_8h.html#a71b9ab562419cb4fee5269df86a3ce1daf6b1e7649b8d17849c25ccf640ac3f61',1,'CWaves.h']]],
+  ['wr_5fwavemustbemono_15',['WR_WAVEMUSTBEMONO',['../_c_waves_8h.html#a71b9ab562419cb4fee5269df86a3ce1dadd7f0b96d2cc6045a6f9cad388ed7c1b',1,'CWaves.h']]],
+  ['wr_5fwavemustbewaveformatpcm_16',['WR_WAVEMUSTBEWAVEFORMATPCM',['../_c_waves_8h.html#a71b9ab562419cb4fee5269df86a3ce1daddad90176a672b9f4dc795b2b5e12f0f',1,'CWaves.h']]],
+  ['wr_5fwavesmusthavesamebitrate_17',['WR_WAVESMUSTHAVESAMEBITRATE',['../_c_waves_8h.html#a71b9ab562419cb4fee5269df86a3ce1dac27743db2d610819e5feffd00227b8a7',1,'CWaves.h']]],
+  ['wr_5fwavesmusthavesamebitresolution_18',['WR_WAVESMUSTHAVESAMEBITRESOLUTION',['../_c_waves_8h.html#a71b9ab562419cb4fee5269df86a3ce1da94d54ec615f49dd84625f332efc4dc3b',1,'CWaves.h']]],
+  ['wr_5fwavesmusthavesameblockalignment_19',['WR_WAVESMUSTHAVESAMEBLOCKALIGNMENT',['../_c_waves_8h.html#a71b9ab562419cb4fee5269df86a3ce1da91a1abdcbf8f458a81fea4c7dd421ca4',1,'CWaves.h']]],
+  ['wr_5fwavesmusthavesamefrequency_20',['WR_WAVESMUSTHAVESAMEFREQUENCY',['../_c_waves_8h.html#a71b9ab562419cb4fee5269df86a3ce1da3136dded29b86de93327a2b922c98302',1,'CWaves.h']]]
+];

@@ -4,9 +4,11 @@
 #include <glm/glm.hpp>
 
 namespace TechStorm {
+
 	// Forward declaration
 	template<typename T>
 	class uVec3Base;
+
 	// Overload subtraction operator for subtracting Jolt's Vector3 from uVec3Base
 	template<typename T>
 	uVec3Base<T> operator-(const uVec3Base<T>& lhs, const JPH::Vec3& rhs) {
@@ -23,6 +25,7 @@ namespace TechStorm {
 	template<typename T>
 	class uVec3Base abstract {
 	public:
+
 		// data
 		T x;
 		T y;
@@ -60,6 +63,7 @@ namespace TechStorm {
 		static void zero() {
 			uVec3Base();
 		}
+
 		// operators
 
 		// Comparison Operators
@@ -93,7 +97,7 @@ namespace TechStorm {
 		uVec3i() : uVec3Base() {}
 		uVec3i(double x, double y, double z) : uVec3Base(x, y, z) {}
 		uVec3i(JPH::Vec3& val) : uVec3Base(val) {}
-		uVec3i(Vector3& val) : uVec3Base(val) {}
+		uVec3i(Vector3 val) : uVec3Base(val) {}
 	};
 
 	class uVec3f : public uVec3Base<float> {
@@ -102,7 +106,7 @@ namespace TechStorm {
 		uVec3f() : uVec3Base() {}
 		uVec3f(float x, float y, float z) : uVec3Base(x, y, z) {}
 		uVec3f(JPH::Vec3& val) : uVec3Base(val) {}
-		uVec3f(Vector3& val) : uVec3Base(val) {}
+		uVec3f(Vector3 val) : uVec3Base(val) {}
 
 		// Note : This only will TRUNCATE the vector, not round it!
 		virtual operator uVec3i() const {
@@ -115,7 +119,7 @@ namespace TechStorm {
 		uVec3d() : uVec3Base() {}
 		uVec3d(double x, double y, double z) : uVec3Base(x, y, z) {}
 		uVec3d(JPH::Vec3& val) : uVec3Base(val) {}
-		uVec3d(Vector3& val) : uVec3Base(val) {}
+		uVec3d(Vector3 val) : uVec3Base(val) {}
 
 		// Note : This only will TRUNCATE the vector, not round it!
 		virtual operator uVec3i() const {

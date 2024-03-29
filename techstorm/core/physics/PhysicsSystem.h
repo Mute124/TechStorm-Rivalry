@@ -14,6 +14,7 @@
 #include <Jolt/Physics/Body/BodyActivationListener.h>
 
 #include "../logging/Logman.h"
+
 // STL includes
 #include <iostream>
 #include <cstdarg>

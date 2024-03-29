@@ -1,6 +1,7 @@
 #pragma once
 #include "../../Common.h"
 #include "../universalTypes/uFBO.h"
+
 // handles rendering
 class ForwardRenderer final
 {
@@ -79,7 +80,7 @@ public:
 	}
 
 	// stop baking to fbo
-	void stopTexturing()
+	void endTexturing()
 	{
 		// EndDraw();
 		EndTextureMode();

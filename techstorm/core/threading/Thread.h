@@ -23,8 +23,10 @@ public:
 		TechStorm::Logman::Log(threadName.c_str());
 		std::thread worker(([this, threadName]() {
 			TechStorm::Logman::Log(threadName.c_str());
+
 			//Logman::Log(TextFormat("Threadname : %s, localThread var id : %i, this thread : %i", threadName.c_str(), localThread->get_id(), std::this_thread::get_id()));
 			while (isRunning && !terminate) {
+
 				// check if we are busy, if not we are idle. Wait until a task is added to the queue.
 				if (!isBusy) {
 					std::this_thread::sleep_for(std::chrono::milliseconds(10));

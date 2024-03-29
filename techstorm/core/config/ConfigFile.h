@@ -7,6 +7,7 @@
 class ConfigFile
 {
 public:
+
 	// FilePath path goes in here
 	ConfigFile(const char* path)
 	{
@@ -37,14 +38,12 @@ public:
 	// The solution to the issue of not being able to get a int from a config file.
 	int getIntEntry(const char* section, const char* entry)
 	{
+		// convert from int64_t to int
+		toml::table tbl = *(file.entry.Data[section][entry].as_table()); // Tableize
 
-			// convert from int64_t to int
-			toml::table tbl = *(file.entry.Data[section][entry].as_table()); // Tableize
+		int result = tbl[section][entry].as_integer()->operator const int64_t & ();
 
-			int result = tbl[section][entry].as_integer()->operator const int64_t & ();
-
-			return result;
-
+		return result;
 	}
 
 	bool getBoolEntry(const char* section, const char* entry)

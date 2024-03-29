@@ -4,6 +4,7 @@
 #include <glm/glm.hpp>
 
 namespace TechStorm {
+
 	// Forward declaration
 	template<typename T>
 	class uVec4Base;
@@ -24,6 +25,7 @@ namespace TechStorm {
 	template<typename T>
 	class uVec4Base abstract {
 	public:
+
 		// data
 		T x;
 		T y;
@@ -108,7 +110,7 @@ namespace TechStorm {
 		uVec4i() : uVec4Base() {}
 		uVec4i(int x, int y, int z, int w) : uVec4Base(x, y, z, w) {}
 		uVec4i(JPH::Vec4& val) : uVec4Base(val) {}
-		uVec4i(Vector4& val) : uVec4Base(val) {}
+		uVec4i(Vector4 val) : uVec4Base(val) {}
 	};
 
 	class uVec4f : public uVec4Base<float> {

@@ -1,0 +1,26 @@
+var class_y_s_e_1_1_p_l_a_y_e_r_1_1interface_object =
+[
+    [ "interfaceObject", "class_y_s_e_1_1_p_l_a_y_e_r_1_1interface_object.html#a0f32f7d24f676ee3a0779f49df06daec", null ],
+    [ "~interfaceObject", "class_y_s_e_1_1_p_l_a_y_e_r_1_1interface_object.html#ac509bdc04453448fa2e71d88ca15e459", null ],
+    [ "addMotif", "class_y_s_e_1_1_p_l_a_y_e_r_1_1interface_object.html#a3cd01b09cdeffc7af12780103207557e", null ],
+    [ "adjustMotifWeight", "class_y_s_e_1_1_p_l_a_y_e_r_1_1interface_object.html#a18701eb9dd8011125d240b9e37c41c92", null ],
+    [ "create", "class_y_s_e_1_1_p_l_a_y_e_r_1_1interface_object.html#aa3e3e47f47bd3ef08ff08d625b178d1d", null ],
+    [ "fitMotifsToScale", "class_y_s_e_1_1_p_l_a_y_e_r_1_1interface_object.html#aacf08fbe2e6f71317b0d11b91be3d0b8", null ],
+    [ "isPlaying", "class_y_s_e_1_1_p_l_a_y_e_r_1_1interface_object.html#a0af0fc355396484847fd61aa664ea954", null ],
+    [ "play", "class_y_s_e_1_1_p_l_a_y_e_r_1_1interface_object.html#a72e39add8eeca8954ff5d299f3cd2be0", null ],
+    [ "playMotifs", "class_y_s_e_1_1_p_l_a_y_e_r_1_1interface_object.html#a02e355c164fedef65256f1c80dfc26bc", null ],
+    [ "playPartialMotifs", "class_y_s_e_1_1_p_l_a_y_e_r_1_1interface_object.html#a41b1bfea136548c77d27d597a54dba4c", null ],
+    [ "removeMotif", "class_y_s_e_1_1_p_l_a_y_e_r_1_1interface_object.html#a26fec7bbc01063ef4bb2b9dfe43a595a", null ],
+    [ "setMaximumGap", "class_y_s_e_1_1_p_l_a_y_e_r_1_1interface_object.html#a340b34cbd6d5135e2aebc2d648ef5f32", null ],
+    [ "setMaximumLength", "class_y_s_e_1_1_p_l_a_y_e_r_1_1interface_object.html#a30b8ba4c12e639a00647be4fc4739d2c", null ],
+    [ "setMaximumPitch", "class_y_s_e_1_1_p_l_a_y_e_r_1_1interface_object.html#ae6cd6228e965f6af0598aed7c04b8445", null ],
+    [ "setMaximumVelocity", "class_y_s_e_1_1_p_l_a_y_e_r_1_1interface_object.html#abfddb7b612fb853508fb2633719896d2", null ],
+    [ "setMinimumGap", "class_y_s_e_1_1_p_l_a_y_e_r_1_1interface_object.html#af86d36d3b51f583145d780c323213dda", null ],
+    [ "setMinimumLength", "class_y_s_e_1_1_p_l_a_y_e_r_1_1interface_object.html#aeba8105d730d83856d134ddfa8038310", null ],
+    [ "setMinimumPitch", "class_y_s_e_1_1_p_l_a_y_e_r_1_1interface_object.html#a81d90a0d70590026e447a74bac7f655f", null ],
+    [ "setMinimumVelocity", "class_y_s_e_1_1_p_l_a_y_e_r_1_1interface_object.html#a243b4c284b6d1d46a96a05442db81c36", null ],
+    [ "setScale", "class_y_s_e_1_1_p_l_a_y_e_r_1_1interface_object.html#ab02643f32258242a31600a4f0c80904e", null ],
+    [ "setVoices", "class_y_s_e_1_1_p_l_a_y_e_r_1_1interface_object.html#aa6b0aeb9e42bf929de4d2e177199aa5c", null ],
+    [ "stop", "class_y_s_e_1_1_p_l_a_y_e_r_1_1interface_object.html#ad54d07d109d524b2fb20dc1566795028", null ],
+    [ "PLAYER::implementationObject", "class_y_s_e_1_1_p_l_a_y_e_r_1_1interface_object.html#ac0ca1d5311a2886b4f540c1379bcb88f", null ]
+];

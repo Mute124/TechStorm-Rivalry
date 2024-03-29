@@ -23,6 +23,7 @@ public:
 	static inline Texture2D spec;
 
 	TestInteractive(Vector3 position, const Color color, Shader shader, Model model) {
+
 		//Logman::customLog(LOG_TRACE, "Block Constructor", NULL);
 		this->model = model;
 		this->tint = color;

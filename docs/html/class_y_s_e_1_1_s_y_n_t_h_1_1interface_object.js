@@ -1,0 +1,26 @@
+var class_y_s_e_1_1_s_y_n_t_h_1_1interface_object =
+[
+    [ "interfaceObject", "class_y_s_e_1_1_s_y_n_t_h_1_1interface_object.html#a7541c9879c77ea288dffd49a0d431eae", null ],
+    [ "~interfaceObject", "class_y_s_e_1_1_s_y_n_t_h_1_1interface_object.html#ad3ace16c3d249a02ed7472051df2562e", null ],
+    [ "interfaceObject", "class_y_s_e_1_1_s_y_n_t_h_1_1interface_object.html#afe74bf396b94a4a86576ef194d6d6744", null ],
+    [ "addVoices", "class_y_s_e_1_1_s_y_n_t_h_1_1interface_object.html#a8ea0ef13da021d07852ea4e671671ecb", null ],
+    [ "addVoices", "class_y_s_e_1_1_s_y_n_t_h_1_1interface_object.html#a43be9c187a7b13e1b7c47ad28b745d7c", null ],
+    [ "aftertouch", "class_y_s_e_1_1_s_y_n_t_h_1_1interface_object.html#a76ba2bc552f6e1373d6494cbb4bc7684", null ],
+    [ "allNotesOff", "class_y_s_e_1_1_s_y_n_t_h_1_1interface_object.html#ae6323825a5f6e1a47bf9834b9a6ecef9", null ],
+    [ "controller", "class_y_s_e_1_1_s_y_n_t_h_1_1interface_object.html#a5458645f6f86a0ee050363b92bafc867", null ],
+    [ "create", "class_y_s_e_1_1_s_y_n_t_h_1_1interface_object.html#a9e1f3b6d65017a80643196f1c19021f4", null ],
+    [ "getNumVoices", "class_y_s_e_1_1_s_y_n_t_h_1_1interface_object.html#ab5e52978bfeacff3ca5cd37e36bcf231", null ],
+    [ "noteOff", "class_y_s_e_1_1_s_y_n_t_h_1_1interface_object.html#a7ebc43879d1d90abd20f0c8deea4ff52", null ],
+    [ "noteOff", "class_y_s_e_1_1_s_y_n_t_h_1_1interface_object.html#a6199c14f20f1fbc019762b65bf97f5fa", null ],
+    [ "noteOn", "class_y_s_e_1_1_s_y_n_t_h_1_1interface_object.html#a65276a932eddd785502d79dc970f3ce7", null ],
+    [ "noteOn", "class_y_s_e_1_1_s_y_n_t_h_1_1interface_object.html#a7dc3fb50409e116c5a6ce92ece061f1e", null ],
+    [ "onNoteEvent", "class_y_s_e_1_1_s_y_n_t_h_1_1interface_object.html#aab7749a56da8f88cfe345cb15667ad08", null ],
+    [ "pitchWheel", "class_y_s_e_1_1_s_y_n_t_h_1_1interface_object.html#a4700cb2eba00da1990bcc19575e56d3f", null ],
+    [ "removeSound", "class_y_s_e_1_1_s_y_n_t_h_1_1interface_object.html#aaa7ae0b8511fbeccf456ce3c99d8e5d4", null ],
+    [ "softPedal", "class_y_s_e_1_1_s_y_n_t_h_1_1interface_object.html#a9b81f0c15c5ccb19cc550daf24542848", null ],
+    [ "sostenuto", "class_y_s_e_1_1_s_y_n_t_h_1_1interface_object.html#a52568e9fa3b13f7c6f2514b567a21109", null ],
+    [ "sustain", "class_y_s_e_1_1_s_y_n_t_h_1_1interface_object.html#a5735a0d68fd77bd26b774aaadf6c637b", null ],
+    [ "implementationObject", "class_y_s_e_1_1_s_y_n_t_h_1_1interface_object.html#a454e8c55f87922c718aaa3def6f820fd", null ],
+    [ "MIDI::fileImpl", "class_y_s_e_1_1_s_y_n_t_h_1_1interface_object.html#a07aaead75db78d9e1f1ac69da474412b", null ],
+    [ "SOUND::interfaceObject", "class_y_s_e_1_1_s_y_n_t_h_1_1interface_object.html#a793bfc9d9917af3dcd89447fc78fa8f9", null ]
+];

@@ -22,25 +22,27 @@ namespace TechStorm {
 	*/
 	class GameObject abstract
 	{
+	protected:
+
 	public:
-		uVec3f position;
 		Model model;
 		float scale;
 		uColor tint;
 		Shader shdr;
-		static inline Shader* globalShader;
+		bool isDynamic = false;
+		bool threadSafe = true;
+		bool hasComponents = false;
+		int componentCount = 0;
+
+		std::vector<GameObjectComponent*> components;
 #ifdef DEBUG
 		bool debugMode = true;
 #else // DEBUG
 		bool debugMode = false;
 #endif
+		uVec3f position;
 
-		bool isDynamic = false;
-		bool threadSafe = true;
-		bool hasComponents = false;
-
-		int componentCount = 0;
-		std::vector<GameObjectComponent*> components;
+		static inline Shader* globalShader;
 
 		friend class GameobjectManager;
 
@@ -100,11 +102,6 @@ namespace TechStorm {
 	public:
 		vector<GameObject*> threadSafeObjects; // objects that are threadsafe
 		vector<GameObject*> nonThreadSafeObjects; // objects that are not threadsafe.
-		static inline GameobjectManager* instance;
-
-		GameobjectManager() {
-			instance = this;
-		}
 		void renderObjects()
 		{
 			for (auto& obj : threadSafeObjects)
@@ -112,7 +109,17 @@ namespace TechStorm {
 				// check for dynamicy.
 				if (obj->isDynamic) {
 					obj->draw();
-					obj->onUpdate();
+				}
+				else {
+					continue;
+				}
+			}
+
+			for (auto& obj : nonThreadSafeObjects)
+			{
+				// check for dynamicy.
+				if (obj->isDynamic) {
+					obj->draw();
 				}
 				else {
 					continue;
@@ -136,6 +143,7 @@ namespace TechStorm {
 
 		void updateObjects() {
 			instance = this;
+
 			// update threadsafe objects on another thread
 			function<void()> threadsafeUpdate = [this]() {
 				for (auto& obj : threadSafeObjects) {
@@ -183,6 +191,13 @@ namespace TechStorm {
 				}
 			}
 		}
+	public:
+
+		static inline GameobjectManager* instance;
+
+		GameobjectManager() {
+			instance = this;
+		}
 
 		void pushObject(GameObject* obj) {
 			if (obj->isThreadSafe()) {
@@ -198,14 +213,18 @@ namespace TechStorm {
 	class ExampleObject : public GameObject {
 	public:
 		ExampleObject(/*Initialization Variables*/) {
+
 			// Startup code. Done only once
 		}
 		void draw() override {
+
 			// On draw
 		}
 		void onUpdate() override {
+
 			// tasks to do on each update.
 		}
+
 		// What to do when destroyed.
 		void onDestroy() const override {
 			delete this;
@@ -216,6 +235,7 @@ namespace TechStorm {
 		// Other variables.
 
 	private:
+
 		// Variables that will only be used by this class
 	};
 }

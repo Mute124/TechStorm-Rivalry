@@ -37,6 +37,7 @@ public:
 		this->position = Vector3Zero();
 		this->name = name;
 		this->isLoaded = true;
+
 		//	manager->loadFx(this);
 	}
 

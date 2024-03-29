@@ -67,6 +67,7 @@ namespace TechStorm {
 
 		// colors
 		uColor btnLiveColor = { 222, 214, 202, 255 },
+
 			// Botton state
 			btnHover = { 135, 195, 74, 100 },
 			btnPressed = { 66, 165, 245, 100 },
@@ -79,8 +80,10 @@ namespace TechStorm {
 			See mutators for modifying specifically the shadow's size.
 		*/
 		Rectangle border{ rect.x, rect.y, btnWidth, btnHeight };
+
 		// color
 		uColor borderLiveColor = BLACK,
+
 			// Botton state
 			borderHover = { 57, 73, 171, 100 },
 			borderPressed = { 0, 105, 92, 100 },

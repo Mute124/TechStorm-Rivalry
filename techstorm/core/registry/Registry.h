@@ -15,28 +15,28 @@ namespace TechStorm {
 	public:
 
 		virtual std::map<SortType, T*> getRegistry() {
-			return registry;
+			return m_mapRegistry;
 		}
 
 		virtual std::map<SortType, T*>* getRegistryPtr() {
-			return &registry;
+			return &m_mapRegistry;
 		}
 
 		// Get a entry witheld in this registry
 		virtual T* getEntry(SortType id) {
-			return registry[id];
+			return m_mapRegistry[id];
 		}
 
 		// Get the next available slot. Use this if you need to assign an ID to an object before pushing it.
 		virtual int getNextEntrySlot() {
-			return objectCount + 1;
+			return m_objectCount + 1;
 		}
 
 		// Adds it to registry and gives you it's slot
 		virtual int addEntry(T* object) {
-			objectCount++;
-			this->registry[objectCount] = object;
-			return objectCount;
+			m_objectCount++;
+			this->m_mapRegistry[m_objectCount] = object;
+			return m_objectCount;
 		}
 
 		virtual void removeEntry(SortType id) {
@@ -56,6 +56,7 @@ namespace TechStorm {
 		int m_objectCount = 0;
 		std::map<SortType, T*, std::less<SortType>> m_mapRegistry;
 	};
+
 	template<typename T>
 	class MRegistry {
 	public:

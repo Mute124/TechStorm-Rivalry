@@ -27,6 +27,7 @@ public:
 
 	// (the first and higher number) measures pressure inside your arteries when the heart beats.
 	int systolicBloodPressure;
+
 	// (the second and lower number) measures the pressure inside the artery when the heart rests between beats.
 	int diastolicBloodPressure;
 

@@ -27,6 +27,7 @@ private:
 	Model model;
 
 	Vector3 position;
+
 	// set to white unless otherwise is true
 	Color tint = WHITE;
 };

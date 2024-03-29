@@ -26,6 +26,7 @@ public:
 			return nullptr;
 		}
 	}
+
 	// put into pool
 	void dunk(T* obj) {
 		pool.push(std::move(obj));
@@ -47,6 +48,7 @@ private:
 template<typename T>
 class Pool {
 public:
+
 	// gets the front and DOES NOT remove it. if empty returns a new nullptr
 	T get() {
 		if (pool.empty()) {
@@ -68,6 +70,7 @@ public:
 			return nullptr;
 		}
 	}
+
 	// put into pool
 	void dunk(T obj) {
 		pool.push(std::move(obj));

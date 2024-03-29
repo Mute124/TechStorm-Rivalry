@@ -32,10 +32,12 @@ public:
 				XMLElement* itemElement = itemElements->FirstChildElement("Item");
 
 				while (itemElement) {
+
 					// Item setup code
 
 					// Todo : Make this fully autonomous
 					XMLElement* itemName = itemElement->FirstChildElement("Name");
+
 					//Logman::Log(itemName->GetText());
 
 					XMLElement* materialType = itemElement->FirstChildElement("MaterialType");

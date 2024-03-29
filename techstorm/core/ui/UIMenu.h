@@ -1,21 +1,17 @@
 #pragma once
 #include "UIElement.h"
 #include "../../Game.h"
-#include "../../console/Console.h"
+
 namespace TechStorm {
-	class UIMenu : public UIContainer {
+	class UIMenu abstract : public UIContainer {
 	public:
 
-		// Only call when the menu is finalized and all elements are added!
-		virtual void initMenu(TechStormRivalry::Game& game) {
-			game.pushContainer(this, false, false);
-		}
-
 		virtual void drawMenu() {
-			this->drawChildren(DRAW_FINAL);
+			UIContainer::drawChildren(DRAW_FINAL);
 		}
 
 		virtual void update() override {
+			UIContainer::update();
 		}
 
 		virtual void awakeMenu() {

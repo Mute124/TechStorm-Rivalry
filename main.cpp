@@ -15,7 +15,7 @@
 #include "techstorm/core/gamescreen/MenuCamera.h"
 #include "techstorm/player/Player.h"
 #include "techstorm/core/rendering/Light.h"
-#include "techstorm/core/enum/EGameState.h"
+
 #include "techstorm/core/threading/ThreadGroups.h"
 #include "techstorm/core/ui/UIElement.h"
 #include "techstorm/core/ui/UIMan.h"
@@ -26,11 +26,8 @@
 #include "techstorm/core/physics/PhysMan.h"
 #include "techstorm/core/ui/UIMenu.h"
 #include "techstorm/ui/MainMenu.h"
+#include "techstorm/ui/PlayerHUD.h"
 
-// Check if any key is pressed
-// NOTE: We limit keys check to keys between 32 (KEY_SPACE) and 126
-
-// std library includes. TODO : Is this still needed?
 #include <time.h>
 #include <vector> // needed for game object list
 
@@ -38,9 +35,6 @@
 
 namespace TechStormRivalry {
 	static void mainThread() {
-		//TODO: Is this still relevant?
-		EGameState currentScreen = Main;
-		// Booleans
 
 		// Lets the program know if the game should use HDR as the skybox
 		bool useHDR = true;
@@ -85,88 +79,12 @@ namespace TechStormRivalry {
 		// Start the game and do any needed setup
 		game->init();
 
-		// IMPORTANT : Do not remove this or delete it as it is the manager of all game objects! (it will fuck up everything)
-
-		// test if temp folder exists, if not create it
-		// currently not used for anything
-		if (!DirectoryExists("temp"))
-		{
-			system("mkdir temp"); // run the system command to create the folder. Note : This is a windows command.
-		}
-
-		// -----------------------------------------------------------------------------
-		// Load Game Assets
-		// -----------------------------------------------------------------------------
-
-		// Ambiance
-		// The passive sound of your breathing.
-		//ToDo: tweak to sound more natural. This could be based on fatigue, stress, or something.
-		Sound breathingSound = LoadSound("resources/audio/breathing.mp3");
-
-		/*
-		---------------------------------------------------------------------------------
-		| 					        Shader Setup										|
-		---------------------------------------------------------------------------------
-		*/
-		TechStorm::Console::ConsoleUI* consoleUI = new TechStorm::Console::ConsoleUI();
-		// declare main menu variables here :
-
-		//RenderTexture mainMenuTexture = LoadRenderTexture(game->windowWidth, game->windowHeight);
-
-		Music menuMusic = LoadMusicStream("resources/audio/ost/starstruck.mp3");
-
 		TechStorm::Logman::Log("Main menu ready");
 
-		MainMenu::MainMenu* menu = new MainMenu::MainMenu(*game);
+		MainMenu::MainMenu* menu = new MainMenu::MainMenu(game);
 
 		menu->awakeMenu();
 		menu->drawMenu();
-
-		// Load the shader into memory
-		game->renderer->pbrShader = LoadShader(TextFormat("resources/shaders/glsl330/pbr.vs", GLSL_VERSION), TextFormat("resources/shaders/glsl330/pbr.fs", GLSL_VERSION));
-
-		// Get shader locations
-		game->renderer->pbrShader.locs[SHADER_LOC_MAP_ALBEDO] = GetShaderLocation(game->renderer->pbrShader, "albedoMap");
-
-		// WARNING: Metalness, roughness, and ambient occlusion are all packed into a MRA texture They
-		// are passed as to the SHADER_LOC_MAP_METALNESS location for convenience, shader already takes
-		// care of it accordingly
-		game->renderer->pbrShader.locs[SHADER_LOC_MAP_METALNESS] = GetShaderLocation(game->renderer->pbrShader, "mraMap");
-		game->renderer->pbrShader.locs[SHADER_LOC_MAP_NORMAL] = GetShaderLocation(game->renderer->pbrShader, "normalMap");
-
-		// WARNING: Similar to the MRA map, the emissive map packs different information into a single
-		// texture: it stores height and emission data It is binded to SHADER_LOC_MAP_EMISSION location
-		// an properly processed on shader
-		game->renderer->pbrShader.locs[SHADER_LOC_MAP_EMISSION] = GetShaderLocation(game->renderer->pbrShader, "emissiveMap");
-		game->renderer->pbrShader.locs[SHADER_LOC_COLOR_DIFFUSE] = GetShaderLocation(game->renderer->pbrShader, "albedoColor");
-
-		// Setup additional required shader locations, including lights data
-		game->renderer->pbrShader.locs[SHADER_LOC_VECTOR_VIEW] = GetShaderLocation(game->renderer->pbrShader, "viewPos");
-		int lightCountLoc = GetShaderLocation(game->renderer->pbrShader, "numOfLights");
-
-		// set it to the value of the MAX_LIGHTS macro and pass it to the shader
-		int maxLightCount = MAX_LIGHTS;
-		SetShaderValue(game->renderer->pbrShader, lightCountLoc, &maxLightCount, SHADER_UNIFORM_INT);
-
-		// Setup ambient color and intensity (brightness) parameters
-		float ambientIntensity = 0.02f;
-		Color ambientColor = GRAY;
-		Vector3 ambientColorNormalized = Vector3{ ambientColor.r / 255.0f, ambientColor.g / 255.0f, ambientColor.b / 255.0f };
-		SetShaderValue(game->renderer->pbrShader, GetShaderLocation(game->renderer->pbrShader, "ambientColor"), &ambientColorNormalized, SHADER_UNIFORM_VEC3);
-		SetShaderValue(game->renderer->pbrShader, GetShaderLocation(game->renderer->pbrShader, "ambient"), &ambientIntensity, SHADER_UNIFORM_FLOAT);
-
-		// Get location for shader parameters that can be modified
-		int emissiveIntensityLoc = GetShaderLocation(game->renderer->pbrShader, "emissivePower");
-		int emissiveColorLoc = GetShaderLocation(game->renderer->pbrShader, "emissiveColor");
-		int textureTilingLoc = GetShaderLocation(game->renderer->pbrShader, "tiling");
-
-		// Assignment of shaders
-		// NOTE: By default, the texture maps are always used
-		int usage = 1;
-		SetShaderValue(game->renderer->pbrShader, GetShaderLocation(game->renderer->pbrShader, "useTexAlbedo"), &usage, SHADER_UNIFORM_INT);
-		SetShaderValue(game->renderer->pbrShader, GetShaderLocation(game->renderer->pbrShader, "useTexNormal"), &usage, SHADER_UNIFORM_INT);
-		SetShaderValue(game->renderer->pbrShader, GetShaderLocation(game->renderer->pbrShader, "useTexMRA"), &usage, SHADER_UNIFORM_INT);
-		SetShaderValue(game->renderer->pbrShader, GetShaderLocation(game->renderer->pbrShader, "useTexEmissive"), &usage, SHADER_UNIFORM_INT);
 
 		// Create a default block model with a length, width, and height of the value of BLOCK_SIZE.
 		// This creates a cube mesh with a length, width, and height of BLOCK_SIZE and then converts it
@@ -179,7 +97,7 @@ namespace TechStormRivalry {
 		SetDefaultModel(DefaultBlockModel);
 
 		// Construct the block object
-		Block* block = new Block(Vector3Zero(), WHITE, game->renderer->pbrShader, DefaultBlockModel);
+		Block* block = new Block(Vector3Zero(), WHITE, game->pbrShader, DefaultBlockModel);
 
 		// Finally push it off to the object manager
 		game->pushObject(block);
@@ -191,7 +109,7 @@ namespace TechStormRivalry {
 		Model PlayerModel = LoadModelFromMesh(GenMeshCube(Playersize, Playersize, Playersize));
 
 		// Construct the player object
-		Player::Player* player = new Player::Player(Vector3{ 0.0f, 2.0f, 4.0f }, 100, PlayerModel, CAMERA_FIRST_PERSON);
+		Player::Player* player = new Player::Player(Vector3{ 0.0f, 2.0f, 4.0f }, PlayerModel, CAMERA_FIRST_PERSON);
 
 		// Finally push it off to the object manager
 		game->pushObject(player);
@@ -252,11 +170,6 @@ namespace TechStormRivalry {
 			// Load HDR panorama (sphere) texture
 			panorama = LoadTexture(skyboxFileName);
 
-			// Generate cubemap (texture with 6 quads-cube-mapping) from panorama HDR texture NOTE 1:
-			// New texture is generated rendering to texture, shader calculates the sphere->cube
-			// coordinates mapping NOTE 2: It seems on some Android devices WebGL, fbo does not properly
-			// support a FLOAT-based attachment, despite texture can be successfully created.. so using
-			// PIXELFORMAT_UNCOMPRESSED_R8G8B8A8 instead of PIXELFORMAT_UNCOMPRESSED_R32G32B32A32
 			//skybox.materials[0].maps[MATERIAL_MAP_CUBEMAP].texture = GenTextureCubemap(
 			//	shdrCubemap, panorama, 1024, PIXELFORMAT_UNCOMPRESSED_R8G8B8A8);
 		}
@@ -276,26 +189,7 @@ namespace TechStormRivalry {
 			UnloadImage(img);
 		}
 
-		// ----------------------------------------------------------------------------- Light Setup -----------------------------------------------------------------------------
-
-		// Create the Sunlight Note : this is not it's final form, it is just a placeholder for testing
-		// ToDo: finalize this step and functionality
-		TechStorm::Light sun = TechStorm::CreateLight(TechStorm::LIGHT_POINT, TechStorm::uVec3f{ 1.0f, 0.0f, 1.0f }, Vector3One(),
-			WHITE, 4.0f, game->renderer->pbrShader); // Ambient color.;
-
-		// Enable the sun as a precautionary measure.
-		sun.enabled = true;
-
-		// TODO : Is this still relevant and figure out what the hell this does.
-		TechStorm::uVec3f Orgin = TechStorm::uVec3f
-		{
-			player->cameraComponent->getPosition().x,
-			player->cameraComponent->getPosition().y - 10.0f,
-			player->cameraComponent->getPosition().z
-		};
-
-		// Note: See the comment regarding main menu
-		//delete mmen_start;
+		TechStorm::Light sun = TechStorm::CreateLight(TechStorm::LIGHT_POINT, TechStorm::uVec3f{ 1.0f, 0.0f, 1.0f }, Vector3One(), WHITE, 4.0f, game->pbrShader);
 
 		// The texture for the near death affect initialization
 		Texture2D nearDeathTex = { 0 };
@@ -306,44 +200,13 @@ namespace TechStormRivalry {
 		// The color for the near death affect initialization
 		TechStorm::uColor nearDeathColor = TechStorm::uColor();
 
-		/*
-		---------------------------------------------------------------------------------
-		| 					         HealthBar Setup									|
-		---------------------------------------------------------------------------------
-		*/
-
 		healthBarPositionX = game->winWidth + healthBarOffsetX;
 		healthBarPositionY = game->winHeight + healthBarOffsetY;
 
-		// the below lines are just me messing with heightmaps.
-		Image cell = GenImageCellular(100, 100, 2);
-		Image perlin = GenImagePerlinNoise(100, 100, 1, 0.5f, 1.0f);
-		//ImageDraw(&perlin, cell, Rectangle{0, 0, (float)cell.width, (float)cell.height}, Rectangle{0, 0, (float)perlin.width, (float)perlin.height}, WHITE);
-
-		ImageAlphaMask(&perlin, cell);
-		Mesh test = GenMeshHeightmap(perlin, Vector3{ 100, 100, 100 });
-
-		// endUIMan of height map tomfoolery
-
-		// set default line spacing to 48.
-		SetTextLineSpacing(48);
-		//TestInteractive::init();
-		//TestInteractive::setShader(game->renderers->forwardRenderer->pbrShader);
-		//GravityWells* wells = new GravityWells();
-
-		//wells->ndTester();
-
-		//game->objMan->pushObject(wells->gravWells[0]);
-
-		//game->objMan->pushObject(obj);
-
 		DisableCursor();
-	
-		Crosshair* crosshair = new Crosshair(game->screenMiddle, game);
-		float brightness = 10.0f;
-		SetShaderValue(game->renderer->pbrShader, GetShaderLocation(game->renderer->pbrShader, "brightness"), &brightness, UNIFORM_FLOAT);
 
-		// Now we can run the game loop and startScriptMan playing!
+		PlayerHUD* hud = new PlayerHUD(game);
+
 		while (!WindowShouldClose())
 		{
 			int scroll = GetMouseWheelMove();
@@ -354,62 +217,8 @@ namespace TechStormRivalry {
 			if (IsMouseButtonDown(MOUSE_BUTTON_RIGHT))
 			{
 				Vector3 placepos = player->cameraComponent->getTarget();
-				//new Block(Vector3{ roundf(placepos.x), roundf(placepos.y), roundf(placepos.z) }, WHITE, game->renderers->forwardRenderer->pbrShader, GetDefaultModel());
-				//tester = new TestInteractive(Vector3{ roundf(placepos.x), roundf(placepos.y), roundf(placepos.z) }, WHITE, game->renderers->forwardRenderer->pbrShader, GetDefaultModel());
-
-				///tester->create(Vector3{ roundf(placepos.x), roundf(placepos.y), roundf(placepos.z) }, GetDefaultModel(), 1.0f, WHITE, block->model.materials[0]);
-				//gameObjectManager->pushObject(tester);
-
-				//PhysObject* ob = new PhysObject();
-				//ob->init(game->gameRenderers->forwardRenderer->pbrShader, placepos);
-
-				//ob->vel.vel = Vector3AddValue(GetCameraForward(player->cameraComponent->getSelfCameraPointer()), 1.0f);
-
-				//game->objMan->pushObject(ob);
-			}
-			//TestInteractive::setCam(player->cameraComponent->getSelfCamera());
-			// Take a screenshot
-			if (IsKeyPressed(KEY_F9))
-			{
-				// take a screenshot
-				for (int i = 0; i < INT_MAX; i++)
-				{
-					const char* fileName = TextFormat("screenshots/screen%i.screenshot", i);
-					// if there isnt a duplicate file, it then will create a screenshot.
-					if (FileExists(fileName) == 0)
-					{
-						std::ofstream outfile(fileName);
-
-						outfile.close();
-						ExportImage(LoadImageFromTexture(game->renderer->operator RenderTexture().texture), fileName);
-
-						break;
-					}
-				}
 			}
 
-			// Sprinting Mechanic
-			if (IsKeyDown(KEY_LEFT_SHIFT))
-			{
-				player->controller->isRunning = true;
-			}
-			else
-			{
-				player->controller->isRunning = false;
-			}
-
-			// NOTE : This is temporary and is only to test the health system
-			if (IsKeyDown(KEY_Y))
-			{
-				//player->healthComp->damagePlayer(5.0f);
-			}
-
-			/*
-			---------------------------------------------------------------------------------
-			| 					         If Statements go here!								|
-			---------------------------------------------------------------------------------
-			*/
-			// TODO : Move input crap into another thread. Pause Menu
 			if (IsKeyPressed(KEY_ESCAPE))
 			{
 				// Todo, move the menuCamera to be created on game startup and then hidden. it gets
@@ -435,22 +244,6 @@ namespace TechStormRivalry {
 
 					exitButton->draw();
 					exitButton->updateObjects();
-
-					if (save->IsClicked())
-					{
-						// todo : implement Saving game data, probably use the Objects vector.
-						const char* filename = "save.sav";
-
-						std::vector<void*> data;
-
-						for (int i = 0; i < game->threadSafeObjects.size(); i++)
-						{
-							data.push_back(game->threadSafeObjects[i]);
-						}
-						SaveFileData(filename, &data, sizeof(data));
-
-						TechStorm::Logman::customLog(LOG_DEBUG, LoadFileText(filename), NULL);
-					}
 
 					if (exitButton->IsClicked())
 					{
@@ -486,6 +279,7 @@ namespace TechStormRivalry {
 						exit = true;
 					}
 				}
+
 				// cleanup UnloadTexture(tex);
 				delete men_pause;
 				delete save;
@@ -500,6 +294,10 @@ namespace TechStormRivalry {
 			if (IsKeyPressed(KEY_E)) {
 			}
 
+			if (IsKeyDown(KEY_Y)) {
+				player->damage(15);
+			}
+
 			// The player's looking direction is the target of the camera. This is the direction the
 			// player is looking TODO : Check relevancy.
 			ray.position = player->cameraComponent->getPosition();
@@ -509,134 +307,69 @@ namespace TechStormRivalry {
 			swayTimer += GetFrameTime();
 
 			// sway the camera according to the sway algorithm.
-			//player->cameraComponent->setTarget(Vector3{ player->cameraComponent->getTarget().x + sin(swayTimer * swaySpeed) * swayAmount, player->cameraComponent->getTarget().y, player->cameraComponent->getTarget().z + cos(swayTimer * swaySpeed) * swayAmount });
+			player->cameraComponent->setTarget(Vector3{ player->cameraComponent->getTarget().x + sin(swayTimer * swaySpeed) * swayAmount, player->cameraComponent->getTarget().y, player->cameraComponent->getTarget().z + cos(swayTimer * swaySpeed) * swayAmount });
 
-			if (player->health <= 15) {
-				// equal to nearDeathTimer + frame delta time
-				nearDeathTimer += GetFrameTime();
+			/*
+			* 			if (player->health <= 15) {
 
-				// Arch algorithm implementation for color
-				nearDeathIntensity = ArchAlgorithm(amplitude, frequency, nearDeathTimer, steepness, offset, 255, scaleFactor);
+							// equal to nearDeathTimer + frame delta time
+					//nearDeathTimer += GetFrameTime();
 
-				// what color the screen should pulsate
-				nearDeathColor = TechStorm::uColor{ (unsigned char)nearDeathIntensity, 0, 0, 100 };
-
-				// convert nearDeathColor to an image
-				nearDeathAffect = GenImageColor(game->renderer->fboDimensions.x, game->renderer->fboDimensions.y, nearDeathColor);
-
-				// Set the ambient color to the normalized nearDeathColor
-				Vector3 nearDeathAmb = Vector3{ nearDeathColor.r() / 255.0f, nearDeathColor.g() / 255.0f, nearDeathColor.b() / 255.0f };
-				// Inform the shader about the new ambient color.
-				SetShaderValue(game->renderer->pbrShader, GetShaderLocation(game->renderer->pbrShader, "ambientColor"), &nearDeathAmb, SHADER_UNIFORM_VEC3);
-
-				// Load the image into the texture
-				nearDeathTex = LoadTextureFromImage(nearDeathAffect);
-				UnloadImage(nearDeathAffect); // We can unload the image now that we have the texture.
-			}
+							if (nearDeathIntensity >= 255) {
+								nearDeathIntensity -= nearDeathIntensity / 2;
+							}
+							else if ((nearDeathIntensity > 0) && (nearDeathIntensity < 255)) {
+								nearDeathIntensity += nearDeathIntensity / 2;
+							}
+							Image img = LoadImageFromTexture(game->renderer->getRenderTexture().texture);
+							nearDeathColor = Color{ 255, 0, 0, (unsigned char)nearDeathIntensity };
+							ImageColorTint(&img, nearDeathColor);
+							Color* pixels = LoadImageColors(img);
+							UpdateTexture(game->renderer->getRenderTexture().texture, pixels);             // Update texture with new image data
+							UnloadImageColors(pixels);                  // Unload pixels data from RAM
+							UpdateTexture(game->renderer->getRenderTexture().texture, pixels);
+						}
+			*/
 
 			// Stashes input events for later
 			PollInputEvents(); // helps for some reason?
 
-			// Where the player's camera is. We need to have this as a float array for the shader
-			float cameraPos[3] =
-			{
-				player->cameraComponent->getPosition().x,
-				player->cameraComponent->getPosition().y,
-				player->cameraComponent->getPosition().z
-			};
+			sun.position = player->cameraComponent->getTarget();
 
-			// Update light position
-			sun.position = player->cameraComponent->getPosition();
+			TechStorm::UpdateLight(game->pbrShader, sun);
 
-			// Update the shader with the new light data. Note : any shader that uses lighting will need
-			// this data!
-			UpdateLight(game->renderer->pbrShader, sun);
-			UpdateLight(game->renderer->bloomShader, sun);
-
-			// Send the camera position to the shader
-			SetShaderValue(game->renderer->pbrShader, game->renderer->pbrShader.locs[SHADER_LOC_VECTOR_VIEW], &cameraPos, SHADER_UNIFORM_VEC3);
-
-			// Update the game object manager
 			game->updateObjects();
 
-			// Start texturing the FBO with what the user will be seeing. This includes UI and Scene objects.
-			game->renderer->startTexturing();
+			game->startTexturingStep(player->cameraComponent->getSelfCameraPointer());
 
 			game->updateUI();
 			game->drawUI(DRAW_CLIPPABLE);
 
-			DrawTextureRec(nearDeathTex, Rectangle{ 0, 0, (float)(game->renderer->fboDimensions.x), (float)(-game->renderer->fboDimensions.y) }, TechStorm::uVec2i{ 0, 0 }, WHITE);
+			//DrawTextureRec(nearDeathTex, Rectangle{ 0, 0, (float)(game->renderer->fboDimensions.x), (float)(-game->renderer->fboDimensions.y) }, TechStorm::uVec2i{ 0, 0 }, WHITE);
 
-			game->renderer->start3D(player->cameraComponent->getSelfCameraPointer());
+			game->startRenderingStep(player->cameraComponent->getSelfCamera());
 
-			// Set old car model texture tiling, emissive color and emissive intensity parameters on shader
-			SetShaderValue(game->renderer->pbrShader, textureTilingLoc, &block->blockTextureTiling, SHADER_UNIFORM_VEC2);
+			SetShaderValue(game->pbrShader, game->textureTilingLoc, &block->blockTextureTiling, SHADER_UNIFORM_VEC2);
 
-			// Normalize the Emissive map into a 0-1 range. Note : This turns the map into a Vector4,
-			// not a color.
 			Vector4 carEmissiveColor = ColorNormalize(block->model.materials[0].maps[MATERIAL_MAP_EMISSION].color);
-			SetShaderValue(game->renderer->pbrShader, emissiveColorLoc, &carEmissiveColor, SHADER_UNIFORM_VEC4);
+			SetShaderValue(game->pbrShader, game->emissiveColorLoc, &carEmissiveColor, SHADER_UNIFORM_VEC4);
 
 			// How bright should the object emit it's emission color.
 			float emissiveIntensity = 0.01f;
-			SetShaderValue(game->renderer->pbrShader, emissiveIntensityLoc, &emissiveIntensity, SHADER_UNIFORM_FLOAT);
 
-			// Render all game objects
-			//rlEnableWireMode();
+			SetShaderValue(game->pbrShader, game->emissiveIntensityLoc, &emissiveIntensity, SHADER_UNIFORM_FLOAT);
+
 			game->renderObjects();
-			// endUIMan 3d rendering and texturing.
-			game->renderer->end3D();
 
-			//EndShaderMode();
-			game->renderer->stopTexturing();
+			game->endRenderingStep();
+			game->endTexturingStep();
 
-			/*
-			---------------------------------------------------------------------------------
-			|     2d Ui rendering for AFTER 3d drawing										|
-			---------------------------------------------------------------------------------
-			*/
-			//UIMan::drawUI();
-
-			// Warning : DO NOT MOVE THIS! this is important! due to a bug within raylib, this must be
-			// done after the texturing is done or a stack overflow WILL occur. GOD DAMN IT!
-			rlPopMatrix();
-
-			/*
-			---------------------------------------------------------------------------------
-			| 					Post Process Affects										|
-			---------------------------------------------------------------------------------
-			*/
-			SetTextureFilter(game->renderer->operator RenderTexture().texture, TEXTURE_FILTER_ANISOTROPIC_16X);
-			game->renderer->startDraw();
-			// Begin drawing mode so we can actually see stuff!
-
-			// We must tell OpenGL that we want to use the bloom shader on the FBO!
-			//BeginShaderMode(game->renderers->forwardRenderer->bloomShader);
-
-			// NOTE: Render texture must be y-flipped due to default OpenGL coordinates (left-bottom)
-
-			// tell OpenGL that we no longer need the bloom shader to be active. so in other words tell it to fuck off.
-			//EndShaderMode();
-
-			// Draw the FPS onto the screen.
-			DrawFPS(100, 100);
-
+			game->startDrawingstep();
 			game->drawUI(DRAW_FINAL);
 
-			// Let raylib know that we're done drawing to the screen.
-			game->renderer->endDraw();
-
-			// clear the screen and replace it with black.
+			game->endDrawingStep();
 		}
 
-		/*
-		---------------------------------------------------------------------------------
-		| 					           Unloading										|
-		---------------------------------------------------------------------------------
-		*/
-
-		// Unload models. Note : Technically we dont need to unload models as they get automatically
-		// unloaded, but it is still good practice. Same goes with textures.
 		UnloadModel(DefaultBlockModel);
 
 		// Unload textures
@@ -652,21 +385,13 @@ namespace TechStormRivalry {
 			remove("HMap.png");
 		}
 
-		// End the game, do closing actions within the EndGame() function
 		game->endGame();
 
-		// Flush all game objects within the buffer. This is important! Otherwise, the game objects will
-		// not be deleted, cause memory leaks, and negates the entire purpose of this system.
-		game->flushBuffer();
-		//threadGroups.join();
-
-		// Delete pointers declared within this function
 		delete game;
 		delete block;
+
 		//delete man;
 		delete player;
-
-		// The software returns a 0 (success) and exits.
 	}
 }
 int main()

@@ -2,6 +2,7 @@
 #include "../../Common.h"
 #include "../states/GameState.h"
 #include <rlgl.h>
+
 // GBuffer data
 typedef struct GBuffer {
 	unsigned int framebuffer;
@@ -42,6 +43,7 @@ public:
 
 		gBuffer.positionTexture = rlLoadTexture(NULL, gameState->screenWidth, gameState->screenHeight, RL_PIXELFORMAT_UNCOMPRESSED_R32G32B32, 1);
 		gBuffer.normalTexture = rlLoadTexture(NULL, gameState->screenWidth, gameState->screenHeight, RL_PIXELFORMAT_UNCOMPRESSED_R32G32B32, 1);
+
 		// Albedo (diffuse color) and specular strength can be combined into one texture.
 		// The color in RGB, and the specular strength in the alpha channel.
 		gBuffer.albedoSpecTexture = rlLoadTexture(NULL, gameState->screenWidth, gameState->screenHeight, RL_PIXELFORMAT_UNCOMPRESSED_R8G8B8A8, 1);

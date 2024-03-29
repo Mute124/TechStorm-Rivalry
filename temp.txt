@@ -1,524 +1,393 @@
+/*
+---------------------------------------------------------------------------------
+| 					         Includes											|
+---------------------------------------------------------------------------------
+*/
 #pragma once
-#include "../../Game.h"
-#include "../../Common.h"
-#include "Velocity.h"
-#include "GravityWell.h"
-#include "PhysicsConstants.h"
+#include "Math.h"
+#include "techstorm/common.h"
+#include "techstorm/core/utils/Button.h" // TODO : Can this be moved to common.h?
 
-class PhysObject : public GameObject {
-public:
-	double envResistance = 0.04; // how much resistance is in the env
-	Vector3 pull = Vector3One();
-	float mass = 3.0f; // in kg
-	Energy energyConstant;
-	Energy specificPotentialEnergy;
-	Energy specificKineticEnergy;
-	Energy specificOrbitalEnergy;
-	Force impactForce; // in newtons.
-	double tangientalVelocity;
-	double scalarMomentum;
-	float scalarSpeed;
-	float averageVelocity;
-	float scalarAcceleration;
-	Vector3 linearVelocity;
-	Vector3 linearSpeed;
-	Vector3 linearAcceleration;
-	Vector3 prevLinearAcceleration;
-	Vector3 prevLinearVelocity;
-	Quaternion rot;
-	GravityWell* selfWell;
+// Game Engine Includes
+#include "techstorm/Game.h"
+#include "techstorm/globalobj/Block.h"
+#include "techstorm/core/obj/Gameobject.h"
+#include "techstorm/core/gamescreen/MenuCamera.h"
+#include "techstorm/player/Player.h"
+#include "techstorm/core/rendering/Light.h"
 
-	PhysObject() {
-	}
+#include "techstorm/core/threading/ThreadGroups.h"
+#include "techstorm/core/ui/UIElement.h"
+#include "techstorm/core/ui/UIMan.h"
+#include "techstorm/ui/UIFadingMsg.h"
+#include "techstorm/core/audio/FxMan.h"
+#include "techstorm/globalobj/Objects.h"
+#include "techstorm/console/Console.h"
+#include "techstorm/core/physics/PhysMan.h"
+#include "techstorm/core/ui/UIMenu.h"
+#include "techstorm/ui/MainMenu.h"
+#include "techstorm/ui/PlayerHUD.h"
 
-	PhysObject(Shader shdr, Vector3 pos) {
-		this->selfWell = new GravityWell();
-		this->selfWell->gravIntensity = 1.5f;
-		GravityWells::push(this->selfWell);
-		this->init(shdr, pos);
-	}
+#include <time.h>
+#include <vector> // needed for game object list
 
-	void init(Shader shdr, Vector3 pos) {
-		this->threadSafe = true;
-		this->isDynamic = true;
-		this->position = pos;
-		this->model = GetDefaultModel();
-		this->tint = WHITE;
-		this->shdr = shdr;
-		const static Texture2D Bricks = LoadTexture("resources/textures/Block/Brick/Brick.png");
-		this->model.materials[0].shader = this->shdr;
+#define NUM_MODELS  9               // Parametric 3d shapes to generate
 
-		// why the fuck does PBR lighting not work on AMD cards but not nvidia??
-		this->model.materials[0].maps[MATERIAL_MAP_ALBEDO].color = WHITE;
-		this->model.materials[0].maps[MATERIAL_MAP_METALNESS].value = 0.0f;
-		this->model.materials[0].maps[MATERIAL_MAP_ROUGHNESS].value = 0.0f;
-		this->model.materials[0].maps[MATERIAL_MAP_OCCLUSION].value = 1.0f;
-		this->model.materials[0].maps[MATERIAL_MAP_EMISSION].color = Color{ 255, 162, 0, 100 };
+namespace TechStormRivalry {
+	static void mainThread() {
 
-		//		this->model.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = Bricks;
-		this->model.materials[0].maps[MATERIAL_MAP_ALBEDO].texture = Bricks;
-		this->model.materials[0].maps[MATERIAL_MAP_METALNESS].texture = LoadTexture("resources/textures/Block/Brick/brickMRAO.png");
-		this->model.materials[0].maps[MATERIAL_MAP_NORMAL].texture = LoadTexture("resources/textures/Block/Brick/brick_NORM.png");
-		this->selfWell = new GravityWell();
-		this->precompute();
-	}
-	void init(Shader shdr) {
-		this->threadSafe = true;
-		this->isDynamic = true;
-		this->position = Vector3{ 10, 10, 10 };
+		// Lets the program know if the game should use HDR as the skybox
+		bool useHDR = true;
 
-		this->model = GetDefaultModel();
-		this->tint = WHITE;
-		this->shdr = shdr;
-		const static Texture2D Bricks = LoadTexture("resources/textures/Block/Brick/Brick.png");
-		this->model.materials[0].shader = this->shdr;
+		// Initialie the condition for the breathing sound.
+		bool isBreathing = false;
 
-		// why the fuck does PBR lighting not work on AMD cards but not nvidia??
-		this->model.materials[0].maps[MATERIAL_MAP_ALBEDO].color = WHITE;
-		this->model.materials[0].maps[MATERIAL_MAP_METALNESS].value = 0.0f;
-		this->model.materials[0].maps[MATERIAL_MAP_ROUGHNESS].value = 0.0f;
-		this->model.materials[0].maps[MATERIAL_MAP_OCCLUSION].value = 1.0f;
-		this->model.materials[0].maps[MATERIAL_MAP_EMISSION].color = Color{ 255, 162, 0, 100 };
+		// Viewsway
+		float swayAmount = 0.0003f; // how much should the view sway be affected.
+		float swaySpeed = 0.02f; // how fast should camera sway
+		float swayTimer = 0.0f; // Dont mess with this. it will fuck up the swaying.
 
-		//		this->model.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = Bricks;
-		this->model.materials[0].maps[MATERIAL_MAP_ALBEDO].texture = Bricks;
-		this->model.materials[0].maps[MATERIAL_MAP_METALNESS].texture = LoadTexture("resources/textures/Block/Brick/brickMRAO.png");
-		this->model.materials[0].maps[MATERIAL_MAP_NORMAL].texture = LoadTexture("resources/textures/Block/Brick/brick_NORM.png");
-		this->precompute();
-	}
+		/*
+		* Near death affect.
+		* Important :
+		*	THESE ARE REQUIRED FOR THE ARCH ALGORITHM TO WORK!
+		*	See Math.h for the Arch algorithm explanation and uses.
+		*
+		* Note:
+		*	Use a graphing calculator to visualize the algorithm
+		*/
+		float nearDeathTimer = 0.0f; // The X axis
+		float amplitude = 255; // How high the Parabola goes
+		float frequency = 5; // How often the arches are
+		float steepness = 2.4f; // How steep the curve is, NOTE : If it is an odd number, it will not show as it only works for even times.
+		float offset = 1; // Offset of the arches from x = 0
+		const float scaleFactor = 25; // Scaling factor, how much the parabolas is scaled
+		float nearDeathIntensity = 0.0f; // The Y Axis of the algorithm
 
-	virtual void draw() override {
-		this->model.transform = QuaternionToMatrix(rot);
-		DrawModel(this->model, this->position, 1.0f, WHITE);
+		// Health bar fuckery
+		float healthBarPositionX = 0.0f;
+		float healthBarPositionY = 0.0f;
+		int healthBarOffsetX = 0;
+		int healthBarOffsetY = 500;
 
-		DrawLine3D(this->position, this->linearVelocity, YELLOW);
-		DrawSphere(this->linearVelocity, 0.2f, YELLOW);
+		// represents the raycasting from the player to the world.
+		Ray ray;
 
-		DrawLine3D(this->position, this->linearAcceleration, RED);
-		DrawSphere(this->linearAcceleration, 0.2f, RED);
-	}
+		// Create game & load it into memory.
+		Game* game = new Game();
 
-	virtual void onUpdate() override {
-		double wellPull;
-		Vector3 preCalculationPosition = this->position;
-		for (int i = 0; i < GravityWells::count; i++) {
-			GravityWell* well = GravityWells::gravWells.at(i);
+		// Start the game and do any needed setup
+		game->init();
 
-			Vector3 wellPos = well->position;
+		TechStorm::Logman::Log("Main menu ready");
 
-			double dst = Vector3Distance(wellPos, this->position);
-			double force = GRAVITATIONAL_CONSTANT * ((well->mass * this->mass) / powf(dst, 2));
+		MainMenu::MainMenu* menu = new MainMenu::MainMenu(game);
 
-			// a = dV / dT
-			this->scalarAcceleration = Vector3Distance(this->linearVelocity, this->prevLinearVelocity) / GetFrameTime();
+		menu->awakeMenu();
+		menu->drawMenu();
 
-			this->impactForce = this->mass * this->scalarAcceleration;
+		// Create a default block model with a length, width, and height of the value of BLOCK_SIZE.
+		// This creates a cube mesh with a length, width, and height of BLOCK_SIZE and then converts it
+		// to a model, loading it into memory.
+		Model DefaultBlockModel = LoadModelFromMesh(
+			GenMeshCube(BLOCK_SIZE, BLOCK_SIZE,
+				BLOCK_SIZE)); // this is the default model used in blocksd.
 
-			//Vector3 pullByGravity = Vector3Lerp(this->position, wellPos, )
+		// todo : change all use instances of DefaultBlockModel to use the global default model.
+		SetDefaultModel(DefaultBlockModel);
 
-				// average velocity is equal to speed divided by time, we are using frame time as it is a good representation of time passed.
-			this->averageVelocity = scalarSpeed / GetFrameTime();
+		// Construct the block object
+		Block* block = new Block(Vector3Zero(), WHITE, game->getGlobalShader(game->pbrShdrLoc), DefaultBlockModel);
 
-			//this->linearVelocity = Vector3Distance(this->position, );
+		// Finally push it off to the object manager
+		game->pushObject(block);
 
-			// k = 1/2 * m * v^2
-			this->specificKineticEnergy = 0.5 * this->mass * pow(this->averageVelocity, 2);
+		// Create the player model
+	// NOTE: This model is TEMPORARY! It will be deleted after a proper model is made. Refers to the
+	// size of the player model. Same process as the default block model creation.
+		const int Playersize = 3;
+		Model PlayerModel = LoadModelFromMesh(GenMeshCube(Playersize, Playersize, Playersize));
 
-			// the rest of the energy is potential energy.
-			this->specificPotentialEnergy = abs(this->specificKineticEnergy - this->energyConstant);
+		// Construct the player object
+		Player::Player* player = new Player::Player(Vector3{ 0.0f, 2.0f, 4.0f }, PlayerModel, CAMERA_FIRST_PERSON);
 
-			this->prevLinearVelocity = this->linearVelocity;
-			/*
-			* this->specificKineticEnergy = 0.5 * this->mass;
+		// Finally push it off to the object manager
+		game->pushObject(player);
 
-			this->linearAcceleration = Vector3AddValue(Vector3Add(this->linearVelocity, Vector3Subtract(this->linearAcceleration, this->prevLinearAcceleration)), -power);
-			this->linearVelocity = Vector3Lerp(wellPos, this->position, dst * GetFrameTime());
+		// Skybox geometry generation step
+		Mesh skyboxMesh = GenMeshCube(1.0f, 1.0f, 1.0f);
 
-			this->position = Vector3Lerp(this->position, this->linearVelocity, power * GetFrameTime());
+		// Skybox model loading step
+		Model skybox = LoadModelFromMesh(skyboxMesh);
 
-			rot = QuaternionFromVector3ToVector3(this->position, Vector3AddValue(wellPos, power));
+		// Load skybox shader and set required locations step
+		// NOTE: Some locations are automatically set at shader loading
+		skybox.materials[0].shader = LoadShader("resources/skybox.vs", "resources/skybox.fs");
 
-			float x = this->linearVelocity.x * this->mass;
-			float y = this->linearVelocity.y * this->mass;
-			float z = this->linearVelocity.z * this->mass;
+		// since the compiler complains about the references of such, these three vars are for the
+		// skybox shaders. They will be deleted after.
+		static int skyboxEnvironmentMap = MATERIAL_MAP_CUBEMAP;
 
-			this->scalarMomentum = x + y + z;
+		// Both variables are equal to 1 if useHDR is true, otherwise 0
+		static int skyboxUsesGamma = { useHDR ? 1 : 0 };
+		static int skyboxIsVFlipped = { useHDR ? 1 : 0 };
 
-			this->prevLinearAcceleration = this->linearVelocity;
-			this->linearAcceleration = Vector3SubtractValue(this->linearVelocity, this->envResistance);
+		// Load the environment map
+		SetShaderValue(
+			skybox.materials[0].shader,
+			GetShaderLocation(skybox.materials[0].shader, "environmentMap"), &skyboxEnvironmentMap,
+			SHADER_UNIFORM_INT);
 
-			this->tangientalVelocity = (Vector3Angle(this->position, wellPos) / 2.0f) * dst;
+		// Should the shader use gamma correction
+		SetShaderValue(skybox.materials[0].shader,
+			GetShaderLocation(skybox.materials[0].shader, "doGamma"), &skyboxUsesGamma,
+			SHADER_UNIFORM_INT);
 
-			this->linearVelocity.z = this->linearVelocity.z + this->tangientalVelocity;
-			this->linearVelocity = Vector3AddValue(this->linearVelocity, this->scalarMomentum + this->tangientalVelocity);
-			*/
+		// Is the skybox flipped vertically
+		SetShaderValue(skybox.materials[0].shader,
+			GetShaderLocation(skybox.materials[0].shader, "vflipped"), &skyboxIsVFlipped,
+			SHADER_UNIFORM_INT);
+
+		// Load cubemap shader and setup required shader locations
+		Shader shdrCubemap =
+			LoadShader("resources/cubemap.vs", "resources/cubemap.fs");
+
+		// set shdrCubemap's equirectangular map.
+		const static int equimap = 0;
+		SetShaderValue(shdrCubemap, GetShaderLocation(shdrCubemap, "equirectangularMap"), &equimap, SHADER_UNIFORM_INT);
+
+		// Note: The filename is hardcoded here and also has a limit of 256 characters! I will be
+		// dissapointed if you somehow dont know what that variable does...
+		char skyboxFileName[256] = { 0 };
+
+		// This is the panoramic texture, It is used IF useHDR is true
+		Texture2D panorama = { 0 };
+
+		if (useHDR)
+		{
+			TextCopy(skyboxFileName, "resources/milkyWay.hdr");
+
+			// Load HDR panorama (sphere) texture
+			panorama = LoadTexture(skyboxFileName);
+
+			//skybox.materials[0].maps[MATERIAL_MAP_CUBEMAP].texture = GenTextureCubemap(
+			//	shdrCubemap, panorama, 1024, PIXELFORMAT_UNCOMPRESSED_R8G8B8A8);
+		}
+		else
+		{
+			// it isnt going to be used. so it can fuck off.
+			UnloadTexture(panorama);
+
+			// Load non HDR panorama (cube) texture
+			Image img = LoadImage("resources/textures/space.png");
+
+			// Set it's cubemap texture.
+			skybox.materials[0].maps[MATERIAL_MAP_CUBEMAP].texture = LoadTextureCubemap(
+				img, CUBEMAP_LAYOUT_AUTO_DETECT); // CUBEMAP_LAYOUT_PANORAMA
+
+			// unload img as we dont need it anymore.
+			UnloadImage(img);
 		}
 
-		this->scalarSpeed = CalculateVector3Speed(preCalculationPosition, this->position);
-
-		// calculate impact force.
-	}
-
-	void onDestroy() const override {
-		delete this;
-	}
-
-private:
-
-	// precompute constants.
-	void precompute() {
-		this->energyConstant = this->mass * pow(LIGHT_SPEED, 2);
-
-		float x = this->linearVelocity.x * this->mass;
-		float y = this->linearVelocity.y * this->mass;
-		float z = this->linearVelocity.z * this->mass;
-
-		this->scalarMomentum = x + y + z;
-	}
-};
-
-
-
-
-	PhysMan::PhysMan();
-	PhysMan::~PhysMan();
-	// Callback for traces, connect this to your own trace function if you have one
-	static void TraceImpl(const char* inFMT, ...);
-
-#ifdef JPH_ENABLE_ASSERTS
-
-	// Callback for asserts, connect this to your own assert handler if you have one
-	static bool AssertFailedImpl(const char* inExpression, const char* inMessage, const char* inFile, JPH::uint inLine);
-
-#endif // JPH_ENABLE_ASSERTS
-
-	/// Class that determines if two object layers can collide
-	class ObjectLayerPairFilterImpl : public JPH::ObjectLayerPairFilter
-	{
-	public:
-		virtual bool ShouldCollide(JPH::ObjectLayer inObject1, JPH::ObjectLayer inObject2) const override;
-	};
-
-	// BroadPhaseLayerInterface implementation
-	// This defines a mapping between object and broadphase layers.
-	class BPLayerInterfaceImpl final : public JPH::BroadPhaseLayerInterface
-	{
-	public:
-		BPLayerInterfaceImpl();
-
-		virtual JPH::uint					GetNumBroadPhaseLayers() const override;
-
-		virtual JPH::BroadPhaseLayer			GetBroadPhaseLayer(JPH::ObjectLayer inLayer) const override;
-
-#if defined(JPH_EXTERNAL_PROFILE) || defined(JPH_PROFILE_ENABLED)
-		virtual const char* GetBroadPhaseLayerName(JPH::BroadPhaseLayer inLayer) const override;
-#endif // JPH_EXTERNAL_PROFILE || JPH_PROFILE_ENABLED
-
-	private:
-		JPH::BroadPhaseLayer					mObjectToBroadPhase[Layers::NUM_LAYERS];
-	};
-
-	/// Class that determines if an object layer can collide with a broadphase layer
-	class ObjectVsBroadPhaseLayerFilterImpl : public JPH::ObjectVsBroadPhaseLayerFilter
-	{
-	public:
-		virtual bool				ShouldCollide(JPH::ObjectLayer inLayer1, JPH::BroadPhaseLayer inLayer2) const override;
-	};
-
-	// An example contact listener
-	class MyContactListener : public JPH::ContactListener
-	{
-	public:
-		// See: ContactListener
-		virtual JPH::ValidateResult	OnContactValidate(const JPH::Body& inBody1, const JPH::Body& inBody2, JPH::RVec3Arg inBaseOffset, const JPH::CollideShapeResult& inCollisionResult) override;
-
-		virtual void			OnContactAdded(const JPH::Body& inBody1, const JPH::Body& inBody2, const JPH::ContactManifold& inManifold, JPH::ContactSettings& ioSettings) override;
-
-		virtual void			OnContactPersisted(const JPH::Body& inBody1, const JPH::Body& inBody2, const JPH::ContactManifold& inManifold, JPH::ContactSettings& ioSettings) override;
-
-		virtual void			OnContactRemoved(const JPH::SubShapeIDPair& inSubShapePair) override;
-	};
-
-	// An example activation listener
-	class MyBodyActivationListener : public JPH::BodyActivationListener
-	{
-	public:
-		virtual void		OnBodyActivated(const JPH::BodyID& inBodyID, JPH::uint64 inBodyUserData) override;
-
-		virtual void		OnBodyDeactivated(const JPH::BodyID& inBodyID, JPH::uint64 inBodyUserData) override;
-	};
-
-	JPH::uint cMaxBodies = 1024;
-	JPH::uint cNumBodyMutexes = 0;
-	JPH::uint cMaxBodyPairs = 1024;
-	JPH::uint cMaxContactConstraints = 1024;
-	BPLayerInterfaceImpl* broad_phase_layer_interface;
-	ObjectVsBroadPhaseLayerFilterImpl object_vs_broadphase_layer_filter;
-	ObjectLayerPairFilterImpl object_vs_object_layer_filter;
-
-	JPH::JobSystemThreadPool* job_system = new JPH::JobSystemThreadPool(JPH::cMaxPhysicsJobs, JPH::cMaxPhysicsBarriers, std::thread::hardware_concurrency() - 1);
-	JPH::TempAllocatorImpl* temp_allocator = new JPH::TempAllocatorImpl(10 * 1024 * 1024);
-
-
-
-	#include "PhysMan.h"
-
-// Callback for asserts, connect this to your own assert handler if you have one
-
-// Callback for traces, connect this to your own trace function if you have one
-using namespace JPH;
-using namespace JPH::literals;
-using namespace std;
-
-PhysMan::PhysMan() {
-	Logman::Log("New Physics manager instance created. Initializing Jolt...");
-
-	RegisterDefaultAllocator();
-
-	// Install trace and assert callbacks
-	Trace = TraceImpl;
-	JPH_IF_ENABLE_ASSERTS(AssertFailed = AssertFailedImpl;);
-
-	Factory::sInstance = new Factory();
-
-	RegisterTypes();
-
-	this->temp_allocator = new TempAllocatorImpl(10 * 1024 * 1024);
-
-	// We need a job system that will execute physics jobs on multiple threads. Typically
-	// you would implement the JobSystem interface yourself and let Jolt Physics run on top
-	// of your own job scheduler. JobSystemThreadPool is an example implementation.
-	JobSystemThreadPool job_system(cMaxPhysicsJobs, cMaxPhysicsBarriers, thread::hardware_concurrency() - 1);
-
-	// This is the max amount of rigid bodies that you can add to the physics system. If you try to add more you'll get an error.
-	// Note: This value is low because this is a simple test. For a real project use something in the order of 65536.
-	const uint cMaxBodies = 1024;
-
-	// This determines how many mutexes to allocate to protect rigid bodies from concurrent access. Set it to 0 for the default settings.
-	const uint cNumBodyMutexes = 0;
-
-	// This is the max amount of body pairs that can be queued at any time (the broad phase will detect overlapping
-	// body pairs based on their bounding boxes and will insert them into a queue for the narrowphase). If you make this buffer
-	// too small the queue will fill up and the broad phase jobs will start to do narrow phase work. This is slightly less efficient.
-	// Note: This value is low because this is a simple test. For a real project use something in the order of 65536.
-	const uint cMaxBodyPairs = 1024;
-
-	// This is the maximum size of the contact constraint buffer. If more contacts (collisions between bodies) are detected than this
-	// number then these contacts will be ignored and bodies will start interpenetrating / fall through the world.
-	// Note: This value is low because this is a simple test. For a real project use something in the order of 10240.
-	const uint cMaxContactConstraints = 1024;
-
-	// Create mapping table from object layer to broadphase layer
-	// Note: As this is an interface, PhysicsSystem will take a reference to this so this instance needs to stay alive!
-	BPLayerInterfaceImpl broad_phase_layer_interface;
-
-	// Create class that filters object vs broadphase layers
-	// Note: As this is an interface, PhysicsSystem will take a reference to this so this instance needs to stay alive!
-	ObjectVsBroadPhaseLayerFilterImpl object_vs_broadphase_layer_filter;
-
-	// Create class that filters object vs object layers
-	// Note: As this is an interface, PhysicsSystem will take a reference to this so this instance needs to stay alive!
-	ObjectLayerPairFilterImpl object_vs_object_layer_filter;
-
-	// Now we can create the actual physics system.
-	physics_system.Init(cMaxBodies, cNumBodyMutexes, cMaxBodyPairs, cMaxContactConstraints, broad_phase_layer_interface, object_vs_broadphase_layer_filter, object_vs_object_layer_filter);
-
-	// A body activation listener gets notified when bodies activate and go to sleep
-	// Note that this is called from a job so whatever you do here needs to be thread safe.
-	// Registering one is entirely optional.
-	physics_system.SetBodyActivationListener(&body_activation_listener);
-
-	// A contact listener gets notified when bodies (are about to) collide, and when they separate again.
-	// Note that this is called from a job so whatever you do here needs to be thread safe.
-	// Registering one is entirely optional.
-
-	physics_system.SetContactListener(&contact_listener);
-
-	// The main way to interact with the bodies in the physics system is through the body interface. There is a locking and a non-locking
-	// variant of this. We're going to use the locking version (even though we're not planning to access bodies from multiple threads)
-	BodyInterface& body_interface = physics_system.GetBodyInterface();
-
-	// Next we can create a rigid body to serve as the floor, we make a large box
-	// Create the settings for the collision volume (the shape).
-	// Note that for simple shapes (like boxes) you can also directly construct a BoxShape.
-	BoxShapeSettings floor_shape_settings(Vec3(100.0f, 1.0f, 100.0f));
-
-	// Create the shape
-	ShapeSettings::ShapeResult floor_shape_result = floor_shape_settings.Create();
-	ShapeRefC floor_shape = floor_shape_result.Get(); // We don't expect an error here, but you can check floor_shape_result for HasError() / GetError()
-
-	// Create the settings for the body itself. Note that here you can also set other properties like the restitution / friction.
-	BodyCreationSettings floor_settings(floor_shape, RVec3(0.0_r, -1.0_r, 0.0_r), Quat::sIdentity(), EMotionType::Static, Layers::NON_MOVING);
-
-	// Create the actual rigid body
-	Body* floor = body_interface.CreateBody(floor_settings); // Note that if we run out of bodies this can return nullptr
-
-	// Add it to the world
-	body_interface.AddBody(floor->GetID(), EActivation::DontActivate);
-
-	// Now create a dynamic body to bounce on the floor
-	// Note that this uses the shorthand version of creating and adding a body to the world
-	BodyCreationSettings sphere_settings(new SphereShape(0.5f), RVec3(0.0_r, 2.0_r, 0.0_r), Quat::sIdentity(), EMotionType::Dynamic, Layers::MOVING);
-	BodyID sphere_id = body_interface.CreateAndAddBody(sphere_settings, EActivation::Activate);
-
-	// Now you can interact with the dynamic body, in this case we're going to give it a velocity.
-	// (note that if we had used CreateBody then we could have set the velocity straight on the body before adding it to the physics system)
-	body_interface.SetLinearVelocity(sphere_id, Vec3(0.0f, -5.0f, 0.0f));
-
-	// We simulate the physics world in discrete time steps. 60 Hz is a good rate to update the physics system.
-	const float cDeltaTime = 1.0f / 60.0f;
-
-	// Optional step: Before starting the physics simulation you can optimize the broad phase. This improves collision detection performance (it's pointless here because we only have 2 bodies).
-	// You should definitely not call this every frame or when e.g. streaming in a new level section as it is an expensive operation.
-	// Instead insert all new objects in batches instead of 1 at a time to keep the broad phase efficient.
-	physics_system.OptimizeBroadPhase();
-}
-
-PhysMan::~PhysMan() {
-	Logman::Log("Closing physics");
-
-	// Unregisters all types with the factory and cleans up the default material
-	UnregisterTypes();
-
-	// Destroy the factory
-	delete Factory::sInstance;
-	Factory::sInstance = nullptr;
-}
-
-// Callback for traces, connect this to your own trace function if you have one
-
-inline void PhysMan::TraceImpl(const char* inFMT, ...)
-{
-	// Format the message
-	va_list list;
-	va_start(list, inFMT);
-	char buffer[1024];
-	vsnprintf(buffer, sizeof(buffer), inFMT, list);
-	va_end(list);
-
-	// Print to the TTY
-	Logman::Log(buffer);
-}
-
-// Callback for asserts, connect this to your own assert handler if you have one
-
-inline bool PhysMan::AssertFailedImpl(const char* inExpression, const char* inMessage, const char* inFile, JPH::uint inLine)
-{
-	// Print to the TTY
-	std::cout << inFile << ":" << inLine << ": (" << inExpression << ") " << (inMessage != nullptr ? inMessage : "") << std::endl;
-
-	// Breakpoint
-	return true;
-}
-
-void PhysMan::makeFloor()
-{
-	// Next we can create a rigid body to serve as the floor, we make a large box
-	// Create the settings for the collision volume (the shape).
-	// Note that for simple shapes (like boxes) you can also directly construct a BoxShape.
-	BoxShapeSettings floor_shape_settings(Vec3(100.0f, 1.0f, 100.0f));
-
-	// Create the shape
-	ShapeSettings::ShapeResult floor_shape_result = floor_shape_settings.Create();
-	ShapeRefC floor_shape = floor_shape_result.Get(); // We don't expect an error here, but you can check floor_shape_result for HasError() / GetError()
-
-	// Create the settings for the body itself. Note that here you can also set other properties like the restitution / friction.
-	BodyCreationSettings floor_settings(floor_shape, RVec3(0.0_r, -1.0_r, 0.0_r), Quat::sIdentity(), EMotionType::Static, Layers::NON_MOVING);
-
-	// Create the actual rigid body
-	Body* floor = body_interface.CreateBody(floor_settings); // Note that if we run out of bodies this can return nullptr
-
-	// Add it to the world
-	body_interface.AddBody(floor->GetID(), EActivation::DontActivate);
-}
-
-inline bool PhysMan::ObjectLayerPairFilterImpl::ShouldCollide(JPH::ObjectLayer inObject1, JPH::ObjectLayer inObject2) const
-{
-	switch (inObject1)
-	{
-	case Layers::NON_MOVING:
-		return inObject2 == Layers::MOVING; // Non moving only collides with moving
-	case Layers::MOVING:
-		return true; // Moving collides with everything
-	default:
-		JPH_ASSERT(false);
-		return false;
+		unsigned int sun = game->CreateLight(TechStorm::LIGHT_POINT, TechStorm::uVec3f{ 1.0f, 0.0f, 1.0f }, Vector3One(), WHITE, 4.0f);
+
+		// Enable the sun as a precautionary measure.
+		game->getlight(sun).enabled = true;
+
+		// The texture for the near death affect initialization
+		Texture2D nearDeathTex = { 0 };
+
+		// The image for the near death affect initialization
+		Image nearDeathAffect = { 0 };
+
+		// The color for the near death affect initialization
+		TechStorm::uColor nearDeathColor = TechStorm::uColor();
+
+		healthBarPositionX = game->winWidth + healthBarOffsetX;
+		healthBarPositionY = game->winHeight + healthBarOffsetY;
+
+		DisableCursor();
+
+		PlayerHUD* hud = new PlayerHUD(game);
+
+		while (!WindowShouldClose())
+		{
+			int scroll = GetMouseWheelMove();
+			UpdateCamera(player->cameraComponent->getSelfCameraPointer(), CAMERA_FIRST_PERSON); // Update camera
+
+			// NOTE : This is a very basic implementation of placing an object into the world. This is
+			// temporary and should be fleshed out.
+			if (IsMouseButtonDown(MOUSE_BUTTON_RIGHT))
+			{
+				Vector3 placepos = player->cameraComponent->getTarget();
+			}
+
+			if (IsKeyPressed(KEY_ESCAPE))
+			{
+				// Todo, move the menuCamera to be created on game startup and then hidden. it gets
+				// shown on if statement validation
+				bool exit = false;
+				bool manualExit = false;
+
+				MenuCamera* men_pause = new MenuCamera();
+				TechStorm::ButtonR* save = new TechStorm::ButtonR("Save", 100, 100);
+				TechStorm::ButtonR* Options = new TechStorm::ButtonR("Options", 100, 200);
+				TechStorm::ButtonR* exitButton = new TechStorm::ButtonR("Exit to Windows", 100, 300);
+
+				EnableCursor();
+				while (!exit)
+				{
+					BeginDrawing();
+
+					save->draw();
+					save->updateObjects();
+
+					Options->draw();
+					Options->updateObjects();
+
+					exitButton->draw();
+					exitButton->updateObjects();
+
+					if (exitButton->IsClicked())
+					{
+						manualExit = true;
+					}
+
+					if (Options->IsClicked())
+					{
+						bool closeOptions = false;
+						while (!closeOptions)
+						{
+							// TODO : Add options
+
+							if (IsKeyDown(KEY_ESCAPE))
+							{
+								closeOptions = true;
+							}
+						}
+					}
+
+					EndDrawing();
+					if (IsKeyPressed(KEY_ESCAPE) && exit == false)
+					{
+						exit = true;
+					}
+					else if (IsKeyPressed(KEY_ESCAPE) && exit == true)
+					{
+						break;
+					}
+
+					if (manualExit)
+					{
+						exit = true;
+					}
+				}
+
+				// cleanup UnloadTexture(tex);
+				delete men_pause;
+				delete save;
+				delete exitButton;
+				if (manualExit)
+				{
+					TechStorm::Logman::customLog(LOG_INFO, "Exiting Game", NULL);
+					break;
+				}
+			}
+
+			if (IsKeyPressed(KEY_E)) {
+			}
+
+			if (IsKeyDown(KEY_Y)) {
+				player->damage(15);
+			}
+
+			// The player's looking direction is the target of the camera. This is the direction the
+			// player is looking TODO : Check relevancy.
+			ray.position = player->cameraComponent->getPosition();
+			ray.direction = player->cameraComponent->getTarget();
+
+			// Sway timer is equal to swayTimer + frame delta time
+			swayTimer += GetFrameTime();
+
+			// sway the camera according to the sway algorithm.
+			player->cameraComponent->setTarget(Vector3{ player->cameraComponent->getTarget().x + sin(swayTimer * swaySpeed) * swayAmount, player->cameraComponent->getTarget().y, player->cameraComponent->getTarget().z + cos(swayTimer * swaySpeed) * swayAmount });
+
+			/*
+			* 			if (player->health <= 15) {
+
+							// equal to nearDeathTimer + frame delta time
+					//nearDeathTimer += GetFrameTime();
+
+							if (nearDeathIntensity >= 255) {
+								nearDeathIntensity -= nearDeathIntensity / 2;
+							}
+							else if ((nearDeathIntensity > 0) && (nearDeathIntensity < 255)) {
+								nearDeathIntensity += nearDeathIntensity / 2;
+							}
+							Image img = LoadImageFromTexture(game->renderer->getRenderTexture().texture);
+							nearDeathColor = Color{ 255, 0, 0, (unsigned char)nearDeathIntensity };
+							ImageColorTint(&img, nearDeathColor);
+							Color* pixels = LoadImageColors(img);
+							UpdateTexture(game->renderer->getRenderTexture().texture, pixels);             // Update texture with new image data
+							UnloadImageColors(pixels);                  // Unload pixels data from RAM
+							UpdateTexture(game->renderer->getRenderTexture().texture, pixels);
+						}
+			*/
+
+			// Stashes input events for later
+			PollInputEvents(); // helps for some reason?
+
+			game->getlight(sun).position = player->cameraComponent->getPosition();
+
+			Vector4 carEmissiveColor = ColorNormalize(block->model.materials[0].maps[MATERIAL_MAP_EMISSION].color);
+			SetShaderValue(Game::getGlobalShader(Game::pbrShdrLoc), Game::emissiveColorLoc, &carEmissiveColor, SHADER_UNIFORM_VEC4);
+
+			// How bright should the object emit it's emission color.
+			float emissiveIntensity = 0.01f;
+			SetShaderValue(Game::getGlobalShader(Game::pbrShdrLoc), Game::emissiveIntensityLoc, &emissiveIntensity, SHADER_UNIFORM_FLOAT);
+			game->startRenderStep(player->cameraComponent->getSelfCameraPointer());
+
+			//DrawTextureRec(nearDeathTex, Rectangle{ 0, 0, (float)(game->renderer->fboDimensions.x), (float)(-game->renderer->fboDimensions.y) }, TechStorm::uVec2i{ 0, 0 }, WHITE);
+		}
+
+		UnloadModel(DefaultBlockModel);
+
+		// Unload textures
+		UnloadTexture(nearDeathTex);
+
+		// Unload images
+		UnloadImage(nearDeathAffect);
+
+		// Delete temporary files.
+		using namespace std;
+		{
+			remove("PerlinTest.png");
+			remove("HMap.png");
+		}
+
+		game->endGame();
+
+		delete game;
+		delete block;
+
+		//delete man;
+		delete player;
 	}
 }
-
-inline PhysMan::BPLayerInterfaceImpl::BPLayerInterfaceImpl()
+int main()
 {
-	// Create a mapping table from object to broad phase layer
-	mObjectToBroadPhase[Layers::NON_MOVING] = BroadPhaseLayers::NON_MOVING;
-	mObjectToBroadPhase[Layers::MOVING] = BroadPhaseLayers::MOVING;
-}
-
-inline JPH::uint PhysMan::BPLayerInterfaceImpl::GetNumBroadPhaseLayers() const
-{
-	return BroadPhaseLayers::NUM_LAYERS;
-}
-
-inline JPH::BroadPhaseLayer PhysMan::BPLayerInterfaceImpl::GetBroadPhaseLayer(JPH::ObjectLayer inLayer) const
-{
-	JPH_ASSERT(inLayer < Layers::NUM_LAYERS);
-	return mObjectToBroadPhase[inLayer];
-}
-
-inline const char* PhysMan::BPLayerInterfaceImpl::GetBroadPhaseLayerName(JPH::BroadPhaseLayer inLayer) const
-{
-	switch ((JPH::BroadPhaseLayer::Type)inLayer)
+	try
 	{
-	case (JPH::BroadPhaseLayer::Type)BroadPhaseLayers::NON_MOVING:	return "NON_MOVING";
-	case (JPH::BroadPhaseLayer::Type)BroadPhaseLayers::MOVING:		return "MOVING";
-	default:													JPH_ASSERT(false); return "INVALID";
-	}
-}
+		// Run the game
+		std::thread t(std::move(TechStormRivalry::mainThread));
 
-inline bool PhysMan::ObjectVsBroadPhaseLayerFilterImpl::ShouldCollide(JPH::ObjectLayer inLayer1, JPH::BroadPhaseLayer inLayer2) const
-{
-	switch (inLayer1)
+		//scriptManager->startScriptMan(true);
+		t.join();
+	}
+	catch (const std::exception& e)
 	{
-	case Layers::NON_MOVING:
-		return inLayer2 == BroadPhaseLayers::MOVING;
-	case Layers::MOVING:
-		return true;
-	default:
-		JPH_ASSERT(false);
-		return false;
+		TechStorm::Logman::Log(e.what());
 	}
-}
 
-// See: ContactListener
-
-inline JPH::ValidateResult PhysMan::MyContactListener::OnContactValidate(const JPH::Body& inBody1, const JPH::Body& inBody2, JPH::RVec3Arg inBaseOffset, const JPH::CollideShapeResult& inCollisionResult)
-{
-	Logman::Log("Contact validate callback");
-
-	// Allows you to ignore a contact before it is created (using layers to not make objects collide is cheaper!)
-	return JPH::ValidateResult::AcceptAllContactsForThisBodyPair;
-}
-
-inline void PhysMan::MyContactListener::OnContactAdded(const JPH::Body& inBody1, const JPH::Body& inBody2, const JPH::ContactManifold& inManifold, JPH::ContactSettings& ioSettings)
-{
-	Logman::Log("A contact was made");
-}
-
-inline void PhysMan::MyContactListener::OnContactPersisted(const JPH::Body& inBody1, const JPH::Body& inBody2, const JPH::ContactManifold& inManifold, JPH::ContactSettings& ioSettings)
-{
-	Logman::Log("a contact persisted");
-}
-
-inline void PhysMan::MyContactListener::OnContactRemoved(const JPH::SubShapeIDPair& inSubShapePair)
-{
-	Logman::Log("A contact was removed");
-}
-
-inline void PhysMan::MyBodyActivationListener::OnBodyActivated(const JPH::BodyID& inBodyID, JPH::uint64 inBodyUserData)
-{
-	Logman::Log("A body was activated");
-}
-
-inline void PhysMan::MyBodyActivationListener::OnBodyDeactivated(const JPH::BodyID& inBodyID, JPH::uint64 inBodyUserData)
-{
-	Logman::Log("A body was deactivated");
+	return 0;
 }

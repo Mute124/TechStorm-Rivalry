@@ -33,6 +33,7 @@ typedef enum EAffectable {
 	AFFECTABLE_NULL, // No affect
 	AFFECTABLE_AFFLICTION, // affects another affliction
 	AFFECTABLE_HEALTH, // Overall health
+
 	// Blood
 	AFFECTABLE_BLOOD_FLOW, // blood flow (if it is zero, well your heart is dead)
 	AFFECTABLE_BLOOD_PRESSURE, // blood pressure

@@ -32,10 +32,6 @@ namespace TechStorm {
 		virtual void updateElement() {}
 
 		virtual void onDestroy() {
-			kill();
-		}
-
-		void kill() {
 			delete this;
 		}
 
@@ -56,23 +52,30 @@ namespace TechStorm {
 			if (!isSleeping) {
 				std::function<void()> updateFunc = [this]() {
 					for (auto& element : children) {
+
 						// check if it should be deleted.
 						if (element.second->deleteMe) {
-							element.second->onDestroy();
-							killChild(element.second->id);
+							killChild(element.first);
+							Logman::Log(TextFormat("Child #%i Killed", element.first));
 						}
 						else {
-							element.second->updateElement();
+							if (element.second == nullptr) {
+								continue;
+							}
+							else {
+								element.second->updateElement();
+							}
 						}
 					}
 					};
+
 				std::thread* updater = new std::thread(updateFunc);
 				updater->detach();
 			}
 		}
 
 		//
-		bool isAsleep() {
+		bool isAsleep() const {
 			return this->isSleeping == true;
 		}
 
@@ -93,7 +96,7 @@ namespace TechStorm {
 		// Let this container it is their time to shine!
 		void drawChildren(EDrawType drawMode) {
 			for (auto& element : children) {
-				if (element.second->drawTime == drawMode) {
+				if (element.second->drawTime == drawMode && element.second != nullptr) {
 					element.second->drawElement();
 				}
 				else {
@@ -123,10 +126,7 @@ namespace TechStorm {
 
 		void clear() {
 			for (auto& element : children) {
-
-				element.second->onDestroy();
-				
-
+				element.second->deleteMe = true;
 			}
 		}
 
@@ -135,11 +135,19 @@ namespace TechStorm {
 		const char* containerTag;
 
 		int containerID;
+
 		// threat eliminated! (It gets deleted next frame.)
 		void killChild(int target) {
-			this->children[target]->isVisible = false;
-			this->children.erase(target);
-			elements--;
+			children.at(target)->onDestroy();
+			children.erase(target);
+		}
+
+		void kill() {
+			for (auto& child : children) {
+				if (child.second != nullptr) {
+					killChild(child.first);
+				}
+			}
 		}
 
 		virtual void onChildKilled() {}

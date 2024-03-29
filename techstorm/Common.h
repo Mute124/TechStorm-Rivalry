@@ -10,6 +10,7 @@
 #include <raylib.h>
 #include <raymath.h>
 #include "lib/rcamera.h"
+
 // C++ Libraries
 #include <stdio.h>
 #include <stdlib.h>
@@ -32,6 +33,7 @@
 
 // Engine Includes
 #include "Globals.h"
+#include "core/TechStorm.h"
 #include "core/config/Configman.h"
 #include "core/logging/Logman.h"
 #include "core/obj/Gameobject.h"
@@ -42,7 +44,8 @@
 #include "core/utils/ArrayUtils.h"
 #include "core/audio/FxMan.h"
 #include "core/ui/UIMan.h"
-#include "core/TechStorm.h"
 #include "TechStorm-Rivalry.h"
+
+#include "Game.h"
 
 // end of common.h

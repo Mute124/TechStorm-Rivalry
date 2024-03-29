@@ -57,6 +57,7 @@ public:
 	*	The name put into the map IS THE FILENAME (without extension). use that to search for it.
 	*/
 	void loadFx(const char* path) {
+
 		// check it's extension.
 		const char* ext = GetFileExtension(path);
 

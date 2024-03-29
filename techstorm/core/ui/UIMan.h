@@ -1,5 +1,5 @@
 #pragma once
-#include "../../Common.h"
+#include "../TechStorm.h"
 #include "../gameScreen/MenuCamera.h"
 #include "UIElement.h"
 
@@ -15,6 +15,7 @@ namespace TechStorm {
 	*/
 	class UIMan {
 	public:
+
 		// constructor, creates the designated rogue container.
 		UIMan() {
 		}
@@ -24,6 +25,7 @@ namespace TechStorm {
 			addRogueContainer();
 
 			currentInstance = this;
+			SetTextLineSpacing(48);
 		}
 
 		void drawUI(EDrawType drawType) {
@@ -59,6 +61,9 @@ namespace TechStorm {
 			pushContainer(new UIContainer(), true, true);
 		}
 
+		void removeContainer(int id) {
+			this->containers.erase(id);
+		}
 		// TODO: this
 		void clearUI(int id) {
 		}
@@ -90,6 +95,7 @@ namespace TechStorm {
 			}
 		}
 	private:
+
 		// set to 1 as 0 is always the rogue container
 		int containerCount = 1;
 

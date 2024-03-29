@@ -1,6 +1,7 @@
 #pragma once
 #include <exception>
 namespace TechStorm {
+
 	// Severities go as below
 	//
 	// Unknown = an error that it's severity is unknown, these are very dangerous!
@@ -20,6 +21,7 @@ namespace TechStorm {
 	class EngineException : public std::exception {
 	public:
 		EExceptionSeverity severity;
+
 		// Constructor with a custom error message
 		EngineException(const char* message, EExceptionSeverity severity);
 

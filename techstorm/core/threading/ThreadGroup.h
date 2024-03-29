@@ -31,6 +31,7 @@ public:
 	}
 
 	void addTask(ThreadGroupTask* task) {
+
 		// go through map, find first idle thread and give it a task.
 		for (auto& thread : threads) {
 			if (thread.second->isIdle) {

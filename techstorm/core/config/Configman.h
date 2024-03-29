@@ -12,9 +12,10 @@
 #include <stdlib.h>
 #include <map>
 
-#ifdef ENABLE_CONFIG
+#ifdef TECHSTORM_ENABLE_CONFIG
 
 namespace TechStorm {
+
 	// Component class of ConfigRegistry
 	class ConfigRegistry : virtual MRegistry_Str<ConfigFile>, public ConfigRegistrySecretary
 	{
@@ -119,4 +120,4 @@ namespace TechStorm {
 		}
 	};
 }
-#endif // ENABLE_CONFIG
+#endif // TECHSTORM_ENABLE_CONFIG

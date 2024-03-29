@@ -12,6 +12,7 @@ class UI3DBillboard : public UIElement {
 public:
 
 	void init(UI3DBillboardData data) {
+
 		// set to a rogue container.
 		this->setContainer(0);
 

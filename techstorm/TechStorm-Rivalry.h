@@ -7,7 +7,7 @@
 // Put your name in the quotes
 
 // Your custom defines here :
-
+#pragma once
 #include "core/TechStorm.h"
 namespace TechStormRivalry {
 	using namespace TechStormRivalry;

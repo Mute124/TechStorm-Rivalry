@@ -36,13 +36,16 @@ public:
 	// register a new entity
 	void registerEntity(Entity* newEntity) {
 		if (newEntity == nullptr) {
+
 			// handle null entity.
 		}
 		else {
 			if (newEntity->id == 0) {
+
 				// assign it a unique ID;
 				newEntity->id = makeID();
 			}
+
 			// Add logic here to register the new entity
 			this->Add(newEntity);
 		}

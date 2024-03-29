@@ -18,24 +18,43 @@
 #include <any>
 
 namespace TechStorm {
-	class Application abstract : public Display, public LuaManager, public UIMan, public ConfigMan, public GameobjectManager, public ScriptManager, public Logman {
+	typedef struct ApplicationState;
+
+	class Application : public Display, public LuaManager, public ConfigMan, public ScriptManager, public Logman, public PBRRenderer {
+	protected:
+
+		static void p_makeCustomProject(Application* customApp) {
+			Application::appInstance = customApp;
+			p_usingCustomApplication = true;
+		}
+
+		static inline bool p_usingCustomApplication = false;
+
 	public:
 		Font defaultFont;
 		int targetFPS = 60;
-
+		static inline Application *appInstance = nullptr;
+		
+		Application()  {}
 
 		// loads config man BEFORE anything else
-		void preInitialize() {
-			this->initConfigMan();
+		virtual void preInitialize() {
 			SetTraceLogCallback(Logman::customLog);
+			this->initConfigMan();
+			
 		}
-		void initApplication(int winWidth, int winHeight, const char* winTitle, unsigned int flags) {
 
-			initDisplay(winWidth, winHeight, winTitle, flags);
+		virtual void initApplication(int winWidth, int winHeight, const char* winTitle, unsigned int flags) {
+
+			
 			this->initLua();
-			this->initUIMan();
+			this->initPBR(uDimension(winWidth, winHeight));
 			
 			InitAudioDevice(); // starts the audio driver(s).
+			
+			if (!p_usingCustomApplication) {
+				appInstance = this;
+			}	
 		}
 
 	protected:
@@ -43,5 +62,19 @@ namespace TechStorm {
 
 
 	};
+	
+	// Note : This is the default project setup. If you want to create your own, a function to do so has been provided.
+	class AppProject : public Application {
+	protected:
 
+
+		
+	public:
+
+	};
+
+	typedef struct ApplicationState {
+		bool applicationIsLoading = true;
+		
+	};
 }

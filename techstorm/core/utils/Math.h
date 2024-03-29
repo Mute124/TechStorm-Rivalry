@@ -21,6 +21,7 @@
 
 #pragma once
 #include <raylib.h>
+
 //#include <math.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -109,6 +110,7 @@ inline float IncrementDelta(float x, float y, float z, float o) {
 *
 */
 inline Vector2 CalculatePoint(Vector2 orgin, float width, float height, int corner) {
+
 	// todo: Calculate any point from any point, width, and height.
 	Vector2 point;
 	switch (corner) {

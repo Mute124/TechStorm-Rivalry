@@ -2,20 +2,13 @@
 
 #include "core/application/Application.h"
 #include "core/rendering/Renderer.h"
-
+#include "techstorm/core/enum/EGameState.h"
 namespace TechStormRivalry {
 	class Game final : public TechStorm::Application
 	{
 	public:
-		static inline TechStorm::PBRRenderer* renderer;
 
-		int lightCountLoc;
-		int emissiveIntensityLoc;
-		int emissiveColorLoc;
-		int textureTilingLoc;
-		float ambientIntensity = 0.02f;
-		Color ambientColor = GRAY;
-		Vector3 ambientColorNormalized = Vector3{ ambientColor.r / 255.0f, ambientColor.g / 255.0f, ambientColor.b / 255.0f };
+		EGameState currentScreen = Main;
 		bool enableMusic;
 		bool loaded;
 
@@ -25,30 +18,34 @@ namespace TechStormRivalry {
 			return { (float)winWidth, (float)winHeight };
 		}
 
+		TechStorm::Application* getApplication() {
+			return appInstance;
+		}
+
 		void init() {
 			try
 			{
+				
 				this->preInitialize();
 
 				// Stamp window config flags & Manufacture
 				// Read config to decide what to set for the game
 				this->customLog(LOG_INFO, "Initiating Config Manager", NULL);
 
-				this->customLog(LOG_INFO, "OptionsConfig file registered", NULL);
-
-				//ConfigFile* config = confRegistry->getFile("data\config\options.toml");
-
-				this->customLog(LOG_INFO, TextFormat("IsFullscreen = %i", isFullscreen), NULL);
-
-				this->customLog(LOG_INFO, TextFormat("EnableMusic = %i", true), NULL);
-
-				// Stamp window config flags & Manufacture
-				this->customLog(LOG_INFO, "Starting Game", NULL);
 				ConfigFile* config = confRegistry->getFile("options.toml");
+				isFullscreen = config->file.entry.Data["Window"]["isFullScreen"].as_boolean()->operator const bool& ();
 
-				int width = config->file.entry.Data["Window"]["windowWidth"].as_integer()->operator const int64_t & ();
-				int height = config->file.entry.Data["Window"]["windowHeight"].as_integer()->operator const int64_t & ();
-				this->initApplication(width, height, "Techstorm Rivalry", FLAG_MSAA_4X_HINT);
+				int wWidth = config->file.entry.Data["Window"]["windowWidth"].as_integer()->operator const int64_t & ();
+				int wHeight = config->file.entry.Data["Window"]["windowHeight"].as_integer()->operator const int64_t & ();
+				const char* wTitle = config->file.entry.Data["Game"]["title"].as_string()->operator const std::string & ().c_str();
+				
+				if (isFullscreen == true) {
+					this->initDisplay(GetMonitorWidth(GetCurrentMonitor()), GetMonitorHeight(GetCurrentMonitor()), wTitle, FLAG_MSAA_4X_HINT);
+					this->initApplication(GetMonitorWidth(GetCurrentMonitor()), GetMonitorHeight(GetCurrentMonitor()), wTitle, FLAG_MSAA_4X_HINT );
+				}
+				else {
+					this->initApplication(wWidth, wHeight, wTitle, FLAG_MSAA_4X_HINT );
+				}
 
 				DisableEventWaiting();
 
@@ -59,20 +56,16 @@ namespace TechStormRivalry {
 				ImageFormat(&icon, PIXELFORMAT_UNCOMPRESSED_R8G8B8A8);
 				SetWindowIcon(icon);
 
-				if (isFullscreen == true) {
-					renderer = new TechStorm::PBRRenderer(TechStorm::uDimension(GetScreenWidth(), GetScreenHeight()));
-				}
-				else {
-					renderer = new TechStorm::PBRRenderer(TechStorm::uDimension(width, height));
-				}
-
-				renderer->bloomShader = LoadShader(0, "resources/shaders/bloom.fs");
-
 				defaultFont = LoadFont("data/gui/fonts/Tektur-VariableFont_wdth,wght.ttf");
 
 				SetTargetFPS(this->targetFPS);
-
+				DisableEventWaiting();
 				instance = this;
+
+				if (!DirectoryExists("temp"))
+				{
+					system("mkdir temp"); // run the system command to create the folder. Note : This is a windows command.
+				}
 			}
 			catch (const std::exception& e)
 			{

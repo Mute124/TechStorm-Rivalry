@@ -7,7 +7,6 @@
 #include "../core/ui/UIElement.h"
 #include "../core/ui/UIMan.h"
 #include "Hand.h"
-#include "../ui/Crosshair.h"
 
 #define STARTINGHP 100
 #define MAX_AFFLICTIONS 20
@@ -38,7 +37,7 @@ namespace TechStormRivalry {
 				return NOCHANGE;
 			}
 		public:
-			PlayerController* controller;
+
 			bool isRunning = false;
 			bool canMove = true;
 			bool isGrounded = false;
@@ -73,6 +72,7 @@ namespace TechStormRivalry {
 					this->isRunning = true;
 					setSpeed(this->walkSpeed * runChangeFactor); //m/s
 				}
+
 				// Camera PRO usage example (EXPERIMENTAL)
 				// This new camera function allows custom movement/rotation values to be directly provided
 				// as input parameters, with this approach, rcamera module is internally independent of raylib inputs
@@ -93,29 +93,6 @@ namespace TechStormRivalry {
 
 					GetMouseWheelMove() * 2.0f);                              // Move to target (zoom)
 			}
-		};
-
-		class HealthBar
-		{
-		public:
-
-			float calculatePercentage(float hp, float max_hp)
-			{
-				float percentage = (float)hp / (float)max_hp;
-				return percentage;
-			}
-
-			void draw(TechStorm::uVec2i position)
-			{
-				float percentage = calculatePercentage(hp, maxHP);
-
-				DrawRectangle(position.x, position.y, 100, 20, BLACK);
-				DrawRectangleLines(position.x, position.y, 100, 20, RED);
-				DrawRectangle(position.x, position.y, 100 * percentage, 20, GREEN);
-			};
-
-			float hp;
-			float maxHP;
 		};
 
 		class CameraData
@@ -146,26 +123,26 @@ namespace TechStormRivalry {
 			CameraComp(CameraData cameradata) : camera(cameradata.constructToCamera()) {
 			}
 
-			Vector3 getPosition()
+			Vector3 getPosition() const
 			{
 				return this->camera.position;
 			}
 
-			Vector3 getTarget()
+			Vector3 getTarget() const
 			{
 				return this->camera.target;
 			}
 
-			Vector3 getUp()
+			Vector3 getUp() const
 			{
 				return this->camera.up;
 			}
-			float getFOVY()
+			float getFOVY() const
 			{
 				return this->camera.fovy;
 			}
 
-			float getProjection()
+			float getProjection() const
 			{
 				return this->camera.projection;
 			}
@@ -199,7 +176,7 @@ namespace TechStormRivalry {
 				return data.constructToCamera();
 			}
 
-			Camera getSelfCamera() {
+			Camera getSelfCamera() const {
 				return this->camera;
 			}
 
@@ -217,22 +194,20 @@ namespace TechStormRivalry {
 		private:
 			bool startDriving = false;
 			int maxHP = STARTINGHP;
+
 		public:
 			int cameraMode;
 			bool doDraw = true;
 			static inline CameraComp* cameraComponent;
 			PlayerController* controller = new PlayerController(KEY_W, KEY_S, KEY_A, KEY_D, KEY_SPACE, KEY_C, cameraMode);
 			bool isRunning;
-			static inline Player* instance;
-			Crosshair* crosshair;
 
 			Player() {
 			}
 
 			// main constructor
-			Player(TechStorm::uVec3f StartingPos, int MaxHP, const Model model, int CameraMode)
-				: maxHP(MaxHP),
-				cameraMode(CameraMode)
+			Player(TechStorm::uVec3f StartingPos, const Model model, int CameraMode)
+				: cameraMode(CameraMode)
 			{
 				this->model = model;
 				this->position = position;
@@ -242,10 +217,10 @@ namespace TechStormRivalry {
 					   {0.0f, 2.0f, 0.0f},
 					   {0.0f, 2.0f, 0.0f},
 					   45.0f,
-					   0 });
-
+						CameraProjection::CAMERA_PERSPECTIVE });
+				this->isDynamic = true;
+				
 				initCharacter(0.4f, 2.0f, 0.7f, 1.0f);
-				instance = this;
 
 				//this->gun = LoadModel("resources/Sniper_Rifle.glb");
 
@@ -266,9 +241,7 @@ namespace TechStormRivalry {
 					}
 				}
 
-				if (controller->canMove) {
-					controller->update(cameraComponent->getSelfCameraPointer());
-				}
+				controller->update(this->cameraComponent->getSelfCameraPointer());
 
 				if (IsKeyDown(KEY_F)) {
 					startDriving = true;
@@ -278,12 +251,23 @@ namespace TechStormRivalry {
 					startDriving = false;
 				}
 
+				// Sprinting Mechanic
+				if (IsKeyDown(KEY_LEFT_SHIFT))
+				{
+					controller->isRunning = true;
+				}
+				else
+				{
+					controller->isRunning = false;
+				}
+
 				// View Sway
 
 				if (startDriving) {
 					drive();
 				}
 			};
+
 			// sends player data to the games render
 			void draw() override
 			{
