@@ -163,7 +163,7 @@ void main()
 
     }
 
-    vec3 color = ComputePBR() * darkening;
+    vec3 color = ComputePBR() * fragNormal;
 
     // HDR tonemapping
     color = pow(color, color + vec3(1.0));

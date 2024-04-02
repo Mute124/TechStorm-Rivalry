@@ -102,6 +102,7 @@ namespace TechStorm {
 	public:
 		vector<GameObject*> threadSafeObjects; // objects that are threadsafe
 		vector<GameObject*> nonThreadSafeObjects; // objects that are not threadsafe.
+
 		void renderObjects()
 		{
 			for (auto& obj : threadSafeObjects)

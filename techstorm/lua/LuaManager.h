@@ -1,5 +1,6 @@
 #pragma once
 #include "../Common.h"
+#include "../core/rendering/Renderer.h"
 
 //#include "raylib-lua-sol.hpp"
 #include <tuple>
@@ -55,7 +56,9 @@ private:
 		lua.set_function("tsVer", [] {TechStorm::Logman::customLog(LOG_INFO, TextFormat("TechStorm's Installed Version is %s.", TECHSTORM_VERSION)); });
 		lua.set_function("tsrVer", [] {TechStorm::Logman::customLog(LOG_INFO, TextFormat("TechStorm-Rivalry's Installed Version is %s.", VERSION)); });
 		lua.set_function("exit", [] {exit(0); });
+
 		lua.set_function("enableWM", [] {rlEnableWireMode(); });
 		lua.set_function("disableWM", [] {rlDisableWireMode(); });
+		lua.set_function("reloadShader", [] {});
 	}
 };

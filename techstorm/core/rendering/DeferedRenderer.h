@@ -37,7 +37,7 @@ public:
 		deferredShader.locs[SHADER_LOC_VECTOR_VIEW] = GetShaderLocation(deferredShader, "viewPosition");
 
 		gBuffer = { 0 };
-		gBuffer.framebuffer = rlLoadFramebuffer(gameState->screenWidth, gameState->screenHeight);
+		gBuffer.framebuffer = rlLoadFramebuffer();
 
 		rlEnableFramebuffer(gBuffer.framebuffer);
 

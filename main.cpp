@@ -3,6 +3,7 @@
 | 					         Includes											|
 ---------------------------------------------------------------------------------
 */
+
 #pragma once
 #include "Math.h"
 #include "techstorm/common.h"
@@ -80,11 +81,16 @@ namespace TechStormRivalry {
 		game->init();
 
 		TechStorm::Logman::Log("Main menu ready");
-
+		Console::ConsoleUI* console = new Console::ConsoleUI();
 		MainMenu::MainMenu* menu = new MainMenu::MainMenu(game);
 
 		menu->awakeMenu();
-		menu->drawMenu();
+		menu->drawMenu(console);
+
+		console = new Console::ConsoleUI();
+		game->pushRogueElement(console);
+
+		// Assign already setup PBR shader to model.materials[0], used by models.meshes[0]
 
 		// Create a default block model with a length, width, and height of the value of BLOCK_SIZE.
 		// This creates a cube mesh with a length, width, and height of BLOCK_SIZE and then converts it
@@ -97,7 +103,7 @@ namespace TechStormRivalry {
 		SetDefaultModel(DefaultBlockModel);
 
 		// Construct the block object
-		Block* block = new Block(Vector3Zero(), WHITE, game->pbrShader, DefaultBlockModel);
+		Block* block = new Block(Vector3Zero(), WHITE, game->pbrShader, LoadModelFromMesh(GenMeshCylinder(BLOCK_SIZE, BLOCK_SIZE, 100)));
 
 		// Finally push it off to the object manager
 		game->pushObject(block);
@@ -210,6 +216,7 @@ namespace TechStormRivalry {
 		while (!WindowShouldClose())
 		{
 			int scroll = GetMouseWheelMove();
+
 			UpdateCamera(player->cameraComponent->getSelfCameraPointer(), CAMERA_FIRST_PERSON); // Update camera
 
 			// NOTE : This is a very basic implementation of placing an object into the world. This is
@@ -223,7 +230,7 @@ namespace TechStormRivalry {
 			{
 				// Todo, move the menuCamera to be created on game startup and then hidden. it gets
 				// shown on if statement validation
-				bool exit = false;
+				bool exitMenu = false;
 				bool manualExit = false;
 
 				MenuCamera* men_pause = new MenuCamera();
@@ -232,9 +239,12 @@ namespace TechStormRivalry {
 				TechStorm::ButtonR* exitButton = new TechStorm::ButtonR("Exit to Windows", 100, 300);
 
 				EnableCursor();
-				while (!exit)
+				while (!exitMenu)
 				{
+					game->updateUI();
 					BeginDrawing();
+
+					game->drawUI(DRAW_FINAL);
 
 					save->draw();
 					save->updateObjects();
@@ -265,18 +275,18 @@ namespace TechStormRivalry {
 					}
 
 					EndDrawing();
-					if (IsKeyPressed(KEY_ESCAPE) && exit == false)
+					if (IsKeyPressed(KEY_ESCAPE) && exitMenu == false)
 					{
-						exit = true;
+						exitMenu = true;
 					}
-					else if (IsKeyPressed(KEY_ESCAPE) && exit == true)
+					else if (IsKeyPressed(KEY_ESCAPE) && exitMenu == true)
 					{
 						break;
 					}
 
 					if (manualExit)
 					{
-						exit = true;
+						exitMenu = true;
 					}
 				}
 
@@ -287,7 +297,7 @@ namespace TechStormRivalry {
 				if (manualExit)
 				{
 					TechStorm::Logman::customLog(LOG_INFO, "Exiting Game", NULL);
-					break;
+					exit(0);
 				}
 			}
 
@@ -349,14 +359,15 @@ namespace TechStormRivalry {
 
 			game->startRenderingStep(player->cameraComponent->getSelfCamera());
 
+			DrawSphereWires(sun.position, 1.0f, 4, 4, WHITE);
+
 			SetShaderValue(game->pbrShader, game->textureTilingLoc, &block->blockTextureTiling, SHADER_UNIFORM_VEC2);
 
 			Vector4 carEmissiveColor = ColorNormalize(block->model.materials[0].maps[MATERIAL_MAP_EMISSION].color);
 			SetShaderValue(game->pbrShader, game->emissiveColorLoc, &carEmissiveColor, SHADER_UNIFORM_VEC4);
 
 			// How bright should the object emit it's emission color.
-			float emissiveIntensity = 0.01f;
-
+			float emissiveIntensity = 0.1f;
 			SetShaderValue(game->pbrShader, game->emissiveIntensityLoc, &emissiveIntensity, SHADER_UNIFORM_FLOAT);
 
 			game->renderObjects();

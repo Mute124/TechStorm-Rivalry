@@ -160,7 +160,6 @@ void main()
 
     for (int i = 0; i < numOfLights; i++) {
          darkening -= (lights[i].color.rgb * ambientColor.rgb * brightness / CalculateDst(viewPos, fragPosition) * brightness);
-
     }
 
     vec3 color = ComputePBR() * darkening;

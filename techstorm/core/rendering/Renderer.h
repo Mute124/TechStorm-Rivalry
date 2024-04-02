@@ -77,6 +77,58 @@ namespace TechStorm {
 			flushUI();
 		}
 
+		static inline void reload() {
+
+			// Load the shader into memory
+			pbrShader = LoadShader(TextFormat("resources/shaders/glsl330/pbr.vs", GLSL_VERSION), TextFormat("resources/shaders/glsl330/pbr.fs", GLSL_VERSION));
+
+			// Get shader locations
+			pbrShader.locs[SHADER_LOC_MAP_ALBEDO] = GetShaderLocation(pbrShader, "albedoMap");
+
+			// WARNING: Metalness, roughness, and ambient occlusion are all packed into a MRA texture They
+			// are passed as to the SHADER_LOC_MAP_METALNESS location for convenience, shader already takes
+			// care of it accordingly
+			pbrShader.locs[SHADER_LOC_MAP_METALNESS] = GetShaderLocation(pbrShader, "mraMap");
+			pbrShader.locs[SHADER_LOC_MAP_NORMAL] = GetShaderLocation(pbrShader, "normalMap");
+
+			// WARNING: Similar to the MRA map, the emissive map packs different information into a single
+			// texture: it stores height and emission data It is binded to SHADER_LOC_MAP_EMISSION location
+			// an properly processed on shader
+			pbrShader.locs[SHADER_LOC_MAP_EMISSION] = GetShaderLocation(pbrShader, "emissiveMap");
+			pbrShader.locs[SHADER_LOC_COLOR_DIFFUSE] = GetShaderLocation(pbrShader, "albedoColor");
+
+			// Setup additional required shader locations, including lights data
+			pbrShader.locs[SHADER_LOC_VECTOR_VIEW] = GetShaderLocation(pbrShader, "viewPos");
+			lightCountLoc = GetShaderLocation(pbrShader, "numOfLights");
+
+			// set it to the value of the MAX_LIGHTS macro and pass it to the shader
+			int maxLightCount = MAX_LIGHTS;
+			SetShaderValue(pbrShader, lightCountLoc, &maxLightCount, SHADER_UNIFORM_INT);
+
+			// Setup ambient color and intensity (brightness) parameters
+			ambientIntensity = 0.02f;
+			ambientColor = GRAY;
+			ambientColorNormalized = Vector3{ ambientColor.r / 255.0f, ambientColor.g / 255.0f, ambientColor.b / 255.0f };
+			SetShaderValue(pbrShader, GetShaderLocation(pbrShader, "ambientColor"), &ambientColorNormalized, SHADER_UNIFORM_VEC3);
+			SetShaderValue(pbrShader, GetShaderLocation(pbrShader, "ambient"), &ambientIntensity, SHADER_UNIFORM_FLOAT);
+
+			// Get location for shader parameters that can be modified
+			emissiveIntensityLoc = GetShaderLocation(pbrShader, "emissivePower");
+			emissiveColorLoc = GetShaderLocation(pbrShader, "emissiveColor");
+			textureTilingLoc = GetShaderLocation(pbrShader, "tiling");
+
+			// Assignment of shaders
+			// NOTE: By default, the texture maps are always used
+			int usage = 1;
+			SetShaderValue(pbrShader, GetShaderLocation(pbrShader, "useTexAlbedo"), &usage, SHADER_UNIFORM_INT);
+			SetShaderValue(pbrShader, GetShaderLocation(pbrShader, "useTexNormal"), &usage, SHADER_UNIFORM_INT);
+			SetShaderValue(pbrShader, GetShaderLocation(pbrShader, "useTexMRA"), &usage, SHADER_UNIFORM_INT);
+			SetShaderValue(pbrShader, GetShaderLocation(pbrShader, "useTexEmissive"), &usage, SHADER_UNIFORM_INT);
+
+			float brightness = 2.0f;
+			SetShaderValue(pbrShader, GetShaderLocation(pbrShader, "brightness"), &brightness, UNIFORM_FLOAT);
+		}
+
 	private:
 
 		void m_updateRenderer(Camera* camera) {

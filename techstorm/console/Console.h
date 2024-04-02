@@ -58,7 +58,7 @@ namespace TechStormRivalry {
 					}
 
 					//DrawText("PLACE MOUSE OVER INPUT BOX!", 240, 140, 20, GRAY);
-					DrawRectangleRec(this->consoleBackDrop, GRAY);
+					//DrawRectangleRec(this->consoleBackDrop, GRAY);
 
 					DrawRectangleRec(textBox, LIGHTGRAY);
 					if (mouseOnText) DrawRectangleLines((int)textBox.x, (int)textBox.y, (int)textBox.width, (int)textBox.height, RED);

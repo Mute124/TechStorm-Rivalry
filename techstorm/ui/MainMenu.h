@@ -60,7 +60,7 @@ namespace TechStormRivalry {
 			bool windowUnfocused = false;
 			bool windowReFocused = false;
 			Texture m_backdrop;
-			Console::ConsoleUI* console = new Console::ConsoleUI();
+
 		public:
 
 			MainMenu(Game* game) {
@@ -76,7 +76,7 @@ namespace TechStormRivalry {
 				game->pushContainer(this, false, false);
 			}
 
-			void drawMenu() override {
+			void drawMenu(Console::ConsoleUI* console) {
 				PlayMusicStream(menuMusic);
 				while (!closeMainMenu) {
 
@@ -100,14 +100,14 @@ namespace TechStormRivalry {
 					if (shouldKill) {
 						break;
 					}
-					this->console->updateElement();
+					console->updateElement();
 
 					//this->update();
 					UpdateMusicStream(menuMusic);   // Update music buffer with new stream data
 
 					BeginDrawing();
 					DrawTextureRec(m_backdrop, Rectangle{ 0, 0, (float)(m_backdrop.width), (float)(-m_backdrop.height) }, Vector2{ 0, 0 }, WHITE);
-					this->console->drawElement();
+					console->drawElement();
 					this->drawChildren(DRAW_FINAL);
 
 					EndDrawing();

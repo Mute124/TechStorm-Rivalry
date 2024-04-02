@@ -41,7 +41,6 @@ namespace TechStorm {
 		virtual void preInitialize() {
 			SetTraceLogCallback(Logman::customLog);
 			this->initConfigMan();
-			
 		}
 
 		virtual void initApplication(int winWidth, int winHeight, const char* winTitle, unsigned int flags) {
@@ -59,22 +58,5 @@ namespace TechStorm {
 
 	protected:
 		chrono::high_resolution_clock::time_point lastUpdate;
-
-
-	};
-	
-	// Note : This is the default project setup. If you want to create your own, a function to do so has been provided.
-	class AppProject : public Application {
-	protected:
-
-
-		
-	public:
-
-	};
-
-	typedef struct ApplicationState {
-		bool applicationIsLoading = true;
-		
 	};
 }

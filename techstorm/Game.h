@@ -2,13 +2,14 @@
 
 #include "core/application/Application.h"
 #include "core/rendering/Renderer.h"
-#include "techstorm/core/enum/EGameState.h"
+
+//#include "techstorm/core/enum/EGameState.h"
 namespace TechStormRivalry {
 	class Game final : public TechStorm::Application
 	{
 	public:
 
-		EGameState currentScreen = Main;
+		//EGameState currentScreen = Main;
 		bool enableMusic;
 		bool loaded;
 
@@ -25,7 +26,6 @@ namespace TechStormRivalry {
 		void init() {
 			try
 			{
-				
 				this->preInitialize();
 
 				// Stamp window config flags & Manufacture
@@ -38,13 +38,18 @@ namespace TechStormRivalry {
 				int wWidth = config->file.entry.Data["Window"]["windowWidth"].as_integer()->operator const int64_t & ();
 				int wHeight = config->file.entry.Data["Window"]["windowHeight"].as_integer()->operator const int64_t & ();
 				const char* wTitle = config->file.entry.Data["Game"]["title"].as_string()->operator const std::string & ().c_str();
-				
+
 				if (isFullscreen == true) {
 					this->initDisplay(GetMonitorWidth(GetCurrentMonitor()), GetMonitorHeight(GetCurrentMonitor()), wTitle, FLAG_MSAA_4X_HINT);
-					this->initApplication(GetMonitorWidth(GetCurrentMonitor()), GetMonitorHeight(GetCurrentMonitor()), wTitle, FLAG_MSAA_4X_HINT );
+					this->initApplication(GetMonitorWidth(GetCurrentMonitor()), GetMonitorHeight(GetCurrentMonitor()), wTitle, FLAG_MSAA_4X_HINT);
+
+					//rlglInit(GetMonitorWidth(GetCurrentMonitor()), GetMonitorHeight(GetCurrentMonitor()));
 				}
 				else {
-					this->initApplication(wWidth, wHeight, wTitle, FLAG_MSAA_4X_HINT );
+					this->initDisplay(wWidth, wHeight, wTitle, FLAG_MSAA_4X_HINT);
+					this->initApplication(wWidth, wHeight, wTitle, FLAG_MSAA_4X_HINT);
+
+					//rlglInit(wWidth, wHeight);
 				}
 
 				DisableEventWaiting();

@@ -219,7 +219,7 @@ namespace TechStormRivalry {
 					   45.0f,
 						CameraProjection::CAMERA_PERSPECTIVE });
 				this->isDynamic = true;
-				
+				this->threadSafe = false;
 				initCharacter(0.4f, 2.0f, 0.7f, 1.0f);
 
 				//this->gun = LoadModel("resources/Sniper_Rifle.glb");
