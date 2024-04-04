@@ -1,0 +1,97 @@
+
+
+/**
+ * Example showing async loading of images with a loading screen.
+ */
+
+#include <fstream>
+#include <iostream>
+#include <memory>
+#include <mutex>
+#include <string>
+#include <thread>
+#include <vector>
+
+#include <raylib.h>
+
+int main(void) {
+	try
+	{
+		const int screenWidth = 800;
+		const int screenHeight = 450;
+
+		InitWindow(screenWidth, screenHeight,
+			"raylib [core] example - async loading of images");
+
+		SetTargetFPS(60);
+
+		// Read the file containing paths to all the images.
+		std::ifstream ifs{ "data/csv/all_images.csv" };
+		if (!ifs.is_open()) return -1;
+
+		std::string line;
+
+		std::vector<std::string> image_paths;
+
+		while (std::getline(ifs, line)) {
+			image_paths.push_back(line);
+		}
+
+		ifs.close();
+
+		std::vector<Image> images;
+		std::string status;
+		std::mutex mu;
+		std::atomic<bool> is_images_loaded = false;
+
+		// Lambda which will load all the images.
+		auto f_load_image = [&image_paths, &images, &status, &mu,
+			&is_images_loaded]() {
+			for (const auto& i : image_paths) {
+				images.push_back(LoadImage(i.c_str()));
+
+				// Use mutex with lock_guard to update status in a thread safe way.
+				std::lock_guard<std::mutex> guard(mu);
+				status = i;
+			}
+			is_images_loaded = true;
+			};
+
+		std::thread t{ f_load_image };
+
+		std::vector<std::unique_ptr<Texture>> textures;
+
+		while (!is_images_loaded) {
+			BeginDrawing();
+			ClearBackground(MAROON);
+			auto msg = "Loading: " + status;
+			DrawText(msg.c_str(), 10, 100, 24, WHITE);
+			EndDrawing();
+		}
+
+		t.join();
+
+		// This is instantaneous for around 44 images.
+		for (const auto& i : images) {
+			textures.push_back(std::make_unique<Texture>(LoadTextureFromImage(i)));
+			UnloadImage(i);
+		}
+
+		while (!WindowShouldClose()) {
+			BeginDrawing();
+			ClearBackground(BLUE);
+			DrawText("Ready to roll", 10, 100, 24, WHITE);
+
+			// Show one texture to prove that they are loaded.
+			DrawTextureEx(*textures.at(0), { 400.0f, 100.0f }, 0.0f, 0.2f, WHITE);
+			EndDrawing();
+		}
+
+		CloseWindow();
+	}
+	catch (const std::exception& e)
+	{
+		printf(e.what());
+	}
+	return 0;
+}

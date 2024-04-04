@@ -5,6 +5,7 @@
 */
 
 #pragma once
+
 #include "Math.h"
 #include "techstorm/common.h"
 #include "techstorm/core/utils/Button.h" // TODO : Can this be moved to common.h?
@@ -24,13 +25,21 @@
 #include "techstorm/core/audio/FxMan.h"
 #include "techstorm/globalobj/Objects.h"
 #include "techstorm/console/Console.h"
-#include "techstorm/core/physics/PhysMan.h"
 #include "techstorm/core/ui/UIMenu.h"
 #include "techstorm/ui/MainMenu.h"
 #include "techstorm/ui/PlayerHUD.h"
+#include "techstorm/economy/SystemEconomy.h"
 
 #include <time.h>
 #include <vector> // needed for game object list
+
+#include <raylib.h>
+#include <lua.hpp>
+#include <sol/sol.hpp>
+
+// config
+#include <toml++/toml.hpp>
+#include <tinyxml2.h>
 
 #define NUM_MODELS  9               // Parametric 3d shapes to generate
 
@@ -79,6 +88,17 @@ namespace TechStormRivalry {
 
 		// Start the game and do any needed setup
 		game->init();
+
+		std::thread t([game] {
+			game->assets->LoadAssets("resources", "data");
+			});
+
+		while (!game->assets->doneLoading) {
+			BeginDrawing();
+			ClearBackground(BLUE);
+			EndDrawing();
+		}
+		t.join();
 
 		TechStorm::Logman::Log("Main menu ready");
 		Console::ConsoleUI* console = new Console::ConsoleUI();
@@ -213,11 +233,43 @@ namespace TechStormRivalry {
 
 		PlayerHUD* hud = new PlayerHUD(game);
 
+		Economy::MarketProduct tester = Economy::MarketProduct();
+		tester.baseValue = 5;
+		tester.supply = 100;
+
+		Economy::Merchant* merchant = new Economy::Merchant();
+		merchant->m_market[0] = tester;
+		merchant->m_priceUptick = 0.25f;
+		Faction::CharacterFaction fa = Faction::CharacterFaction();
+		Faction::CharacterFaction fb = Faction::CharacterFaction();
+
+		merchant->m_owner = &fb;
+		fa.meetFaction(fb);
+		fb.meetFaction(fa);
+
 		while (!WindowShouldClose())
 		{
 			int scroll = GetMouseWheelMove();
 
-			UpdateCamera(player->cameraComponent->getSelfCameraPointer(), CAMERA_FIRST_PERSON); // Update camera
+			// Camera PRO usage example (EXPERIMENTAL)
+// This new camera function allows custom movement/rotation values to be directly provided
+// as input parameters, with this approach, rcamera module is internally independent of raylib inputs
+			UpdateCameraPro(player->cameraComponent->getSelfCameraPointer(),
+				Vector3{
+					(IsKeyDown(player->controller->forward) || IsKeyDown(KEY_UP)) * player->controller->speed -      // Move forward-backward
+					(IsKeyDown(player->controller->backward) || IsKeyDown(KEY_DOWN)) * player->controller->speed,
+					(IsKeyDown(player->controller->right) || IsKeyDown(KEY_RIGHT)) * player->controller->speed -   // Move right-left
+					(IsKeyDown(player->controller->left) || IsKeyDown(KEY_LEFT)) * player->controller->speed,
+					(IsKeyDown(player->controller->jump)) * player->controller->speed -                                                 // Move up-down
+					(IsKeyDown(player->controller->crouch)) * player->controller->speed
+				},
+				Vector3{
+					GetMouseDelta().x * player->controller->mouseSensitivity,                            // Rotation: yaw
+					GetMouseDelta().y * player->controller->mouseSensitivity,                            // Rotation: pitch
+					player->controller->CalculateCameraTilt()                // Rotation: roll
+				},
+
+				GetMouseWheelMove() * 2.0f);                              // Move to target (zoom)
 
 			// NOTE : This is a very basic implementation of placing an object into the world. This is
 			// temporary and should be fleshed out.
@@ -308,6 +360,18 @@ namespace TechStormRivalry {
 				player->damage(15);
 			}
 
+			if (IsKeyPressed(KEY_B)) {
+				merchant->buy(0, 5, fa);
+				TechStorm::Logman::Log(TextFormat("Supply %i, Demand %i, buy price %f, sell %f, base %i", merchant->m_market[0].supply, merchant->m_market[0].demand, merchant->m_market[0].buyPrice, merchant->m_market[0].sellPrice, merchant->m_market[0].baseValue));
+			}
+
+			if (IsKeyPressed(KEY_K)) {
+				Economy::MarketPurchase purchase = merchant->sell(0, 500, fa);
+
+				//player->m_balance += purchase.value;
+				TechStorm::Logman::Log(TextFormat("Supply %i, Demand %i, buy price %f, sell %f, base %i", merchant->m_market[0].supply, merchant->m_market[0].demand, merchant->m_market[0].buyPrice, merchant->m_market[0].sellPrice, merchant->m_market[0].baseValue));
+			}
+
 			// The player's looking direction is the target of the camera. This is the direction the
 			// player is looking TODO : Check relevancy.
 			ray.position = player->cameraComponent->getPosition();
@@ -358,8 +422,6 @@ namespace TechStormRivalry {
 			//DrawTextureRec(nearDeathTex, Rectangle{ 0, 0, (float)(game->renderer->fboDimensions.x), (float)(-game->renderer->fboDimensions.y) }, TechStorm::uVec2i{ 0, 0 }, WHITE);
 
 			game->startRenderingStep(player->cameraComponent->getSelfCamera());
-
-			DrawSphereWires(sun.position, 1.0f, 4, 4, WHITE);
 
 			SetShaderValue(game->pbrShader, game->textureTilingLoc, &block->blockTextureTiling, SHADER_UNIFORM_VEC2);
 

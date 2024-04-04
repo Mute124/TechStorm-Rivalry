@@ -1,9 +1,10 @@
 #pragma once
 #include "FactionGovernmentModifier.h"
+#include "FactionPersonality.h"
 
 namespace TechStormRivalry {
 	namespace Faction {
-		class FactionGovernment {
+		class FactionGovernment : public FactionPersonality {
 		public:
 			FactionGovernmentModifier* governmentModifier = nullptr;
 			const char* government = "unknown";

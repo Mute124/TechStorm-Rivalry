@@ -64,6 +64,7 @@ namespace TechStorm {
 		void removeContainer(int id) {
 			this->containers.erase(id);
 		}
+
 		// TODO: this
 		void clearUI(int id) {
 		}

@@ -204,12 +204,6 @@ inline void SetDefaultModel(Model model) {
 inline Texture GetDefaultTexture() {
 	return LoadTexture("resources/textures/default.png");
 }
-float Vector3Dist(Vector3 v1, Vector3 v2) {
-	return sqrt(
-		powf((v2.x - v1.x), 2.0f) +
-		powf((v2.y - v1.y), 2.0f) +
-		powf((v2.z - v1.z), 2.0f));
-}
 
 // Mesh Tools
 /**

@@ -7,9 +7,9 @@ public:
 	IScriptable() {
 	}
 
-	virtual void init();
-	virtual void update();
-	virtual void end();
+	virtual void init() {}
+	virtual void update() {}
+	virtual void end() {}
 
 	int ID;
 };

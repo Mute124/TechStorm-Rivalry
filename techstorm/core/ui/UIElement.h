@@ -1,5 +1,6 @@
 #pragma once
-#include "../scripting/IScriptable.h"
+#include "../TechStorm.h"
+#include "../logging/Logman.h"
 #include "../registry/Registry.h"
 #include "EUITypes.h"
 #include "EDrawType.h"

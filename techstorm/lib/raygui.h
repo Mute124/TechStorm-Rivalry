@@ -309,7 +309,7 @@
 *     3. This notice may not be removed or altered from any source distribution.
 *
 **********************************************************************************************/
-
+#pragma warning(disable : 4996)
 #ifndef RAYGUI_H
 #define RAYGUI_H
 
@@ -450,6 +450,8 @@ typedef struct GuiStyleProp {
     int propertyValue;          // Property value
 } GuiStyleProp;
 
+
+
 /*
 // Controls text style -NOT USED-
 // NOTE: Text style is defined by control
@@ -462,6 +464,8 @@ typedef struct GuiTextStyle {
     int padding;
 } GuiTextStyle;
 */
+
+
 
 // Gui control state
 typedef enum {
@@ -1984,6 +1988,7 @@ int GuiButton(Rectangle bounds, const char *text)
 
     return result;      // Button pressed: result = 1
 }
+
 
 // Label button control
 int GuiLabelButton(Rectangle bounds, const char *text)

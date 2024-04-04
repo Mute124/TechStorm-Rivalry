@@ -3,7 +3,6 @@
 #include "../../common.h"
 #include "../rendering/Light.h"
 #include "../../player/Player.h"
-#include "../scripting/ScriptManager.h"
 #include "../rendering/Renderers.h"
 #include "../ui/UIMan.h"
 #include "../../lua/LuaManager.h"
@@ -11,7 +10,7 @@
 #include "../obj/Gameobject.h"
 #include "../logging/Logman.h"
 #include "../rendering/Renderer.h"
-
+#include "../assets/AssetLoader.h"
 #include <chrono>
 #include <stdlib.h>
 #include <stdio.h>
@@ -20,7 +19,7 @@
 namespace TechStorm {
 	typedef struct ApplicationState;
 
-	class Application : public Display, public LuaManager, public ConfigMan, public ScriptManager, public Logman, public PBRRenderer {
+	class Application : public Display, public LuaManager, public ConfigMan, public Logman, public PBRRenderer {
 	protected:
 
 		static void p_makeCustomProject(Application* customApp) {
@@ -31,6 +30,8 @@ namespace TechStorm {
 		static inline bool p_usingCustomApplication = false;
 
 	public:
+
+		AssetLoader* assets;
 		Font defaultFont;
 		int targetFPS = 60;
 		static inline Application *appInstance = nullptr;
@@ -48,7 +49,7 @@ namespace TechStorm {
 			
 			this->initLua();
 			this->initPBR(uDimension(winWidth, winHeight));
-			
+			assets = new AssetLoader();
 			InitAudioDevice(); // starts the audio driver(s).
 			
 			if (!p_usingCustomApplication) {

@@ -15,7 +15,7 @@ namespace TechStormRivalry {
 	namespace Player {
 		class PlayerController : public PlayerCharacter
 		{
-		protected:
+		public:
 
 			int mode;
 			float speed;
@@ -36,7 +36,6 @@ namespace TechStormRivalry {
 
 				return NOCHANGE;
 			}
-		public:
 
 			bool isRunning = false;
 			bool canMove = true;
@@ -72,26 +71,6 @@ namespace TechStormRivalry {
 					this->isRunning = true;
 					setSpeed(this->walkSpeed * runChangeFactor); //m/s
 				}
-
-				// Camera PRO usage example (EXPERIMENTAL)
-				// This new camera function allows custom movement/rotation values to be directly provided
-				// as input parameters, with this approach, rcamera module is internally independent of raylib inputs
-				UpdateCameraPro(camera,
-					Vector3{
-						(IsKeyDown(forward) || IsKeyDown(KEY_UP)) * speed -      // Move forward-backward
-						(IsKeyDown(backward) || IsKeyDown(KEY_DOWN)) * speed,
-						(IsKeyDown(right) || IsKeyDown(KEY_RIGHT)) * speed -   // Move right-left
-						(IsKeyDown(left) || IsKeyDown(KEY_LEFT)) * speed,
-						(IsKeyDown(jump)) * speed -                                                 // Move up-down
-						(IsKeyDown(crouch)) * speed
-					},
-					Vector3{
-						GetMouseDelta().x * mouseSensitivity,                            // Rotation: yaw
-						GetMouseDelta().y * mouseSensitivity,                            // Rotation: pitch
-						CalculateCameraTilt()                // Rotation: roll
-					},
-
-					GetMouseWheelMove() * 2.0f);                              // Move to target (zoom)
 			}
 		};
 
@@ -194,6 +173,7 @@ namespace TechStormRivalry {
 		private:
 			bool startDriving = false;
 			int maxHP = STARTINGHP;
+			int m_balance;
 
 		public:
 			int cameraMode;
@@ -240,7 +220,7 @@ namespace TechStormRivalry {
 						DrawModel(model, this->cameraComponent->getPosition(), 0.2f, GREEN);
 					}
 				}
-
+				UpdateCamera(this->cameraComponent->getSelfCameraPointer(), CAMERA_CUSTOM); // Update camera
 				controller->update(this->cameraComponent->getSelfCameraPointer());
 
 				if (IsKeyDown(KEY_F)) {

@@ -7,7 +7,7 @@ namespace TechStorm {
 	// Unknown = an error that it's severity is unknown, these are very dangerous!
 	// Low = a trivial error that honestly doesnt affect much. (Can still be seen)
 	// Medium = an error that DOES have a noticeable impact.
-	// High = an error that MAY be fatal, basically it is bad and has the capability to be fatal
+	// High = an error that MAY be fatal, basically it is bad and is fatal if not dealt with.
 	// Fatal = an error that WILL result in a crash.
 	typedef enum EExceptionSeverity {
 		ESEVERITY_UNKNOWN = 0,

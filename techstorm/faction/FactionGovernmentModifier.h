@@ -1,5 +1,5 @@
 #pragma once
-#include "../../util/Modifier.h"
+#include "../util/Modifier.h"
 
 namespace TechStormRivalry {
 	namespace Faction {

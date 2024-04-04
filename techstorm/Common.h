@@ -5,11 +5,15 @@
 */
 #pragma once
 #define SOL_ALL_SAFETIES_ON 1
+#define _CRT_SECURE_NO_WARNINGS
 
 // framework(s) / external libraries
 #include <raylib.h>
 #include <raymath.h>
 #include "lib/rcamera.h"
+#define RAYGUI_IMPLEMENTATION
+#include "lib/raygui.h"
+#undef RAYGUI_IMPLEMENTATION            // Avoid including raygui implementation again
 
 // C++ Libraries
 #include <stdio.h>
@@ -39,13 +43,12 @@
 #include "core/obj/Gameobject.h"
 #include "core/utils/Math.h"
 #include "core/registry/Registry.h"
-#include "core/scripting/ScriptManager.h"
-#include "core/scripting/IScriptable.h"
 #include "core/utils/ArrayUtils.h"
 #include "core/audio/FxMan.h"
 #include "core/ui/UIMan.h"
-#include "TechStorm-Rivalry.h"
 
+#include "TechStorm-Rivalry.h"
 #include "Game.h"
+#include "env/GameDirector.h"
 
 // end of common.h

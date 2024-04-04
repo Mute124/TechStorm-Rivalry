@@ -9,6 +9,13 @@ namespace TechStormRivalry {
 	{
 	public:
 
+		static inline Image cursor;
+		static inline Texture curTex;
+		static inline Sound buttonClick;
+		static inline Sound hover;
+
+		const char* gameName = "null";
+
 		//EGameState currentScreen = Main;
 		bool enableMusic;
 		bool loaded;
@@ -38,7 +45,7 @@ namespace TechStormRivalry {
 				int wWidth = config->file.entry.Data["Window"]["windowWidth"].as_integer()->operator const int64_t & ();
 				int wHeight = config->file.entry.Data["Window"]["windowHeight"].as_integer()->operator const int64_t & ();
 				const char* wTitle = config->file.entry.Data["Game"]["title"].as_string()->operator const std::string & ().c_str();
-
+				this->gameName = wTitle;
 				if (isFullscreen == true) {
 					this->initDisplay(GetMonitorWidth(GetCurrentMonitor()), GetMonitorHeight(GetCurrentMonitor()), wTitle, FLAG_MSAA_4X_HINT);
 					this->initApplication(GetMonitorWidth(GetCurrentMonitor()), GetMonitorHeight(GetCurrentMonitor()), wTitle, FLAG_MSAA_4X_HINT);
@@ -63,10 +70,21 @@ namespace TechStormRivalry {
 
 				defaultFont = LoadFont("data/gui/fonts/Tektur-VariableFont_wdth,wght.ttf");
 
+				SetMouseOffset(0, 25);
+				cursor = LoadImage("resources/icons/ui/cursor.png");
+
+				curTex = LoadTextureFromImage(cursor);
+
+				buttonClick = LoadSound("resources/audio/button.ogg");
+
+				hover = LoadSound("resources/audio/uiHover.mp3");
+				SetSoundVolume(buttonClick, 25.0f);
+
 				SetTargetFPS(this->targetFPS);
 				DisableEventWaiting();
 				instance = this;
 
+				DisableCursor();
 				if (!DirectoryExists("temp"))
 				{
 					system("mkdir temp"); // run the system command to create the folder. Note : This is a windows command.
@@ -78,6 +96,16 @@ namespace TechStormRivalry {
 			}
 		}
 
+		static inline void drawCursor() {
+			DrawTexture(curTex, GetMouseX(), GetMouseY(), WHITE);
+		}
+
+		static inline void playButtonClick() {
+			PlaySound(buttonClick);
+		}
+		static inline void playUIHoverSound() {
+			PlaySound(hover);
+		}
 		void endGame() {
 			CloseWindow(); // Close window and OpenGL context
 			CloseAudioDevice();
