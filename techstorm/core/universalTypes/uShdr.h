@@ -79,8 +79,6 @@ namespace TechStorm {
 
 		virtual void setVec3f(const char* name, uVec3f& value) { SetShaderValue(mShdr, GetShaderLocation(mShdr, name), &value.operator Vector3(), SHADER_UNIFORM_VEC3); }
 
-		virtual void setVec3i(const char* name, uVec3i& value) { SetShaderValue(mShdr, GetShaderLocation(mShdr, name), &value.operator Vector3(), SHADER_UNIFORM_VEC3); }
-
 		virtual void setVec3(const char* name, float x, float y, float z) {
 			Vector3 vec = { x, y, z };
 			SetShaderValue(mShdr, GetShaderLocation(mShdr, name), &vec, SHADER_UNIFORM_VEC3);
