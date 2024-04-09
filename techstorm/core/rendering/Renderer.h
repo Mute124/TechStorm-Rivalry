@@ -125,7 +125,7 @@ namespace TechStorm {
 			SetShaderValue(pbrShader, GetShaderLocation(pbrShader, "useTexMRA"), &usage, SHADER_UNIFORM_INT);
 			SetShaderValue(pbrShader, GetShaderLocation(pbrShader, "useTexEmissive"), &usage, SHADER_UNIFORM_INT);
 
-			float brightness = 2.0f;
+			float brightness = 10.0f;
 			SetShaderValue(pbrShader, GetShaderLocation(pbrShader, "brightness"), &brightness, SHADER_UNIFORM_FLOAT);
 		}
 

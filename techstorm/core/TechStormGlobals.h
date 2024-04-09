@@ -1,1 +1,1 @@
-#define TECHSTORM_VERSION "v0.0.3"
+#define TECHSTORM_VERSION "v0.0.4"

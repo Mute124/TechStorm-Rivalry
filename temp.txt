@@ -29,9 +29,18 @@
 #include "techstorm/ui/MainMenu.h"
 #include "techstorm/ui/PlayerHUD.h"
 #include "techstorm/economy/SystemEconomy.h"
+#include "techstorm/discord/DiscordAPI.h"
 
 #include <time.h>
 #include <vector> // needed for game object list
+
+#include <raylib.h>
+#include <lua.hpp>
+#include <sol/sol.hpp>
+
+//config
+#include <toml++/toml.hpp>
+#include <tinyxml2.h>
 
 #define NUM_MODELS  9               // Parametric 3d shapes to generate
 
@@ -80,6 +89,10 @@ namespace TechStormRivalry {
 
 		// Start the game and do any needed setup
 		game->init();
+
+		DiscordAPI* disc = new DiscordAPI();
+
+		disc->initAPI();
 
 		TechStorm::Logman::Log("Main menu ready");
 		Console::ConsoleUI* console = new Console::ConsoleUI();
@@ -227,10 +240,12 @@ namespace TechStormRivalry {
 		merchant->m_owner = &fb;
 		fa.meetFaction(fb);
 		fb.meetFaction(fa);
-
+		SetTargetFPS(60);
 		while (!WindowShouldClose())
 		{
 			int scroll = GetMouseWheelMove();
+
+			disc->update();
 
 			// Camera PRO usage example (EXPERIMENTAL)
 // This new camera function allows custom movement/rotation values to be directly provided
@@ -439,6 +454,7 @@ namespace TechStormRivalry {
 			remove("HMap.png");
 		}
 
+		game->assets->unloadAssets();
 		game->endGame();
 
 		delete game;

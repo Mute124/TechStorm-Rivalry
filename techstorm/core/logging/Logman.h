@@ -2,8 +2,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#include <fstream>
 #include <raylib.h>
 #include "../universalTypes/uString.h"
+
 #pragma warning(disable : 4996)
 
 namespace TechStorm {
@@ -11,6 +13,13 @@ namespace TechStorm {
 	// handles logging
 	class Logman {
 	public:
+
+		// use this to log a msg if you dont want to type more code.
+		Logman(const char* msg) {
+			Log(msg);
+		}
+		Logman() {}
+
 		static inline void init() {
 			SetTraceLogCallback(customLog);
 		}

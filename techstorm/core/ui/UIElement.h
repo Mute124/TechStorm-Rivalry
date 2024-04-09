@@ -27,136 +27,66 @@ namespace TechStorm {
 		EDrawType drawTime = DRAW_FINAL;
 		UIContainer* parent;
 
-		virtual void init() {}
+		virtual void init();
 
-		virtual void drawElement() {}
-		virtual void updateElement() {}
+		virtual void drawElement();
+		virtual void updateElement();
 
-		virtual void onDestroy() {
-			delete this;
-		}
+		virtual void onDestroy();
 
-		void setContainer(UIContainer* container) {
-			this->parent = container;
-		}
+		void setContainer(UIContainer* container);
 	};
 
 	// The UI container not only contains all elements, but also manages them aswell.
 	class UIContainer {
 	public:
 
-		static void start() {
-			UIElement::font = LoadFont("Data/gui/fonts/Tektur-VariableFont_wdth,wght.ttf");
-		}
+		static void start();
 
-		virtual void update() {
-			if (!isSleeping) {
-				std::function<void()> updateFunc = [this]() {
-					for (auto& element : children) {
-
-						// check if it should be deleted.
-						if (element.second->deleteMe) {
-							killChild(element.first);
-							Logman::Log(TextFormat("Child #%i Killed", element.first));
-						}
-						else {
-							if (element.second == nullptr) {
-								continue;
-							}
-							else {
-								element.second->updateElement();
-							}
-						}
-					}
-					};
-
-				std::thread* updater = new std::thread(updateFunc);
-				updater->detach();
-			}
-		}
+		virtual void update();
 
 		//
-		bool isAsleep() const {
-			return this->isSleeping == true;
-		}
+		bool isAsleep() const;
 
 		// amimir
-		void sleep() {
-			this->isSleeping = true;
-		}
+		void sleep();
 
 		/*
 		* Rise and shine, Mr.Freeman. Rise and... shine. Not that I... wish to imply you have been sleeping on the job. No one is more deserving of a rest...
 		* and all the effort in the world would have gone to waste until... well, let's just say your hour has... come again.
 		* The right man in the wrong place can make all the difference in the world. So, wake up, Mister Freeman. Wake up and... smell the ashes...
 		*/
-		void wake() {
-			this->isSleeping = false;
-		}
+		void wake();
 
 		// Let this container it is their time to shine!
-		void drawChildren(EDrawType drawMode) {
-			for (auto& element : children) {
-				if (element.second->drawTime == drawMode && element.second != nullptr) {
-					element.second->drawElement();
-				}
-				else {
-					continue;
-				}
-			}
-		}
+		void drawChildren(EDrawType drawMode);
 
-		virtual void onChildrenDraw() {}
+		virtual void onChildrenDraw();
 
-		void addChild(UIElement* element) {
-			int newID = assignID();
+		void addChild(UIElement* element);
 
-			element->id = newID;
-
-			element->setContainer(this);
-
-			children[newID] = element;
-		}
-
-		virtual void onChildAdded() {}
+		virtual void onChildAdded();
 
 		// abduct the child and yeet it!
-		UIElement* getChild(int id) {
-			return children[id];
-		}
+		UIElement* getChild(int id);
 
-		void clear() {
-			for (auto& element : children) {
-				element.second->deleteMe = true;
-			}
-		}
+		void clear();
 
-		virtual void onClear() {}
+		virtual void onClear();
 
 		const char* containerTag;
 
 		int containerID;
 
 		// threat eliminated! (It gets deleted next frame.)
-		void killChild(int target) {
-			children.at(target)->onDestroy();
-			children.erase(target);
-		}
+		void killChild(int target);
 
-		void kill() {
-			for (auto& child : children) {
-				if (child.second != nullptr) {
-					killChild(child.first);
-				}
-			}
-		}
+		void kill();
 
-		virtual void onChildKilled() {}
+		virtual void onChildKilled();
 
 		// Use if you are a child element, signifying the container should exit, for example a button that exits the menu
-		virtual void requestKill() {
-			shouldKill = true;
-		}
+		virtual void requestKill();
 
 	protected:
 		bool shouldKill = false;
@@ -164,10 +94,7 @@ namespace TechStorm {
 
 		int elements = 0;
 
-		int assignID() {
-			return elements;
-			elements++;
-		}
+		int assignID();
 
 		bool isSleeping = true;
 		std::map<int, UIElement*> children;

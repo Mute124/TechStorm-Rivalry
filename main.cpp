@@ -3,9 +3,7 @@
 | 					         Includes											|
 ---------------------------------------------------------------------------------
 */
-
 #pragma once
-
 #include "Math.h"
 #include "techstorm/common.h"
 #include "techstorm/core/utils/Button.h" // TODO : Can this be moved to common.h?
@@ -29,6 +27,7 @@
 #include "techstorm/ui/MainMenu.h"
 #include "techstorm/ui/PlayerHUD.h"
 #include "techstorm/economy/SystemEconomy.h"
+#include "techstorm/discord/DiscordAPI.h"
 
 #include <time.h>
 #include <vector> // needed for game object list
@@ -37,7 +36,7 @@
 #include <lua.hpp>
 #include <sol/sol.hpp>
 
-// config
+//config
 #include <toml++/toml.hpp>
 #include <tinyxml2.h>
 
@@ -47,7 +46,7 @@ namespace TechStormRivalry {
 	static void mainThread() {
 
 		// Lets the program know if the game should use HDR as the skybox
-		bool useHDR = true;
+		bool useHDR = false;
 
 		// Initialie the condition for the breathing sound.
 		bool isBreathing = false;
@@ -89,16 +88,9 @@ namespace TechStormRivalry {
 		// Start the game and do any needed setup
 		game->init();
 
-		std::thread t([game] {
-			game->assets->LoadAssets("resources", "data");
-			});
+		DiscordAPI* disc = new DiscordAPI();
 
-		while (!game->assets->doneLoading) {
-			BeginDrawing();
-			ClearBackground(BLUE);
-			EndDrawing();
-		}
-		t.join();
+		disc->initAPI();
 
 		TechStorm::Logman::Log("Main menu ready");
 		Console::ConsoleUI* console = new Console::ConsoleUI();
@@ -189,12 +181,21 @@ namespace TechStormRivalry {
 		// This is the panoramic texture, It is used IF useHDR is true
 		Texture2D panorama = { 0 };
 
+		TextureCubemap cubemap = { 0 };
+		Image img;
 		if (useHDR)
 		{
 			TextCopy(skyboxFileName, "resources/milkyWay.hdr");
 
 			// Load HDR panorama (sphere) texture
-			panorama = LoadTexture(skyboxFileName);
+			//panorama = LoadTexture(skyboxFileName);
+
+			Image pan = LoadImage(skyboxFileName);
+			printf(TextFormat("Format %i", pan.format));
+
+			//ImageFormat(&pan, PIXELFORMAT_UNCOMPRESSED_R8G8B8A8);
+
+			//panorama = LoadTextureFromImage(pan);
 
 			//skybox.materials[0].maps[MATERIAL_MAP_CUBEMAP].texture = GenTextureCubemap(
 			//	shdrCubemap, panorama, 1024, PIXELFORMAT_UNCOMPRESSED_R8G8B8A8);
@@ -205,17 +206,16 @@ namespace TechStormRivalry {
 			UnloadTexture(panorama);
 
 			// Load non HDR panorama (cube) texture
-			Image img = LoadImage("resources/textures/space.png");
+			img = LoadImage("resources/textures/space.png");
 
 			// Set it's cubemap texture.
 			skybox.materials[0].maps[MATERIAL_MAP_CUBEMAP].texture = LoadTextureCubemap(
 				img, CUBEMAP_LAYOUT_AUTO_DETECT); // CUBEMAP_LAYOUT_PANORAMA
 
 			// unload img as we dont need it anymore.
-			UnloadImage(img);
 		}
 
-		TechStorm::Light sun = TechStorm::CreateLight(TechStorm::LIGHT_POINT, TechStorm::uVec3f{ 1.0f, 0.0f, 1.0f }, Vector3One(), WHITE, 4.0f, game->pbrShader);
+		TechStorm::Light sun = TechStorm::CreateLight(TechStorm::LIGHT_DIRECTIONAL, TechStorm::uVec3f{ 10.0f, 10.0f, 10.0f }, Vector3One(), WHITE, 4.0f, game->pbrShader);
 
 		// The texture for the near death affect initialization
 		Texture2D nearDeathTex = { 0 };
@@ -247,9 +247,12 @@ namespace TechStormRivalry {
 		fa.meetFaction(fb);
 		fb.meetFaction(fa);
 
+		SetTargetFPS(60);
 		while (!WindowShouldClose())
 		{
 			int scroll = GetMouseWheelMove();
+
+			disc->update();
 
 			// Camera PRO usage example (EXPERIMENTAL)
 // This new camera function allows custom movement/rotation values to be directly provided
@@ -365,6 +368,19 @@ namespace TechStormRivalry {
 				TechStorm::Logman::Log(TextFormat("Supply %i, Demand %i, buy price %f, sell %f, base %i", merchant->m_market[0].supply, merchant->m_market[0].demand, merchant->m_market[0].buyPrice, merchant->m_market[0].sellPrice, merchant->m_market[0].baseValue));
 			}
 
+			if (IsKeyPressed(KEY_F9))
+			{
+				// take a screenshot
+				for (int i = 0; i < INT_MAX; i++)
+				{
+					const char* fileName = TextFormat("screen%i.png", i);
+					if (FileExists(fileName) == 0)
+					{
+						ExportImage(LoadImageFromTexture(game->getFBO().texture), fileName);
+						break;
+					}
+				}
+			}
 			if (IsKeyPressed(KEY_K)) {
 				Economy::MarketPurchase purchase = merchant->sell(0, 500, fa);
 
@@ -432,8 +448,16 @@ namespace TechStormRivalry {
 			float emissiveIntensity = 0.1f;
 			SetShaderValue(game->pbrShader, game->emissiveIntensityLoc, &emissiveIntensity, SHADER_UNIFORM_FLOAT);
 
+			// We are inside the cube, we need to disable backface culling!
+			rlDisableBackfaceCulling();
+			rlDisableDepthMask();
+			DrawModel(skybox, Vector3{ 0, 0, 0 }, 1.0f, WHITE);
+			rlEnableBackfaceCulling();
+			rlEnableDepthMask();
+
 			game->renderObjects();
 
+			//game->renderObjects();
 			game->endRenderingStep();
 			game->endTexturingStep();
 
@@ -458,8 +482,10 @@ namespace TechStormRivalry {
 			remove("HMap.png");
 		}
 
+		game->assets->unloadAssets();
 		game->endGame();
 
+		//rCloseWindow();
 		delete game;
 		delete block;
 

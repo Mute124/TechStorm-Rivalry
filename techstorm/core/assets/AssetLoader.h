@@ -1,5 +1,5 @@
 #pragma once
-#include "../errorHandling/TechStormError.h"
+#include "../errorHandling/TechStormException.h"
 #include "../logging/Logman.h"
 #include "Asset.h"
 #include <tinyxml2.h>
@@ -174,6 +174,42 @@ namespace TechStorm {
 		void LoadAssets(const char* assetPath, const char* dataPath) {
 			this->m_init(assetPath, dataPath);
 			doneLoading = true;
+		}
+
+		void loadCSVFiles(const char* loc) {
+		}
+
+		void unloadAssets() {
+			for (auto& sound : m_sounds) {
+				UnloadSound(sound.second);
+			}
+
+			for (auto& model : m_models) {
+				UnloadModel(model.second);
+			}
+
+			for (auto& material : m_materials) {
+				UnloadMaterial(material.second);
+			}
+
+			for (auto& img : m_images) {
+				UnloadImage(img.second);
+			}
+
+			for (auto& tex : m_textures) {
+				UnloadTexture(tex.second);
+			}
+
+			for (auto& music : m_music) {
+				UnloadMusicStream(music.second);
+			}
+			for (auto& font : m_fonts) {
+				UnloadFont(font.second);
+			}
+
+			for (auto& shdr : m_shaders) {
+				UnloadShader(shdr.second);
+			}
 		}
 
 		AssetLoader() {

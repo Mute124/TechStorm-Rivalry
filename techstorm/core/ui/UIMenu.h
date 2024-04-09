@@ -4,6 +4,10 @@
 
 namespace TechStorm {
 	class UIMenu abstract : public UIContainer {
+	protected:
+
+		Sound m_clickSound;
+		Sound m_hoverSound;
 	public:
 
 		virtual void drawMenu() {

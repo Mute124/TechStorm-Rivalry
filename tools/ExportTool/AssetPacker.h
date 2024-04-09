@@ -8,6 +8,7 @@
 #define REQUISITE_PATH "../data/publishReqs.xml"
 #define TEXTURES_CSV_FILE_NAME "textures.csv"
 #include <raylib.h>
+#include <raygui.h>
 using namespace std;
 
 //#include <stdio.h>
@@ -51,18 +52,20 @@ private:
 	}
 
 public:
+
+	// Run the packer as if this is the resources folder.
 	void run(std::string assetsLoc, std::string outputDirectory) {
 		if (DirectoryExists(assetsLoc.c_str())
 			&& DirectoryExists(outputDirectory.c_str())) {
 			createCSVFile("textures", outputDirectory);
 
-			//cout << "Registering assets..." << std::endl;
+			cout << "Registering assets..." << std::endl;
 
 			this->m_assets = LoadDirectoryFilesEx(assetsLoc.c_str(), NULL, true);
 			populateCSVFile(outputDirectory + "/textures", { ".png" });
 			populateCSVFile(outputDirectory + "/fonts", { "." });
 
-			//cout << "Done registering assets" << std::endl;
+			cout << "Done registering assets" << std::endl;
 			UnloadDirectoryFiles(m_assets);
 		}
 		else {
@@ -70,6 +73,7 @@ public:
 		}
 	}
 
+	// run the packer as if this is the data folder.
 	void packDataDir(std::string assetsLoc, std::string outputDirectory) {
 		if (DirectoryExists(assetsLoc.c_str())
 			&& DirectoryExists(outputDirectory.c_str())) {
@@ -81,7 +85,7 @@ public:
 			createCSVFile("xml", outputDirectory);
 			createCSVFile("toml", outputDirectory);
 
-			cout << "Registering assets..." << std::endl;
+			cout << "Registering data assets..." << std::endl;
 
 			this->m_assets = LoadDirectoryFilesEx(assetsLoc.c_str(), NULL, true);
 			populateCSVFile(outputDirectory + "/dataImages", { ".png" });
@@ -92,7 +96,7 @@ public:
 			populateCSVFile(outputDirectory + "/xml", { ".xml" });
 			populateCSVFile(outputDirectory + "/toml", { ".toml" });
 
-			cout << "Done registering assets" << std::endl;
+			cout << "Done registering data assets" << std::endl;
 			UnloadDirectoryFiles(m_assets);
 		}
 		else {

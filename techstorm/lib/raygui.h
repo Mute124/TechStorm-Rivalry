@@ -309,7 +309,7 @@
 *     3. This notice may not be removed or altered from any source distribution.
 *
 **********************************************************************************************/
-#pragma warning(disable : 4996)
+
 #ifndef RAYGUI_H
 #define RAYGUI_H
 

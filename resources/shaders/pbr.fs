@@ -1,4 +1,4 @@
-#version 330
+#version 443
 
 #define MAX_LIGHTS              4
 #define LIGHT_DIRECTIONAL       0
@@ -162,7 +162,7 @@ void main()
          darkening -= (lights[i].color.rgb * ambientColor.rgb * brightness / CalculateDst(viewPos, fragPosition) * brightness);
     }
 
-    vec3 color = ComputePBR() * darkening;
+    vec3 color = ComputePBR() ;
 
     // HDR tonemapping
     color = pow(color, color + vec3(1.0));

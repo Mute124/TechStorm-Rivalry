@@ -60,7 +60,6 @@ namespace TechStorm {
 		ConfigMan() {};
 
 		~ConfigMan() {
-			delete this;
 		}
 
 		void initConfigMan() {

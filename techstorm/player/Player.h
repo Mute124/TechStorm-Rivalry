@@ -214,7 +214,7 @@ namespace TechStormRivalry {
 
 			void onUpdate()
 			{
-				tick();
+				//	tick();
 				if (cameraMode != CAMERA_FIRST_PERSON) {
 					if (this->doDraw) {
 						DrawModel(model, this->cameraComponent->getPosition(), 0.2f, GREEN);

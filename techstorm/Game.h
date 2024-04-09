@@ -64,7 +64,7 @@ namespace TechStormRivalry {
 				SetExitKey(KEY_NULL); // In event of your fuck up press this.
 
 				// Setting the window icon in task bar
-				Image icon = LoadImage("resources/icons/icon1.png");
+				Image icon = LoadImage("resources/textures/background.png");
 				ImageFormat(&icon, PIXELFORMAT_UNCOMPRESSED_R8G8B8A8);
 				SetWindowIcon(icon);
 
@@ -75,12 +75,6 @@ namespace TechStormRivalry {
 
 				curTex = LoadTextureFromImage(cursor);
 
-				buttonClick = LoadSound("resources/audio/button.ogg");
-
-				hover = LoadSound("resources/audio/uiHover.mp3");
-				SetSoundVolume(buttonClick, 25.0f);
-
-				SetTargetFPS(this->targetFPS);
 				DisableEventWaiting();
 				instance = this;
 
@@ -100,14 +94,7 @@ namespace TechStormRivalry {
 			DrawTexture(curTex, GetMouseX(), GetMouseY(), WHITE);
 		}
 
-		static inline void playButtonClick() {
-			PlaySound(buttonClick);
-		}
-		static inline void playUIHoverSound() {
-			PlaySound(hover);
-		}
 		void endGame() {
-			CloseWindow(); // Close window and OpenGL context
 			CloseAudioDevice();
 		}
 

@@ -30,7 +30,7 @@
 #include "universalTypes/uVec3.h"
 #include "universalTypes/uVec4.h"
 #include "universalTypes/uColor.h"
-#include "errorHandling/TechStormError.h"
+
 namespace TechStorm {
 	using namespace TechStorm;
 }

@@ -8,7 +8,7 @@ namespace TechStorm {
 	template<typename T>
 	class uVec2Base;
 
-	// Overload subtraction operator for subtracting Raylib's Vector3 from uVec3Base
+	// Overload subtraction operator for subtracting Raylib's Vector3 from uVec3
 	template<typename T>
 	uVec2Base<T> operator-(const uVec2Base<T>& lhs, const Vector2& rhs) {
 		return uVec2Base<T>(lhs.x - static_cast<T>(rhs.x), lhs.y - static_cast<T>(rhs.y));

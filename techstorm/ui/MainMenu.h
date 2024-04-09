@@ -1,8 +1,9 @@
 #pragma once
 #include "../Common.h"
 #include "../core/ui/UIMenu.h"
-#include "../core/utils/Button.h"
+#include "../core/ui/UIButton.h"
 #include "../console/Console.h"
+#include "OptionsMenu.h"
 
 namespace TechStormRivalry {
 	namespace MainMenu {
@@ -61,30 +62,6 @@ namespace TechStormRivalry {
 			}
 		};
 
-		class MenuButton : public TechStorm::UIElement {
-		public:
-			bool isClicked = false;
-			Rectangle rect;
-			const char* text;
-
-			bool hide = false;
-
-			MenuButton(Rectangle rect, const char* txt) : rect(rect), text(txt) {
-			}
-
-			void drawElement() override {
-				isClicked = GuiButton(rect, text);
-
-				// has to be false because it would only play at the end of the collision.
-				if (CheckCollisionPointRec(GetMousePosition(), this->rect)) {
-					Game::playUIHoverSound();
-				}
-			}
-
-			void updateElement() override {
-			}
-		};
-
 		class MainMenu final : public TechStorm::UIMenu {
 		private:
 			Music menuMusic;
@@ -93,19 +70,26 @@ namespace TechStormRivalry {
 			Texture m_backdrop;
 			bool closeMainMenu = false;
 			int padding = 150;
-			MenuButton* start;
-			MenuButton* exitBtn;
+			TechStorm::UIButton* start;
+			TechStorm::UIButton* exitBtn;
+
+			bool m_windowUnfocused = false;
+
 			MainMenuTitle* title;
+
 		public:
 
 			MainMenu(Game* game) {
 				menuMusic = LoadMusicStream("resources/audio/ost/starstruck.mp3");
-				Image backdropImg = game->assets->getImage("background");
+				Image backdropImg = LoadImage("resources/textures/background.png");
 
 				ImageResize(&backdropImg, GetScreenWidth(), GetScreenHeight());
 				m_backdrop = LoadTextureFromImage(backdropImg);
 
 				//game->pushRogueElement(consoleUI);
+
+				this->m_clickSound = LoadSound("resources/audio/button.ogg");
+				this->m_hoverSound = LoadSound("resources/audio/uiHover.mp3");
 
 				Rectangle titleBox = Rectangle{
 				};
@@ -113,7 +97,7 @@ namespace TechStormRivalry {
 
 				title = new MainMenuTitle(game->wintitle, Color{ 66, 203, 245, 255 }, 45.0f, 10.0f);
 				title->initTitle();
-				start = new MenuButton(
+				start = new TechStorm::UIButton(
 					Rectangle
 					{
 						100.0f,
@@ -121,18 +105,23 @@ namespace TechStormRivalry {
 						250,
 						MeasureTextEx(guiFont, "Singleplayer", guiFont.baseSize, guiFont.glyphPadding).y + 80
 					},
-					"Singleplayer"
+					"Singleplayer",
+					m_clickSound,
+					m_hoverSound
 				);
 
-				exitBtn = new MenuButton(
+				exitBtn = new TechStorm::UIButton(
 					Rectangle
 					{
-						(float)start->rect.x,
-						(float)start->rect.y + padding,
+						(float)start->getX(),
+						(float)start->getY() + padding,
 						250,
 						MeasureTextEx(guiFont, "Exit To Desktop", guiFont.baseSize, guiFont.glyphPadding).y + 80
 					},
-					"Exit To Desktop"
+					"Exit To Desktop",
+					m_clickSound,
+					m_hoverSound
+
 				);
 
 				game->pushContainer(this, false, false);
@@ -196,6 +185,7 @@ namespace TechStormRivalry {
 					UpdateMusicStream(menuMusic);   // Update music buffer with new stream data
 
 					BeginDrawing();
+					ClearBackground(RAYWHITE);
 					DrawTextureRec(m_backdrop, Rectangle{ 0, 0, (float)(m_backdrop.width), (float)(-m_backdrop.height) }, Vector2{ 0, 0 }, WHITE);
 					console->drawElement();
 					this->drawChildren(DRAW_FINAL);
@@ -203,17 +193,12 @@ namespace TechStormRivalry {
 					exitBtn->drawElement();
 					title->drawElement();
 
-					if (start->isClicked) {
+					if (start->isClicked()) {
 						break;
 					}
 
-					if (exitBtn->isClicked) {
+					if (exitBtn->isClicked()) {
 						showExitConfirmation = true;
-						Game::playButtonClick();
-					}
-
-					if (exitBtn->isClicked || start->isClicked) {
-						Game::playButtonClick();
 					}
 
 					if (showExitConfirmation) {
@@ -224,7 +209,7 @@ namespace TechStormRivalry {
 						bool back = GuiButton(backBox, "Back");
 
 						if (back || confirm || confirmation) {
-							Game::playButtonClick();
+							PlaySound(m_clickSound);
 						}
 
 						if ((back || confirmation)) {
@@ -239,7 +224,10 @@ namespace TechStormRivalry {
 					DrawCircle(GetMouseX(), GetMouseY(), 2.5f, WHITE);
 #endif // TECHSTORM_DEBUG
 
-					Game::drawCursor();
+					if (IsWindowFocused()) {
+						Game::drawCursor();
+					}
+
 					EndDrawing();
 				}
 

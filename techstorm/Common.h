@@ -8,10 +8,12 @@
 #define _CRT_SECURE_NO_WARNINGS
 
 // framework(s) / external libraries
+
 #include <raylib.h>
 #include <raymath.h>
 #include "lib/rcamera.h"
 #define RAYGUI_IMPLEMENTATION
+#pragma warning(disable : 4996)
 #include "lib/raygui.h"
 #undef RAYGUI_IMPLEMENTATION            // Avoid including raygui implementation again
 

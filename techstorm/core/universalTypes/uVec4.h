@@ -9,13 +9,13 @@ namespace TechStorm {
 	template<typename T>
 	class uVec4Base;
 
-	// Overload subtraction operator for subtracting Jolt's Vector3 from uVec3Base
+	// Overload subtraction operator for subtracting Jolt's Vector3 from uVec3
 	template<typename T>
 	uVec4Base<T> operator-(const uVec4Base<T>& lhs, const JPH::Vec4& rhs) {
 		return uVec4Base<T>(lhs.x - static_cast<T>(rhs.GetX()), lhs.y - static_cast<T>(rhs.GetY()), lhs.z - static_cast<T>(rhs.GetZ()), lhs.w - static_cast<T>(rhs.GetW()));
 	}
 
-	// Overload subtraction operator for subtracting Raylib's Vector3 from uVec3Base
+	// Overload subtraction operator for subtracting Raylib's Vector3 from uVec3
 	template<typename T>
 	uVec4Base<T> operator-(const uVec4Base<T>& lhs, const Vector4& rhs) {
 		return uVec4Base<T>(lhs.x - static_cast<T>(rhs.x), lhs.y - static_cast<T>(rhs.y), lhs.z - static_cast<T>(rhs.z), lhs.w - static_cast<T>(rhs.w));
@@ -77,7 +77,7 @@ namespace TechStorm {
 
 		// Math Operators
 
-		// Subtraction operator for uVec3Base
+		// Subtraction operator for uVec3
 		uVec4Base operator-(const uVec4Base& rhs) const {
 			return uVec4Base(x - rhs.x, y - rhs.y, z - rhs.z, w - rhs.w);
 		}
